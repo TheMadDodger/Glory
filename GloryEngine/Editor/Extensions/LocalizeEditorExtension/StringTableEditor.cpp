@@ -97,11 +97,11 @@ namespace Glory::Editor
 		}
 	}
 
-	void ItemRightClickMenu(Utils::NodeValueRef item)
+	void ItemRightClickMenu(Utils::NodeValueRef baseItem, Utils::NodeValueRef item, bool hasRemoveAndRename, bool hasClear)
 	{
 		if (ImGui::BeginPopup("ItemRightClick"))
 		{
-			if (ImGui::MenuItem("Remove", "", false))
+			if (hasRemoveAndRename && ImGui::MenuItem("Remove", "", false))
 			{
 				ImGui::CloseCurrentPopup();
 				ToRemovePath = item.Path();
@@ -115,10 +115,10 @@ namespace Glory::Editor
 				EditingKeyPath = "";
 
 				EditingItemPath = item.Path();
-				const std::string value = item.As<std::string>();
+				const std::string value = item.Exists() ? item.As<std::string>() : baseItem.As<std::string>();
 				std::strcpy(ValueBuffer, value.data());
 			}
-			if (ImGui::MenuItem("Rename", "", false))
+			if (hasRemoveAndRename && ImGui::MenuItem("Rename", "", false))
 			{
 				ImGui::CloseCurrentPopup();
 				CreatingNewItem = false;
@@ -129,6 +129,11 @@ namespace Glory::Editor
 				EditingKeyPath = item.Path();
 				const std::string key = item.Path().filename().string();
 				std::strcpy(KeyBuffer, key.data());
+			}
+			if (hasClear && ImGui::MenuItem("Clear", "", false))
+			{
+				ImGui::CloseCurrentPopup();
+				ToRemovePath = item.Path();
 			}
 			ImGui::EndPopup();
 		}
@@ -160,17 +165,20 @@ namespace Glory::Editor
 			TextArea = !TextArea;
 	}
 
-	bool StringTableEditor::FolderGUI(Utils::YAMLFileRef& file, Utils::NodeValueRef node, float rowHeight)
+	bool StringTableEditor::FolderGUI(Utils::YAMLFileRef& file, Utils::NodeValueRef baseNode, Utils::NodeValueRef node, float rowHeight)
 	{
+		const bool differentBase = baseNode.Path() != node.Path();
+
 		bool changed = false;
 		const ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
 		std::vector<std::string> stringKeys;
 
-		for (auto it = node.Begin(); it != node.End(); ++it)
+		for (auto it = baseNode.Begin(); it != baseNode.End(); ++it)
 		{
 			std::string key = *it;
+			auto baseItem = baseNode[key];
 			auto item = node[key];
-			if (!item.IsMap())
+			if (!baseItem.IsMap())
 			{
 				stringKeys.push_back(std::move(key));
 				continue;
@@ -192,7 +200,7 @@ namespace Glory::Editor
 			if (ImGui::Selectable("##selectable", false, selectableFlags, ImVec2(0, rowHeight)))
 				ImGui::TreeNodeSetOpen(id, !treeOpen);
 
-			if (ImGui::IsItemClicked(1))
+			if (!differentBase && ImGui::IsItemClicked(1))
 				ImGui::OpenPopup("FolderRightClick");
 
 			ImGui::SameLine();
@@ -214,10 +222,10 @@ namespace Glory::Editor
 			ImGui::TableNextColumn();
 			ImGui::TextUnformatted("Folder");
 
-			FolderRightClickMenu(item, true);
+			if (!differentBase) FolderRightClickMenu(baseItem, true);
 
 			if (treeOpen)
-				changed |= FolderGUI(file, item, rowHeight);
+				changed |= FolderGUI(file, baseItem, item, rowHeight);
 			ImGui::TreePop();
 			ImGui::PopID();
 		}
@@ -225,6 +233,7 @@ namespace Glory::Editor
 		ImGui::Indent();
 		for (std::string_view key : stringKeys)
 		{
+			auto baseItem = baseNode[key];
 			auto item = node[key];
 
 			ImGui::PushID(key.data());
@@ -275,7 +284,7 @@ namespace Glory::Editor
 
 					if (confirm)
 					{
-						const std::string oldValue = file[EditingItemPath].As<std::string>();
+						const std::string oldValue = item.Exists() ? file[EditingItemPath].As<std::string>() : baseItem.As<std::string>();
 						const std::string newValue = ValueBuffer;
 
 						Undo::StartRecord("Edit Value", m_TableID);
@@ -286,15 +295,15 @@ namespace Glory::Editor
 					}
 					if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) EditingItemPath = "";
 				}
-				else ImGui::Text("%s", item.As<std::string>().data());
+				else ImGui::Text("%s", item.Exists() ? item.As<std::string>().data() : baseItem.As<std::string>().data());
 			}
 
-			ItemRightClickMenu(item);
+			ItemRightClickMenu(baseItem, item, !differentBase, differentBase);
 
 			ImGui::PopID();
 		}
 
-		changed |= NewItemGUI(file, node, rowHeight);
+		if (!differentBase) changed |= NewItemGUI(file, node, rowHeight);
 		ImGui::Unindent();
 
 		return changed;
@@ -412,12 +421,36 @@ namespace Glory::Editor
 		}
 
 		YAMLResourceBase* pYAMLResource = static_cast<YAMLResourceBase*>(pResource);
+		YAMLResourceBase* pBaseTableYAMLResource = pYAMLResource;
 		Utils::YAMLFileRef& file = **pYAMLResource;
+		const bool isOverrideTable = meta.Hash() == ResourceTypes::GetHash<StringsOverrideTable>();
 
 		auto rootNode = file.RootNodeRef().ValueRef();
 		if (!rootNode.Exists() || !rootNode.IsMap()) rootNode.SetMap();
-		auto rootFolder = meta.Hash() == ResourceTypes::GetHash<StringsOverrideTable>() ? rootNode["Overrides"] : rootNode;
+		auto rootFolder = isOverrideTable ? rootNode["Overrides"] : rootNode;
 		if (!rootFolder.Exists() || !rootFolder.IsMap()) rootFolder.SetMap();
+
+		if (isOverrideTable)
+		{
+			const UUID baseTableID = file["BaseTable"].As<uint64_t>();
+			if (!baseTableID)
+			{
+				ImGui::TextUnformatted("Override table has no base table.");
+				return;
+			}
+
+			pResource = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(baseTableID);
+			if (!pResource)
+			{
+				ImGui::TextUnformatted("Base table could not be found.");
+				return;
+			}
+
+			pBaseTableYAMLResource = static_cast<YAMLResourceBase*>(pResource);
+		}
+
+		Utils::YAMLFileRef& baseFile = **pBaseTableYAMLResource;
+		auto baseRootNode = baseFile.RootNodeRef().ValueRef();
 
 		static const ImGuiTableFlags flags =
 			ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg
@@ -466,7 +499,7 @@ namespace Glory::Editor
 			if (ImGui::Selectable("##selectable", false, selectableFlags, ImVec2(0, rowHeight)))
 				ImGui::TreeNodeSetOpen(id, !treeOpen);
 
-			if (ImGui::IsItemClicked(1))
+			if (!isOverrideTable && ImGui::IsItemClicked(1))
 				ImGui::OpenPopup("FolderRightClick");
 
 			FolderRightClickMenu(rootFolder, false);
@@ -478,13 +511,13 @@ namespace Glory::Editor
 		if (ImGui::TableNextColumn()) {}
 
 		if (treeOpen)
-			changed |= FolderGUI(file, rootFolder, rowHeight);
+			changed |= FolderGUI(file, baseRootNode, rootFolder, rowHeight);
 		ImGui::TreePop();
 
 		if (!ToRemovePath.empty())
 		{
 			Undo::StartRecord("Remove Folder", m_TableID);
-			Undo::YAMLEdit(file, ToRemovePath, rootNode[ToRemovePath].Node(), YAML::Node(YAML::NodeType::Null));
+			Undo::YAMLEdit(file, ToRemovePath, rootFolder[ToRemovePath].Node(), YAML::Node(YAML::NodeType::Null));
 			Undo::StopRecord();
 			ToRemovePath.clear();
 			changed = true;

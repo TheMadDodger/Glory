@@ -19,7 +19,7 @@ namespace Glory::Editor
 		virtual void Draw() override;
 		virtual void OnOpen() override;
 
-		bool FolderGUI(Utils::YAMLFileRef& file, Utils::NodeValueRef node, float rowHeight);
+		bool FolderGUI(Utils::YAMLFileRef& file, Utils::NodeValueRef baseNode, Utils::NodeValueRef node, float rowHeight);
 		bool NewItemGUI(Utils::YAMLFileRef& file, Utils::NodeValueRef node, float rowHeight);
 
 		UUID m_TableID;
