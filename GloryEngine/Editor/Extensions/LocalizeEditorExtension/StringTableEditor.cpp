@@ -458,14 +458,15 @@ namespace Glory::Editor
 
 		const float rowHeight = 22.0f;
 
-		const float regionWidth = ImGui::GetWindowContentRegionMax().x;
-		bool needsFilter = EditorUI::SearchBar(regionWidth, SearchBuffer, SearchBufferSize) || ForceFilter;
-		ForceFilter = false;
+		/** @todo: Search bar */
+		//const float regionWidth = ImGui::GetWindowContentRegionMax().x;
+		//bool needsFilter = EditorUI::SearchBar(regionWidth, SearchBuffer, SearchBufferSize) || ForceFilter;
+		//ForceFilter = false;
 
-		if (needsFilter)
+		/*if (needsFilter)
 		{
 
-		}
+		}*/
 
 		if (!ImGui::BeginChild("TextChild") || !ImGui::BeginTable("TextTable", 2, flags))
 		{

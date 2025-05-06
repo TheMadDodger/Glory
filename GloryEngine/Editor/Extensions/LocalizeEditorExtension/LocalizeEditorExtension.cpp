@@ -3,6 +3,7 @@
 #include "StringTableTumbnailGenerator.h"
 #include "LanguageSettings.h"
 #include "StringTableEditor.h"
+#include "StringsOverrideTableEditor.h"
 
 #include <Localize.h>
 #include <StringsOverrideTable.h>
@@ -39,8 +40,10 @@ namespace Glory::Editor
 
 	static constexpr char* Shortcut_Window_StringTableEditor = "Open String Table Editor";
 
-	StringTableImporter Importer;
+	StringTableImporter TableImporter;
+	StringsOverrideTableImporter OverrideTableImporter;
 	LanguageSettings LangSettings;
+	StringsOverrideTableEditor OverrideTableEditor;
 
 	LocalizeEditorExtension::LocalizeEditorExtension()
 	{
@@ -74,16 +77,19 @@ namespace Glory::Editor
 			finalPath.replace_extension("gotable");
 			if (std::filesystem::exists(finalPath)) return;
 
-			StringTable* pStringTable = nullptr;
+			YAMLResource<StringTable>* pStringTable = nullptr;
 			if (pBaseTable)
 			{
 				std::type_index type = typeid(Object);
 				pBaseTable->GetType(0, type);
-				if (type == typeid(StringTable)) pStringTable = static_cast<StringTable*>(pBaseTable);
+				if (type == typeid(YAMLResource<StringTable>)) pStringTable = static_cast<YAMLResource<StringTable>*>(pBaseTable);
 			}
 
 			const UUID baseTableID = pStringTable ? pStringTable->GetUUID() : 0;
-			std::string language = "English";
+			ProjectSettings* pLanguageSettings = ProjectSettings::Get("Languages");
+			Utils::YAMLFileRef& languagesFile = **pLanguageSettings;
+			auto defaultLang = languagesFile["DefaultLanguage"];
+			std::string language = defaultLang.As<std::string>();
 
 			StringsOverrideTable* pStringOverrideTable = new StringsOverrideTable(baseTableID, std::move(language));
 			EditorAssetDatabase::CreateAsset(pStringOverrideTable, finalPath.string());
@@ -194,7 +200,9 @@ namespace Glory::Editor
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		MainEditor& editor = pApp->GetMainEditor();
 
-		Importer::Register(&Importer);
+		Importer::Register(&TableImporter);
+		Importer::Register(&OverrideTableImporter);
+		Editor::RegisterEditor(&OverrideTableEditor);
 		Tumbnail::AddGenerator<StringTableTumbnailGenerator>();
 		Tumbnail::AddGenerator<StringsOverrideTableTumbnailGenerator>();
 		ObjectMenu::AddMenuItem("Create/Localize/String Table", OnCreateStringTable, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
@@ -277,7 +285,7 @@ namespace Glory::Editor
 			}
 		});
 
-		Undo::RegisterChangeHandler(std::string(".gotable"), std::string(""),
+		Undo::RegisterChangeHandler(std::string(".gotable"), std::string("Overrides"),
 		[this, pApp](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
 			const UUID tableID = EditorAssetDatabase::FindAssetUUID(file.Path().string());
 			if (!tableID) return;
@@ -321,6 +329,28 @@ namespace Glory::Editor
 					pTable->RemoveKey(path);
 				}
 			}
+		});
+
+		Undo::RegisterChangeHandler(std::string(".gotable"), std::string("BaseTable"),
+		[this, pApp](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			const UUID tableID = EditorAssetDatabase::FindAssetUUID(file.Path().string());
+			if (!tableID) return;
+			Resource* pResource = pApp->GetAssetManager().FindResource(tableID);
+			if (!pResource) return;
+			StringsOverrideTable* pTable = static_cast<StringsOverrideTable*>(pResource);
+			auto baseTable = file["BaseTable"];
+			pTable->SetBaseTableID(baseTable.Exists() ? baseTable.As<uint64_t>() : 0);
+		});
+
+		Undo::RegisterChangeHandler(std::string(".gotable"), std::string("Language"),
+		[this, pApp](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			const UUID tableID = EditorAssetDatabase::FindAssetUUID(file.Path().string());
+			if (!tableID) return;
+			Resource* pResource = pApp->GetAssetManager().FindResource(tableID);
+			if (!pResource) return;
+			StringsOverrideTable* pTable = static_cast<StringsOverrideTable*>(pResource);
+			auto language = file["Language"];
+			pTable->SetLanguage(language.Exists() ? std::move(language.As<std::string>()) : "");
 		});
 	}
 

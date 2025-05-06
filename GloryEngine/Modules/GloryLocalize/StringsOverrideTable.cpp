@@ -24,9 +24,19 @@ namespace Glory
 		return m_BaseTableID;
 	}
 
+	void StringsOverrideTable::SetBaseTableID(UUID uuid)
+	{
+		m_BaseTableID = uuid;
+	}
+
 	const std::string& StringsOverrideTable::Language() const
 	{
 		return m_OverrideLanguage;
+	}
+
+	void StringsOverrideTable::SetLanguage(std::string&& language)
+	{
+		m_OverrideLanguage = std::move(language);
 	}
 
 	void StringsOverrideTable::References(Engine*, std::vector<UUID>& references) const

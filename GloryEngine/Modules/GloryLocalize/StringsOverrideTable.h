@@ -15,8 +15,12 @@ namespace Glory
 
 		/** @brief Base table ID */
 		GLORY_API UUID BaseTableID() const;
+		/** @brief Set base table ID */
+		GLORY_API void SetBaseTableID(UUID uuid);
 		/** @brief Language */
 		GLORY_API const std::string& Language() const;
+		/** @brief Set language */
+		GLORY_API void SetLanguage(std::string&& language);
 
 	private:
 		/** @brief Get a vector containing other resources referenced by this resource */

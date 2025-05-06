@@ -19,7 +19,7 @@ namespace Glory::Editor
 
     bool StringTableImporter::SupportsExtension(const std::filesystem::path& extension) const
     {
-        return extension.compare(".gtable") == 0 || extension.compare(".gotable") == 0;
+        return extension.compare(".gtable") == 0;
     }
 
     void ReadFolder(Utils::NodeValueRef folder, StringTable* pStringTable, std::string fullKey="")
@@ -45,18 +45,6 @@ namespace Glory::Editor
         Utils::YAMLFileRef file{ path };
         auto root = file.RootNodeRef().ValueRef();
         if (!root.Exists() || !root.IsMap()) root.SetMap();
-
-        if (path.extension().compare(".gotable") == 0)
-        {
-            /* Override table */
-            const UUID baseTableID = root["BaseTable"].As<uint64_t>();
-            std::string language = root["Language"].As<std::string>();
-
-            StringsOverrideTable* pStringOverrideTable = new StringsOverrideTable(baseTableID, std::move(language));
-
-            ReadFolder(root["Overrides"], pStringOverrideTable);
-            return { path, pStringOverrideTable };
-        }
 
         StringTable* pStringTable = new StringTable();
         ReadFolder(root, pStringTable);
@@ -86,28 +74,59 @@ namespace Glory::Editor
         Utils::YAMLFileRef file{ path };
         auto root = file.RootNodeRef().ValueRef();
         if (!root.Exists() || !root.IsMap()) root.SetMap();
-
-        if (path.extension().compare(".gotable") == 0)
-        {
-            /* Override table */
-            auto baseTableID = root["BaseTable"];
-            auto language = root["Language"];
-
-            StringsOverrideTable* pStringOverrideTable = static_cast<StringsOverrideTable*>(pStringTable);
-            baseTableID.Set(uint64_t(pStringOverrideTable->BaseTableID()));
-            language.Set(pStringOverrideTable->Language());
-
-            WriteStrings(root["Overrides"], pStringOverrideTable);
-            file.Save();
-            return true;
-        }
-
         WriteStrings(root, pStringTable);
         file.Save();
         return true;
     }
 
     void StringTableImporter::Initialize()
+    {
+    }
+
+    std::string_view StringsOverrideTableImporter::Name() const
+    {
+        return "Strings Override Table Importer";
+    }
+
+    bool StringsOverrideTableImporter::SupportsExtension(const std::filesystem::path& extension) const
+    {
+        return extension.compare(".gotable") == 0;
+    }
+
+    ImportedResource StringsOverrideTableImporter::LoadResource(const std::filesystem::path& path, void*) const
+    {
+        Utils::YAMLFileRef file{ path };
+        auto root = file.RootNodeRef().ValueRef();
+        if (!root.Exists() || !root.IsMap()) root.SetMap();
+
+        const UUID baseTableID = root["BaseTable"].As<uint64_t>();
+        std::string language = root["Language"].As<std::string>();
+
+        StringsOverrideTable* pStringOverrideTable = new StringsOverrideTable(baseTableID, std::move(language));
+        ReadFolder(root["Overrides"], pStringOverrideTable);
+        return { path, pStringOverrideTable };
+    }
+
+    bool StringsOverrideTableImporter::SaveResource(const std::filesystem::path& path, StringsOverrideTable* pStringTable) const
+    {
+        Utils::YAMLFileRef file{ path };
+        auto root = file.RootNodeRef().ValueRef();
+        if (!root.Exists() || !root.IsMap()) root.SetMap();
+
+        /* Override table */
+        auto baseTableID = root["BaseTable"];
+        auto language = root["Language"];
+
+        StringsOverrideTable* pStringOverrideTable = static_cast<StringsOverrideTable*>(pStringTable);
+        baseTableID.Set(uint64_t(pStringOverrideTable->BaseTableID()));
+        language.Set(pStringOverrideTable->Language());
+
+        WriteStrings(root["Overrides"], pStringOverrideTable);
+        file.Save();
+        return true;
+    }
+
+    void StringsOverrideTableImporter::Initialize()
     {
     }
 }
