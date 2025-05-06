@@ -59,9 +59,7 @@ namespace Glory::Editor
 		}
 
 		for (size_t i = 0; i < languages.size(); ++i)
-		{
 			languageViews.emplace_back(languages[i]);
-		}
 
 		if (EditorUI::InputDropdown("Language", languageViews, &index, currentLanguage))
 		{

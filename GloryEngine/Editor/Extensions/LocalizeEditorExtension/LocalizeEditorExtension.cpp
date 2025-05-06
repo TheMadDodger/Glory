@@ -77,16 +77,19 @@ namespace Glory::Editor
 			finalPath.replace_extension("gotable");
 			if (std::filesystem::exists(finalPath)) return;
 
-			StringTable* pStringTable = nullptr;
+			YAMLResource<StringTable>* pStringTable = nullptr;
 			if (pBaseTable)
 			{
 				std::type_index type = typeid(Object);
 				pBaseTable->GetType(0, type);
-				if (type == typeid(StringTable)) pStringTable = static_cast<StringTable*>(pBaseTable);
+				if (type == typeid(YAMLResource<StringTable>)) pStringTable = static_cast<YAMLResource<StringTable>*>(pBaseTable);
 			}
 
 			const UUID baseTableID = pStringTable ? pStringTable->GetUUID() : 0;
-			std::string language = "English";
+			ProjectSettings* pLanguageSettings = ProjectSettings::Get("Languages");
+			Utils::YAMLFileRef& languagesFile = **pLanguageSettings;
+			auto defaultLang = languagesFile["DefaultLanguage"];
+			std::string language = defaultLang.As<std::string>();
 
 			StringsOverrideTable* pStringOverrideTable = new StringsOverrideTable(baseTableID, std::move(language));
 			EditorAssetDatabase::CreateAsset(pStringOverrideTable, finalPath.string());
