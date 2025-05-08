@@ -121,6 +121,125 @@ namespace Glory
 
 #pragma endregion
 
+#pragma region String Table
+
+	MonoArray* StringTable_FindKeys(uint64_t tableID, MonoString* path)
+	{
+		const std::string pathStr = mono_string_to_utf8(path);
+		Resource* pTableResource = Localize_EngineInstance->GetAssetManager().FindResource(tableID);
+		if (!pTableResource) return nullptr;
+		StringTable* pTable = static_cast<StringTable*>(pTableResource);
+		std::vector<std::string>* keys = pTable->FindKeys(pathStr);
+		if (keys == nullptr) return nullptr;
+		
+		MonoClass* pStringClass = mono_get_string_class();
+		MonoArray* pArray = mono_array_new(mono_domain_get(), pStringClass, keys->size());
+		for (size_t i = 0; i < keys->size(); ++i)
+		{
+			MonoString* pMonoString = mono_string_new(mono_domain_get(), (*keys)[i].data());
+			mono_array_setref(pArray, i, pMonoString);
+		}
+		return pArray;
+	}
+
+	uint32_t StringTable_FindKeysNoAlloc(uint64_t tableID, MonoString* path, MonoArray* pArray, uint32_t maxKeys)
+	{
+		const std::string pathStr = mono_string_to_utf8(path);
+		Resource* pTableResource = Localize_EngineInstance->GetAssetManager().FindResource(tableID);
+		if (!pTableResource) return 0;
+		StringTable* pTable = static_cast<StringTable*>(pTableResource);
+		std::vector<std::string>* keys = pTable->FindKeys(pathStr);
+		if (keys == nullptr) return 0;
+
+		const uint32_t keyCount = size_t(std::fmin(keys->size(), maxKeys));
+		for (size_t i = 0; i < keyCount; ++i)
+		{
+			MonoString* pMonoString = mono_string_new(mono_domain_get(), (*keys)[i].data());
+			mono_array_setref(pArray, i, pMonoString);
+		}
+		return keyCount;
+	}
+
+	MonoArray* StringTable_FindKeysRecursive(uint64_t tableID, MonoString* path)
+	{
+		const std::string pathStr = mono_string_to_utf8(path);
+		Resource* pTableResource = Localize_EngineInstance->GetAssetManager().FindResource(tableID);
+		if (!pTableResource) return nullptr;
+		StringTable* pTable = static_cast<StringTable*>(pTableResource);
+		std::vector<std::string> keys;
+		pTable->FindKeysRecursively(pathStr, keys);
+		if (keys.empty()) return nullptr;
+
+		MonoClass* pStringClass = mono_get_string_class();
+		MonoArray* pArray = mono_array_new(mono_domain_get(), pStringClass, keys.size());
+		for (size_t i = 0; i < keys.size(); ++i)
+		{
+			MonoString* pMonoString = mono_string_new(mono_domain_get(), keys[i].data());
+			mono_array_setref(pArray, i, pMonoString);
+		}
+		return pArray;
+	}
+
+	uint32_t StringTable_FindKeysRecursiveNoAlloc(uint64_t tableID, MonoString* path, MonoArray* pArray, uint32_t maxKeys)
+	{
+		const std::string pathStr = mono_string_to_utf8(path);
+		Resource* pTableResource = Localize_EngineInstance->GetAssetManager().FindResource(tableID);
+		if (!pTableResource) return 0;
+		StringTable* pTable = static_cast<StringTable*>(pTableResource);
+		std::vector<std::string> keys;
+		pTable->FindKeysRecursively(pathStr, keys);
+		if (keys.empty()) return 0;
+
+		const uint32_t keyCount = size_t(std::fmin(keys.size(), maxKeys));
+		for (size_t i = 0; i < keyCount; ++i)
+		{
+			MonoString* pMonoString = mono_string_new(mono_domain_get(), keys[i].data());
+			mono_array_setref(pArray, i, pMonoString);
+		}
+		return keyCount;
+	}
+
+	MonoArray* StringTable_FindSubgroups(uint64_t tableID, MonoString* path)
+	{
+		const std::string pathStr = mono_string_to_utf8(path);
+		Resource* pTableResource = Localize_EngineInstance->GetAssetManager().FindResource(tableID);
+		if (!pTableResource) return nullptr;
+		StringTable* pTable = static_cast<StringTable*>(pTableResource);
+		std::vector<std::string_view> groups;
+		pTable->FindSubgroups(pathStr, groups);
+		if (groups.empty()) return nullptr;
+
+		MonoClass* pStringClass = mono_get_string_class();
+		MonoArray* pArray = mono_array_new(mono_domain_get(), pStringClass, groups.size());
+		for (size_t i = 0; i < groups.size(); ++i)
+		{
+			MonoString* pMonoString = mono_string_new(mono_domain_get(), groups[i].data());
+			mono_array_setref(pArray, i, pMonoString);
+		}
+		return pArray;
+	}
+
+	uint32_t StringTable_FindSubgroupsNoAlloc(uint64_t tableID, MonoString* path, MonoArray* pArray, uint32_t maxGroups)
+	{
+		const std::string pathStr = mono_string_to_utf8(path);
+		Resource* pTableResource = Localize_EngineInstance->GetAssetManager().FindResource(tableID);
+		if (!pTableResource) return 0;
+		StringTable* pTable = static_cast<StringTable*>(pTableResource);
+		std::vector<std::string_view> groups;
+		pTable->FindSubgroups(pathStr, groups);
+		if (groups.empty()) return 0;
+
+		const uint32_t keyCount = size_t(std::fmin(groups.size(), maxGroups));
+		for (size_t i = 0; i < groups.size(); ++i)
+		{
+			MonoString* pMonoString = mono_string_new(mono_domain_get(), groups[i].data());
+			mono_array_setref(pArray, i, pMonoString);
+		}
+		return keyCount;
+	}
+
+#pragma endregion
+
 #pragma region Binding
 
 	void LocalizeCSAPI::AddInternalCalls(std::vector<InternalCall>& internalCalls)
@@ -141,6 +260,14 @@ namespace Glory
         BIND("GloryEngine.Localize.StringTableLoader::StringTableLoader_SetTableToLoadID", StringTableLoader_SetTableToLoadID);
         BIND("GloryEngine.Localize.StringTableLoader::StringTableLoader_GetKeepLoaded", StringTableLoader_GetKeepLoaded);
         BIND("GloryEngine.Localize.StringTableLoader::StringTableLoader_SetKeepLoaded", StringTableLoader_SetKeepLoaded);
+
+		/* StringTable */
+        BIND("GloryEngine.Localize.StringTable::StringTable_FindKeys", StringTable_FindKeys);
+        BIND("GloryEngine.Localize.StringTable::StringTable_FindKeysNoAlloc", StringTable_FindKeysNoAlloc);
+        BIND("GloryEngine.Localize.StringTable::StringTable_FindSubgroups", StringTable_FindSubgroups);
+        BIND("GloryEngine.Localize.StringTable::StringTable_FindSubgroupsNoAlloc", StringTable_FindSubgroupsNoAlloc);
+        BIND("GloryEngine.Localize.StringTable::StringTable_FindKeysRecursive", StringTable_FindKeysRecursive);
+        BIND("GloryEngine.Localize.StringTable::StringTable_FindKeysRecursiveNoAlloc", StringTable_FindKeysRecursiveNoAlloc);
 	}
 
 	void LocalizeCSAPI::SetEngine(Engine* pEngine)
