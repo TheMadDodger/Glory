@@ -94,6 +94,26 @@ namespace Glory
 		return &group->m_Keys;
 	}
 
+	void StringTable::FindSubgroups(const std::string& path, std::vector<std::string_view>& groups)
+	{
+		std::vector<std::string> tokens;
+		Reflect::Tokenize(path, tokens, '.');
+
+		GroupData* group = &m_RootGroup;
+		for (size_t i = 0; i < tokens.size(); ++i)
+		{
+			std::string token = tokens[i];
+			auto& iter = group->m_Subgroups.find(token);
+			if (iter == group->m_Subgroups.end()) return;
+			group = &iter->second;
+		}
+
+		if (group->m_Subgroups.empty()) return;
+		groups.reserve(group->m_Subgroups.size());
+		for (auto& iter = group->m_Subgroups.begin(); iter != group->m_Subgroups.end(); ++iter)
+			groups.push_back(iter->first);
+	}
+
 	void StringTable::FindKeysRecursively(const std::string& path, std::vector<std::string>& keys)
 	{
 		std::vector<std::string> tokens;

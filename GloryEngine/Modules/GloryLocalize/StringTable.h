@@ -34,6 +34,11 @@ namespace Glory
 		 * @param path Path to the group
 		 */
 		GLORY_API std::vector<std::string>* FindKeys(const std::string& path);
+		/** @brief Find all subgroups belonging to a specific group at a specified path
+		 * @param path Path to the group
+		 * @param groups Vector of string views to write the group names to
+		 */
+		GLORY_API void FindSubgroups(const std::string& path, std::vector<std::string_view>& groups);
 		/** @brief Search for all keys recursively starting at a path
 		 * @param path Path to the group to search recursively
 		 * @param keys Vector containing all found keys
