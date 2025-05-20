@@ -123,11 +123,13 @@ namespace Glory
 		const FSMNode* node = pFSMData->Node(UUID(nodeId));
 		if (!node) return;
 		state->SetCurrentState(nodeId, pFSMData);
+		state->Update();
 	}
 
 	uint64_t FSMInstance_GetState(uint64_t stateId)
 	{
 		FSMState* state = FSM_MODULE->GetFSMState(stateId);
+		if (!state) return 0;
 		Resource* pFSMResource = FSM_EngineInstance->GetAssetManager().FindResource(state->OriginalFSMID());
 		if (!pFSMResource) return 0;
 		FSMData* pFSMData = static_cast<FSMData*>(pFSMResource);
@@ -145,6 +147,7 @@ namespace Glory
 		const std::string_view nameStr = mono_string_to_utf8(name);
 		int trigger = 1;
 		state->SetPropertyValue(pFSMData, nameStr, &trigger);
+		state->Update();
 	}
 
 	void FSMInstance_SetBool(uint64_t stateId, MonoString* name, bool value)
@@ -156,6 +159,7 @@ namespace Glory
 		FSMData* pFSMData = static_cast<FSMData*>(pFSMResource);
 		const std::string_view nameStr = mono_string_to_utf8(name);
 		state->SetPropertyValue(pFSMData, nameStr, &value);
+		state->Update();
 	}
 
 	void FSMInstance_SetFloat(uint64_t stateId, MonoString* name, float value)
@@ -167,6 +171,7 @@ namespace Glory
 		FSMData* pFSMData = static_cast<FSMData*>(pFSMResource);
 		const std::string_view nameStr = mono_string_to_utf8(name);
 		state->SetPropertyValue(pFSMData, nameStr, &value);
+		state->Update();
 	}
 
 #pragma endregion
