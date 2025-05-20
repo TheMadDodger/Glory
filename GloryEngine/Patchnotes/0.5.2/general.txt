@@ -3,6 +3,7 @@ Runtime:
 Engine:
 
 Editor:
+- Fixed crash when exiting and entering playmode when physics objects are in use
 
 Scripting:
 - Fixed crash when trying to get the FSM state of a state machine instance that does not exist

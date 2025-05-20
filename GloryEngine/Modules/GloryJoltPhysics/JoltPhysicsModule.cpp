@@ -467,6 +467,12 @@ namespace Glory
 
 	void JoltPhysicsModule::CleanupPhysics()
 	{
+		for (size_t i = 0; i < size_t(ActivationCallback::Count); ++i)
+			m_LateActivationCallbacks[ActivationCallback(i)].clear();
+
+		for (size_t i = 0; i < size_t(ContactCallback::Count); ++i)
+			m_LateContactCallbacks[ContactCallback(i)].clear();
+
 		m_CharacterManager.DestroyAll();
 
 		delete m_pJPHTempAllocator;
