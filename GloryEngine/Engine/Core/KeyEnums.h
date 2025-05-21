@@ -194,6 +194,8 @@ namespace Glory
 		KeyBraceRight,
 		KeySysRq,
 
+		KeyBackQuote,
+
 		KeyboardKeyCount
 	};
 
@@ -424,6 +426,8 @@ const std::string Glory::Utils::Reflect::Enum<Glory::KeyboardKey>::m_EnumStringV
 	"KeyBraceLeft",
 	"KeyBraceRight",
 	"KeySysRq",
+
+	"KeyBackQuote",
 };
 
 const size_t Glory::Utils::Reflect::Enum<Glory::MouseButton>::m_NumValues = size_t(Glory::MouseButton::MouseButtonCount);

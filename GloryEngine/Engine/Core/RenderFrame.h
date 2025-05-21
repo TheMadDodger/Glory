@@ -79,6 +79,7 @@ namespace Glory
 		RP_Lateobjectpass,
 		RP_CameraPostpass,
 		RP_Postpass,
+		RP_Postblit,
 		RP_Count
 	};
 

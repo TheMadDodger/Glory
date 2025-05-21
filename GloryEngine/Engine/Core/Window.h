@@ -60,6 +60,7 @@ namespace Glory
 		void ForceUngrabInput(bool ungrab);
 		bool HasFocus() const;
 		bool IsShown() const;
+		bool IsBackQuoteDown() const;
 
 	protected:
 		Window(const WindowCreateInfo& createInfo);
@@ -91,6 +92,7 @@ namespace Glory
 
 		bool m_Fullscreen;
 		bool m_Maximized;
+		bool m_BackQuote;
 
 	private:
 		friend class WindowModule;

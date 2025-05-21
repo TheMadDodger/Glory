@@ -202,6 +202,7 @@ namespace Glory
 		{SDLK_KP_LEFTBRACE,		   KeyBraceLeft,				   },
 		{SDLK_KP_RIGHTBRACE,		   KeyBraceRight,				},
 		{SDLK_SYSREQ,			   KeySysRq,					   },
+		{SDLK_BACKQUOTE,			KeyBackQuote,					},
 	};
 	const std::map<uint8_t, MouseButton> MOUSE_BUTTONMAP = {
 		{ SDL_BUTTON_LEFT, MouseButton::MouseButtonLeft },
@@ -299,6 +300,7 @@ namespace Glory
 			if (iter == KEYBOARD_KEYMAP.end()) break;
 			if (iter->second == KeyboardKey::KeyAltL) m_LAltDown = true;
 			if (iter->second == KeyboardKey::KeyAltR) m_RAltDown = true;
+			if (iter->second == KeyboardKey::KeyBackQuote) m_BackQuote = true;
 
 			if ((m_LAltDown || m_RAltDown) && iter->second == KeyboardKey::KeyReturn)
 				SetFullscreen(!m_Fullscreen, false);
@@ -318,6 +320,7 @@ namespace Glory
 			if (iter == KEYBOARD_KEYMAP.end()) break;
 			if (iter->second == KeyboardKey::KeyAltL) m_LAltDown = false;
 			if (iter->second == KeyboardKey::KeyAltR) m_RAltDown = false;
+			if (iter->second == KeyboardKey::KeyBackQuote) m_BackQuote = false;
 
 			inputEvent.InputDeviceType = InputDeviceType::Keyboard;
 			inputEvent.KeyID = iter->second;

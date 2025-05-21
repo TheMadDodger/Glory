@@ -11,7 +11,8 @@ namespace Glory
 		m_pWindowManager(createInfo.pWindowManager), m_ShowCursor(true),
 		m_ForceShowCursor(false), m_ForceUnlockCursor(false), m_GrabInput(false),
 		m_ForceUngrabInput(false), m_HasFocus(false), m_IsShown(false),
-		m_Fullscreen(createInfo.Fullscreen), m_Maximized(createInfo.Maximize)
+		m_Fullscreen(createInfo.Fullscreen), m_Maximized(createInfo.Maximize),
+		m_BackQuote(false)
 	{
 	}
 
@@ -70,6 +71,11 @@ namespace Glory
 	bool Window::IsShown() const
 	{
 		return m_IsShown;
+	}
+
+	bool Window::IsBackQuoteDown() const
+	{
+		return m_BackQuote;
 	}
 
 	void Window::GetVulkanRequiredExtensions(std::vector<const char*>&) {}

@@ -40,11 +40,11 @@ namespace Glory
 
         Glory::WindowCreateInfo windowCreateInfo;
         windowCreateInfo.WindowName = m_AppName;
-        windowCreateInfo.Width = 0.0f;
-        windowCreateInfo.Height = 0.0f;
+        windowCreateInfo.Width = 1920.0f;
+        windowCreateInfo.Height = 1080.0f;
         //windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
         windowCreateInfo.WindowFlags = 2 | 32;
-        windowCreateInfo.Fullscreen = true;
+        windowCreateInfo.Fullscreen = false;
         windowCreateInfo.Maximize = false;
 
         static Glory::Logs logs;
