@@ -11,6 +11,33 @@ namespace Glory
 {
 	class Engine;
 
+	/** @brief Console variable data */
+	struct CVar
+	{
+		std::string m_Name;
+		std::string m_Description;
+		float m_Value;
+
+		/** @brief CVar flags
+		 * @todo: These dont do anything yet */
+		enum Flags
+		{
+			/** @brief No flags */
+			None = 0,
+			/** @brief Write out value on save */
+			Save = 1 << 0,
+			/** @brief Changing this value is only allowed when cheats are enabled */
+			Cheat = 1 << 1,
+			/** @brief Enables cheats */
+			CheatsOn = 1 << 2,
+			/** @brief Server variable */
+			Server = 1 << 3,
+			/** @brief Requires authentication */
+			RequiresAuth = 1 << 4
+		};
+		Flags m_Flags;
+	};
+
 	class Console
 	{
 	public:
@@ -21,6 +48,7 @@ namespace Glory
 		void Cleanup();
 
 		void RegisterCommand(BaseConsoleCommand* pCommand);
+		void RegisterCVar(CVar&& var);
 		void QueueCommand(const std::string& command);
 		void ExecuteCommand(const std::string& command, bool addToHistory = true);
 		void WriteLine(const std::string& line, bool addTimestamp = true);
@@ -53,6 +81,9 @@ namespace Glory
 
 		std::string TimeStamp();
 
+		CVar* FindCVar(std::string_view name);
+		void ExecuteCVarCommand(CVar& cvar, std::vector<std::string>& args);
+
 	private:
 		friend class Engine;
 		friend class Debug;
@@ -71,6 +102,7 @@ namespace Glory
 		std::vector<std::string> m_CommandHistory;
 		std::vector<std::string> m_ConsoleLines;
 		std::queue<std::string> m_CommandQueue;
+		std::vector<CVar> m_CVars;
 
 		static const int MAX_HISTORY_SIZE = 10;
 		static const int MAX_CONSOLE_SIZE = 2;

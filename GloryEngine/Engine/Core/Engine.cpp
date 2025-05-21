@@ -252,6 +252,7 @@ namespace Glory
 	{
 		if (m_Initialized) return;
 
+		m_Console->Initialize();
 		m_UUIDRemapper.Reset();
 
 		WindowModule* pWindows = GetMainModule<WindowModule>();
@@ -322,6 +323,7 @@ namespace Glory
 	{
 		if (!m_Initialized) return;
 
+		m_Console->Cleanup();
 		m_AssetDatabase->Destroy();
 		m_pJobManager->Kill();
 		m_pThreadManager->Destroy();

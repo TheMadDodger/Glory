@@ -7,14 +7,16 @@ namespace Glory
 {
 	void Console::Initialize()
 	{
-		//if (m_pInstance != nullptr) return;
-		//m_pInstance = new Console();
 		RegisterCommand(new ConsoleCommand("printhistory", [this]() { return PrintHistory(); }));
 	}
 
 	void Console::Cleanup()
 	{
-		
+		m_pCommands.clear();
+		m_pConsoles.clear();
+		m_CommandHistory.clear();
+		m_ConsoleLines.clear();
+		m_CVars.clear();
 	}
 
 	void Console::Update()
@@ -59,6 +61,11 @@ namespace Glory
 		m_pCommands.push_back(pCommand);
 	}
 
+	void Console::RegisterCVar(CVar&& var)
+	{
+		m_CVars.emplace_back(std::move(var));
+	}
+
 	void Console::QueueCommand(const std::string& command)
 	{
 		// If m_Reading is true this function is called from another thread, this thread will need to wait untill we are done reading on the main thread!
@@ -87,10 +94,18 @@ namespace Glory
 		if (pCommand != nullptr)
 		{
 			if (pCommand->RootExecuteCommand(args)) return;
-				WriteLine(">>>> Could not execute command", false);
+			WriteLine(">>>> Could not execute command", false);
+			return;
 		}
-		else
+
+		CVar* cvar = FindCVar(commandText);
+		if (!cvar)
+		{
 			WriteLine(">>>> Unknown Command", false);
+			return;
+		}
+
+		ExecuteCVarCommand(*cvar, args);
 	}
 
 	void Console::WriteLine(const std::string& line, bool addTimestamp)
@@ -203,6 +218,30 @@ namespace Glory
 		std::stringstream sstream;
 		sstream << "[" << std::put_time(&tM, "%d-%m-%Y %H-%M-%S") << "] ";
 		return sstream.str();
+	}
+
+	CVar* Console::FindCVar(std::string_view name)
+	{
+		auto& iter = std::find_if(m_CVars.begin(), m_CVars.end(), [name](const CVar& cvar) { return cvar.m_Name == name; });
+		if (iter == m_CVars.end()) return nullptr;
+		return &*iter;
+	}
+
+	void Console::ExecuteCVarCommand(CVar& cvar, std::vector<std::string>& args)
+	{
+		if (args.empty())
+		{
+			/* Print description and current value */
+			std::stringstream stream;
+			stream << cvar.m_Name << " = " << cvar.m_Value;
+			WriteLine(stream.str());
+			WriteLine(cvar.m_Description);
+			return;
+		}
+
+		/* Change the value */
+		if (Parser::Parse<float>(args[0], cvar.m_Value)) return;
+		WriteLine("Error: Value must be a number");
 	}
 
 	Console::Console():
