@@ -28,7 +28,7 @@ namespace Glory
 
 	OverlayConsoleModule::OverlayConsoleModule():
 		m_ConsoleButtonDown(false), m_ConsoleOpen(false), m_ConsoleAnimationTime(0.0f),
-		m_TextDirty(false), m_CurrentColor(1.0f, 1.0f, 1.0f, 1.0f), m_Scroll(0.0f)
+		m_TextDirty(false), m_Scroll(0.0f)
 	{
 	}
 
@@ -135,7 +135,7 @@ namespace Glory
 		const float w = 1.0f;
 		const float h = 1.0f;
 
-		const glm::vec4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		const glm::vec4 color{ 0.0f, 0.0f, 0.0f, 1.0f };
 
 		VertexPosColorTex vertices[4] = {
 			{ { xpos, ypos + h, }, color, {0.0f, 0.0f}},
@@ -189,7 +189,8 @@ namespace Glory
 	void OverlayConsoleModule::OverlayPass()
 	{
 		/* Do not render if console is fully closed */
-		if (!m_ConsoleOpen && m_ConsoleAnimationTime == 0.0f || m_Lines.empty()) return;
+		Console& console = m_pEngine->GetConsole();
+		if (!m_ConsoleOpen && m_ConsoleAnimationTime == 0.0f || console.LineCount() == 0) return;
 
 		const UUID consoleFont = Settings().Value<uint64_t>("Console Font");
 		Resource* pResource = m_pEngine->GetAssetManager().FindResource(consoleFont);
@@ -207,7 +208,7 @@ namespace Glory
 		const float consolePadding = 10.0f;
 		const float consoleHeight = 20.0f*pFont->FontHeight()*textScale + consolePadding;
 		const float animatedConsoleHeight = consoleHeight*(1.0f - m_ConsoleAnimationTime);
-		const float textHeight = pFont->FontHeight()*textScale*m_Lines.size();
+		const float textHeight = pFont->FontHeight()*textScale*console.LineCount();
 		const float textStart = glm::max(consoleHeight - textHeight - consolePadding, 0.0f);
 		const float maxScroll = glm::max(textHeight + consolePadding - consoleHeight, 0.0f);
 		m_Scroll = glm::clamp(m_Scroll, 0.0f, maxScroll);
@@ -218,14 +219,14 @@ namespace Glory
 			m_pConsoleLogTextMesh->ClearVertices();
 
 			const size_t maxVisibleLines = size_t(std::floor(consoleHeight/(pFont->FontHeight()*textScale)));
-			const size_t lastLine = m_Lines.size() - size_t(std::floor(m_Scroll/(pFont->FontHeight()*textScale)));
+			const size_t lastLine = console.LineCount() - size_t(std::floor(m_Scroll/(pFont->FontHeight()*textScale)));
 			const size_t firstLine = size_t(glm::max(int(lastLine - maxVisibleLines), 0));
 
 			for (size_t i = 0; i < lastLine - firstLine; ++i)
 			{
 				TextRenderData textData;
-				textData.m_Color = m_CurrentColor;
-				textData.m_Text = m_Lines[firstLine+i];
+				textData.m_Color = console.LineColor(firstLine + i);
+				textData.m_Text = console.Line(firstLine + i);
 				textData.m_FontID = consoleFont;
 				textData.m_TextWrap = 0.0f;
 				textData.m_Alignment = Alignment::Left;
@@ -286,17 +287,14 @@ namespace Glory
 
 	void OverlayConsoleModule::SetNextColor(const glm::vec4& color)
 	{
-		m_CurrentColor = color;
 	}
 
 	void OverlayConsoleModule::ResetNextColor()
 	{
-		m_CurrentColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	void OverlayConsoleModule::Write(const std::string& line)
 	{
-		m_Lines.push_back(line);
 		m_TextDirty = true;
 	}
 

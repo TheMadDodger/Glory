@@ -68,7 +68,7 @@ namespace Glory::Utils
 
 			for (char c : line)
 			{
-				const size_t glyphIndex = pFontData->GetGlyphIndex(c);
+				const size_t glyphIndex = pFontData->GetGlyphIndex(c == '\t' ? ' ' : c);
 				const GlyphData* glyph = pFontData->GetGlyph(glyphIndex);
 
 				if (!glyph) continue;
@@ -136,7 +136,7 @@ namespace Glory::Utils
 			float wordWidth = 0.0f;
 			for (char c : word)
 			{
-				const size_t glyphIndex = pFontData->GetGlyphIndex(c);
+				const size_t glyphIndex = pFontData->GetGlyphIndex(c == '\t' ? ' ' : c);
 				const GlyphData* glyph = pFontData->GetGlyph(glyphIndex);
 
 				if (!glyph) continue;

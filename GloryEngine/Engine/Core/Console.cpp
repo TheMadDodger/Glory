@@ -16,6 +16,7 @@ namespace Glory
 		m_pConsoles.clear();
 		m_CommandHistory.clear();
 		m_ConsoleLines.clear();
+		m_ConsoleLineColors.clear();
 		m_CVars.clear();
 	}
 
@@ -29,6 +30,21 @@ namespace Glory
 		ExecuteCommand(command);
 		m_CommandQueue.pop();
 		m_Reading = false;
+	}
+
+	size_t Console::LineCount() const
+	{
+		return m_ConsoleLines.size();
+	}
+
+	std::string_view Console::Line(size_t index) const
+	{
+		return m_ConsoleLines[index];
+	}
+
+	const glm::vec4& Console::LineColor(size_t index) const
+	{
+		return m_ConsoleLineColors[index];
 	}
 
 	bool Console::PrintHistory()
@@ -50,10 +66,8 @@ namespace Glory
 
 	void Console::AddLineToConsole(const std::string& line)
 	{
-		++m_ConsoleInsertIndex;
-		if (m_ConsoleInsertIndex >= MAX_CONSOLE_SIZE) m_ConsoleInsertIndex = 0;
-		if (m_CurrentConsoleSize < MAX_CONSOLE_SIZE) ++m_CurrentConsoleSize;
-		m_ConsoleLines[m_ConsoleInsertIndex] = line;
+		m_ConsoleLines.push_back(line);
+		m_ConsoleLineColors.push_back(m_CurrentColor);
 	}
 
 	void Console::RegisterCommand(BaseConsoleCommand* pCommand)
@@ -147,6 +161,7 @@ namespace Glory
 
 	void Console::SetNextColor(const glm::vec4& color)
 	{
+		m_CurrentColor = color;
 		for (size_t i = 0; i < m_pConsoles.size(); i++)
 		{
 			m_pConsoles[i]->SetNextColor(color);
@@ -246,7 +261,7 @@ namespace Glory
 
 	Console::Console():
 		m_CommandHistory(std::vector<std::string>(MAX_HISTORY_SIZE)),
-		m_ConsoleLines(std::vector<std::string>(MAX_CONSOLE_SIZE))
+		m_ConsoleLines(), m_CurrentColor(1.0f, 1.0f, 1.0f, 1.0f)
 	{}
 
 	Console::~Console()
@@ -267,5 +282,6 @@ namespace Glory
 
 		m_CommandHistory.clear();
 		m_ConsoleLines.clear();
+		m_ConsoleLineColors.clear();
 	}
 }

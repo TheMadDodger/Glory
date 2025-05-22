@@ -70,6 +70,10 @@ namespace Glory
 			m_pConsoles.erase(it);
 		}
 
+		size_t LineCount() const;
+		std::string_view Line(size_t index) const;
+		const glm::vec4& LineColor(size_t index) const;
+
 	private:
 		bool PrintHistory();
 
@@ -92,8 +96,6 @@ namespace Glory
 		std::vector<IConsole*> m_pConsoles;
 		int m_CommandHistoryInsertIndex = -1;
 		int m_CurrentCommandHistorySize = 0;
-		int m_ConsoleInsertIndex = -1;
-		int m_CurrentConsoleSize = 0;
 		bool m_Writing = false;
 		bool m_Reading = false;
 
@@ -101,10 +103,11 @@ namespace Glory
 
 		std::vector<std::string> m_CommandHistory;
 		std::vector<std::string> m_ConsoleLines;
+		std::vector<glm::vec4> m_ConsoleLineColors;
+		glm::vec4 m_CurrentColor;
 		std::queue<std::string> m_CommandQueue;
 		std::vector<CVar> m_CVars;
 
 		static const int MAX_HISTORY_SIZE = 10;
-		static const int MAX_CONSOLE_SIZE = 2;
 	};
 }

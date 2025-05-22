@@ -56,9 +56,7 @@ namespace Glory
 		float m_ConsoleAnimationTime;
 		float m_Scroll;
 
-		std::vector<std::string> m_Lines;
 		std::unique_ptr<MeshData> m_pConsoleLogTextMesh;
 		bool m_TextDirty;
-		glm::vec4 m_CurrentColor;
 	};
 }
