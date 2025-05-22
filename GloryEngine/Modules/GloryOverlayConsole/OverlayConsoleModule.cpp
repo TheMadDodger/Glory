@@ -27,7 +27,8 @@ namespace Glory
 	GLORY_MODULE_VERSION_CPP(OverlayConsoleModule);
 
 	OverlayConsoleModule::OverlayConsoleModule():
-		m_ConsoleButtonDown(false), m_ConsoleOpen(false), m_ConsoleAnimationTime(0.0f)
+		m_ConsoleButtonDown(false), m_ConsoleOpen(false), m_ConsoleAnimationTime(0.0f),
+		m_TextDirty(false), m_CurrentColor(1.0f, 1.0f, 1.0f, 1.0f), m_Scroll(0.0f)
 	{
 	}
 
@@ -57,6 +58,7 @@ namespace Glory
 				references.push_back(shaderID);
 			}
 		}
+		references.push_back(settings.Value<uint64_t>("Console Font"));
 	}
 
 	const std::type_info& OverlayConsoleModule::GetModuleType()
@@ -64,14 +66,33 @@ namespace Glory
 		return typeid(OverlayConsoleModule);
 	}
 
-	MaterialData* OverlayConsoleModule::ConsoleBackgroundMaterial()
+	bool OverlayConsoleModule::OnOverrideInputEvent(InputEvent& e)
 	{
-		return m_pConsoleBackgroundMaterial;
-	}
+		const UUID consoleFont = Settings().Value<uint64_t>("Console Font");
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(consoleFont);
+		if (!pResource) return false;
+		FontData* pFont = static_cast<FontData*>(pResource);
 
-	MaterialData* OverlayConsoleModule::ConsoleTextMaterial()
-	{
-		return m_pConsoleTextMaterial;
+		int windowWidth, windowHeight;
+		WindowModule* pWindows = m_pEngine->GetMainModule<WindowModule>();
+		pWindows->GetMainWindow()->GetDrawableSize(&windowWidth, &windowHeight);
+		const float textScale = 0.5f*windowWidth/1920.0f;
+
+		switch (e.State)
+		{
+		case InputState::KeyDown:
+			break;
+		case InputState::KeyUp:
+			break;
+		case InputState::Axis:
+			if (e.InputDeviceType != InputDeviceType::Mouse) return true;
+			if (e.KeyID != MouseAxis::MouseAxisScrollY) return true;
+			m_Scroll += e.Delta*pFont->FontHeight()*textScale;
+			m_TextDirty = true;
+			break;
+		}
+
+		return true;
 	}
 
 	void OverlayConsoleModule::Initialize()
@@ -105,6 +126,9 @@ namespace Glory
 		m_pConsoleMesh.reset(new MeshData(4, sizeof(VertexPosColorTex),
 			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }));
 
+		m_pConsoleLogTextMesh.reset(new MeshData(0, sizeof(VertexPosColorTex),
+			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }));
+
 		const float xpos = 0.0f;
 		const float ypos = 0.0f;
 
@@ -132,12 +156,17 @@ namespace Glory
 		REQUIRE_MODULE(m_pEngine, WindowModule, );
 
 		WindowModule* pWindows = m_pEngine->GetMainModule<WindowModule>();
-		if (pWindows->GetMainWindow()->IsBackQuoteDown() && !m_ConsoleButtonDown)
+		Window* pMainWindow = pWindows->GetMainWindow();
+		if (pMainWindow->IsBackQuoteDown() && !m_ConsoleButtonDown)
 		{
 			m_ConsoleButtonDown = true;
 			m_ConsoleOpen = !m_ConsoleOpen;
+			if (m_ConsoleOpen)
+				pMainWindow->AddInputOverrideHandler(this);
+			else
+				pMainWindow->RemoveInputOverrideHandler(this);
 		}
-		else if (!pWindows->GetMainWindow()->IsBackQuoteDown())
+		else if (!pMainWindow->IsBackQuoteDown())
 			m_ConsoleButtonDown = false;
 
 		if (m_ConsoleOpen && m_ConsoleAnimationTime < 1.0f)
@@ -160,33 +189,93 @@ namespace Glory
 	void OverlayConsoleModule::OverlayPass()
 	{
 		/* Do not render if console is fully closed */
-		//if (!m_ConsoleOpen && m_ConsoleAnimationTime == 0.0f) return;
+		if (!m_ConsoleOpen && m_ConsoleAnimationTime == 0.0f || m_Lines.empty()) return;
+
+		const UUID consoleFont = Settings().Value<uint64_t>("Console Font");
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(consoleFont);
+		if (!pResource) return;
+		FontData* pFont = static_cast<FontData*>(pResource);
 
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pGPUResourceManager = pGraphics->GetResourceManager();
 		WindowModule* pWindows = m_pEngine->GetMainModule<WindowModule>();
 
 		int windowWidth, windowHeight;
-		pWindows->GetMainWindow()->GetDrawableSize(&windowWidth, &windowHeight);
+		pWindows->GetMainWindow()->GetWindowSize(&windowWidth, &windowHeight);
 
-		const float height = windowHeight*0.4f;
+		const float textScale = 0.5f*windowWidth/1920.0f;
+		const float consolePadding = 10.0f;
+		const float consoleHeight = 20.0f*pFont->FontHeight()*textScale + consolePadding;
+		const float animatedConsoleHeight = consoleHeight*(1.0f - m_ConsoleAnimationTime);
+		const float textHeight = pFont->FontHeight()*textScale*m_Lines.size();
+		const float textStart = glm::max(consoleHeight - textHeight - consolePadding, 0.0f);
+		const float maxScroll = glm::max(textHeight + consolePadding - consoleHeight, 0.0f);
+		m_Scroll = glm::clamp(m_Scroll, 0.0f, maxScroll);
+
+		if (m_TextDirty)
+		{
+			m_pConsoleLogTextMesh->ClearIndices();
+			m_pConsoleLogTextMesh->ClearVertices();
+
+			const size_t maxVisibleLines = size_t(std::floor(consoleHeight/(pFont->FontHeight()*textScale)));
+			const size_t lastLine = m_Lines.size() - size_t(std::floor(m_Scroll/(pFont->FontHeight()*textScale)));
+			const size_t firstLine = size_t(glm::max(int(lastLine - maxVisibleLines), 0));
+
+			for (size_t i = 0; i < lastLine - firstLine; ++i)
+			{
+				TextRenderData textData;
+				textData.m_Color = m_CurrentColor;
+				textData.m_Text = m_Lines[firstLine+i];
+				textData.m_FontID = consoleFont;
+				textData.m_TextWrap = 0.0f;
+				textData.m_Alignment = Alignment::Left;
+				textData.m_Scale = textScale;
+				textData.m_Offsets.y = -1.0f*pFont->FontHeight()*textScale*(i+1);
+				textData.m_Append = true;
+				Utils::GenerateTextMesh(m_pConsoleLogTextMesh.get(), pFont, textData);
+				m_pConsoleLogTextMesh->SetDirty(true);
+			}
+			m_TextDirty = false;
+		}
 
 		ObjectData object;
-		const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, windowHeight - height + height*(1.0f - m_ConsoleAnimationTime), 0.0f));
-		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(float(windowWidth), float(height), 1.0f));
+		const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, windowHeight - consoleHeight + animatedConsoleHeight, 0.0f));
+		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(float(windowWidth), float(consoleHeight), 1.0f));
 		object.Model = translation*scale;
 		object.Projection = glm::ortho(0.0f, float(windowWidth), 0.0f, float(windowHeight));
 
-		Material* pMaterial = pGraphics->UseMaterial(m_pConsoleBackgroundMaterial);
+		pGraphics->EnableDepthTest(false);
 
+		Material* pMaterial = pGraphics->UseMaterial(m_pConsoleBackgroundMaterial);
 		pMaterial->SetProperties(m_pEngine);
 		pMaterial->SetObjectData(object);
 
-		pGraphics->UseMaterial(m_pConsoleBackgroundMaterial);
-		pGraphics->EnableDepthTest(false);
-
+		pGraphics->EnableStencilTest(true);
+		pGraphics->SetStencilMask(0xFF);
+		pGraphics->ClearStencil(0);
+		pGraphics->SetStencilOP(Func::OP_Replace, Func::OP_Replace, Func::OP_Replace);
+		pGraphics->SetStencilFunc(CompareOp::OP_Always, 255, 0xFF);
 		pGraphics->DrawMesh(m_pConsoleMesh.get(), 0, m_pConsoleMesh->VertexCount());
 
+		pGraphics->SetStencilMask(0x00);
+		pGraphics->SetStencilOP(Func::OP_Keep, Func::OP_Keep, Func::OP_Keep);
+		pGraphics->SetStencilFunc(CompareOp::OP_Equal, 255, 0xFF);
+		pMaterial = pGraphics->UseMaterial(m_pConsoleTextMaterial);
+		pMaterial->SetProperties(m_pEngine);
+		object.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, windowHeight + animatedConsoleHeight - textStart, 0.0f));
+		pMaterial->SetObjectData(object);
+
+		InternalTexture* pTextureData = pFont->GetGlyphTexture();
+		if (!pTextureData) return;
+
+		Texture* pTexture = pGPUResourceManager->CreateTexture((TextureData*)pTextureData);
+		if (pTexture) pMaterial->SetTexture("textSampler", pTexture);
+
+		pGraphics->DrawMesh(m_pConsoleLogTextMesh.get(), 0, m_pConsoleLogTextMesh->VertexCount());
+
 		/* Reset render textures and materials */
+		pGraphics->SetStencilMask(0x00);
+		pGraphics->EnableStencilTest(false);
 		pGraphics->UseMaterial(nullptr);
 		pGraphics->EnableDepthTest(true);
 	}
@@ -197,19 +286,24 @@ namespace Glory
 
 	void OverlayConsoleModule::SetNextColor(const glm::vec4& color)
 	{
+		m_CurrentColor = color;
 	}
 
 	void OverlayConsoleModule::ResetNextColor()
 	{
+		m_CurrentColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	void OverlayConsoleModule::Write(const std::string& line)
 	{
+		m_Lines.push_back(line);
+		m_TextDirty = true;
 	}
 
 	void OverlayConsoleModule::LoadSettings(ModuleSettings& settings)
 	{
 		settings.RegisterAssetReference<PipelineData>("Console Background Pipeline", 113);
 		settings.RegisterAssetReference<PipelineData>("Console Text Pipeline", 115);
+		settings.RegisterAssetReference<FontData>("Console Font", 116);
 	}
 }

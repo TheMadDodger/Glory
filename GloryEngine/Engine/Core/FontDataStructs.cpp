@@ -17,8 +17,13 @@ namespace Glory::Utils
 		const Alignment alignment = renderData.m_Alignment;
 		textWrap = textWrap > 0.0f ? textWrap : renderData.m_TextWrap/scale;
 
-		pMesh->ClearVertices();
-		pMesh->ClearIndices();
+		if (!renderData.m_Append)
+		{
+			pMesh->ClearVertices();
+			pMesh->ClearIndices();
+		}
+
+		const size_t indexOffset = pMesh->VertexCount();
 
 		/* Get words */
 		std::vector<std::pair<size_t, size_t>> wordPositions;
@@ -68,8 +73,8 @@ namespace Glory::Utils
 
 				if (!glyph) continue;
 
-				const float xpos = writeX + glyph->Bearing.x * scale;
-				const float ypos = writeY - (glyph->Size.y - glyph->Bearing.y) * scale;
+				const float xpos = renderData.m_Offsets.x + writeX + glyph->Bearing.x * scale;
+				const float ypos = renderData.m_Offsets.y + writeY - (glyph->Size.y - glyph->Bearing.y) * scale;
 
 				const float w = glyph->Size.x * scale;
 				const float h = glyph->Size.y * scale;
@@ -85,7 +90,8 @@ namespace Glory::Utils
 				pMesh->AddVertex(reinterpret_cast<float*>(&vertices[1]));
 				pMesh->AddVertex(reinterpret_cast<float*>(&vertices[2]));
 				pMesh->AddVertex(reinterpret_cast<float*>(&vertices[3]));
-				pMesh->AddFace(letterCount * 4 + 0, letterCount * 4 + 1, letterCount * 4 + 2, letterCount * 4 + 3);
+				pMesh->AddFace(indexOffset + letterCount*4 + 0, indexOffset + letterCount*4 + 1,
+					indexOffset + letterCount*4 + 2, indexOffset + letterCount*4 + 3);
 				++letterCount;
 				writeX += (glyph->Advance >> 6) * scale;
 			}

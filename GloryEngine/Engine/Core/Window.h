@@ -25,6 +25,8 @@ namespace Glory
 		bool Maximize;
 	};
 
+	class IWindowInputOverrideHandler;
+
 	class Window : public Object
 	{
 	public:
@@ -62,6 +64,9 @@ namespace Glory
 		bool IsShown() const;
 		bool IsBackQuoteDown() const;
 
+		void AddInputOverrideHandler(IWindowInputOverrideHandler* handler);
+		void RemoveInputOverrideHandler(IWindowInputOverrideHandler* handler);
+
 	protected:
 		Window(const WindowCreateInfo& createInfo);
 		virtual ~Window();
@@ -93,6 +98,8 @@ namespace Glory
 		bool m_Fullscreen;
 		bool m_Maximized;
 		bool m_BackQuote;
+
+		std::vector<IWindowInputOverrideHandler*> m_pInputOverrideHandlers;
 
 	private:
 		friend class WindowModule;

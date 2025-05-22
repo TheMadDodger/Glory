@@ -2,6 +2,7 @@
 #include <IConsole.h>
 #include <Module.h>
 #include <Glory.h>
+#include <IWindowInputOverrideHandler.h>
 
 #include <glm/glm.hpp>
 
@@ -11,18 +12,23 @@ namespace Glory
 	class RenderTexture;
 	class MeshData;
 
-	class OverlayConsoleModule : public Module, IConsole
+	/** @brief Overlay console module */
+	class OverlayConsoleModule : public Module, IConsole, IWindowInputOverrideHandler
 	{
 	public:
+		/** @brief Constructor */
 		GLORY_API OverlayConsoleModule();
+		/** @brief Destructor */
 		GLORY_API virtual ~OverlayConsoleModule();
 
+		/** @brief Collect references to assets used by this module */
 		GLORY_API virtual void CollectReferences(std::vector<UUID>& references) override;
 
+		/** @brief Module type OverlayConsoleModule */
 		GLORY_API virtual const std::type_info& GetModuleType() override;
 
-		GLORY_API MaterialData* ConsoleBackgroundMaterial();
-		GLORY_API MaterialData* ConsoleTextMaterial();
+		/** @brief Redirect input from main window to this module when console is open */
+		GLORY_API bool OnOverrideInputEvent(InputEvent& e) override;
 
 		GLORY_MODULE_VERSION_H(0,1,0);
 
@@ -48,5 +54,11 @@ namespace Glory
 		bool m_ConsoleButtonDown;
 		bool m_ConsoleOpen;
 		float m_ConsoleAnimationTime;
+		float m_Scroll;
+
+		std::vector<std::string> m_Lines;
+		std::unique_ptr<MeshData> m_pConsoleLogTextMesh;
+		bool m_TextDirty;
+		glm::vec4 m_CurrentColor;
 	};
 }

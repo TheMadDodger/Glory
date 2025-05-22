@@ -96,6 +96,7 @@ project "Glorious"
 		"GloryUIRenderer",
 		"GloryFSM",
 		"GloryLocalize",
+		"GloryOverlayConsole",
 		"SDLAudioExtension",
 		"EntityScenesEditorExtension",
 		"JoltEditorExtension",
