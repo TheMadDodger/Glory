@@ -27,8 +27,8 @@ namespace Glory
 	GLORY_MODULE_VERSION_CPP(OverlayConsoleModule);
 
 	OverlayConsoleModule::OverlayConsoleModule():
-		m_ConsoleButtonDown(false), m_ConsoleOpen(false), m_ConsoleAnimationTime(0.0f),
-		m_TextDirty(false), m_Scroll(0.0f)
+		m_ConsoleButtonDown(false), m_ConsoleOpen(false), m_ConsoleOpenedThisFrame(false), m_ConsoleAnimationTime(0.0f),
+		m_Scroll(0.0f), m_TextDirty(false), m_InputTextDirty(false), m_CursorPos(0), m_ConsoleInput("\0")
 	{
 	}
 
@@ -68,30 +68,65 @@ namespace Glory
 
 	bool OverlayConsoleModule::OnOverrideInputEvent(InputEvent& e)
 	{
-		const UUID consoleFont = Settings().Value<uint64_t>("Console Font");
-		Resource* pResource = m_pEngine->GetAssetManager().FindResource(consoleFont);
-		if (!pResource) return false;
-		FontData* pFont = static_cast<FontData*>(pResource);
-
-		int windowWidth, windowHeight;
 		WindowModule* pWindows = m_pEngine->GetMainModule<WindowModule>();
-		pWindows->GetMainWindow()->GetDrawableSize(&windowWidth, &windowHeight);
-		const float textScale = 0.5f*windowWidth/1920.0f;
+		Window* pMainWindow = pWindows->GetMainWindow();
 
 		switch (e.State)
 		{
 		case InputState::KeyDown:
+		{
+			if (e.InputDeviceType != InputDeviceType::Keyboard) return m_ConsoleOpen;
+			if (m_ConsoleOpen && e.KeyMods & KeyboardMod::ModCtrl && e.KeyID == KeyV)
+			{
+				const std::string clipboard = pMainWindow->GetClipboardText();
+				for (size_t i = 0; i < clipboard.size(); ++i)
+				{
+					if (m_CursorPos >= MAX_CONSOLE_INPUT - 1) break;
+					m_ConsoleInput[m_CursorPos] = clipboard[i];
+					++m_CursorPos;
+					m_ConsoleInput[m_CursorPos] = '\0';
+					m_InputTextDirty = true;
+				}
+				break;
+			}
+			HandleKeyboardInput(pMainWindow, m_pEngine->GetConsole(), KeyboardKey(e.KeyID));
 			break;
+		}
 		case InputState::KeyUp:
+			if (e.KeyID != KeyBackQuote) break;
+			m_ConsoleButtonDown = false;
 			break;
 		case InputState::Axis:
-			if (e.InputDeviceType != InputDeviceType::Mouse) return true;
-			if (e.KeyID != MouseAxis::MouseAxisScrollY) return true;
-			m_Scroll += e.Delta*pFont->FontHeight()*textScale;
+		{
+			if (!m_ConsoleOpen) break;
+			if (e.InputDeviceType != InputDeviceType::Mouse) break;
+			if (e.KeyID != MouseAxis::MouseAxisScrollY) break;
+
+			const UUID consoleFont = Settings().Value<uint64_t>("Console Font");
+			Resource* pResource = m_pEngine->GetAssetManager().FindResource(consoleFont);
+			if (!pResource) return false;
+			FontData* pFont = static_cast<FontData*>(pResource);
+
+			int windowWidth, windowHeight;
+			pMainWindow->GetDrawableSize(&windowWidth, &windowHeight);
+			const float textScale = 0.5f * windowWidth / 1920.0f;
+			m_Scroll += e.Delta * pFont->FontHeight() * textScale;
 			m_TextDirty = true;
 			break;
 		}
+		}
 
+		return m_ConsoleOpen;
+	}
+
+	bool OverlayConsoleModule::OnOverrideTextEvent(TextEvent& e)
+	{
+		if (!m_ConsoleOpen || m_ConsoleOpenedThisFrame) return false;
+		if (m_CursorPos >= MAX_CONSOLE_INPUT - 1) return true;
+		m_ConsoleInput[m_CursorPos] = e.Character;
+		++m_CursorPos;
+		m_ConsoleInput[m_CursorPos] = '\0';
+		m_InputTextDirty = true;
 		return true;
 	}
 
@@ -128,6 +163,8 @@ namespace Glory
 
 		m_pConsoleLogTextMesh.reset(new MeshData(0, sizeof(VertexPosColorTex),
 			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }));
+		m_pInputTextMesh.reset(new MeshData(0, sizeof(VertexPosColorTex),
+			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }));
 
 		const float xpos = 0.0f;
 		const float ypos = 0.0f;
@@ -149,6 +186,10 @@ namespace Glory
 		m_pConsoleMesh->AddVertex(reinterpret_cast<float*>(&vertices[2]));
 		m_pConsoleMesh->AddVertex(reinterpret_cast<float*>(&vertices[3]));
 		m_pConsoleMesh->AddFace(0, 1, 2, 3);
+
+		WindowModule* pWindows = m_pEngine->GetMainModule<WindowModule>();
+		Window* pMainWindow = pWindows->GetMainWindow();
+		pMainWindow->AddInputOverrideHandler(this);
 	}
 
 	void OverlayConsoleModule::Update()
@@ -157,17 +198,6 @@ namespace Glory
 
 		WindowModule* pWindows = m_pEngine->GetMainModule<WindowModule>();
 		Window* pMainWindow = pWindows->GetMainWindow();
-		if (pMainWindow->IsBackQuoteDown() && !m_ConsoleButtonDown)
-		{
-			m_ConsoleButtonDown = true;
-			m_ConsoleOpen = !m_ConsoleOpen;
-			if (m_ConsoleOpen)
-				pMainWindow->AddInputOverrideHandler(this);
-			else
-				pMainWindow->RemoveInputOverrideHandler(this);
-		}
-		else if (!pMainWindow->IsBackQuoteDown())
-			m_ConsoleButtonDown = false;
 
 		if (m_ConsoleOpen && m_ConsoleAnimationTime < 1.0f)
 			m_ConsoleAnimationTime += m_pEngine->Time().GetDeltaTime()*10.0f;
@@ -175,10 +205,16 @@ namespace Glory
 		else if (!m_ConsoleOpen && m_ConsoleAnimationTime > 0.0f)
 			m_ConsoleAnimationTime -= m_pEngine->Time().GetDeltaTime()*10.0f;
 		else if (!m_ConsoleOpen) m_ConsoleAnimationTime = 0.0f;
+
+		m_ConsoleOpenedThisFrame = false;
 	}
 
 	void OverlayConsoleModule::Cleanup()
 	{
+		WindowModule* pWindows = m_pEngine->GetMainModule<WindowModule>();
+		Window* pMainWindow = pWindows->GetMainWindow();
+		pMainWindow->RemoveInputOverrideHandler(this);
+
 		delete m_pConsoleBackgroundMaterial;
 		m_pConsoleBackgroundMaterial = nullptr;
 
@@ -206,20 +242,58 @@ namespace Glory
 
 		const float textScale = 0.5f*windowWidth/1920.0f;
 		const float consolePadding = 10.0f;
-		const float consoleHeight = 20.0f*pFont->FontHeight()*textScale + consolePadding;
+		const float textLineHeight = pFont->FontHeight()*textScale;
+		const float consoleHeight = 20.0f*textLineHeight + consolePadding;
 		const float animatedConsoleHeight = consoleHeight*(1.0f - m_ConsoleAnimationTime);
-		const float textHeight = pFont->FontHeight()*textScale*console.LineCount();
+		const float textHeight = textLineHeight*console.LineCount();
 		const float textStart = glm::max(consoleHeight - textHeight - consolePadding, 0.0f);
 		const float maxScroll = glm::max(textHeight + consolePadding - consoleHeight, 0.0f);
 		m_Scroll = glm::clamp(m_Scroll, 0.0f, maxScroll);
 
+		/* Generate input text bracket */
+		if (!m_pInputTextBracketMesh)
+		{
+			m_pInputTextBracketMesh.reset(new MeshData(4, sizeof(VertexPosColorTex),
+				{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }));
+
+			TextRenderData textData;
+			textData.m_Color = glm::vec4(1.0f);
+			textData.m_Text = "]";
+			textData.m_FontID = consoleFont;
+			textData.m_TextWrap = 0.0f;
+			textData.m_Alignment = Alignment::Left;
+			textData.m_Scale = textScale;
+			textData.m_Offsets.y = -1.0f*textLineHeight;
+			textData.m_Append = false;
+			Utils::GenerateTextMesh(m_pInputTextBracketMesh.get(), pFont, textData);
+		}
+
+		/* Generate input text cursor */
+		if (!m_pInputTextCursorMesh)
+		{
+			m_pInputTextCursorMesh.reset(new MeshData(4, sizeof(VertexPosColorTex),
+				{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }));
+
+			TextRenderData textData;
+			textData.m_Color = glm::vec4(1.0f);
+			textData.m_Text = "|";
+			textData.m_FontID = consoleFont;
+			textData.m_TextWrap = 0.0f;
+			textData.m_Alignment = Alignment::Left;
+			textData.m_Scale = textScale;
+			textData.m_Offsets.y = -1.0f * pFont->FontHeight() * textScale;
+			textData.m_Append = false;
+			Utils::GenerateTextMesh(m_pInputTextCursorMesh.get(), pFont, textData);
+		}
+
+		/* Generate console text mesh */
 		if (m_TextDirty)
 		{
 			m_pConsoleLogTextMesh->ClearIndices();
 			m_pConsoleLogTextMesh->ClearVertices();
 
-			const size_t maxVisibleLines = size_t(std::floor(consoleHeight/(pFont->FontHeight()*textScale)));
-			const size_t lastLine = console.LineCount() - size_t(std::floor(m_Scroll/(pFont->FontHeight()*textScale)));
+			const size_t maxVisibleLines = size_t(std::floor(consoleHeight/(textLineHeight))) - 1;
+			const size_t lastLine = console.LineCount() - size_t(std::floor(m_Scroll/(textLineHeight)));
 			const size_t firstLine = size_t(glm::max(int(lastLine - maxVisibleLines), 0));
 
 			for (size_t i = 0; i < lastLine - firstLine; ++i)
@@ -231,12 +305,28 @@ namespace Glory
 				textData.m_TextWrap = 0.0f;
 				textData.m_Alignment = Alignment::Left;
 				textData.m_Scale = textScale;
-				textData.m_Offsets.y = -1.0f*pFont->FontHeight()*textScale*(i+1);
+				textData.m_Offsets.y = -1.0f*textLineHeight*(i+1);
 				textData.m_Append = true;
 				Utils::GenerateTextMesh(m_pConsoleLogTextMesh.get(), pFont, textData);
 				m_pConsoleLogTextMesh->SetDirty(true);
 			}
 			m_TextDirty = false;
+		}
+
+		if (m_InputTextDirty && m_CursorPos > 0)
+		{
+			TextRenderData textData;
+			textData.m_Color = glm::vec4(1.0f);
+			textData.m_Text = m_ConsoleInput;
+			textData.m_FontID = consoleFont;
+			textData.m_TextWrap = 0.0f;
+			textData.m_Alignment = Alignment::Left;
+			textData.m_Scale = textScale;
+			textData.m_Offsets.y = -1.0f*textLineHeight;
+			textData.m_Append = false;
+			Utils::GenerateTextMesh(m_pInputTextMesh.get(), pFont, textData);
+			m_pInputTextMesh->SetDirty(true);
+			m_InputTextDirty = false;
 		}
 
 		ObjectData object;
@@ -247,17 +337,25 @@ namespace Glory
 
 		pGraphics->EnableDepthTest(false);
 
+		/* Draw background */
 		Material* pMaterial = pGraphics->UseMaterial(m_pConsoleBackgroundMaterial);
 		pMaterial->SetProperties(m_pEngine);
 		pMaterial->SetObjectData(object);
+		pGraphics->DrawMesh(m_pConsoleMesh.get(), 0, m_pConsoleMesh->VertexCount());
 
+		/* Draw stencil mask */
+		pGraphics->SetColorMask(false, false, false, false);
 		pGraphics->EnableStencilTest(true);
 		pGraphics->SetStencilMask(0xFF);
 		pGraphics->ClearStencil(0);
 		pGraphics->SetStencilOP(Func::OP_Replace, Func::OP_Replace, Func::OP_Replace);
 		pGraphics->SetStencilFunc(CompareOp::OP_Always, 255, 0xFF);
+		const glm::mat4 maskTranslation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, windowHeight - (consoleHeight - textLineHeight) + animatedConsoleHeight, 0.0f));
+		object.Model = maskTranslation*scale;
 		pGraphics->DrawMesh(m_pConsoleMesh.get(), 0, m_pConsoleMesh->VertexCount());
+		pGraphics->SetColorMask(true, true, true, true);
 
+		/* Draw text */
 		pGraphics->SetStencilMask(0x00);
 		pGraphics->SetStencilOP(Func::OP_Keep, Func::OP_Keep, Func::OP_Keep);
 		pGraphics->SetStencilFunc(CompareOp::OP_Equal, 255, 0xFF);
@@ -274,9 +372,28 @@ namespace Glory
 
 		pGraphics->DrawMesh(m_pConsoleLogTextMesh.get(), 0, m_pConsoleLogTextMesh->VertexCount());
 
-		/* Reset render textures and materials */
+		/* Disable stencil */
 		pGraphics->SetStencilMask(0x00);
 		pGraphics->EnableStencilTest(false);
+
+		/* Draw input text bracket */
+		const float inputTextHeight = windowHeight + animatedConsoleHeight - consoleHeight + textLineHeight + consolePadding;
+		object.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, inputTextHeight, 0.0f));
+		pMaterial->SetObjectData(object);
+		pGraphics->DrawMesh(m_pInputTextBracketMesh.get(), 0, m_pInputTextBracketMesh->VertexCount());
+
+		/* Draw input text */
+		if (m_pInputTextMesh->VertexCount() > 0 && m_CursorPos > 0)
+		{
+			const size_t bracketGlyphIndex = pFont->GetGlyphIndex(']');
+			const GlyphData* pBracketGlyph = pFont->GetGlyph(bracketGlyphIndex);
+			const float inputTextXOffset = (pBracketGlyph->Size.x + (pBracketGlyph->Advance >> 6)) * textScale;
+			object.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(inputTextXOffset, inputTextHeight, 0.0f));
+			pMaterial->SetObjectData(object);
+			pGraphics->DrawMesh(m_pInputTextMesh.get(), 0, m_pInputTextMesh->VertexCount());
+		}
+
+		/* Reset render textures and materials */
 		pGraphics->UseMaterial(nullptr);
 		pGraphics->EnableDepthTest(true);
 	}
@@ -303,5 +420,77 @@ namespace Glory
 		settings.RegisterAssetReference<PipelineData>("Console Background Pipeline", 113);
 		settings.RegisterAssetReference<PipelineData>("Console Text Pipeline", 115);
 		settings.RegisterAssetReference<FontData>("Console Font", 116);
+	}
+
+	void OverlayConsoleModule::HandleKeyboardInput(Window* pWindow, Console& pConsole, KeyboardKey key)
+	{
+		switch (key)
+		{
+		case Glory::KeyBackQuote:
+			if (m_ConsoleButtonDown) return;
+			m_ConsoleButtonDown = true;
+			m_ConsoleOpen = !m_ConsoleOpen;
+			m_ConsoleOpenedThisFrame = m_ConsoleOpen;
+			if (m_ConsoleOpen) pWindow->StartTextInput();
+			else pWindow->StopTextInput();
+			return;
+		case Glory::KeyEscape:
+			/* Clear input */
+			m_CursorPos = 0;
+			m_ConsoleInput[m_CursorPos] = '\0';
+			m_InputTextDirty = true;
+			return;
+		case Glory::KeyBackSpace:
+			/* Erase last character */
+			if (m_CursorPos == 0) return;
+			--m_CursorPos;
+			m_ConsoleInput[m_CursorPos] = '\0';
+			m_InputTextDirty = true;
+			return;
+		case Glory::KeyTab:
+			/* Auto complete */
+			return;
+		case Glory::KeyKpEnter:
+		case Glory::KeyReturn:
+			/* Execute command */
+			pConsole.QueueCommand(m_ConsoleInput);
+			m_CursorPos = 0;
+			m_ConsoleInput[m_CursorPos] = '\0';
+			m_InputTextDirty = true;
+			return;
+
+		case Glory::KeyLeft:
+		case Glory::KeyKpLeft:
+			/* @todo: Shift cursor left */
+			return;
+		case Glory::KeyRight:
+		case Glory::KeyKpRight:
+			/* @todo: Shift cursor right */
+			return;
+		case Glory::KeyUp:
+		case Glory::KeyKpUp:
+			/* @todo: Get previous history */
+			return;
+		case Glory::KeyDown:
+		case Glory::KeyKpDown:
+			/* @todo: Get next or last history */
+			return;
+		case Glory::KeyInsert:
+		case Glory::KeyKpInsert:
+			return;
+		case Glory::KeyHome:
+		case Glory::KeyKpBegin:
+		case Glory::KeyKpHome:
+			/* @todo: Shift cursor to start */
+			return;
+		case Glory::KeyDelete:
+		case Glory::KeyKpDelete:
+			/* @todo: Delete next character */
+			return;
+		case Glory::KeyEnd:
+		case Glory::KeyKpEnd:
+			/* @todo: Shift cursor to end */
+			return;
+		}
 	}
 }

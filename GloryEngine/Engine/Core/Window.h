@@ -52,6 +52,9 @@ namespace Glory
 
 		virtual void SetSplashScreen(const char* data, size_t size) = 0;
 		virtual void SetSplashScreen(const std::filesystem::path& path) = 0;
+		virtual std::string GetClipboardText() = 0;
+		virtual void StartTextInput() = 0;
+		virtual void StopTextInput() = 0;
 
 		void ShowCursor(bool shown);
 		void ForceShowCursor(bool show);
@@ -62,7 +65,6 @@ namespace Glory
 		void ForceUngrabInput(bool ungrab);
 		bool HasFocus() const;
 		bool IsShown() const;
-		bool IsBackQuoteDown() const;
 
 		void AddInputOverrideHandler(IWindowInputOverrideHandler* handler);
 		void RemoveInputOverrideHandler(IWindowInputOverrideHandler* handler);
@@ -79,6 +81,7 @@ namespace Glory
 
 		bool ForwardInputEvent(InputEvent& input);
 		void ForwardCursorEvent(CursorEvent& input);
+		bool ForwardTextEvent(TextEvent& text);
 
 	protected:
 		std::string m_WindowName;
@@ -97,7 +100,6 @@ namespace Glory
 
 		bool m_Fullscreen;
 		bool m_Maximized;
-		bool m_BackQuote;
 
 		std::vector<IWindowInputOverrideHandler*> m_pInputOverrideHandlers;
 

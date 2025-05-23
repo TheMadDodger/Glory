@@ -18,6 +18,7 @@ namespace Glory
 
 		bool OnInput(InputEvent& event);
 		void OnCursor(CursorEvent& event);
+		bool OnText(TextEvent& event);
 
 		size_t AddPlayer();
 		void RemovePlayer(size_t playerIndex);

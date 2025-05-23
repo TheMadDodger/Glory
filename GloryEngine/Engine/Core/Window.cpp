@@ -12,8 +12,7 @@ namespace Glory
 		m_pWindowManager(createInfo.pWindowManager), m_ShowCursor(true),
 		m_ForceShowCursor(false), m_ForceUnlockCursor(false), m_GrabInput(false),
 		m_ForceUngrabInput(false), m_HasFocus(false), m_IsShown(false),
-		m_Fullscreen(createInfo.Fullscreen), m_Maximized(createInfo.Maximize),
-		m_BackQuote(false)
+		m_Fullscreen(createInfo.Fullscreen), m_Maximized(createInfo.Maximize)
 	{
 	}
 
@@ -75,11 +74,6 @@ namespace Glory
 		return m_IsShown;
 	}
 
-	bool Window::IsBackQuoteDown() const
-	{
-		return m_BackQuote;
-	}
-
 	void Window::AddInputOverrideHandler(IWindowInputOverrideHandler* handler)
 	{
 		m_pInputOverrideHandlers.push_back(handler);
@@ -122,6 +116,18 @@ namespace Glory
 	void Window::ForwardCursorEvent(CursorEvent& input)
 	{
 		InputModule* pInput = m_pWindowManager->GetEngine()->GetMainModule<InputModule>();
-		return pInput->OnCursor(input);
+		pInput->OnCursor(input);
+	}
+
+	bool Window::ForwardTextEvent(TextEvent& text)
+	{
+		for (size_t i = 0; i < m_pInputOverrideHandlers.size(); ++i)
+		{
+			if (!m_pInputOverrideHandlers[i]->OnOverrideTextEvent(text)) continue;
+			return true;
+		}
+
+		InputModule* pInput = m_pWindowManager->GetEngine()->GetMainModule<InputModule>();
+		return pInput->OnText(text);
 	}
 }

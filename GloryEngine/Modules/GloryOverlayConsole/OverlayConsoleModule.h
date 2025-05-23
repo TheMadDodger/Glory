@@ -2,6 +2,7 @@
 #include <IConsole.h>
 #include <Module.h>
 #include <Glory.h>
+#include <KeyEnums.h>
 #include <IWindowInputOverrideHandler.h>
 
 #include <glm/glm.hpp>
@@ -11,6 +12,8 @@ namespace Glory
 	class MaterialData;
 	class RenderTexture;
 	class MeshData;
+	class Console;
+	class Window;
 
 	/** @brief Overlay console module */
 	class OverlayConsoleModule : public Module, IConsole, IWindowInputOverrideHandler
@@ -29,6 +32,7 @@ namespace Glory
 
 		/** @brief Redirect input from main window to this module when console is open */
 		GLORY_API bool OnOverrideInputEvent(InputEvent& e) override;
+		GLORY_API bool OnOverrideTextEvent(TextEvent& e) override;
 
 		GLORY_MODULE_VERSION_H(0,1,0);
 
@@ -46,6 +50,8 @@ namespace Glory
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
 
+		void HandleKeyboardInput(Window* pWindow, Console& pConsole, KeyboardKey key);
+
 	private:
 		MaterialData* m_pConsoleBackgroundMaterial = nullptr;
 		MaterialData* m_pConsoleTextMaterial = nullptr;
@@ -53,10 +59,18 @@ namespace Glory
 		std::unique_ptr<MeshData> m_pConsoleMesh;
 		bool m_ConsoleButtonDown;
 		bool m_ConsoleOpen;
+		bool m_ConsoleOpenedThisFrame;
 		float m_ConsoleAnimationTime;
 		float m_Scroll;
 
 		std::unique_ptr<MeshData> m_pConsoleLogTextMesh;
 		bool m_TextDirty;
+		std::unique_ptr<MeshData> m_pInputTextMesh;
+		std::unique_ptr<MeshData> m_pInputTextBracketMesh;
+		std::unique_ptr<MeshData> m_pInputTextCursorMesh;
+		bool m_InputTextDirty;
+		static const size_t MAX_CONSOLE_INPUT = 1024;
+		size_t m_CursorPos;
+		char m_ConsoleInput[MAX_CONSOLE_INPUT];
 	};
 }

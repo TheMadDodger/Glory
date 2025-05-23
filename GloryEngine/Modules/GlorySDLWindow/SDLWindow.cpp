@@ -14,196 +14,230 @@
 namespace Glory
 {
 	const std::map<SDL_Keycode, KeyboardKey> KEYBOARD_KEYMAP = {
-		{SDLK_ESCAPE,			   KeyEscape,					   },
-		{SDLK_F1,				   KeyF1,						   },
-		{SDLK_F2,				   KeyF2,						   },
-		{SDLK_F3,				   KeyF3,						   },
-		{SDLK_F4,				   KeyF4,						   },
-		{SDLK_F5,				   KeyF5,						   },
-		{SDLK_F6,				   KeyF6,						   },
-		{SDLK_F7,				   KeyF7,						   },
-		{SDLK_F8,				   KeyF8,						   },
-		{SDLK_F9,				   KeyF9,						   },
-		{SDLK_F10,			   KeyF10,						   },
-		{SDLK_F11,			   KeyF11,						   },
-		{SDLK_F12,			   KeyF12,						   },
-		{SDLK_F13,			   KeyF13,						   },
-		{SDLK_F14,			   KeyF14,						   },
-		{SDLK_F15,			   KeyF15,						   },
-		{SDLK_F16,			   KeyF16,						   },
-		{SDLK_F17,			   KeyF17,						   },
-		{SDLK_F18,			   KeyF18,						   },
-		{SDLK_F19,			   KeyF19,						   },
-		{SDLK_PRINTSCREEN,			   KeyPrint,					   },
-		{SDLK_SCROLLLOCK,		   KeyScrollLock,				   },
-		//{SDLK_BREAK,			   KeyBreak,					   },
+		{SDLK_ESCAPE,				KeyEscape,					   },
+		{SDLK_F1,					KeyF1,						   },
+		{SDLK_F2,					KeyF2,						   },
+		{SDLK_F3,					KeyF3,						   },
+		{SDLK_F4,					KeyF4,						   },
+		{SDLK_F5,					KeyF5,						   },
+		{SDLK_F6,					KeyF6,						   },
+		{SDLK_F7,					KeyF7,						   },
+		{SDLK_F8,					KeyF8,						   },
+		{SDLK_F9,					KeyF9,						   },
+		{SDLK_F10,					KeyF10,						   },
+		{SDLK_F11,					KeyF11,						   },
+		{SDLK_F12,					KeyF12,						   },
+		{SDLK_F13,					KeyF13,						   },
+		{SDLK_F14,					KeyF14,						   },
+		{SDLK_F15,					KeyF15,						   },
+		{SDLK_F16,					KeyF16,						   },
+		{SDLK_F17,					KeyF17,						   },
+		{SDLK_F18,					KeyF18,						   },
+		{SDLK_F19,					KeyF19,						   },
+		{SDLK_PRINTSCREEN,			KeyPrint,					   },
+		{SDLK_SCROLLLOCK,			KeyScrollLock,				   },
+		//{SDLK_BREAK,				KeyBreak,					   },
 
-		{SDLK_SPACE,			   KeySpace,					   },
+		{SDLK_SPACE,				KeySpace,					   },
 
-		//{SDLK_APOSTROPHE,		   KeyApostrophe,				   },
-		{SDLK_COMMA,			   KeyComma,					   },
-		{SDLK_MINUS,			   KeyMinus,					   },
-		{SDLK_PERIOD,			   KeyPeriod,					   },
-		{SDLK_SLASH,			   KeySlash,					   },
+		//{SDLK_APOSTROPHE,			KeyApostrophe,				   },
+		{SDLK_COMMA,				KeyComma,					   },
+		{SDLK_MINUS,				KeyMinus,					   },
+		{SDLK_PERIOD,				KeyPeriod,					   },
+		{SDLK_SLASH,				KeySlash,					   },
 
-		{SDLK_0,				   Key0,						   },
-		{SDLK_1,				   Key1,						   },
-		{SDLK_2,				   Key2,						   },
-		{SDLK_3,				   Key3,						   },
-		{SDLK_4,				   Key4,						   },
-		{SDLK_5,				   Key5,						   },
-		{SDLK_6,				   Key6,						   },
-		{SDLK_7,				   Key7,						   },
-		{SDLK_8,				   Key8,						   },
-		{SDLK_9,				   Key9,						   },
+		{SDLK_0,					Key0,						   },
+		{SDLK_1,					Key1,						   },
+		{SDLK_2,					Key2,						   },
+		{SDLK_3,					Key3,						   },
+		{SDLK_4,					Key4,						   },
+		{SDLK_5,					Key5,						   },
+		{SDLK_6,					Key6,						   },
+		{SDLK_7,					Key7,						   },
+		{SDLK_8,					Key8,						   },
+		{SDLK_9,					Key9,						   },
 
-		{SDLK_SEMICOLON,		   KeySemicolon,				   },
-		{SDLK_LESS,					KeyLess,						   },
-		{SDLK_EQUALS,			   KeyEqual,					   },
+		{SDLK_SEMICOLON,			KeySemicolon,				   },
+		{SDLK_LESS,					KeyLess,						},
+		{SDLK_EQUALS,				KeyEqual,					   },
 
-		{SDLK_a,				   KeyA,						   },
-		{SDLK_b,				   KeyB,						   },
-		{SDLK_c,				   KeyC,						   },
-		{SDLK_d,				   KeyD,						   },
-		{SDLK_e,				   KeyE,						   },
-		{SDLK_f,				   KeyF,						   },
-		{SDLK_g,				   KeyG,						   },
-		{SDLK_h,				   KeyH,						   },
-		{SDLK_i,				   KeyI,						   },
-		{SDLK_j,				   KeyJ,						   },
-		{SDLK_k,				   KeyK,						   },
-		{SDLK_l,				   KeyL,						   },
-		{SDLK_m,				   KeyM,						   },
-		{SDLK_n,				   KeyN,						   },
-		{SDLK_o,				   KeyO,						   },
-		{SDLK_p,				   KeyP,						   },
-		{SDLK_q,				   KeyQ,						   },
-		{SDLK_r,				   KeyR,						   },
-		{SDLK_s,				   KeyS,						   },
-		{SDLK_t,				   KeyT,						   },
-		{SDLK_u,				   KeyU,						   },
-		{SDLK_v,				   KeyV,						   },
-		{SDLK_w,				   KeyW,						   },
-		{SDLK_x,				   KeyX,						   },
-		{SDLK_y,				   KeyY,						   },
-		{SDLK_z,				   KeyZ,						   },
+		{SDLK_a,					KeyA,						   },
+		{SDLK_b,					KeyB,						   },
+		{SDLK_c,					KeyC,						   },
+		{SDLK_d,					KeyD,						   },
+		{SDLK_e,					KeyE,						   },
+		{SDLK_f,					KeyF,						   },
+		{SDLK_g,					KeyG,						   },
+		{SDLK_h,					KeyH,						   },
+		{SDLK_i,					KeyI,						   },
+		{SDLK_j,					KeyJ,						   },
+		{SDLK_k,					KeyK,						   },
+		{SDLK_l,					KeyL,						   },
+		{SDLK_m,					KeyM,						   },
+		{SDLK_n,					KeyN,						   },
+		{SDLK_o,					KeyO,						   },
+		{SDLK_p,					KeyP,						   },
+		{SDLK_q,					KeyQ,						   },
+		{SDLK_r,					KeyR,						   },
+		{SDLK_s,					KeyS,						   },
+		{SDLK_t,					KeyT,						   },
+		{SDLK_u,					KeyU,						   },
+		{SDLK_v,					KeyV,						   },
+		{SDLK_w,					KeyW,						   },
+		{SDLK_x,					KeyX,						   },
+		{SDLK_y,					KeyY,						   },
+		{SDLK_z,					KeyZ,						   },
 
-		{SDLK_LEFTBRACKET,	   KeyBracketLeft,				   },
-		{SDLK_BACKSLASH,		   KeyBackslash,				   },
-		{SDLK_RIGHTBRACKET,	   KeyBracketRight,				   },
+		{SDLK_LEFTBRACKET,			KeyBracketLeft,					},
+		{SDLK_BACKSLASH,			KeyBackslash,					},
+		{SDLK_RIGHTBRACKET,			KeyBracketRight,				},
 
-		//{SDLK_GRAVE,			   KeyGrave,					   },
+		//{SDLK_GRAVE,				KeyGrave,					   },
 
-		{SDLK_LEFT,			   KeyLeft,						   },
-		{SDLK_RIGHT,			   KeyRight,					   },
-		{SDLK_UP,				   KeyUp,						   },
-		{SDLK_DOWN,			   KeyDown,						   },
-		{SDLK_INSERT,			   KeyInsert,					   },
-		{SDLK_HOME,			   KeyHome,						   },
-		{SDLK_DELETE,			   KeyDelete,					   },
-		{SDLK_END,			   KeyEnd,						   },
-		{SDLK_PAGEUP,			   KeyPageUp,					   },
-		{SDLK_PAGEDOWN,		   KeyPageDown,					   },
+		{SDLK_LEFT,					KeyLeft,						   },
+		{SDLK_RIGHT,				KeyRight,					   },
+		{SDLK_UP,					KeyUp,						   },
+		{SDLK_DOWN,					KeyDown,						   },
+		{SDLK_INSERT,				KeyInsert,					   },
+		{SDLK_HOME,					KeyHome,						   },
+		{SDLK_DELETE,				KeyDelete,					   },
+		{SDLK_END,					KeyEnd,						   },
+		{SDLK_PAGEUP,				KeyPageUp,					   },
+		{SDLK_PAGEDOWN,				KeyPageDown,					   },
 
-		{SDLK_NUMLOCKCLEAR,		   KeyNumLock,					   },
-		{SDLK_KP_EQUALS,		   KeyKpEqual,					   },
-		{SDLK_KP_DIVIDE,		   KeyKpDivide,					   },
-		{SDLK_KP_MULTIPLY,		   KeyKpMultiply,				   },
-		{SDLK_KP_MEMSUBTRACT,		   KeyKpSubtract,				   },
-		{SDLK_KP_MEMADD,			   KeyKpAdd,					   },
-		{SDLK_KP_ENTER,		   KeyKpEnter,					   },
-		//{SDLK_KP_INSERT,		   KeyKpInsert,					   },
-		//{SDLK_KP_END,			   KeyKpEnd,					   },
-		//{SDLK_KP_DOWN,			   KeyKpDown,					   },
-		//{SDLK_KpPageDown,		   KeyKpPageDown,				   },
-		//{SDLK_KpLeft,			   KeyKpLeft,					   },
-		//{SDLK_KpBegin,		   KeyKpBegin,					   },
-		//{SDLK_KpRight,		   KeyKpRight,					   },
-		//{SDLK_KpHome,			   KeyKpHome,					   },
-		//{SDLK_KpUp,			   KeyKpUp,						   },
-		//{SDLK_KpPageUp,		   KeyKpPageUp,					   },
-		//{SDLK_KpDelete,		   KeyKpDelete,					   },
+		{SDLK_NUMLOCKCLEAR,			KeyNumLock,					   },
+		{SDLK_KP_EQUALS,			KeyKpEqual,					   },
+		{SDLK_KP_DIVIDE,			KeyKpDivide,					   },
+		{SDLK_KP_MULTIPLY,			KeyKpMultiply,				   },
+		{SDLK_KP_MEMSUBTRACT,		KeyKpSubtract,				   },
+		{SDLK_KP_MEMADD,			KeyKpAdd,					   },
+		{SDLK_KP_ENTER,				KeyKpEnter,					   },
+		//{SDLK_KP_INSERT,			KeyKpInsert,					   },
+		//{SDLK_KP_END,				KeyKpEnd,					   },
+		//{SDLK_KP_DOWN,			KeyKpDown,					   },
+		//{SDLK_KpPageDown,			KeyKpPageDown,				   },
+		//{SDLK_KpLeft,				KeyKpLeft,					   },
+		//{SDLK_KpBegin,			KeyKpBegin,					   },
+		//{SDLK_KpRight,			KeyKpRight,					   },
+		//{SDLK_KpHome,				KeyKpHome,					   },
+		//{SDLK_KpUp,				KeyKpUp,						   },
+		//{SDLK_KpPageUp,			KeyKpPageUp,					   },
+		//{SDLK_KpDelete,			KeyKpDelete,					   },
 
-		{SDLK_BACKSPACE,		   KeyBackSpace,				   },
-		{SDLK_TAB,			   KeyTab,						   },
-		{SDLK_RETURN,			   KeyReturn,					   },
-		{SDLK_CAPSLOCK,		   KeyCapsLock,					   },
-		{SDLK_LSHIFT,			   KeyShiftL,					   },
-		{SDLK_LCTRL,			   KeyCtrlL,					   },
-		//{SDLK_SUPER,			   KeySuperL,					   },
-		{SDLK_LALT,			   KeyAltL,						   },
-		{SDLK_RALT,			   KeyAltR,						   },
-		//{SDLK_SuperR,			   KeySuperR,					   },
-		{SDLK_MENU,			   KeyMenu,						   },
-		{SDLK_RCTRL,			   KeyCtrlR,					   },
-		{SDLK_RSHIFT,			   KeyShiftR,					   },
+		{SDLK_BACKSPACE,			KeyBackSpace,				   },
+		{SDLK_TAB,					KeyTab,						   },
+		{SDLK_RETURN,				KeyReturn,					   },
+		{SDLK_CAPSLOCK,				KeyCapsLock,					   },
+		{SDLK_LSHIFT,				KeyShiftL,					   },
+		{SDLK_LCTRL,				KeyCtrlL,					   },
+		//{SDLK_SUPER,				KeySuperL,					   },
+		{SDLK_LALT,					KeyAltL,						   },
+		{SDLK_RALT,					KeyAltR,						   },
+		//{SDLK_SuperR,				KeySuperR,					   },
+		{SDLK_MENU,					KeyMenu,						   },
+		{SDLK_RCTRL,				KeyCtrlR,					   },
+		{SDLK_RSHIFT,				KeyKpMultiply,					   },
 
-		//{SDLK_BACK,			   KeyBack,						   },
-		//{SDLK_SoftLeft,		   KeySoftLeft,					   },
-		//{SDLK_SoftRight,		   KeySoftRight,				   },
-		//{SDLK_Call,			   KeyCall,						   },
-		//{SDLK_Endcall,		   KeyEndcall,					   },
-		//{SDLK_Star,			   KeyStar,						   },
-		//{SDLK_Pound,			   KeyPound,					   },
-		//{SDLK_DpadCenter,		   KeyDpadCenter,				   },
-		{SDLK_VOLUMEUP,		   KeyVolumeUp,					   },
-		{SDLK_VOLUMEDOWN,		   KeyVolumeDown,				   },
-		{SDLK_POWER,			   KeyPower,					   },
-		//{SDLK_Camera,			   KeyCamera,					   },
-		{SDLK_CLEAR,			   KeyClear,					   },
-		//{SDLK_Symbol,			   KeySymbol,					   },
-		//{SDLK_Explorer,		   KeyExplorer,					   },
-		//{SDLK_Envelope,		   KeyEnvelope,					   },
-		{SDLK_EQUALS,			   KeyEquals,					   },
-		{SDLK_AT,				   KeyAt,						   },
-		//{SDLK_Headsethook,	   KeyHeadsethook,				   },
-		//{SDLK_Focus,			   KeyFocus,					   },
-		{SDLK_PLUS,			   KeyPlus,						   },
-		//{SDLK_Notification,	   KeyNotification,				   },
-		//{SDLK_Search,			   KeySearch,					   },
-		//{SDLK_MediaPlayPause,	   KeyMediaPlayPause,			   },
-		//{SDLK_MediaStop,		   KeyMediaStop,				   },
-		//{SDLK_MediaNext,		   KeyMediaNext,				   },
-		//{SDLK_MediaPrevious,	   KeyMediaPrevious,			   },
-		//{SDLK_MediaRewind,	   KeyMediaRewind,				   },
-		//{SDLK_MediaFastForward,  KeyMediaFastForward,			   },
-		//{SDLK_Mute,			   KeyMute,						   },
-		//{SDLK_Pictsymbols,	   KeyPictsymbols,				   },
-		//{SDLK_SwitchCharset,	   KeySwitchCharset,			   },
+		//{SDLK_BACK,				KeyBack,						   },
+		//{SDLK_SoftLeft,			KeySoftLeft,					   },
+		//{SDLK_SoftRight,			KeySoftRight,				   },
+		//{SDLK_Call,				KeyCall,						   },
+		//{SDLK_Endcall,			KeyEndcall,					   },
+		//{SDLK_Star,				KeyStar,						   },
+		//{SDLK_Pound,				KeyPound,					   },
+		//{SDLK_DpadCenter,			KeyDpadCenter,				   },
+		{SDLK_VOLUMEUP,				KeyVolumeUp,					   },
+		{SDLK_VOLUMEDOWN,			KeyVolumeDown,				   },
+		{SDLK_POWER,				KeyPower,					   },
+		//{SDLK_Camera,				KeyCamera,					   },
+		{SDLK_CLEAR,				KeyClear,					   },
+		//{SDLK_Symbol,				KeySymbol,					   },
+		//{SDLK_Explorer,			KeyExplorer,					   },
+		//{SDLK_Envelope,			KeyEnvelope,					   },
+		{SDLK_EQUALS,				KeyEquals,					   },
+		{SDLK_AT,					KeyAt,						   },
+		//{SDLK_Headsethook,		KeyHeadsethook,				   },
+		//{SDLK_Focus,				KeyFocus,					   },
+		{SDLK_PLUS,					KeyPlus,						   },
+		//{SDLK_Notification,		KeyNotification,				   },
+		//{SDLK_Search,				KeySearch,					   },
+		//{SDLK_MediaPlayPause,		KeyMediaPlayPause,			   },
+		//{SDLK_MediaStop,			KeyMediaStop,				   },
+		//{SDLK_MediaNext,			KeyMediaNext,				   },
+		//{SDLK_MediaPrevious,		KeyMediaPrevious,			   },
+		//{SDLK_MediaRewind,		KeyMediaRewind,				   },
+		//{SDLK_MediaFastForward,	KeyMediaFastForward,			   },
+		//{SDLK_Mute,				KeyMute,						   },
+		//{SDLK_Pictsymbols,		KeyPictsymbols,				   },
+		//{SDLK_SwitchCharset,		KeySwitchCharset,			   },
 
 		{SDL_SCANCODE_AC_FORWARD,		   KeyForward,					   },
-		//{SDLK_Extra1,			   KeyExtra1,					   },
-		//{SDLK_Extra2,			   KeyExtra2,					   },
-		//{SDLK_Extra3,			   KeyExtra3,					   },
-		//{SDLK_Extra4,			   KeyExtra4,					   },
-		//{SDLK_Extra5,			   KeyExtra5,					   },
-		//{SDLK_Extra6,			   KeyExtra6,					   },
-		//{SDLK_Fn,				   KeyFn,						   },
+		//{SDLK_Extra1,				KeyExtra1,					   },
+		//{SDLK_Extra2,				KeyExtra2,					   },
+		//{SDLK_Extra3,				KeyExtra3,					   },
+		//{SDLK_Extra4,				KeyExtra4,					   },
+		//{SDLK_Extra5,				KeyExtra5,					   },
+		//{SDLK_Extra6,				KeyExtra6,					   },
+		//{SDLK_Fn,					KeyFn,						   },
 
-		//{SDLK_Circumflex,		   KeyCircumflex,				   },
-		//{SDLK_Ssharp,			   KeySsharp,					   },
-		//{SDLK_Acute,			   KeyAcute,					   },
-		{SDLK_ALTERASE,			   KeyAltGr,					   },
-		//{SDLK_Numbersign,		   KeyNumbersign,				   },
-		//{SDLK_Udiaeresis,		   KeyUdiaeresis,				   },
-		//{SDLK_Adiaeresis,		   KeyAdiaeresis,				   },
-		//{SDLK_Odiaeresis,		   KeyOdiaeresis,				   },
-		//{SDLK_Section,		   KeySection,					   },
-		//{SDLK_Aring,			   KeyAring,					   },
-		//{SDLK_Diaeresis,		   KeyDiaeresis,				   },
-		//{SDLK_Twosuperior,	   KeyTwosuperior,				   },
-		//{SDLK_RightParenthesis,  KeyRightParenthesis,			   },
-		{SDLK_DOLLAR,			   KeyDollar,					   },
-		//{SDLK_Ugrave,			   KeyUgrave,					   },
-		{SDLK_ASTERISK,		   KeyAsterisk,							},
-		{SDLK_COLON,			   KeyColon,					   },
-		{SDLK_EXCLAIM,			   KeyExclam,					   },
+		//{SDLK_Circumflex,			KeyCircumflex,				   },
+		//{SDLK_Ssharp,				KeySsharp,					   },
+		//{SDLK_Acute,				KeyAcute,					   },
+		{SDLK_ALTERASE,				KeyAltGr,					   },
+		//{SDLK_Numbersign,			KeyNumbersign,				   },
+		//{SDLK_Udiaeresis,			KeyUdiaeresis,				   },
+		//{SDLK_Adiaeresis,			KeyAdiaeresis,				   },
+		//{SDLK_Odiaeresis,			KeyOdiaeresis,				   },
+		//{SDLK_Section,			KeySection,					   },
+		//{SDLK_Aring,				KeyAring,					   },
+		//{SDLK_Diaeresis,			KeyDiaeresis,				   },
+		//{SDLK_Twosuperior,		KeyTwosuperior,				   },
+		//{SDLK_RightParenthesis,	KeyRightParenthesis,			   },
+		{SDLK_DOLLAR,				KeyDollar,					   },
+		//{SDLK_Ugrave,				KeyUgrave,					   },
+		{SDLK_ASTERISK,				KeyAsterisk,							},
+		{SDLK_COLON,				KeyColon,					   },
+		{SDLK_EXCLAIM,				KeyExclam,					   },
 
-		{SDLK_KP_LEFTBRACE,		   KeyBraceLeft,				   },
-		{SDLK_KP_RIGHTBRACE,		   KeyBraceRight,				},
-		{SDLK_SYSREQ,			   KeySysRq,					   },
+		{SDLK_KP_LEFTBRACE,			KeyBraceLeft,				   },
+		{SDLK_KP_RIGHTBRACE,		KeyBraceRight,				},
+		{SDLK_SYSREQ,				KeySysRq,					   },
 		{SDLK_BACKQUOTE,			KeyBackQuote,					},
+
+		{SDLK_KP_MINUS,				KeyKpMinus						},
+		{SDLK_KP_PLUS,				KeyKpPlus						},
+		{SDLK_KP_1,					KeyKp1							},
+		{SDLK_KP_2,					KeyKp2							},
+		{SDLK_KP_3,					KeyKp3							},
+		{SDLK_KP_4,					KeyKp4							},
+		{SDLK_KP_5,					KeyKp5							},
+		{SDLK_KP_6,					KeyKp6							},
+		{SDLK_KP_7,					KeyKp7							},
+		{SDLK_KP_8,					KeyKp8							},
+		{SDLK_KP_9,					KeyKp9							},
+		{SDLK_KP_0,					KeyKp0							},
+		{SDLK_KP_PERIOD,			KeyKpPeriod						},
 	};
+	
+	const std::map<SDL_Keymod, KeyboardMod> KEYBOARD_MODMAP =		{
+		{SDL_Keymod::KMOD_ALT,		ModAlt							},
+		{SDL_Keymod::KMOD_LALT,		ModLAlt							},
+		{SDL_Keymod::KMOD_RALT,		ModRAlt							},
+		{SDL_Keymod::KMOD_SHIFT,	ModShift						},
+		{SDL_Keymod::KMOD_LSHIFT,	ModLShift						},
+		{SDL_Keymod::KMOD_RSHIFT,	ModRShift						},
+		{SDL_Keymod::KMOD_CTRL,		ModCtrl							},
+		{SDL_Keymod::KMOD_RCTRL,	ModRCtrl						},
+		{SDL_Keymod::KMOD_LCTRL,	ModLCtrl						},
+		{SDL_Keymod::KMOD_CAPS,		ModCaps							},
+		{SDL_Keymod::KMOD_GUI,		ModGui							},
+		{SDL_Keymod::KMOD_LGUI,		ModLGui							},
+		{SDL_Keymod::KMOD_RGUI,		ModRGui							},
+		{SDL_Keymod::KMOD_NUM,		ModNum							},
+		{SDL_Keymod::KMOD_MODE,		ModMode							},
+		{SDL_Keymod::KMOD_SCROLL,	ModScroll						},
+	};
+	
 	const std::map<uint8_t, MouseButton> MOUSE_BUTTONMAP = {
 		{ SDL_BUTTON_LEFT, MouseButton::MouseButtonLeft },
 		{ SDL_BUTTON_RIGHT, MouseButton::MouseButtonRight },
@@ -301,7 +335,6 @@ namespace Glory
 			if (iter == KEYBOARD_KEYMAP.end()) break;
 			if (iter->second == KeyboardKey::KeyAltL) m_LAltDown = true;
 			if (iter->second == KeyboardKey::KeyAltR) m_RAltDown = true;
-			if (iter->second == KeyboardKey::KeyBackQuote) m_BackQuote = true;
 
 			if ((m_LAltDown || m_RAltDown) && iter->second == KeyboardKey::KeyReturn)
 				SetFullscreen(!m_Fullscreen, false);
@@ -312,6 +345,7 @@ namespace Glory
 			inputEvent.SourceDeviceID = 0;
 			inputEvent.Value = 1.0f;
 			inputEvent.Delta = 1.0f;
+			inputEvent.KeyMods = KeyboardMod(event.key.keysym.mod);
 			return ForwardInputEvent(inputEvent);
 		}
 		case SDL_KEYUP:
@@ -321,7 +355,6 @@ namespace Glory
 			if (iter == KEYBOARD_KEYMAP.end()) break;
 			if (iter->second == KeyboardKey::KeyAltL) m_LAltDown = false;
 			if (iter->second == KeyboardKey::KeyAltR) m_RAltDown = false;
-			if (iter->second == KeyboardKey::KeyBackQuote) m_BackQuote = false;
 
 			inputEvent.InputDeviceType = InputDeviceType::Keyboard;
 			inputEvent.KeyID = iter->second;
@@ -329,6 +362,7 @@ namespace Glory
 			inputEvent.SourceDeviceID = 0;
 			inputEvent.Value = 0.0f;
 			inputEvent.Delta = -1.0f;
+			inputEvent.KeyMods = KeyboardMod(event.key.keysym.mod);
 			return ForwardInputEvent(inputEvent);
 		}
 		case SDL_MOUSEBUTTONDOWN:
@@ -345,7 +379,7 @@ namespace Glory
 			inputEvent.SourceDeviceID = event.button.which;
 			inputEvent.Value = 1.0f;
 			inputEvent.Delta = 1.0f;
-
+			inputEvent.KeyMods = KeyboardMod::ModNone;
 			const bool consumed = ForwardInputEvent(inputEvent);
 
 			if (inputEvent.KeyID == MouseButton::MouseButtonLeft)
@@ -375,6 +409,7 @@ namespace Glory
 			inputEvent.SourceDeviceID = event.button.which;
 			inputEvent.Value = 0.0f;
 			inputEvent.Delta = -1.0f;
+			inputEvent.KeyMods = KeyboardMod::ModNone;
 			const bool consumed = ForwardInputEvent(inputEvent);
 
 			if (inputEvent.KeyID == MouseButton::MouseButtonLeft)
@@ -402,6 +437,7 @@ namespace Glory
 				inputEvent.SourceDeviceID = event.wheel.which;
 				inputEvent.Value = (float)event.wheel.x;
 				inputEvent.Delta = (float)event.wheel.x;
+				inputEvent.KeyMods = KeyboardMod::ModNone;
 				consumed |= ForwardInputEvent(inputEvent);
 			}
 
@@ -414,6 +450,7 @@ namespace Glory
 				inputEvent.SourceDeviceID = event.wheel.which;
 				inputEvent.Value = (float)event.wheel.y;
 				inputEvent.Delta = (float)event.wheel.y;
+				inputEvent.KeyMods = KeyboardMod::ModNone;
 				consumed |= ForwardInputEvent(inputEvent);
 
 				/* Button event */
@@ -423,6 +460,7 @@ namespace Glory
 				inputEvent.SourceDeviceID = event.wheel.which;
 				inputEvent.Value = 1.0f;
 				inputEvent.Delta = 1.0f;
+				inputEvent.KeyMods = KeyboardMod::ModNone;
 				consumed |= ForwardInputEvent(inputEvent);
 				inputEvent.State = InputState::KeyUp;
 				inputEvent.Value = 0.0f;
@@ -440,6 +478,7 @@ namespace Glory
 			inputEvent.SourceDeviceID = event.motion.which;
 			inputEvent.Value = (float)event.motion.x;
 			inputEvent.Delta = (float)event.motion.xrel;
+			inputEvent.KeyMods = KeyboardMod::ModNone;
 			consumed |= ForwardInputEvent(inputEvent);
 
 			inputEvent.InputDeviceType = InputDeviceType::Mouse;
@@ -459,6 +498,13 @@ namespace Glory
 			cursorEvent.IsDown = false;
 			ForwardCursorEvent(cursorEvent);
 			return consumed;
+		}
+		case SDL_TEXTINPUT:
+		{
+			TextEvent text;
+			text.InputDeviceType = InputDeviceType::Keyboard;
+			text.Character = event.text.text[0];
+			return ForwardTextEvent(text);
 		}
 		default:
 			// Do nothing.
@@ -643,6 +689,24 @@ namespace Glory
 
 		SDL_BlitSurface(m_pSplashScreen, NULL, m_pWindowSurface, NULL);
 		SDL_UpdateWindowSurface(m_pWindow);
+	}
+
+	std::string SDLWindow::GetClipboardText()
+	{
+		char* clipboard = SDL_GetClipboardText();
+		std::string clipboardStr = clipboard;
+		SDL_free(clipboard);
+		return clipboardStr;
+	}
+
+	void SDLWindow::StartTextInput()
+	{
+		SDL_StartTextInput();
+	}
+
+	void SDLWindow::StopTextInput()
+	{
+		SDL_StopTextInput();
 	}
 
 	SDLWindow::SDLWindow(const WindowCreateInfo& createInfo) : Window(createInfo),

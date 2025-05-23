@@ -196,7 +196,43 @@ namespace Glory
 
 		KeyBackQuote,
 
+		KeyKpMinus,
+		KeyKpPlus,
+		KeyKp1,
+		KeyKp2,
+		KeyKp3,
+		KeyKp4,
+		KeyKp5,
+		KeyKp6,
+		KeyKp7,
+		KeyKp8,
+		KeyKp9,
+		KeyKp0,
+		KeyKpPeriod,
+
 		KeyboardKeyCount
+	};
+
+	enum KeyboardMod
+	{
+		ModNone = 0x0000,
+		ModLShift = 0x0001,
+		ModRShift = 0x0002,
+		ModLCtrl = 0x0040,
+		ModRCtrl = 0x0080,
+		ModLAlt = 0x0100,
+		ModRAlt = 0x0200,
+		ModLGui = 0x0400,
+		ModRGui = 0x0800,
+		ModNum = 0x1000,
+		ModCaps = 0x2000,
+		ModMode = 0x4000,
+		ModScroll = 0x8000,
+
+		ModCtrl = ModLCtrl | ModRCtrl,
+		ModShift = ModLShift | ModRShift,
+		ModAlt = ModLAlt | ModRAlt,
+		ModGui = ModLGui | ModRGui,
 	};
 
 	enum MouseButton
@@ -428,6 +464,20 @@ const std::string Glory::Utils::Reflect::Enum<Glory::KeyboardKey>::m_EnumStringV
 	"KeySysRq",
 
 	"KeyBackQuote",
+
+	"KeyKpMinus",
+	"KeyKpPlus",
+	"KeyKp1",
+	"KeyKp2",
+	"KeyKp3",
+	"KeyKp4",
+	"KeyKp5",
+	"KeyKp6",
+	"KeyKp7",
+	"KeyKp8",
+	"KeyKp9",
+	"KeyKp0",
+	"KeyKpPeriod",
 };
 
 const size_t Glory::Utils::Reflect::Enum<Glory::MouseButton>::m_NumValues = size_t(Glory::MouseButton::MouseButtonCount);
