@@ -77,6 +77,8 @@ namespace Glory
 		size_t HistoryCount() const;
 		const std::string& History(size_t rewwindIndex) const;
 
+		std::string AutoComplete(const std::string_view input);
+
 	private:
 		bool PrintHistory();
 

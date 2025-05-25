@@ -1,5 +1,7 @@
 #include "Console.h"
 #include "Commands.h"
+#include "StringUtils.h"
+
 #include <iostream>
 #include <iomanip>
 
@@ -59,6 +61,49 @@ namespace Glory
 	{
 		const size_t index = rewindIndex >= m_CommandHistory.size() ? 0 : m_CommandHistory.size() - 1 - rewindIndex;
 		return m_CommandHistory[index];
+	}
+
+	std::string Console::AutoComplete(const std::string_view input)
+	{
+		std::vector<std::string> possibleOptions;
+		/* Find commands */
+		for (size_t i = 0; i < m_pCommands.size(); ++i)
+		{
+			if (Utils::CaseInsensitiveSearch(m_pCommands[i]->m_Command, input) == std::string::npos)
+				continue;
+			possibleOptions.push_back(m_pCommands[i]->m_Command);
+		}
+
+		/* Find CVars */
+		for (size_t i = 0; i < m_CVars.size(); ++i)
+		{
+			if (Utils::CaseInsensitiveSearch(m_CVars[i].m_Name, input) == std::string::npos)
+				continue;
+			possibleOptions.push_back(m_CVars[i].m_Name);
+		}
+
+		if (possibleOptions.empty()) return "";
+		if (possibleOptions.size() == 1) return possibleOptions[0];
+
+		std::string closest = "";
+
+		/* Find closest string while printing all options */
+		for (size_t i = 0; i < possibleOptions[0].size(); ++i)
+		{
+			bool found = true;
+			for (size_t j = 1; j < possibleOptions.size(); ++j)
+			{
+				if (i == 0) WriteLine(possibleOptions[j], false);
+				if (i >= possibleOptions[j].size() || possibleOptions[0][i] != possibleOptions[j][i])
+				{
+					found = false;
+					break;
+				}
+			}
+			if (!found) break;
+			closest += possibleOptions[0][i];
+		}
+		return closest;
 	}
 
 	bool Console::PrintHistory()
