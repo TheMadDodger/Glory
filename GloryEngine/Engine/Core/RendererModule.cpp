@@ -291,6 +291,16 @@ namespace Glory
 		OnRender(camera, renderData);
 	}
 
+	void RendererModule::RenderOnBackBuffer(RenderTexture* pTexture)
+	{
+		REQUIRE_MODULE_CALL(m_pEngine, GraphicsModule, Blit(pTexture), );
+
+		for (auto& pass : m_RenderPasses[RP_Postblit])
+		{
+			pass.m_Callback(nullptr, {});
+		}
+	}
+
 	void RendererModule::Initialize()
 	{
 		REQUIRE_MODULE_MESSAGE(m_pEngine, WindowModule, "A renderer module was loaded but there is no WindowModule present to render to.", Warning, );

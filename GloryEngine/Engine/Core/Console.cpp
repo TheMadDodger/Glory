@@ -8,6 +8,9 @@ namespace Glory
 	void Console::Initialize()
 	{
 		RegisterCommand(new ConsoleCommand("printhistory", [this]() { return PrintHistory(); }));
+
+		m_ConsoleLines.reserve(1000);
+		m_CommandHistory.reserve(1000);
 	}
 
 	void Console::Cleanup()
@@ -16,6 +19,7 @@ namespace Glory
 		m_pConsoles.clear();
 		m_CommandHistory.clear();
 		m_ConsoleLines.clear();
+		m_ConsoleLineColors.clear();
 		m_CVars.clear();
 	}
 
@@ -31,6 +35,32 @@ namespace Glory
 		m_Reading = false;
 	}
 
+	size_t Console::LineCount() const
+	{
+		return m_ConsoleLines.size();
+	}
+
+	std::string_view Console::Line(size_t index) const
+	{
+		return m_ConsoleLines[index];
+	}
+
+	const glm::vec4& Console::LineColor(size_t index) const
+	{
+		return m_ConsoleLineColors[index];
+	}
+
+	size_t Console::HistoryCount() const
+	{
+		return m_CommandHistory.size();
+	}
+
+	const std::string& Console::History(size_t rewindIndex) const
+	{
+		const size_t index = rewindIndex >= m_CommandHistory.size() ? 0 : m_CommandHistory.size() - 1 - rewindIndex;
+		return m_CommandHistory[index];
+	}
+
 	bool Console::PrintHistory()
 	{
 		ForEachCommandInHistory([=](const std::string& command)
@@ -42,18 +72,13 @@ namespace Glory
 
 	void Console::AddCommandToHistory(const std::string& command)
 	{
-		++m_CommandHistoryInsertIndex;
-		if (m_CommandHistoryInsertIndex >= MAX_HISTORY_SIZE) m_CommandHistoryInsertIndex = 0;
-		if (m_CurrentCommandHistorySize < MAX_HISTORY_SIZE) ++m_CurrentCommandHistorySize;
-		m_CommandHistory[m_CommandHistoryInsertIndex] = command;
+		m_CommandHistory.emplace_back(command);
 	}
 
 	void Console::AddLineToConsole(const std::string& line)
 	{
-		++m_ConsoleInsertIndex;
-		if (m_ConsoleInsertIndex >= MAX_CONSOLE_SIZE) m_ConsoleInsertIndex = 0;
-		if (m_CurrentConsoleSize < MAX_CONSOLE_SIZE) ++m_CurrentConsoleSize;
-		m_ConsoleLines[m_ConsoleInsertIndex] = line;
+		m_ConsoleLines.push_back(line);
+		m_ConsoleLineColors.push_back(m_CurrentColor);
 	}
 
 	void Console::RegisterCommand(BaseConsoleCommand* pCommand)
@@ -124,29 +149,16 @@ namespace Glory
 
 	void Console::ForEachCommandInHistory(std::function<void(const std::string&)> callback)
 	{
-		if (m_CurrentCommandHistorySize < MAX_HISTORY_SIZE)
+		for (size_t i = m_CommandHistory.size(); i > 0; --i)
 		{
-			for (int i = m_CommandHistoryInsertIndex; i >= 0; --i)
-			{
-				const std::string& command = m_CommandHistory[(size_t)i];
-				callback(command);
-			}
-			return;
-		}
-
-		int currentIndex = m_CommandHistoryInsertIndex;
-		for (size_t i = 0; i < MAX_HISTORY_SIZE; i++)
-		{
-			const std::string& command = m_CommandHistory[(size_t)currentIndex];
+			const std::string& command = m_CommandHistory[i-1];
 			callback(command);
-
-			--currentIndex;
-			if (currentIndex < 0) currentIndex = MAX_HISTORY_SIZE - 1;
 		}
 	}
 
 	void Console::SetNextColor(const glm::vec4& color)
 	{
+		m_CurrentColor = color;
 		for (size_t i = 0; i < m_pConsoles.size(); i++)
 		{
 			m_pConsoles[i]->SetNextColor(color);
@@ -245,8 +257,7 @@ namespace Glory
 	}
 
 	Console::Console():
-		m_CommandHistory(std::vector<std::string>(MAX_HISTORY_SIZE)),
-		m_ConsoleLines(std::vector<std::string>(MAX_CONSOLE_SIZE))
+		m_CommandHistory(), m_ConsoleLines(), m_CurrentColor(1.0f, 1.0f, 1.0f, 1.0f)
 	{}
 
 	Console::~Console()
@@ -267,5 +278,6 @@ namespace Glory
 
 		m_CommandHistory.clear();
 		m_ConsoleLines.clear();
+		m_ConsoleLineColors.clear();
 	}
 }

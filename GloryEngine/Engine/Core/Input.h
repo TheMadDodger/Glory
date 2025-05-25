@@ -37,6 +37,7 @@ namespace Glory
 		InputState State;
 		float Value;
 		float Delta;
+		KeyboardMod KeyMods;
 	};
 
 	struct CursorEvent
@@ -53,6 +54,12 @@ namespace Glory
 		glm::vec2 Cursor;
 		bool IsDelta;
 		bool IsDown;
+	};
+
+	struct TextEvent
+	{
+		InputDeviceType InputDeviceType;
+		char Character;
 	};
 
 	struct KeyBindingCompact

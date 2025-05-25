@@ -2,6 +2,7 @@
 #include "WindowModule.h"
 #include "InputModule.h"
 #include "Engine.h"
+#include "IWindowInputOverrideHandler.h"
 
 namespace Glory
 {
@@ -17,6 +18,7 @@ namespace Glory
 
 	Window::~Window()
 	{
+		m_pInputOverrideHandlers.clear();
 	}
 
 	void Window::ShowCursor(bool show)
@@ -72,6 +74,18 @@ namespace Glory
 		return m_IsShown;
 	}
 
+	void Window::AddInputOverrideHandler(IWindowInputOverrideHandler* handler)
+	{
+		m_pInputOverrideHandlers.push_back(handler);
+	}
+
+	void Window::RemoveInputOverrideHandler(IWindowInputOverrideHandler* handler)
+	{
+		auto iter = std::find(m_pInputOverrideHandlers.begin(), m_pInputOverrideHandlers.end(), handler);
+		if (iter == m_pInputOverrideHandlers.end()) return;
+		m_pInputOverrideHandlers.erase(iter);
+	}
+
 	void Window::GetVulkanRequiredExtensions(std::vector<const char*>&) {}
 
 	void Window::GetVulkanSurface(void* instance, void* surface) {}
@@ -89,6 +103,12 @@ namespace Glory
 
 	bool Window::ForwardInputEvent(InputEvent& input)
 	{
+		for (size_t i = 0; i < m_pInputOverrideHandlers.size(); ++i)
+		{
+			if (!m_pInputOverrideHandlers[i]->OnOverrideInputEvent(input)) continue;
+			return true;
+		}
+
 		InputModule* pInput = m_pWindowManager->GetEngine()->GetMainModule<InputModule>();
 		return pInput->OnInput(input);
 	}
@@ -96,6 +116,18 @@ namespace Glory
 	void Window::ForwardCursorEvent(CursorEvent& input)
 	{
 		InputModule* pInput = m_pWindowManager->GetEngine()->GetMainModule<InputModule>();
-		return pInput->OnCursor(input);
+		pInput->OnCursor(input);
+	}
+
+	bool Window::ForwardTextEvent(TextEvent& text)
+	{
+		for (size_t i = 0; i < m_pInputOverrideHandlers.size(); ++i)
+		{
+			if (!m_pInputOverrideHandlers[i]->OnOverrideTextEvent(text)) continue;
+			return true;
+		}
+
+		InputModule* pInput = m_pWindowManager->GetEngine()->GetMainModule<InputModule>();
+		return pInput->OnText(text);
 	}
 }

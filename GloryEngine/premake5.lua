@@ -146,6 +146,7 @@ group "Modules"
 	include "Modules/GloryUIRenderer"
 	include "Modules/GloryFSM"
 	include "Modules/GloryLocalize"
+	include "Modules/GloryOverlayConsole"
 	--include "GloryVulkanGraphics"
 group ""
 
