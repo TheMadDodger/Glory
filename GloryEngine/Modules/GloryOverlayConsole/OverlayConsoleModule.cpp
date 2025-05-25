@@ -452,8 +452,23 @@ namespace Glory
 			m_InputTextDirty = true;
 			return;
 		case Glory::KeyTab:
+		{
 			/* Auto complete */
+			if (m_CursorPos == 0) return;
+			const std::string autoComplete = console.AutoComplete(m_ConsoleInput);
+			if (autoComplete.empty()) return;
+			m_CursorPos = 0;
+			m_ConsoleInput[m_CursorPos] = '\0';
+			for (size_t i = 0; i < autoComplete.size(); ++i)
+			{
+				if (m_CursorPos >= MAX_CONSOLE_INPUT - 1) break;
+				m_ConsoleInput[m_CursorPos] = autoComplete[i];
+				++m_CursorPos;
+				m_ConsoleInput[m_CursorPos] = '\0';
+			}
+			m_InputTextDirty = true;
 			return;
+		}
 		case Glory::KeyKpEnter:
 		case Glory::KeyReturn:
 			/* Execute command */
