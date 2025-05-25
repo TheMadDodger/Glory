@@ -74,6 +74,9 @@ namespace Glory
 		std::string_view Line(size_t index) const;
 		const glm::vec4& LineColor(size_t index) const;
 
+		size_t HistoryCount() const;
+		const std::string& History(size_t rewwindIndex) const;
+
 	private:
 		bool PrintHistory();
 
@@ -94,8 +97,6 @@ namespace Glory
 		friend class GloryContext;
 		std::vector<BaseConsoleCommand*> m_pCommands;
 		std::vector<IConsole*> m_pConsoles;
-		int m_CommandHistoryInsertIndex = -1;
-		int m_CurrentCommandHistorySize = 0;
 		bool m_Writing = false;
 		bool m_Reading = false;
 
@@ -107,7 +108,5 @@ namespace Glory
 		glm::vec4 m_CurrentColor;
 		std::queue<std::string> m_CommandQueue;
 		std::vector<CVar> m_CVars;
-
-		static const int MAX_HISTORY_SIZE = 10;
 	};
 }

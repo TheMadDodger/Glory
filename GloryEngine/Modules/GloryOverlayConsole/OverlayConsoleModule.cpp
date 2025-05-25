@@ -26,9 +26,13 @@ namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(OverlayConsoleModule);
 
+	float TextScaleFactor = 0.35f;
+
 	OverlayConsoleModule::OverlayConsoleModule():
-		m_ConsoleButtonDown(false), m_ConsoleOpen(false), m_ConsoleOpenedThisFrame(false), m_ConsoleAnimationTime(0.0f),
-		m_Scroll(0.0f), m_TextDirty(false), m_InputTextDirty(false), m_CursorPos(0), m_ConsoleInput("\0")
+		m_ConsoleButtonDown(false), m_ConsoleOpen(false), m_ConsoleOpenedThisFrame(false),
+		m_ConsoleAnimationTime(0.0f), m_Scroll(0.0f), m_TextDirty(false),
+		m_InputTextDirty(false), m_CursorPos(0), m_ConsoleInput("\0"),
+		m_HistoryRewindIndex(-1), m_BackedUpInput("")
 	{
 	}
 
@@ -85,8 +89,8 @@ namespace Glory
 					m_ConsoleInput[m_CursorPos] = clipboard[i];
 					++m_CursorPos;
 					m_ConsoleInput[m_CursorPos] = '\0';
-					m_InputTextDirty = true;
 				}
+				m_InputTextDirty = true;
 				break;
 			}
 			HandleKeyboardInput(pMainWindow, m_pEngine->GetConsole(), KeyboardKey(e.KeyID));
@@ -109,7 +113,7 @@ namespace Glory
 
 			int windowWidth, windowHeight;
 			pMainWindow->GetDrawableSize(&windowWidth, &windowHeight);
-			const float textScale = 0.5f * windowWidth / 1920.0f;
+			const float textScale = TextScaleFactor*windowWidth/1920.0f;
 			m_Scroll += e.Delta * pFont->FontHeight() * textScale;
 			m_TextDirty = true;
 			break;
@@ -240,7 +244,7 @@ namespace Glory
 		int windowWidth, windowHeight;
 		pWindows->GetMainWindow()->GetWindowSize(&windowWidth, &windowHeight);
 
-		const float textScale = 0.5f*windowWidth/1920.0f;
+		const float textScale = TextScaleFactor*windowWidth/1920.0f;
 		const float consolePadding = 10.0f;
 		const float textLineHeight = pFont->FontHeight()*textScale;
 		const float consoleHeight = 20.0f*textLineHeight + consolePadding;
@@ -422,7 +426,7 @@ namespace Glory
 		settings.RegisterAssetReference<FontData>("Console Font", 116);
 	}
 
-	void OverlayConsoleModule::HandleKeyboardInput(Window* pWindow, Console& pConsole, KeyboardKey key)
+	void OverlayConsoleModule::HandleKeyboardInput(Window* pWindow, Console& console, KeyboardKey key)
 	{
 		switch (key)
 		{
@@ -453,11 +457,71 @@ namespace Glory
 		case Glory::KeyKpEnter:
 		case Glory::KeyReturn:
 			/* Execute command */
-			pConsole.QueueCommand(m_ConsoleInput);
+			console.QueueCommand(m_ConsoleInput);
 			m_CursorPos = 0;
 			m_ConsoleInput[m_CursorPos] = '\0';
 			m_InputTextDirty = true;
+			m_HistoryRewindIndex = -1;
+			m_BackedUpInput = "";
 			return;
+		case Glory::KeyUp:
+		case Glory::KeyKpUp:
+		{
+			/* History up */
+			if (console.HistoryCount() == 0) return;
+			if (m_HistoryRewindIndex == -1) m_BackedUpInput = m_ConsoleInput;
+			++m_HistoryRewindIndex;
+			if (m_HistoryRewindIndex > console.HistoryCount() - 1) m_HistoryRewindIndex = console.HistoryCount() - 1;
+			const std::string_view history = console.History(size_t(m_HistoryRewindIndex));
+
+			m_CursorPos = 0;
+			m_ConsoleInput[m_CursorPos] = '\0';
+			for (size_t i = 0; i < history.size(); ++i)
+			{
+				if (m_CursorPos >= MAX_CONSOLE_INPUT - 1) break;
+				m_ConsoleInput[m_CursorPos] = history[i];
+				++m_CursorPos;
+				m_ConsoleInput[m_CursorPos] = '\0';
+			}
+			m_InputTextDirty = true;
+			return;
+		}
+		case Glory::KeyKpDown:
+		case Glory::KeyDown:
+		{
+			/* History down */
+			if (console.HistoryCount() == 0) return;
+			if (m_HistoryRewindIndex > 0) --m_HistoryRewindIndex;
+			else if (m_HistoryRewindIndex == 0)
+			{
+				m_HistoryRewindIndex = -1;
+				m_CursorPos = 0;
+				m_ConsoleInput[m_CursorPos] = '\0';
+				for (size_t i = 0; i < m_BackedUpInput.size(); ++i)
+				{
+					if (m_CursorPos >= MAX_CONSOLE_INPUT - 1) break;
+					m_ConsoleInput[m_CursorPos] = m_BackedUpInput[i];
+					++m_CursorPos;
+					m_ConsoleInput[m_CursorPos] = '\0';
+				}
+				m_BackedUpInput = "";
+				m_InputTextDirty = true;
+				return;
+			}
+			else return;
+			const std::string_view history = console.History(size_t(m_HistoryRewindIndex));
+			m_CursorPos = 0;
+			m_ConsoleInput[m_CursorPos] = '\0';
+			for (size_t i = 0; i < history.size(); ++i)
+			{
+				if (m_CursorPos >= MAX_CONSOLE_INPUT - 1) break;
+				m_ConsoleInput[m_CursorPos] = history[i];
+				++m_CursorPos;
+				m_ConsoleInput[m_CursorPos] = '\0';
+			}
+			m_InputTextDirty = true;
+			return;
+		}
 
 		case Glory::KeyLeft:
 		case Glory::KeyKpLeft:
@@ -466,17 +530,6 @@ namespace Glory
 		case Glory::KeyRight:
 		case Glory::KeyKpRight:
 			/* @todo: Shift cursor right */
-			return;
-		case Glory::KeyUp:
-		case Glory::KeyKpUp:
-			/* @todo: Get previous history */
-			return;
-		case Glory::KeyDown:
-		case Glory::KeyKpDown:
-			/* @todo: Get next or last history */
-			return;
-		case Glory::KeyInsert:
-		case Glory::KeyKpInsert:
 			return;
 		case Glory::KeyHome:
 		case Glory::KeyKpBegin:

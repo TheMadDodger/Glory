@@ -72,5 +72,7 @@ namespace Glory
 		static const size_t MAX_CONSOLE_INPUT = 1024;
 		size_t m_CursorPos;
 		char m_ConsoleInput[MAX_CONSOLE_INPUT];
+		int m_HistoryRewindIndex;
+		std::string m_BackedUpInput;
 	};
 }
