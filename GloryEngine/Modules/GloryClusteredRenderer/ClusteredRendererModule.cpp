@@ -14,6 +14,7 @@
 #include <FontData.h>
 #include <CubemapData.h>
 #include <FontDataStructs.h>
+#include <Console.h>
 
 #include <DistributedRandom.h>
 
@@ -21,6 +22,8 @@
 
 namespace Glory
 {
+	static constexpr std::string_view ScreenSpaceAOCVarName = "r_screenSpaceAO";
+
 	GLORY_MODULE_VERSION_CPP(ClusteredRendererModule);
 
 	ClusteredRendererModule::ClusteredRendererModule()
@@ -103,6 +106,17 @@ namespace Glory
 				references.push_back(shaderID);
 			}
 		}
+	}
+
+	void ClusteredRendererModule::Initialize()
+	{
+		RendererModule::Initialize();
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ ScreenSpaceAOCVarName }, "Enables/disables screen space ambient occlusion.", 1.0f, CVar::Flags::Save });
+
+		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ ScreenSpaceAOCVarName }, [this](const CVar* cvar) {
+			m_GlobalSSAOSetting.m_Enabled = cvar->m_Value == 1.0f;
+			m_GlobalSSAOSetting.m_Dirty = true;
+		});
 	}
 
 	void ClusteredRendererModule::OnPostInitialize()
@@ -368,12 +382,16 @@ namespace Glory
 		GScene* pActiveScene = m_pEngine->GetSceneManager()->GetActiveScene();
 		SSAOSettings& ssao = pActiveScene ? pActiveScene->Settings().m_SSAOSettings : DefaultSSAO;
 
-		if (pActiveScene && ssao.m_Dirty)
+		if (pActiveScene && (ssao.m_Dirty || m_GlobalSSAOSetting.m_Dirty))
 		{
+			const bool hasAO = ssao.m_Enabled;
+			ssao.m_Enabled &= m_GlobalSSAOSetting.m_Enabled;
 			m_pSSAOSettingsSSBO->Assign(&ssao, sizeof(SSAOSettings));
 			ssao.m_Dirty = false;
+			m_GlobalSSAOSetting.m_Dirty = false;
+			ssao.m_Enabled = hasAO;
 		}
-		if (!ssao.m_Enabled) return;
+		if (!ssao.m_Enabled || !m_GlobalSSAOSetting.m_Enabled) return;
 
 		GenerateDomeSamplePointsSSBO(pGraphics->GetResourceManager(), ssao.m_KernelSize);
 

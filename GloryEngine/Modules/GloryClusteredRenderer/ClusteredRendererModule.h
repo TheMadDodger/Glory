@@ -50,6 +50,7 @@ namespace Glory
 
 	private:
 		virtual void Cleanup() override;
+		virtual void Initialize() override;
 		virtual void OnPostInitialize() override;
 		virtual void Update() override;
 
@@ -127,5 +128,7 @@ namespace Glory
 		MaterialData* m_pIrradianceMaterialData = nullptr;
 
 		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
+
+		SSAOSettings m_GlobalSSAOSetting;
 	};
 }
