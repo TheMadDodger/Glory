@@ -1,5 +1,7 @@
 #include "Console.h"
 #include "Commands.h"
+#include "Engine.h"
+#include "WindowModule.h"
 #include "StringUtils.h"
 
 #include <iostream>
@@ -12,7 +14,8 @@ namespace Glory
 	{
 		RegisterCommand(new ConsoleCommand("printhistory", [this]() { return PrintHistory(); }));
 		RegisterCommand(new ConsoleCommand("listvars", [this]() { return ListVars(); }));
-		RegisterCommand(new ConsoleCommand1<std::string>("writeconfig", [this](std::string path) { return WriteConfig(path); }));
+		RegisterCommand(new ConsoleCommand("writeconfig", [this]() { return WriteConfig(""); }));
+		RegisterCommand(new ConsoleCommand1<std::string>("writeconfigto", [this](std::string path) { return WriteConfig(path); }));
 		RegisterCommand(new ConsoleCommand1<std::string>("exec", [this](std::string path) { return Exec(path); }));
 
 		m_ConsoleLines.reserve(1000);
@@ -35,6 +38,11 @@ namespace Glory
 		const std::string& command = m_CommandQueue.front();
 		ExecuteCommand(command);
 		m_CommandQueue.pop();
+	}
+
+	void Console::SetEngine(Engine* pEngine)
+	{
+		m_pEngine = pEngine;
 	}
 
 	size_t Console::LineCount() const
@@ -106,8 +114,25 @@ namespace Glory
 		return closest;
 	}
 
-	bool Console::WriteConfig(const std::filesystem::path& path)
+	bool Console::WriteConfig(std::filesystem::path path)
 	{
+		if (path.empty())
+		{
+			if (!m_pEngine)
+			{
+				WriteLine("Need a path to write the config to");
+				return false;
+			}
+			WindowModule* pWindows = m_pEngine->GetMainModule<WindowModule>();
+			if (!pWindows)
+			{
+				WriteLine("Need a path to write the config to");
+				return false;
+			}
+			path = pWindows->GetPrefPath();
+			path.append("config.cfg");
+		}
+
 		std::ofstream stream{ path };
 		if (!stream.is_open())
 		{
@@ -367,7 +392,8 @@ namespace Glory
 	}
 
 	Console::Console():
-		m_CommandHistory(), m_ConsoleLines(), m_CurrentColor(1.0f, 1.0f, 1.0f, 1.0f)
+		m_CommandHistory(), m_ConsoleLines(),
+		m_CurrentColor(1.0f, 1.0f, 1.0f, 1.0f), m_pEngine(nullptr)
 	{}
 
 	Console::~Console()
