@@ -79,6 +79,12 @@ namespace Glory
 			m_pConsoles.erase(it);
 		}
 
+		/** @brief Set the engine this console runs in,
+		 * only required for writing configs to pref path
+		 * @param pEngine Engine instance
+		 */
+		void SetEngine(Engine* pEngine);
+
 		/** @brief Number of lines currently logged in the console */
 		size_t LineCount() const;
 		/** @brief Get a specific line at an index
@@ -107,7 +113,7 @@ namespace Glory
 		 * @param path Path to write the config to
 		 * @returns @cpp true @ce if writing was successfull, @cpp false @ce otherwise
 		 */
-		bool WriteConfig(const std::filesystem::path& path);
+		bool WriteConfig(std::filesystem::path path);
 		/** @brief Read a file and execute each line as a command
 		 * @param path Path to the file to read
 		 * @returns @cpp true @ce if reading was successfull, @cpp false @ce otherwise
@@ -151,5 +157,6 @@ namespace Glory
 		std::vector<CVar> m_CVars;
 
 		std::map<std::string, std::vector<std::function<void(const CVar*)>>> m_ChangeHandlers;
+		Engine* m_pEngine;
 	};
 }

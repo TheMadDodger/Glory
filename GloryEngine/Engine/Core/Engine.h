@@ -208,6 +208,10 @@ namespace Utils::Reflect
 		void SetApplicationVersion(uint32_t major, uint32_t minor, uint32_t subMinor, uint32_t rc=0);
 		const Version& GetApplicationVersion() const;
 
+		void SetOrganizationAndAppName(std::string&& organization, std::string&& appName);
+		std::string_view Organization() const;
+		std::string_view AppName() const;
+
 	private:
 		void RegisterStandardSerializers();
 		void RegisterBasicTypes();
@@ -273,5 +277,7 @@ namespace Utils::Reflect
 		std::filesystem::path m_RootPath;
 
 		Version m_ApplicationVersion;
+		std::string m_Organization;
+		std::string m_AppName;
 	};
 }

@@ -500,8 +500,8 @@ namespace Glory
 		{
 			BinaryMemoryStream memoryStream{ GetData("General") };
 			BinaryStream* stream = &memoryStream;
-			uint32_t value;
 			stream->Read(m_ApplicationVersion);
+			stream->Read(m_Organization).Read(m_AppName);
 		}
 
 		for (size_t i = 0; i < m_pAllModules.size(); ++i)
@@ -546,6 +546,22 @@ namespace Glory
 	const Version& Engine::GetApplicationVersion() const
 	{
 		return m_ApplicationVersion;
+	}
+
+	void Engine::SetOrganizationAndAppName(std::string&& organization, std::string&& appName)
+	{
+		m_Organization = std::move(organization);
+		m_AppName = std::move(appName);
+	}
+
+	std::string_view Engine::Organization() const
+	{
+		return m_Organization;
+	}
+
+	std::string_view Engine::AppName() const
+	{
+		return m_AppName;
 	}
 
 	void Engine::RegisterStandardSerializers()

@@ -5,12 +5,14 @@ Engine:
 - Added overlay console module
 - Added CVars
 - Added console auto completion (currently only in overlay console)
-- Added command for writing CVars to a file
-- Added command for reading a file and executing it as commands
+- Added command for writing CVars to a file (writeconfig and writeconfigto)
+- Added command for reading a file and executing it as commands (exec)
 - Added r_screenSpaceAO CVar
+- Added preference path which uses organization and application name
 
 Editor:
 - Fixed crash when exiting and entering playmode when physics objects are in use
+- Added Organization and Application Name to general project settings
 
 Scripting:
 - Fixed crash when trying to get the FSM state of a state machine instance that does not exist

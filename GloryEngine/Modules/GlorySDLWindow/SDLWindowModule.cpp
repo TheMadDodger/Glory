@@ -2,6 +2,8 @@
 #include "SDLWindow.h"
 #include "SDLWindowExceptions.h"
 
+#include <Engine.h>
+
 namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(SDLWindowModule);
@@ -18,6 +20,14 @@ namespace Glory
 		SDL_GetCurrentDisplayMode(0, &DM);
 		width = DM.w;
 		height = DM.h;
+	}
+
+	std::filesystem::path SDLWindowModule::GetPrefPath() const
+	{
+		char* prefPathStr = SDL_GetPrefPath(m_pEngine->Organization().data(), m_pEngine->AppName().data());
+		std::filesystem::path path = prefPathStr;
+		SDL_free(prefPathStr);
+		return path;
 	}
 
 	Window* SDLWindowModule::CreateWindow_Internal(const WindowCreateInfo& createInfo)
