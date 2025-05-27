@@ -629,6 +629,27 @@ namespace Glory
 		return Core_EngineInstance->GetApplicationVersion();
 	}
 
+	MonoString* Application_GetOrganization()
+	{
+		return mono_string_new(mono_domain_get(), Core_EngineInstance->Organization().data());
+	}
+
+	MonoString* Application_GetAppName()
+	{
+		return mono_string_new(mono_domain_get(), Core_EngineInstance->AppName().data());
+	}
+
+	MonoString* Application_GetPrefPath()
+	{
+		WindowModule* pWindows = Core_EngineInstance->GetMainModule<WindowModule>();
+		if (!pWindows)
+		{
+			Core_EngineInstance->GetDebug().LogError("Cannot get pref path with no window module loaded.");
+			return nullptr;
+		}
+		return mono_string_new(mono_domain_get(), pWindows->GetPrefPath().string().data());
+	}
+
 #pragma endregion
 
 
@@ -754,8 +775,12 @@ namespace Glory
 		BIND("GloryEngine.Engine::Engine_GetGrabInput", Engine_GetGrabInput);
 		BIND("GloryEngine.Engine::Engine_SetGrabInput", Engine_SetGrabInput);
 
+		/* Application */
 		BIND("GloryEngine.Application::Application_Quit", Application_Quit);
 		BIND("GloryEngine.Application::Application_GetVersion", Application_GetVersion);
+		BIND("GloryEngine.Application::Application_GetOrganization", Application_GetOrganization);
+		BIND("GloryEngine.Application::Application_GetAppName", Application_GetAppName);
+		BIND("GloryEngine.Application::Application_GetPrefPath", Application_GetPrefPath);
 	}
 
 	void CoreCSAPI::SetEngine(Engine* pEngine)
