@@ -3,6 +3,11 @@ Runtime:
 
 Engine:
 - Added overlay console module
+- Added CVars
+- Added console auto completion (currently only in overlay console)
+- Added command for writing CVars to a file
+- Added command for reading a file and executing it as commands
+- Added r_screenSpaceAO CVar
 
 Editor:
 - Fixed crash when exiting and entering playmode when physics objects are in use

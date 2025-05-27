@@ -4,12 +4,16 @@
 
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 
 namespace Glory
 {
 	void Console::Initialize()
 	{
 		RegisterCommand(new ConsoleCommand("printhistory", [this]() { return PrintHistory(); }));
+		RegisterCommand(new ConsoleCommand("listvars", [this]() { return ListVars(); }));
+		RegisterCommand(new ConsoleCommand1<std::string>("writeconfig", [this](std::string path) { return WriteConfig(path); }));
+		RegisterCommand(new ConsoleCommand1<std::string>("exec", [this](std::string path) { return Exec(path); }));
 
 		m_ConsoleLines.reserve(1000);
 		m_CommandHistory.reserve(1000);
@@ -27,14 +31,10 @@ namespace Glory
 
 	void Console::Update()
 	{
-		if (m_Writing) return;
 		if (m_CommandQueue.empty()) return;
-
-		m_Reading = true;
 		const std::string& command = m_CommandQueue.front();
 		ExecuteCommand(command);
 		m_CommandQueue.pop();
-		m_Reading = false;
 	}
 
 	size_t Console::LineCount() const
@@ -106,12 +106,64 @@ namespace Glory
 		return closest;
 	}
 
+	bool Console::WriteConfig(const std::filesystem::path& path)
+	{
+		std::ofstream stream{ path };
+		if (!stream.is_open())
+		{
+			WriteLine("Failed to write config to: " + path.string());
+			return false;
+		}
+
+		for (size_t i = 0; i < m_CVars.size(); ++i)
+		{
+			const CVar& cvar = m_CVars[i];
+			if (!(cvar.m_Flags & CVar::Save)) continue;
+			stream << cvar.m_Name << " " << cvar.m_Value << std::endl;
+		}
+		stream.close();
+		return true;
+	}
+
+	bool Console::Exec(const std::filesystem::path& path)
+	{
+		if (!std::filesystem::exists(path))
+		{
+			WriteLine("Failed to open config at: " + path.string() + " file does not exist!");
+			return false;
+		}
+
+		std::ifstream stream{ path };
+		if (!stream.is_open())
+		{
+			WriteLine("Failed to read config at: " + path.string());
+			return false;
+		}
+
+		std::string line = "";
+		while (!stream.eof())
+		{
+			std::getline(stream, line);
+			if (line.empty()) continue;
+			QueueCommand(line);
+		}
+		return true;
+	}
+
 	bool Console::PrintHistory()
 	{
 		ForEachCommandInHistory([=](const std::string& command)
 		{
 			WriteLine(command);
 		});
+		return true;
+	}
+
+	bool Console::ListVars()
+	{
+		for (const CVar& cvar : m_CVars)
+			WriteLine(cvar.m_Name + " = " + std::to_string(cvar.m_Value) + " : " + cvar.m_Description);
+
 		return true;
 	}
 
@@ -138,15 +190,7 @@ namespace Glory
 
 	void Console::QueueCommand(const std::string& command)
 	{
-		// If m_Reading is true this function is called from another thread, this thread will need to wait untill we are done reading on the main thread!
-		while (m_Reading)
-		{
-			// Do nothing
-		}
-
-		m_Writing = true;
 		m_CommandQueue.push(command);
-		m_Writing = false;
 	}
 
 	void Console::ExecuteCommand(const std::string& command, bool addToHistory)
@@ -284,6 +328,18 @@ namespace Glory
 		return &*iter;
 	}
 
+	void Console::RegisterCVarChangeHandler(std::string&& cvarName, std::function<void(const CVar*)> handler)
+	{
+		auto iter = m_ChangeHandlers.find(cvarName);
+		if (iter == m_ChangeHandlers.end())
+		{
+			m_ChangeHandlers.emplace(std::move(cvarName),
+				std::vector<std::function<void(const CVar*)>>{ handler });
+			return;
+		}
+		iter->second.emplace_back(handler);
+	}
+
 	void Console::ExecuteCVarCommand(CVar& cvar, std::vector<std::string>& args)
 	{
 		if (args.empty())
@@ -297,7 +353,16 @@ namespace Glory
 		}
 
 		/* Change the value */
-		if (Parser::Parse<float>(args[0], cvar.m_Value)) return;
+		if (Parser::Parse<float>(args[0], cvar.m_Value))
+		{
+			auto& iter = m_ChangeHandlers.find(cvar.m_Name);
+			if (iter == m_ChangeHandlers.end()) return;
+			for (auto& handler : iter->second)
+			{
+				handler(&cvar);
+			}
+			return;
+		}
 		WriteLine("Error: Value must be a number");
 	}
 
