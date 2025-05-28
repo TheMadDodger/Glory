@@ -64,6 +64,11 @@ namespace Glory
 		m_Players[inputDevice.m_PlayerIndex].HandleCursorEvent(event);
 	}
 
+	bool InputModule::OnText(TextEvent&)
+	{
+		return false;
+	}
+
 	size_t InputModule::AddPlayer()
 	{
 		const size_t index = m_Players.size();

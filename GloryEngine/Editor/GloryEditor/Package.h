@@ -60,6 +60,7 @@ namespace Glory::Editor
 	GLORY_EDITOR_API bool PackageState(size_t& currentIndex, size_t& count, std::string_view& name, size_t& subIndex, size_t& subCount, std::string_view& subName);
 	GLORY_EDITOR_API bool IsPackagingBusy();
 	GLORY_EDITOR_API bool PackageFailed();
+	GLORY_EDITOR_API bool IsAssetPackaged(UUID assetID);
 	GLORY_EDITOR_API void Package(Glory::Engine* pEngine);
 	GLORY_EDITOR_API void ScanSceneFileForAssets(Glory::Engine* pEngine, Utils::YAMLFileRef& file, std::vector<UUID>& assets);
 	GLORY_EDITOR_API void ScanSceneFileForAssets(Glory::Engine* pEngine, Utils::YAMLFileRef& file, std::vector<UUID>& assets);

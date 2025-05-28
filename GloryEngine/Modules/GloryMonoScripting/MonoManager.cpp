@@ -3,6 +3,7 @@
 #include "CoreLibManager.h"
 #include "ScriptingMethodsHelper.h"
 #include "AssemblyDomain.h"
+#include "IMonoLibManager.h"
 
 #include <Debug.h>
 
@@ -277,6 +278,15 @@ namespace Glory
 				std::this_thread::sleep_for(std::chrono::nanoseconds(1));
 			}
 		}
+	}
+
+	void MonoManager::Reset(Engine* pEngine)
+	{
+		m_pAppDomain->ForEachAssembly([pEngine](Assembly* pAssembly) {
+			IMonoLibManager* pLibManager = pAssembly->LibManager();
+			if (!pLibManager) return;
+			pLibManager->Reset(pEngine);
+		});
 	}
 
 	bool MonoManager::DebuggingEnabled() const

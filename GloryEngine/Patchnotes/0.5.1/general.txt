@@ -1,16 +1,50 @@
 Runtime:
 - Added loading for application version from data folder
+- Added loading of FSM data resource
+- Fixed OnValidate, Start and OnEnable callbacks not working when loading a scene at runtime
+- Added loading of string tables
+- Added loading of string override tables on language switching
 
 Engine:
 - Fixed prefab instantiation not properly setting the start location
 - Added application version
+- Fixed setting ui elements active/inactive not properly hiding/unhiding elements and/or rerendering the UI texture
+- Fixed ui element width being incorrect when using the aspect constraint
+- Added FSM data resource
+- Added text file data resource
+- Added localize module
+- Added string table resource
+- Added strings override table resource
+- Added setLanguage console command
+- Added term field to UIText component
+- Implemented automated text swapping for UIText components
+- Added Localize component
+- Added StringTableLoader component
 
 Editor:
 - Fixed dupplicate start calls or start not being called at all sometimes when entering playmode
 - Fixed crash when packaging tries to package an invalid asset
 - Added application version to general settings
+- Added FSM editor
+- Added FSM properties window
+- Added FSM node window
+- Added FSM node inspector window
+- Added FSM debugger window
+- Added packaging of FSM data resource
+- Added raw .txt file importer
+- Added string table editor
+- Added strings override table editor
+- Added localization settings in project settings
+- Added packaging for StringTable and StringsaOverrideTable
 
 Scripting:
 - Fixed WorldRotationEuler property not working properly
 - Improved WorldRotation property
 - Added Application.Version()
+- Added FSM CS API
+- Added text file CS API
+- Fixed a bug that could cause a crash where types are loaded too late
+- Added CS API for localization
+- Added CS API for string tables
+- Added CS API for setting the term on a UIText component
+- Added CS API for Localize and StringTableLoader components

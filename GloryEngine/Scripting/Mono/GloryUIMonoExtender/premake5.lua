@@ -28,6 +28,7 @@ project "GloryUIMonoExtender"
 		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.ui}",
+		"%{BaseIncludeDir.localize}",
 		"%{GloryIncludeDir.mono}",
 
 		"%{IncludeDir.ECS}",

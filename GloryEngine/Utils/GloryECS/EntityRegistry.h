@@ -145,7 +145,7 @@ namespace Glory::Utils::ECS
 		{
 			if (!m_CallbacksEnabled || !CallbackEnabled(invocationType)) return;
 			TypeView<T>* pTypeView = GetTypeView<T>();
-			pTypeView->InvokeAll(invocationType, this);
+			pTypeView->InvokeAll(invocationType, this, NULL);
 		}
 
 		void InvokeAll(uint32_t typeHash, InvocationType invocationType);

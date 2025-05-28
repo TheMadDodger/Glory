@@ -16,6 +16,7 @@
 #include <PrefabData.h>
 #include <AudioData.h>
 #include <FontData.h>
+#include <TextFileData.h>
 
 #include <glm/detail/type_quat.hpp>
 
@@ -40,6 +41,7 @@ namespace Glory
 		{"GloryEngine.Prefab", SerializedType::ST_Asset},
 		{"GloryEngine.Audio", SerializedType::ST_Asset},
 		{"GloryEngine.Font", SerializedType::ST_Asset},
+		{"GloryEngine.TextFile", SerializedType::ST_Asset},
 		{"GloryEngine.Quaternion", ResourceTypes::GetHash<glm::quat>()},
 		{"GloryEngine.Vector2", ResourceTypes::GetHash<glm::vec2>()},
 		{"GloryEngine.Vector3", ResourceTypes::GetHash<glm::vec3>()},
@@ -55,6 +57,7 @@ namespace Glory
 		{"GloryEngine.Prefab", ResourceTypes::GetHash<PrefabData>()},
 		{"GloryEngine.Audio", ResourceTypes::GetHash<AudioData>()},
 		{"GloryEngine.Font", ResourceTypes::GetHash<FontData>()},
+		{"GloryEngine.TextFile", ResourceTypes::GetHash<TextFileData>()},
 	};
 
 	Assembly::Assembly(AssemblyDomain* pDomain)
@@ -208,7 +211,7 @@ namespace Glory
 		m_TypeName(mono_type_get_name(m_pType)),
 		m_SizeAllignment(0),
 		m_Size(mono_type_size(m_pType, &m_SizeAllignment)),
-		m_TypeHash(MonoTypeToHash[m_TypeName]),
+		m_TypeHash(MonoTypeToHash.find(m_TypeName) != MonoTypeToHash.end() ? MonoTypeToHash.at(m_TypeName) : 0),
 		m_ElementTypeHash(MonoTypeToElementHash.find(m_TypeName) != MonoTypeToElementHash.end() ? MonoTypeToElementHash[m_TypeName] : m_TypeHash),
 		m_IsStatic((m_Flags & MONO_FIELD_ATTR_STATIC) == MONO_FIELD_ATTR_STATIC)
 	{
@@ -354,6 +357,12 @@ namespace Glory
 	{
 		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
 		if (m_pLibManager) m_pLibManager->Initialize(pEngine, this);
+	}
+
+	void Assembly::CollectTypes()
+	{
+		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
+		if (m_pLibManager) m_pLibManager->CollectTypes(pEngine, this);
 	}
 
     bool Assembly::LoadAssembly(const std::filesystem::path& assemblyPath)

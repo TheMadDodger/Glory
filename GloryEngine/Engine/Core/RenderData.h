@@ -60,5 +60,8 @@ namespace Glory
 		glm::mat4 m_World;
 
 		LayerMask m_LayerMask;
+
+		glm::vec2 m_Offsets{};
+		bool m_Append{ false };
 	};
 }

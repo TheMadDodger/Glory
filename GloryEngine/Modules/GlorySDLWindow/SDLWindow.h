@@ -27,8 +27,11 @@ namespace Glory
 
 		GLORY_API virtual void GetWindowBordersSize(int* top, int* left, int* bottom, int* right) override;
 
-		virtual void SetSplashScreen(const char* data, size_t size) override;
-		virtual void SetSplashScreen(const std::filesystem::path& path) override;
+		GLORY_API virtual void SetSplashScreen(const char* data, size_t size) override;
+		GLORY_API virtual void SetSplashScreen(const std::filesystem::path& path) override;
+		GLORY_API virtual std::string GetClipboardText() override;
+		GLORY_API virtual void StartTextInput() override;
+		GLORY_API virtual void StopTextInput() override;
 
 		GLORY_API SDL_Window* GetSDLWindow();
 		GLORY_API SDL_GLContext GetSDLGLConext() const;

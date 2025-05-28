@@ -45,6 +45,7 @@ namespace Glory
 		default:
 			break;
 		}
+		m_pConsole->SetNextColor({ 1.f, 1.f, 1.0f, 1.0f });
 	}
 
 	void Debug::LogInfo(const std::string& message, bool bIncludeTimeStamp)

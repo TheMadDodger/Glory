@@ -1,4 +1,6 @@
 #pragma once
+#include <GloryEditor.h>
+
 #include <functional>
 
 namespace Glory::Editor
@@ -6,10 +8,10 @@ namespace Glory::Editor
 	class ListView
 	{
 	public:
-		ListView(const char* label);
+		GLORY_EDITOR_API ListView(const char* label);
 
 	public:
-		bool Draw(size_t elementCount);
+		GLORY_EDITOR_API bool Draw(size_t elementCount);
 
 		std::function<void(size_t)> OnDrawElement = NULL;
 		std::function<void()> OnAdd = NULL;

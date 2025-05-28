@@ -45,11 +45,15 @@ namespace Glory
 		return true;
 	}
 
+	void UILibManager::CollectTypes(Engine*, Assembly*)
+	{
+		AddMonoType("GloryEngine.UI.UIDocument", SerializedType::ST_Asset, ResourceTypes::GetHash<UIDocumentData>());
+	}
+
 	void UILibManager::Initialize(Engine* pEngine, Assembly* pAssembly)
 	{
 		UIComponentsCSAPI::SetEngine(pEngine);
 		UISceneCSAPI::SetEngine(pEngine);
-		AddMonoType("GloryEngine.UI.UIDocument", SerializedType::ST_Asset, ResourceTypes::GetHash<UIDocumentData>());
 
 		UIRendererModule* pUIRenderer = pEngine->GetOptionalModule<UIRendererModule>();
 		Utils::ECS::ComponentTypes::SetInstance(pUIRenderer->GetComponentTypes());
@@ -120,6 +124,10 @@ namespace Glory
 	}
 
 	void UILibManager::Cleanup(Engine*)
+	{
+	}
+
+	void UILibManager::Reset(Engine*)
 	{
 	}
 }

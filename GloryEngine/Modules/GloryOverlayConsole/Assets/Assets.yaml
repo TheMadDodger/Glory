@@ -1,0 +1,12 @@
+- Path: "Shaders\\ConsoleBackground_Frag.shader"
+  ID: 111
+- Path: "Shaders\\Console_Vert.shader"
+  ID: 112
+- Path: "Pipelines\\ConsoleBackground.gpln"
+  ID: 113
+- Path: "Shaders\\ConsoleText_Frag.shader"
+  ID: 114
+- Path: "Pipelines\\ConsoleText.gpln"
+  ID: 115
+- Path: "Fonts\\F25_Bank_Printer.ttf"
+  ID: 116

@@ -9,10 +9,12 @@
 #include <FontData.h>
 #include <RendererModule.h>
 #include <GraphicsModule.h>
+#include <SceneManager.h>
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/glm.hpp>
+#include <LocalizeModuleBase.h>
 
 namespace Glory
 {
@@ -50,8 +52,10 @@ namespace Glory
 
 		Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
  		Constraints::ProcessConstraint(pComponent.m_Height, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
+		Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
 		Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
 		Constraints::ProcessConstraint(pComponent.m_Y, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
+		Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
 
 		/* Conversion top to bottom rather than bottom to top */
 		const float actualY = parent ? -float(pComponent.m_Y) : pComponent.m_ParentSize.y - float(pComponent.m_Y);
@@ -124,7 +128,29 @@ namespace Glory
 		}
 	}
 
-    void UITextSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent)
+	void UITextSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent)
+	{
+		if (pComponent.m_LocalizeTerm.empty()) return;
+
+		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
+		UIRendererModule* pUIRenderer = pDocument->Renderer();
+		Engine* pEngine = pUIRenderer->GetEngine();
+		LocalizeModuleBase* pLocalize = pEngine->GetOptionalModule<LocalizeModuleBase>();
+		if (!pLocalize) return;
+
+		const std::string_view fullTerm = pComponent.m_LocalizeTerm;
+		const size_t firstDot = fullTerm.find('.');
+		if (firstDot == std::string::npos) return;
+		const std::string_view tableName = fullTerm.substr(0, firstDot);
+		const std::string_view term = fullTerm.substr(firstDot + 1);
+		if (pLocalize->FindString(tableName, term, pComponent.m_Text))
+		{
+			pComponent.m_Dirty = true;
+			pDocument->SetDrawDirty();
+		}
+	}
+
+	void UITextSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent)
     {
 		/* No need to do anything if there is no text */
 		if (pComponent.m_Text.empty()) return;

@@ -72,7 +72,7 @@ namespace Glory
 			}
 			std::vector<char> data;
 			stream->Read(data);
-			m_pEngine->AddData(name, std::move(data));
+			m_pEngine->AddData(path, name, std::move(data));
 		}
 
 		/* Initialize engine */
@@ -140,8 +140,8 @@ namespace Glory
 
 	void GloryRuntime::Run()
 	{
-		m_pEngine->GetSceneManager()->Start();
 		m_IsRunning = true;
+		m_pEngine->GetSceneManager()->Start();
 
 		while (!m_pEngine->WantsToQuit())
 		{
@@ -252,7 +252,7 @@ namespace Glory
 	void GloryRuntime::EndFrame()
 	{
 		RenderTexture* pTexture = m_pEngine->GetDisplayManager().GetDisplayRenderTexture(0);
-		m_pGraphics->Blit(pTexture);
+		m_pRenderer->RenderOnBackBuffer(pTexture);
 		m_pGraphics->Swap();
 
 		if (m_MaxFramerate == 0.0f)

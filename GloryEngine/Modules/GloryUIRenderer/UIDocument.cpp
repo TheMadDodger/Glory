@@ -41,6 +41,24 @@ namespace Glory
 		return uuid;
 	}
 
+	void UIDocument::UpdateEntityActiveHierarchy(Utils::ECS::EntityID entity)
+	{
+		const Utils::ECS::EntityID parent = m_Registry.GetParent(entity);
+		Utils::ECS::EntityView* pEntity = m_Registry.GetEntityView(entity);
+		Utils::ECS::EntityView* pParent = parent ? m_Registry.GetEntityView(parent) : nullptr;
+
+		const bool activeSelf = pEntity->Active();
+		const bool activeHierarchy = activeSelf && (pParent ? pParent->HierarchyActive() : true);
+		pEntity->HierarchyActive() = activeSelf && activeHierarchy;
+		m_Registry.SetEntityDirty(entity);
+
+		for (size_t i = 0; i < m_Registry.ChildCount(entity); ++i)
+		{
+			const Utils::ECS::EntityID child = m_Registry.Child(entity, i);
+			UpdateEntityActiveHierarchy(child);
+		}
+	}
+
 	UIDocument::UIDocument(UIDocumentData* pDocument):
 		m_OriginalDocumentID(pDocument->GetUUID()), m_SceneID(0), m_ObjectID(0),
 		m_pUITexture(nullptr), m_pRenderer(nullptr), m_Projection(glm::identity<glm::mat4>()),
@@ -285,5 +303,27 @@ namespace Glory
 			if (i == 0) firstElementID = uuid;
 		}
 		return firstElementID;
+	}
+
+	void UIDocument::SetAllEntitiesDirty()
+	{
+		for (size_t i = 0; i < m_Registry.ChildCount(0); ++i)
+		{
+			const Utils::ECS::EntityID child = m_Registry.Child(0, i);
+			m_Registry.SetEntityDirty(child);
+		}
+	}
+
+	void UIDocument::SetEntityActive(Utils::ECS::EntityID entity, bool active)
+	{
+		m_Registry.GetEntityView(entity)->Active() = active;
+		UpdateEntityActiveHierarchy(entity);
+		m_DrawIsDirty = true;
+	}
+
+	void UIDocument::Start()
+	{
+		m_Registry.SetUserData(this);
+		m_Registry.InvokeAll(Utils::ECS::InvocationType::Start, NULL);
 	}
 }

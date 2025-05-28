@@ -13,6 +13,7 @@
 #include <GloryMonoScipting.h>
 #include <Debug.h>
 #include <Engine.h>
+#include <LocalizeModuleBase.h>
 
 #define UI_MODULE UIComponents_EngineInstance->GetOptionalModule<UIRendererModule>()
 namespace Glory
@@ -61,6 +62,9 @@ namespace Glory
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
 		uiComp.m_Target = target;
 		uiComp.m_IsDirty = true;
+
+		UIDocument* pDocument = UI_MODULE->FindDocument(uiComp.m_RenderDocumentID);
+		if (pDocument) pDocument->SetAllEntitiesDirty();
 	}
 
 	ResolutionMode UIRenderer_GetResolutionMode(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -74,6 +78,9 @@ namespace Glory
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
 		uiComp.m_ResolutionMode = mode;
 		uiComp.m_IsDirty = true;
+
+		UIDocument* pDocument = UI_MODULE->FindDocument(uiComp.m_RenderDocumentID);
+		if (pDocument) pDocument->SetAllEntitiesDirty();
 	}
 
 	Vec3Wrapper UIRenderer_GetResolution(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -87,6 +94,9 @@ namespace Glory
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
 		uiComp.m_Resolution = ToGLMVec3(resolution);
 		uiComp.m_IsDirty = true;
+
+		UIDocument* pDocument = UI_MODULE->FindDocument(uiComp.m_RenderDocumentID);
+		if (pDocument) pDocument->SetAllEntitiesDirty();
 	}
 
 	uint64_t UIRenderer_GetWorldMaterialID(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -100,6 +110,9 @@ namespace Glory
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
 		uiComp.m_WorldMaterial.SetUUID(materialID);
 		uiComp.m_IsDirty = true;
+
+		UIDocument* pDocument = UI_MODULE->FindDocument(uiComp.m_RenderDocumentID);
+		if (pDocument) pDocument->SetAllEntitiesDirty();
 	}
 
 	Vec3Wrapper UIRenderer_GetWorldSize(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -113,6 +126,9 @@ namespace Glory
 		UIRenderer& uiComp = GetComponent<UIRenderer>(sceneID, objectID, componentID);
 		uiComp.m_WorldSize = ToGLMVec3(size);
 		uiComp.m_IsDirty = true;
+
+		UIDocument* pDocument = UI_MODULE->FindDocument(uiComp.m_RenderDocumentID);
+		if (pDocument) pDocument->SetAllEntitiesDirty();
 	}
 
 	bool UIRenderer_GetInputEnabled(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -314,6 +330,43 @@ namespace Glory
 		uiText.m_Dirty = true;
 		pDocument->SetDrawDirty();
 	}
+	
+	MonoString* UIText_GetTerm(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return nullptr;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
+		return mono_string_new(mono_domain_get(), uiText.m_LocalizeTerm.data());
+	}
+
+	void UIText_SetTerm(uint64_t sceneID, uint64_t objectID, uint64_t componentID, MonoString* text)
+	{
+		UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
+		if (!pDocument) return;
+		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
+		uiText.m_LocalizeTerm = mono_string_to_utf8(text);
+
+		LocalizeModuleBase* pLocalize = UIComponents_EngineInstance->GetOptionalModule<LocalizeModuleBase>();
+		if (!pLocalize)
+		{
+			UIComponents_EngineInstance->GetDebug().
+				LogWarning("UIText localize term was set but there is no Localize module available for translation.");
+			return;
+		}
+
+		const std::string_view fullTerm = uiText.m_LocalizeTerm;
+		const size_t firstDot = fullTerm.find('.');
+		if (firstDot == std::string::npos) return;
+		const std::string_view tableName = fullTerm.substr(0, firstDot);
+		const std::string_view term = fullTerm.substr(firstDot + 1);
+		if (pLocalize->FindString(tableName, term, uiText.m_Text))
+		{
+			uiText.m_Dirty = true;
+			pDocument->SetDrawDirty();
+		}
+	}
 
 	float UIText_GetScale(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
@@ -331,6 +384,7 @@ namespace Glory
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
 		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
 		uiText.m_Scale = scale;
+		uiText.m_Dirty = true;
 		pDocument->SetDrawDirty();
 	}
 
@@ -350,6 +404,7 @@ namespace Glory
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
 		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
 		uiText.m_Color = ToGLMVec4(color);
+		uiText.m_Dirty = true;
 		pDocument->SetDrawDirty();
 	}
 
@@ -369,6 +424,7 @@ namespace Glory
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
 		UIText& uiText = pDocument->Registry().GetComponent<UIText>(entity);
 		uiText.m_Alignment = alignment;
+		uiText.m_Dirty = true;
 		pDocument->SetDrawDirty();
 	}
 
@@ -505,6 +561,8 @@ namespace Glory
 		BIND("GloryEngine.UI.UIText::UIText_SetFont", UIText_SetFont);
 		BIND("GloryEngine.UI.UIText::UIText_GetText", UIText_GetText);
 		BIND("GloryEngine.UI.UIText::UIText_SetText", UIText_SetText);
+		BIND("GloryEngine.UI.UIText::UIText_GetTerm", UIText_GetTerm);
+		BIND("GloryEngine.UI.UIText::UIText_SetTerm", UIText_SetTerm);
 		BIND("GloryEngine.UI.UIText::UIText_GetScale", UIText_GetScale);
 		BIND("GloryEngine.UI.UIText::UIText_SetScale", UIText_SetScale);
 		BIND("GloryEngine.UI.UIText::UIText_GetColor", UIText_GetColor);

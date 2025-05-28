@@ -29,6 +29,7 @@ namespace Glory
 		GLORY_API void CollectGC();
 		GLORY_API void CollectGC(int32_t generation);
 		GLORY_API void WaitForPendingFinalizers();
+		GLORY_API void Reset(Engine* pEngine);
 		GLORY_API bool DebuggingEnabled() const;
 
 		static GLORY_API MonoManager* Instance();

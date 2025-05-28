@@ -39,6 +39,10 @@ namespace Glory
 		return true;
 	}
 
+	void JoltLibManager::CollectTypes(Engine*, Assembly*)
+	{
+	}
+
 	void JoltLibManager::Initialize(Engine* pEngine, Assembly*)
 	{
 		PhysicsCSAPI::SetEngine(pEngine);
@@ -58,5 +62,9 @@ namespace Glory
 		PhysicsSystem::Instance()->OnContactAdded_Callback = NULL;
 		PhysicsSystem::Instance()->OnContactPersisted_Callback = NULL;
 		PhysicsSystem::Instance()->OnContactRemoved_Callback = NULL;
+	}
+
+	void JoltLibManager::Reset(Engine*)
+	{
 	}
 }

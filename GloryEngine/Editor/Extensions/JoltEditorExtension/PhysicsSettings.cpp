@@ -20,13 +20,11 @@ namespace Glory::Editor
 
 		ImGui::BeginChild("Physics Settings");
 
-		EditorUI::InputFloat3(m_YAMLFile, "Gravity");
+		bool changed = EditorUI::InputFloat3(m_YAMLFile, "Gravity");
 
 		Utils::NodeValueRef collisionMatrixNode = m_YAMLFile["CollisionMatrix"];
 		if (!collisionMatrixNode.IsSequence())
 			collisionMatrixNode.Set(YAML::Node(YAML::NodeType::Sequence));
-
-		bool changed = false;
 
 		ImGui::TextUnformatted("Collision Matrix");
 		ImGui::Separator();

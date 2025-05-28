@@ -38,6 +38,13 @@ namespace Glory::Editor
 		else if(rc.As<uint32_t>() != 0u)
 			rc.Set(0u);
 
+		auto organization = root["Organization"];
+		auto appName = root["ApplicationName"];
+		ImGui::Separator();
+		ImGui::TextUnformatted("Application");
+		change |= EditorUI::InputText(m_YAMLFile, organization.Path());
+		change |= EditorUI::InputText(m_YAMLFile, appName.Path());
+
 		return change;
 	}
 
@@ -51,12 +58,19 @@ namespace Glory::Editor
 		auto subMinor = root["SubMinor"];
 		auto enableRC = root["EnableReleaseCanditate"];
 		auto rc = root["RC"];
+		auto organization = root["Organization"];
+		auto appName = root["ApplicationName"];
 
 		if (!major.Exists()) major.Set(0u);
 		if (!minor.Exists()) minor.Set(1u);
 		if (!subMinor.Exists()) subMinor.Set(0u);
 		if (!rc.Exists()) rc.Set(0u);
 		if (!enableRC.Exists()) enableRC.Set(false);
+		if (!organization.Exists()) organization.Set("My Company");
+		if (!appName.Exists()) appName.Set("My Game");
+
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		pEngine->SetOrganizationAndAppName(std::move(organization.As<std::string>()), std::move(appName.As<std::string>()));
 	}
 
 	void GeneralSettings::OnCompile(const std::filesystem::path& path)
@@ -75,6 +89,10 @@ namespace Glory::Editor
 
 		Version version{ major.As<int>(0), minor.As<int>(1), subMinor.As<int>(0), rc.As<int>(0) };
 		stream->Write(version);
+
+		auto organization = root["Organization"];
+		auto appName = root["ApplicationName"];
+		stream->Write(organization.As<std::string>()).Write(appName.As<std::string>());
 	}
 
 	void GeneralSettings::OnStartPlay_Impl()
@@ -86,5 +104,9 @@ namespace Glory::Editor
 		auto subMinor = root["SubMinor"];
 		auto rc = root["RC"];
 		pEngine->SetApplicationVersion(major.As<uint32_t>(0), minor.As<uint32_t>(1), subMinor.As<uint32_t>(0), rc.As<uint32_t>(0));
+
+		auto organization = root["Organization"];
+		auto appName = root["ApplicationName"];
+		pEngine->SetOrganizationAndAppName(std::move(organization.As<std::string>()), std::move(appName.As<std::string>()));
 	}
 }

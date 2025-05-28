@@ -19,6 +19,7 @@
 #include <Material.h>
 #include <MaterialData.h>
 #include <SceneManager.h>
+#include <LocalizeModuleBase.h>
 
 #include <DistributedRandom.h>
 
@@ -158,7 +159,7 @@ namespace Glory
 		m_pEngine->GetResourceTypes().RegisterResource<UIDocumentData>("");
 		pComponentTypes->RegisterInvokaction<UIRenderer>(Glory::Utils::ECS::InvocationType::Draw, UIRenderSystem::OnDraw);
 		pComponentTypes->RegisterInvokaction<UIRenderer>(Glory::Utils::ECS::InvocationType::OnValidate, UIRenderSystem::OnValidate);
-		pComponentTypes->RegisterInvokaction<UIRenderer>(Glory::Utils::ECS::InvocationType::OnValidate, UIRenderSystem::OnValidate);
+		pComponentTypes->RegisterInvokaction<UIRenderer>(Glory::Utils::ECS::InvocationType::Start, UIRenderSystem::OnStart);
 		pComponentTypes->RegisterReferencesCallback<UIRenderer>(UIRenderSystem::GetReferences);
 
 		/* Register the UI components with a different component types instance */
@@ -175,6 +176,7 @@ namespace Glory
 		m_pComponentTypes->RegisterInvokaction<UIImage>(Glory::Utils::ECS::InvocationType::Draw, UIImageSystem::OnDraw);
 		m_pComponentTypes->RegisterReferencesCallback<UIImage>(UIImageSystem::GetReferences);
 		/* Text */
+		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::Start, UITextSystem::OnStart);
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::Draw, UITextSystem::OnDraw);
 		m_pComponentTypes->RegisterInvokaction<UIText>(Glory::Utils::ECS::InvocationType::OnDirty, UITextSystem::OnDirty);
 		m_pComponentTypes->RegisterReferencesCallback<UIText>(UITextSystem::GetReferences);
@@ -198,6 +200,17 @@ namespace Glory
 		pRenderer->AddRenderPass(RenderPassType::RP_Objectpass, { "UI Worldspace Quad Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			UIWorldSpaceQuadPass(camera, frame);
 		} });
+
+		LocalizeModuleBase* pLocalize = m_pEngine->GetOptionalModule<LocalizeModuleBase>();
+		if (pLocalize)
+		{
+			pLocalize->OnLanguageChanged = [this]() {
+				for (auto& iter : m_Documents)
+				{
+					iter.second.Registry().InvokeAll<UIText>(Utils::ECS::InvocationType::Start);
+				}
+			};
+		}
 
 		m_pImageMesh.reset(new MeshData(4, sizeof(VertexPosColorTex),
 			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }));

@@ -82,6 +82,7 @@ namespace Glory
 
 		void RenderObject(CameraRef camera, const RenderData& renderData);
 
+		void RenderOnBackBuffer(RenderTexture* pTexture);
 
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}

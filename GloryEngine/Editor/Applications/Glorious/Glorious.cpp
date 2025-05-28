@@ -62,6 +62,7 @@ int main(int argc, char* argv[])
 
         Glory::EngineLoader engineLoader(engineConfPath, windowCreateInfo);
         Glory::Engine engine = engineLoader.LoadEngine(&console, &debug);
+        console.SetEngine(&engine);
         std::filesystem::path moduleSettingsRootPath = engineConfPath.parent_path().parent_path();
         moduleSettingsRootPath.append("Modules");
         engine.LoadModuleSettings(moduleSettingsRootPath);

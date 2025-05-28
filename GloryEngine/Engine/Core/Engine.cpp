@@ -22,6 +22,7 @@
 #include "AudioData.h"
 #include "FontData.h"
 #include "CubemapData.h"
+#include "TextFileData.h"
 
 #include "Debug.h"
 #include "Console.h"
@@ -251,6 +252,7 @@ namespace Glory
 	{
 		if (m_Initialized) return;
 
+		m_Console->Initialize();
 		m_UUIDRemapper.Reset();
 
 		WindowModule* pWindows = GetMainModule<WindowModule>();
@@ -321,6 +323,7 @@ namespace Glory
 	{
 		if (!m_Initialized) return;
 
+		m_Console->Cleanup();
 		m_AssetDatabase->Destroy();
 		m_pJobManager->Kill();
 		m_pThreadManager->Destroy();
@@ -473,9 +476,10 @@ namespace Glory
 		return m_Quit;
 	}
 
-	void Engine::AddData(const std::string& name, std::vector<char>&& data)
+	void Engine::AddData(const std::filesystem::path& path, const std::string& name, std::vector<char>&& data)
 	{
 		m_Datas.emplace(name, std::move(data));
+		m_DataPaths.emplace(name, path);
 	}
 
 	void Engine::ProcessData()
@@ -496,8 +500,8 @@ namespace Glory
 		{
 			BinaryMemoryStream memoryStream{ GetData("General") };
 			BinaryStream* stream = &memoryStream;
-			uint32_t value;
 			stream->Read(m_ApplicationVersion);
+			stream->Read(m_Organization).Read(m_AppName);
 		}
 
 		for (size_t i = 0; i < m_pAllModules.size(); ++i)
@@ -506,9 +510,14 @@ namespace Glory
 		}
 	}
 
-	bool Engine::HasData(const std::string& name)
+	bool Engine::HasData(const std::string& name) const
 	{
 		return m_Datas.find(name) != m_Datas.end();
+	}
+
+	const std::filesystem::path& Engine::DataPath(const std::string& name) const
+	{
+		return m_DataPaths.at(name);
 	}
 
 	std::vector<char>& Engine::GetData(const std::string& name)
@@ -537,6 +546,22 @@ namespace Glory
 	const Version& Engine::GetApplicationVersion() const
 	{
 		return m_ApplicationVersion;
+	}
+
+	void Engine::SetOrganizationAndAppName(std::string&& organization, std::string&& appName)
+	{
+		m_Organization = std::move(organization);
+		m_AppName = std::move(appName);
+	}
+
+	std::string_view Engine::Organization() const
+	{
+		return m_Organization;
+	}
+
+	std::string_view Engine::AppName() const
+	{
+		return m_AppName;
 	}
 
 	void Engine::RegisterStandardSerializers()
@@ -593,6 +618,7 @@ namespace Glory
 		m_ResourceTypes->RegisterResource<AudioData>("");
 		m_ResourceTypes->RegisterResource<FontData>("");
 		m_ResourceTypes->RegisterResource<CubemapData>("");
+		m_ResourceTypes->RegisterResource<TextFileData>("");
 
 		Reflect::RegisterBasicType<glm::vec2>("vec2");
 		Reflect::RegisterBasicType<glm::vec3>("vec3");

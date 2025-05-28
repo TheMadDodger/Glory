@@ -679,7 +679,9 @@ namespace Glory::Editor
 		task.m_SubTaskName = "Generating Configuration.h";
 		PACKAGE_LAG
 
+		ProjectSettings* pGeneral = ProjectSettings::Get("General");
 		const std::string projectName = ProjectSpace::GetOpenProject()->Name();
+		const std::string appName = (**pGeneral)["ApplicationName"].As<std::string>("My Game");
 		/* Generate Configuration.h */
 		std::filesystem::path configHeaderPath = packagingCachePath;
 		configHeaderPath.append("Configuration.h");
@@ -688,7 +690,7 @@ namespace Glory::Editor
 		configHeaderStream << "#include \"RuntimeAPI.h\"" << std::endl << std::endl;
 		configHeaderStream << "namespace Config" << std::endl;
 		configHeaderStream << "{" << std::endl;
-		configHeaderStream << "	constexpr char* AppName = \"" << projectName << "\";" << std::endl;
+		configHeaderStream << "	constexpr char* AppName = \"" << appName << "\";" << std::endl;
 		configHeaderStream << "}" << std::endl << std::endl << std::endl;
 		configHeaderStream << "inline void Exec()" << std::endl;
 		configHeaderStream << "{" << std::endl;
@@ -1002,6 +1004,11 @@ namespace Glory::Editor
 	bool PackageFailed()
 	{
 		return Failed;
+	}
+
+	bool IsAssetPackaged(UUID assetID)
+	{
+		return std::find(UsedAssets.begin(), UsedAssets.end(), assetID) != UsedAssets.end();
 	}
 
     void PackageScene(GScene* pScene, const std::filesystem::path& path)

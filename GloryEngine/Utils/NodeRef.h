@@ -24,7 +24,7 @@ namespace Glory::Utils
 		template<typename T>
 		T As(const T& defaultValue)
 		{
-			if (!Exists() || !IsScalar()) return defaultValue;
+			if (!Exists()) return defaultValue;
 			return As<T>();
 		}
 

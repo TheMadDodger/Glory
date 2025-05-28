@@ -22,6 +22,8 @@ namespace Glory
 
 		virtual void GetCurrentScreenResolution(uint32_t& width, uint32_t& height) = 0;
 
+		virtual std::filesystem::path GetPrefPath() const = 0;
+
 	public: // Module functions
 		Window* CreateNewWindow(WindowCreateInfo& createInfo);
 		virtual void OpenMessageBox(const std::string& message);

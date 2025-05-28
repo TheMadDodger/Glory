@@ -19,6 +19,7 @@
 #include <MaterialData.h>
 #include <MaterialInstanceData.h>
 #include <PrefabData.h>
+#include <TextFileData.h>
 
 namespace Glory
 {
@@ -282,6 +283,22 @@ namespace Glory
 		}
 		MaterialInstanceData* pInstance = materials.CreateRuntimeMaterialInstance(pMaterial->GetUUID());
 		return pInstance->GetUUID();
+	}
+
+#pragma endregion
+
+#pragma region Text File
+
+	MonoString* TextFile_GetFullBody(uint64_t textID)
+	{
+		AssetManager& pManager = Core_EngineInstance->GetAssetManager();
+		auto pFile = pManager.GetAssetImmediate<TextFileData>(textID);
+		if (!pFile)
+		{
+			Core_EngineInstance->GetDebug().LogError("Text file does not exist!");
+			return nullptr;
+		}
+		return pFile->Size() > 0 ? mono_string_new(mono_domain_get(), pFile->Data()) : nullptr;
 	}
 
 #pragma endregion
@@ -612,6 +629,27 @@ namespace Glory
 		return Core_EngineInstance->GetApplicationVersion();
 	}
 
+	MonoString* Application_GetOrganization()
+	{
+		return mono_string_new(mono_domain_get(), Core_EngineInstance->Organization().data());
+	}
+
+	MonoString* Application_GetAppName()
+	{
+		return mono_string_new(mono_domain_get(), Core_EngineInstance->AppName().data());
+	}
+
+	MonoString* Application_GetPrefPath()
+	{
+		WindowModule* pWindows = Core_EngineInstance->GetMainModule<WindowModule>();
+		if (!pWindows)
+		{
+			Core_EngineInstance->GetDebug().LogError("Cannot get pref path with no window module loaded.");
+			return nullptr;
+		}
+		return mono_string_new(mono_domain_get(), pWindows->GetPrefPath().string().data());
+	}
+
 #pragma endregion
 
 
@@ -695,6 +733,9 @@ namespace Glory
 
 		BIND("GloryEngine.Material::Material_CreateInstance", Material_CreateInstance);
 
+		/* Text files */
+		BIND("GloryEngine.TextFile::TextFile_GetFullBody", TextFile_GetFullBody);
+
 		// Scenes
 		BIND("GloryEngine.SceneManagement.Scene::Scene_NewEmptyObject", Scene_NewEmptyObject);
 		BIND("GloryEngine.SceneManagement.Scene::Scene_NewEmptyObjectWithName", Scene_NewEmptyObjectWithName);
@@ -734,8 +775,12 @@ namespace Glory
 		BIND("GloryEngine.Engine::Engine_GetGrabInput", Engine_GetGrabInput);
 		BIND("GloryEngine.Engine::Engine_SetGrabInput", Engine_SetGrabInput);
 
+		/* Application */
 		BIND("GloryEngine.Application::Application_Quit", Application_Quit);
 		BIND("GloryEngine.Application::Application_GetVersion", Application_GetVersion);
+		BIND("GloryEngine.Application::Application_GetOrganization", Application_GetOrganization);
+		BIND("GloryEngine.Application::Application_GetAppName", Application_GetAppName);
+		BIND("GloryEngine.Application::Application_GetPrefPath", Application_GetPrefPath);
 	}
 
 	void CoreCSAPI::SetEngine(Engine* pEngine)

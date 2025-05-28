@@ -53,6 +53,20 @@ namespace Glory::Utils::Reflect
 		if (str.length() > 0) tokens.push_back(str);
 	}
 
+	void Reflect::Tokenize(std::string_view str, std::vector<std::string_view>& tokens, char separator)
+	{
+		size_t lastPos = 0;
+		size_t pos = 0;
+		while ((pos = str.find(separator, lastPos)) != std::string::npos)
+		{
+			std::string_view token = str.substr(0, pos);
+			tokens.push_back(token);
+			lastPos = pos + 1;
+		}
+
+		if (lastPos < str.length()) tokens.push_back(str.substr(lastPos));
+	}
+
 	const TypeData* Reflect::RegisterTemplatedType(const char* typeName, uint32_t typeHash, size_t size)
 	{
 		if (m_pReflectInstance->m_pTypeDatas.find(typeHash) != m_pReflectInstance->m_pTypeDatas.end()) return m_pReflectInstance->m_pTypeDatas[typeHash];
