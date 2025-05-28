@@ -42,7 +42,7 @@ namespace Glory
 		void Submit(CameraRef camera);
 		size_t Submit(const glm::ivec2& pickPos, UUID cameraID);
 		void Submit(CameraRef camera, RenderTexture* pTexture);
-		void Submit(LightData&& light);
+		void Submit(LightData&& light, glm::mat4&& transform);
 
 		virtual void OnBeginFrame() override;
 
@@ -125,7 +125,7 @@ namespace Glory
 		void MainTextPass(CameraRef camera, const RenderFrame& frame);
 		void MainLateObjectPass(CameraRef camera, const RenderFrame& frame);
 		void DeferredCompositePass(CameraRef camera, const RenderFrame& frame);
-		void RenderShadow(const LightData& light, const RenderData& objectToRender);
+		void RenderShadow(const LightData& light, const glm::mat4& transform, const RenderData& objectToRender);
 
 	private:
 		RenderFrame m_FrameData;
@@ -148,5 +148,7 @@ namespace Glory
 		std::atomic_bool m_DisplaysDirty;
 
 		std::vector<std::vector<RenderPass>> m_RenderPasses;
+
+		RenderTexture* m_pShadowMap;
 	};
 }

@@ -68,6 +68,7 @@ namespace Glory
 		std::vector<RenderData> ObjectsToRenderLate;
 		std::vector<CameraRef> ActiveCameras;
 		std::vector<std::pair<glm::ivec2, UUID>> Picking;
+		std::vector<glm::mat4> LightTransforms;
 		FrameData<LightData> ActiveLights;
 	};
 

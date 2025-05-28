@@ -85,4 +85,18 @@ const std::string Enum<nameSpace::enumName>::m_EnumStringValues[] = {			\
 const size_t Enum<nameSpace::enumName>::m_NumValues = NARGS(__VA_ARGS__);		\
 bool Enum<nameSpace::enumName>::Valid() { return true; }						\
 
+
+#define REFLECTABLE_ENUM_NS_SIZE(nameSpace, enumName, size, ...) namespace nameSpace {		\
+enum class enumName	: size																	\
+{																							\
+	FOR_EACH(REFLECT_ENUM_VALUE, __VA_ARGS__)												\
+};																							\
+}																							\
+																							\
+const std::string Enum<nameSpace::enumName>::m_EnumStringValues[] = {			\
+	FOR_EACH(REFLECT_ENUM_STRING_VALUE, __VA_ARGS__)										\
+};																							\
+const size_t Enum<nameSpace::enumName>::m_NumValues = NARGS(__VA_ARGS__);		\
+bool Enum<nameSpace::enumName>::Valid() { return true; }						\
+
 #pragma endregion

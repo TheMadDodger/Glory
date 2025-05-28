@@ -29,7 +29,8 @@ namespace Glory
 		light.sceneID = pScene->GetUUID();
 		light.objectID = pScene->GetEntityUUID(entity);
 
-		pEngine->GetMainModule<RendererModule>()->Submit(std::move(light));
+		glm::mat4 matTransform = glm::inverse(transform.MatTransform);
+		pEngine->GetMainModule<RendererModule>()->Submit(std::move(light), std::move(matTransform));
 	}
 
 	LightSystem::LightSystem()

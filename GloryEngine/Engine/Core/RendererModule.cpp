@@ -14,11 +14,12 @@
 #include "GScene.h"
 #include "AssetManager.h"
 #include "CubemapData.h"
+#include "MaterialManager.h"
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/ext/scalar_constants.hpp>
-#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 
 namespace Glory
@@ -26,7 +27,8 @@ namespace Glory
 	RendererModule::RendererModule()
 		: m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0), m_LineVertexCount(0),
 		m_pLineBuffer(nullptr), m_pLineMesh(nullptr), m_pLinesMaterialData(nullptr),
-		m_pLineVertex(nullptr), m_pLineVertices(nullptr), m_DisplaysDirty(false), m_RenderPasses(RP_Count)
+		m_pLineVertex(nullptr), m_pLineVertices(nullptr), m_DisplaysDirty(false), m_RenderPasses(RP_Count),
+		m_pShadowMap(nullptr)
 	{
 	}
 
@@ -103,11 +105,12 @@ namespace Glory
 	{
 	}
 
-	void RendererModule::Submit(LightData&& light)
+	void RendererModule::Submit(LightData&& light, glm::mat4&& transform)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(light)" };
 		const size_t index = m_FrameData.ActiveLights.count();
 		m_FrameData.ActiveLights.push_back(std::move(light));
+		m_FrameData.LightTransforms.push_back(std::move(transform));
 		OnSubmit(m_FrameData.ActiveLights[index]);
 	}
 
@@ -372,14 +375,31 @@ namespace Glory
 			pass.m_Callback(nullptr, m_FrameData);
 		}
 
-		for (size_t i = 0; i < m_FrameData.ActiveLights.size(); ++i)
+		if (!m_pShadowMap)
+		{
+			RenderTextureCreateInfo renderTextureInfo;
+			renderTextureInfo.HasDepth = true;
+			renderTextureInfo.HasStencil = false;
+			renderTextureInfo.Width = 1024;
+			renderTextureInfo.Height = 1024;
+			m_pShadowMap = pGraphics->GetResourceManager()->CreateRenderTexture(renderTextureInfo);
+		}
+
+		for (size_t i = 0; i < m_FrameData.ActiveLights.count(); ++i)
 		{
 			const auto& lightData = m_FrameData.ActiveLights[i];
+			const auto& lightTransform = m_FrameData.LightTransforms[i];
+
+			pGraphics->SetColorMask(false, false, false, false);
+			m_pShadowMap->BindForDraw();
+			pGraphics->Clear();
 			for (size_t j = 0; j < m_FrameData.ObjectsToRender.size(); ++j)
 			{
 				const auto& objectToRender = m_FrameData.ObjectsToRender[j];
-				RenderShadow(lightData, objectToRender);
+				RenderShadow(lightData, lightTransform, objectToRender);
 			}
+			m_pShadowMap->UnBindForDraw();
+			pGraphics->SetColorMask(true, true, true, true);
 		}
 
 		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
@@ -629,9 +649,29 @@ namespace Glory
 		m_pEngine->Profiler().EndSample();
 	}
 
-	void RendererModule::RenderShadow(const LightData& light, const RenderData& objectToRender)
+	void RendererModule::RenderShadow(const LightData& light, const glm::mat4& transform, const RenderData& objectToRender)
 	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 
+		Resource* pMeshResource = m_pEngine->GetAssetManager().FindResource(objectToRender.m_MeshID);
+		if (!pMeshResource) return;
+		MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+		MaterialData* pMaterialData = m_pEngine->GetMaterialManager().GetMaterial(objectToRender.m_MaterialID);
+		if (!pMaterialData) return;
+		Material* pMaterial = pGraphics->UseMaterial(pMaterialData);
+		if (!pMaterial) return;
+
+		ObjectData object;
+		object.Model = objectToRender.m_World;
+		object.View = transform;
+		object.Projection = glm::perspective(glm::radians(light.data.y), 1024.0f / 1024.0f, 0.001f, light.data.z);
+		object.ObjectID = objectToRender.m_ObjectID;
+		object.SceneID = objectToRender.m_SceneID;
+		pMaterial->SetProperties(m_pEngine);
+		pMaterial->SetObjectData(object);
+		pGraphics->EnableDepthWrite(true);
+		pGraphics->EnableDepthTest(true);
+		pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
 	}
 
 	void RendererModule::CreateCameraRenderTextures(uint32_t width, uint32_t height, std::vector<RenderTexture*>& renderTextures)
