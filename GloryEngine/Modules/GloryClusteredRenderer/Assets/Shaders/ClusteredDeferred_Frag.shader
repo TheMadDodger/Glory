@@ -33,11 +33,16 @@ const float PI = 3.14159265359;
 
 struct LightData
 {
-	/* Type is in the w value */
-    vec4 Position;
+    vec3 Position;
+	uint Type;
 	vec4 Direction;
 	vec4 Color;
 	vec4 Data;
+	uint shadowsEnabled;
+	float shadowBias;
+	float padding1;
+	float padding2;
+    vec4 IDs;
 };
 
 struct LightGridElement
@@ -151,7 +156,7 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 vec3 CalculateLighting(LightData light, vec3 normal, vec3 color, vec3 worldPosition, vec3 CameraPos, vec3 V, float roughness, float metallic)
 {
 	vec3 lightPos = light.Position.xyz;
-	float lightType = light.Position.w;
+	uint lightType = light.Type;
 	vec3 direction = light.Direction.xyz;
 	float innerRadius = light.Data.x;
 	float outerRadius = light.Data.y;
@@ -289,7 +294,7 @@ void main()
 vec3 CalculateLighting(LightData light, vec3 normal, vec3 color, vec3 worldPosition, vec3 viewDir, float specularIntensity)
 {
 	vec3 lightPos = light.Position.xyz;
-	float lightType = light.Position.w;
+	uint lightType = light.Type;
 	vec3 direction = normalize(light.Direction.xyz);
 	float innerRadius = light.Data.x;
 	float outerRadius = light.Data.y;

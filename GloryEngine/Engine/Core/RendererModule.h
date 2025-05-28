@@ -125,6 +125,7 @@ namespace Glory
 		void MainTextPass(CameraRef camera, const RenderFrame& frame);
 		void MainLateObjectPass(CameraRef camera, const RenderFrame& frame);
 		void DeferredCompositePass(CameraRef camera, const RenderFrame& frame);
+		void RenderShadow(const LightData& light, const RenderData& objectToRender);
 
 	private:
 		RenderFrame m_FrameData;

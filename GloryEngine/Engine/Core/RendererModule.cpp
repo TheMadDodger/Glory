@@ -372,6 +372,16 @@ namespace Glory
 			pass.m_Callback(nullptr, m_FrameData);
 		}
 
+		for (size_t i = 0; i < m_FrameData.ActiveLights.size(); ++i)
+		{
+			const auto& lightData = m_FrameData.ActiveLights[i];
+			for (size_t j = 0; j < m_FrameData.ObjectsToRender.size(); ++j)
+			{
+				const auto& objectToRender = m_FrameData.ObjectsToRender[j];
+				RenderShadow(lightData, objectToRender);
+			}
+		}
+
 		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
 		{
 			CameraRef camera = m_FrameData.ActiveCameras[i];
@@ -617,6 +627,11 @@ namespace Glory
 		OnDoCompositing(camera, frame.ActiveLights, width, height, pRenderTexture);
 		pOutputTexture->UnBindForDraw();
 		m_pEngine->Profiler().EndSample();
+	}
+
+	void RendererModule::RenderShadow(const LightData& light, const RenderData& objectToRender)
+	{
+
 	}
 
 	void RendererModule::CreateCameraRenderTextures(uint32_t width, uint32_t height, std::vector<RenderTexture*>& renderTextures)

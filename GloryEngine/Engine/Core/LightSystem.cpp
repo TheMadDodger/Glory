@@ -18,7 +18,7 @@ namespace Glory
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		LightData light;
 		light.position = transform.MatTransform[3];
-		light.position.w = (float)pComponent.m_Type;
+		light.type = pComponent.m_Type;
 		light.direction = transform.MatTransform[2];
 		light.color = pComponent.m_Color;
 		light.color.a = 1.0f;
@@ -26,6 +26,8 @@ namespace Glory
 		light.data.y = pComponent.m_Outer;
 		light.data.z = pComponent.m_Range;
 		light.data.w = pComponent.m_Intensity;
+		light.sceneID = pScene->GetUUID();
+		light.objectID = pScene->GetEntityUUID(entity);
 
 		pEngine->GetMainModule<RendererModule>()->Submit(std::move(light));
 	}
