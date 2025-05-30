@@ -28,9 +28,32 @@ namespace Glory
 		light.data.w = pComponent.m_Intensity;
 		light.sceneID = pScene->GetUUID();
 		light.objectID = pScene->GetEntityUUID(entity);
+		light.shadowsEnabled = pComponent.m_Shadows.m_Enable ? 1 : 0;
+		light.shadowBias = pComponent.m_Shadows.m_Bias;
 
-		glm::mat4 matTransform = glm::inverse(transform.MatTransform);
-		pEngine->GetMainModule<RendererModule>()->Submit(std::move(light), std::move(matTransform));
+		glm::mat4 lightView = glm::inverse(transform.MatTransform);
+		glm::mat4 lightProjection;
+
+		switch (light.type)
+		{
+		case LightType::Spot:
+		{
+			const float outerRadius = pComponent.m_Range * std::tan(glm::radians(pComponent.m_Outer / 2.0f));
+			lightProjection = glm::perspective(glm::radians(pComponent.m_Outer), 1.0f, 0.001f, pComponent.m_Range + outerRadius*2.0f + 1.0f);
+			break;
+		}
+		case LightType::Point:
+			lightProjection = glm::perspective(glm::radians(45.0f), 1.0f, 0.001f, pComponent.m_Outer);
+			break;
+		case LightType::Sun:
+			lightProjection = glm::ortho(-1000.0f, 1000.0f, -1000.0f, 1000.0f, 0.01f, 3000.0f);
+			break;
+		default:
+			break;
+		}
+
+		glm::mat4 lightSpace = lightProjection*lightView;
+		pEngine->GetMainModule<RendererModule>()->Submit(std::move(light), std::move(lightSpace));
 	}
 
 	LightSystem::LightSystem()

@@ -181,8 +181,10 @@ namespace Glory
 		m_pScreenToViewSSBO = pResourceManager->CreateBuffer(sizeof(ScreenToView), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 2);
 		m_pScreenToViewSSBO->Assign(NULL);
 
-		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(LightData) * MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
+		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(LightData)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
 		m_pLightsSSBO->Assign(NULL);
+		m_pLightSpaceTransformsSSBO = pResourceManager->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 8);
+		m_pLightSpaceTransformsSSBO->Assign(NULL);
 
 		m_pSSAOSettingsSSBO = pResourceManager->CreateBuffer(sizeof(SSAOSettings), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 6);
 		m_pSSAOSettingsSSBO->Assign(NULL);
@@ -435,7 +437,7 @@ namespace Glory
 		pGraphics->EnableDepthTest(true);
 	}
 
-	void ClusteredRendererModule::OnDoCompositing(CameraRef camera, const FrameData<LightData>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture)
+	void ClusteredRendererModule::OnDoCompositing(CameraRef camera, uint32_t width, uint32_t height, RenderTexture* pRenderTexture)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 
@@ -455,8 +457,9 @@ namespace Glory
 		pGraphics->EnableDepthTest(false);
 		pGraphics->SetViewport(0, 0, width, height);
 
-		uint32_t count = (uint32_t)std::fmin(lights.size(), MAX_LIGHTS);
-		m_pLightsSSBO->Assign(lights.data(), 0, count * sizeof(LightData));
+		const uint32_t count = (uint32_t)std::fmin(m_FrameData.ActiveLights.size(), MAX_LIGHTS);
+		m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, count*sizeof(LightData));
+		m_pLightSpaceTransformsSSBO->Assign(m_FrameData.LightSpaceTransforms.data(), 0, count*sizeof(glm::mat4));
 
 		glm::uvec2 resolution = camera.GetResolution();
 		glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
@@ -480,7 +483,8 @@ namespace Glory
 		Material* pMaterial = pGraphics->UseMaterial(m_pDeferredCompositeMaterial);
 
 		pRenderTexture->BindAll(pMaterial);
-		if (pIrradianceTexture) pMaterial->SetCubemapTexture("IrradianceMap", pIrradianceTexture);
+		pMaterial->SetCubemapTexture("IrradianceMap", pIrradianceTexture ? pIrradianceTexture : nullptr);
+		pMaterial->SetTexture("ShadowMap", m_pShadowMap->GetTextureAttachment("Depth"));
 		pMaterial->SetPropertiesBuffer(m_pEngine, 7);
 
 		pClusterSSBO->BindForDraw();
@@ -488,6 +492,7 @@ namespace Glory
 		m_pLightsSSBO->BindForDraw();
 		pLightIndexSSBO->BindForDraw();
 		pLightGridSSBO->BindForDraw();
+		m_pLightSpaceTransformsSSBO->BindForDraw();
 
 		/* Draw the screen quad */
 		pGraphics->DrawScreenQuad();
@@ -497,6 +502,7 @@ namespace Glory
 		m_pLightsSSBO->Unbind();
 		pLightIndexSSBO->Unbind();
 		pLightGridSSBO->Unbind();
+		m_pLightSpaceTransformsSSBO->Unbind();
 
 		// Reset render textures and materials
 		pGraphics->UseMaterial(nullptr);

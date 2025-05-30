@@ -142,6 +142,17 @@ namespace Glory
 		)
 	};
 
+	struct ShadowSettings
+	{
+		ShadowSettings() : m_Enable(true), m_Bias(0.0000005f)
+		{}
+
+		REFLECTABLE(ShadowSettings,
+			(bool)(m_Enable),
+			(float)(m_Bias)
+		);
+	};
+
 	struct LightComponent
 	{
 		LightComponent() :
@@ -157,7 +168,8 @@ namespace Glory
 			(float)	(m_Inner),
 			(float)	(m_Outer),
 			(float)	(m_Range),
-			(float)	(m_Intensity)
+			(float)	(m_Intensity),
+			(ShadowSettings)(m_Shadows)
 		)
 	};
 

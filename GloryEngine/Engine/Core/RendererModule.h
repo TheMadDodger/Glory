@@ -42,7 +42,7 @@ namespace Glory
 		void Submit(CameraRef camera);
 		size_t Submit(const glm::ivec2& pickPos, UUID cameraID);
 		void Submit(CameraRef camera, RenderTexture* pTexture);
-		void Submit(LightData&& light, glm::mat4&& transform);
+		void Submit(LightData&& light, glm::mat4&& lightSpace);
 
 		virtual void OnBeginFrame() override;
 
@@ -98,7 +98,7 @@ namespace Glory
 		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) = 0;
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) = 0;
 		virtual void OnRenderSkybox(CameraRef camera, CubemapData* pCubemap) = 0;
-		virtual void OnDoCompositing(CameraRef camera, const FrameData<LightData>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) = 0;
+		virtual void OnDoCompositing(CameraRef camera, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) = 0;
 		virtual void OnDisplayCopy(RenderTexture* pRenderTexture, uint32_t width, uint32_t height) = 0;
 
 		virtual void OnPostInitialize() {};
@@ -125,9 +125,9 @@ namespace Glory
 		void MainTextPass(CameraRef camera, const RenderFrame& frame);
 		void MainLateObjectPass(CameraRef camera, const RenderFrame& frame);
 		void DeferredCompositePass(CameraRef camera, const RenderFrame& frame);
-		void RenderShadow(const LightData& light, const glm::mat4& transform, const RenderData& objectToRender);
+		void RenderShadow(size_t lightIndex, const RenderData& objectToRender);
 
-	private:
+	protected:
 		RenderFrame m_FrameData;
 		size_t m_LastSubmittedObjectCount;
 		size_t m_LastSubmittedCameraCount;
@@ -149,6 +149,7 @@ namespace Glory
 
 		std::vector<std::vector<RenderPass>> m_RenderPasses;
 
+	protected:
 		RenderTexture* m_pShadowMap;
 	};
 }

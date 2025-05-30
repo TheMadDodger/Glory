@@ -28,7 +28,7 @@ namespace Glory
 		: m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0), m_LineVertexCount(0),
 		m_pLineBuffer(nullptr), m_pLineMesh(nullptr), m_pLinesMaterialData(nullptr),
 		m_pLineVertex(nullptr), m_pLineVertices(nullptr), m_DisplaysDirty(false), m_RenderPasses(RP_Count),
-		m_pShadowMap(nullptr)
+		m_pShadowMap(nullptr), m_FrameData(size_t(MAX_LIGHTS))
 	{
 	}
 
@@ -105,12 +105,12 @@ namespace Glory
 	{
 	}
 
-	void RendererModule::Submit(LightData&& light, glm::mat4&& transform)
+	void RendererModule::Submit(LightData&& light, glm::mat4&& lightSpace)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(light)" };
 		const size_t index = m_FrameData.ActiveLights.count();
 		m_FrameData.ActiveLights.push_back(std::move(light));
-		m_FrameData.LightTransforms.push_back(std::move(transform));
+		m_FrameData.LightSpaceTransforms.push_back(std::move(lightSpace));
 		OnSubmit(m_FrameData.ActiveLights[index]);
 	}
 
@@ -121,7 +121,7 @@ namespace Glory
 		REQUIRE_MODULE(m_pEngine, WindowModule, );
 
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::StartFrame" };
-		m_FrameData = RenderFrame{};
+		m_FrameData.Reset();
 	}
 
 	size_t RendererModule::LastSubmittedObjectCount()
@@ -300,7 +300,7 @@ namespace Glory
 
 		for (auto& pass : m_RenderPasses[RP_Postblit])
 		{
-			pass.m_Callback(nullptr, {});
+			pass.m_Callback(nullptr, {0});
 		}
 	}
 
@@ -380,26 +380,28 @@ namespace Glory
 			RenderTextureCreateInfo renderTextureInfo;
 			renderTextureInfo.HasDepth = true;
 			renderTextureInfo.HasStencil = false;
-			renderTextureInfo.Width = 1024;
-			renderTextureInfo.Height = 1024;
+			renderTextureInfo.Width = 4096;
+			renderTextureInfo.Height = 4096;
 			m_pShadowMap = pGraphics->GetResourceManager()->CreateRenderTexture(renderTextureInfo);
 		}
 
 		for (size_t i = 0; i < m_FrameData.ActiveLights.count(); ++i)
 		{
 			const auto& lightData = m_FrameData.ActiveLights[i];
-			const auto& lightTransform = m_FrameData.LightTransforms[i];
+			const auto& lightTransform = m_FrameData.LightSpaceTransforms[i];
 
+			pGraphics->SetCullFace(CullFace::Front);
 			pGraphics->SetColorMask(false, false, false, false);
 			m_pShadowMap->BindForDraw();
 			pGraphics->Clear();
 			for (size_t j = 0; j < m_FrameData.ObjectsToRender.size(); ++j)
 			{
 				const auto& objectToRender = m_FrameData.ObjectsToRender[j];
-				RenderShadow(lightData, lightTransform, objectToRender);
+				RenderShadow(i, objectToRender);
 			}
 			m_pShadowMap->UnBindForDraw();
 			pGraphics->SetColorMask(true, true, true, true);
+			pGraphics->SetCullFace(CullFace::None);
 		}
 
 		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
@@ -644,12 +646,12 @@ namespace Glory
 
 		m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Output Rendering");
 		pOutputTexture->BindForDraw();
-		OnDoCompositing(camera, frame.ActiveLights, width, height, pRenderTexture);
+		OnDoCompositing(camera, width, height, pRenderTexture);
 		pOutputTexture->UnBindForDraw();
 		m_pEngine->Profiler().EndSample();
 	}
 
-	void RendererModule::RenderShadow(const LightData& light, const glm::mat4& transform, const RenderData& objectToRender)
+	void RendererModule::RenderShadow(size_t lightIndex, const RenderData& objectToRender)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 
@@ -663,8 +665,8 @@ namespace Glory
 
 		ObjectData object;
 		object.Model = objectToRender.m_World;
-		object.View = transform;
-		object.Projection = glm::perspective(glm::radians(light.data.y), 1024.0f / 1024.0f, 0.001f, light.data.z);
+		object.View = glm::identity<glm::mat4>();
+		object.Projection = m_FrameData.LightSpaceTransforms[lightIndex];
 		object.ObjectID = objectToRender.m_ObjectID;
 		object.SceneID = objectToRender.m_SceneID;
 		pMaterial->SetProperties(m_pEngine);

@@ -57,7 +57,7 @@ namespace Glory
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) override;
 		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) override;
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) override;
-		virtual void OnDoCompositing(CameraRef camera, const FrameData<LightData>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
+		virtual void OnDoCompositing(CameraRef camera, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
 		virtual void OnDisplayCopy(RenderTexture* pRenderTexture, uint32_t width, uint32_t height) override;
 		virtual void OnRenderSkybox(CameraRef camera, CubemapData* pCubemap) override;
 
@@ -97,6 +97,7 @@ namespace Glory
 		// Data for clustering
 		Buffer* m_pScreenToViewSSBO = nullptr;
 		Buffer* m_pLightsSSBO = nullptr;
+		Buffer* m_pLightSpaceTransformsSSBO = nullptr;
 		Buffer* m_pSamplePointsDomeSSBO = nullptr;
 		Buffer* m_pSSAOSettingsSSBO = nullptr;
 		Texture* m_pSampleNoiseTexture = nullptr;

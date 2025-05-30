@@ -39,6 +39,12 @@ REFLECTABLE_ENUM_NS(Glory, Func,
     OP_DecrementWrap,
     OP_Invert);
 
+REFLECTABLE_ENUM_NS(Glory, CullFace,
+    None,
+    Front,
+    Back,
+    FrontAndBack);
+
 namespace Glory
 {
     constexpr size_t AspectRatioCount = 5;

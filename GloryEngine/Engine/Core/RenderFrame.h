@@ -51,6 +51,11 @@ namespace Glory
 			return m_ActiveObjects.data();
 		}
 
+		void reset()
+		{
+			m_Counter = 0;
+		}
+
 	private:
 		std::vector<T> m_ActiveObjects;
 		size_t m_Counter;
@@ -59,8 +64,10 @@ namespace Glory
 	struct RenderFrame
 	{
 	public:
-		RenderFrame();
+		RenderFrame(size_t maxLigts);
 		~RenderFrame();
+
+		void Reset();
 
 	public:
 		std::vector<RenderData> ObjectsToRender;
@@ -68,8 +75,8 @@ namespace Glory
 		std::vector<RenderData> ObjectsToRenderLate;
 		std::vector<CameraRef> ActiveCameras;
 		std::vector<std::pair<glm::ivec2, UUID>> Picking;
-		std::vector<glm::mat4> LightTransforms;
 		FrameData<LightData> ActiveLights;
+		FrameData<glm::mat4> LightSpaceTransforms;
 	};
 
 	enum RenderPassType : size_t

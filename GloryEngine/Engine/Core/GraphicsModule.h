@@ -38,6 +38,7 @@ namespace Glory
             Filter filter = Filter::F_Nearest) = 0;
         virtual void Blit(RenderTexture* pSource, RenderTexture* pDest, glm::uvec4 src = glm::uvec4(), glm::uvec4 dst = glm::uvec4(),
             Filter filter = Filter::F_Nearest) = 0;
+        virtual void SetCullFace(CullFace cullFace) = 0;
 
     public: // Getters
         GPUResourceManager* GetResourceManager();
