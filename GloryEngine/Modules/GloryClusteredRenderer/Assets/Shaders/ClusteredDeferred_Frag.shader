@@ -272,7 +272,7 @@ void main()
 
 	vec3 color = texture(Color, Coord).xyz;
 	vec4 metallicRoughnessAO = texture(Data, Coord);
-	float ssao = AOEnabled == 1 ? Magnitude*pow(texture(AO, Coord).x, Contrast) : 1.0;
+	float ssao = AOEnabled == 1.0 ? Magnitude*pow(texture(AO, Coord).x, Contrast) : 1.0;
 	ssao = min(ssao, 1.0);
 	float ao = metallicRoughnessAO.r;
 	float roughness = metallicRoughnessAO.g;
@@ -303,7 +303,13 @@ void main()
 	{
 		uint indexListIndex = offset + i;
 		uint lightIndex = GlobalLightIndexList[indexListIndex];
-		Lo += CalculateLighting(Lights[lightIndex], normal, color, worldPosition, CameraPos, V, roughness, metallic);
+
+		// calculate shadow
+		vec4 fragPosLightSpace = LightSpaceTransforms[lightIndex]*vec4(worldPosition, 1.0);
+		vec3 lightDir = normalize(Lights[lightIndex].Position - worldPosition);
+		float shadow = Lights[lightIndex].ShadowsEnabled == 1 ? 1.0 - ShadowCalculation(fragPosLightSpace, Lights[lightIndex].ShadowBias, normal, lightDir) : 1.0;
+
+		Lo += CalculateLighting(Lights[lightIndex], normal, color, worldPosition, CameraPos, V, roughness, metallic)*shadow;
 	}
 
 	/* Ambient lighting */
