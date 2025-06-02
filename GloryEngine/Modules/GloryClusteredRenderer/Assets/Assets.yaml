@@ -76,3 +76,11 @@
   ID: 34
 - Path: "Pipelines\\Irradiance.gpln"
   ID: 35
+- Path: "Shaders\\Shadows_frag.shader"
+  ID: 36
+- Path: "Shaders\\Shadows_vert.shader"
+  ID: 37
+- Path: "Pipelines\\Shadows.gpln"
+  ID: 38
+- Path: "Pipelines\\ShadowsTransparentTextured.gpln"
+  ID: 39

@@ -26,7 +26,7 @@ namespace Glory
 
 	GLORY_MODULE_VERSION_CPP(ClusteredRendererModule);
 
-	ClusteredRendererModule::ClusteredRendererModule()
+	ClusteredRendererModule::ClusteredRendererModule(): m_pTemporaryShadowMap(nullptr)
 	{
 	}
 
@@ -91,6 +91,8 @@ namespace Glory
 		newReferences.push_back(settings.Value<uint64_t>("Text Pipeline"));
 		newReferences.push_back(settings.Value<uint64_t>("Display Copy Pipeline"));
 		newReferences.push_back(settings.Value<uint64_t>("Skybox Pipeline"));
+		newReferences.push_back(settings.Value<uint64_t>("Shadows Pipeline"));
+		newReferences.push_back(settings.Value<uint64_t>("Shadows Transparent Textured Pipeline"));
 
 		for (size_t i = 0; i < newReferences.size(); ++i)
 		{
@@ -117,6 +119,10 @@ namespace Glory
 			m_GlobalSSAOSetting.m_Enabled = cvar->m_Value == 1.0f;
 			m_GlobalSSAOSetting.m_Dirty = true;
 		});
+
+		AddRenderPass(RP_Prepass, RenderPass{ "Skybox Pass", [this](CameraRef camera, const RenderFrame& frame) {
+			ShadowMapsPass(camera, frame);
+		} });
 	}
 
 	void ClusteredRendererModule::OnPostInitialize()
@@ -158,6 +164,8 @@ namespace Glory
 		const UUID displayPipeline = settings.Value<uint64_t>("Display Copy Pipeline");
 		const UUID skyboxPipeline = settings.Value<uint64_t>("Skybox Pipeline");
 		const UUID irradiancePipeline = settings.Value<uint64_t>("Irradiance Pipeline");
+		const UUID shadowsPipeline = settings.Value<uint64_t>("Shadows Pipeline");
+		const UUID shadowsTransparentPipeline = settings.Value<uint64_t>("Shadows Transparent Textured Pipeline");
 
 		m_pDeferredCompositeMaterial = new MaterialData();
 		m_pDeferredCompositeMaterial->SetPipeline(screenPipeline);
@@ -174,6 +182,10 @@ namespace Glory
 		m_pSkyboxMaterialData->SetPipeline(skyboxPipeline);
 		m_pIrradianceMaterialData = new MaterialData();
 		m_pIrradianceMaterialData->SetPipeline(irradiancePipeline);
+		m_pShadowsMaterialData = new MaterialData();
+		m_pShadowsMaterialData->SetPipeline(shadowsPipeline);
+		m_pShadowsTransparentMaterialData = new MaterialData();
+		m_pShadowsTransparentMaterialData->SetPipeline(shadowsTransparentPipeline);
 
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -230,6 +242,8 @@ namespace Glory
 		const UUID displayPipeline = settings.Value<uint64_t>("Display Copy Pipeline");
 		const UUID skyboxPipeline = settings.Value<uint64_t>("Skybox Pipeline");
 		const UUID irradiancePipeline = settings.Value<uint64_t>("Irradiance Pipeline");
+		const UUID shadowsPipeline = settings.Value<uint64_t>("Shadows Pipeline");
+		const UUID shadowsTransparentPipeline = settings.Value<uint64_t>("Shadows Transparent Textured Pipeline");
 
 		m_pDeferredCompositeMaterial->SetPipeline(screenPipeline);
 		m_pDisplayCopyMaterial->SetPipeline(displayPipeline);
@@ -238,6 +252,8 @@ namespace Glory
 		m_pTextMaterialData->SetPipeline(textPipeline);
 		m_pSkyboxMaterialData->SetPipeline(skyboxPipeline);
 		m_pIrradianceMaterialData->SetPipeline(irradiancePipeline);
+		m_pShadowsMaterialData->SetPipeline(shadowsPipeline);
+		m_pShadowsTransparentMaterialData->SetPipeline(shadowsTransparentPipeline);
 
 		settings.SetDirty(false);
 	}
@@ -291,6 +307,9 @@ namespace Glory
 		
 		delete m_pIrradianceMaterialData;
 		m_pIrradianceMaterialData = nullptr;
+		
+		delete m_pShadowsMaterialData;
+		m_pShadowsMaterialData = nullptr;
 	}
 
 	void ClusteredRendererModule::OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>&)
@@ -484,7 +503,7 @@ namespace Glory
 
 		pRenderTexture->BindAll(pMaterial);
 		pMaterial->SetCubemapTexture("IrradianceMap", pIrradianceTexture ? pIrradianceTexture : nullptr);
-		pMaterial->SetTexture("ShadowMap", m_pShadowMap->GetTextureAttachment("Depth"));
+		pMaterial->SetTexture("ShadowMap", m_pTemporaryShadowMap->GetTextureAttachment("Depth"));
 		pMaterial->SetPropertiesBuffer(m_pEngine, 7);
 
 		pClusterSSBO->BindForDraw();
@@ -675,6 +694,8 @@ namespace Glory
 		settings.RegisterAssetReference<PipelineData>("Display Copy Pipeline", 30);
 		settings.RegisterAssetReference<PipelineData>("Skybox Pipeline", 33);
 		settings.RegisterAssetReference<PipelineData>("Irradiance Pipeline", 35);
+		settings.RegisterAssetReference<PipelineData>("Shadows Pipeline", 38);
+		settings.RegisterAssetReference<PipelineData>("Shadows Transparent Textured Pipeline", 39);
 	}
 
 	size_t ClusteredRendererModule::GetGCD(size_t a, size_t b)
@@ -771,5 +792,65 @@ namespace Glory
 		textureInfo.m_ImageType = ImageType::IT_2D;
 		textureInfo.m_Type = DataType::DT_Float;
 		m_pSampleNoiseTexture = m_pEngine->GetMainModule<GraphicsModule>()->GetResourceManager()->CreateTexture(std::move(textureInfo), static_cast<const void*>(ssaoNoise.data()));
+	}
+
+	void ClusteredRendererModule::ShadowMapsPass(CameraRef camera, const RenderFrame& frameData)
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+
+		if (!m_pTemporaryShadowMap)
+		{
+			RenderTextureCreateInfo renderTextureInfo;
+			renderTextureInfo.HasDepth = true;
+			renderTextureInfo.HasStencil = false;
+			renderTextureInfo.Width = 1024;
+			renderTextureInfo.Height = 1024;
+			m_pTemporaryShadowMap = pGraphics->GetResourceManager()->CreateRenderTexture(renderTextureInfo);
+		}
+
+		for (size_t i = 0; i < m_FrameData.ActiveLights.count(); ++i)
+		{
+			const auto& lightData = m_FrameData.ActiveLights[i];
+			const auto& lightTransform = m_FrameData.LightSpaceTransforms[i];
+
+			pGraphics->SetCullFace(CullFace::Front);
+			pGraphics->SetColorMask(false, false, false, false);
+			m_pTemporaryShadowMap->BindForDraw();
+			pGraphics->Clear();
+			for (size_t j = 0; j < m_FrameData.ObjectsToRender.size(); ++j)
+			{
+				const auto& objectToRender = m_FrameData.ObjectsToRender[j];
+				RenderShadow(i, m_FrameData, objectToRender);
+			}
+			m_pTemporaryShadowMap->UnBindForDraw();
+			pGraphics->SetColorMask(true, true, true, true);
+			pGraphics->SetCullFace(CullFace::None);
+		}
+	}
+
+	void ClusteredRendererModule::RenderShadow(size_t lightIndex, const RenderFrame& frameData, const RenderData& objectToRender)
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+
+		Resource* pMeshResource = m_pEngine->GetAssetManager().FindResource(objectToRender.m_MeshID);
+		if (!pMeshResource) return;
+		MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+		MaterialData* pMaterialData = m_pEngine->GetMaterialManager().GetMaterial(objectToRender.m_MaterialID);
+		if (!pMaterialData) return;
+		/* @todo Check if attached pipeline has the TRANSPARENT feature enabled */
+		Material* pMaterial = pGraphics->UseMaterial(m_pShadowsMaterialData);
+		if (!pMaterial) return;
+
+		ObjectData object;
+		object.Model = objectToRender.m_World;
+		object.View = frameData.LightSpaceTransforms[lightIndex];
+		object.Projection = glm::identity<glm::mat4>();
+		object.ObjectID = objectToRender.m_ObjectID;
+		object.SceneID = objectToRender.m_SceneID;
+		pMaterial->SetProperties(m_pEngine);
+		pMaterial->SetObjectData(object);
+		pGraphics->EnableDepthWrite(true);
+		pGraphics->EnableDepthTest(true);
+		pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
 	}
 }

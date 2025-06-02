@@ -72,6 +72,9 @@ namespace Glory
 		void GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera);
 		void GenerateDomeSamplePointsSSBO(GPUResourceManager* pResourceManager, uint32_t size);
 
+		void ShadowMapsPass(CameraRef camera, const RenderFrame& frameData);
+		void RenderShadow(size_t lightIndex, const RenderFrame& frameData, const RenderData& objectToRender);
+
 	private:
 		// Compute shaders
 		FileData* m_pClusterShaderData = nullptr;
@@ -127,9 +130,13 @@ namespace Glory
 
 		MaterialData* m_pSkyboxMaterialData = nullptr;
 		MaterialData* m_pIrradianceMaterialData = nullptr;
+		MaterialData* m_pShadowsMaterialData = nullptr;
+		MaterialData* m_pShadowsTransparentMaterialData = nullptr;
 
 		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
 
 		SSAOSettings m_GlobalSSAOSetting;
+
+		RenderTexture* m_pTemporaryShadowMap;
 	};
 }

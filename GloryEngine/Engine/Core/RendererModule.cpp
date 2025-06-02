@@ -27,8 +27,8 @@ namespace Glory
 	RendererModule::RendererModule()
 		: m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0), m_LineVertexCount(0),
 		m_pLineBuffer(nullptr), m_pLineMesh(nullptr), m_pLinesMaterialData(nullptr),
-		m_pLineVertex(nullptr), m_pLineVertices(nullptr), m_DisplaysDirty(false), m_RenderPasses(RP_Count),
-		m_pShadowMap(nullptr), m_FrameData(size_t(MAX_LIGHTS))
+		m_pLineVertex(nullptr), m_pLineVertices(nullptr), m_DisplaysDirty(false),
+		m_RenderPasses(RP_Count), m_FrameData(size_t(MAX_LIGHTS))
 	{
 	}
 
@@ -375,35 +375,6 @@ namespace Glory
 			pass.m_Callback(nullptr, m_FrameData);
 		}
 
-		if (!m_pShadowMap)
-		{
-			RenderTextureCreateInfo renderTextureInfo;
-			renderTextureInfo.HasDepth = true;
-			renderTextureInfo.HasStencil = false;
-			renderTextureInfo.Width = 4096;
-			renderTextureInfo.Height = 4096;
-			m_pShadowMap = pGraphics->GetResourceManager()->CreateRenderTexture(renderTextureInfo);
-		}
-
-		for (size_t i = 0; i < m_FrameData.ActiveLights.count(); ++i)
-		{
-			const auto& lightData = m_FrameData.ActiveLights[i];
-			const auto& lightTransform = m_FrameData.LightSpaceTransforms[i];
-
-			pGraphics->SetCullFace(CullFace::Front);
-			pGraphics->SetColorMask(false, false, false, false);
-			m_pShadowMap->BindForDraw();
-			pGraphics->Clear();
-			for (size_t j = 0; j < m_FrameData.ObjectsToRender.size(); ++j)
-			{
-				const auto& objectToRender = m_FrameData.ObjectsToRender[j];
-				RenderShadow(i, objectToRender);
-			}
-			m_pShadowMap->UnBindForDraw();
-			pGraphics->SetColorMask(true, true, true, true);
-			pGraphics->SetCullFace(CullFace::None);
-		}
-
 		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
 		{
 			CameraRef camera = m_FrameData.ActiveCameras[i];
@@ -649,31 +620,6 @@ namespace Glory
 		OnDoCompositing(camera, width, height, pRenderTexture);
 		pOutputTexture->UnBindForDraw();
 		m_pEngine->Profiler().EndSample();
-	}
-
-	void RendererModule::RenderShadow(size_t lightIndex, const RenderData& objectToRender)
-	{
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-
-		Resource* pMeshResource = m_pEngine->GetAssetManager().FindResource(objectToRender.m_MeshID);
-		if (!pMeshResource) return;
-		MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
-		MaterialData* pMaterialData = m_pEngine->GetMaterialManager().GetMaterial(objectToRender.m_MaterialID);
-		if (!pMaterialData) return;
-		Material* pMaterial = pGraphics->UseMaterial(pMaterialData);
-		if (!pMaterial) return;
-
-		ObjectData object;
-		object.Model = objectToRender.m_World;
-		object.View = glm::identity<glm::mat4>();
-		object.Projection = m_FrameData.LightSpaceTransforms[lightIndex];
-		object.ObjectID = objectToRender.m_ObjectID;
-		object.SceneID = objectToRender.m_SceneID;
-		pMaterial->SetProperties(m_pEngine);
-		pMaterial->SetObjectData(object);
-		pGraphics->EnableDepthWrite(true);
-		pGraphics->EnableDepthTest(true);
-		pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
 	}
 
 	void RendererModule::CreateCameraRenderTextures(uint32_t width, uint32_t height, std::vector<RenderTexture*>& renderTextures)

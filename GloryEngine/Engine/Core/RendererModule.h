@@ -125,7 +125,6 @@ namespace Glory
 		void MainTextPass(CameraRef camera, const RenderFrame& frame);
 		void MainLateObjectPass(CameraRef camera, const RenderFrame& frame);
 		void DeferredCompositePass(CameraRef camera, const RenderFrame& frame);
-		void RenderShadow(size_t lightIndex, const RenderData& objectToRender);
 
 	protected:
 		RenderFrame m_FrameData;
@@ -148,8 +147,5 @@ namespace Glory
 		std::atomic_bool m_DisplaysDirty;
 
 		std::vector<std::vector<RenderPass>> m_RenderPasses;
-
-	protected:
-		RenderTexture* m_pShadowMap;
 	};
 }
