@@ -15,4 +15,9 @@ namespace Glory
 	{
 		CopyFromBuffer(pBuffer, 0, 0, 0, m_TextureInfo.m_Width, m_TextureInfo.m_Height, 1);
 	}
+
+	const TextureCreateInfo& Texture::Info() const
+	{
+		return m_TextureInfo;
+	}
 }

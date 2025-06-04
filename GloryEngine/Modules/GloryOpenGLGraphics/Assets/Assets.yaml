@@ -1,0 +1,6 @@
+- Path: "Shaders\\Passthrough_Frag.shader"
+  ID: 800
+- Path: "Shaders\\Passthrough_Vert.shader"
+  ID: 801
+- Path: "Pipelines\\Passthrough.gpln"
+  ID: 802

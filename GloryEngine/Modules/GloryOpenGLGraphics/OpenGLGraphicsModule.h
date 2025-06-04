@@ -38,6 +38,8 @@ namespace Glory
 			Filter filter = Filter::F_Nearest) override;
 		virtual void SetCullFace(CullFace cullFace) override;
 
+		Material* UsePassthroughMaterial();
+
 	protected:
 		virtual void OnInitialize() override;
 		virtual void OnCleanup() override;
@@ -48,5 +50,7 @@ namespace Glory
 		GLuint m_ScreenQuadVertexbufferID;
 		GLuint m_UnitCubeVertexArrayID;
 		GLuint m_UnitCubeVertexbufferID;
+
+		MaterialData* m_pPassthroughMaterial = nullptr;
 	};
 }

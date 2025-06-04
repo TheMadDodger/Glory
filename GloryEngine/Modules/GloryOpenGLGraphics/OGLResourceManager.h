@@ -21,6 +21,7 @@ namespace Glory
         virtual Texture* CreateTexture_Internal(TextureData* pTextureData) override;
         virtual Texture* CreateTexture_Internal(CubemapData* pCubemapData) override;
         virtual Texture* CreateTexture_Internal(TextureCreateInfo&& textureInfo) override;
+        virtual TextureAtlas* CreateTextureAtlas_Internal(TextureCreateInfo&& textureInfo) override;
         virtual RenderTexture* CreateRenderTexture_Internal(const RenderTextureCreateInfo& createInfo) override;
     };
 }

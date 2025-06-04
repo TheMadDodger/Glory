@@ -189,6 +189,9 @@ namespace Glory
 
 		glBindVertexArray(NULL);
 		LogGLError(glGetError());
+
+		m_pPassthroughMaterial = new MaterialData();
+		m_pPassthroughMaterial->SetPipeline(802);
 	}
 
 	void OpenGLGraphicsModule::OnCleanup()
@@ -406,5 +409,10 @@ namespace Glory
 			glCullFace(GL_FRONT_AND_BACK);
 			return;
 		}
+	}
+
+	Material* OpenGLGraphicsModule::UsePassthroughMaterial()
+	{
+		return UseMaterial(m_pPassthroughMaterial);
 	}
 }

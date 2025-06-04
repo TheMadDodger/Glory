@@ -8,6 +8,7 @@
 namespace Glory
 {
 	class PipelineData;
+	class TextureAtlas;
 
 	struct VolumeTileAABB
 	{
@@ -138,5 +139,7 @@ namespace Glory
 		SSAOSettings m_GlobalSSAOSetting;
 
 		RenderTexture* m_pTemporaryShadowMap;
+
+		TextureAtlas* m_pShadowAtlas;
 	};
 }

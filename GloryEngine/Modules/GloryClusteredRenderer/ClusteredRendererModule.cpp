@@ -15,6 +15,7 @@
 #include <CubemapData.h>
 #include <FontDataStructs.h>
 #include <Console.h>
+#include <TextureAtlas.h>
 
 #include <DistributedRandom.h>
 
@@ -26,7 +27,7 @@ namespace Glory
 
 	GLORY_MODULE_VERSION_CPP(ClusteredRendererModule);
 
-	ClusteredRendererModule::ClusteredRendererModule(): m_pTemporaryShadowMap(nullptr)
+	ClusteredRendererModule::ClusteredRendererModule(): m_pTemporaryShadowMap(nullptr), m_pShadowAtlas(nullptr)
 	{
 	}
 
@@ -228,6 +229,17 @@ namespace Glory
 		m_pQuadMeshVertexBuffer->Assign(defaultVertices, 4 * sizeof(VertexPosColorTex));
 		m_pQuadMesh = pResourceManager->CreateMesh(4, 6, InputRate::Vertex, 0, sizeof(VertexPosColorTex),
 			PrimitiveType::PT_Triangles, { AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }, m_pQuadMeshVertexBuffer, m_pQuadMeshIndexBuffer);
+
+		SamplerSettings sampler;
+		sampler.MipmapMode = Filter::F_None;
+		sampler.MinFilter = Filter::F_Nearest;
+		sampler.MagFilter = Filter::F_Nearest;
+		sampler.AddressModeU = SamplerAddressMode::SAM_ClampToBorder;
+		sampler.AddressModeV = SamplerAddressMode::SAM_ClampToBorder;
+		sampler.AddressModeW = SamplerAddressMode::SAM_ClampToBorder;
+		m_pShadowAtlas = pResourceManager->CreateTextureAtlas({ 8192, 8192, PixelFormat::PF_R, PixelFormat::PF_R32Sfloat,
+			ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Color, sampler }
+		);
 	}
 
 	void ClusteredRendererModule::Update()
@@ -310,6 +322,9 @@ namespace Glory
 		
 		delete m_pShadowsMaterialData;
 		m_pShadowsMaterialData = nullptr;
+
+		delete m_pShadowAtlas;
+		m_pShadowAtlas = nullptr;
 	}
 
 	void ClusteredRendererModule::OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>&)
@@ -813,6 +828,9 @@ namespace Glory
 			const auto& lightData = m_FrameData.ActiveLights[i];
 			const auto& lightTransform = m_FrameData.LightSpaceTransforms[i];
 
+			if (!m_pShadowAtlas->HasReservedChunk(lightData.objectID) &&
+				!m_pShadowAtlas->ReserveChunk(1024, 1024, lightData.objectID)) continue;
+
 			pGraphics->SetCullFace(CullFace::Front);
 			pGraphics->SetColorMask(false, false, false, false);
 			m_pTemporaryShadowMap->BindForDraw();
@@ -825,6 +843,8 @@ namespace Glory
 			m_pTemporaryShadowMap->UnBindForDraw();
 			pGraphics->SetColorMask(true, true, true, true);
 			pGraphics->SetCullFace(CullFace::None);
+
+			m_pShadowAtlas->AsignChunk(lightData.objectID, m_pTemporaryShadowMap->GetTextureAttachment(0));
 		}
 	}
 
@@ -852,5 +872,7 @@ namespace Glory
 		pGraphics->EnableDepthWrite(true);
 		pGraphics->EnableDepthTest(true);
 		pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
+
+		pGraphics->UseMaterial(nullptr);
 	}
 }

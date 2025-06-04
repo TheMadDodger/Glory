@@ -28,6 +28,9 @@ layout(location = 5) out vec4 outData;
 void main()
 {
 	vec4 baseColor = TextureEnabled(0) ? texture(texSampler, fragTexCoord) : Properties.Color;
+	if (baseColor.a == 0.0) discard;
+	baseColor.a = 1.0;
+
 	vec3 normal = TextureEnabled(1) ? (texture(normalSampler, fragTexCoord).xyz * 2.0 - 1.0) : TBN[2];
 	float shininess = TextureEnabled(2) ? texture(shininessSampler, fragTexCoord).r : Properties.Shininess;
 	normal = TextureEnabled(1) ? normalize(TBN * normal) : normal;

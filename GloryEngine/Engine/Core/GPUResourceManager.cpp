@@ -6,6 +6,7 @@
 #include "Pipeline.h"
 #include "PipelineData.h"
 #include "CubemapData.h"
+#include "TextureAtlas.h"
 
 #include <algorithm>
 
@@ -261,6 +262,13 @@ namespace Glory
 		pTexture->Create(pCubemap);
 		m_IDResources[pCubemap->GetGPUUUID()] = pTexture;
 		m_pEngine->Profiler().EndSample();
+		return pTexture;
+	}
+
+	TextureAtlas* GPUResourceManager::CreateTextureAtlas(TextureCreateInfo&& textureInfo)
+	{
+		TextureAtlas* pTexture = CreateTextureAtlas_Internal(std::move(textureInfo));
+		pTexture->Initialize();
 		return pTexture;
 	}
 
