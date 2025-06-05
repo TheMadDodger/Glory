@@ -27,5 +27,6 @@ namespace Glory
         Picking.clear();
         ActiveLights.reset();
         LightSpaceTransforms.reset();
+        ActiveLightIDs.clear();
     }
 }

@@ -46,6 +46,11 @@ namespace Glory
 			return m_ActiveObjects[index];
 		}
 
+		T& operator[](size_t index)
+		{
+			return m_ActiveObjects[index];
+		}
+
 		const void* data() const
 		{
 			return m_ActiveObjects.data();
@@ -77,6 +82,7 @@ namespace Glory
 		std::vector<std::pair<glm::ivec2, UUID>> Picking;
 		FrameData<LightData> ActiveLights;
 		FrameData<glm::mat4> LightSpaceTransforms;
+		std::vector<UUID> ActiveLightIDs;
 	};
 
 	enum RenderPassType : size_t

@@ -105,12 +105,13 @@ namespace Glory
 	{
 	}
 
-	void RendererModule::Submit(LightData&& light, glm::mat4&& lightSpace)
+	void RendererModule::Submit(LightData&& light, glm::mat4&& lightSpace, UUID id)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(light)" };
 		const size_t index = m_FrameData.ActiveLights.count();
 		m_FrameData.ActiveLights.push_back(std::move(light));
 		m_FrameData.LightSpaceTransforms.push_back(std::move(lightSpace));
+		m_FrameData.ActiveLightIDs.push_back(id);
 		OnSubmit(m_FrameData.ActiveLights[index]);
 	}
 

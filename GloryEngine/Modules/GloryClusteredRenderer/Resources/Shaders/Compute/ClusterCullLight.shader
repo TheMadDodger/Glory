@@ -8,11 +8,11 @@ struct LightData
 	vec4 Direction;
 	vec4 Color;
 	vec4 Data;
-    uint shadowsEnabled;
-	float shadowBias;
-	float padding1;
-	float padding2;
-    vec4 IDs;
+	uint ShadowsEnabled;
+	float ShadowBias;
+	float Padding1;
+	float Padding2;
+	vec4 ShadowCoords;
 };
 
 struct LightGridElement

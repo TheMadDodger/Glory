@@ -518,7 +518,7 @@ namespace Glory
 
 		pRenderTexture->BindAll(pMaterial);
 		pMaterial->SetCubemapTexture("IrradianceMap", pIrradianceTexture ? pIrradianceTexture : nullptr);
-		pMaterial->SetTexture("ShadowMap", m_pTemporaryShadowMap->GetTextureAttachment("Depth"));
+		pMaterial->SetTexture("ShadowAtlas", m_pShadowAtlas->GetTexture());
 		pMaterial->SetPropertiesBuffer(m_pEngine, 7);
 
 		pClusterSSBO->BindForDraw();
@@ -825,11 +825,16 @@ namespace Glory
 
 		for (size_t i = 0; i < m_FrameData.ActiveLights.count(); ++i)
 		{
-			const auto& lightData = m_FrameData.ActiveLights[i];
+			auto& lightData = m_FrameData.ActiveLights[i];
 			const auto& lightTransform = m_FrameData.LightSpaceTransforms[i];
+			const auto& lightID = m_FrameData.ActiveLightIDs[i];
 
-			if (!m_pShadowAtlas->HasReservedChunk(lightData.objectID) &&
-				!m_pShadowAtlas->ReserveChunk(1024, 1024, lightData.objectID)) continue;
+			if (!m_pShadowAtlas->HasReservedChunk(lightID) &&
+				!m_pShadowAtlas->ReserveChunk(1024, 1024, lightID))
+			{
+				lightData.shadowsEnabled = 0;
+				continue;
+			}
 
 			pGraphics->SetCullFace(CullFace::Front);
 			pGraphics->SetColorMask(false, false, false, false);
@@ -844,7 +849,12 @@ namespace Glory
 			pGraphics->SetColorMask(true, true, true, true);
 			pGraphics->SetCullFace(CullFace::None);
 
-			m_pShadowAtlas->AsignChunk(lightData.objectID, m_pTemporaryShadowMap->GetTextureAttachment(0));
+			if (!m_pShadowAtlas->AsignChunk(lightID, m_pTemporaryShadowMap->GetTextureAttachment(0)))
+			{
+				lightData.shadowsEnabled = 0;
+				continue;
+			}
+			lightData.shadowCoords = m_pShadowAtlas->GetChunkCoords(lightID);
 		}
 	}
 

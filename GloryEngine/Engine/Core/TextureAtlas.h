@@ -16,8 +16,9 @@ namespace Glory
 		virtual Texture* GetTexture() = 0;
 
 		UUID ReserveChunk(uint32_t width, uint32_t height, UUID id=UUID());
-		bool HasReservedChunk(UUID id);
+		bool HasReservedChunk(UUID id) const;
 		bool AsignChunk(UUID id, Texture* pTexture);
+		glm::vec4 GetChunkCoords(UUID id) const;
 
 	protected:
 		struct ReservedChunk

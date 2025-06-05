@@ -45,7 +45,7 @@ namespace Glory
 		return id;
 	}
 
-	bool TextureAtlas::HasReservedChunk(UUID id)
+	bool TextureAtlas::HasReservedChunk(UUID id) const
 	{
 		return std::find_if(m_ReservedChunks.begin(), m_ReservedChunks.end(),
 				[id](const ReservedChunk& chunk) { return chunk.ID == id; })
@@ -73,5 +73,26 @@ namespace Glory
 		}
 
 		return AssignChunk(pTexture, chunk);
+	}
+
+	glm::vec4 TextureAtlas::GetChunkCoords(UUID id) const
+	{
+		auto& iter = std::find_if(m_ReservedChunks.begin(), m_ReservedChunks.end(), [id](const ReservedChunk& chunk) {
+			return chunk.ID == id;
+		});
+
+		if (iter == m_ReservedChunks.end())
+		{
+			m_pEngine->GetDebug().LogError("TextureAtlas::GetChunkCoords() > Chunk not found!");
+			return {};
+		}
+
+		const ReservedChunk& chunk = *iter;
+		glm::vec4 coords;
+		coords.x = float(chunk.XOffset)/m_Width;
+		coords.y = float(chunk.YOffset)/m_Height;
+		coords.z = float(chunk.XOffset + chunk.Width)/m_Width;
+		coords.w = float(chunk.YOffset + chunk.Height)/m_Height;
+		return coords;
 	}
 }

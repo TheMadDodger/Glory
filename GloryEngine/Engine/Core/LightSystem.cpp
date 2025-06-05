@@ -26,8 +26,6 @@ namespace Glory
 		light.data.y = pComponent.m_Outer;
 		light.data.z = pComponent.m_Range;
 		light.data.w = pComponent.m_Intensity;
-		light.sceneID = pScene->GetUUID();
-		light.objectID = pScene->GetEntityUUID(entity);
 		light.shadowsEnabled = pComponent.m_Shadows.m_Enable ? 1 : 0;
 		light.shadowBias = pComponent.m_Shadows.m_Bias;
 
@@ -53,7 +51,7 @@ namespace Glory
 		}
 
 		glm::mat4 lightSpace = lightProjection*lightView;
-		pEngine->GetMainModule<RendererModule>()->Submit(std::move(light), std::move(lightSpace));
+		pEngine->GetMainModule<RendererModule>()->Submit(std::move(light), std::move(lightSpace), pScene->GetEntityUUID(entity));
 	}
 
 	LightSystem::LightSystem()

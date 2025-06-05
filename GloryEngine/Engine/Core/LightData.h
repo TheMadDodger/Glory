@@ -17,7 +17,6 @@ namespace Glory
 		float shadowBias;
 		float padding1;
 		float padding2;
-		uint64_t sceneID;
-		uint64_t objectID;
+		glm::vec4 shadowCoords;
 	};
 }

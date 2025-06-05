@@ -15,7 +15,7 @@ layout (binding = 4) uniform sampler2D Data;
 layout (binding = 5) uniform sampler2D Depth;
 
 layout (binding = 6) uniform samplerCube IrradianceMap;
-layout (binding = 7) uniform sampler2D ShadowMap;
+layout (binding = 7) uniform sampler2D ShadowAtlas;
 
 #include "Internal/DepthHelpers.glsl"
 
@@ -41,9 +41,9 @@ struct LightData
 	vec4 Data;
 	uint ShadowsEnabled;
 	float ShadowBias;
-	float padding1;
-	float padding2;
-    vec4 IDs;
+	float Padding1;
+	float Padding2;
+	vec4 ShadowCoords;
 };
 
 struct LightGridElement
@@ -117,7 +117,7 @@ const uint Sun = 1;
 const uint Point = 2;
 const uint Spot = 3;
 
-float ShadowCalculation(vec4 fragPosLightSpace, float bias, vec3 normal, vec3 lightDir)
+float ShadowCalculation(vec4 fragPosLightSpace, LightData lightData, vec3 normal, vec3 lightDir)
 {
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -126,19 +126,25 @@ float ShadowCalculation(vec4 fragPosLightSpace, float bias, vec3 normal, vec3 li
     // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
 
+	// calculate texture coords
+	vec4 shadowCoords = lightData.ShadowCoords;
+	vec2 coordRanges = vec2(shadowCoords.z - shadowCoords.x, shadowCoords.w - shadowCoords.y);
+	vec2 actualCoords = vec2(shadowCoords.x + coordRanges.x*projCoords.x, shadowCoords.y + coordRanges.y*projCoords.y);
+
 	// Calculate bias based on surface normal
+	float bias = lightData.ShadowBias;
 	float surfaceBias = max(bias * (1.0 - dot(normal, lightDir)), bias*0.01);
 
 	// PCF samples
 	float shadow = 0.0;
-	vec2 texelSize = 1.0 / textureSize(ShadowMap, 0);
+	vec2 texelSize = 1.0 / textureSize(ShadowAtlas, 0);
 	int sampleCounts = 1;
 	float totalSamples = pow((float(sampleCounts)*2.0 + 1.0), 2.0);
 	for(int x = -sampleCounts; x <= sampleCounts; ++x)
 	{
 		for(int y = -sampleCounts; y <= sampleCounts; ++y)
 		{
-			float pcfDepth = texture(ShadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+			float pcfDepth = texture(ShadowAtlas, actualCoords + vec2(x, y) * texelSize).r; 
 			shadow += currentDepth - surfaceBias > pcfDepth ? 1.0 : 0.0;        
 		}    
 	}
@@ -307,7 +313,7 @@ void main()
 		// calculate shadow
 		vec4 fragPosLightSpace = LightSpaceTransforms[lightIndex]*vec4(worldPosition, 1.0);
 		vec3 lightDir = normalize(Lights[lightIndex].Position - worldPosition);
-		float shadow = Lights[lightIndex].ShadowsEnabled == 1 ? 1.0 - ShadowCalculation(fragPosLightSpace, Lights[lightIndex].ShadowBias, normal, lightDir) : 1.0;
+		float shadow = Lights[lightIndex].ShadowsEnabled == 1 ? 1.0 - ShadowCalculation(fragPosLightSpace, Lights[lightIndex], normal, lightDir) : 1.0;
 
 		Lo += CalculateLighting(Lights[lightIndex], normal, color, worldPosition, CameraPos, V, roughness, metallic)*shadow;
 	}
@@ -444,7 +450,7 @@ void main()
 		// calculate shadow
 		vec4 fragPosLightSpace = LightSpaceTransforms[lightIndex]*vec4(worldPosition, 1.0);
 		vec3 lightDir = normalize(Lights[lightIndex].Position - worldPosition);
-		float shadow = Lights[lightIndex].ShadowsEnabled == 1 ? 1.0 - ShadowCalculation(fragPosLightSpace, Lights[lightIndex].ShadowBias, normal, lightDir) : 1.0;
+		float shadow = Lights[lightIndex].ShadowsEnabled == 1 ? 1.0 - ShadowCalculation(fragPosLightSpace, Lights[lightIndex], normal, lightDir) : 1.0;
 
 		diffuseColor += shadow == 0.0 ? vec3(0.0) :
 			shadow*CalculateLighting(Lights[lightIndex], normal, color, worldPosition, viewDir, specularIntensity);

@@ -42,7 +42,7 @@ namespace Glory
 		void Submit(CameraRef camera);
 		size_t Submit(const glm::ivec2& pickPos, UUID cameraID);
 		void Submit(CameraRef camera, RenderTexture* pTexture);
-		void Submit(LightData&& light, glm::mat4&& lightSpace);
+		void Submit(LightData&& light, glm::mat4&& lightSpace, UUID id);
 
 		virtual void OnBeginFrame() override;
 
