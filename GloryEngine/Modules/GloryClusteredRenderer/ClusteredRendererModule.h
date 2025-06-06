@@ -8,6 +8,7 @@
 namespace Glory
 {
 	class PipelineData;
+	class TextureAtlas;
 
 	struct VolumeTileAABB
 	{
@@ -57,7 +58,7 @@ namespace Glory
 		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) override;
 		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) override;
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) override;
-		virtual void OnDoCompositing(CameraRef camera, const FrameData<LightData>& lights, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
+		virtual void OnDoCompositing(CameraRef camera, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
 		virtual void OnDisplayCopy(RenderTexture* pRenderTexture, uint32_t width, uint32_t height) override;
 		virtual void OnRenderSkybox(CameraRef camera, CubemapData* pCubemap) override;
 
@@ -71,6 +72,9 @@ namespace Glory
 
 		void GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera);
 		void GenerateDomeSamplePointsSSBO(GPUResourceManager* pResourceManager, uint32_t size);
+
+		void ShadowMapsPass(CameraRef camera, const RenderFrame& frameData);
+		void RenderShadow(size_t lightIndex, const RenderFrame& frameData, const RenderData& objectToRender);
 
 	private:
 		// Compute shaders
@@ -97,6 +101,7 @@ namespace Glory
 		// Data for clustering
 		Buffer* m_pScreenToViewSSBO = nullptr;
 		Buffer* m_pLightsSSBO = nullptr;
+		Buffer* m_pLightSpaceTransformsSSBO = nullptr;
 		Buffer* m_pSamplePointsDomeSSBO = nullptr;
 		Buffer* m_pSSAOSettingsSSBO = nullptr;
 		Texture* m_pSampleNoiseTexture = nullptr;
@@ -126,9 +131,15 @@ namespace Glory
 
 		MaterialData* m_pSkyboxMaterialData = nullptr;
 		MaterialData* m_pIrradianceMaterialData = nullptr;
+		MaterialData* m_pShadowsMaterialData = nullptr;
+		MaterialData* m_pShadowsTransparentMaterialData = nullptr;
 
 		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
 
 		SSAOSettings m_GlobalSSAOSetting;
+
+		RenderTexture* m_pTemporaryShadowMap;
+
+		TextureAtlas* m_pShadowAtlas;
 	};
 }

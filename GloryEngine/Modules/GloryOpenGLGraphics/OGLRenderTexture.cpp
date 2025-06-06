@@ -70,7 +70,7 @@ namespace Glory
 		CreateTextures();
 		
 		// Initialize the framebuffer
-		size_t attachmentCount = m_CreateInfo.Attachments.size();
+		const size_t attachmentCount = m_CreateInfo.Attachments.size();
 		std::vector<GLenum> drawBuffers = std::vector<GLenum>(attachmentCount);
 		for (uint32_t i = 0; i < attachmentCount; i++)
 		{
@@ -93,8 +93,11 @@ namespace Glory
 			OpenGLGraphicsModule::LogGLError(glGetError());
 		}
 
-		glDrawBuffers(attachmentCount, &drawBuffers[0]);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		if (attachmentCount > 0)
+		{
+			glDrawBuffers(attachmentCount, &drawBuffers[0]);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
 		
 		// Check if something went wrong
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)

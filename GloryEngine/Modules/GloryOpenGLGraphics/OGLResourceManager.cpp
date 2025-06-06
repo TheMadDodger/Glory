@@ -7,6 +7,7 @@
 #include "GLTexture.h"
 #include "OGLRenderTexture.h"
 #include "GloryOGL.h"
+#include "GLTextureAtlas.h"
 
 #include <Engine.h>
 #include <CubemapData.h>
@@ -88,6 +89,11 @@ namespace Glory
 	Texture* OGLResourceManager::CreateTexture_Internal(TextureCreateInfo&& textureInfo)
 	{
 		return new GLTexture(std::move(textureInfo));
+	}
+
+	TextureAtlas* OGLResourceManager::CreateTextureAtlas_Internal(TextureCreateInfo&& textureInfo)
+	{
+		return new GLTextureAtlas(std::move(textureInfo), m_pEngine);
 	}
 
 	RenderTexture* OGLResourceManager::CreateRenderTexture_Internal(const RenderTextureCreateInfo& createInfo)

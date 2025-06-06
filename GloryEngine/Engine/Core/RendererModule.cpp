@@ -14,11 +14,12 @@
 #include "GScene.h"
 #include "AssetManager.h"
 #include "CubemapData.h"
+#include "MaterialManager.h"
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/ext/scalar_constants.hpp>
-#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 
 namespace Glory
@@ -26,7 +27,8 @@ namespace Glory
 	RendererModule::RendererModule()
 		: m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0), m_LineVertexCount(0),
 		m_pLineBuffer(nullptr), m_pLineMesh(nullptr), m_pLinesMaterialData(nullptr),
-		m_pLineVertex(nullptr), m_pLineVertices(nullptr), m_DisplaysDirty(false), m_RenderPasses(RP_Count)
+		m_pLineVertex(nullptr), m_pLineVertices(nullptr), m_DisplaysDirty(false),
+		m_RenderPasses(RP_Count), m_FrameData(size_t(MAX_LIGHTS))
 	{
 	}
 
@@ -103,11 +105,13 @@ namespace Glory
 	{
 	}
 
-	void RendererModule::Submit(LightData&& light)
+	void RendererModule::Submit(LightData&& light, glm::mat4&& lightSpace, UUID id)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(light)" };
 		const size_t index = m_FrameData.ActiveLights.count();
 		m_FrameData.ActiveLights.push_back(std::move(light));
+		m_FrameData.LightSpaceTransforms.push_back(std::move(lightSpace));
+		m_FrameData.ActiveLightIDs.push_back(id);
 		OnSubmit(m_FrameData.ActiveLights[index]);
 	}
 
@@ -118,7 +122,7 @@ namespace Glory
 		REQUIRE_MODULE(m_pEngine, WindowModule, );
 
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::StartFrame" };
-		m_FrameData = RenderFrame{};
+		m_FrameData.Reset();
 	}
 
 	size_t RendererModule::LastSubmittedObjectCount()
@@ -297,7 +301,7 @@ namespace Glory
 
 		for (auto& pass : m_RenderPasses[RP_Postblit])
 		{
-			pass.m_Callback(nullptr, {});
+			pass.m_Callback(nullptr, {0});
 		}
 	}
 
@@ -614,7 +618,7 @@ namespace Glory
 
 		m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Output Rendering");
 		pOutputTexture->BindForDraw();
-		OnDoCompositing(camera, frame.ActiveLights, width, height, pRenderTexture);
+		OnDoCompositing(camera, width, height, pRenderTexture);
 		pOutputTexture->UnBindForDraw();
 		m_pEngine->Profiler().EndSample();
 	}

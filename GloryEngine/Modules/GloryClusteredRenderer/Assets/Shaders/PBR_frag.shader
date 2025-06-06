@@ -7,6 +7,7 @@
 #include "Internal/Textured.glsl"
 
 #define FEATURE_TEXTURED
+#define FEATURE_TRANSPARENT
 
 layout(std430, binding = 1) buffer PropertiesSSBO
 {
@@ -40,7 +41,11 @@ layout(location = 5) out vec4 outData;
 void main()
 {
 #ifdef WITH_TEXTURED
+
 	vec4 texColor = texture(texSampler, fragTexCoord);
+#ifdef WITH_TRANSPARENT
+	if (texColor.a < 1.0) discard;
+#endif
 	outColor = (TextureEnabled(0) ? vec4(pow(texColor.rgb, vec3(2.2)), texColor.a) : Properties.Color) * inColor;
 	vec3 normal = TextureEnabled(1) ? normalize(TBN * (texture(normalSampler, fragTexCoord).xyz * 2.0 - 1.0)) : TBN[2];
 	float ambient = TextureEnabled(2) ? texture(ambientSampler, fragTexCoord).r : Properties.AmbientOcclusion;

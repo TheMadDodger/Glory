@@ -1,0 +1,4 @@
+Type: "Shadow"
+Shaders: [36, 37]
+Features:
+  FEATURE_TRANSPARENT_TEXTURED: false

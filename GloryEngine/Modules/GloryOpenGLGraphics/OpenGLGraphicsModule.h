@@ -36,6 +36,9 @@ namespace Glory
 			Filter filter = Filter::F_Nearest) override;
 		virtual void Blit(RenderTexture* pSource, RenderTexture* pDest, glm::uvec4 src = glm::uvec4(), glm::uvec4 dst = glm::uvec4(),
 			Filter filter = Filter::F_Nearest) override;
+		virtual void SetCullFace(CullFace cullFace) override;
+
+		Material* UsePassthroughMaterial();
 
 	protected:
 		virtual void OnInitialize() override;
@@ -47,5 +50,7 @@ namespace Glory
 		GLuint m_ScreenQuadVertexbufferID;
 		GLuint m_UnitCubeVertexArrayID;
 		GLuint m_UnitCubeVertexbufferID;
+
+		MaterialData* m_pPassthroughMaterial = nullptr;
 	};
 }

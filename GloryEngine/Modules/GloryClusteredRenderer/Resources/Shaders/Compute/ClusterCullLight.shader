@@ -3,11 +3,16 @@ layout(local_size_x = 16, local_size_y = 9, local_size_z = 4) in;
 
 struct LightData
 {
-    /* Type is in the w value */
-	vec4 Position;
+	vec3 Position;
+	uint Type;
 	vec4 Direction;
 	vec4 Color;
 	vec4 Data;
+	uint ShadowsEnabled;
+	float ShadowBias;
+	float Padding1;
+	float Padding2;
+	vec4 ShadowCoords;
 };
 
 struct LightGridElement
@@ -97,17 +102,17 @@ void main()
         //Iterating within the current batch of lights
         for (uint light = 0; light < threadCount; ++light)
         {
-            if (sharedLights[light].Position.w == Point && TestSphereAABB(light, tileIndex))
+            if (sharedLights[light].Type == Point && TestSphereAABB(light, tileIndex))
             {
                 visibleLightIndices[visibleLightCount] = batch * threadCount + light;
                 visibleLightCount += 1;
             }
-            if (sharedLights[light].Position.w == Sun)
+            if (sharedLights[light].Type == Sun)
             {
                 visibleLightIndices[visibleLightCount] = batch * threadCount + light;
                 visibleLightCount += 1;
             }
-            if (sharedLights[light].Position.w == Spot && TestConeAABB(light, tileIndex))
+            if (sharedLights[light].Type == Spot && TestConeAABB(light, tileIndex))
             {
                 visibleLightIndices[visibleLightCount] = batch * threadCount + light;
                 visibleLightCount += 1;

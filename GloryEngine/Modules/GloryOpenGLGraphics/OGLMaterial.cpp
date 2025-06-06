@@ -116,7 +116,7 @@ namespace Glory
 		glUniform1i(texLocation, m_TextureCounter);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
-		GLTexture* pGLTexture = (GLTexture*)pTexture;
+		GLTexture* pGLTexture = pTexture ? (GLTexture*)pTexture : nullptr;
 		glActiveTexture(GL_TEXTURE0 + m_TextureCounter);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindTexture(GL_TEXTURE_CUBE_MAP, pGLTexture ? pGLTexture->GetID() : 0);

@@ -39,6 +39,12 @@ REFLECTABLE_ENUM_NS(Glory, Func,
     OP_DecrementWrap,
     OP_Invert);
 
+REFLECTABLE_ENUM_NS(Glory, CullFace,
+    None,
+    Front,
+    Back,
+    FrontAndBack);
+
 namespace Glory
 {
     constexpr size_t AspectRatioCount = 5;
@@ -576,6 +582,9 @@ namespace Glory
         /** @brief For skybox rendering */
         PT_Skybox = 16,
 
+        /** @brief For rendering shadow maps */
+        PT_Shadow = 17,
+
         /** @brief Number of pipeline types */
         PT_Count,
     };
@@ -597,6 +606,7 @@ namespace Glory
         "Screen",
         "Other",
         "Skybox",
+        "Shadow",
     };
 
     const size_t Enum<PipelineType>::m_NumValues = PT_Count;

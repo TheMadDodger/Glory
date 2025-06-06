@@ -18,6 +18,7 @@ namespace Glory
 	class Pipeline;
 	class PipelineData;
 	class CubemapData;
+	class TextureAtlas;
 
 	class GPUResourceManager
 	{
@@ -36,6 +37,7 @@ namespace Glory
 		Texture* CreateTexture(TextureData* pTextureData);
 		Texture* CreateTexture(TextureCreateInfo&& textureInfo, const void* pixels=nullptr);
 		Texture* CreateCubemapTexture(CubemapData* pCubemap);
+		TextureAtlas* CreateTextureAtlas(TextureCreateInfo&& textureInfo);
 		RenderTexture* CreateRenderTexture(const RenderTextureCreateInfo& createInfo);
 
 		void Free(GPUResource* pResource);
@@ -59,6 +61,7 @@ namespace Glory
 		virtual Texture* CreateTexture_Internal(TextureData* pTextureData) = 0;
 		virtual Texture* CreateTexture_Internal(CubemapData* pCubemapData) = 0;
 		virtual Texture* CreateTexture_Internal(TextureCreateInfo&& textureInfo) = 0;
+		virtual TextureAtlas* CreateTextureAtlas_Internal(TextureCreateInfo&& textureInfo) = 0;
 		virtual RenderTexture* CreateRenderTexture_Internal(const RenderTextureCreateInfo& createInfo) = 0;
 
 	protected:

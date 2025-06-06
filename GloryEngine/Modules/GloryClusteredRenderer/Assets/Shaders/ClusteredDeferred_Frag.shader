@@ -15,6 +15,7 @@ layout (binding = 4) uniform sampler2D Data;
 layout (binding = 5) uniform sampler2D Depth;
 
 layout (binding = 6) uniform samplerCube IrradianceMap;
+layout (binding = 7) uniform sampler2D ShadowAtlas;
 
 #include "Internal/DepthHelpers.glsl"
 
@@ -33,11 +34,16 @@ const float PI = 3.14159265359;
 
 struct LightData
 {
-	/* Type is in the w value */
-    vec4 Position;
+    vec3 Position;
+	uint Type;
 	vec4 Direction;
 	vec4 Color;
 	vec4 Data;
+	uint ShadowsEnabled;
+	float ShadowBias;
+	float Padding1;
+	float Padding2;
+	vec4 ShadowCoords;
 };
 
 struct LightGridElement
@@ -93,6 +99,11 @@ layout(std430, binding = 7) buffer HasTextureSSBO
     uint64_t HasTexture;
 };
 
+layout(std430, binding = 8) buffer lightSpaceTransformsSSBO
+{
+    mat4 LightSpaceTransforms[];
+};
+
 bool TextureEnabled(int index)
 {
 	uint64_t bit = 1 << index;
@@ -105,6 +116,41 @@ const vec3 BadColor = vec3(1.0, 0.0, 0.0);
 const uint Sun = 1;
 const uint Point = 2;
 const uint Spot = 3;
+
+float ShadowCalculation(vec4 fragPosLightSpace, LightData lightData, vec3 normal, vec3 lightDir)
+{
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+
+	// calculate texture coords
+	vec4 shadowCoords = lightData.ShadowCoords;
+	vec2 coordRanges = vec2(shadowCoords.z - shadowCoords.x, shadowCoords.w - shadowCoords.y);
+	vec2 actualCoords = vec2(shadowCoords.x + coordRanges.x*projCoords.x, shadowCoords.y + coordRanges.y*projCoords.y);
+
+	// Calculate bias based on surface normal
+	float bias = lightData.ShadowBias;
+	float surfaceBias = max(bias * (1.0 - dot(normal, lightDir)), bias*0.01);
+
+	// PCF samples
+	float shadow = 0.0;
+	vec2 texelSize = 1.0 / textureSize(ShadowAtlas, 0);
+	int sampleCounts = 1;
+	float totalSamples = pow((float(sampleCounts)*2.0 + 1.0), 2.0);
+	for(int x = -sampleCounts; x <= sampleCounts; ++x)
+	{
+		for(int y = -sampleCounts; y <= sampleCounts; ++y)
+		{
+			float pcfDepth = texture(ShadowAtlas, actualCoords + vec2(x, y) * texelSize).r; 
+			shadow += currentDepth - surfaceBias > pcfDepth ? 1.0 : 0.0;        
+		}    
+	}
+	shadow /= totalSamples;
+    return shadow;
+}
 
 #ifdef WITH_PBR
 
@@ -151,7 +197,7 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 vec3 CalculateLighting(LightData light, vec3 normal, vec3 color, vec3 worldPosition, vec3 CameraPos, vec3 V, float roughness, float metallic)
 {
 	vec3 lightPos = light.Position.xyz;
-	float lightType = light.Position.w;
+	uint lightType = light.Type;
 	vec3 direction = light.Direction.xyz;
 	float innerRadius = light.Data.x;
 	float outerRadius = light.Data.y;
@@ -232,7 +278,7 @@ void main()
 
 	vec3 color = texture(Color, Coord).xyz;
 	vec4 metallicRoughnessAO = texture(Data, Coord);
-	float ssao = AOEnabled == 1 ? Magnitude*pow(texture(AO, Coord).x, Contrast) : 1.0;
+	float ssao = AOEnabled == 1.0 ? Magnitude*pow(texture(AO, Coord).x, Contrast) : 1.0;
 	ssao = min(ssao, 1.0);
 	float ao = metallicRoughnessAO.r;
 	float roughness = metallicRoughnessAO.g;
@@ -263,7 +309,13 @@ void main()
 	{
 		uint indexListIndex = offset + i;
 		uint lightIndex = GlobalLightIndexList[indexListIndex];
-		Lo += CalculateLighting(Lights[lightIndex], normal, color, worldPosition, CameraPos, V, roughness, metallic);
+
+		// calculate shadow
+		vec4 fragPosLightSpace = LightSpaceTransforms[lightIndex]*vec4(worldPosition, 1.0);
+		vec3 lightDir = normalize(Lights[lightIndex].Position - worldPosition);
+		float shadow = Lights[lightIndex].ShadowsEnabled == 1 ? 1.0 - ShadowCalculation(fragPosLightSpace, Lights[lightIndex], normal, lightDir) : 1.0;
+
+		Lo += CalculateLighting(Lights[lightIndex], normal, color, worldPosition, CameraPos, V, roughness, metallic)*shadow;
 	}
 
 	/* Ambient lighting */
@@ -289,7 +341,7 @@ void main()
 vec3 CalculateLighting(LightData light, vec3 normal, vec3 color, vec3 worldPosition, vec3 viewDir, float specularIntensity)
 {
 	vec3 lightPos = light.Position.xyz;
-	float lightType = light.Position.w;
+	uint lightType = light.Type;
 	vec3 direction = normalize(light.Direction.xyz);
 	float innerRadius = light.Data.x;
 	float outerRadius = light.Data.y;
@@ -395,7 +447,13 @@ void main()
 		uint indexListIndex = offset + i;
 		uint lightIndex = GlobalLightIndexList[indexListIndex];
 
-		diffuseColor += CalculateLighting(Lights[lightIndex], normal, color, worldPosition, viewDir, specularIntensity);
+		// calculate shadow
+		vec4 fragPosLightSpace = LightSpaceTransforms[lightIndex]*vec4(worldPosition, 1.0);
+		vec3 lightDir = normalize(Lights[lightIndex].Position - worldPosition);
+		float shadow = Lights[lightIndex].ShadowsEnabled == 1 ? 1.0 - ShadowCalculation(fragPosLightSpace, Lights[lightIndex], normal, lightDir) : 1.0;
+
+		diffuseColor += shadow == 0.0 ? vec3(0.0) :
+			shadow*CalculateLighting(Lights[lightIndex], normal, color, worldPosition, viewDir, specularIntensity);
 	}
 
 	out_Color = vec4(ambient*diffuseColor*ssao, 1.0);

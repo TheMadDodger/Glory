@@ -73,6 +73,7 @@ project "GloryOpenGLGraphics"
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
 		("{COPY} %{DepsBinDir}/glew32*.dll %{moduleOutDir}/Dependencies"),
+		("{COPY} ./Assets %{moduleOutDir}/Assets"),
 	}
 
 	filter "system:windows"

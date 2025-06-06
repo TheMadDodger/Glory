@@ -189,6 +189,9 @@ namespace Glory
 
 		glBindVertexArray(NULL);
 		LogGLError(glGetError());
+
+		m_pPassthroughMaterial = new MaterialData();
+		m_pPassthroughMaterial->SetPipeline(802);
 	}
 
 	void OpenGLGraphicsModule::OnCleanup()
@@ -384,5 +387,32 @@ namespace Glory
 		glBlitNamedFramebuffer(srcID, dstID, src.x, src.y, src.z, src.w, dst.x, dst.y, dst.z, dst.w,
 			GL_COLOR_BUFFER_BIT, glFilter);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OpenGLGraphicsModule::SetCullFace(CullFace cullFace)
+	{
+		switch (cullFace)
+		{
+		case Glory::CullFace::None:
+			glDisable(GL_CULL_FACE);
+			return;
+		case Glory::CullFace::Front:
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_FRONT);
+			return;
+		case Glory::CullFace::Back:
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
+			return;
+		case Glory::CullFace::FrontAndBack:
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_FRONT_AND_BACK);
+			return;
+		}
+	}
+
+	Material* OpenGLGraphicsModule::UsePassthroughMaterial()
+	{
+		return UseMaterial(m_pPassthroughMaterial);
 	}
 }
