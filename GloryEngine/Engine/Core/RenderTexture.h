@@ -13,11 +13,13 @@ namespace Glory
 	class GPUResourceManager;
 	class Texture;
 	class Material;
+	struct TextureCreateInfo;
 
 	struct Attachment
 	{
 		Attachment(const std::string& name, const PixelFormat& pixelFormat, const PixelFormat& internalFormat,
 			const ImageType& imageType, const ImageAspect& imageAspect, DataType type=DataType::DT_UByte, bool autoBind = true);
+		Attachment(const std::string& name, const TextureCreateInfo& textureInfo, bool autoBind = true);
 
 		//PixelFormat::PF_R8G8B8A8Srgb
 		std::string Name;

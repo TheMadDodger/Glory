@@ -265,13 +265,6 @@ namespace Glory
 		return pTexture;
 	}
 
-	TextureAtlas* GPUResourceManager::CreateTextureAtlas(TextureCreateInfo&& textureInfo)
-	{
-		TextureAtlas* pTexture = CreateTextureAtlas_Internal(std::move(textureInfo));
-		pTexture->Initialize();
-		return pTexture;
-	}
-
 	RenderTexture* GPUResourceManager::CreateRenderTexture(const RenderTextureCreateInfo& createInfo)
 	{
 		m_pEngine->Profiler().BeginSample("GPUResourceManager::CreateRenderTexture");

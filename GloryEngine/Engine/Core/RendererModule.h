@@ -18,6 +18,7 @@ namespace Glory
 	class PipelineData;
 	class CubemapData;
 	class MaterialData;
+	class GPUTextureAtlas;
 	struct RenderPass;
 
 	struct PickResult
@@ -84,6 +85,8 @@ namespace Glory
 
 		void RenderOnBackBuffer(RenderTexture* pTexture);
 
+		GPUTextureAtlas* CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo);
+
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}
 		virtual void OnSubmit(const TextRenderData& renderData) {}
@@ -147,5 +150,7 @@ namespace Glory
 		std::atomic_bool m_DisplaysDirty;
 
 		std::vector<std::vector<RenderPass>> m_RenderPasses;
+
+		std::vector<GPUTextureAtlas> m_GPUTextureAtlases;
 	};
 }

@@ -17,5 +17,7 @@ layout(location = 0) out vec2 fragTexCoord;
 void main()
 {
 	gl_Position = Object.view * Object.model * vec4(inPosition, 1.0);
+#ifdef WITH_TRANSPARENT_TEXTURED
 	fragTexCoord = inTexCoord;
+#endif
 }

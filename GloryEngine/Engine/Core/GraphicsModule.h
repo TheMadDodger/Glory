@@ -40,6 +40,8 @@ namespace Glory
             Filter filter = Filter::F_Nearest) = 0;
         virtual void SetCullFace(CullFace cullFace) = 0;
 
+        virtual Material* UsePassthroughMaterial() { return nullptr; };
+
     public: // Getters
         GPUResourceManager* GetResourceManager();
 

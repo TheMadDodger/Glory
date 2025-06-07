@@ -15,7 +15,7 @@
 #include <CubemapData.h>
 #include <FontDataStructs.h>
 #include <Console.h>
-#include <TextureAtlas.h>
+#include <GPUTextureAtlas.h>
 
 #include <DistributedRandom.h>
 
@@ -237,7 +237,7 @@ namespace Glory
 		sampler.AddressModeU = SamplerAddressMode::SAM_ClampToBorder;
 		sampler.AddressModeV = SamplerAddressMode::SAM_ClampToBorder;
 		sampler.AddressModeW = SamplerAddressMode::SAM_ClampToBorder;
-		m_pShadowAtlas = pResourceManager->CreateTextureAtlas({ 8192, 8192, PixelFormat::PF_R, PixelFormat::PF_R32Sfloat,
+		m_pShadowAtlas = CreateGPUTextureAtlas({ 8192, 8192, PixelFormat::PF_R, PixelFormat::PF_R32Sfloat,
 			ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Color, sampler }
 		);
 	}

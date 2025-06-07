@@ -38,7 +38,7 @@ namespace Glory
 			Filter filter = Filter::F_Nearest) override;
 		virtual void SetCullFace(CullFace cullFace) override;
 
-		Material* UsePassthroughMaterial();
+		virtual Material* UsePassthroughMaterial() override;
 
 	protected:
 		virtual void OnInitialize() override;
