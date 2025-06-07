@@ -140,6 +140,6 @@ namespace Glory
 
 		RenderTexture* m_pTemporaryShadowMap;
 
-		TextureAtlas* m_pShadowAtlas;
+		GPUTextureAtlas* m_pShadowAtlas;
 	};
 }

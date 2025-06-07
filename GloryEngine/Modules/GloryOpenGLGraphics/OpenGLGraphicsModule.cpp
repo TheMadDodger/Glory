@@ -344,7 +344,7 @@ namespace Glory
 
 	void OpenGLGraphicsModule::SetViewport(int x, int y, uint32_t width, uint32_t height)
 	{
-		glViewport(0, 0, width, height);
+		glViewport(x, y, width, height);
 	}
 
 	void OpenGLGraphicsModule::Blit(RenderTexture* pTexture, glm::uvec4 src, glm::uvec4 dst, Filter filter)

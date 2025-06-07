@@ -1,30 +1,30 @@
 #pragma once
-#include <TextureAtlas.h>
+#include "TextureAtlas.h"
 
 #include <memory>
 
 namespace Glory
 {
-	class GLTexture;
+	class RenderTexture;
 
 	/** @brief Texture atlas for Open GL graphics API */
-	class GLTextureAtlas : public TextureAtlas
+	class GPUTextureAtlas : public TextureAtlas
 	{
 	public:
 		/** @brief Constructor
 		 * @param createInfo Creation info for the attached texture
 		 * @param pEngine Engine instance
 		 */
-		GLTextureAtlas(TextureCreateInfo&& createInfo, Engine* pEngine);
+		GPUTextureAtlas(TextureCreateInfo&& createInfo, Engine* pEngine);
 		/** @brief Destructor */
-		virtual ~GLTextureAtlas();
+		virtual ~GPUTextureAtlas();
 
-	private:
-		/** @brief Initialize the atlas by creating the render texture */
-		virtual void Initialize() override;
 		/** @brief Get the attached texture */
 		virtual Texture* GetTexture() override;
+		/** @brief Initialize the atlas by creating the render texture */
+		virtual void Initialize() override;
 
+	private:
 		/** @brief OpenGL implementation for copying pixels from a texture to a chunk in the atlas
 		 * @param pTexture Texture to copy pixels from
 		 * @param chunk The chunk data to copy the pixels to
@@ -33,7 +33,7 @@ namespace Glory
 		virtual bool AssignChunk(Texture* pTexture, const ReservedChunk& chunk) override;
 
 	private:
-		GLTexture* m_pTexture;
-		unsigned int m_GLFrameBufferID;
+		TextureCreateInfo m_TextureInfo;
+		RenderTexture* m_pTexture;
 	};
 }

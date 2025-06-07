@@ -15,6 +15,7 @@
 #include "AssetManager.h"
 #include "CubemapData.h"
 #include "MaterialManager.h"
+#include "GPUTextureAtlas.h"
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -303,6 +304,13 @@ namespace Glory
 		{
 			pass.m_Callback(nullptr, {0});
 		}
+	}
+
+	GPUTextureAtlas* RendererModule::CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo)
+	{
+		GPUTextureAtlas& newAtlas = m_GPUTextureAtlases.emplace_back(std::move(textureInfo), m_pEngine);
+		newAtlas.Initialize();
+		return &newAtlas;
 	}
 
 	void RendererModule::Initialize()

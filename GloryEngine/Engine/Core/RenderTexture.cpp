@@ -14,6 +14,12 @@ namespace Glory
 	{
 	}
 
+	Attachment::Attachment(const std::string& name, const TextureCreateInfo& textureInfo, bool autoBind):
+		Name(name), InternalFormat(textureInfo.m_InternalFormat), Format(textureInfo.m_PixelFormat), ImageType(textureInfo.m_ImageType),
+		ImageAspect(textureInfo.m_ImageAspectFlags), m_Type(textureInfo.m_Type), m_AutoBind(autoBind)
+	{
+	}
+
 	RenderTextureCreateInfo::RenderTextureCreateInfo()
 		: Width(0), Height(0), HasDepth(false), HasStencil(false), Attachments(std::vector<Attachment>()) {}
 
