@@ -53,6 +53,18 @@ namespace Glory
 		 */
 		glm::vec4 GetChunkCoords(UUID id) const;
 
+		/** @brief Release a specific chunk from the atlas so that it can be reserved again
+		 * @param id ID of the chunk to release
+		 *
+		 * Does not clear the attached texture
+		 */
+		void ReleaseChunk(UUID id);
+		/** @brief Release all chunks and reset rows in the texture atlas
+		 *
+		 * Does not clear the attached texture
+		 */
+		void ReleaseAllChunks();
+
 	protected:
 		/** @brief Reserved chunk data */
 		struct ReservedChunk
@@ -62,6 +74,7 @@ namespace Glory
 			uint32_t YOffset;
 			uint32_t Width;
 			uint32_t Height;
+			uint32_t RowIndex;
 		};
 
 		/** @brief Row data */
@@ -71,7 +84,7 @@ namespace Glory
 			uint32_t AvailableWidth;
 			uint32_t Height;
 
-			/* Keep track of gaps? */
+			std::vector<std::pair<uint32_t, uint32_t>> m_FreeGaps;
 		};
 
 		/** @brief Implementation for copying the pixels of a GPU texture to a chunk in this atlas

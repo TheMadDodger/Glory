@@ -18,17 +18,35 @@ namespace Glory
 	UUID TextureAtlas::ReserveChunk(uint32_t width, uint32_t height, UUID id)
 	{
 		/* Find a row with the same height */
-		for (RowData& row : m_Rows)
+		for (size_t i = 0; i < m_Rows.size(); ++i)
 		{
+			RowData& row = m_Rows[i];
 			if (row.Height != height) continue;
 			/* Use this row if enough space is available */
-			if (row.AvailableWidth < width) continue;
+			if (row.AvailableWidth < width)
+			{
+				/* Check if there is a gap */
+				if (row.m_FreeGaps.empty()) continue;
+				for (size_t j = 0; j < row.m_FreeGaps.size(); ++j)
+				{
+					auto& gap = row.m_FreeGaps[j];
+					if (gap.first != width) continue;
+					/* Get the xoffset */
+					const uint32_t xoffset = m_Width - gap.first;
+					/* Remove the gap */
+					row.m_FreeGaps.erase(row.m_FreeGaps.begin() + j);
+					/* Reserve the chunk */
+					m_ReservedChunks.emplace_back(ReservedChunk{ id, xoffset, row.YOffset, width, height, uint32_t(i) });
+					break;
+				}
+				continue;
+			}
 			/* Get the xoffset */
 			const uint32_t xoffset = m_Width - row.AvailableWidth;
 			/* Reduce available width for this row */
 			row.AvailableWidth -= width;
 			/* Reserve the chunk */
-			m_ReservedChunks.emplace_back(ReservedChunk{ id, xoffset, row.YOffset, width, height });
+			m_ReservedChunks.emplace_back(ReservedChunk{ id, xoffset, row.YOffset, width, height, uint32_t(i) });
 			return id;
 		}
 
@@ -39,9 +57,10 @@ namespace Glory
 		/* Reduce available height */
 		m_AvailableHeight -= height;
 		/* Create the row */
+		const uint32_t rowIndex = uint32_t(m_Rows.size());
 		m_Rows.emplace_back(RowData{ yoffset, m_Width - width, height });
 		/* Reserve the chunk */
-		m_ReservedChunks.emplace_back(ReservedChunk{ id, 0, yoffset, width, height });
+		m_ReservedChunks.emplace_back(ReservedChunk{ id, 0, yoffset, width, height, rowIndex });
 		return id;
 	}
 
@@ -94,5 +113,27 @@ namespace Glory
 		coords.z = float(chunk.XOffset + chunk.Width)/m_Width;
 		coords.w = float(chunk.YOffset + chunk.Height)/m_Height;
 		return coords;
+	}
+
+	void TextureAtlas::ReleaseChunk(UUID id)
+	{
+		auto iter = std::find_if(m_ReservedChunks.begin(), m_ReservedChunks.end(), [id](const ReservedChunk& chunk) { return chunk.ID == id; });
+		if (iter == m_ReservedChunks.end()) return;
+		RowData& row = m_Rows[iter->RowIndex];
+		if (m_Width - iter->Width - row.AvailableWidth == iter->XOffset)
+		{
+			/* Just free a spot at the end */
+			row.AvailableWidth += iter->Width;
+			return;
+		}
+
+		/* We have to make a gap */
+		row.m_FreeGaps.emplace_back(iter->XOffset, iter->Width);
+	}
+
+	void TextureAtlas::ReleaseAllChunks()
+	{
+		m_ReservedChunks.clear();
+		m_Rows.clear();
 	}
 }
