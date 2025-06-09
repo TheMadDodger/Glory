@@ -25,12 +25,14 @@ namespace Glory
 		virtual void Initialize() override;
 
 	private:
-		/** @brief OpenGL implementation for copying pixels from a texture to a chunk in the atlas
+		/** @brief GPU implementation for copying pixels from a texture to a chunk in the atlas
 		 * @param pTexture Texture to copy pixels from
 		 * @param chunk The chunk data to copy the pixels to
 		 * @returns @cpp true @ce on success, @cpp false @ce otherwise
 		 */
 		virtual bool AssignChunk(Texture* pTexture, const ReservedChunk& chunk) override;
+		/** @brief GPU implementation for resizing the atlas */
+		virtual void OnResize() override;
 
 	private:
 		TextureCreateInfo m_TextureInfo;

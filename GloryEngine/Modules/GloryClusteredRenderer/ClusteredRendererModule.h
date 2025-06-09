@@ -76,6 +76,10 @@ namespace Glory
 		void ShadowMapsPass(CameraRef camera, const RenderFrame& frameData);
 		void RenderShadow(size_t lightIndex, const RenderFrame& frameData, const RenderData& objectToRender);
 
+		void CreateTemporaryShadowMaps();
+		void ResizeTemporaryShadowMaps(uint32_t maxSize);
+		void ResizeShadowAtlas(uint32_t newSize);
+
 	private:
 		// Compute shaders
 		FileData* m_pClusterShaderData = nullptr;
@@ -138,7 +142,9 @@ namespace Glory
 
 		SSAOSettings m_GlobalSSAOSetting;
 
-		RenderTexture* m_pTemporaryShadowMap;
+		uint32_t m_MaxShadowResolution;
+		uint32_t m_ShadowAtlasResolution;
+		RenderTexture* m_pTemporaryShadowMaps[1];
 
 		GPUTextureAtlas* m_pShadowAtlas;
 	};

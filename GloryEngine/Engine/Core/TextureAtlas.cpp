@@ -135,5 +135,14 @@ namespace Glory
 	{
 		m_ReservedChunks.clear();
 		m_Rows.clear();
+		m_AvailableHeight = m_Height;
+	}
+
+	void TextureAtlas::Resize(uint32_t newSize)
+	{
+		m_Width = newSize;
+		m_Height = newSize;
+		ReleaseAllChunks();
+		OnResize();
 	}
 }
