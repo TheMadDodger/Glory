@@ -65,6 +65,13 @@ namespace Glory
 		 */
 		void ReleaseAllChunks();
 
+		/** @brief Resize the texture atlas
+		 * @param newSize New width and height of the atlas
+		 *
+		 * Note: this releases all chunks!
+		 */
+		void Resize(uint32_t newSize);
+
 	protected:
 		/** @brief Reserved chunk data */
 		struct ReservedChunk
@@ -93,6 +100,8 @@ namespace Glory
 		 * @returns @cpp true @ce on success, @cpp false @ce otherwise
 		 */
 		virtual bool AssignChunk(Texture* pTexture, const ReservedChunk& chunk) = 0;
+		/** @brief Implementation for resizing the atlas */
+		virtual void OnResize() = 0;
 
 	protected:
 		Engine* m_pEngine;

@@ -24,10 +24,14 @@
 namespace Glory
 {
 	static constexpr std::string_view ScreenSpaceAOCVarName = "r_screenSpaceAO";
+	static constexpr std::string_view MaxShadowResolutionVarName = "r_maxShadowResolution";
+	static constexpr std::string_view ShadowAtlasResolution = "r_shadowAtlasResolution";
 
 	GLORY_MODULE_VERSION_CPP(ClusteredRendererModule);
 
-	ClusteredRendererModule::ClusteredRendererModule(): m_pTemporaryShadowMap(nullptr), m_pShadowAtlas(nullptr)
+	ClusteredRendererModule::ClusteredRendererModule() :
+		m_MaxShadowResolution(1024), m_ShadowAtlasResolution(8192),
+		m_pTemporaryShadowMaps{nullptr}, m_pShadowAtlas(nullptr)
 	{
 	}
 
@@ -115,10 +119,20 @@ namespace Glory
 	{
 		RendererModule::Initialize();
 		m_pEngine->GetConsole().RegisterCVar({ std::string{ ScreenSpaceAOCVarName }, "Enables/disables screen space ambient occlusion.", 1.0f, CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ MaxShadowResolutionVarName }, "Sets the maximum resolution for shadow maps.", 1024.0f, CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ ShadowAtlasResolution }, "Sets the resolution for the shadow atlas.", 8192.0f, CVar::Flags::Save });
 
 		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ ScreenSpaceAOCVarName }, [this](const CVar* cvar) {
 			m_GlobalSSAOSetting.m_Enabled = cvar->m_Value == 1.0f;
 			m_GlobalSSAOSetting.m_Dirty = true;
+		});
+
+		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ MaxShadowResolutionVarName }, [this](const CVar* cvar) {
+			ResizeTemporaryShadowMaps(uint32_t(cvar->m_Value));
+		});
+
+		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ ShadowAtlasResolution }, [this](const CVar* cvar) {
+			ResizeShadowAtlas(uint32_t(cvar->m_Value));
 		});
 
 		AddRenderPass(RP_Prepass, RenderPass{ "Skybox Pass", [this](CameraRef camera, const RenderFrame& frame) {
@@ -237,9 +251,11 @@ namespace Glory
 		sampler.AddressModeU = SamplerAddressMode::SAM_ClampToBorder;
 		sampler.AddressModeV = SamplerAddressMode::SAM_ClampToBorder;
 		sampler.AddressModeW = SamplerAddressMode::SAM_ClampToBorder;
-		m_pShadowAtlas = CreateGPUTextureAtlas({ 8192, 8192, PixelFormat::PF_R, PixelFormat::PF_R32Sfloat,
+		m_pShadowAtlas = CreateGPUTextureAtlas({ m_ShadowAtlasResolution, m_ShadowAtlasResolution, PixelFormat::PF_R, PixelFormat::PF_R32Sfloat,
 			ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Color, sampler }
 		);
+
+		CreateTemporaryShadowMaps();
 	}
 
 	void ClusteredRendererModule::Update()
@@ -813,43 +829,38 @@ namespace Glory
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 
-		if (!m_pTemporaryShadowMap)
-		{
-			RenderTextureCreateInfo renderTextureInfo;
-			renderTextureInfo.HasDepth = true;
-			renderTextureInfo.HasStencil = false;
-			renderTextureInfo.Width = 1024;
-			renderTextureInfo.Height = 1024;
-			m_pTemporaryShadowMap = pGraphics->GetResourceManager()->CreateRenderTexture(renderTextureInfo);
-		}
-
 		for (size_t i = 0; i < m_FrameData.ActiveLights.count(); ++i)
 		{
 			auto& lightData = m_FrameData.ActiveLights[i];
 			const auto& lightTransform = m_FrameData.LightSpaceTransforms[i];
 			const auto& lightID = m_FrameData.ActiveLightIDs[i];
 
+			RenderTexture* pShadowMap = m_pTemporaryShadowMaps[0];
+			uint32_t shadowWidth, shadowHeight;
+			pShadowMap->GetDimensions(shadowWidth, shadowHeight);
+
 			if (!m_pShadowAtlas->HasReservedChunk(lightID) &&
-				!m_pShadowAtlas->ReserveChunk(1024, 1024, lightID))
+				!m_pShadowAtlas->ReserveChunk(shadowWidth, shadowHeight, lightID))
 			{
 				lightData.shadowsEnabled = 0;
+				m_pEngine->GetDebug().LogError("Failed to reserve chunk in shadow atlas, there is not enough space left.");
 				continue;
 			}
 
 			pGraphics->SetCullFace(CullFace::Front);
 			pGraphics->SetColorMask(false, false, false, false);
-			m_pTemporaryShadowMap->BindForDraw();
+			m_pTemporaryShadowMaps[0]->BindForDraw();
 			pGraphics->Clear();
 			for (size_t j = 0; j < m_FrameData.ObjectsToRender.size(); ++j)
 			{
 				const auto& objectToRender = m_FrameData.ObjectsToRender[j];
 				RenderShadow(i, m_FrameData, objectToRender);
 			}
-			m_pTemporaryShadowMap->UnBindForDraw();
+			m_pTemporaryShadowMaps[0]->UnBindForDraw();
 			pGraphics->SetColorMask(true, true, true, true);
 			pGraphics->SetCullFace(CullFace::None);
 
-			if (!m_pShadowAtlas->AsignChunk(lightID, m_pTemporaryShadowMap->GetTextureAttachment(0)))
+			if (!m_pShadowAtlas->AsignChunk(lightID, m_pTemporaryShadowMaps[0]->GetTextureAttachment(0)))
 			{
 				lightData.shadowsEnabled = 0;
 				continue;
@@ -884,5 +895,31 @@ namespace Glory
 		pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
 
 		pGraphics->UseMaterial(nullptr);
+	}
+
+	void ClusteredRendererModule::CreateTemporaryShadowMaps()
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		RenderTextureCreateInfo renderTextureInfo;
+		renderTextureInfo.HasDepth = true;
+		renderTextureInfo.HasStencil = false;
+		renderTextureInfo.Width = m_MaxShadowResolution;
+		renderTextureInfo.Height = m_MaxShadowResolution;
+		m_pTemporaryShadowMaps[0] = pGraphics->GetResourceManager()->CreateRenderTexture(renderTextureInfo);
+	}
+
+	void ClusteredRendererModule::ResizeTemporaryShadowMaps(uint32_t maxSize)
+	{
+		m_MaxShadowResolution = maxSize;
+		if (!m_pTemporaryShadowMaps[0]) return;
+		m_pTemporaryShadowMaps[0]->Resize(m_MaxShadowResolution, m_MaxShadowResolution);
+		m_pShadowAtlas->ReleaseAllChunks();
+	}
+
+	void ClusteredRendererModule::ResizeShadowAtlas(uint32_t newSize)
+	{
+		m_ShadowAtlasResolution = newSize;
+		if (!m_pShadowAtlas) return;
+		m_pShadowAtlas->Resize(m_ShadowAtlasResolution);
 	}
 }
