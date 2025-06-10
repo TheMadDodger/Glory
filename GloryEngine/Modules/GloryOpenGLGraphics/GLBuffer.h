@@ -19,6 +19,10 @@ namespace Glory
 		virtual void BindForDraw() override;
 		virtual void Unbind() override;
 
+		virtual void* MapRead(uint32_t offset, uint32_t size) override;
+		virtual void Unmap() override;
+		virtual void Read(void* data, uint32_t offset, uint32_t size) override;
+
 	private:
 		GLuint m_BufferID;
 	};

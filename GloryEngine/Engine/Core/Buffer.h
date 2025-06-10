@@ -20,6 +20,12 @@ namespace Glory
 		virtual void BindForDraw() = 0;
 		virtual void Unbind() = 0;
 
+		virtual void* MapRead(uint32_t offset, uint32_t size) = 0;
+		virtual void Unmap() = 0;
+		virtual void Read(void* data, uint32_t offset, uint32_t size) = 0;
+
+		size_t Size() const;
+
 	protected:
 		virtual void CreateBuffer() = 0;
 

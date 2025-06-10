@@ -210,6 +210,8 @@ namespace Glory
 
 		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(LightData)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
 		m_pLightsSSBO->Assign(NULL);
+		m_pLightCountSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 7);
+		m_pLightCountSSBO->Assign(NULL);
 		m_pLightSpaceTransformsSSBO = pResourceManager->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 8);
 		m_pLightSpaceTransformsSSBO->Assign(NULL);
 
@@ -507,10 +509,6 @@ namespace Glory
 		pGraphics->EnableDepthTest(false);
 		pGraphics->SetViewport(0, 0, width, height);
 
-		const uint32_t count = (uint32_t)std::fmin(m_FrameData.ActiveLights.size(), MAX_LIGHTS);
-		m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, count*sizeof(LightData));
-		m_pLightSpaceTransformsSSBO->Assign(m_FrameData.LightSpaceTransforms.data(), 0, count*sizeof(glm::mat4));
-
 		glm::uvec2 resolution = camera.GetResolution();
 		glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
 		float zNear = camera.GetNear();
@@ -606,35 +604,31 @@ namespace Glory
 
 	void ClusteredRendererModule::OnStartCameraRender(CameraRef camera, const FrameData<LightData>& lights)
 	{
+		/* Update light data */
+		const uint32_t count = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
+		m_pLightCountSSBO->Assign(&count, 0, sizeof(uint32_t));
+		m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, count*sizeof(LightData));
+		m_pLightSpaceTransformsSSBO->Assign(m_FrameData.LightSpaceTransforms.data(), 0, count*sizeof(glm::mat4));
+
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
 		Buffer* pClusterSSBO = nullptr;
 		if (!camera.GetUserData<Buffer>("ClusterSSBO", pClusterSSBO))
 		{
-			Buffer* pActiveClustersSSBO = nullptr;
-			Buffer* pActiveUniqueClustersSSBO = nullptr;
 			Buffer* pLightIndexSSBO = nullptr;
 			Buffer* pLightGridSSBO = nullptr;
 
-			pClusterSSBO = pResourceManager->CreateBuffer(sizeof(VolumeTileAABB) * NUM_CLUSTERS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 1);
+			pClusterSSBO = pResourceManager->CreateBuffer(sizeof(VolumeTileAABB)*NUM_CLUSTERS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 1);
 			pClusterSSBO->Assign(NULL);
 
-			pActiveClustersSSBO = pResourceManager->CreateBuffer(sizeof(bool) * NUM_CLUSTERS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 1);
-			pActiveClustersSSBO->Assign(NULL);
-
-			pActiveUniqueClustersSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t) * (NUM_CLUSTERS + 1), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 2);
-			pActiveUniqueClustersSSBO->Assign(NULL);
-
-			pLightIndexSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t) * (NUM_CLUSTERS * MAX_LIGHTS_PER_TILE + 1), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 4);
+			pLightIndexSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t)*(NUM_CLUSTERS*MAX_LIGHTS_PER_TILE + 1), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_COPY, 4);
 			pLightIndexSSBO->Assign(NULL);
 
-			pLightGridSSBO = pResourceManager->CreateBuffer(sizeof(LightGrid) * NUM_CLUSTERS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 5);
+			pLightGridSSBO = pResourceManager->CreateBuffer(sizeof(LightGrid)*NUM_CLUSTERS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_COPY, 5);
 			pLightGridSSBO->Assign(NULL);
 
 			camera.SetUserData("ClusterSSBO", pClusterSSBO);
-			camera.SetUserData("ActiveClustersSSBO", pActiveClustersSSBO);
-			camera.SetUserData("ActiveUniqueClustersSSBO", pActiveUniqueClustersSSBO);
 			camera.SetUserData("LightIndexSSBO", pLightIndexSSBO);
 			camera.SetUserData("LightGridSSBO", pLightGridSSBO);
 
@@ -654,35 +648,11 @@ namespace Glory
 		glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
 
 		Buffer* pClusterSSBO = nullptr;
-		Buffer* pActiveClustersSSBO = nullptr;
-		Buffer* pActiveUniqueClustersSSBO = nullptr;
 		Buffer* pLightIndexSSBO = nullptr;
 		Buffer* pLightGridSSBO = nullptr;
 		if (!camera.GetUserData("ClusterSSBO", pClusterSSBO)) return;
-		if (!camera.GetUserData("ActiveClustersSSBO", pActiveClustersSSBO)) return;
-		if (!camera.GetUserData("ActiveUniqueClustersSSBO", pActiveUniqueClustersSSBO)) return;
 		if (!camera.GetUserData("LightIndexSSBO", pLightIndexSSBO)) return;
 		if (!camera.GetUserData("LightGridSSBO", pLightGridSSBO)) return;
-
-		//m_pMarkActiveClustersMaterial->Use();
-		//pActiveClustersSSBO->Bind();
-		//m_pMarkActiveClustersMaterial->SetFloat("zNear", camera.GetNear());
-		//m_pMarkActiveClustersMaterial->SetFloat("zFar", camera.GetFar());
-		//m_pMarkActiveClustersMaterial->SetUInt("tileSizeInPx", resolution.x / gridSize.x);
-		//m_pMarkActiveClustersMaterial->SetUVec3("numClusters", gridSize);
-		//m_pMarkActiveClustersMaterial->SetTexture("Depth", pDepthTexture);
-		//pGraphics->DispatchCompute(resolution.x, resolution.y, 1);
-		//pActiveClustersSSBO->Unbind();
-
-		//m_pCompactClustersMaterial->Use();
-		//pActiveClustersSSBO->Bind();
-		//pActiveUniqueClustersSSBO->Bind();
-		//pGraphics->DispatchCompute(NUM_CLUSTERS, 1, 1);
-		//pActiveClustersSSBO->Unbind();
-		//pActiveUniqueClustersSSBO->Unbind();
-
-		const uint32_t count = (uint32_t)std::fmin(lights.size(), MAX_LIGHTS);
-		m_pLightsSSBO->Assign(lights.data(), 0, count*sizeof(LightData));
 
 		float zNear = camera.GetNear();
 		float zFar = camera.GetFar();

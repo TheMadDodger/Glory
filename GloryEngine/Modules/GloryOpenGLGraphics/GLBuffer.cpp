@@ -44,13 +44,10 @@ namespace Glory
 	void GLBuffer::Assign(const void* data, uint32_t size)
 	{
 		const GLuint target = GLConverter::TO_GLBUFFERTARGET.at(m_UsageFlag);
-		const GLuint usage = GLConverter::TO_GLBUFFERUSAGE.at(m_MemoryFlags);
-
-		m_BufferSize = size;
 
 		glBindBuffer(target, m_BufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBufferData(target, size, data, usage);
+		glBufferSubData(target, 0, size, data);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindBuffer(target, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
@@ -59,8 +56,6 @@ namespace Glory
 	void GLBuffer::Assign(const void* data, uint32_t offset, uint32_t size)
 	{
 		GLuint target = GLConverter::TO_GLBUFFERTARGET.at(m_UsageFlag);
-
-		m_BufferSize = size;
 
 		glBindBuffer(target, m_BufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
@@ -91,5 +86,40 @@ namespace Glory
 	{
 		GLuint target = GLConverter::TO_GLBUFFERTARGET.at(m_UsageFlag);
 		glBindBuffer(target, NULL);
+	}
+
+	void* GLBuffer::MapRead(uint32_t offset, uint32_t size)
+	{
+		const GLuint target = GLConverter::TO_GLBUFFERTARGET.at(m_UsageFlag);
+		glBindBuffer(target, m_BufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		void* pMemory = glMapBufferRange(target, offset, size, GL_MAP_READ_BIT);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		return pMemory;
+	}
+
+	void GLBuffer::Unmap()
+	{
+		const GLuint target = GLConverter::TO_GLBUFFERTARGET.at(m_UsageFlag);
+		glUnmapBuffer(target);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glBindBuffer(target, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void GLBuffer::Read(void* data, uint32_t offset, uint32_t size)
+	{
+		const GLuint target = GLConverter::TO_GLBUFFERTARGET.at(m_UsageFlag);
+		glBindBuffer(target, m_BufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glGetBufferSubData(target, offset, size, data);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glBindBuffer(target, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 }
