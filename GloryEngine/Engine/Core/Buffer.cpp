@@ -15,4 +15,9 @@ namespace Glory
 	{
 		dest->CopyFrom(source, size);
 	}
+
+	size_t Buffer::Size() const
+	{
+		return m_BufferSize;
+	}
 }

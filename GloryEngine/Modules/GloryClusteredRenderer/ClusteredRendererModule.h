@@ -105,6 +105,7 @@ namespace Glory
 		// Data for clustering
 		Buffer* m_pScreenToViewSSBO = nullptr;
 		Buffer* m_pLightsSSBO = nullptr;
+		Buffer* m_pLightCountSSBO = nullptr;
 		Buffer* m_pLightSpaceTransformsSSBO = nullptr;
 		Buffer* m_pSamplePointsDomeSSBO = nullptr;
 		Buffer* m_pSSAOSettingsSSBO = nullptr;
