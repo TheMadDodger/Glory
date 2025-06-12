@@ -61,6 +61,11 @@ layout(std430, binding = 5) buffer lightGridSSBO
     LightGridElement LightGrid[];
 };
 
+layout(std430, binding = 6) buffer lightDistanceSSBO
+{
+    uint LightDepthSlices[];
+};
+
 //Shared variables 
 shared LightData sharedLights[16 * 9 * 4];
 
@@ -125,9 +130,13 @@ void main()
 
     uint offset = atomicAdd(GlobalIndexCount, visibleLightCount);
 
+    uint depthSlice = tileIndex/(TileSizes.x*TileSizes.y);
+
     for (uint i = 0; i < visibleLightCount; ++i)
     {
-        GlobalLightIndexList[offset + i] = visibleLightIndices[i];
+        uint lightIndex = visibleLightIndices[i];
+        GlobalLightIndexList[offset + i] = lightIndex;
+        atomicMin(LightDepthSlices[lightIndex], depthSlice);
     }
 
     LightGrid[tileIndex].Offset = offset;

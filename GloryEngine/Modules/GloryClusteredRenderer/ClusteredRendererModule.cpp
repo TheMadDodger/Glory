@@ -27,6 +27,12 @@ namespace Glory
 	static constexpr std::string_view MaxShadowResolutionVarName = "r_maxShadowResolution";
 	static constexpr std::string_view ShadowAtlasResolution = "r_shadowAtlasResolution";
 
+	static uint32_t* ResetLightDistances;
+
+	const uint32_t ClusteredRendererModule::SHADOW_LOD_SCALES[] = {
+		1, 2, 4, 8
+	};
+
 	GLORY_MODULE_VERSION_CPP(ClusteredRendererModule);
 
 	ClusteredRendererModule::ClusteredRendererModule() :
@@ -214,6 +220,12 @@ namespace Glory
 		m_pLightCountSSBO->Assign(NULL);
 		m_pLightSpaceTransformsSSBO = pResourceManager->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 8);
 		m_pLightSpaceTransformsSSBO->Assign(NULL);
+		m_pLightDistancesSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_COPY, 6);
+
+		ResetLightDistances = new uint32_t[MAX_LIGHTS];
+		for (size_t i = 0; i < MAX_LIGHTS; ++i)
+			ResetLightDistances[i] = NUM_DEPTH_SLICES;
+		m_pLightDistancesSSBO->Assign(ResetLightDistances);
 
 		m_pSSAOSettingsSSBO = pResourceManager->CreateBuffer(sizeof(SSAOSettings), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 6);
 		m_pSSAOSettingsSSBO->Assign(NULL);
@@ -609,6 +621,7 @@ namespace Glory
 		m_pLightCountSSBO->Assign(&count, 0, sizeof(uint32_t));
 		m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, count*sizeof(LightData));
 		m_pLightSpaceTransformsSSBO->Assign(m_FrameData.LightSpaceTransforms.data(), 0, count*sizeof(glm::mat4));
+		m_pLightDistancesSSBO->Assign(ResetLightDistances);
 
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -677,12 +690,14 @@ namespace Glory
 		m_pLightsSSBO->BindForDraw();
 		pLightIndexSSBO->BindForDraw();
 		pLightGridSSBO->BindForDraw();
+		m_pLightDistancesSSBO->BindForDraw();
 		pGraphics->DispatchCompute(1, 1, 6);
 		pClusterSSBO->Unbind();
 		m_pScreenToViewSSBO->Unbind();
 		m_pLightsSSBO->Unbind();
 		pLightIndexSSBO->Unbind();
 		pLightGridSSBO->Unbind();
+		m_pLightDistancesSSBO->Unbind();
 	}
 
 	void ClusteredRendererModule::LoadSettings(ModuleSettings& settings)
@@ -797,7 +812,15 @@ namespace Glory
 
 	void ClusteredRendererModule::ShadowMapsPass(CameraRef camera, const RenderFrame& frameData)
 	{
+		if (m_FrameData.ActiveLights.count() == 0) return;
+
+		uint32_t lightDepthSlices[MAX_LIGHTS];
+		m_pLightDistancesSSBO->Read(&lightDepthSlices, 0, m_FrameData.ActiveLights.count()*sizeof(uint32_t));
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+
+		const uint32_t sliceSteps = NUM_DEPTH_SLICES/MAX_SHADOW_LODS;
+
+		m_pShadowAtlas->ReleaseAllChunks();
 
 		for (size_t i = 0; i < m_FrameData.ActiveLights.count(); ++i)
 		{
@@ -805,12 +828,22 @@ namespace Glory
 			const auto& lightTransform = m_FrameData.LightSpaceTransforms[i];
 			const auto& lightID = m_FrameData.ActiveLightIDs[i];
 
-			RenderTexture* pShadowMap = m_pTemporaryShadowMaps[0];
+			if (!lightData.shadowsEnabled) continue;
+
+			const uint32_t depthSlice = lightDepthSlices[i];
+			/* No need to render that which can't be seen! */
+			if (depthSlice == NUM_DEPTH_SLICES)
+			{
+				lightData.shadowsEnabled = 0;
+				continue;
+			}
+
+			const uint32_t shadowLOD = std::min(depthSlice/sliceSteps, uint32_t(MAX_SHADOW_LODS - 1));
+			RenderTexture* pShadowMap = m_pTemporaryShadowMaps[shadowLOD];
 			uint32_t shadowWidth, shadowHeight;
 			pShadowMap->GetDimensions(shadowWidth, shadowHeight);
 
-			if (!m_pShadowAtlas->HasReservedChunk(lightID) &&
-				!m_pShadowAtlas->ReserveChunk(shadowWidth, shadowHeight, lightID))
+			if (!m_pShadowAtlas->ReserveChunk(shadowWidth, shadowHeight, lightID))
 			{
 				lightData.shadowsEnabled = 0;
 				m_pEngine->GetDebug().LogError("Failed to reserve chunk in shadow atlas, there is not enough space left.");
@@ -819,18 +852,18 @@ namespace Glory
 
 			pGraphics->SetCullFace(CullFace::Front);
 			pGraphics->SetColorMask(false, false, false, false);
-			m_pTemporaryShadowMaps[0]->BindForDraw();
+			pShadowMap->BindForDraw();
 			pGraphics->Clear();
 			for (size_t j = 0; j < m_FrameData.ObjectsToRender.size(); ++j)
 			{
 				const auto& objectToRender = m_FrameData.ObjectsToRender[j];
 				RenderShadow(i, m_FrameData, objectToRender);
 			}
-			m_pTemporaryShadowMaps[0]->UnBindForDraw();
+			pShadowMap->UnBindForDraw();
 			pGraphics->SetColorMask(true, true, true, true);
 			pGraphics->SetCullFace(CullFace::None);
 
-			if (!m_pShadowAtlas->AsignChunk(lightID, m_pTemporaryShadowMaps[0]->GetTextureAttachment(0)))
+			if (!m_pShadowAtlas->AsignChunk(lightID, pShadowMap->GetTextureAttachment(0)))
 			{
 				lightData.shadowsEnabled = 0;
 				continue;
@@ -875,14 +908,23 @@ namespace Glory
 		renderTextureInfo.HasStencil = false;
 		renderTextureInfo.Width = m_MaxShadowResolution;
 		renderTextureInfo.Height = m_MaxShadowResolution;
-		m_pTemporaryShadowMaps[0] = pGraphics->GetResourceManager()->CreateRenderTexture(renderTextureInfo);
+
+		for (size_t i = 0; i < MAX_SHADOW_LODS; ++i)
+		{
+			renderTextureInfo.Width = m_MaxShadowResolution/SHADOW_LOD_SCALES[i];
+			renderTextureInfo.Height = m_MaxShadowResolution/SHADOW_LOD_SCALES[i];
+			m_pTemporaryShadowMaps[i] = pGraphics->GetResourceManager()->CreateRenderTexture(renderTextureInfo);
+		}
 	}
 
 	void ClusteredRendererModule::ResizeTemporaryShadowMaps(uint32_t maxSize)
 	{
 		m_MaxShadowResolution = maxSize;
 		if (!m_pTemporaryShadowMaps[0]) return;
-		m_pTemporaryShadowMaps[0]->Resize(m_MaxShadowResolution, m_MaxShadowResolution);
+
+		for (size_t i = 0; i < MAX_SHADOW_LODS; ++i)
+			m_pTemporaryShadowMaps[i]->Resize(m_MaxShadowResolution/SHADOW_LOD_SCALES[i], m_MaxShadowResolution/SHADOW_LOD_SCALES[i]);
+
 		m_pShadowAtlas->ReleaseAllChunks();
 	}
 

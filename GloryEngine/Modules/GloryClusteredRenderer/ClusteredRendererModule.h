@@ -107,6 +107,7 @@ namespace Glory
 		Buffer* m_pLightsSSBO = nullptr;
 		Buffer* m_pLightCountSSBO = nullptr;
 		Buffer* m_pLightSpaceTransformsSSBO = nullptr;
+		Buffer* m_pLightDistancesSSBO = nullptr;
 		Buffer* m_pSamplePointsDomeSSBO = nullptr;
 		Buffer* m_pSSAOSettingsSSBO = nullptr;
 		Texture* m_pSampleNoiseTexture = nullptr;
@@ -145,7 +146,9 @@ namespace Glory
 
 		uint32_t m_MaxShadowResolution;
 		uint32_t m_ShadowAtlasResolution;
-		RenderTexture* m_pTemporaryShadowMaps[1];
+		static const size_t MAX_SHADOW_LODS = 4;
+		static const uint32_t SHADOW_LOD_SCALES[MAX_SHADOW_LODS];
+		RenderTexture* m_pTemporaryShadowMaps[MAX_SHADOW_LODS];
 
 		GPUTextureAtlas* m_pShadowAtlas;
 	};
