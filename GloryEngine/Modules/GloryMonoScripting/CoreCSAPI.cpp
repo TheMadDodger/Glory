@@ -415,7 +415,7 @@ namespace Glory
 	{
 		SceneManager* pScenes = Core_EngineInstance->GetSceneManager();
 		if (!pScenes) return;
-		pScenes->LoadScene(id, additive);
+		pScenes->LoadSceneNextFrame(id, additive);
 	}
 
 	void SceneManager_OpenSceneByName(MonoString* name, bool additive)

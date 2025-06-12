@@ -14,7 +14,7 @@ namespace Glory
 {
 	SceneManager::SceneManager(Engine* pEngine) : m_pEngine(pEngine), m_ActiveSceneIndex(0),
 		m_HoveringObjectSceneID(0), m_HoveringObjectID(0), m_HoveringPos(),
-		m_HoveringNormal(), m_pComponentTypesInstance(nullptr)
+		m_HoveringNormal(), m_pComponentTypesInstance(nullptr), m_NextFrameLoadIsAdditive(false)
 	{
 	}
 
@@ -75,6 +75,14 @@ namespace Glory
 		}
 		OnUnloadAllScenes();
 		m_pOpenScenes.clear();
+	}
+
+	void SceneManager::LoadSceneNextFrame(UUID uuid, bool additive)
+	{
+		if (!additive)
+			m_ToLoadNextFrame.clear();
+		m_ToLoadNextFrame.push_back(uuid);
+		m_NextFrameLoadIsAdditive = additive;
 	}
 
 	Engine* SceneManager::GetEngine()
@@ -257,6 +265,11 @@ namespace Glory
 	void SceneManager::Update()
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "SceneManager::Tick" };
+		std::for_each(m_ToLoadNextFrame.begin(), m_ToLoadNextFrame.end(), [this](const UUID sceneID) {
+			LoadScene(sceneID, m_NextFrameLoadIsAdditive);
+		});
+		m_ToLoadNextFrame.clear();
+
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [this](GScene* pScene) {
 			pScene->OnTick();
 		});
