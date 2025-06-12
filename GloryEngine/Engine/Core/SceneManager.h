@@ -23,6 +23,7 @@ namespace Glory
 		void LoadScene(UUID uuid, bool additive);
 		void UnloadScene(UUID uuid);
 		void UnloadAllScenes();
+		void LoadSceneNextFrame(UUID uuid, bool additive);
 
 		virtual void OnLoadScene(UUID uuid) = 0;
 		virtual void OnUnloadScene(GScene* pScene) = 0;
@@ -108,6 +109,9 @@ namespace Glory
 		UUID m_HoveringObjectID;
 		glm::vec3 m_HoveringPos;
 		glm::vec3 m_HoveringNormal;
+
+		std::vector<UUID> m_ToLoadNextFrame;
+		bool m_NextFrameLoadIsAdditive;
 
 		Glory::Utils::ECS::ComponentTypes* m_pComponentTypesInstance;
 

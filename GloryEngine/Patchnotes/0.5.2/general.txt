@@ -19,3 +19,4 @@ Scripting:
 - Added an update call to FSM state and property changing API calls
 - Added Application.Organization and Application.Name
 - Added Application.PrefPath which returns a unique path based on Organization and AppName
+- Calling SceneManager.LoadScene will now delay the scene loading by 1 frame to avoid a crash
