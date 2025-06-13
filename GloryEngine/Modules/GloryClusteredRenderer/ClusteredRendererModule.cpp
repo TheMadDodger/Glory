@@ -691,6 +691,7 @@ namespace Glory
 		pLightIndexSSBO->BindForDraw();
 		pLightGridSSBO->BindForDraw();
 		m_pLightDistancesSSBO->BindForDraw();
+		m_pLightCountSSBO->BindForDraw();
 		pGraphics->DispatchCompute(1, 1, 6);
 		pClusterSSBO->Unbind();
 		m_pScreenToViewSSBO->Unbind();
@@ -698,6 +699,7 @@ namespace Glory
 		pLightIndexSSBO->Unbind();
 		pLightGridSSBO->Unbind();
 		m_pLightDistancesSSBO->Unbind();
+		m_pLightCountSSBO->Unbind();
 	}
 
 	void ClusteredRendererModule::LoadSettings(ModuleSettings& settings)
