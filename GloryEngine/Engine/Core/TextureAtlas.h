@@ -72,6 +72,9 @@ namespace Glory
 		 */
 		void Resize(uint32_t newSize);
 
+		/** @brief Reset all pixels of the atlas to a specific color */
+		void Clear(const glm::vec4& clearColor=glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
+
 	protected:
 		/** @brief Reserved chunk data */
 		struct ReservedChunk
@@ -102,6 +105,8 @@ namespace Glory
 		virtual bool AssignChunk(Texture* pTexture, const ReservedChunk& chunk) = 0;
 		/** @brief Implementation for resizing the atlas */
 		virtual void OnResize() = 0;
+		/** @brief Implementation for clearing the atlas */
+		virtual void OnClear(const glm::vec4& clearColor) = 0;
 
 	protected:
 		Engine* m_pEngine;

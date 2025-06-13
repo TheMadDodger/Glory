@@ -212,7 +212,7 @@ namespace Glory
 			UIOverlayPass(camera, frame);
 		} });
 
-		pRenderer->AddRenderPass(RenderPassType::RP_Objectpass, { "UI Worldspace Quad Pass", [this](CameraRef camera, const RenderFrame& frame) {
+		pRenderer->AddRenderPass(RenderPassType::RP_ObjectPass, { "UI Worldspace Quad Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			UIWorldSpaceQuadPass(camera, frame);
 		} });
 

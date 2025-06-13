@@ -145,4 +145,9 @@ namespace Glory
 		ReleaseAllChunks();
 		OnResize();
 	}
+
+	void TextureAtlas::Clear(const glm::vec4& clearColor)
+	{
+		OnClear(clearColor);
+	}
 }

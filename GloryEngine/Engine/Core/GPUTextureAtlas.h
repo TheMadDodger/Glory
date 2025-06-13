@@ -33,6 +33,8 @@ namespace Glory
 		virtual bool AssignChunk(Texture* pTexture, const ReservedChunk& chunk) override;
 		/** @brief GPU implementation for resizing the atlas */
 		virtual void OnResize() override;
+		/** @brief GPU implementation for clearing the atlas */
+		virtual void OnClear(const glm::vec4& clearColor) override;
 
 	private:
 		TextureCreateInfo m_TextureInfo;

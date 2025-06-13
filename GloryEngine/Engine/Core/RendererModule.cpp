@@ -330,27 +330,27 @@ namespace Glory
 		m_pLinesMaterialData = new MaterialData();
 		m_pLinesMaterialData->SetPipeline(linesPipeline);
 
-		m_RenderPasses[RP_Objectpass].push_back(RenderPass{ "Skybox Pass", [this](CameraRef camera, const RenderFrame& frame) {
+		m_RenderPasses[RP_ObjectPass].push_back(RenderPass{ "Skybox Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			SkyboxPass(camera, frame);
 		} });
 
-		m_RenderPasses[RP_Objectpass].push_back(RenderPass{ "Main Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
+		m_RenderPasses[RP_ObjectPass].push_back(RenderPass{ "Main Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			MainObjectPass(camera, frame);
 		} });
 
-		m_RenderPasses[RP_Objectpass].push_back(RenderPass{ "Main Text Pass", [this](CameraRef camera, const RenderFrame& frame) {
+		m_RenderPasses[RP_ObjectPass].push_back(RenderPass{ "Main Text Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			MainTextPass(camera, frame);
 		} });
 
-		m_RenderPasses[RP_Lateobjectpass].push_back(RenderPass{ "Main Late Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
+		m_RenderPasses[RP_LateobjectPass].push_back(RenderPass{ "Main Late Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			MainLateObjectPass(camera, frame);
 		} });
 
-		m_RenderPasses[RP_Lateobjectpass].push_back(RenderPass{ "Line Pass", [this](CameraRef camera, const RenderFrame& frame) {
+		m_RenderPasses[RP_LateobjectPass].push_back(RenderPass{ "Line Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			RenderLines(camera);
 		} });
 
-		m_RenderPasses[RP_CameraPostpass].push_back(RenderPass{ "Deferred Composite Pass", [this](CameraRef camera, const RenderFrame& frame) {
+		m_RenderPasses[RP_CameraCompositePass].push_back(RenderPass{ "Deferred Composite Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			DeferredCompositePass(camera, frame);
 		} });
 	}
@@ -399,7 +399,7 @@ namespace Glory
 
 			OnStartCameraRender(camera, m_FrameData.ActiveLights);
 
-			for (auto& pass : m_RenderPasses[RP_Objectpass])
+			for (auto& pass : m_RenderPasses[RP_ObjectPass])
 			{
 				pass.m_Callback(camera, m_FrameData);
 			}
@@ -413,7 +413,7 @@ namespace Glory
 			}
 			
 			pRenderTexture->BindForDraw();
-			for (auto& pass : m_RenderPasses[RP_Lateobjectpass])
+			for (auto& pass : m_RenderPasses[RP_LateobjectPass])
 			{
 				pass.m_Callback(camera, m_FrameData);
 			}
@@ -426,6 +426,24 @@ namespace Glory
 			{
 				pass.m_Callback(camera, m_FrameData);
 			}
+		}
+
+		for (auto& pass : m_RenderPasses[RP_PreCompositePass])
+		{
+			pass.m_Callback(nullptr, m_FrameData);
+		}
+
+		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
+		{
+			CameraRef camera = m_FrameData.ActiveCameras[i];
+
+			RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
+			pRenderTexture->BindForDraw();
+			for (auto& pass : m_RenderPasses[RP_CameraCompositePass])
+			{
+				pass.m_Callback(camera, m_FrameData);
+			}
+			pRenderTexture->UnBindForDraw();
 
 			/* Copy to display */
 			int displayIndex = camera.GetDisplayIndex();
@@ -442,6 +460,11 @@ namespace Glory
 			OnDisplayCopy(pOutputTexture, width, height);
 			pDisplayRenderTexture->UnBindForDraw();
 			m_pEngine->Profiler().EndSample();
+		}
+
+		for (auto& pass : m_RenderPasses[RP_PostCompositePass])
+		{
+			pass.m_Callback(nullptr, m_FrameData);
 		}
 
 		for (auto& pass : m_RenderPasses[RP_Postpass])
