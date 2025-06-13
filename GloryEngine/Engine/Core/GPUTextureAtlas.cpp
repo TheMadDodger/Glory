@@ -60,4 +60,12 @@ namespace Glory
 		m_TextureInfo.m_Height = m_Height;
 		m_pTexture->Resize(m_TextureInfo.m_Width, m_TextureInfo.m_Height);
 	}
+
+	void GPUTextureAtlas::OnClear(const glm::vec4& clearColor)
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		m_pTexture->BindForDraw();
+		pGraphics->Clear(clearColor);
+		m_pTexture->UnBindForDraw();
+	}
 }

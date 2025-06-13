@@ -144,8 +144,10 @@ float ShadowCalculation(vec4 fragPosLightSpace, LightData lightData, vec3 normal
 	{
 		for(int y = -sampleCounts; y <= sampleCounts; ++y)
 		{
-			float pcfDepth = texture(ShadowAtlas, actualCoords + vec2(x, y) * texelSize).r; 
-			shadow += currentDepth - surfaceBias > pcfDepth ? 1.0 : 0.0;        
+			vec2 pcfCoord = actualCoords + vec2(x, y)*texelSize;
+			pcfCoord = clamp(pcfCoord, shadowCoords.xy, shadowCoords.zw);
+			float pcfDepth = texture(ShadowAtlas, pcfCoord).r; 
+			shadow += currentDepth - surfaceBias > pcfDepth ? 1.0 : 0.0;
 		}    
 	}
 	shadow /= totalSamples;
@@ -427,12 +429,13 @@ void main()
 	vec2 pixelID = Coord * ScreenDimensions;
 	uint clusterID = GetClusterIndex(vec3(pixelID.xy, depth));
 
-	//uint clusterColorIndex = uint(mod(clusterID, 5));
+	//uint depthSlice = clusterID/(TileSizes.x*TileSizes.y);
+	//uint clusterColorIndex = uint(mod(float(depthSlice), 8.0));
+	//vec3 clusterColor = depthSliceColors[clusterColorIndex];
+
 	//uint totalClusters = TileSizes.x * TileSizes.y * TileSizes.z;
 	//float clusterFrac = float(clusterColorIndex) / float(totalClusters);
-	//
 	//uint clusterZVal = GetDepthSlice(depth);
-	//vec3 clusterColor = depthSliceColors[uint(mod(clusterZVal, 5))];
 
 	uint offset = LightGrid[clusterID].Offset;
 	uint count = LightGrid[clusterID].Count;

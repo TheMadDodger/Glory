@@ -24,20 +24,18 @@
 namespace Glory
 {
 	static constexpr std::string_view ScreenSpaceAOCVarName = "r_screenSpaceAO";
+	static constexpr std::string_view MinShadowResolutionVarName = "r_minShadowResolution";
 	static constexpr std::string_view MaxShadowResolutionVarName = "r_maxShadowResolution";
 	static constexpr std::string_view ShadowAtlasResolution = "r_shadowAtlasResolution";
+	static constexpr std::string_view MaxShadowLODs = "r_maxShadowLODs";
 
 	static uint32_t* ResetLightDistances;
-
-	const uint32_t ClusteredRendererModule::SHADOW_LOD_SCALES[] = {
-		1, 2, 4, 8
-	};
 
 	GLORY_MODULE_VERSION_CPP(ClusteredRendererModule);
 
 	ClusteredRendererModule::ClusteredRendererModule() :
-		m_MaxShadowResolution(1024), m_ShadowAtlasResolution(8192),
-		m_pTemporaryShadowMaps{nullptr}, m_pShadowAtlas(nullptr)
+		m_MinShadowResolution(256), m_MaxShadowResolution(2048), m_ShadowAtlasResolution(8192),
+		m_pTemporaryShadowMaps{}, m_pShadowAtlas(nullptr), m_MaxShadowLODs(6)
 	{
 	}
 
@@ -124,25 +122,46 @@ namespace Glory
 	void ClusteredRendererModule::Initialize()
 	{
 		RendererModule::Initialize();
-		m_pEngine->GetConsole().RegisterCVar({ std::string{ ScreenSpaceAOCVarName }, "Enables/disables screen space ambient occlusion.", 1.0f, CVar::Flags::Save });
-		m_pEngine->GetConsole().RegisterCVar({ std::string{ MaxShadowResolutionVarName }, "Sets the maximum resolution for shadow maps.", 1024.0f, CVar::Flags::Save });
-		m_pEngine->GetConsole().RegisterCVar({ std::string{ ShadowAtlasResolution }, "Sets the resolution for the shadow atlas.", 8192.0f, CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ ScreenSpaceAOCVarName }, "Enables/disables screen space ambient occlusion.", float(m_GlobalSSAOSetting.m_Enabled), CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ MinShadowResolutionVarName }, "Sets the minimum resolution for shadow maps.", float(m_MinShadowResolution), CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ MaxShadowResolutionVarName }, "Sets the maximum resolution for shadow maps.", float(m_MaxShadowResolution), CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ ShadowAtlasResolution }, "Sets the resolution for the shadow atlas.", float(m_ShadowAtlasResolution), CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ MaxShadowLODs }, "Sets the number of shadow map LODs.", float(m_MaxShadowLODs), CVar::Flags::Save });
 
 		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ ScreenSpaceAOCVarName }, [this](const CVar* cvar) {
 			m_GlobalSSAOSetting.m_Enabled = cvar->m_Value == 1.0f;
 			m_GlobalSSAOSetting.m_Dirty = true;
 		});
 
+		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ MinShadowResolutionVarName }, [this](const CVar* cvar) {
+			ResizeTemporaryShadowMaps(uint32_t(cvar->m_Value), m_MaxShadowResolution);
+		});
+
 		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ MaxShadowResolutionVarName }, [this](const CVar* cvar) {
-			ResizeTemporaryShadowMaps(uint32_t(cvar->m_Value));
+			ResizeTemporaryShadowMaps(m_MinShadowResolution, uint32_t(cvar->m_Value));
 		});
 
 		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ ShadowAtlasResolution }, [this](const CVar* cvar) {
 			ResizeShadowAtlas(uint32_t(cvar->m_Value));
 		});
 
-		AddRenderPass(RP_Prepass, RenderPass{ "Skybox Pass", [this](CameraRef camera, const RenderFrame& frame) {
+		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ MaxShadowLODs }, [this](const CVar* cvar) {
+			GenerateShadowLODDivisions(cvar->m_Value);
+			ResizeTemporaryShadowMaps(m_MinShadowResolution, m_MaxShadowResolution);
+		});
+
+		AddRenderPass(RP_Prepass, RenderPass{ "Prepare Data Pass", [this](CameraRef, const RenderFrame& frame) {
+			/* Update light data */
+			const uint32_t count = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
+			m_pLightCountSSBO->Assign(&count, 0, sizeof(uint32_t));
+			m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS*sizeof(LightData));
+			m_pLightSpaceTransformsSSBO->Assign(m_FrameData.LightSpaceTransforms.data(), 0, MAX_LIGHTS*sizeof(glm::mat4));
+			m_pLightDistancesSSBO->Assign(ResetLightDistances);
+		} });
+
+		AddRenderPass(RP_PreCompositePass, RenderPass{ "Shadows Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			ShadowMapsPass(camera, frame);
+			m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS*sizeof(LightData));
 		} });
 	}
 
@@ -214,13 +233,13 @@ namespace Glory
 		m_pScreenToViewSSBO = pResourceManager->CreateBuffer(sizeof(ScreenToView), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 2);
 		m_pScreenToViewSSBO->Assign(NULL);
 
-		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(LightData)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
+		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(LightData)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 3);
 		m_pLightsSSBO->Assign(NULL);
-		m_pLightCountSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 7);
+		m_pLightCountSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 7);
 		m_pLightCountSSBO->Assign(NULL);
-		m_pLightSpaceTransformsSSBO = pResourceManager->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 8);
+		m_pLightSpaceTransformsSSBO = pResourceManager->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 8);
 		m_pLightSpaceTransformsSSBO->Assign(NULL);
-		m_pLightDistancesSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_COPY, 6);
+		m_pLightDistancesSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 6);
 
 		ResetLightDistances = new uint32_t[MAX_LIGHTS];
 		for (size_t i = 0; i < MAX_LIGHTS; ++i)
@@ -237,38 +256,39 @@ namespace Glory
 		m_pCompactClustersMaterial = pResourceManager->CreateMaterial(m_pCompactClustersMaterialData);
 		m_pClusterCullLightMaterial = pResourceManager->CreateMaterial(m_pClusterCullLightMaterialData);
 
-		uint32_t vertexBufferSize = 4 * sizeof(VertexPosColorTex);
-		uint32_t indexBufferSize = 6 * sizeof(uint32_t);
-		m_pQuadMeshVertexBuffer = pResourceManager->CreateBuffer(vertexBufferSize, BufferBindingTarget::B_ARRAY, MemoryUsage::MU_DYNAMIC_DRAW, 0);
-		m_pQuadMeshIndexBuffer = pResourceManager->CreateBuffer(indexBufferSize, BufferBindingTarget::B_ELEMENT_ARRAY, MemoryUsage::MU_DYNAMIC_DRAW, 0);
+		const uint32_t vertexBufferSize = 4*sizeof(VertexPosColorTex);
+		const uint32_t indexBufferSize = 6*sizeof(uint32_t);
+		m_pQuadMeshVertexBuffer = pResourceManager->CreateBuffer(vertexBufferSize, BufferBindingTarget::B_ARRAY, MemoryUsage::MU_STATIC_DRAW, 0);
+		m_pQuadMeshIndexBuffer = pResourceManager->CreateBuffer(indexBufferSize, BufferBindingTarget::B_ELEMENT_ARRAY, MemoryUsage::MU_STATIC_DRAW, 0);
 
-		uint32_t indices[6] = {
+		const uint32_t indices[6] = {
 			0, 1, 2,
 			2, 3, 0
 		};
-		VertexPosColorTex defaultVertices[4] = {
+		const VertexPosColorTex defaultVertices[4] = {
 			{{-1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
 			{{-1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
 			{{1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
 			{{1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
 		};
 
-		m_pQuadMeshIndexBuffer->Assign(indices, 6 * sizeof(uint32_t));
-		m_pQuadMeshVertexBuffer->Assign(defaultVertices, 4 * sizeof(VertexPosColorTex));
+		m_pQuadMeshIndexBuffer->Assign(indices);
+		m_pQuadMeshVertexBuffer->Assign(defaultVertices);
 		m_pQuadMesh = pResourceManager->CreateMesh(4, 6, InputRate::Vertex, 0, sizeof(VertexPosColorTex),
 			PrimitiveType::PT_Triangles, { AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }, m_pQuadMeshVertexBuffer, m_pQuadMeshIndexBuffer);
 
 		SamplerSettings sampler;
 		sampler.MipmapMode = Filter::F_None;
-		sampler.MinFilter = Filter::F_Nearest;
-		sampler.MagFilter = Filter::F_Nearest;
+		sampler.MinFilter = Filter::F_Linear;
+		sampler.MagFilter = Filter::F_Linear;
 		sampler.AddressModeU = SamplerAddressMode::SAM_ClampToBorder;
 		sampler.AddressModeV = SamplerAddressMode::SAM_ClampToBorder;
 		sampler.AddressModeW = SamplerAddressMode::SAM_ClampToBorder;
 		m_pShadowAtlas = CreateGPUTextureAtlas({ m_ShadowAtlasResolution, m_ShadowAtlasResolution, PixelFormat::PF_R, PixelFormat::PF_R32Sfloat,
-			ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Color, sampler }
+			ImageType::IT_2D, DataType::DT_Float, 0, 0, ImageAspect::IA_Color, sampler }
 		);
 
+		GenerateShadowLODDivisions(m_MaxShadowLODs);
 		CreateTemporaryShadowMaps();
 	}
 
@@ -616,13 +636,6 @@ namespace Glory
 
 	void ClusteredRendererModule::OnStartCameraRender(CameraRef camera, const FrameData<LightData>& lights)
 	{
-		/* Update light data */
-		const uint32_t count = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
-		m_pLightCountSSBO->Assign(&count, 0, sizeof(uint32_t));
-		m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, count*sizeof(LightData));
-		m_pLightSpaceTransformsSSBO->Assign(m_FrameData.LightSpaceTransforms.data(), 0, count*sizeof(glm::mat4));
-		m_pLightDistancesSSBO->Assign(ResetLightDistances);
-
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
@@ -820,9 +833,10 @@ namespace Glory
 		m_pLightDistancesSSBO->Read(&lightDepthSlices, 0, m_FrameData.ActiveLights.count()*sizeof(uint32_t));
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 
-		const uint32_t sliceSteps = NUM_DEPTH_SLICES/MAX_SHADOW_LODS;
+		const uint32_t sliceSteps = NUM_DEPTH_SLICES/m_MaxShadowLODs;
 
 		m_pShadowAtlas->ReleaseAllChunks();
+		m_pShadowAtlas->Clear({1.0f, 1.0f, 1.0f, 1.0f});
 
 		for (size_t i = 0; i < m_FrameData.ActiveLights.count(); ++i)
 		{
@@ -840,7 +854,7 @@ namespace Glory
 				continue;
 			}
 
-			const uint32_t shadowLOD = std::min(depthSlice/sliceSteps, uint32_t(MAX_SHADOW_LODS - 1));
+			const uint32_t shadowLOD = std::min(depthSlice/sliceSteps, uint32_t(m_MaxShadowLODs - 1));
 			RenderTexture* pShadowMap = m_pTemporaryShadowMaps[shadowLOD];
 			uint32_t shadowWidth, shadowHeight;
 			pShadowMap->GetDimensions(shadowWidth, shadowHeight);
@@ -902,6 +916,18 @@ namespace Glory
 		pGraphics->UseMaterial(nullptr);
 	}
 
+	void ClusteredRendererModule::GenerateShadowLODDivisions(uint32_t maxLODs)
+	{
+		m_MaxShadowLODs = std::min(MAX_SHADOW_LODS, maxLODs);
+		m_ShadowLODDivisions.clear();
+		m_ShadowLODDivisions.reserve(m_MaxShadowLODs);
+		for (size_t i = 0; i < m_MaxShadowLODs; ++i)
+		{
+			const uint32_t divider = uint32_t(pow(2, i));
+			m_ShadowLODDivisions.push_back(divider);
+		}
+	}
+
 	void ClusteredRendererModule::CreateTemporaryShadowMaps()
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
@@ -910,22 +936,42 @@ namespace Glory
 		renderTextureInfo.HasStencil = false;
 		renderTextureInfo.Width = m_MaxShadowResolution;
 		renderTextureInfo.Height = m_MaxShadowResolution;
+		m_pTemporaryShadowMaps.reserve(m_MaxShadowLODs);
 
-		for (size_t i = 0; i < MAX_SHADOW_LODS; ++i)
+		for (size_t i = 0; i < m_MaxShadowLODs; ++i)
 		{
-			renderTextureInfo.Width = m_MaxShadowResolution/SHADOW_LOD_SCALES[i];
-			renderTextureInfo.Height = m_MaxShadowResolution/SHADOW_LOD_SCALES[i];
-			m_pTemporaryShadowMaps[i] = pGraphics->GetResourceManager()->CreateRenderTexture(renderTextureInfo);
+			const uint32_t res = std::max(m_MinShadowResolution, m_MaxShadowResolution/m_ShadowLODDivisions[i]);
+			renderTextureInfo.Width = res;
+			renderTextureInfo.Height = res;
+			m_pTemporaryShadowMaps.push_back(pGraphics->GetResourceManager()->CreateRenderTexture(renderTextureInfo));
 		}
 	}
 
-	void ClusteredRendererModule::ResizeTemporaryShadowMaps(uint32_t maxSize)
+	void ClusteredRendererModule::ResizeTemporaryShadowMaps(uint32_t minSize, uint32_t maxSize)
 	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		m_MinShadowResolution = minSize;
 		m_MaxShadowResolution = maxSize;
-		if (!m_pTemporaryShadowMaps[0]) return;
+		m_pTemporaryShadowMaps.reserve(m_MaxShadowLODs);
 
-		for (size_t i = 0; i < MAX_SHADOW_LODS; ++i)
-			m_pTemporaryShadowMaps[i]->Resize(m_MaxShadowResolution/SHADOW_LOD_SCALES[i], m_MaxShadowResolution/SHADOW_LOD_SCALES[i]);
+		RenderTextureCreateInfo renderTextureInfo;
+		renderTextureInfo.HasDepth = true;
+		renderTextureInfo.HasStencil = false;
+		renderTextureInfo.Width = m_MaxShadowResolution;
+		renderTextureInfo.Height = m_MaxShadowResolution;
+
+		for (size_t i = 0; i < m_MaxShadowLODs; ++i)
+		{
+			const uint32_t res = std::max(m_MinShadowResolution, m_MaxShadowResolution/m_ShadowLODDivisions[i]);
+			if (i >= m_pTemporaryShadowMaps.size())
+			{
+				renderTextureInfo.Width = res;
+				renderTextureInfo.Height = res;
+				m_pTemporaryShadowMaps.push_back(pGraphics->GetResourceManager()->CreateRenderTexture(renderTextureInfo));
+				continue;
+			}
+			m_pTemporaryShadowMaps[i]->Resize(res, res);
+		}
 
 		m_pShadowAtlas->ReleaseAllChunks();
 	}
