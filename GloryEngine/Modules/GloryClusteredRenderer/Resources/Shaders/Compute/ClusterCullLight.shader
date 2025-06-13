@@ -42,7 +42,6 @@ layout(std430, binding = 2) buffer screenToView
     float Bias;
     float zNear;
 	float zFar;
-    vec3 CameraPos;
 };
 
 layout(std430, binding = 3) buffer lightSSBO
@@ -66,8 +65,14 @@ layout(std430, binding = 6) buffer lightDistanceSSBO
     uint LightDepthSlices[];
 };
 
+layout(std430, binding = 7) buffer lightCountSSBO
+{
+    uint LightCount;
+};
+
 //Shared variables 
 shared LightData sharedLights[16 * 9 * 4];
+shared uint sharedLightIndices[16 * 9 * 4];
 
 uniform mat4 viewMatrix;
 
@@ -98,29 +103,33 @@ void main()
         uint lightIndex = batch * threadCount + gl_LocalInvocationIndex;
 
         //Prevent overflow by clamping to last light which is always null
-        lightIndex = min(lightIndex, lightCount);
+        lightIndex = min(lightIndex, Lights.length());
 
         //Populating shared light array
         sharedLights[gl_LocalInvocationIndex] = Lights[lightIndex];
+        sharedLightIndices[gl_LocalInvocationIndex] = lightIndex;
         barrier();
 
         //Iterating within the current batch of lights
         for (uint light = 0; light < threadCount; ++light)
         {
-            if (sharedLights[light].Type == Point && TestSphereAABB(light, tileIndex))
+            if(sharedLightIndices[light] < LightCount)
             {
-                visibleLightIndices[visibleLightCount] = batch * threadCount + light;
-                visibleLightCount += 1;
-            }
-            if (sharedLights[light].Type == Sun)
-            {
-                visibleLightIndices[visibleLightCount] = batch * threadCount + light;
-                visibleLightCount += 1;
-            }
-            if (sharedLights[light].Type == Spot && TestConeAABB(light, tileIndex))
-            {
-                visibleLightIndices[visibleLightCount] = batch * threadCount + light;
-                visibleLightCount += 1;
+                if (sharedLights[light].Type == Point && TestSphereAABB(light, tileIndex))
+                {
+                    visibleLightIndices[visibleLightCount] = batch * threadCount + light;
+                    visibleLightCount += 1;
+                }
+                if (sharedLights[light].Type == Sun)
+                {
+                    visibleLightIndices[visibleLightCount] = batch * threadCount + light;
+                    visibleLightCount += 1;
+                }
+                if (sharedLights[light].Type == Spot && TestConeAABB(light, tileIndex))
+                {
+                    visibleLightIndices[visibleLightCount] = batch * threadCount + light;
+                    visibleLightCount += 1;
+                }
             }
         }
     }
