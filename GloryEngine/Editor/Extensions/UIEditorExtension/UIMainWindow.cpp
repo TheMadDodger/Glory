@@ -191,6 +191,34 @@ namespace Glory::Editor
 			pDocument->SetName(entity, newName);
 		});
 
+		Undo::RegisterChangeHandler(std::string(".gui"), std::string("Active"),
+		[this, &serializers](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			std::vector<std::string> components;
+			Reflect::Tokenize(path.string(), components, '\\');
+
+			switch (components.size())
+			{
+			case 3:
+			{
+				const std::filesystem::path filePath = file.Path();
+				const UUID documentID = EditorAssetDatabase::FindAssetUUID(filePath.string());
+				const UUID entityUUID = (UUID)std::stoull(components[1]);
+
+				UIDocument* pDocument = FindEditingDocument(documentID);
+				const Utils::ECS::EntityID entity = pDocument->EntityID(entityUUID);
+				const bool active = file[path].As<bool>();
+				pDocument->SetEntityActive(entity, active);
+				break;
+			}
+			case 4:
+
+				break;
+
+			default:
+				return;
+			}
+		});
+
 		Shortcuts::AddMainWindowAction("Delete", m_MainWindowIndex, [this, pEngine, &resources]() {
 			UIDocument* pDocument = CurrentDocument();
 			if (!m_EditingDocument || !pDocument || !m_SelectedEntity) return;

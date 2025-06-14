@@ -13,6 +13,7 @@ Engine:
 Editor:
 - Fixed crash when exiting and entering playmode when physics objects are in use
 - Added Organization and Application Name to general project settings
+- Fixed UI element active toggle not updating the document
 
 Scripting:
 - Fixed crash when trying to get the FSM state of a state machine instance that does not exist
