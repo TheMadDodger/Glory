@@ -208,7 +208,7 @@ namespace Glory
 			UIPrepass(camera, frame);
 		} });
 
-		pRenderer->AddRenderPass(RenderPassType::RP_CameraPostpass, { "UI Overlay Pass", [this](CameraRef camera, const RenderFrame& frame) {
+		pRenderer->AddRenderPass(RenderPassType::RP_CameraCompositePass, { "UI Overlay Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			UIOverlayPass(camera, frame);
 		} });
 
