@@ -9,6 +9,7 @@ Engine:
 - Added command for reading a file and executing it as commands (exec)
 - Added r_screenSpaceAO CVar
 - Added preference path which uses organization and application name
+- Added Vertical Container component for UI elements
 
 Editor:
 - Fixed crash when exiting and entering playmode when physics objects are in use

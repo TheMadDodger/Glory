@@ -24,7 +24,7 @@ namespace Glory
         CalculateMatrix(pRegistry, entity, pComponent);
 	}
 
-    void UITransformSystem::CalculateMatrix(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent)
+    void UITransformSystem::CalculateMatrix(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent, bool calculateParentIfDirty)
     {
 		glm::mat4 startTransform = glm::identity<glm::mat4>();
 		glm::mat4 startInteractionTransform = glm::identity<glm::mat4>();
@@ -32,7 +32,7 @@ namespace Glory
         Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
         const Utils::ECS::EntityID parent = pEntityView->Parent();
 
-        if (pRegistry->IsValid(parent) && pRegistry->IsEntityDirty(parent))
+        if (pRegistry->IsValid(parent) && pRegistry->IsEntityDirty(parent) && calculateParentIfDirty)
         {
             CalculateMatrix(pRegistry, parent, pRegistry->GetComponent<UITransform>(parent));
         }
@@ -418,5 +418,32 @@ namespace Glory
 		pGraphics->SetStencilMask(0x00);
 		pGraphics->SetStencilOP(Func::OP_Keep, Func::OP_Keep, Func::OP_Keep);
 		pGraphics->SetStencilFunc(CompareOp::OP_LessOrEqual, counter, 0xFF);
+	}
+
+	void UIVerticalContainerSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIVerticalContainer& pComponent)
+	{
+		if (!pComponent.m_Dirty) return;
+		Utils::ECS::EntityView* pEntity = pRegistry->GetEntityView(entity);
+		float height = 0.0f;
+		for (size_t i = 0; i < pEntity->ChildCount(); ++i)
+		{
+			const Utils::ECS::EntityID child = pEntity->Child(i);
+			UITransform& transform = pRegistry->GetComponent<UITransform>(child);
+			if (pRegistry->IsEntityDirty(child))
+				UITransformSystem::CalculateMatrix(pRegistry, child, transform, false);
+			const float elementHeight = transform.m_Height.m_FinalValue;
+			transform.m_Y.m_Constraint = 0;
+			transform.m_Y.m_Value = height;
+			height += elementHeight + pComponent.m_Seperation;
+			pRegistry->SetEntityDirty(child);
+			UITransformSystem::CalculateMatrix(pRegistry, child, transform, false);
+		}
+		pComponent.m_Dirty = false;
+	}
+
+	void UIVerticalContainerSystem::OnDirty(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIVerticalContainer& pComponent)
+	{
+		pComponent.m_Dirty = true;
+		UIVerticalContainerSystem::OnUpdate(pRegistry, entity, pComponent);
 	}
 }

@@ -22,15 +22,14 @@ namespace Glory
 	struct UIInteraction;
 	struct UIPanel;
 	struct UIConstraint;
+	struct UIVerticalContainer;
 	class Engine;
 
 	class UITransformSystem
 	{
 	public:
 		static void OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent);
-
-	private:
-		static void CalculateMatrix(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent);
+		static void CalculateMatrix(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent, bool calculateParentIfDirty=true);
 	};
 
 	class UIImageSystem
@@ -78,5 +77,12 @@ namespace Glory
 	public:
 		static void OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIPanel& pComponent);
 		static void OnPostDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIPanel& pComponent);
+	};
+
+	class UIVerticalContainerSystem
+	{
+	public:
+		static void OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIVerticalContainer& pComponent);
+		static void OnDirty(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIVerticalContainer& pComponent);
 	};
 }
