@@ -60,8 +60,8 @@ namespace Glory
             m_ParentSize(), m_Transform(glm::identity<glm::mat4>()),
             m_TransformNoScale(glm::identity<glm::mat4>()),
             m_TransformNoScaleNoPivot(glm::identity<glm::mat4>()),
-            m_InteractionTransform(glm::identity<glm::mat4>()),
-            m_IsDirty(false) {}
+            m_InteractionTransform(glm::identity<glm::mat4>())
+        {}
 
         REFLECTABLE(UITransform,
             (XConstraint)(m_X),
@@ -79,7 +79,6 @@ namespace Glory
         glm::mat4 m_TransformNoScaleNoPivot;
         glm::mat4 m_InteractionTransform;
         glm::mat4 m_InteractionTransformNoPivot;
-        bool m_IsDirty;
     };
 
     /** @brief UI Image renderer */
@@ -169,5 +168,17 @@ namespace Glory
         glm::vec2 m_CursorPos;
         bool m_CursorDown;
         bool m_IsDirty;
+    };
+
+    /** @brief Vertical container automatically moves child elements down */
+    struct UIVerticalContainer
+    {
+        UIVerticalContainer() : m_Seperation(0.0f) {}
+
+        REFLECTABLE(UIVerticalContainer,
+            (float)(m_Seperation)
+        );
+
+        bool m_Dirty;
     };
 }

@@ -150,6 +150,7 @@ namespace Glory
 		Reflect::SetFieldFlags(pColorField, PropertyFlags::Color);
 		Reflect::RegisterType<UIInteraction>();
 		Reflect::RegisterType<UIPanel>();
+		Reflect::RegisterType<UIVerticalContainer>();
 
 		Constraints::AddBuiltinConstraints();
 
@@ -170,6 +171,7 @@ namespace Glory
 		m_pComponentTypes->RegisterComponent<UIBox>();
 		m_pComponentTypes->RegisterComponent<UIInteraction>();
 		m_pComponentTypes->RegisterComponent<UIPanel>();
+		m_pComponentTypes->RegisterComponent<UIVerticalContainer>();
 		/* Transform */
 		m_pComponentTypes->RegisterInvokaction<UITransform>(Glory::Utils::ECS::InvocationType::Update, UITransformSystem::OnUpdate);
 		/* Image */
@@ -187,6 +189,9 @@ namespace Glory
 		/* Panel */
 		m_pComponentTypes->RegisterInvokaction<UIPanel>(Glory::Utils::ECS::InvocationType::Draw, UIPanelSystem::OnDraw);
 		m_pComponentTypes->RegisterInvokaction<UIPanel>(Glory::Utils::ECS::InvocationType::PostDraw, UIPanelSystem::OnPostDraw);
+		/* Vertical Container */
+		m_pComponentTypes->RegisterInvokaction<UIVerticalContainer>(Glory::Utils::ECS::InvocationType::OnDirty, UIVerticalContainerSystem::OnDirty);
+		m_pComponentTypes->RegisterInvokaction<UIVerticalContainer>(Glory::Utils::ECS::InvocationType::Update, UIVerticalContainerSystem::OnUpdate);
 
 		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
 		pRenderer->AddRenderPass(RenderPassType::RP_Prepass, { "UI Prepass", [this](CameraRef camera, const RenderFrame& frame) {

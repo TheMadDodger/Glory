@@ -52,6 +52,7 @@ namespace Glory::Utils::ECS
 			Glory::UUID uuid;
 			pEntityView->Add(pTypeView->m_TypeHash, uuid);
 			pTypeView->m_Callbacks->Invoke(InvocationType::OnAdd, this, entity, component);
+			SetEntityDirty(entity);
 			return component;
 		}
 
@@ -68,6 +69,7 @@ namespace Glory::Utils::ECS
 			EntityView* pEntityView = GetEntityView(entity);
 			pEntityView->Add(pTypeView->m_TypeHash, uuid);
 			pTypeView->m_Callbacks->Invoke(InvocationType::OnAdd, this, entity, component);
+			SetEntityDirty(entity);
 			return component;
 		}
 

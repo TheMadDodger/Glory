@@ -52,6 +52,7 @@ namespace Glory::Utils::ECS
 			EntityView* pParentView = m_pEntityViews.at(pEntityView->m_Parent);
 			const auto itor = std::find(pParentView->m_Children.begin(), pParentView->m_Children.end(), entity);
 			pParentView->m_Children.erase(itor);
+			SetEntityDirty(pEntityView->m_Parent);
 		}
 		else
 		{
@@ -78,6 +79,7 @@ namespace Glory::Utils::ECS
 		EntityView* pEntityView = GetEntityView(entityID);
 		pEntityView->Add(pTypeView->m_TypeHash, uuid);
 		pTypeView->Invoke(InvocationType::OnAdd, this, entityID, pAddress);
+		SetEntityDirty(entityID);
 		return pAddress;
 	}
 
@@ -95,6 +97,7 @@ namespace Glory::Utils::ECS
 		pEntityView->Add(pTypeView->m_TypeHash, uuid);
 		pTypeView->Invoke(InvocationType::OnAdd, this, entityID, pAddress);
 		pTypeView->Invoke(InvocationType::OnValidate, this, entityID, pAddress);
+		SetEntityDirty(entityID);
 		return pAddress;
 	}
 
@@ -157,6 +160,7 @@ namespace Glory::Utils::ECS
 		BaseTypeView* pTypeView = GetTypeView(typeHash);
 		void* pAddress = pTypeView->GetComponentAddress(entity);
 		pTypeView->Remove(entity);
+		SetEntityDirty(entity);
 		return m_pEntityViews[entity]->Remove(typeHash);
 	}
 
@@ -168,6 +172,7 @@ namespace Glory::Utils::ECS
 		void* pAddress = pTypeView->GetComponentAddress(entity);
 		pTypeView->Remove(entity);
 		m_pEntityViews[entity]->Remove(typeHash);
+		SetEntityDirty(entity);
 	}
 
 	size_t EntityRegistry::ComponentCount(EntityID entity)
@@ -185,6 +190,7 @@ namespace Glory::Utils::ECS
 			BaseTypeView* pTypeView = GetTypeView(typeHash);
 			void* pAddress = pTypeView->GetComponentAddress(entity);
 			pTypeView->Remove(entity);
+			SetEntityDirty(entity);
 		}
 	}
 
@@ -247,6 +253,7 @@ namespace Glory::Utils::ECS
 			auto& oldParentChildren = m_pEntityViews.at(oldParent)->m_Children;
 			const auto itor = std::find(oldParentChildren.begin(), oldParentChildren.end(), entity);
 			oldParentChildren.erase(itor);
+			SetEntityDirty(oldParent);
 		}
 		else
 		{
@@ -302,15 +309,18 @@ namespace Glory::Utils::ECS
 	void EntityRegistry::SetSiblingIndex(Utils::ECS::EntityID entity, size_t index)
 	{
 		auto itor = m_pEntityViews.find(entity);
-		itor = m_pEntityViews.find(itor->second->Parent());
+		const Utils::ECS::EntityID parent = itor->second->Parent();
+		itor = m_pEntityViews.find(parent);
 		std::vector<EntityID>* targetVector = nullptr;
 		if (itor == m_pEntityViews.end())
 		{
 			targetVector = &m_RootOrder;
+			SetEntityDirty(entity);
 		}
 		else
 		{
-			targetVector = &itor->second->m_Children;;
+			targetVector = &itor->second->m_Children;
+			SetEntityDirty(parent);
 		}
 		auto it = std::find(targetVector->begin(), targetVector->end(), entity);
 		const size_t oldIndex = it - targetVector->begin();
@@ -371,11 +381,19 @@ namespace Glory::Utils::ECS
 		EntityView* pView = GetEntityView(entity);
 		if (!pView) return;
 
+		if (dirty == IsEntityDirty(entity)) return;
 		m_EntityDirty.Set(entity, dirty);
 		
 		if (!dirty) return;
 
 		InvokeAll(InvocationType::OnDirty, { entity });
+		/* Notify parent once */
+		const Utils::ECS::EntityID parent = GetParent(entity);
+		if (parent && !IsEntityDirty(parent))
+		{
+			m_EntityDirty.Set(parent, dirty);
+			InvokeAll(InvocationType::OnDirty, { parent });
+		}
 
 		/* Must set all children as dirty as well! */
 		for (size_t i = 0; i < pView->ChildCount(); ++i)
