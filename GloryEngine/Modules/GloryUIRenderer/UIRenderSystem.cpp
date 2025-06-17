@@ -123,6 +123,7 @@ namespace Glory
 			{
 				const glm::vec2 screenScale = 1.0f / pInput->GetScreenScale();
 				pComponent.m_CursorPos = pInput->GetCursorPos(0)*screenScale;
+				pComponent.m_CursorScrollDelta = pInput->GetCursorScrollDelta(0);
 				pComponent.m_CursorDown = pInput->IsCursorDown(0);
 			}
 			break;
@@ -158,6 +159,7 @@ namespace Glory
 		}
 
 		data.m_CursorPos = pComponent.m_CursorPos;
+		data.m_CursorScrollDelta = pComponent.m_CursorScrollDelta;
 		data.m_CursorDown = pComponent.m_CursorDown;
 
 		pModule->Submit(std::move(data));

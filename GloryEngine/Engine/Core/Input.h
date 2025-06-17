@@ -45,7 +45,8 @@ namespace Glory
 		enum Type
 		{
 			Motion,
-			Button
+			Button,
+			Scroll
 		};
 
 		Type Type;

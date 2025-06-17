@@ -151,6 +151,7 @@ namespace Glory
 		Reflect::RegisterType<UIInteraction>();
 		Reflect::RegisterType<UIPanel>();
 		Reflect::RegisterType<UIVerticalContainer>();
+		Reflect::RegisterType<UIScrollView>();
 
 		Constraints::AddBuiltinConstraints();
 
@@ -172,6 +173,7 @@ namespace Glory
 		m_pComponentTypes->RegisterComponent<UIInteraction>();
 		m_pComponentTypes->RegisterComponent<UIPanel>();
 		m_pComponentTypes->RegisterComponent<UIVerticalContainer>();
+		m_pComponentTypes->RegisterComponent<UIScrollView>();
 		/* Transform */
 		m_pComponentTypes->RegisterInvokaction<UITransform>(Glory::Utils::ECS::InvocationType::Update, UITransformSystem::OnUpdate);
 		/* Image */
@@ -192,6 +194,11 @@ namespace Glory
 		/* Vertical Container */
 		m_pComponentTypes->RegisterInvokaction<UIVerticalContainer>(Glory::Utils::ECS::InvocationType::OnDirty, UIVerticalContainerSystem::OnDirty);
 		m_pComponentTypes->RegisterInvokaction<UIVerticalContainer>(Glory::Utils::ECS::InvocationType::Update, UIVerticalContainerSystem::OnUpdate);
+		/* Scroll View */
+		m_pComponentTypes->RegisterInvokaction<UIScrollView>(Glory::Utils::ECS::InvocationType::Start, UIScrollViewSystem::OnStart);
+		m_pComponentTypes->RegisterInvokaction<UIScrollView>(Glory::Utils::ECS::InvocationType::OnValidate, UIScrollViewSystem::OnValidate);
+		m_pComponentTypes->RegisterInvokaction<UIScrollView>(Glory::Utils::ECS::InvocationType::OnDirty, UIScrollViewSystem::OnDirty);
+		m_pComponentTypes->RegisterInvokaction<UIScrollView>(Glory::Utils::ECS::InvocationType::Update, UIScrollViewSystem::OnUpdate);
 
 		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
 		pRenderer->AddRenderPass(RenderPassType::RP_Prepass, { "UI Prepass", [this](CameraRef camera, const RenderFrame& frame) {
@@ -299,6 +306,7 @@ namespace Glory
 			RenderTexture* pRenderTexture = document.m_pUITexture;
 			document.m_Projection = glm::ortho(0.0f, float(data.m_Resolution.x), 0.0f, float(data.m_Resolution.y));
 			document.m_CursorPos = data.m_CursorPos;
+			document.m_CursorScrollDelta = data.m_CursorScrollDelta;
 			document.m_CursorDown = data.m_CursorDown;
 			document.m_InputEnabled = data.m_InputEnabled;
 			document.Update();

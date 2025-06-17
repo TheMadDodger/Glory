@@ -179,7 +179,7 @@ namespace Glory::Utils::ECS
 		EntityID CopyEntityToOtherRegistry(EntityID entity, EntityID parent, EntityRegistry* pRegistry);
 
 		bool IsEntityDirty(EntityID entity) const;
-		void SetEntityDirty(EntityID entity, bool dirty=true);
+		void SetEntityDirty(EntityID entity, bool dirty=true, bool setChildrenDirty=true);
 
 		/** @brief Disable any execution of component callbacks */
 		void DisableCallbacks();

@@ -376,7 +376,7 @@ namespace Glory::Utils::ECS
 		return m_EntityDirty.IsSet(entity);
 	}
 
-	void EntityRegistry::SetEntityDirty(EntityID entity, bool dirty)
+	void EntityRegistry::SetEntityDirty(EntityID entity, bool dirty, bool setChildrenDirty)
 	{
 		EntityView* pView = GetEntityView(entity);
 		if (!pView) return;
@@ -395,6 +395,7 @@ namespace Glory::Utils::ECS
 			InvokeAll(InvocationType::OnDirty, { parent });
 		}
 
+		if (!setChildrenDirty) return;
 		/* Must set all children as dirty as well! */
 		for (size_t i = 0; i < pView->ChildCount(); ++i)
 		{

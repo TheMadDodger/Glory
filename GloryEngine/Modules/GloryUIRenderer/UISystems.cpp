@@ -438,6 +438,14 @@ namespace Glory
 			pRegistry->SetEntityDirty(child);
 			UITransformSystem::CalculateMatrix(pRegistry, child, transform, false);
 		}
+		UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
+		if (pComponent.m_AutoResizeHeight && transform.m_Height.m_FinalValue != height)
+		{
+			transform.m_Height.m_Constraint = 0;
+			transform.m_Height = height;
+			UITransformSystem::CalculateMatrix(pRegistry, entity, transform, false);
+			pRegistry->SetEntityDirty(entity, true);
+		}
 		pComponent.m_Dirty = false;
 	}
 
@@ -445,5 +453,77 @@ namespace Glory
 	{
 		pComponent.m_Dirty = true;
 		UIVerticalContainerSystem::OnUpdate(pRegistry, entity, pComponent);
+	}
+
+	void UIScrollViewSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIScrollView& pComponent)
+	{
+		pComponent.m_ScrollPosition = pComponent.m_StartScrollPosition;
+		pComponent.m_Dirty = true;
+	}
+
+	void UIScrollViewSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIScrollView& pComponent)
+	{
+		pComponent.m_ScrollPosition = pComponent.m_StartScrollPosition;
+		pComponent.m_Dirty = true;
+	}
+
+	void UIScrollViewSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIScrollView& pComponent)
+	{
+		if (!pRegistry->HasComponent<UIInteraction>(entity)) return;
+		UIInteraction& interaction = pRegistry->GetComponent<UIInteraction>(entity);
+		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
+
+		const glm::vec2& cursorScrollDelta = pDocument->GetCursorScrollDelta();
+		const float length = glm::length(cursorScrollDelta);
+		if ((!pComponent.m_RequireHover || interaction.m_Hovered) && length != 0.0f)
+		{
+			if (!pComponent.m_LockHorizontal)
+				pComponent.m_ScrollPosition.x += pDocument->GetCursorScrollDelta().x*pComponent.m_ScrollSpeeds.x;
+			if (!pComponent.m_LockVertical)
+				pComponent.m_ScrollPosition.y += pDocument->GetCursorScrollDelta().y*pComponent.m_ScrollSpeeds.y;
+			pComponent.m_Dirty = true;
+		}
+
+		if (!pComponent.m_Dirty) return;
+
+		/* Calculate content size */
+		glm::vec2 contentSize{ 0.0f };
+		glm::vec2 startPos{ 0.0f };
+		for (size_t i = 0; i < pRegistry->ChildCount(entity); ++i)
+		{
+			const Utils::ECS::EntityID child = pRegistry->Child(entity, i);
+			UITransform& childTransform = pRegistry->GetComponent<UITransform>(child);
+			if (pRegistry->IsEntityDirty(child))
+				UITransformSystem::CalculateMatrix(pRegistry, child, childTransform, false);
+
+			if (i == 0)
+				startPos = glm::min(glm::vec2{ 0.0f, 0.0f }, glm::vec2{ childTransform.m_X.m_FinalValue, childTransform.m_Y.m_FinalValue });
+
+			contentSize.x += glm::max(contentSize.x, childTransform.m_X.m_FinalValue - startPos.x + childTransform.m_Width.m_FinalValue);
+			contentSize.y += glm::max(contentSize.y, childTransform.m_Y.m_FinalValue - startPos.y + childTransform.m_Height.m_FinalValue);
+		}
+		UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
+
+		const glm::vec2 maxScroll{ glm::max(glm::vec2{0.0f}, contentSize - glm::vec2{ transform.m_Width.m_FinalValue, transform.m_Height.m_FinalValue }) };
+		pComponent.m_ScrollPosition = glm::clamp(pComponent.m_ScrollPosition, glm::vec2{ 0.0f, 0.0f }, maxScroll);
+
+		for (size_t i = 0; i < pRegistry->ChildCount(entity); ++i)
+		{
+			const Utils::ECS::EntityID child = pRegistry->Child(entity, i);
+			UITransform& transform = pRegistry->GetComponent<UITransform>(child);
+			transform.m_X.m_Constraint = 0;
+			transform.m_X.m_Value = -pComponent.m_ScrollPosition.x;
+			transform.m_Y.m_Constraint = 0;
+			transform.m_Y.m_Value = -pComponent.m_ScrollPosition.y;
+			pRegistry->SetEntityDirty(child);
+			UITransformSystem::CalculateMatrix(pRegistry, child, transform, false);
+		}
+
+		pComponent.m_Dirty = false;
+	}
+
+	void UIScrollViewSystem::OnDirty(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIScrollView& pComponent)
+	{
+		pComponent.m_Dirty = true;
 	}
 }
