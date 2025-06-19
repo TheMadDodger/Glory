@@ -132,6 +132,8 @@ namespace Glory
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
 		Reflect::RegisterEnum<UITarget>();
 		Reflect::RegisterEnum<ResolutionMode>();
+		Reflect::RegisterEnum<ScrollMode>();
+		Reflect::RegisterEnum<ScrollEdgeMode>();
 		Reflect::RegisterType<XConstraint>();
 		Reflect::RegisterType<YConstraint>();
 		Reflect::RegisterType<WidthConstraint>();
@@ -175,7 +177,7 @@ namespace Glory
 		m_pComponentTypes->RegisterComponent<UIVerticalContainer>();
 		m_pComponentTypes->RegisterComponent<UIScrollView>();
 		/* Transform */
-		m_pComponentTypes->RegisterInvokaction<UITransform>(Glory::Utils::ECS::InvocationType::Update, UITransformSystem::OnUpdate);
+		m_pComponentTypes->RegisterInvokaction<UITransform>(Glory::Utils::ECS::InvocationType::PostUpdate, UITransformSystem::OnPostUpdate);
 		/* Image */
 		m_pComponentTypes->RegisterInvokaction<UIImage>(Glory::Utils::ECS::InvocationType::Draw, UIImageSystem::OnDraw);
 		m_pComponentTypes->RegisterReferencesCallback<UIImage>(UIImageSystem::GetReferences);
@@ -193,11 +195,13 @@ namespace Glory
 		m_pComponentTypes->RegisterInvokaction<UIPanel>(Glory::Utils::ECS::InvocationType::PostDraw, UIPanelSystem::OnPostDraw);
 		/* Vertical Container */
 		m_pComponentTypes->RegisterInvokaction<UIVerticalContainer>(Glory::Utils::ECS::InvocationType::OnDirty, UIVerticalContainerSystem::OnDirty);
+		m_pComponentTypes->RegisterInvokaction<UIVerticalContainer>(Glory::Utils::ECS::InvocationType::PreUpdate, UIVerticalContainerSystem::OnPreUpdate);
 		m_pComponentTypes->RegisterInvokaction<UIVerticalContainer>(Glory::Utils::ECS::InvocationType::Update, UIVerticalContainerSystem::OnUpdate);
 		/* Scroll View */
 		m_pComponentTypes->RegisterInvokaction<UIScrollView>(Glory::Utils::ECS::InvocationType::Start, UIScrollViewSystem::OnStart);
 		m_pComponentTypes->RegisterInvokaction<UIScrollView>(Glory::Utils::ECS::InvocationType::OnValidate, UIScrollViewSystem::OnValidate);
 		m_pComponentTypes->RegisterInvokaction<UIScrollView>(Glory::Utils::ECS::InvocationType::OnDirty, UIScrollViewSystem::OnDirty);
+		m_pComponentTypes->RegisterInvokaction<UIScrollView>(Glory::Utils::ECS::InvocationType::PreUpdate, UIScrollViewSystem::OnPreUpdate);
 		m_pComponentTypes->RegisterInvokaction<UIScrollView>(Glory::Utils::ECS::InvocationType::Update, UIScrollViewSystem::OnUpdate);
 
 		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();

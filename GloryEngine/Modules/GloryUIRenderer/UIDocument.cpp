@@ -79,10 +79,34 @@ namespace Glory
 		return m_pUITexture;
 	}
 
+	void UpdateEntity(Utils::ECS::EntityID entity, Utils::ECS::EntityRegistry& registry, Utils::ECS::InvocationType invocation)
+	{
+		registry.InvokeAll(invocation, { entity });
+		for (size_t i = 0; i < registry.ChildCount(entity); ++i)
+		{
+			const Utils::ECS::EntityID child = registry.Child(entity, i);
+			UpdateEntity(child, registry, invocation);
+		}
+	}
+
 	void UIDocument::Update()
 	{
 		m_Registry.SetUserData(this);
-		m_Registry.InvokeAll(Utils::ECS::InvocationType::Update, NULL);
+		for (size_t i = 0; i < m_Registry.ChildCount(0); ++i)
+		{
+			const Utils::ECS::EntityID child = m_Registry.Child(0, i);
+			UpdateEntity(child, m_Registry, Utils::ECS::InvocationType::PreUpdate);
+		}
+		for (size_t i = 0; i < m_Registry.ChildCount(0); ++i)
+		{
+			const Utils::ECS::EntityID child = m_Registry.Child(0, i);
+			UpdateEntity(child, m_Registry, Utils::ECS::InvocationType::Update);
+		}
+		for (size_t i = 0; i < m_Registry.ChildCount(0); ++i)
+		{
+			const Utils::ECS::EntityID child = m_Registry.Child(0, i);
+			UpdateEntity(child, m_Registry, Utils::ECS::InvocationType::PostUpdate);
+		}
 		m_WasCursorDown = m_CursorDown;
 	}
 
