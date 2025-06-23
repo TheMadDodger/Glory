@@ -13,6 +13,8 @@
 
 REFLECTABLE_ENUM_NS(Glory, UITarget, None, CameraOverlay, WorldSpaceQuad);
 REFLECTABLE_ENUM_NS(Glory, ResolutionMode, CameraScale, Fixed);
+REFLECTABLE_ENUM_NS(Glory, ScrollMode, Snap, Lerp);
+REFLECTABLE_ENUM_NS(Glory, ScrollEdgeMode, Clamp, Innertia);
 
 #define CONSTRAINT(axis)\
 struct axis##Constraint\
@@ -147,10 +149,9 @@ namespace Glory
     struct UIRenderer
     {
         UIRenderer(): m_Target(UITarget::CameraOverlay),
-            m_ResolutionMode(ResolutionMode::CameraScale),
-            m_Resolution(1.0f, 1.0f), m_RenderDocumentID(0),
-            m_WorldMaterial(0), m_WorldSize(1.0f, 1.0f),
-            m_InputEnabled(true), m_CursorPos(0.0f, 0.0f),
+            m_ResolutionMode(ResolutionMode::CameraScale), m_Resolution(1.0f, 1.0f),
+            m_RenderDocumentID(0), m_WorldMaterial(0), m_WorldSize(1.0f, 1.0f),
+            m_InputEnabled(true), m_CursorPos(0.0f, 0.0f), m_CursorScrollDelta(0.0f, 0.0f),
             m_CursorDown(false), m_IsDirty(false)
         {}
 
@@ -166,6 +167,7 @@ namespace Glory
 
         UUID m_RenderDocumentID;
         glm::vec2 m_CursorPos;
+        glm::vec2 m_CursorScrollDelta;
         bool m_CursorDown;
         bool m_IsDirty;
     };
@@ -173,12 +175,42 @@ namespace Glory
     /** @brief Vertical container automatically moves child elements down */
     struct UIVerticalContainer
     {
-        UIVerticalContainer() : m_Seperation(0.0f) {}
+        UIVerticalContainer() :
+            m_AutoResizeHeight(true), m_Seperation(0.0f), m_Dirty(true) {}
 
         REFLECTABLE(UIVerticalContainer,
+            (bool)(m_AutoResizeHeight),
             (float)(m_Seperation)
         );
 
+        bool m_Dirty;
+    };
+
+    /** @brief Scroll view */
+    struct UIScrollView
+    {
+        UIScrollView() : m_RequireHover(true), m_LockHorizontal(false), m_LockVertical(false), m_AutoScroll(true),
+            m_ScrollSpeeds(-1.0f, -1.0f), m_StartScrollPosition(0.0f, 0.0f), m_ScrollMode(ScrollMode::Lerp),
+            m_ScrollEdgeMode(ScrollEdgeMode::Innertia), m_LerpSpeed(10.0f), m_Innertia(10.0f),
+            m_ScrollPosition(0.0f, 0.0f), m_DesiredScrollPosition(0.0f, 0.0f), m_MaxScroll(0.0f, 0.0f),
+            m_Dirty(true) {}
+
+        REFLECTABLE(UIScrollView,
+            (bool)(m_RequireHover),
+            (bool)(m_LockHorizontal),
+            (bool)(m_LockVertical),
+            (bool)(m_AutoScroll),
+            (glm::vec2)(m_ScrollSpeeds),
+            (glm::vec2)(m_StartScrollPosition),
+            (ScrollMode)(m_ScrollMode),
+            (ScrollEdgeMode)(m_ScrollEdgeMode),
+            (float)(m_LerpSpeed),
+            (float)(m_Innertia)
+        );
+
+        glm::vec2 m_ScrollPosition;
+        glm::vec2 m_DesiredScrollPosition;
+        glm::vec2 m_MaxScroll;
         bool m_Dirty;
     };
 }

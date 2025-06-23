@@ -10,6 +10,7 @@ Engine:
 - Added r_screenSpaceAO CVar
 - Added preference path which uses organization and application name
 - Added Vertical Container component for UI elements
+- Added Scroll View component for UI elements
 
 Editor:
 - Fixed crash when exiting and entering playmode when physics objects are in use

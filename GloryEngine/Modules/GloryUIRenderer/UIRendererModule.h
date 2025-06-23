@@ -31,6 +31,7 @@ namespace Glory
 		glm::uvec2 m_Resolution;
 		glm::vec2 m_WorldSize;
 		glm::vec2 m_CursorPos;
+		glm::vec2 m_CursorScrollDelta;
 		bool m_CursorDown;
 		glm::mat4 m_WorldTransform;
 		LayerMask m_LayerMask;

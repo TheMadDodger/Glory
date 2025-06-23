@@ -466,6 +466,15 @@ namespace Glory
 				inputEvent.Value = 0.0f;
 				inputEvent.Delta = -1.0f;
 				consumed |= ForwardInputEvent(inputEvent);
+
+				CursorEvent cursorEvent;
+				cursorEvent.Type = CursorEvent::Scroll;
+				cursorEvent.InputDeviceType = InputDeviceType::Mouse;
+				cursorEvent.SourceDeviceID = event.motion.which;
+				cursorEvent.Cursor = glm::vec2{ float(event.wheel.x), float(event.wheel.y) };
+				cursorEvent.IsDelta = true;
+				cursorEvent.IsDown = false;
+				ForwardCursorEvent(cursorEvent);
 			}
 			return consumed;
 		}

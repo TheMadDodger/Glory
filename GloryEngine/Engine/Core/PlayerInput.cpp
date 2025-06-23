@@ -9,8 +9,8 @@
 namespace Glory
 {
 	PlayerInput::PlayerInput(InputModule* pInputModule, size_t playerIndex)
-		: m_pInputModule(pInputModule), m_PlayerIndex(playerIndex),
-		m_InputMode(InputMode::None.m_Name), m_CursorPos(0.0f, 0.0f), m_CursorDown(false)
+		: m_pInputModule(pInputModule), m_PlayerIndex(playerIndex), m_InputMode(InputMode::None.m_Name),
+		m_CursorPos(0.0f, 0.0f), m_CursorScrollDelta(0.0f), m_CursorDown(false)
 	{
 	}
 
@@ -66,6 +66,9 @@ namespace Glory
 		case CursorEvent::Button:
 			m_CursorDown = event.IsDown;
 			break;
+		case CursorEvent::Scroll:
+			m_CursorScrollDelta = event.Cursor;
+			break;
 		}
 	}
 
@@ -94,6 +97,7 @@ namespace Glory
 			}
 			m_InputData[i].m_ToClearValues.clear();
 		}
+		m_CursorScrollDelta = glm::vec2();
 	}
 
 	const float PlayerInput::GetAxis(const std::string& inputMap, const std::string& actionName) const
@@ -135,6 +139,11 @@ namespace Glory
 	const glm::vec2& PlayerInput::GetCursorPos() const
 	{
 		return m_CursorPos;
+	}
+
+	const glm::vec2& PlayerInput::GetCursorScrollDelta() const
+	{
+		return m_CursorScrollDelta;
 	}
 
 	bool PlayerInput::IsCursorDown() const

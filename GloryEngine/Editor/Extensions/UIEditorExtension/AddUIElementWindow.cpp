@@ -23,11 +23,12 @@ namespace Glory::Editor
 		{ ResourceTypes::GetHash<UIBox>(), ICON_FA_SQUARE },
 		{ ResourceTypes::GetHash<UIPanel>(), ICON_FA_ADDRESS_CARD },
 		{ ResourceTypes::GetHash<UIVerticalContainer>(), ICON_FA_RULER_VERTICAL },
+		{ ResourceTypes::GetHash<UIScrollView>(), ICON_FA_SCROLL },
 	};
 
 	std::vector<std::pair<std::string_view, std::vector<uint32_t>>> ElementCategories = {
 		{ "Graphics", { ResourceTypes::GetHash<UIText>(), ResourceTypes::GetHash<UIImage>(), ResourceTypes::GetHash<UIBox>() } },
-		{ "Organization", { ResourceTypes::GetHash<UIPanel>(), ResourceTypes::GetHash<UIVerticalContainer>() }},
+		{ "Organization", { ResourceTypes::GetHash<UIPanel>(), ResourceTypes::GetHash<UIVerticalContainer>(), ResourceTypes::GetHash<UIScrollView>() }},
 	};
 
 	size_t SelectedCategory = 0;
