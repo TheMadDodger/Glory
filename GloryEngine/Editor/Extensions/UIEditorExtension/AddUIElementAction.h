@@ -23,6 +23,7 @@ namespace Glory::Editor
 
 		static UUID AddElement(Engine* pEngine, UIDocument* pDocument, Utils::YAMLFileRef& file,
 			std::string_view name, uint32_t type, UUID parent, size_t siblingIndex);
+		static UUID DuplicateElement(Engine* pEngine, UIDocument* pDocument, Utils::YAMLFileRef& file, UUID objectID);
 
 	private:
 		void OnUndo(const ActionRecord& actionRecord) override;

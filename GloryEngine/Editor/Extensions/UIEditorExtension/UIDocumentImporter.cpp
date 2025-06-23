@@ -96,7 +96,6 @@ namespace Glory::Editor
 		const Utils::ECS::EntityID entity = pDocument->CreateEmptyEntity(name, uuid);
 		registry.GetEntityView(entity)->Active() = active;
 
-
 		if (parentUuid != NULL)
 		{
 			Utils::ECS::EntityID parent = pDocument->EntityID(parentUuid);

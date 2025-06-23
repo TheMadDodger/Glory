@@ -5,6 +5,7 @@
 #include "SetUIParentAction.h"
 #include "AddUIElementAction.h"
 #include "UIDocumentImporter.h"
+#include "DeleteUIElementAction.h"
 
 #include <UIComponents.h>
 
@@ -15,12 +16,14 @@
 #include <ImGuiHelpers.h>
 
 #include <IconsFontAwesome6.h>
+#include <Shortcuts.h>
 
 namespace Glory::Editor
 {
 	DND DragAndDrop{ { ResourceTypes::GetHash<UIElementType>() } };
 
-	UIElementsGraphWindow::UIElementsGraphWindow() : EditorWindowTemplate("UI Elements", 600.0f, 600.0f)
+	UIElementsGraphWindow::UIElementsGraphWindow() : EditorWindowTemplate("UI Elements", 600.0f, 600.0f),
+		m_OpenRightClickPopup(false), m_RightClickedElement(0)
 	{
 	}
 
@@ -144,6 +147,29 @@ namespace Glory::Editor
 		});
 
 		ImGui::PopStyleVar();
+
+		if (m_OpenRightClickPopup)
+		{
+			ImGui::OpenPopup("ElementRightClick");
+			m_OpenRightClickPopup = false;
+		}
+
+		if (ImGui::BeginPopup("ElementRightClick"))
+		{
+			if (ImGui::MenuItem("Delete", Shortcuts::GetShortcutString("Delete").data(), false))
+			{
+				if (selectedEntity == m_RightClickedElement) selectedEntity = 0;
+				DeleteUIElementAction::DeleteElement(pEngine, pDocument, file, m_RightClickedElement);
+				m_RightClickedElement = 0;
+			}
+			if (ImGui::MenuItem("Duplicate", Shortcuts::GetShortcutString("Duplicate").data(), false))
+			{
+				if (selectedEntity == m_RightClickedElement) selectedEntity = 0;
+				selectedEntity = AddUIElementAction::DuplicateElement(pEngine, pDocument, file, m_RightClickedElement);
+				m_RightClickedElement = 0;
+			}
+			ImGui::EndPopup();
+		}
 	}
 
 	UIMainWindow* UIElementsGraphWindow::GetMainWindow()
@@ -286,7 +312,8 @@ namespace Glory::Editor
 		if (ImGui::IsItemClicked(1))
 		{
 			selectedEntity = uuid;
-			//ObjectMenu::Open(pEntity, T_SceneObject);
+			m_OpenRightClickPopup = true;
+			m_RightClickedElement = uuid;
 		}
 
 		Utils::ECS::EntityView* pEntity = registry.GetEntityView(entity);
