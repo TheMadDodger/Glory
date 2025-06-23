@@ -11,11 +11,14 @@ Engine:
 - Added preference path which uses organization and application name
 - Added Vertical Container component for UI elements
 - Added Scroll View component for UI elements
+- Fixed crash that could be caused when a UI element is destroyed
 
 Editor:
 - Fixed crash when exiting and entering playmode when physics objects are in use
 - Added Organization and Application Name to general project settings
 - Fixed UI element active toggle not updating the document
+- Added a context menu when right clicking a UI element in the element graph
+- Added an option to duplicate a UI element, either through the context menu or by shortcut
 
 Scripting:
 - Fixed crash when trying to get the FSM state of a state machine instance that does not exist

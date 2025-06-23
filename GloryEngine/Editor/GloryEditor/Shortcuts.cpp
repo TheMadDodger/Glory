@@ -164,7 +164,7 @@ namespace Glory::Editor
 				continue;
 			}
 
-			if (!ImGui::IsKeyPressed(itor->second.m_Key))
+			if (!ImGui::IsKeyPressed(itor->second.m_Key, false))
 			{
 				continue;
 			}

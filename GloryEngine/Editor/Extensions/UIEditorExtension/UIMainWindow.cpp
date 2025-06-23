@@ -1,6 +1,7 @@
 #include "UIMainWindow.h"
 #include "UIDocumentImporter.h"
 #include "DeleteUIElementAction.h"
+#include "AddUIElementAction.h"
 
 #include <EditorResourceManager.h>
 #include <EditorAssetManager.h>
@@ -147,6 +148,35 @@ namespace Glory::Editor
 		Serializers& serializers = pEngine->GetSerializers();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 
+		Undo::RegisterChangeHandler(std::string(".gui"), std::string("Entities"),
+		[this, pEngine](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			std::vector<std::string> components;
+			Reflect::Tokenize(path.string(), components, '\\');
+			if (components.size() != 2) return;
+			const std::filesystem::path filePath = file.Path();
+			const UUID documentID = EditorAssetDatabase::FindAssetUUID(filePath.string());
+			UIDocument* pDocument = FindEditingDocument(documentID);
+			const UUID entityUUID = (UUID)std::stoull(components[1]);
+
+			auto entity = file[path];
+			if (!entity.Exists())
+			{
+				/* Remove it */
+				if (!pDocument->EntityExists(entityUUID)) return;
+				const Utils::ECS::EntityID parentID = pDocument->Registry().GetParent(entityUUID);
+				pDocument->DestroyEntity(entityUUID);
+				if (parentID) pDocument->Registry().SetEntityDirty(parentID);
+				pDocument->SetDrawDirty();
+				return;
+			}
+
+			/* Add it */
+			UIDocumentImporter::DeserializeEntity(pEngine, pDocument, file[path]);
+			const Utils::ECS::EntityID newEntityID = pDocument->EntityID(entityUUID);
+			pDocument->Registry().SetEntityDirty(newEntityID);
+			pDocument->SetDrawDirty();
+		});
+
 		Undo::RegisterChangeHandler(std::string(".gui"), std::string("Components"),
 		[this, &serializers](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
 			std::vector<std::string> components;
@@ -173,6 +203,7 @@ namespace Glory::Editor
 			serializers.DeserializeProperty(pType, data, file[componentPath]["Properties"]);
 
 			registry.SetEntityDirty(entity);
+			pDocument->SetDrawDirty();
 		});
 
 		Undo::RegisterChangeHandler(std::string(".gui"), std::string("Name"),
@@ -227,6 +258,16 @@ namespace Glory::Editor
 			YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
 			Utils::YAMLFileRef& file = **pDocumentData;
 			DeleteUIElementAction::DeleteElement(pEngine, pDocument, file, m_SelectedEntity);
+		});
+
+		Shortcuts::AddMainWindowAction("Duplicate", m_MainWindowIndex, [this, pEngine, &resources]() {
+			UIDocument* pDocument = CurrentDocument();
+			if (!m_EditingDocument || !pDocument || !m_SelectedEntity) return;
+
+			EditableResource* pResource = resources.GetEditableResource(m_EditingDocument);
+			YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
+			Utils::YAMLFileRef& file = **pDocumentData;
+			m_SelectedEntity = AddUIElementAction::DuplicateElement(pEngine, pDocument, file, m_SelectedEntity);
 		});
 
 		Shortcuts::AddMainWindowAction("Save Scene", m_MainWindowIndex, [this, pApp, &resources]() {

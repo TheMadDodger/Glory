@@ -27,5 +27,9 @@ namespace Glory::Editor
 		virtual void OnGUI() override;
 		UIMainWindow* GetMainWindow();
 		bool ChildrenList(bool first, UUID& selectedEntity, Utils::ECS::EntityID entity, UIDocument* pDocument);
+
+	private:
+		bool m_OpenRightClickPopup;
+		UUID m_RightClickedElement;
 	};
 }
