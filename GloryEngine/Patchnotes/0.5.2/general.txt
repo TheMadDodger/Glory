@@ -1,5 +1,6 @@
 Runtime:
 - Added overlayed console
+- Fixed groups not loading correctly when loading a StringTable at runtime
 
 Engine:
 - Added overlay console module
