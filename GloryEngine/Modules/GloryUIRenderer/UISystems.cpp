@@ -41,7 +41,9 @@ namespace Glory
 		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
 		uint32_t width, height;
 		pDocument->GetUITexture()->GetDimensions(width, height);
-		pComponent.m_ParentSize = { float(width), float(height) };
+		const glm::vec2 screenSize{ float(width), float(height) };
+
+		pComponent.m_ParentSize = screenSize;
 
         if (pRegistry->IsValid(parent))
         {
@@ -51,12 +53,12 @@ namespace Glory
 			pComponent.m_ParentSize = { parentTransform.m_Width, parentTransform.m_Height };
         }
 
-		Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
- 		Constraints::ProcessConstraint(pComponent.m_Height, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
-		Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
-		Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
-		Constraints::ProcessConstraint(pComponent.m_Y, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
-		Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
+		Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+ 		Constraints::ProcessConstraint(pComponent.m_Height, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		Constraints::ProcessConstraint(pComponent.m_Y, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
 
 		/* Conversion top to bottom rather than bottom to top */
 		const float actualY = parent ? -float(pComponent.m_Y) : pComponent.m_ParentSize.y - float(pComponent.m_Y);
@@ -166,7 +168,11 @@ namespace Glory
 		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
 		const glm::vec2 size{ transform.m_Width, transform.m_Height };
 
-		Constraints::ProcessConstraint(pComponent.m_Scale, size, transform.m_ParentSize);
+		uint32_t screenWidth, screenHeight;
+		pDocument->GetUITexture()->GetDimensions(screenWidth, screenHeight);
+		const glm::vec2 screenSize{ float(screenWidth), float(screenHeight) };
+
+		Constraints::ProcessConstraint(pComponent.m_Scale, size, transform.m_ParentSize, screenSize);
 
 		TextRenderData textData;
 		textData.m_FontID = pComponent.m_Font.AssetUUID();
