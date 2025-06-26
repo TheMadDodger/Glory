@@ -13,6 +13,11 @@ Engine:
 - Added Vertical Container component for UI elements
 - Added Scroll View component for UI elements
 - Fixed crash that could be caused when a UI element is destroyed
+- RelativeConstraint is now always % based
+- Added RelativePixelsConstraint if you want a relative constraint based purely on pixels
+- Added RelativeScreenPercentageConstraint
+- Added RelativeScreenPixelsConstraint
+- Added ScreenHeight1080pReferenceScaleConstraint
 
 Editor:
 - Fixed crash when exiting and entering playmode when physics objects are in use
