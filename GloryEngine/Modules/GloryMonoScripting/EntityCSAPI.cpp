@@ -311,7 +311,7 @@ namespace Glory
 		transformRotation[0] = glm::normalize(transformRotation[0]);
 		transformRotation[1] = glm::normalize(transformRotation[1]);
 		transformRotation[2] = glm::normalize(transformRotation[2]);
-		transform.Rotation = glm::quat_cast(transformRotation);
+		transform.Rotation = glm::inverse(glm::quat_cast(transformRotation));
 		entity.SetDirty(true);
 	}
 
@@ -345,7 +345,7 @@ namespace Glory
 		transformRotation[0] = glm::normalize(transformRotation[0]);
 		transformRotation[1] = glm::normalize(transformRotation[1]);
 		transformRotation[2] = glm::normalize(transformRotation[2]);
-		transform.Rotation = glm::quat_cast(transformRotation);
+		transform.Rotation = glm::inverse(glm::quat_cast(transformRotation));
 		entity.SetDirty(true);
 	}
 
