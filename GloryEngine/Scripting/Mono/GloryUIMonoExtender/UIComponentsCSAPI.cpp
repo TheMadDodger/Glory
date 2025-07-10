@@ -200,7 +200,7 @@ namespace Glory
 		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
 		transform.m_X = pos.x;
 		transform.m_Y = pos.y;
-		pDocument->Registry().SetEntityDirty(entity, true);
+		pDocument->SetEntityDirty(entity, true, true);
 		pDocument->SetDrawDirty();
 	}
 
@@ -221,7 +221,7 @@ namespace Glory
 		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
 		transform.m_Width = size.x;
 		transform.m_Height = size.y;
-		pDocument->Registry().SetEntityDirty(entity, true);
+		pDocument->SetEntityDirty(entity, true, true);
 		pDocument->SetDrawDirty();
 	}
 
@@ -242,7 +242,7 @@ namespace Glory
 		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
 		transform.m_Pivot.x = pivot.x;
 		transform.m_Pivot.y = pivot.y;
-		pDocument->Registry().SetEntityDirty(entity, true);
+		pDocument->SetEntityDirty(entity, true, true);
 		pDocument->SetDrawDirty();
 	}
 
@@ -262,7 +262,7 @@ namespace Glory
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
 		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
 		transform.m_Rotation = rotation;
-		pDocument->Registry().SetEntityDirty(entity, true);
+		pDocument->SetEntityDirty(entity, true, false);
 		pDocument->SetDrawDirty();
 	}
 
@@ -283,7 +283,7 @@ namespace Glory
 		UITransform& transform = pDocument->Registry().GetComponent<UITransform>(entity);
 		transform.m_Scale.x = scale.x;
 		transform.m_Scale.y = scale.y;
-		pDocument->Registry().SetEntityDirty(entity, true);
+		pDocument->SetEntityDirty(entity, true, false);
 		pDocument->SetDrawDirty();
 	}
 

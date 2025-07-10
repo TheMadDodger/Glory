@@ -57,8 +57,7 @@ namespace Glory
         if (!pResource) return 0;
         UIDocumentData* pDocumentData = static_cast<UIDocumentData*>(pResource);
         const UUID instantiated = pDocument->Instantiate(pDocumentData, parentID);
-        pDocument->Registry().SetEntityDirty(pDocument->EntityID(instantiated));
-        if (parentID) pDocument->Registry().SetEntityDirty(pDocument->EntityID(parentID));
+        pDocument->SetEntityDirty(pDocument->EntityID(instantiated), true, true);
         pDocument->SetDrawDirty();
         return instantiated;
     }
@@ -113,7 +112,7 @@ namespace Glory
         if (!pDocument) return;
         const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
         pDocument->Registry().SetSiblingIndex(entity, index);
-        pDocument->Registry().SetEntityDirty(entity);
+        pDocument->SetEntityDirty(entity, true, true);
         pDocument->SetDrawDirty();
     }
 
@@ -150,9 +149,10 @@ namespace Glory
         UIDocument* pDocument = UI_MODULE->FindDocument(sceneID);
         if (!pDocument) return;
         const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
+        const Utils::ECS::EntityID oldParent = pDocument->Registry().GetParent(entity);
         pDocument->Registry().SetParent(entity, parentID ? pDocument->EntityID(parentID) : 0);
-        pDocument->Registry().SetEntityDirty(entity);
-        if (parentID) pDocument->Registry().SetEntityDirty(pDocument->EntityID(parentID));
+        pDocument->SetEntityDirty(entity, true, true);
+        if (oldParent) pDocument->SetEntityDirty(oldParent, true, true);
         pDocument->SetDrawDirty();
     }
 
@@ -202,7 +202,7 @@ namespace Glory
         if (pEntityView->IsActive())
             pTypeView->Invoke(Utils::ECS::InvocationType::OnEnable, &registry, entity, pNewComponent);
 
-        registry.SetEntityDirty(entity);
+        pDocument->SetEntityDirty(entity, true, true);
         pDocument->SetDrawDirty();
 
         return uuid;
@@ -219,7 +219,7 @@ namespace Glory
         Utils::ECS::EntityRegistry& registry = pDocument->Registry();
         if (!componentHash) return 0;
         const UUID componentID = registry.RemoveComponent(entity, componentHash);
-        registry.SetEntityDirty(entity);
+        pDocument->SetEntityDirty(entity, true, true);
         pDocument->SetDrawDirty();
         return componentID;
     }
@@ -235,7 +235,7 @@ namespace Glory
         const uint32_t hash = pEntityView->ComponentType(componentID);
         if (!hash) return;
         registry.RemoveComponent(entity, hash);
-        registry.SetEntityDirty(entity);
+        pDocument->SetEntityDirty(entity, true, true);
         pDocument->SetDrawDirty();
     }
 
@@ -275,7 +275,7 @@ namespace Glory
         const uint32_t type = pEntityView->ComponentType(componentID);
         Utils::ECS::BaseTypeView* pTypeView = registry.GetTypeView(type);
         pTypeView->SetActive(entity, active);
-        registry.SetEntityDirty(entity);
+        pDocument->SetEntityDirty(entity, true, true);
         pDocument->SetDrawDirty();
     }
 

@@ -49,21 +49,23 @@ namespace Glory
 		 * @parm parent The container size of the parent
 		 */
 		template<typename T>
-		static void ProcessConstraint(T& constraint, const glm::vec2& self, const glm::vec2& parent, const glm::vec2& screen)
+		static bool ProcessConstraint(T& constraint, const glm::vec2& self, const glm::vec2& parent, const glm::vec2& screen)
 		{
+			const float oldValue = constraint.m_FinalValue;
 			if (!constraint.m_Constraint)
 			{
 				constraint.m_FinalValue = constraint.m_Value;
-				return;
+				return oldValue != constraint.m_FinalValue;
 			}
 
 			const size_t handler = IndexOf(constraint.m_Constraint);
 			if (handler == 0)
 			{
 				constraint.m_FinalValue = constraint.m_Value;
-				return;
+				return oldValue != constraint.m_FinalValue;
 			}
 			ProcessConstraint(T::Axis, static_cast<void*>(&constraint), handler, self, parent, screen);
+			return oldValue != constraint.m_FinalValue;
 		}
 
 		/** @brief Register built-in constraints */

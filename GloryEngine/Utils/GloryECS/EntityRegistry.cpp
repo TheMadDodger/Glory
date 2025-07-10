@@ -385,15 +385,7 @@ namespace Glory::Utils::ECS
 		m_EntityDirty.Set(entity, dirty);
 		
 		if (!dirty) return;
-
 		InvokeAll(InvocationType::OnDirty, { entity });
-		/* Notify parent once */
-		const Utils::ECS::EntityID parent = GetParent(entity);
-		if (parent && !IsEntityDirty(parent))
-		{
-			m_EntityDirty.Set(parent, dirty);
-			InvokeAll(InvocationType::OnDirty, { parent });
-		}
 
 		if (!setChildrenDirty) return;
 		/* Must set all children as dirty as well! */

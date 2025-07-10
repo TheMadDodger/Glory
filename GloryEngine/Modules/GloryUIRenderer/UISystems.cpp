@@ -25,18 +25,9 @@ namespace Glory
         CalculateMatrix(pRegistry, entity, pComponent);
 	}
 
-    void UITransformSystem::CalculateMatrix(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent, bool calculateParentIfDirty)
-    {
-		glm::mat4 startTransform = glm::identity<glm::mat4>();
-		glm::mat4 startInteractionTransform = glm::identity<glm::mat4>();
-
-        Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
-        const Utils::ECS::EntityID parent = pEntityView->Parent();
-
-        if (pRegistry->IsValid(parent) && pRegistry->IsEntityDirty(parent) && calculateParentIfDirty)
-        {
-            CalculateMatrix(pRegistry, parent, pRegistry->GetComponent<UITransform>(parent));
-        }
+	bool UITransformSystem::ProcessConstraints(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent)
+	{
+		bool change = false;
 
 		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
 		uint32_t width, height;
@@ -45,20 +36,44 @@ namespace Glory
 
 		pComponent.m_ParentSize = screenSize;
 
+		Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
+		const Utils::ECS::EntityID parent = pEntityView->Parent();
+
+		if (pRegistry->IsValid(parent))
+		{
+			UITransform& parentTransform = pRegistry->GetComponent<UITransform>(parent);
+			pComponent.m_ParentSize = { parentTransform.m_Width, parentTransform.m_Height };
+		}
+
+		change |= Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		change |= Constraints::ProcessConstraint(pComponent.m_Height, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		change |= Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		change |= Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		change |= Constraints::ProcessConstraint(pComponent.m_Y, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		change |= Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		return change;
+	}
+
+    void UITransformSystem::CalculateMatrix(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent, bool calculateParentIfDirty)
+    {
+		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
+		glm::mat4 startTransform = glm::identity<glm::mat4>();
+		glm::mat4 startInteractionTransform = glm::identity<glm::mat4>();
+
+        Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
+        const Utils::ECS::EntityID parent = pEntityView->Parent();
+
         if (pRegistry->IsValid(parent))
         {
-            UITransform& parentTransform = pRegistry->GetComponent<UITransform>(parent);
+			if (pRegistry->IsEntityDirty(parent) && calculateParentIfDirty)
+				CalculateMatrix(pRegistry, parent, pRegistry->GetComponent<UITransform>(parent));
+
+			UITransform& parentTransform = pRegistry->GetComponent<UITransform>(parent);
 			startTransform = parentTransform.m_TransformNoScaleNoPivot;
 			startInteractionTransform = parentTransform.m_InteractionTransformNoPivot;
-			pComponent.m_ParentSize = { parentTransform.m_Width, parentTransform.m_Height };
         }
 
-		Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
- 		Constraints::ProcessConstraint(pComponent.m_Height, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
-		Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
-		Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
-		Constraints::ProcessConstraint(pComponent.m_Y, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
-		Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		ProcessConstraints(pRegistry, entity, pComponent);
 
 		/* Conversion top to bottom rather than bottom to top */
 		const float actualY = parent ? -float(pComponent.m_Y) : pComponent.m_ParentSize.y - float(pComponent.m_Y);
@@ -427,35 +442,63 @@ namespace Glory
 		pGraphics->SetStencilFunc(CompareOp::OP_LessOrEqual, counter, 0xFF);
 	}
 
+	template<typename Comp>
+	static void UpdateEntity(Utils::ECS::EntityID entity, Utils::ECS::EntityRegistry& registry, Utils::ECS::InvocationType invocation)
+	{
+		Utils::ECS::TypeView<Comp>* pTypeView = registry.GetTypeView<Comp>();
+		pTypeView->InvokeAll(invocation, &registry, { entity });
+		for (size_t i = 0; i < registry.ChildCount(entity); ++i)
+		{
+			const Utils::ECS::EntityID child = registry.Child(entity, i);
+			UpdateEntity<Comp>(child, registry, invocation);
+		}
+	}
+
+	static void UpdateEntity(Utils::ECS::EntityID entity, Utils::ECS::EntityRegistry& registry, Utils::ECS::InvocationType invocation)
+	{
+		registry.InvokeAll(invocation, { entity });
+		for (size_t i = 0; i < registry.ChildCount(entity); ++i)
+		{
+			const Utils::ECS::EntityID child = registry.Child(entity, i);
+			UpdateEntity(child, registry, invocation);
+		}
+	}
+
 	void UIVerticalContainerSystem::OnPreUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIVerticalContainer& pComponent)
 	{
 		if (!pComponent.m_Dirty) return;
 		Utils::ECS::EntityView* pEntity = pRegistry->GetEntityView(entity);
 		float height = 0.0f;
+
+		/* Make sure all children were processed first in case they will be resized */
+		for (size_t i = 0; i < pEntity->ChildCount(); ++i)
+		{
+			const Utils::ECS::EntityID child = pEntity->Child(i);
+			UpdateEntity(child, *pRegistry, Utils::ECS::InvocationType::PreUpdate);
+		}
+
+		/* Update child sizes */
 		for (size_t i = 0; i < pEntity->ChildCount(); ++i)
 		{
 			const Utils::ECS::EntityID child = pEntity->Child(i);
 			UITransform& transform = pRegistry->GetComponent<UITransform>(child);
-			if (pRegistry->IsEntityDirty(child))
-				UITransformSystem::CalculateMatrix(pRegistry, child, transform, false);
 			const float elementHeight = transform.m_Height.m_FinalValue;
 			transform.m_Y.m_Constraint = 0;
 			transform.m_Y.m_Value = height;
 			height += elementHeight + pComponent.m_Seperation;
-			UITransformSystem::CalculateMatrix(pRegistry, child, transform, false);
+			if (UITransformSystem::ProcessConstraints(pRegistry, child, transform))
+				pRegistry->SetEntityDirty(child);
 		}
+
+		/* Resize self */
 		UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
 		if (pComponent.m_AutoResizeHeight && transform.m_Height.m_FinalValue != height)
 		{
 			transform.m_Height.m_Constraint = 0;
 			transform.m_Height = height;
-			UITransformSystem::CalculateMatrix(pRegistry, entity, transform, false);
+			if (UITransformSystem::ProcessConstraints(pRegistry, entity, transform))
+				pRegistry->SetEntityDirty(entity);
 		}
-		pComponent.m_Dirty = false;
-	}
-
-	void UIVerticalContainerSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIVerticalContainer& pComponent)
-	{
 		pComponent.m_Dirty = false;
 	}
 
@@ -540,12 +583,7 @@ namespace Glory
 		{
 			const Utils::ECS::EntityID child = pRegistry->Child(entity, i);
 			UITransform& childTransform = pRegistry->GetComponent<UITransform>(child);
-			if (pRegistry->IsEntityDirty(child))
-				UITransformSystem::CalculateMatrix(pRegistry, child, childTransform, false);
-
-			if (i == 0)
-				startPos = glm::vec2{ childTransform.m_X.m_FinalValue, childTransform.m_Y.m_FinalValue };
-
+			if (i == 0) startPos = glm::vec2{ childTransform.m_X.m_FinalValue, childTransform.m_Y.m_FinalValue };
 			contentSize.x = glm::max(contentSize.x, childTransform.m_X.m_FinalValue - startPos.x + childTransform.m_Width.m_FinalValue);
 			contentSize.y = glm::max(contentSize.y, childTransform.m_Y.m_FinalValue - startPos.y + childTransform.m_Height.m_FinalValue);
 		}
@@ -556,6 +594,7 @@ namespace Glory
 		if (tempMaxScroll != pComponent.m_MaxScroll && pComponent.m_AutoScroll)
 			pComponent.m_DesiredScrollPosition = pComponent.m_MaxScroll;
 
+		/* Position children */
 		for (size_t i = 0; i < pRegistry->ChildCount(entity); ++i)
 		{
 			const Utils::ECS::EntityID child = pRegistry->Child(entity, i);
@@ -564,8 +603,8 @@ namespace Glory
 			transform.m_X.m_Value = -pComponent.m_ScrollPosition.x;
 			transform.m_Y.m_Constraint = 0;
 			transform.m_Y.m_Value = -pComponent.m_ScrollPosition.y;
-			pRegistry->SetEntityDirty(child);
-			UITransformSystem::CalculateMatrix(pRegistry, child, transform, false);
+			if (UITransformSystem::ProcessConstraints(pRegistry, child, transform))
+				pRegistry->SetEntityDirty(child);
 		}
 
 		pComponent.m_Dirty = false;
