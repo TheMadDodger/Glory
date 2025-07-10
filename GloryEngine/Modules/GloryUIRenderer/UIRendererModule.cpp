@@ -196,7 +196,6 @@ namespace Glory
 		/* Vertical Container */
 		m_pComponentTypes->RegisterInvokaction<UIVerticalContainer>(Glory::Utils::ECS::InvocationType::OnDirty, UIVerticalContainerSystem::OnDirty);
 		m_pComponentTypes->RegisterInvokaction<UIVerticalContainer>(Glory::Utils::ECS::InvocationType::PreUpdate, UIVerticalContainerSystem::OnPreUpdate);
-		m_pComponentTypes->RegisterInvokaction<UIVerticalContainer>(Glory::Utils::ECS::InvocationType::Update, UIVerticalContainerSystem::OnUpdate);
 		/* Scroll View */
 		m_pComponentTypes->RegisterInvokaction<UIScrollView>(Glory::Utils::ECS::InvocationType::Start, UIScrollViewSystem::OnStart);
 		m_pComponentTypes->RegisterInvokaction<UIScrollView>(Glory::Utils::ECS::InvocationType::OnValidate, UIScrollViewSystem::OnValidate);

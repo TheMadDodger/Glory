@@ -66,6 +66,7 @@ namespace Glory
 		GLORY_API void SetAllEntitiesDirty();
 		GLORY_API void SetEntityActive(Utils::ECS::EntityID entity, bool active);
 		GLORY_API void Start();
+		GLORY_API void SetEntityDirty(Utils::ECS::EntityID entity, bool setChildrenDirty, bool setParentsDirty);
 
 	private:
 		void CopyEntity(Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);

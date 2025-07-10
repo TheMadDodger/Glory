@@ -163,9 +163,10 @@ namespace Glory::Editor
 			{
 				/* Remove it */
 				if (!pDocument->EntityExists(entityUUID)) return;
-				const Utils::ECS::EntityID parentID = pDocument->Registry().GetParent(entityUUID);
+				const Utils::ECS::EntityID entityID = pDocument->EntityID(entityUUID);
+				const Utils::ECS::EntityID parentID = pDocument->Registry().GetParent(entityID);
 				pDocument->DestroyEntity(entityUUID);
-				if (parentID) pDocument->Registry().SetEntityDirty(parentID);
+				pDocument->SetEntityDirty(parentID, true, true);
 				pDocument->SetDrawDirty();
 				return;
 			}
@@ -173,7 +174,7 @@ namespace Glory::Editor
 			/* Add it */
 			UIDocumentImporter::DeserializeEntity(pEngine, pDocument, file[path]);
 			const Utils::ECS::EntityID newEntityID = pDocument->EntityID(entityUUID);
-			pDocument->Registry().SetEntityDirty(newEntityID);
+			pDocument->SetEntityDirty(newEntityID, true, true);
 			pDocument->SetDrawDirty();
 		});
 
@@ -190,7 +191,8 @@ namespace Glory::Editor
 			const size_t index = (size_t)std::stoull(components[3].substr(2));
 
 			UIDocument* pDocument = FindEditingDocument(documentID);
-			Utils::ECS::EntityID entity = pDocument->EntityID(entityUUID);
+			const Utils::ECS::EntityID entity = pDocument->EntityID(entityUUID);
+			const Utils::ECS::EntityID parent = pDocument->Registry().GetParent(entity);
 
 			std::filesystem::path componentPath = components[0];
 			componentPath.append(components[1]).append(components[2]).append(components[3]);
@@ -202,7 +204,7 @@ namespace Glory::Editor
 			void* data = registry.GetComponentAddress(entity, componentID);
 			serializers.DeserializeProperty(pType, data, file[componentPath]["Properties"]);
 
-			registry.SetEntityDirty(entity);
+			pDocument->SetEntityDirty(entity, true, true);
 			pDocument->SetDrawDirty();
 		});
 
