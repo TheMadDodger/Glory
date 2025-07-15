@@ -62,9 +62,9 @@ namespace Glory
 	UIDocument::UIDocument(UIDocumentData* pDocument):
 		m_OriginalDocumentID(pDocument->GetUUID()), m_SceneID(0), m_ObjectID(0),
 		m_pUITexture(nullptr), m_pRenderer(nullptr), m_Projection(glm::identity<glm::mat4>()),
-		m_CursorPos(0.0f, 0.0f), m_CursorDown(false), m_WasCursorDown(false), m_InputEnabled(true),
-		m_PanelCounter(0), m_Name(pDocument->m_Name), m_Ids(pDocument->m_Ids),
-		m_UUIds(pDocument->m_UUIds), m_Names(pDocument->m_Names), m_DrawIsDirty(true)
+		m_CursorPos(0.0f, 0.0f), m_CursorScrollDelta(0.0f, 0.0f), m_CursorDown(false),
+		m_WasCursorDown(false), m_InputEnabled(true), m_PanelCounter(0), m_Name(pDocument->m_Name),
+		m_Ids(pDocument->m_Ids), m_UUIds(pDocument->m_UUIds), m_Names(pDocument->m_Names), m_DrawIsDirty(true)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
 		for (size_t i = 0; i < registry.ChildCount(0); ++i)
@@ -79,10 +79,37 @@ namespace Glory
 		return m_pUITexture;
 	}
 
+	static void UpdateEntity(Utils::ECS::EntityID entity, Utils::ECS::EntityRegistry& registry, Utils::ECS::InvocationType invocation)
+	{
+		registry.InvokeAll(invocation, { entity });
+		for (size_t i = 0; i < registry.ChildCount(entity); ++i)
+		{
+			const Utils::ECS::EntityID child = registry.Child(entity, i);
+			UpdateEntity(child, registry, invocation);
+		}
+	}
+
 	void UIDocument::Update()
 	{
 		m_Registry.SetUserData(this);
-		m_Registry.InvokeAll(Utils::ECS::InvocationType::Update, NULL);
+
+		/* Update all transforms first so we have a base for other components */
+		m_Registry.GetTypeView<UITransform>()->InvokeAll(Utils::ECS::InvocationType::PostUpdate, &m_Registry, NULL);
+		for (size_t i = 0; i < m_Registry.ChildCount(0); ++i)
+		{
+			const Utils::ECS::EntityID child = m_Registry.Child(0, i);
+			UpdateEntity(child, m_Registry, Utils::ECS::InvocationType::PreUpdate);
+		}
+		for (size_t i = 0; i < m_Registry.ChildCount(0); ++i)
+		{
+			const Utils::ECS::EntityID child = m_Registry.Child(0, i);
+			UpdateEntity(child, m_Registry, Utils::ECS::InvocationType::Update);
+		}
+		for (size_t i = 0; i < m_Registry.ChildCount(0); ++i)
+		{
+			const Utils::ECS::EntityID child = m_Registry.Child(0, i);
+			UpdateEntity(child, m_Registry, Utils::ECS::InvocationType::PostUpdate);
+		}
 		m_WasCursorDown = m_CursorDown;
 	}
 
@@ -219,9 +246,9 @@ namespace Glory
 	void UIDocument::DestroyEntity(UUID uuid)
 	{
 		const Utils::ECS::EntityID entity = m_Ids.at(uuid);
-		for (size_t i = 0; i < m_Registry.ChildCount(entity); ++i)
+		while (m_Registry.ChildCount(entity) > 0)
 		{
-			const Utils::ECS::EntityID child = m_Registry.Child(entity, i);
+			const Utils::ECS::EntityID child = m_Registry.Child(entity, 0);
 			const UUID uuid = m_UUIds.at(child);
 			DestroyEntity(uuid);
 		}
@@ -259,6 +286,11 @@ namespace Glory
 	const glm::vec2& UIDocument::GetCursorPos() const
 	{
 		return m_CursorPos;
+	}
+
+	const glm::vec2& UIDocument::GetCursorScrollDelta() const
+	{
+		return m_CursorScrollDelta;
 	}
 
 	bool UIDocument::IsCursorDown() const
@@ -325,5 +357,16 @@ namespace Glory
 	{
 		m_Registry.SetUserData(this);
 		m_Registry.InvokeAll(Utils::ECS::InvocationType::Start, NULL);
+	}
+
+	void UIDocument::SetEntityDirty(Utils::ECS::EntityID entity, bool setChildrenDirty, bool setParentsDirty)
+	{
+		m_Registry.SetEntityDirty(entity, true, setChildrenDirty);
+		Utils::ECS::EntityID parent = m_Registry.GetParent(entity);
+		while (setParentsDirty && parent)
+		{
+			m_Registry.SetEntityDirty(parent, true, false);
+			parent = m_Registry.GetParent(parent);
+		}
 	}
 }

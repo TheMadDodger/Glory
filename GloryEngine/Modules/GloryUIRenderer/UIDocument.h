@@ -55,6 +55,7 @@ namespace Glory
 		GLORY_API size_t ElementCount();
 		GLORY_API UUID FindElement(UUID parentId, std::string_view name);
 		GLORY_API const glm::vec2& GetCursorPos() const;
+		GLORY_API const glm::vec2& GetCursorScrollDelta() const;
 		GLORY_API bool IsCursorDown() const;
 		GLORY_API bool WasCursorDown() const;
 		GLORY_API bool IsEnputEnabled() const;
@@ -65,6 +66,7 @@ namespace Glory
 		GLORY_API void SetAllEntitiesDirty();
 		GLORY_API void SetEntityActive(Utils::ECS::EntityID entity, bool active);
 		GLORY_API void Start();
+		GLORY_API void SetEntityDirty(Utils::ECS::EntityID entity, bool setChildrenDirty, bool setParentsDirty);
 
 	private:
 		void CopyEntity(Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
@@ -82,6 +84,7 @@ namespace Glory
 		UIRendererModule* m_pRenderer;
 		glm::mat4 m_Projection;
 		glm::vec2 m_CursorPos;
+		glm::vec2 m_CursorScrollDelta;
 		bool m_CursorDown;
 		bool m_WasCursorDown;
 		bool m_InputEnabled;

@@ -50,11 +50,14 @@ namespace Glory::Editor
 		auto selectedEntity = entities[uuidString];
 
 		ImGui::PushID(uuidString.c_str());
-		bool active = selectedEntity["Active"].As<bool>();
+		const bool oldActive = selectedEntity["Active"].As<bool>();
+		bool active = oldActive;
 		bool change = false;
 		if (EditorUI::CheckBox("Active", &active))
 		{
-			selectedEntity["Active"].Set(active);
+			Undo::StartRecord("UI Property");
+			Undo::ApplyYAMLEdit(file, selectedEntity["Active"].Path(), oldActive, active);
+			Undo::StopRecord();
 			change = true;
 		}
 

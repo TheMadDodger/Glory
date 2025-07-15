@@ -6,6 +6,7 @@
 
 #include <GScene.h>
 #include <Engine.h>
+#include <GameTime.h>
 #include <FontData.h>
 #include <RendererModule.h>
 #include <GraphicsModule.h>
@@ -18,44 +19,61 @@
 
 namespace Glory
 {
-	void UITransformSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent)
+	void UITransformSystem::OnPostUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent)
 	{
         if (!pRegistry->IsEntityDirty(entity)) return;
         CalculateMatrix(pRegistry, entity, pComponent);
 	}
 
-    void UITransformSystem::CalculateMatrix(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent)
+	bool UITransformSystem::ProcessConstraints(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent)
+	{
+		bool change = false;
+
+		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
+		uint32_t width, height;
+		pDocument->GetUITexture()->GetDimensions(width, height);
+		const glm::vec2 screenSize{ float(width), float(height) };
+
+		pComponent.m_ParentSize = screenSize;
+
+		Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
+		const Utils::ECS::EntityID parent = pEntityView->Parent();
+
+		if (pRegistry->IsValid(parent))
+		{
+			UITransform& parentTransform = pRegistry->GetComponent<UITransform>(parent);
+			pComponent.m_ParentSize = { parentTransform.m_Width, parentTransform.m_Height };
+		}
+
+		change |= Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		change |= Constraints::ProcessConstraint(pComponent.m_Height, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		change |= Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		change |= Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		change |= Constraints::ProcessConstraint(pComponent.m_Y, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		change |= Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize, screenSize);
+		return change;
+	}
+
+    void UITransformSystem::CalculateMatrix(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UITransform& pComponent, bool calculateParentIfDirty)
     {
+		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
 		glm::mat4 startTransform = glm::identity<glm::mat4>();
 		glm::mat4 startInteractionTransform = glm::identity<glm::mat4>();
 
         Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
         const Utils::ECS::EntityID parent = pEntityView->Parent();
 
-        if (pRegistry->IsValid(parent) && pRegistry->IsEntityDirty(parent))
-        {
-            CalculateMatrix(pRegistry, parent, pRegistry->GetComponent<UITransform>(parent));
-        }
-
-		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
-		uint32_t width, height;
-		pDocument->GetUITexture()->GetDimensions(width, height);
-		pComponent.m_ParentSize = { float(width), float(height) };
-
         if (pRegistry->IsValid(parent))
         {
-            UITransform& parentTransform = pRegistry->GetComponent<UITransform>(parent);
+			if (pRegistry->IsEntityDirty(parent) && calculateParentIfDirty)
+				CalculateMatrix(pRegistry, parent, pRegistry->GetComponent<UITransform>(parent));
+
+			UITransform& parentTransform = pRegistry->GetComponent<UITransform>(parent);
 			startTransform = parentTransform.m_TransformNoScaleNoPivot;
 			startInteractionTransform = parentTransform.m_InteractionTransformNoPivot;
-			pComponent.m_ParentSize = { parentTransform.m_Width, parentTransform.m_Height };
         }
 
-		Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
- 		Constraints::ProcessConstraint(pComponent.m_Height, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
-		Constraints::ProcessConstraint(pComponent.m_Width, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
-		Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
-		Constraints::ProcessConstraint(pComponent.m_Y, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
-		Constraints::ProcessConstraint(pComponent.m_X, glm::vec2{ pComponent.m_Width, pComponent.m_Height }, pComponent.m_ParentSize);
+		ProcessConstraints(pRegistry, entity, pComponent);
 
 		/* Conversion top to bottom rather than bottom to top */
 		const float actualY = parent ? -float(pComponent.m_Y) : pComponent.m_ParentSize.y - float(pComponent.m_Y);
@@ -165,7 +183,11 @@ namespace Glory
 		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
 		const glm::vec2 size{ transform.m_Width, transform.m_Height };
 
-		Constraints::ProcessConstraint(pComponent.m_Scale, size, transform.m_ParentSize);
+		uint32_t screenWidth, screenHeight;
+		pDocument->GetUITexture()->GetDimensions(screenWidth, screenHeight);
+		const glm::vec2 screenSize{ float(screenWidth), float(screenHeight) };
+
+		Constraints::ProcessConstraint(pComponent.m_Scale, size, transform.m_ParentSize, screenSize);
 
 		TextRenderData textData;
 		textData.m_FontID = pComponent.m_Font.AssetUUID();
@@ -418,5 +440,178 @@ namespace Glory
 		pGraphics->SetStencilMask(0x00);
 		pGraphics->SetStencilOP(Func::OP_Keep, Func::OP_Keep, Func::OP_Keep);
 		pGraphics->SetStencilFunc(CompareOp::OP_LessOrEqual, counter, 0xFF);
+	}
+
+	template<typename Comp>
+	static void UpdateEntity(Utils::ECS::EntityID entity, Utils::ECS::EntityRegistry& registry, Utils::ECS::InvocationType invocation)
+	{
+		Utils::ECS::TypeView<Comp>* pTypeView = registry.GetTypeView<Comp>();
+		pTypeView->InvokeAll(invocation, &registry, { entity });
+		for (size_t i = 0; i < registry.ChildCount(entity); ++i)
+		{
+			const Utils::ECS::EntityID child = registry.Child(entity, i);
+			UpdateEntity<Comp>(child, registry, invocation);
+		}
+	}
+
+	static void UpdateEntity(Utils::ECS::EntityID entity, Utils::ECS::EntityRegistry& registry, Utils::ECS::InvocationType invocation)
+	{
+		registry.InvokeAll(invocation, { entity });
+		for (size_t i = 0; i < registry.ChildCount(entity); ++i)
+		{
+			const Utils::ECS::EntityID child = registry.Child(entity, i);
+			UpdateEntity(child, registry, invocation);
+		}
+	}
+
+	void UIVerticalContainerSystem::OnPreUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIVerticalContainer& pComponent)
+	{
+		if (!pComponent.m_Dirty) return;
+		Utils::ECS::EntityView* pEntity = pRegistry->GetEntityView(entity);
+		float height = 0.0f;
+
+		/* Make sure all children were processed first in case they will be resized */
+		for (size_t i = 0; i < pEntity->ChildCount(); ++i)
+		{
+			const Utils::ECS::EntityID child = pEntity->Child(i);
+			UpdateEntity(child, *pRegistry, Utils::ECS::InvocationType::PreUpdate);
+		}
+
+		/* Update child sizes */
+		for (size_t i = 0; i < pEntity->ChildCount(); ++i)
+		{
+			const Utils::ECS::EntityID child = pEntity->Child(i);
+			UITransform& transform = pRegistry->GetComponent<UITransform>(child);
+			const float elementHeight = transform.m_Height.m_FinalValue;
+			transform.m_Y.m_Constraint = 0;
+			transform.m_Y.m_Value = height;
+			height += elementHeight + pComponent.m_Seperation;
+			if (UITransformSystem::ProcessConstraints(pRegistry, child, transform))
+				pRegistry->SetEntityDirty(child);
+		}
+
+		/* Resize self */
+		UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
+		if (pComponent.m_AutoResizeHeight && transform.m_Height.m_FinalValue != height)
+		{
+			transform.m_Height.m_Constraint = 0;
+			transform.m_Height = height;
+			if (UITransformSystem::ProcessConstraints(pRegistry, entity, transform))
+				pRegistry->SetEntityDirty(entity);
+		}
+		pComponent.m_Dirty = false;
+	}
+
+	void UIVerticalContainerSystem::OnDirty(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIVerticalContainer& pComponent)
+	{
+		pComponent.m_Dirty = true;
+	}
+
+	void UIScrollViewSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIScrollView& pComponent)
+	{
+		pComponent.m_ScrollPosition = pComponent.m_StartScrollPosition;
+		pComponent.m_Dirty = true;
+	}
+
+	void UIScrollViewSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIScrollView& pComponent)
+	{
+		pComponent.m_ScrollPosition = pComponent.m_StartScrollPosition;
+		pComponent.m_Dirty = true;
+	}
+
+	void UIScrollViewSystem::OnPreUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIScrollView& pComponent)
+	{
+		if (!pRegistry->HasComponent<UIInteraction>(entity)) return;
+		UIInteraction& interaction = pRegistry->GetComponent<UIInteraction>(entity);
+		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
+		Engine* pEngine = pDocument->Renderer()->GetEngine();
+
+		const glm::vec2& cursorScrollDelta = pDocument->GetCursorScrollDelta();
+		const float length = glm::length(cursorScrollDelta);
+		if ((!pComponent.m_RequireHover || interaction.m_Hovered) && length != 0.0f)
+		{
+			if (!pComponent.m_LockHorizontal)
+				pComponent.m_DesiredScrollPosition.x += pDocument->GetCursorScrollDelta().x*pComponent.m_ScrollSpeeds.x;
+			if (!pComponent.m_LockVertical)
+				pComponent.m_DesiredScrollPosition.y += pDocument->GetCursorScrollDelta().y*pComponent.m_ScrollSpeeds.y;
+			pComponent.m_Dirty = true;
+		}
+
+		switch (pComponent.m_ScrollEdgeMode)
+		{
+		case ScrollEdgeMode::Clamp:
+			pComponent.m_DesiredScrollPosition = glm::clamp(pComponent.m_DesiredScrollPosition, glm::vec2{ 0.0f, 0.0f }, pComponent.m_MaxScroll);
+			break;
+		case ScrollEdgeMode::Innertia:
+		{
+			const glm::vec2 target = glm::clamp(pComponent.m_DesiredScrollPosition, glm::vec2{ 0.0f, 0.0f }, pComponent.m_MaxScroll);
+			pComponent.m_DesiredScrollPosition = glm::mix(pComponent.m_DesiredScrollPosition, target,
+				pComponent.m_Innertia*pEngine->Time().GetDeltaTime());
+			break;
+		}
+		default:
+			break;
+		}
+
+		if (pComponent.m_ScrollPosition != pComponent.m_DesiredScrollPosition)
+		{
+			switch (pComponent.m_ScrollMode)
+			{
+			case ScrollMode::Snap:
+				pComponent.m_ScrollPosition = pComponent.m_DesiredScrollPosition;
+				pComponent.m_Dirty = true;
+				break;
+			case ScrollMode::Lerp:
+				pComponent.m_ScrollPosition = glm::mix(pComponent.m_ScrollPosition, pComponent.m_DesiredScrollPosition,
+					pComponent.m_LerpSpeed*pEngine->Time().GetDeltaTime());
+				pComponent.m_Dirty = true;
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	void UIScrollViewSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIScrollView& pComponent)
+	{
+		if (!pComponent.m_Dirty) return;
+
+		/* Calculate content size */
+		glm::vec2 contentSize{ 0.0f };
+		glm::vec2 startPos{ 0.0f };
+		for (size_t i = 0; i < pRegistry->ChildCount(entity); ++i)
+		{
+			const Utils::ECS::EntityID child = pRegistry->Child(entity, i);
+			UITransform& childTransform = pRegistry->GetComponent<UITransform>(child);
+			if (i == 0) startPos = glm::vec2{ childTransform.m_X.m_FinalValue, childTransform.m_Y.m_FinalValue };
+			contentSize.x = glm::max(contentSize.x, childTransform.m_X.m_FinalValue - startPos.x + childTransform.m_Width.m_FinalValue);
+			contentSize.y = glm::max(contentSize.y, childTransform.m_Y.m_FinalValue - startPos.y + childTransform.m_Height.m_FinalValue);
+		}
+		UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
+
+		const glm::vec2 tempMaxScroll = pComponent.m_MaxScroll;
+		pComponent.m_MaxScroll = { glm::max(glm::vec2{0.0f}, contentSize - glm::vec2{ transform.m_Width.m_FinalValue, transform.m_Height.m_FinalValue }) };
+		if (tempMaxScroll != pComponent.m_MaxScroll && pComponent.m_AutoScroll)
+			pComponent.m_DesiredScrollPosition = pComponent.m_MaxScroll;
+
+		/* Position children */
+		for (size_t i = 0; i < pRegistry->ChildCount(entity); ++i)
+		{
+			const Utils::ECS::EntityID child = pRegistry->Child(entity, i);
+			UITransform& transform = pRegistry->GetComponent<UITransform>(child);
+			transform.m_X.m_Constraint = 0;
+			transform.m_X.m_Value = -pComponent.m_ScrollPosition.x;
+			transform.m_Y.m_Constraint = 0;
+			transform.m_Y.m_Value = -pComponent.m_ScrollPosition.y;
+			if (UITransformSystem::ProcessConstraints(pRegistry, child, transform))
+				pRegistry->SetEntityDirty(child);
+		}
+
+		pComponent.m_Dirty = false;
+	}
+
+	void UIScrollViewSystem::OnDirty(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIScrollView& pComponent)
+	{
+		pComponent.m_Dirty = true;
 	}
 }

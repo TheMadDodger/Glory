@@ -42,6 +42,7 @@ namespace Glory
 		float GetAxisDelta(size_t playerIndex, const std::string& inputMap, const std::string& actionName) const;
 		bool GetBool(size_t playerIndex, const std::string& inputMap, const std::string& actionName) const;
 		glm::vec2 GetCursorPos(size_t playerIndex) const;
+		glm::vec2 GetCursorScrollDelta(size_t playerIndex) const;
 		bool IsCursorDown(size_t playerIndex) const;
 
 		void FreeDevice(const UUID deviceId);

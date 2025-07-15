@@ -20,7 +20,9 @@ namespace Glory::Utils::ECS
 		OnDirty,
 		Start,
 		Stop,
+		PreUpdate,
 		Update,
+		PostUpdate,
 		Draw,
 		PostDraw,
 

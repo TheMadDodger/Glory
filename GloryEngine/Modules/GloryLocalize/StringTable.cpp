@@ -165,7 +165,7 @@ namespace Glory
 		{
 			std::string key, value;
 			container.Read(key).Read(value);
-			m_Strings.emplace(std::move(key), std::move(value));
+			AddString(std::move(key), std::move(value));
 		}
 	}
 

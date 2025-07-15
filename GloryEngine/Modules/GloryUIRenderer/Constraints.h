@@ -25,7 +25,8 @@ namespace Glory
 		 * @param name Name of the constraint
 		 * @param callback Callback handler of the constraint
 		 */
-		GLORY_API static void AddConstraint(std::string&& name, std::function<void(Constraint&, ConstraintAxis, const glm::vec2&, const glm::vec2&)> callback);
+		GLORY_API static void AddConstraint(std::string&& name, std::function<void(Constraint&, ConstraintAxis,
+			const glm::vec2&, const glm::vec2&, const glm::vec2&)> callback);
 
 		/** @brief Get a vector with all constraint names */
 		GLORY_API static const std::vector<std::string_view>& Names();
@@ -48,16 +49,23 @@ namespace Glory
 		 * @parm parent The container size of the parent
 		 */
 		template<typename T>
-		static void ProcessConstraint(T& constraint, const glm::vec2& self, const glm::vec2& parent)
+		static bool ProcessConstraint(T& constraint, const glm::vec2& self, const glm::vec2& parent, const glm::vec2& screen)
 		{
+			const float oldValue = constraint.m_FinalValue;
 			if (!constraint.m_Constraint)
 			{
 				constraint.m_FinalValue = constraint.m_Value;
-				return;
+				return oldValue != constraint.m_FinalValue;
 			}
 
 			const size_t handler = IndexOf(constraint.m_Constraint);
-			ProcessConstraint(T::Axis, static_cast<void*>(&constraint), handler, self, parent);
+			if (handler == 0)
+			{
+				constraint.m_FinalValue = constraint.m_Value;
+				return oldValue != constraint.m_FinalValue;
+			}
+			ProcessConstraint(T::Axis, static_cast<void*>(&constraint), handler, self, parent, screen);
+			return oldValue != constraint.m_FinalValue;
 		}
 
 		/** @brief Register built-in constraints */
@@ -71,12 +79,14 @@ namespace Glory
 		 * @parm self The container size of self
 		 * @parm parent The container size of the parent
 		 */
-		GLORY_API static void ProcessConstraint(ConstraintAxis axis, void* constraint, size_t handler, const glm::vec2& self, const glm::vec2& parent);
+		GLORY_API static void ProcessConstraint(ConstraintAxis axis, void* constraint, size_t handler,
+			const glm::vec2& self, const glm::vec2& parent, const glm::vec2& screen);
 
 	private:
 		static std::vector<std::string> m_Names;
 		static std::vector<std::string_view> m_NamesView;
 		static std::vector<uint32_t> m_Hashes;
-		static std::vector<std::function<void(Constraint&, ConstraintAxis, const glm::vec2&, const glm::vec2&)>> m_Callbacks;
+		static std::vector<std::function<void(Constraint&, ConstraintAxis,
+			const glm::vec2&, const glm::vec2&, const glm::vec2&)>> m_Callbacks;
 	};
 }

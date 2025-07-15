@@ -205,6 +205,12 @@ namespace Glory
 		return player ? player->GetCursorPos() : glm::vec2{};
 	}
 
+	glm::vec2 InputModule::GetCursorScrollDelta(size_t playerIndex) const
+	{
+		const PlayerInput* player = GetPlayer(playerIndex);
+		return player ? player->GetCursorScrollDelta() : glm::vec2{};
+	}
+
 	bool InputModule::IsCursorDown(size_t playerIndex) const
 	{
 		const PlayerInput* player = GetPlayer(playerIndex);

@@ -1,6 +1,7 @@
 #include "UIMainWindow.h"
 #include "UIDocumentImporter.h"
 #include "DeleteUIElementAction.h"
+#include "AddUIElementAction.h"
 
 #include <EditorResourceManager.h>
 #include <EditorAssetManager.h>
@@ -147,6 +148,36 @@ namespace Glory::Editor
 		Serializers& serializers = pEngine->GetSerializers();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 
+		Undo::RegisterChangeHandler(std::string(".gui"), std::string("Entities"),
+		[this, pEngine](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			std::vector<std::string> components;
+			Reflect::Tokenize(path.string(), components, '\\');
+			if (components.size() != 2) return;
+			const std::filesystem::path filePath = file.Path();
+			const UUID documentID = EditorAssetDatabase::FindAssetUUID(filePath.string());
+			UIDocument* pDocument = FindEditingDocument(documentID);
+			const UUID entityUUID = (UUID)std::stoull(components[1]);
+
+			auto entity = file[path];
+			if (!entity.Exists())
+			{
+				/* Remove it */
+				if (!pDocument->EntityExists(entityUUID)) return;
+				const Utils::ECS::EntityID entityID = pDocument->EntityID(entityUUID);
+				const Utils::ECS::EntityID parentID = pDocument->Registry().GetParent(entityID);
+				pDocument->DestroyEntity(entityUUID);
+				pDocument->SetEntityDirty(parentID, true, true);
+				pDocument->SetDrawDirty();
+				return;
+			}
+
+			/* Add it */
+			UIDocumentImporter::DeserializeEntity(pEngine, pDocument, file[path]);
+			const Utils::ECS::EntityID newEntityID = pDocument->EntityID(entityUUID);
+			pDocument->SetEntityDirty(newEntityID, true, true);
+			pDocument->SetDrawDirty();
+		});
+
 		Undo::RegisterChangeHandler(std::string(".gui"), std::string("Components"),
 		[this, &serializers](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
 			std::vector<std::string> components;
@@ -160,7 +191,8 @@ namespace Glory::Editor
 			const size_t index = (size_t)std::stoull(components[3].substr(2));
 
 			UIDocument* pDocument = FindEditingDocument(documentID);
-			Utils::ECS::EntityID entity = pDocument->EntityID(entityUUID);
+			const Utils::ECS::EntityID entity = pDocument->EntityID(entityUUID);
+			const Utils::ECS::EntityID parent = pDocument->Registry().GetParent(entity);
 
 			std::filesystem::path componentPath = components[0];
 			componentPath.append(components[1]).append(components[2]).append(components[3]);
@@ -172,7 +204,8 @@ namespace Glory::Editor
 			void* data = registry.GetComponentAddress(entity, componentID);
 			serializers.DeserializeProperty(pType, data, file[componentPath]["Properties"]);
 
-			registry.SetEntityDirty(entity);
+			pDocument->SetEntityDirty(entity, true, true);
+			pDocument->SetDrawDirty();
 		});
 
 		Undo::RegisterChangeHandler(std::string(".gui"), std::string("Name"),
@@ -191,6 +224,34 @@ namespace Glory::Editor
 			pDocument->SetName(entity, newName);
 		});
 
+		Undo::RegisterChangeHandler(std::string(".gui"), std::string("Active"),
+		[this, &serializers](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			std::vector<std::string> components;
+			Reflect::Tokenize(path.string(), components, '\\');
+
+			switch (components.size())
+			{
+			case 3:
+			{
+				const std::filesystem::path filePath = file.Path();
+				const UUID documentID = EditorAssetDatabase::FindAssetUUID(filePath.string());
+				const UUID entityUUID = (UUID)std::stoull(components[1]);
+
+				UIDocument* pDocument = FindEditingDocument(documentID);
+				const Utils::ECS::EntityID entity = pDocument->EntityID(entityUUID);
+				const bool active = file[path].As<bool>();
+				pDocument->SetEntityActive(entity, active);
+				break;
+			}
+			case 4:
+
+				break;
+
+			default:
+				return;
+			}
+		});
+
 		Shortcuts::AddMainWindowAction("Delete", m_MainWindowIndex, [this, pEngine, &resources]() {
 			UIDocument* pDocument = CurrentDocument();
 			if (!m_EditingDocument || !pDocument || !m_SelectedEntity) return;
@@ -199,6 +260,16 @@ namespace Glory::Editor
 			YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
 			Utils::YAMLFileRef& file = **pDocumentData;
 			DeleteUIElementAction::DeleteElement(pEngine, pDocument, file, m_SelectedEntity);
+		});
+
+		Shortcuts::AddMainWindowAction("Duplicate", m_MainWindowIndex, [this, pEngine, &resources]() {
+			UIDocument* pDocument = CurrentDocument();
+			if (!m_EditingDocument || !pDocument || !m_SelectedEntity) return;
+
+			EditableResource* pResource = resources.GetEditableResource(m_EditingDocument);
+			YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
+			Utils::YAMLFileRef& file = **pDocumentData;
+			m_SelectedEntity = AddUIElementAction::DuplicateElement(pEngine, pDocument, file, m_SelectedEntity);
 		});
 
 		Shortcuts::AddMainWindowAction("Save Scene", m_MainWindowIndex, [this, pApp, &resources]() {
