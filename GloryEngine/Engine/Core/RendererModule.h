@@ -85,7 +85,7 @@ namespace Glory
 
 		void RenderOnBackBuffer(RenderTexture* pTexture);
 
-		GPUTextureAtlas* CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo);
+		GPUTextureAtlas* CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, bool depth=false);
 
 	protected:
 		virtual void OnSubmit(const RenderData& renderData) {}

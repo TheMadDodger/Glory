@@ -277,16 +277,7 @@ namespace Glory
 		m_pQuadMesh = pResourceManager->CreateMesh(4, 6, InputRate::Vertex, 0, sizeof(VertexPosColorTex),
 			PrimitiveType::PT_Triangles, { AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }, m_pQuadMeshVertexBuffer, m_pQuadMeshIndexBuffer);
 
-		SamplerSettings sampler;
-		sampler.MipmapMode = Filter::F_None;
-		sampler.MinFilter = Filter::F_Linear;
-		sampler.MagFilter = Filter::F_Linear;
-		sampler.AddressModeU = SamplerAddressMode::SAM_ClampToBorder;
-		sampler.AddressModeV = SamplerAddressMode::SAM_ClampToBorder;
-		sampler.AddressModeW = SamplerAddressMode::SAM_ClampToBorder;
-		m_pShadowAtlas = CreateGPUTextureAtlas({ m_ShadowAtlasResolution, m_ShadowAtlasResolution, PixelFormat::PF_R, PixelFormat::PF_R32Sfloat,
-			ImageType::IT_2D, DataType::DT_Float, 0, 0, ImageAspect::IA_Color, sampler }
-		);
+		m_pShadowAtlas = CreateGPUTextureAtlas({ m_ShadowAtlasResolution, m_ShadowAtlasResolution }, true);
 
 		GenerateShadowLODDivisions(m_MaxShadowLODs);
 		CreateTemporaryShadowMaps();
@@ -836,7 +827,7 @@ namespace Glory
 		const uint32_t sliceSteps = NUM_DEPTH_SLICES/m_MaxShadowLODs;
 
 		m_pShadowAtlas->ReleaseAllChunks();
-		m_pShadowAtlas->Clear({1.0f, 1.0f, 1.0f, 1.0f});
+		m_pShadowAtlas->Clear({}, 0.0);
 
 		for (size_t i = 0; i < m_FrameData.ActiveLights.count(); ++i)
 		{
@@ -859,7 +850,8 @@ namespace Glory
 			uint32_t shadowWidth, shadowHeight;
 			pShadowMap->GetDimensions(shadowWidth, shadowHeight);
 
-			if (!m_pShadowAtlas->ReserveChunk(shadowWidth, shadowHeight, lightID))
+			const UUID chunkID = m_pShadowAtlas->ReserveChunk(shadowWidth, shadowHeight, lightID);
+			if (!chunkID)
 			{
 				lightData.shadowsEnabled = 0;
 				m_pEngine->GetDebug().LogError("Failed to reserve chunk in shadow atlas, there is not enough space left.");
@@ -868,22 +860,17 @@ namespace Glory
 
 			pGraphics->SetCullFace(CullFace::Front);
 			pGraphics->SetColorMask(false, false, false, false);
-			pShadowMap->BindForDraw();
-			pGraphics->Clear();
+			pGraphics->EnableDepthWrite(true);
+			pGraphics->EnableDepthTest(true);
+			m_pShadowAtlas->BindChunk(chunkID);
 			for (size_t j = 0; j < m_FrameData.ObjectsToRender.size(); ++j)
 			{
 				const auto& objectToRender = m_FrameData.ObjectsToRender[j];
 				RenderShadow(i, m_FrameData, objectToRender);
 			}
-			pShadowMap->UnBindForDraw();
+			m_pShadowAtlas->Unbind();
 			pGraphics->SetColorMask(true, true, true, true);
 			pGraphics->SetCullFace(CullFace::None);
-
-			if (!m_pShadowAtlas->AsignChunk(lightID, pShadowMap->GetTextureAttachment(0)))
-			{
-				lightData.shadowsEnabled = 0;
-				continue;
-			}
 			lightData.shadowCoords = m_pShadowAtlas->GetChunkCoords(lightID);
 		}
 	}
@@ -909,8 +896,6 @@ namespace Glory
 		object.SceneID = objectToRender.m_SceneID;
 		pMaterial->SetProperties(m_pEngine);
 		pMaterial->SetObjectData(object);
-		pGraphics->EnableDepthWrite(true);
-		pGraphics->EnableDepthTest(true);
 		pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
 
 		pGraphics->UseMaterial(nullptr);

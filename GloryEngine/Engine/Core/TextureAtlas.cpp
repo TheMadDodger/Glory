@@ -94,6 +94,22 @@ namespace Glory
 		return AssignChunk(pTexture, chunk);
 	}
 
+	bool TextureAtlas::BindChunk(UUID id)
+	{
+		auto& iter = std::find_if(m_ReservedChunks.begin(), m_ReservedChunks.end(), [id](const ReservedChunk& chunk) {
+			return chunk.ID == id;
+		});
+
+		if (iter == m_ReservedChunks.end())
+		{
+			m_pEngine->GetDebug().LogError("TextureAtlas::AsignChunk(Texture) > Chunk not found!");
+			return false;
+		}
+
+		const ReservedChunk& chunk = *iter;
+		return OnBindChunk(chunk);
+	}
+
 	glm::vec4 TextureAtlas::GetChunkCoords(UUID id) const
 	{
 		auto& iter = std::find_if(m_ReservedChunks.begin(), m_ReservedChunks.end(), [id](const ReservedChunk& chunk) {
@@ -146,8 +162,8 @@ namespace Glory
 		OnResize();
 	}
 
-	void TextureAtlas::Clear(const glm::vec4& clearColor)
+	void TextureAtlas::Clear(const glm::vec4& clearColor, double depth)
 	{
-		OnClear(clearColor);
+		OnClear(clearColor, depth);
 	}
 }

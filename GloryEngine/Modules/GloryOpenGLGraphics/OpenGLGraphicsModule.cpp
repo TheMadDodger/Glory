@@ -228,9 +228,11 @@ namespace Glory
 		}
 	}
 
-	void OpenGLGraphicsModule::Clear(glm::vec4 color)
+	void OpenGLGraphicsModule::Clear(glm::vec4 color, double depth)
 	{
 		glClearColor(color.r, color.g, color.b, color.a);
+		LogGLError(glGetError());
+		glClearDepth(depth);
 		LogGLError(glGetError());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		LogGLError(glGetError());
@@ -345,6 +347,17 @@ namespace Glory
 	void OpenGLGraphicsModule::SetViewport(int x, int y, uint32_t width, uint32_t height)
 	{
 		glViewport(x, y, width, height);
+	}
+
+	void OpenGLGraphicsModule::Scissor(int x, int y, uint32_t width, uint32_t height)
+	{
+		glEnable(GL_SCISSOR_TEST);
+		glScissor(x, y, width, height);
+	}
+
+	void OpenGLGraphicsModule::EndScissor()
+	{
+		glDisable(GL_SCISSOR_TEST);
 	}
 
 	void OpenGLGraphicsModule::Blit(RenderTexture* pTexture, glm::uvec4 src, glm::uvec4 dst, Filter filter)
