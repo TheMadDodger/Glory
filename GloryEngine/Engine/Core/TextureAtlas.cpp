@@ -17,6 +17,10 @@ namespace Glory
 
 	UUID TextureAtlas::ReserveChunk(uint32_t width, uint32_t height, UUID id)
 	{
+		auto chunkIter = std::find_if(m_ReservedChunks.begin(), m_ReservedChunks.end(),
+			[id](const ReservedChunk& chunk) { return chunk.ID == id; });
+		if (chunkIter != m_ReservedChunks.end()) return chunkIter->ID;
+
 		/* Find a row with the same height */
 		for (size_t i = 0; i < m_Rows.size(); ++i)
 		{
@@ -94,6 +98,22 @@ namespace Glory
 		return AssignChunk(pTexture, chunk);
 	}
 
+	bool TextureAtlas::BindChunk(UUID id)
+	{
+		auto& iter = std::find_if(m_ReservedChunks.begin(), m_ReservedChunks.end(), [id](const ReservedChunk& chunk) {
+			return chunk.ID == id;
+		});
+
+		if (iter == m_ReservedChunks.end())
+		{
+			m_pEngine->GetDebug().LogError("TextureAtlas::AsignChunk(Texture) > Chunk not found!");
+			return false;
+		}
+
+		const ReservedChunk& chunk = *iter;
+		return OnBindChunk(chunk);
+	}
+
 	glm::vec4 TextureAtlas::GetChunkCoords(UUID id) const
 	{
 		auto& iter = std::find_if(m_ReservedChunks.begin(), m_ReservedChunks.end(), [id](const ReservedChunk& chunk) {
@@ -135,5 +155,19 @@ namespace Glory
 	{
 		m_ReservedChunks.clear();
 		m_Rows.clear();
+		m_AvailableHeight = m_Height;
+	}
+
+	void TextureAtlas::Resize(uint32_t newSize)
+	{
+		m_Width = newSize;
+		m_Height = newSize;
+		ReleaseAllChunks();
+		OnResize();
+	}
+
+	void TextureAtlas::Clear(const glm::vec4& clearColor, double depth)
+	{
+		OnClear(clearColor, depth);
 	}
 }

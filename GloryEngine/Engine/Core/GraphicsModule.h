@@ -21,7 +21,7 @@ namespace Glory
         void DrawMesh(Mesh* pMesh, uint32_t vertexOffset, uint32_t vertexCount);
         virtual void DrawScreenQuad() = 0;
         virtual void DrawUnitCube() = 0;
-        virtual void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) = 0;
+        virtual void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), double depth=1.0) = 0;
         virtual void Swap() = 0;
         virtual Material* UseMaterial(MaterialData* pMaterialData) = 0;
         virtual void DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z) = 0;
@@ -34,6 +34,8 @@ namespace Glory
         virtual void SetColorMask(bool r, bool g, bool b, bool a) = 0;
         virtual void ClearStencil(int value) = 0;
         virtual void SetViewport(int x, int y, uint32_t width, uint32_t height) = 0;
+        virtual void Scissor(int x, int y, uint32_t width, uint32_t height) = 0;
+        virtual void EndScissor() = 0;
         virtual void Blit(RenderTexture* pTexture, glm::uvec4 src = glm::uvec4(), glm::uvec4 dst = glm::uvec4(),
             Filter filter = Filter::F_Nearest) = 0;
         virtual void Blit(RenderTexture* pSource, RenderTexture* pDest, glm::uvec4 src = glm::uvec4(), glm::uvec4 dst = glm::uvec4(),

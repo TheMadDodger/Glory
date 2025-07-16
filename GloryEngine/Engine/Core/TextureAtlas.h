@@ -48,6 +48,17 @@ namespace Glory
 		 * must be compatible with the format of that atlas.
 		 */
 		bool AsignChunk(UUID id, Texture* pTexture);
+		/** @brief Bind a chunk for rendering to it
+		 * @param id ID of the chunk to render to
+		 * @returns @cpp true @ce on success, @cpp false @ce otherwise
+		 *
+		 * Make sure to call @ref Bind() first!
+		 */
+		bool BindChunk(UUID id);
+		/** @brief Bind texture for rendering */
+		virtual void Bind() = 0;
+		/** @brief Unbind texture */
+		virtual void Unbind() = 0;
 		/** @brief Get the texture coordinates of a chunk
 		 * @param id ID of the chunk
 		 */
@@ -64,6 +75,16 @@ namespace Glory
 		 * Does not clear the attached texture
 		 */
 		void ReleaseAllChunks();
+
+		/** @brief Resize the texture atlas
+		 * @param newSize New width and height of the atlas
+		 *
+		 * Note: this releases all chunks!
+		 */
+		void Resize(uint32_t newSize);
+
+		/** @brief Reset all pixels of the atlas to a specific color */
+		void Clear(const glm::vec4& clearColor=glm::vec4{0.0f, 0.0f, 0.0f, 1.0f}, double depth=1.0);
 
 	protected:
 		/** @brief Reserved chunk data */
@@ -93,6 +114,15 @@ namespace Glory
 		 * @returns @cpp true @ce on success, @cpp false @ce otherwise
 		 */
 		virtual bool AssignChunk(Texture* pTexture, const ReservedChunk& chunk) = 0;
+		/** @brief Implementation for binding a chunk for rendering
+		 * @param chunk The chunk to bind for rendering
+		 * @returns @cpp true @ce on success, @cpp false @ce otherwise
+		 */
+		virtual bool OnBindChunk(const ReservedChunk& chunk) = 0;
+		/** @brief Implementation for resizing the atlas */
+		virtual void OnResize() = 0;
+		/** @brief Implementation for clearing the atlas */
+		virtual void OnClear(const glm::vec4& clearColor, double depth) = 0;
 
 	protected:
 		Engine* m_pEngine;

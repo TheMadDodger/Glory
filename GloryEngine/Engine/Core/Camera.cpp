@@ -28,6 +28,8 @@ namespace Glory
 
 	void Camera::SetPerspectiveProjection(uint32_t width, uint32_t height, float halfFOV, float near, float far)
 	{
+		if (m_HalfFOV == halfFOV && m_Near == near && m_Far == far) return;
+
 		m_HalfFOV = halfFOV;
 		m_Near = near;
 		m_Far = far;
@@ -41,6 +43,8 @@ namespace Glory
 
 	void Camera::SetOrthographicProjection(float width, float height, float near, float far)
 	{
+		if (m_Near == near && m_Far == far) return;
+
 		m_Near = near;
 		m_Far = far;
 

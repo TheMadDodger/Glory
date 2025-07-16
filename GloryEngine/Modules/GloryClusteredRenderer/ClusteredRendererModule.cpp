@@ -24,10 +24,18 @@
 namespace Glory
 {
 	static constexpr std::string_view ScreenSpaceAOCVarName = "r_screenSpaceAO";
+	static constexpr std::string_view MinShadowResolutionVarName = "r_minShadowResolution";
+	static constexpr std::string_view MaxShadowResolutionVarName = "r_maxShadowResolution";
+	static constexpr std::string_view ShadowAtlasResolution = "r_shadowAtlasResolution";
+	static constexpr std::string_view MaxShadowLODs = "r_maxShadowLODs";
+
+	static uint32_t* ResetLightDistances;
 
 	GLORY_MODULE_VERSION_CPP(ClusteredRendererModule);
 
-	ClusteredRendererModule::ClusteredRendererModule(): m_pTemporaryShadowMap(nullptr), m_pShadowAtlas(nullptr)
+	ClusteredRendererModule::ClusteredRendererModule() :
+		m_MinShadowResolution(256), m_MaxShadowResolution(2048), m_ShadowAtlasResolution(8192),
+		m_ShadowMapResolutions{}, m_pShadowAtlas(nullptr), m_MaxShadowLODs(6)
 	{
 	}
 
@@ -114,15 +122,46 @@ namespace Glory
 	void ClusteredRendererModule::Initialize()
 	{
 		RendererModule::Initialize();
-		m_pEngine->GetConsole().RegisterCVar({ std::string{ ScreenSpaceAOCVarName }, "Enables/disables screen space ambient occlusion.", 1.0f, CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ ScreenSpaceAOCVarName }, "Enables/disables screen space ambient occlusion.", float(m_GlobalSSAOSetting.m_Enabled), CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ MinShadowResolutionVarName }, "Sets the minimum resolution for shadow maps.", float(m_MinShadowResolution), CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ MaxShadowResolutionVarName }, "Sets the maximum resolution for shadow maps.", float(m_MaxShadowResolution), CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ ShadowAtlasResolution }, "Sets the resolution for the shadow atlas.", float(m_ShadowAtlasResolution), CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ MaxShadowLODs }, "Sets the number of shadow map LODs.", float(m_MaxShadowLODs), CVar::Flags::Save });
 
 		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ ScreenSpaceAOCVarName }, [this](const CVar* cvar) {
 			m_GlobalSSAOSetting.m_Enabled = cvar->m_Value == 1.0f;
 			m_GlobalSSAOSetting.m_Dirty = true;
 		});
 
-		AddRenderPass(RP_Prepass, RenderPass{ "Skybox Pass", [this](CameraRef camera, const RenderFrame& frame) {
+		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ MinShadowResolutionVarName }, [this](const CVar* cvar) {
+			ResizeShadowMapLODResolutions(uint32_t(cvar->m_Value), m_MaxShadowResolution);
+		});
+
+		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ MaxShadowResolutionVarName }, [this](const CVar* cvar) {
+			ResizeShadowMapLODResolutions(m_MinShadowResolution, uint32_t(cvar->m_Value));
+		});
+
+		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ ShadowAtlasResolution }, [this](const CVar* cvar) {
+			ResizeShadowAtlas(uint32_t(cvar->m_Value));
+		});
+
+		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ MaxShadowLODs }, [this](const CVar* cvar) {
+			GenerateShadowLODDivisions(cvar->m_Value);
+			ResizeShadowMapLODResolutions(m_MinShadowResolution, m_MaxShadowResolution);
+		});
+
+		AddRenderPass(RP_Prepass, RenderPass{ "Prepare Data Pass", [this](CameraRef, const RenderFrame& frame) {
+			/* Update light data */
+			const uint32_t count = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
+			m_pLightCountSSBO->Assign(&count, 0, sizeof(uint32_t));
+			m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS*sizeof(LightData));
+			m_pLightSpaceTransformsSSBO->Assign(m_FrameData.LightSpaceTransforms.data(), 0, MAX_LIGHTS*sizeof(glm::mat4));
+			m_pLightDistancesSSBO->Assign(ResetLightDistances);
+		} });
+
+		AddRenderPass(RP_PreCompositePass, RenderPass{ "Shadows Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			ShadowMapsPass(camera, frame);
+			m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS*sizeof(LightData));
 		} });
 	}
 
@@ -194,10 +233,18 @@ namespace Glory
 		m_pScreenToViewSSBO = pResourceManager->CreateBuffer(sizeof(ScreenToView), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 2);
 		m_pScreenToViewSSBO->Assign(NULL);
 
-		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(LightData)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
+		m_pLightsSSBO = pResourceManager->CreateBuffer(sizeof(LightData)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 3);
 		m_pLightsSSBO->Assign(NULL);
-		m_pLightSpaceTransformsSSBO = pResourceManager->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 8);
+		m_pLightCountSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 7);
+		m_pLightCountSSBO->Assign(NULL);
+		m_pLightSpaceTransformsSSBO = pResourceManager->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 8);
 		m_pLightSpaceTransformsSSBO->Assign(NULL);
+		m_pLightDistancesSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t)*MAX_LIGHTS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 6);
+
+		ResetLightDistances = new uint32_t[MAX_LIGHTS];
+		for (size_t i = 0; i < MAX_LIGHTS; ++i)
+			ResetLightDistances[i] = NUM_DEPTH_SLICES;
+		m_pLightDistancesSSBO->Assign(ResetLightDistances);
 
 		m_pSSAOSettingsSSBO = pResourceManager->CreateBuffer(sizeof(SSAOSettings), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 6);
 		m_pSSAOSettingsSSBO->Assign(NULL);
@@ -209,37 +256,31 @@ namespace Glory
 		m_pCompactClustersMaterial = pResourceManager->CreateMaterial(m_pCompactClustersMaterialData);
 		m_pClusterCullLightMaterial = pResourceManager->CreateMaterial(m_pClusterCullLightMaterialData);
 
-		uint32_t vertexBufferSize = 4 * sizeof(VertexPosColorTex);
-		uint32_t indexBufferSize = 6 * sizeof(uint32_t);
-		m_pQuadMeshVertexBuffer = pResourceManager->CreateBuffer(vertexBufferSize, BufferBindingTarget::B_ARRAY, MemoryUsage::MU_DYNAMIC_DRAW, 0);
-		m_pQuadMeshIndexBuffer = pResourceManager->CreateBuffer(indexBufferSize, BufferBindingTarget::B_ELEMENT_ARRAY, MemoryUsage::MU_DYNAMIC_DRAW, 0);
+		const uint32_t vertexBufferSize = 4*sizeof(VertexPosColorTex);
+		const uint32_t indexBufferSize = 6*sizeof(uint32_t);
+		m_pQuadMeshVertexBuffer = pResourceManager->CreateBuffer(vertexBufferSize, BufferBindingTarget::B_ARRAY, MemoryUsage::MU_STATIC_DRAW, 0);
+		m_pQuadMeshIndexBuffer = pResourceManager->CreateBuffer(indexBufferSize, BufferBindingTarget::B_ELEMENT_ARRAY, MemoryUsage::MU_STATIC_DRAW, 0);
 
-		uint32_t indices[6] = {
+		const uint32_t indices[6] = {
 			0, 1, 2,
 			2, 3, 0
 		};
-		VertexPosColorTex defaultVertices[4] = {
+		const VertexPosColorTex defaultVertices[4] = {
 			{{-1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
 			{{-1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
 			{{1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
 			{{1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
 		};
 
-		m_pQuadMeshIndexBuffer->Assign(indices, 6 * sizeof(uint32_t));
-		m_pQuadMeshVertexBuffer->Assign(defaultVertices, 4 * sizeof(VertexPosColorTex));
+		m_pQuadMeshIndexBuffer->Assign(indices);
+		m_pQuadMeshVertexBuffer->Assign(defaultVertices);
 		m_pQuadMesh = pResourceManager->CreateMesh(4, 6, InputRate::Vertex, 0, sizeof(VertexPosColorTex),
 			PrimitiveType::PT_Triangles, { AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }, m_pQuadMeshVertexBuffer, m_pQuadMeshIndexBuffer);
 
-		SamplerSettings sampler;
-		sampler.MipmapMode = Filter::F_None;
-		sampler.MinFilter = Filter::F_Nearest;
-		sampler.MagFilter = Filter::F_Nearest;
-		sampler.AddressModeU = SamplerAddressMode::SAM_ClampToBorder;
-		sampler.AddressModeV = SamplerAddressMode::SAM_ClampToBorder;
-		sampler.AddressModeW = SamplerAddressMode::SAM_ClampToBorder;
-		m_pShadowAtlas = CreateGPUTextureAtlas({ 8192, 8192, PixelFormat::PF_R, PixelFormat::PF_R32Sfloat,
-			ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Color, sampler }
-		);
+		m_pShadowAtlas = CreateGPUTextureAtlas({ m_ShadowAtlasResolution, m_ShadowAtlasResolution }, true);
+
+		GenerateShadowLODDivisions(m_MaxShadowLODs);
+		GenerateShadowMapLODResolutions();
 	}
 
 	void ClusteredRendererModule::Update()
@@ -491,10 +532,6 @@ namespace Glory
 		pGraphics->EnableDepthTest(false);
 		pGraphics->SetViewport(0, 0, width, height);
 
-		const uint32_t count = (uint32_t)std::fmin(m_FrameData.ActiveLights.size(), MAX_LIGHTS);
-		m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, count*sizeof(LightData));
-		m_pLightSpaceTransformsSSBO->Assign(m_FrameData.LightSpaceTransforms.data(), 0, count*sizeof(glm::mat4));
-
 		glm::uvec2 resolution = camera.GetResolution();
 		glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
 		float zNear = camera.GetNear();
@@ -596,29 +633,19 @@ namespace Glory
 		Buffer* pClusterSSBO = nullptr;
 		if (!camera.GetUserData<Buffer>("ClusterSSBO", pClusterSSBO))
 		{
-			Buffer* pActiveClustersSSBO = nullptr;
-			Buffer* pActiveUniqueClustersSSBO = nullptr;
 			Buffer* pLightIndexSSBO = nullptr;
 			Buffer* pLightGridSSBO = nullptr;
 
-			pClusterSSBO = pResourceManager->CreateBuffer(sizeof(VolumeTileAABB) * NUM_CLUSTERS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 1);
+			pClusterSSBO = pResourceManager->CreateBuffer(sizeof(VolumeTileAABB)*NUM_CLUSTERS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 1);
 			pClusterSSBO->Assign(NULL);
 
-			pActiveClustersSSBO = pResourceManager->CreateBuffer(sizeof(bool) * NUM_CLUSTERS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 1);
-			pActiveClustersSSBO->Assign(NULL);
-
-			pActiveUniqueClustersSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t) * (NUM_CLUSTERS + 1), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 2);
-			pActiveUniqueClustersSSBO->Assign(NULL);
-
-			pLightIndexSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t) * (NUM_CLUSTERS * MAX_LIGHTS_PER_TILE + 1), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 4);
+			pLightIndexSSBO = pResourceManager->CreateBuffer(sizeof(uint32_t)*(NUM_CLUSTERS*MAX_LIGHTS_PER_TILE + 1), BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_COPY, 4);
 			pLightIndexSSBO->Assign(NULL);
 
-			pLightGridSSBO = pResourceManager->CreateBuffer(sizeof(LightGrid) * NUM_CLUSTERS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_COPY, 5);
+			pLightGridSSBO = pResourceManager->CreateBuffer(sizeof(LightGrid)*NUM_CLUSTERS, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_COPY, 5);
 			pLightGridSSBO->Assign(NULL);
 
 			camera.SetUserData("ClusterSSBO", pClusterSSBO);
-			camera.SetUserData("ActiveClustersSSBO", pActiveClustersSSBO);
-			camera.SetUserData("ActiveUniqueClustersSSBO", pActiveUniqueClustersSSBO);
 			camera.SetUserData("LightIndexSSBO", pLightIndexSSBO);
 			camera.SetUserData("LightGridSSBO", pLightGridSSBO);
 
@@ -638,35 +665,11 @@ namespace Glory
 		glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
 
 		Buffer* pClusterSSBO = nullptr;
-		Buffer* pActiveClustersSSBO = nullptr;
-		Buffer* pActiveUniqueClustersSSBO = nullptr;
 		Buffer* pLightIndexSSBO = nullptr;
 		Buffer* pLightGridSSBO = nullptr;
 		if (!camera.GetUserData("ClusterSSBO", pClusterSSBO)) return;
-		if (!camera.GetUserData("ActiveClustersSSBO", pActiveClustersSSBO)) return;
-		if (!camera.GetUserData("ActiveUniqueClustersSSBO", pActiveUniqueClustersSSBO)) return;
 		if (!camera.GetUserData("LightIndexSSBO", pLightIndexSSBO)) return;
 		if (!camera.GetUserData("LightGridSSBO", pLightGridSSBO)) return;
-
-		//m_pMarkActiveClustersMaterial->Use();
-		//pActiveClustersSSBO->Bind();
-		//m_pMarkActiveClustersMaterial->SetFloat("zNear", camera.GetNear());
-		//m_pMarkActiveClustersMaterial->SetFloat("zFar", camera.GetFar());
-		//m_pMarkActiveClustersMaterial->SetUInt("tileSizeInPx", resolution.x / gridSize.x);
-		//m_pMarkActiveClustersMaterial->SetUVec3("numClusters", gridSize);
-		//m_pMarkActiveClustersMaterial->SetTexture("Depth", pDepthTexture);
-		//pGraphics->DispatchCompute(resolution.x, resolution.y, 1);
-		//pActiveClustersSSBO->Unbind();
-
-		//m_pCompactClustersMaterial->Use();
-		//pActiveClustersSSBO->Bind();
-		//pActiveUniqueClustersSSBO->Bind();
-		//pGraphics->DispatchCompute(NUM_CLUSTERS, 1, 1);
-		//pActiveClustersSSBO->Unbind();
-		//pActiveUniqueClustersSSBO->Unbind();
-
-		const uint32_t count = (uint32_t)std::fmin(lights.size(), MAX_LIGHTS);
-		m_pLightsSSBO->Assign(lights.data(), 0, count*sizeof(LightData));
 
 		float zNear = camera.GetNear();
 		float zFar = camera.GetFar();
@@ -691,12 +694,16 @@ namespace Glory
 		m_pLightsSSBO->BindForDraw();
 		pLightIndexSSBO->BindForDraw();
 		pLightGridSSBO->BindForDraw();
+		m_pLightDistancesSSBO->BindForDraw();
+		m_pLightCountSSBO->BindForDraw();
 		pGraphics->DispatchCompute(1, 1, 6);
 		pClusterSSBO->Unbind();
 		m_pScreenToViewSSBO->Unbind();
 		m_pLightsSSBO->Unbind();
 		pLightIndexSSBO->Unbind();
 		pLightGridSSBO->Unbind();
+		m_pLightDistancesSSBO->Unbind();
+		m_pLightCountSSBO->Unbind();
 	}
 
 	void ClusteredRendererModule::LoadSettings(ModuleSettings& settings)
@@ -811,51 +818,58 @@ namespace Glory
 
 	void ClusteredRendererModule::ShadowMapsPass(CameraRef camera, const RenderFrame& frameData)
 	{
+		if (m_FrameData.ActiveLights.count() == 0) return;
+
+		uint32_t lightDepthSlices[MAX_LIGHTS];
+		m_pLightDistancesSSBO->Read(&lightDepthSlices, 0, m_FrameData.ActiveLights.count()*sizeof(uint32_t));
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 
-		if (!m_pTemporaryShadowMap)
-		{
-			RenderTextureCreateInfo renderTextureInfo;
-			renderTextureInfo.HasDepth = true;
-			renderTextureInfo.HasStencil = false;
-			renderTextureInfo.Width = 1024;
-			renderTextureInfo.Height = 1024;
-			m_pTemporaryShadowMap = pGraphics->GetResourceManager()->CreateRenderTexture(renderTextureInfo);
-		}
+		const uint32_t sliceSteps = NUM_DEPTH_SLICES/m_MaxShadowLODs;
 
+		m_pShadowAtlas->ReleaseAllChunks();
+		m_pShadowAtlas->Bind();
 		for (size_t i = 0; i < m_FrameData.ActiveLights.count(); ++i)
 		{
 			auto& lightData = m_FrameData.ActiveLights[i];
 			const auto& lightTransform = m_FrameData.LightSpaceTransforms[i];
 			const auto& lightID = m_FrameData.ActiveLightIDs[i];
 
-			if (!m_pShadowAtlas->HasReservedChunk(lightID) &&
-				!m_pShadowAtlas->ReserveChunk(1024, 1024, lightID))
+			if (!lightData.shadowsEnabled) continue;
+
+			const uint32_t depthSlice = lightDepthSlices[i];
+			/* No need to render that which can't be seen! */
+			if (depthSlice == NUM_DEPTH_SLICES)
 			{
 				lightData.shadowsEnabled = 0;
+				continue;
+			}
+
+			const uint32_t shadowLOD = std::min(depthSlice/sliceSteps, uint32_t(m_MaxShadowLODs - 1));
+			const glm::uvec2 shadowMapResolution = m_ShadowMapResolutions[shadowLOD];
+
+			const UUID chunkID = m_pShadowAtlas->ReserveChunk(shadowMapResolution.x, shadowMapResolution.y, lightID);
+			if (!chunkID)
+			{
+				lightData.shadowsEnabled = 0;
+				m_pEngine->GetDebug().LogError("Failed to reserve chunk in shadow atlas, there is not enough space left.");
 				continue;
 			}
 
 			pGraphics->SetCullFace(CullFace::Front);
 			pGraphics->SetColorMask(false, false, false, false);
-			m_pTemporaryShadowMap->BindForDraw();
-			pGraphics->Clear();
+			pGraphics->EnableDepthWrite(true);
+			pGraphics->EnableDepthTest(true);
+			m_pShadowAtlas->BindChunk(chunkID);
 			for (size_t j = 0; j < m_FrameData.ObjectsToRender.size(); ++j)
 			{
 				const auto& objectToRender = m_FrameData.ObjectsToRender[j];
 				RenderShadow(i, m_FrameData, objectToRender);
 			}
-			m_pTemporaryShadowMap->UnBindForDraw();
 			pGraphics->SetColorMask(true, true, true, true);
 			pGraphics->SetCullFace(CullFace::None);
-
-			if (!m_pShadowAtlas->AsignChunk(lightID, m_pTemporaryShadowMap->GetTextureAttachment(0)))
-			{
-				lightData.shadowsEnabled = 0;
-				continue;
-			}
 			lightData.shadowCoords = m_pShadowAtlas->GetChunkCoords(lightID);
 		}
+		m_pShadowAtlas->Unbind();
 	}
 
 	void ClusteredRendererModule::RenderShadow(size_t lightIndex, const RenderFrame& frameData, const RenderData& objectToRender)
@@ -879,10 +893,57 @@ namespace Glory
 		object.SceneID = objectToRender.m_SceneID;
 		pMaterial->SetProperties(m_pEngine);
 		pMaterial->SetObjectData(object);
-		pGraphics->EnableDepthWrite(true);
-		pGraphics->EnableDepthTest(true);
 		pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
 
 		pGraphics->UseMaterial(nullptr);
+	}
+
+	void ClusteredRendererModule::GenerateShadowLODDivisions(uint32_t maxLODs)
+	{
+		m_MaxShadowLODs = std::min(MAX_SHADOW_LODS, maxLODs);
+		m_ShadowLODDivisions.clear();
+		m_ShadowLODDivisions.reserve(m_MaxShadowLODs);
+		for (size_t i = 0; i < m_MaxShadowLODs; ++i)
+		{
+			const uint32_t divider = uint32_t(pow(2, i));
+			m_ShadowLODDivisions.push_back(divider);
+		}
+	}
+
+	void ClusteredRendererModule::GenerateShadowMapLODResolutions()
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		m_ShadowMapResolutions.reserve(m_MaxShadowLODs);
+		for (size_t i = 0; i < m_MaxShadowLODs; ++i)
+		{
+			const uint32_t res = std::max(m_MinShadowResolution, m_MaxShadowResolution/m_ShadowLODDivisions[i]);
+			m_ShadowMapResolutions.push_back({ res, res });
+		}
+	}
+
+	void ClusteredRendererModule::ResizeShadowMapLODResolutions(uint32_t minSize, uint32_t maxSize)
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		m_MinShadowResolution = minSize;
+		m_MaxShadowResolution = maxSize;
+		m_ShadowMapResolutions.reserve(m_MaxShadowLODs);
+
+		for (size_t i = 0; i < m_MaxShadowLODs; ++i)
+		{
+			const uint32_t res = std::max(m_MinShadowResolution, m_MaxShadowResolution/m_ShadowLODDivisions[i]);
+			if (i >= m_ShadowMapResolutions.size())
+			{
+				m_ShadowMapResolutions.push_back({ res, res });
+				continue;
+			}
+			m_ShadowMapResolutions[i] = { res, res };
+		}
+	}
+
+	void ClusteredRendererModule::ResizeShadowAtlas(uint32_t newSize)
+	{
+		m_ShadowAtlasResolution = newSize;
+		if (!m_pShadowAtlas) return;
+		m_pShadowAtlas->Resize(m_ShadowAtlasResolution);
 	}
 }

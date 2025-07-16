@@ -89,9 +89,12 @@ namespace Glory
 	{
 		RP_Prepass,
 		RP_CameraPrepass,
-		RP_Objectpass,
-		RP_Lateobjectpass,
+		RP_ObjectPass,
+		RP_LateobjectPass,
 		RP_CameraPostpass,
+		RP_PreCompositePass,
+		RP_CameraCompositePass,
+		RP_PostCompositePass,
 		RP_Postpass,
 		RP_Postblit,
 		RP_Count

@@ -76,6 +76,11 @@ namespace Glory
 		void ShadowMapsPass(CameraRef camera, const RenderFrame& frameData);
 		void RenderShadow(size_t lightIndex, const RenderFrame& frameData, const RenderData& objectToRender);
 
+		void GenerateShadowLODDivisions(uint32_t maxLODs);
+		void GenerateShadowMapLODResolutions();
+		void ResizeShadowMapLODResolutions(uint32_t minSize, uint32_t maxSize);
+		void ResizeShadowAtlas(uint32_t newSize);
+
 	private:
 		// Compute shaders
 		FileData* m_pClusterShaderData = nullptr;
@@ -101,7 +106,9 @@ namespace Glory
 		// Data for clustering
 		Buffer* m_pScreenToViewSSBO = nullptr;
 		Buffer* m_pLightsSSBO = nullptr;
+		Buffer* m_pLightCountSSBO = nullptr;
 		Buffer* m_pLightSpaceTransformsSSBO = nullptr;
+		Buffer* m_pLightDistancesSSBO = nullptr;
 		Buffer* m_pSamplePointsDomeSSBO = nullptr;
 		Buffer* m_pSSAOSettingsSSBO = nullptr;
 		Texture* m_pSampleNoiseTexture = nullptr;
@@ -138,7 +145,13 @@ namespace Glory
 
 		SSAOSettings m_GlobalSSAOSetting;
 
-		RenderTexture* m_pTemporaryShadowMap;
+		uint32_t m_MinShadowResolution;
+		uint32_t m_MaxShadowResolution;
+		uint32_t m_ShadowAtlasResolution;
+		uint32_t m_MaxShadowLODs;
+		static const uint32_t MAX_SHADOW_LODS = 24;
+		std::vector<uint32_t> m_ShadowLODDivisions;
+		std::vector<glm::uvec2> m_ShadowMapResolutions;
 
 		GPUTextureAtlas* m_pShadowAtlas;
 	};
