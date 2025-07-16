@@ -35,7 +35,7 @@ namespace Glory
 
 	ClusteredRendererModule::ClusteredRendererModule() :
 		m_MinShadowResolution(256), m_MaxShadowResolution(2048), m_ShadowAtlasResolution(8192),
-		m_pTemporaryShadowMaps{}, m_pShadowAtlas(nullptr), m_MaxShadowLODs(6)
+		m_ShadowMapResolutions{}, m_pShadowAtlas(nullptr), m_MaxShadowLODs(6)
 	{
 	}
 
@@ -134,11 +134,11 @@ namespace Glory
 		});
 
 		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ MinShadowResolutionVarName }, [this](const CVar* cvar) {
-			ResizeTemporaryShadowMaps(uint32_t(cvar->m_Value), m_MaxShadowResolution);
+			ResizeShadowMapLODResolutions(uint32_t(cvar->m_Value), m_MaxShadowResolution);
 		});
 
 		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ MaxShadowResolutionVarName }, [this](const CVar* cvar) {
-			ResizeTemporaryShadowMaps(m_MinShadowResolution, uint32_t(cvar->m_Value));
+			ResizeShadowMapLODResolutions(m_MinShadowResolution, uint32_t(cvar->m_Value));
 		});
 
 		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ ShadowAtlasResolution }, [this](const CVar* cvar) {
@@ -147,7 +147,7 @@ namespace Glory
 
 		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ MaxShadowLODs }, [this](const CVar* cvar) {
 			GenerateShadowLODDivisions(cvar->m_Value);
-			ResizeTemporaryShadowMaps(m_MinShadowResolution, m_MaxShadowResolution);
+			ResizeShadowMapLODResolutions(m_MinShadowResolution, m_MaxShadowResolution);
 		});
 
 		AddRenderPass(RP_Prepass, RenderPass{ "Prepare Data Pass", [this](CameraRef, const RenderFrame& frame) {
@@ -280,7 +280,7 @@ namespace Glory
 		m_pShadowAtlas = CreateGPUTextureAtlas({ m_ShadowAtlasResolution, m_ShadowAtlasResolution }, true);
 
 		GenerateShadowLODDivisions(m_MaxShadowLODs);
-		CreateTemporaryShadowMaps();
+		GenerateShadowMapLODResolutions();
 	}
 
 	void ClusteredRendererModule::Update()
@@ -845,11 +845,9 @@ namespace Glory
 			}
 
 			const uint32_t shadowLOD = std::min(depthSlice/sliceSteps, uint32_t(m_MaxShadowLODs - 1));
-			RenderTexture* pShadowMap = m_pTemporaryShadowMaps[shadowLOD];
-			uint32_t shadowWidth, shadowHeight;
-			pShadowMap->GetDimensions(shadowWidth, shadowHeight);
+			const glm::uvec2 shadowMapResolution = m_ShadowMapResolutions[shadowLOD];
 
-			const UUID chunkID = m_pShadowAtlas->ReserveChunk(shadowWidth, shadowHeight, lightID);
+			const UUID chunkID = m_pShadowAtlas->ReserveChunk(shadowMapResolution.x, shadowMapResolution.y, lightID);
 			if (!chunkID)
 			{
 				lightData.shadowsEnabled = 0;
@@ -912,52 +910,34 @@ namespace Glory
 		}
 	}
 
-	void ClusteredRendererModule::CreateTemporaryShadowMaps()
+	void ClusteredRendererModule::GenerateShadowMapLODResolutions()
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-		RenderTextureCreateInfo renderTextureInfo;
-		renderTextureInfo.HasDepth = true;
-		renderTextureInfo.HasStencil = false;
-		renderTextureInfo.Width = m_MaxShadowResolution;
-		renderTextureInfo.Height = m_MaxShadowResolution;
-		m_pTemporaryShadowMaps.reserve(m_MaxShadowLODs);
-
+		m_ShadowMapResolutions.reserve(m_MaxShadowLODs);
 		for (size_t i = 0; i < m_MaxShadowLODs; ++i)
 		{
 			const uint32_t res = std::max(m_MinShadowResolution, m_MaxShadowResolution/m_ShadowLODDivisions[i]);
-			renderTextureInfo.Width = res;
-			renderTextureInfo.Height = res;
-			m_pTemporaryShadowMaps.push_back(pGraphics->GetResourceManager()->CreateRenderTexture(renderTextureInfo));
+			m_ShadowMapResolutions.push_back({ res, res });
 		}
 	}
 
-	void ClusteredRendererModule::ResizeTemporaryShadowMaps(uint32_t minSize, uint32_t maxSize)
+	void ClusteredRendererModule::ResizeShadowMapLODResolutions(uint32_t minSize, uint32_t maxSize)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		m_MinShadowResolution = minSize;
 		m_MaxShadowResolution = maxSize;
-		m_pTemporaryShadowMaps.reserve(m_MaxShadowLODs);
-
-		RenderTextureCreateInfo renderTextureInfo;
-		renderTextureInfo.HasDepth = true;
-		renderTextureInfo.HasStencil = false;
-		renderTextureInfo.Width = m_MaxShadowResolution;
-		renderTextureInfo.Height = m_MaxShadowResolution;
+		m_ShadowMapResolutions.reserve(m_MaxShadowLODs);
 
 		for (size_t i = 0; i < m_MaxShadowLODs; ++i)
 		{
 			const uint32_t res = std::max(m_MinShadowResolution, m_MaxShadowResolution/m_ShadowLODDivisions[i]);
-			if (i >= m_pTemporaryShadowMaps.size())
+			if (i >= m_ShadowMapResolutions.size())
 			{
-				renderTextureInfo.Width = res;
-				renderTextureInfo.Height = res;
-				m_pTemporaryShadowMaps.push_back(pGraphics->GetResourceManager()->CreateRenderTexture(renderTextureInfo));
+				m_ShadowMapResolutions.push_back({ res, res });
 				continue;
 			}
-			m_pTemporaryShadowMaps[i]->Resize(res, res);
+			m_ShadowMapResolutions[i] = { res, res };
 		}
-
-		m_pShadowAtlas->ReleaseAllChunks();
 	}
 
 	void ClusteredRendererModule::ResizeShadowAtlas(uint32_t newSize)
