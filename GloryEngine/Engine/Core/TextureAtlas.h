@@ -52,11 +52,12 @@ namespace Glory
 		 * @param id ID of the chunk to render to
 		 * @returns @cpp true @ce on success, @cpp false @ce otherwise
 		 *
-		 * The texture must have the exact same size as the chunk, and its format
-		 * must be compatible with the format of that atlas.
+		 * Make sure to call @ref Bind() first!
 		 */
 		bool BindChunk(UUID id);
-		/** @brief Unbind current binded chunk */
+		/** @brief Bind texture for rendering */
+		virtual void Bind() = 0;
+		/** @brief Unbind texture */
 		virtual void Unbind() = 0;
 		/** @brief Get the texture coordinates of a chunk
 		 * @param id ID of the chunk

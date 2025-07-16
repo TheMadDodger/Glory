@@ -33,6 +33,11 @@ namespace Glory
 		m_pTexture = pResources->CreateRenderTexture(renderTextureInfo);
 	}
 
+	void GPUTextureAtlas::Bind()
+	{
+		m_pTexture->BindForDraw();
+	}
+
 	void GPUTextureAtlas::Unbind()
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
@@ -63,7 +68,6 @@ namespace Glory
 	bool GPUTextureAtlas::OnBindChunk(const ReservedChunk& chunk)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-		m_pTexture->BindForDraw();
 		pGraphics->SetViewport(int(chunk.XOffset), int(chunk.YOffset), chunk.Width, chunk.Height);
 		pGraphics->Scissor(int(chunk.XOffset), int(chunk.YOffset), chunk.Width, chunk.Height);
 		pGraphics->Clear();

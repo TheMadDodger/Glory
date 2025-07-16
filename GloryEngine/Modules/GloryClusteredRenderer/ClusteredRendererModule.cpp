@@ -827,8 +827,7 @@ namespace Glory
 		const uint32_t sliceSteps = NUM_DEPTH_SLICES/m_MaxShadowLODs;
 
 		m_pShadowAtlas->ReleaseAllChunks();
-		m_pShadowAtlas->Clear({}, 0.0);
-
+		m_pShadowAtlas->Bind();
 		for (size_t i = 0; i < m_FrameData.ActiveLights.count(); ++i)
 		{
 			auto& lightData = m_FrameData.ActiveLights[i];
@@ -868,11 +867,11 @@ namespace Glory
 				const auto& objectToRender = m_FrameData.ObjectsToRender[j];
 				RenderShadow(i, m_FrameData, objectToRender);
 			}
-			m_pShadowAtlas->Unbind();
 			pGraphics->SetColorMask(true, true, true, true);
 			pGraphics->SetCullFace(CullFace::None);
 			lightData.shadowCoords = m_pShadowAtlas->GetChunkCoords(lightID);
 		}
+		m_pShadowAtlas->Unbind();
 	}
 
 	void ClusteredRendererModule::RenderShadow(size_t lightIndex, const RenderFrame& frameData, const RenderData& objectToRender)

@@ -24,7 +24,9 @@ namespace Glory
 		/** @brief Initialize the atlas by creating the render texture */
 		virtual void Initialize() override;
 
-		/** @brief Unbind current binded chunk */
+		/** @brief Bind texture for rendering */
+		virtual void Bind() override;
+		/** @brief Unbind texture */
 		virtual void Unbind() override;
 
 	private:
