@@ -86,6 +86,7 @@ namespace Glory::Components
         if (!entity.IsActive()) return;
         void* pComponent = pTypeView->GetComponentAddressFromIndex(componentIndex);
         pTypeView->Invoke(Utils::ECS::InvocationType::OnEnable, entity.GetRegistry(), entity.GetEntityID(), pComponent);
+        pTypeView->Invoke(Utils::ECS::InvocationType::OnEnableDraw, entity.GetRegistry(), entity.GetEntityID(), pComponent);
     }
 
     void CallOnEnable(Entity entity)
@@ -113,6 +114,7 @@ namespace Glory::Components
 
         void* pComponent = pTypeView->GetComponentAddressFromIndex(componentIndex);
         pTypeView->Invoke(Utils::ECS::InvocationType::OnEnable, entity.GetRegistry(), entity.GetEntityID(), pComponent);
+        pTypeView->Invoke(Utils::ECS::InvocationType::OnEnableDraw, entity.GetRegistry(), entity.GetEntityID(), pComponent);
     }
 
     void Deactivate(Entity entity, Utils::ECS::BaseTypeView* pTypeView, size_t componentIndex)

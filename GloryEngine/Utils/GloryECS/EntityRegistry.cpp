@@ -39,6 +39,7 @@ namespace Glory::Utils::ECS
 			uint32_t typeHash = it->second;
 			BaseTypeView* pTypeView = GetTypeView(typeHash);
 			void* pAddress = pTypeView->GetComponentAddress(entity);
+			pTypeView->Invoke(InvocationType::OnDisableDraw, this, entity, pAddress);
 			pTypeView->Invoke(InvocationType::OnDisable, this, entity, pAddress);
 			pTypeView->Invoke(InvocationType::Stop, this, entity, pAddress);
 			pTypeView->Invoke(InvocationType::OnRemove, this, entity, pAddress);

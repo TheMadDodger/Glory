@@ -17,6 +17,8 @@ namespace Glory::Utils::ECS
 		OnValidate,
 		OnEnable,
 		OnDisable,
+		OnEnableDraw,
+		OnDisableDraw,
 		OnDirty,
 		Start,
 		Stop,
