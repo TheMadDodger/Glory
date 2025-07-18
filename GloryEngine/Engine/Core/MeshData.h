@@ -36,6 +36,8 @@ namespace Glory
 		bool IsDirty() const;
 		void SetDirty(bool dirty);
 
+		void Merge(MeshData* pOther);
+
 	private:
 		virtual void References(Engine*, std::vector<UUID>&) const override {}
 

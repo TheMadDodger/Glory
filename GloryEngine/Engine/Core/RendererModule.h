@@ -29,6 +29,52 @@ namespace Glory
 		const glm::vec3 m_Normal;
 	};
 
+	struct PerObjectData
+	{
+		UUID m_SceneID;
+		UUID m_ObjectID;
+		glm::mat4 m_World;
+	};
+
+	template<typename T>
+	struct CPUBuffer
+	{
+		template <class... _Valty>
+		decltype(auto) emplace_back(_Valty&&... _Val)
+		{
+			T& newElement = m_Data.emplace_back(std::forward<_Valty>(_Val)...);
+			m_Dirty = true;
+			return newElement;
+		}
+
+		operator bool()
+		{
+			const bool value = m_Dirty;
+			m_Dirty = false;
+			return value;
+		}
+		std::vector<T>* operator->() { return &m_Data; }
+		std::vector<T> m_Data;
+		bool m_Dirty{ false };
+	};
+
+	struct PipelineRenderData
+	{
+		PipelineRenderData(UUID pipeline);
+
+		UUID m_Pipeline;
+		CPUBuffer<UUID> m_Meshes;
+		CPUBuffer<UUID> m_Materials;
+		CPUBuffer<PerObjectData> m_PerObjectData;
+		MeshData* m_pCombinedMesh;
+		CPUBuffer<DrawElementsIndirectCommand> m_IndirectDrawCommands;
+		bool m_Dirty;
+
+		Buffer* m_pIndirectDrawCommandsBuffer;
+		Buffer* m_pIndirectDrawPerObjectDataBuffer;
+		Mesh* m_pIndirectDrawMesh;
+	};
+
 	class RendererModule : public Module
 	{
 	public:
@@ -37,8 +83,11 @@ namespace Glory
 
 		virtual const std::type_info& GetModuleType() override;
 
-		void Submit(RenderData&& renderData);
-		void Submit(TextRenderData&& renderData);
+		void SubmitStatic(RenderData&& renderData);
+		void UpdateStatic(UUID pipelineID, UUID objectID, glm::mat4 world);
+		void UnsubmitStatic(UUID id);
+		void SubmitDynamic(RenderData&& renderData);
+		void SubmitDynamic(TextRenderData&& renderData);
 		void SubmitLate(RenderData&& renderData);
 		void Submit(CameraRef camera);
 		size_t Submit(const glm::ivec2& pickPos, UUID cameraID);
@@ -88,8 +137,8 @@ namespace Glory
 		GPUTextureAtlas* CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, bool depth=false);
 
 	protected:
-		virtual void OnSubmit(const RenderData& renderData) {}
-		virtual void OnSubmit(const TextRenderData& renderData) {}
+		virtual void OnSubmitDynamic(const RenderData& renderData) {}
+		virtual void OnSubmitDynamic(const TextRenderData& renderData) {}
 		virtual void OnSubmit(CameraRef camera) {}
 		virtual void OnSubmit(const LightData& light) {}
 
@@ -152,5 +201,9 @@ namespace Glory
 		std::vector<std::vector<RenderPass>> m_RenderPasses;
 
 		std::vector<GPUTextureAtlas> m_GPUTextureAtlases;
+
+		std::vector<RenderData> m_ToProcessStaticRenderData;
+		std::vector<PipelineRenderData> m_StaticPipelineRenderDatas;
+		std::vector<PipelineRenderData> m_DynamicPipelineRenderDatas;
 	};
 }

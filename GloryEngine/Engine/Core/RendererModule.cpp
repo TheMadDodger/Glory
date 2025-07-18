@@ -44,20 +44,81 @@ namespace Glory
 		return typeid(RendererModule);
 	}
 
-	void RendererModule::Submit(RenderData&& renderData)
+	void RendererModule::SubmitStatic(RenderData&& renderData)
+	{
+		GPUResourceManager* gpuResources = m_pEngine->GetMainModule<GraphicsModule>()->GetResourceManager();
+		Resource* pMeshResource = m_pEngine->GetAssetManager().FindResource(renderData.m_MeshID);
+		Resource* pMaterialResource = m_pEngine->GetAssetManager().FindResource(renderData.m_MaterialID);
+
+		if (!pMeshResource || !pMaterialResource)
+		{
+			/* We'll have to process it some other time */
+			m_ToProcessStaticRenderData.emplace_back(std::move(renderData));
+			return;
+		}
+
+		MeshData* pMesh = static_cast<MeshData*>(pMeshResource);
+		MaterialData* pMaterial = static_cast<MaterialData*>(pMaterialResource);
+
+		const UUID pipelineID = pMaterial->GetPipelineID(m_pEngine->GetMaterialManager());
+		/* Can't render anything without a pipeline */
+		if (!pipelineID) return;
+
+		auto& iter = std::find_if(m_StaticPipelineRenderDatas.begin(), m_StaticPipelineRenderDatas.end(),
+			[pipelineID](const PipelineRenderData& data) { return data.m_Pipeline == pipelineID; });
+		PipelineRenderData& pipelineRenderData = iter == m_StaticPipelineRenderDatas.end() ?
+			m_StaticPipelineRenderDatas.emplace_back(pipelineID) : *iter;
+
+		pipelineRenderData.m_Meshes.emplace_back(renderData.m_MeshID);
+		pipelineRenderData.m_Materials.emplace_back(renderData.m_MaterialID);
+		pipelineRenderData.m_PerObjectData.emplace_back(PerObjectData{ renderData.m_SceneID, renderData.m_ObjectID, renderData.m_World });
+
+		DrawElementsIndirectCommand command;
+		command.BaseVertex = pipelineRenderData.m_pCombinedMesh->VertexCount();
+		command.FirstIndex = pipelineRenderData.m_pCombinedMesh->IndexCount();
+		command.BaseInstance = 0;
+		command.InstanceCount = 1;
+		command.Count = pMesh->IndexCount();
+		pipelineRenderData.m_IndirectDrawCommands.emplace_back(std::move(command));
+
+		pipelineRenderData.m_pCombinedMesh->Merge(pMesh);
+		pipelineRenderData.m_Dirty = true;
+	}
+
+	void RendererModule::UpdateStatic(UUID pipelineID, UUID objectID, glm::mat4 world)
+	{
+		auto pipelineIter = std::find_if(m_StaticPipelineRenderDatas.begin(), m_StaticPipelineRenderDatas.end(),
+			[pipelineID](const PipelineRenderData& otherPipeline) { return otherPipeline.m_Pipeline == pipelineID; });
+
+		if (pipelineIter == m_StaticPipelineRenderDatas.end()) return;
+
+		auto objectIter = std::find_if(pipelineIter->m_PerObjectData->begin(), pipelineIter->m_PerObjectData->end(),
+			[objectID](const PerObjectData& obj) { return obj.m_ObjectID == objectID; });
+
+		if (objectIter == pipelineIter->m_PerObjectData->end()) return;
+		objectIter->m_World = world;
+		pipelineIter->m_PerObjectData.m_Dirty = true;
+	}
+
+	void RendererModule::UnsubmitStatic(UUID id)
+	{
+
+	}
+
+	void RendererModule::SubmitDynamic(RenderData&& renderData)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(RenderData)" };
 		const size_t index = m_FrameData.ObjectsToRender.size();
 		m_FrameData.ObjectsToRender.push_back(std::move(renderData));
-		OnSubmit(m_FrameData.ObjectsToRender[index]);
+		OnSubmitDynamic(m_FrameData.ObjectsToRender[index]);
 	}
 
-	void RendererModule::Submit(TextRenderData&& renderData)
+	void RendererModule::SubmitDynamic(TextRenderData&& renderData)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(TextRenderData)" };
 		const size_t index = m_FrameData.TextsToRender.size();
 		m_FrameData.TextsToRender.push_back(std::move(renderData));
-		OnSubmit(m_FrameData.TextsToRender[index]);
+		OnSubmitDynamic(m_FrameData.TextsToRender[index]);
 	}
 
 	void RendererModule::SubmitLate(RenderData&& renderData)
@@ -65,7 +126,7 @@ namespace Glory
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::SubmitLate(RenderData)" };
 		const size_t index = m_FrameData.ObjectsToRenderLate.size();
 		m_FrameData.ObjectsToRenderLate.push_back(std::move(renderData));
-		OnSubmit(m_FrameData.ObjectsToRenderLate[index]);
+		OnSubmitDynamic(m_FrameData.ObjectsToRenderLate[index]);
 	}
 
 	void RendererModule::Submit(CameraRef camera)
@@ -364,6 +425,8 @@ namespace Glory
 
 	void RendererModule::Render()
 	{
+		GPUResourceManager* gpuResources = m_pEngine->GetMainModule<GraphicsModule>()->GetResourceManager();
+
 		if (m_DisplaysDirty)
 		{
 			int width, height;
@@ -691,5 +754,14 @@ namespace Glory
 	void RendererModule::LoadSettings(ModuleSettings& settings)
 	{
 		settings.RegisterAssetReference<PipelineData>("Lines Pipeline", 19);
+	}
+
+	PipelineRenderData::PipelineRenderData(UUID pipeline) : m_Pipeline(pipeline),
+		m_pCombinedMesh(new MeshData(1000000, sizeof(DefaultVertex3D),
+			{ AttributeType::Float3, AttributeType::Float3, AttributeType::Float3,
+			AttributeType::Float3 , AttributeType::Float2, AttributeType::Float4 })),
+		m_Dirty(false), m_pIndirectDrawCommandsBuffer(nullptr),
+		m_pIndirectDrawPerObjectDataBuffer(nullptr), m_pIndirectDrawMesh(nullptr)
+	{
 	}
 }

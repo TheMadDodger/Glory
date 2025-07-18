@@ -264,7 +264,15 @@ namespace Glory
 		else glDrawElements(primitiveType, indexCount, GL_UNSIGNED_INT, NULL);
 		LogGLError(glGetError());
 		glBindVertexArray(NULL);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		LogGLError(glGetError());
+	}
+
+	void OpenGLGraphicsModule::OnMultiDrawMeshIndirect(Mesh* pMesh, size_t count)
+	{
+		pMesh->BindForDraw();
+		const GLuint primitiveType = GLConverter::TO_GLPRIMITIVETYPE.at(pMesh->GetPrimitiveType());
+		glMultiDrawElementsIndirect(primitiveType, GL_UNSIGNED_INT, NULL, count, 0);
+		LogGLError(glGetError());
 	}
 
 	void OpenGLGraphicsModule::DrawScreenQuad()

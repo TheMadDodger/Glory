@@ -20,6 +20,7 @@ namespace Glory
 		virtual void Swap() override;
 		virtual Material* UseMaterial(MaterialData* pMaterialData) override;
 		virtual void OnDrawMesh(Mesh* pMesh, uint32_t vertexOffset, uint32_t vertexCount) override;
+		virtual void OnMultiDrawMeshIndirect(Mesh* pMesh, size_t count) override;
 		virtual void DrawScreenQuad() override;
 		virtual void DrawUnitCube() override;
 		virtual void DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z) override;

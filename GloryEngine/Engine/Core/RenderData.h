@@ -64,4 +64,13 @@ namespace Glory
 		glm::vec2 m_Offsets{};
 		bool m_Append{ false };
 	};
+
+	struct DrawElementsIndirectCommand
+	{
+		unsigned int Count = 0;
+		unsigned int InstanceCount = 0;
+		unsigned int FirstIndex = 0;
+		int BaseVertex = 0;
+		unsigned int BaseInstance = 0;
+	};
 }

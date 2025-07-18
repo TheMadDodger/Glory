@@ -48,6 +48,11 @@ namespace Glory
 		OnDrawMesh(pMesh, vertexOffset, vertexCount);
 	}
 
+	void GraphicsModule::MultiDrawMeshIndirect(Mesh* pMesh, size_t count)
+	{
+		OnMultiDrawMeshIndirect(pMesh, count);
+	}
+
 	GPUResourceManager* GraphicsModule::GetResourceManager()
 	{
 		return m_pResourceManager;

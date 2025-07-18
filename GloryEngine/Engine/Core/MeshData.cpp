@@ -170,4 +170,17 @@ namespace Glory
 	{
 		m_IsDirty = dirty;
 	}
+
+	void MeshData::Merge(MeshData* pOther)
+	{
+		m_VertexCount += pOther->m_VertexCount;
+		m_IndexCount += pOther->m_IndexCount;
+		const size_t vertexStart = m_Vertices.size();
+		const size_t indexStart = m_Indices.size();
+		m_Vertices.resize(m_Vertices.size() + pOther->m_Vertices.size());
+		m_Indices.resize(m_Indices.size() + pOther->m_Indices.size());
+		std::memcpy(&m_Vertices[vertexStart], pOther->m_Vertices.data(), pOther->m_Vertices.size()*sizeof(float));
+		std::memcpy(&m_Indices[indexStart], pOther->m_Indices.data(), pOther->m_Indices.size()*sizeof(uint32_t));
+		m_IsDirty = true;
+	}
 }

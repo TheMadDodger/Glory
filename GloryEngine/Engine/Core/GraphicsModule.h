@@ -19,6 +19,7 @@ namespace Glory
     public: // Commands
         void DrawMesh(MeshData* pMeshData, uint32_t vertexOffset, uint32_t vertexCount);
         void DrawMesh(Mesh* pMesh, uint32_t vertexOffset, uint32_t vertexCount);
+        void MultiDrawMeshIndirect(Mesh* pMesh, size_t count);
         virtual void DrawScreenQuad() = 0;
         virtual void DrawUnitCube() = 0;
         virtual void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), double depth=1.0) = 0;
@@ -52,6 +53,7 @@ namespace Glory
         virtual void OnCleanup() = 0;
 
         virtual void OnDrawMesh(Mesh* pMesh, uint32_t vertexOffset = 0, uint32_t vertexCount = 0) = 0;
+        virtual void OnMultiDrawMeshIndirect(Mesh* pMesh, size_t count) = 0;
 
         virtual GPUResourceManager* CreateGPUResourceManager() = 0;
 

@@ -220,7 +220,8 @@ namespace Glory
 
 		// Register Invocations
 		// Transform
-		m_pComponentTypesInstance->RegisterInvokaction<Transform>(Glory::Utils::ECS::InvocationType::Start, TransformSystem::OnStart);
+		m_pComponentTypesInstance->RegisterInvokaction<Transform>(Glory::Utils::ECS::InvocationType::OnValidate, TransformSystem::OnValidate);
+		m_pComponentTypesInstance->RegisterInvokaction<Transform>(Glory::Utils::ECS::InvocationType::OnEnableDraw, TransformSystem::OnEnable);
 		m_pComponentTypesInstance->RegisterInvokaction<Transform>(Glory::Utils::ECS::InvocationType::Update, TransformSystem::OnUpdate);
 
 		// Camera
@@ -236,7 +237,10 @@ namespace Glory
 		m_pComponentTypesInstance->RegisterInvokaction<LookAt>(Glory::Utils::ECS::InvocationType::Update, LookAtSystem::OnUpdate);
 
 		// MeshRenderer
+		m_pComponentTypesInstance->RegisterInvokaction<MeshRenderer>(Glory::Utils::ECS::InvocationType::OnDirty, MeshRenderSystem::OnDirty);
 		m_pComponentTypesInstance->RegisterInvokaction<MeshRenderer>(Glory::Utils::ECS::InvocationType::Draw, MeshRenderSystem::OnDraw);
+		m_pComponentTypesInstance->RegisterInvokaction<MeshRenderer>(Glory::Utils::ECS::InvocationType::OnEnableDraw, MeshRenderSystem::OnEnable);
+		m_pComponentTypesInstance->RegisterInvokaction<MeshRenderer>(Glory::Utils::ECS::InvocationType::OnDisableDraw, MeshRenderSystem::OnDisable);
 		m_pComponentTypesInstance->RegisterReferencesCallback<MeshRenderer>(MeshRenderSystem::GetReferences);
 
 		// Spin

@@ -163,6 +163,61 @@ namespace Glory
 			ShadowMapsPass(camera, frame);
 			m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS*sizeof(LightData));
 		} });
+		
+		AddRenderPass(RP_ObjectPass, RenderPass{ "Indirect Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
+			GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+			GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+
+			for (PipelineRenderData& pipelineRenderData : m_StaticPipelineRenderDatas)
+			{
+				if (pipelineRenderData.m_pCombinedMesh->VertexCount() == 0) continue;
+
+				if (!pipelineRenderData.m_pIndirectDrawCommandsBuffer)
+				{
+					pipelineRenderData.m_pIndirectDrawCommandsBuffer = pResourceManager->CreateBuffer(1, BufferBindingTarget::B_DRAW_INDIRECT, MemoryUsage::MU_STATIC_DRAW, 0);
+					pipelineRenderData.m_IndirectDrawCommands.m_Dirty = true;
+				}
+
+				if (!pipelineRenderData.m_pIndirectDrawPerObjectDataBuffer)
+				{
+					pipelineRenderData.m_pIndirectDrawPerObjectDataBuffer = pResourceManager->CreateBuffer(1, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 4);
+					pipelineRenderData.m_PerObjectData.m_Dirty = true;
+				}
+
+				if (pipelineRenderData.m_IndirectDrawCommands)
+					pipelineRenderData.m_pIndirectDrawCommandsBuffer->Assign(pipelineRenderData.m_IndirectDrawCommands->data(),
+						pipelineRenderData.m_IndirectDrawCommands->size()*sizeof(DrawElementsIndirectCommand));
+				if (pipelineRenderData.m_PerObjectData)
+					pipelineRenderData.m_pIndirectDrawPerObjectDataBuffer->Assign(pipelineRenderData.m_PerObjectData->data(),
+						pipelineRenderData.m_PerObjectData->size()*sizeof(PerObjectData));
+
+				Mesh* pMesh = pResourceManager->CreateMesh(pipelineRenderData.m_pCombinedMesh);
+
+				MaterialData* pMaterialData = m_pEngine->GetMaterialManager().GetMaterial(pipelineRenderData.m_Materials->at(0));
+				if (!pMaterialData) continue;
+				Material* pMaterial = pGraphics->UseMaterial(pMaterialData);
+				if (!pMaterial) continue;
+
+				ObjectData object;
+				object.Model = glm::identity<glm::mat4>();
+				object.View = camera.GetView();
+				object.Projection = camera.GetProjection();
+				object.ObjectID = 0;
+				object.SceneID = 0;
+
+				pMaterial->SetProperties(m_pEngine);
+				pMaterial->SetObjectData(object);
+				pGraphics->EnableDepthWrite(true);
+
+				pipelineRenderData.m_pIndirectDrawCommandsBuffer->BindForDraw();
+				pipelineRenderData.m_pIndirectDrawPerObjectDataBuffer->BindForDraw();
+				pGraphics->MultiDrawMeshIndirect(pMesh, pipelineRenderData.m_IndirectDrawCommands->size());
+				pGraphics->EnableDepthWrite(true);
+				pipelineRenderData.m_pIndirectDrawCommandsBuffer->Unbind();
+				pipelineRenderData.m_pIndirectDrawPerObjectDataBuffer->Unbind();
+			}
+
+		} });
 	}
 
 	void ClusteredRendererModule::OnPostInitialize()

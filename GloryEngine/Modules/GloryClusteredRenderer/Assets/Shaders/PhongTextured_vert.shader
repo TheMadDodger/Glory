@@ -1,7 +1,8 @@
 #type vert
 
-#version 450
+#version 460
 #extension GL_ARB_separate_shader_objects : enable
+#extension ARB_shader_draw_parameters : enable
 
 #include "internal/ObjectData.glsl"
 
@@ -16,14 +17,19 @@ layout(location = 0) out vec2 fragTexCoord;
 layout(location = 1) out vec4 outColor;
 layout(location = 2) out mat3 TBN;
 
+layout(std430, binding = 4) restrict readonly buffer IndirectTransformsSSBO
+{
+	mat4 World[];
+} IndirectTransforms;
+
 void main()
 {
-	gl_Position = Object.proj * Object.view * Object.model * vec4(inPosition, 1.0);
+	gl_Position = Object.proj * Object.view * IndirectTransforms.World[gl_DrawID] * vec4(inPosition, 1.0);
 	fragTexCoord = inTexCoord;
 
-	vec3 T = normalize(vec3(Object.model * vec4(inTangent, 0.0)));
-	vec3 B = normalize(vec3(Object.model * vec4(inBitangent, 0.0)));
-	vec3 N = normalize(vec3(Object.model * vec4(inNormal, 0.0)));
+	vec3 T = normalize(vec3(IndirectTransforms.World[gl_DrawID] * vec4(inTangent, 0.0)));
+	vec3 B = normalize(vec3(IndirectTransforms.World[gl_DrawID] * vec4(inBitangent, 0.0)));
+	vec3 N = normalize(vec3(IndirectTransforms.World[gl_DrawID] * vec4(inNormal, 0.0)));
 	TBN = mat3(T, B, N);
 
 	outColor = inColor;

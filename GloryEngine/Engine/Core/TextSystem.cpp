@@ -47,7 +47,7 @@ namespace Glory
 		renderData.m_Color = pComponent.m_Color;
 		pComponent.m_Dirty = false;
 
-		REQUIRE_MODULE_CALL(pEngine, RendererModule, Submit(std::move(renderData)), );
+		REQUIRE_MODULE_CALL(pEngine, RendererModule, SubmitDynamic(std::move(renderData)), );
 	}
 
 	void TextSystem::GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references)
