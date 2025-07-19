@@ -113,6 +113,11 @@ namespace Glory
 			const bool isActive = pEntity->IsActive() && pTypeView->IsActiveByIndex(componentIndex);
 			return isActive;
 		});
+		m_Registry.InvokeAll(Utils::ECS::InvocationType::OnDisableDraw,
+		[](Utils::ECS::BaseTypeView* pTypeView, Utils::ECS::EntityView* pEntity, size_t componentIndex) {
+			const bool isActive = pEntity->IsActive() && pTypeView->IsActiveByIndex(componentIndex);
+			return isActive;
+		});
 		m_Registry.InvokeAll(Utils::ECS::InvocationType::Stop, NULL);
 		m_Registry.InvokeAll(Utils::ECS::InvocationType::OnRemove, NULL);
 	}

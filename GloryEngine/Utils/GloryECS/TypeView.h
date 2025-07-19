@@ -158,6 +158,7 @@ namespace Glory::Utils::ECS
 			const uint32_t index = GetComponentIndex(entity);
 			switch (callbackType)
 			{
+			case InvocationType::OnEnableDraw:
 			case InvocationType::Update:
 			case InvocationType::Draw:
 				if (!pEntityView->IsActive() || !m_ActiveStates.IsSet(index)) return;

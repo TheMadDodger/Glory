@@ -147,8 +147,14 @@ namespace Glory
 
         GScene* pScene = pRegistry->GetUserData<GScene*>();
         Engine* pEngine = pScene->Manager()->GetEngine();
+
+        MaterialManager* pMaterials = &pEngine->GetMaterialManager();
+        MaterialData* pMaterial = pMaterials->GetMaterial(pComponent.m_Material.AssetUUID());
+        if (!pMaterial) return;
+
+        const UUID pipelineID = pMaterial->GetPipelineID(*pMaterials);
         const UUID id = pScene->GetEntityUUID(entity);
-        REQUIRE_MODULE_CALL(pEngine, RendererModule, UnsubmitStatic(id), );
+        REQUIRE_MODULE_CALL(pEngine, RendererModule, UnsubmitStatic(pipelineID, id), );
     }
 
     void MeshRenderSystem::GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references)

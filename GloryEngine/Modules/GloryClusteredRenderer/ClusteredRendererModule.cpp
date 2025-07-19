@@ -170,7 +170,7 @@ namespace Glory
 
 			for (PipelineRenderData& pipelineRenderData : m_StaticPipelineRenderDatas)
 			{
-				if (pipelineRenderData.m_pCombinedMesh->VertexCount() == 0) continue;
+				if (pipelineRenderData.m_pCombinedMesh->VertexCount() == 0 || pipelineRenderData.m_IndirectDrawCommands->empty()) continue;
 
 				if (!pipelineRenderData.m_pIndirectDrawCommandsBuffer)
 				{

@@ -100,9 +100,22 @@ namespace Glory
 		pipelineIter->m_PerObjectData.m_Dirty = true;
 	}
 
-	void RendererModule::UnsubmitStatic(UUID id)
+	void RendererModule::UnsubmitStatic(UUID pipelineID, UUID objectID)
 	{
+		auto pipelineIter = std::find_if(m_StaticPipelineRenderDatas.begin(), m_StaticPipelineRenderDatas.end(),
+			[pipelineID](const PipelineRenderData& otherPipeline) { return otherPipeline.m_Pipeline == pipelineID; });
 
+		if (pipelineIter == m_StaticPipelineRenderDatas.end()) return;
+
+		auto objectIter = std::find_if(pipelineIter->m_PerObjectData->begin(), pipelineIter->m_PerObjectData->end(),
+			[objectID](const PerObjectData& obj) { return obj.m_ObjectID == objectID; });
+
+		if (objectIter == pipelineIter->m_PerObjectData->end()) return;
+		const size_t index = objectIter - pipelineIter->m_PerObjectData->begin();
+		pipelineIter->m_PerObjectData->erase(objectIter);
+		pipelineIter->m_Meshes->erase(pipelineIter->m_Meshes->begin() + index);
+		pipelineIter->m_Materials->erase(pipelineIter->m_Materials->begin() + index);
+		pipelineIter->m_IndirectDrawCommands->erase(pipelineIter->m_IndirectDrawCommands->begin() + index);
 	}
 
 	void RendererModule::SubmitDynamic(RenderData&& renderData)
@@ -372,6 +385,12 @@ namespace Glory
 		GPUTextureAtlas& newAtlas = m_GPUTextureAtlases.emplace_back(std::move(textureInfo), m_pEngine, depth);
 		newAtlas.Initialize();
 		return &newAtlas;
+	}
+
+	void RendererModule::Reset()
+	{
+		m_StaticPipelineRenderDatas.clear();
+		m_DynamicPipelineRenderDatas.clear();
 	}
 
 	void RendererModule::Initialize()
@@ -763,5 +782,11 @@ namespace Glory
 		m_Dirty(false), m_pIndirectDrawCommandsBuffer(nullptr),
 		m_pIndirectDrawPerObjectDataBuffer(nullptr), m_pIndirectDrawMesh(nullptr)
 	{
+	}
+
+	PipelineRenderData::~PipelineRenderData()
+	{
+		delete m_pCombinedMesh;
+		m_pCombinedMesh = nullptr;
 	}
 }

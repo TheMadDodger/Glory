@@ -61,6 +61,7 @@ namespace Glory
 	struct PipelineRenderData
 	{
 		PipelineRenderData(UUID pipeline);
+		virtual ~PipelineRenderData();
 
 		UUID m_Pipeline;
 		CPUBuffer<UUID> m_Meshes;
@@ -85,7 +86,7 @@ namespace Glory
 
 		void SubmitStatic(RenderData&& renderData);
 		void UpdateStatic(UUID pipelineID, UUID objectID, glm::mat4 world);
-		void UnsubmitStatic(UUID id);
+		void UnsubmitStatic(UUID pipelineID, UUID objectID);
 		void SubmitDynamic(RenderData&& renderData);
 		void SubmitDynamic(TextRenderData&& renderData);
 		void SubmitLate(RenderData&& renderData);
@@ -135,6 +136,8 @@ namespace Glory
 		void RenderOnBackBuffer(RenderTexture* pTexture);
 
 		GPUTextureAtlas* CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, bool depth=false);
+
+		void Reset();
 
 	protected:
 		virtual void OnSubmitDynamic(const RenderData& renderData) {}
