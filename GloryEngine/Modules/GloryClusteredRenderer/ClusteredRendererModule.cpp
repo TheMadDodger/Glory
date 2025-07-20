@@ -167,6 +167,7 @@ namespace Glory
 		AddRenderPass(RP_ObjectPass, RenderPass{ "Indirect Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 			GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+			MaterialManager& materialManager = m_pEngine->GetMaterialManager();
 
 			for (PipelineRenderData& pipelineRenderData : m_StaticPipelineRenderDatas)
 			{
@@ -189,6 +190,9 @@ namespace Glory
 					pipelineRenderData.m_pIndirectObjectDataOffsetsBuffer = pResourceManager->CreateBuffer(1, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 5);
 					pipelineRenderData.m_ObjectDataOffsets.m_Dirty = true;
 				}
+				
+				if (!pipelineRenderData.m_pIndirectMaterialPropertyData)
+					pipelineRenderData.m_pIndirectMaterialPropertyData = pResourceManager->CreateBuffer(1, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 6);
 
 				if (pipelineRenderData.m_IndirectDrawCommands)
 					pipelineRenderData.m_pIndirectDrawCommandsBuffer->Assign(pipelineRenderData.m_IndirectDrawCommands->data(),
@@ -202,9 +206,32 @@ namespace Glory
 
 				Mesh* pMesh = pResourceManager->CreateMesh(pipelineRenderData.m_pCombinedMesh);
 
-				MaterialData* pMaterialData = m_pEngine->GetMaterialManager().GetMaterial(pipelineRenderData.m_BaseMaterial);
-				if (!pMaterialData) continue;
-				Material* pMaterial = pGraphics->UseMaterial(pMaterialData);
+				const size_t materialCount = pipelineRenderData.m_UniqueMaterials->size();
+				MaterialData* pBaseMaterialData = materialManager.GetMaterial(pipelineRenderData.m_UniqueMaterials.m_Data[0]);
+				if (!pBaseMaterialData) continue;
+				const size_t propertyDataSize = pBaseMaterialData->PropertyDataSize(materialManager);
+				const size_t paddingBytes = 16 - propertyDataSize%16;
+				const size_t finalPropertyDataSize = propertyDataSize + paddingBytes;
+				pipelineRenderData.m_PropertiesBuffer.resize(finalPropertyDataSize*materialCount);
+
+				for (size_t i = 0; i < materialCount; ++i)
+				{
+					MaterialData* pMaterialData = materialManager.GetMaterial(pipelineRenderData.m_UniqueMaterials.m_Data[i]);
+					if (std::memcmp(&pipelineRenderData.m_PropertiesBuffer.m_Data[i*finalPropertyDataSize],
+						pMaterialData->GetFinalBufferReference(materialManager).data(), propertyDataSize) == 0)
+						continue;
+
+					pMaterialData->CopyProperties(materialManager, &pipelineRenderData.m_PropertiesBuffer.m_Data[i * finalPropertyDataSize]);
+					pipelineRenderData.m_PropertiesBuffer.m_Dirty = true;
+				}
+
+				if (pipelineRenderData.m_PropertiesBuffer)
+				{
+					pipelineRenderData.m_pIndirectMaterialPropertyData->Assign(pipelineRenderData.m_PropertiesBuffer->data(),
+						pipelineRenderData.m_PropertiesBuffer->size());
+				}
+
+				Material* pMaterial = pGraphics->UseMaterial(pBaseMaterialData);
 				if (!pMaterial) continue;
 
 				ObjectData object;
@@ -214,18 +241,20 @@ namespace Glory
 				object.ObjectID = 0;
 				object.SceneID = 0;
 
-				pMaterial->SetProperties(m_pEngine);
+				//pMaterial->SetProperties(m_pEngine);
 				pMaterial->SetObjectData(object);
 				pGraphics->EnableDepthWrite(true);
 
 				pipelineRenderData.m_pIndirectDrawCommandsBuffer->BindForDraw();
 				pipelineRenderData.m_pIndirectDrawPerObjectDataBuffer->BindForDraw();
 				pipelineRenderData.m_pIndirectObjectDataOffsetsBuffer->BindForDraw();
+				pipelineRenderData.m_pIndirectMaterialPropertyData->BindForDraw();
 				pGraphics->MultiDrawMeshIndirect(pMesh, pipelineRenderData.m_IndirectDrawCommands->size());
 				pGraphics->EnableDepthWrite(true);
 				pipelineRenderData.m_pIndirectDrawCommandsBuffer->Unbind();
 				pipelineRenderData.m_pIndirectDrawPerObjectDataBuffer->Unbind();
 				pipelineRenderData.m_pIndirectObjectDataOffsetsBuffer->Unbind();
+				pipelineRenderData.m_pIndirectMaterialPropertyData->Unbind();
 			}
 		} });
 	}

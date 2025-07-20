@@ -76,21 +76,6 @@ namespace Glory
 		meshIter->second.m_Objects.emplace_back(PerObjectData{ renderData.m_SceneID, renderData.m_ObjectID, renderData.m_World });
 		meshIter->second.m_Materials.emplace_back(renderData.m_MaterialID);
 		pipelineRenderData.m_Dirty = true;
-
-		/*pipelineRenderData.m_Meshes.emplace_back(renderData.m_MeshID);
-		pipelineRenderData.m_Materials.emplace_back(renderData.m_MaterialID);
-		pipelineRenderData.m_PerObjectData.emplace_back(PerObjectData{ renderData.m_SceneID, renderData.m_ObjectID, renderData.m_World });
-
-		DrawElementsIndirectCommand command;
-		command.BaseVertex = pipelineRenderData.m_pCombinedMesh->VertexCount();
-		command.FirstIndex = pipelineRenderData.m_pCombinedMesh->IndexCount();
-		command.BaseInstance = 0;
-		command.InstanceCount = 1;
-		command.Count = pMesh->IndexCount();
-		pipelineRenderData.m_IndirectDrawCommands.emplace_back(std::move(command));
-
-		pipelineRenderData.m_pCombinedMesh->Merge(pMesh);
-		pipelineRenderData.m_Dirty = true;*/
 	}
 
 	void RendererModule::UpdateStatic(UUID pipelineID, UUID objectID, glm::mat4 world)
@@ -466,19 +451,15 @@ namespace Glory
 
 			for (auto& iter : pipelineRenderData.m_Meshes)
 			{
-				const PipelineMeshRenderData& meshRenderData = iter.second;
+				PipelineMeshRenderData& meshRenderData = iter.second;
 				Resource* pMeshResource = m_pEngine->GetAssetManager().FindResource(meshRenderData.m_Mesh);
 				MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
 				const int baseVertex = (int)pipelineRenderData.m_pCombinedMesh->VertexCount();
 				const uint32_t firstIndex = (int)pipelineRenderData.m_pCombinedMesh->IndexCount();
 
-				pipelineRenderData.m_BaseMaterial = meshRenderData.m_Materials[0];
 				pipelineRenderData.m_ObjectDataOffsets.emplace_back(pipelineRenderData.m_FinalPerObjectData->size());
 				pipelineRenderData.m_pCombinedMesh->Merge(pMeshData);
 				const size_t objectDataStart = pipelineRenderData.m_FinalPerObjectData->size();
-				pipelineRenderData.m_FinalPerObjectData.resize(objectDataStart + meshRenderData.m_Objects.size());
-				std::memcpy(&pipelineRenderData.m_FinalPerObjectData.m_Data[objectDataStart], meshRenderData.m_Objects.data(),
-					sizeof(PerObjectData)*meshRenderData.m_Objects.size());
 
 				DrawElementsIndirectCommand command;
 				command.BaseInstance = 0;
@@ -487,6 +468,19 @@ namespace Glory
 				command.BaseVertex = baseVertex;
 				command.FirstIndex = firstIndex;
 				pipelineRenderData.m_IndirectDrawCommands.emplace_back(std::move(command));
+
+				for (size_t i = 0; i < meshRenderData.m_Materials.size(); ++i)
+				{
+					const UUID materialID = meshRenderData.m_Materials[i];
+					auto materialIter = std::find(pipelineRenderData.m_UniqueMaterials->begin(), pipelineRenderData.m_UniqueMaterials->end(), materialID);
+					const bool hasMaterial = materialIter != pipelineRenderData.m_UniqueMaterials->end();
+					const size_t index = hasMaterial ? materialIter - pipelineRenderData.m_UniqueMaterials->begin() : pipelineRenderData.m_UniqueMaterials->size();
+					if (!hasMaterial) pipelineRenderData.m_UniqueMaterials.emplace_back(materialID);
+					meshRenderData.m_Objects[i].m_MaterialIndex = (uint32_t)index;
+				}
+				pipelineRenderData.m_FinalPerObjectData.resize(objectDataStart + meshRenderData.m_Objects.size());
+				std::memcpy(&pipelineRenderData.m_FinalPerObjectData.m_Data[objectDataStart], meshRenderData.m_Objects.data(),
+					sizeof(PerObjectData)*meshRenderData.m_Objects.size());
 			}
 			pipelineRenderData.m_Dirty = false;
 		}
@@ -825,7 +819,8 @@ namespace Glory
 			{ AttributeType::Float3, AttributeType::Float3, AttributeType::Float3,
 			AttributeType::Float3 , AttributeType::Float2, AttributeType::Float4 })),
 		m_Dirty(false), m_pIndirectDrawCommandsBuffer(nullptr),
-		m_pIndirectDrawPerObjectDataBuffer(nullptr), m_pIndirectObjectDataOffsetsBuffer(nullptr)
+		m_pIndirectDrawPerObjectDataBuffer(nullptr), m_pIndirectObjectDataOffsetsBuffer(nullptr),
+		m_pIndirectMaterialPropertyData(nullptr)
 	{
 	}
 

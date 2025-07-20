@@ -11,9 +11,35 @@ layout(binding = 1, std430) buffer PropertiesSSBO
 	float Shininess;
 } Properties;
 
+struct PerObjectData
+{
+	uvec4 ObjectID;
+	mat4 World;
+	uint MaterialIndex;
+	uint padding1;
+	uint padding2;
+	uint padding3;
+};
+
+layout(std430, binding = 4) restrict readonly buffer PerObjectDataSSBO
+{
+	PerObjectData Datas[];
+} PerObjectDatas;
+
+struct Props
+{
+	vec4 Color;
+	float Shininess;
+};
+
+layout(std430, binding = 6) restrict readonly buffer PropertyDataSSBO
+{
+	Props PropertyDatas[];
+} PropertyData;
+
 layout(location = 0) in vec3 normal;
 layout(location = 1) in vec4 inColor;
-layout(location = 2) flat in uvec4 inObjectID;
+layout(location = 2) in flat uint inObjectIndex;
 
 layout(location = 0) out uvec4 outID;
 layout(location = 2) out vec4 outColor;
@@ -22,9 +48,12 @@ layout(location = 5) out vec4 outData;
 
 void main()
 {
-	outColor = inColor * Properties.Color;
+	PerObjectData objectData = PerObjectDatas.Datas[inObjectIndex];
+	Props props = PropertyData.PropertyDatas[objectData.MaterialIndex];
+
+	outColor = inColor * props.Color;
 	outNormal = vec4((normalize(normal) + 1.0) * 0.5, 1.0);
-	outID = inObjectID;
-	outData.g = Properties.Shininess;
+	outID = objectData.ObjectID;
+	outData.g = props.Shininess;
 	outData.a = 1.0;
 }

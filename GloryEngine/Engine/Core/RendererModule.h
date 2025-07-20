@@ -34,6 +34,10 @@ namespace Glory
 		UUID m_SceneID;
 		UUID m_ObjectID;
 		glm::mat4 m_World;
+		uint32_t m_MaterialIndex;
+		uint32_t padding1;
+		uint32_t padding2;
+		uint32_t padding3;
 	};
 
 	template<typename T>
@@ -87,18 +91,18 @@ namespace Glory
 		std::unordered_map<UUID, PipelineMeshRenderData> m_Meshes;
 
 		UUID m_Pipeline;
-		//CPUBuffer<UUID> m_Meshes;
-		//CPUBuffer<UUID> m_Materials;
-		UUID m_BaseMaterial;
 		CPUBuffer<PerObjectData> m_FinalPerObjectData;
 		CPUBuffer<uint32_t> m_ObjectDataOffsets;
 		MeshData* m_pCombinedMesh;
 		CPUBuffer<DrawElementsIndirectCommand> m_IndirectDrawCommands;
+		CPUBuffer<UUID> m_UniqueMaterials;
+		CPUBuffer<char> m_PropertiesBuffer;
 		bool m_Dirty;
 
 		Buffer* m_pIndirectDrawCommandsBuffer;
 		Buffer* m_pIndirectDrawPerObjectDataBuffer;
 		Buffer* m_pIndirectObjectDataOffsetsBuffer;
+		Buffer* m_pIndirectMaterialPropertyData;
 	};
 
 	class RendererModule : public Module

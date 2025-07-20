@@ -54,6 +54,9 @@ namespace Glory
 
         virtual bool IsInstance() const { return false; }
 
+        void CopyProperties(MaterialManager& materialManager, void* dst);
+        size_t PropertyDataSize(const MaterialManager& materialManager);
+
     public: // Properties
         // Setters
         template<typename T>
