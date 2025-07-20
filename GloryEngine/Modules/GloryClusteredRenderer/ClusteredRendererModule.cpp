@@ -181,19 +181,28 @@ namespace Glory
 				if (!pipelineRenderData.m_pIndirectDrawPerObjectDataBuffer)
 				{
 					pipelineRenderData.m_pIndirectDrawPerObjectDataBuffer = pResourceManager->CreateBuffer(1, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 4);
-					pipelineRenderData.m_PerObjectData.m_Dirty = true;
+					pipelineRenderData.m_FinalPerObjectData.m_Dirty = true;
+				}
+
+				if (!pipelineRenderData.m_pIndirectObjectDataOffsetsBuffer)
+				{
+					pipelineRenderData.m_pIndirectObjectDataOffsetsBuffer = pResourceManager->CreateBuffer(1, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 5);
+					pipelineRenderData.m_ObjectDataOffsets.m_Dirty = true;
 				}
 
 				if (pipelineRenderData.m_IndirectDrawCommands)
 					pipelineRenderData.m_pIndirectDrawCommandsBuffer->Assign(pipelineRenderData.m_IndirectDrawCommands->data(),
 						pipelineRenderData.m_IndirectDrawCommands->size()*sizeof(DrawElementsIndirectCommand));
-				if (pipelineRenderData.m_PerObjectData)
-					pipelineRenderData.m_pIndirectDrawPerObjectDataBuffer->Assign(pipelineRenderData.m_PerObjectData->data(),
-						pipelineRenderData.m_PerObjectData->size()*sizeof(PerObjectData));
+				if (pipelineRenderData.m_FinalPerObjectData)
+					pipelineRenderData.m_pIndirectDrawPerObjectDataBuffer->Assign(pipelineRenderData.m_FinalPerObjectData->data(),
+						pipelineRenderData.m_FinalPerObjectData->size()*sizeof(PerObjectData));
+				if (pipelineRenderData.m_ObjectDataOffsets)
+					pipelineRenderData.m_pIndirectObjectDataOffsetsBuffer->Assign(pipelineRenderData.m_ObjectDataOffsets->data(),
+						pipelineRenderData.m_ObjectDataOffsets->size()*sizeof(uint32_t));
 
 				Mesh* pMesh = pResourceManager->CreateMesh(pipelineRenderData.m_pCombinedMesh);
 
-				MaterialData* pMaterialData = m_pEngine->GetMaterialManager().GetMaterial(pipelineRenderData.m_Materials->at(0));
+				MaterialData* pMaterialData = m_pEngine->GetMaterialManager().GetMaterial(pipelineRenderData.m_BaseMaterial);
 				if (!pMaterialData) continue;
 				Material* pMaterial = pGraphics->UseMaterial(pMaterialData);
 				if (!pMaterial) continue;
@@ -211,12 +220,13 @@ namespace Glory
 
 				pipelineRenderData.m_pIndirectDrawCommandsBuffer->BindForDraw();
 				pipelineRenderData.m_pIndirectDrawPerObjectDataBuffer->BindForDraw();
+				pipelineRenderData.m_pIndirectObjectDataOffsetsBuffer->BindForDraw();
 				pGraphics->MultiDrawMeshIndirect(pMesh, pipelineRenderData.m_IndirectDrawCommands->size());
 				pGraphics->EnableDepthWrite(true);
 				pipelineRenderData.m_pIndirectDrawCommandsBuffer->Unbind();
 				pipelineRenderData.m_pIndirectDrawPerObjectDataBuffer->Unbind();
+				pipelineRenderData.m_pIndirectObjectDataOffsetsBuffer->Unbind();
 			}
-
 		} });
 	}
 

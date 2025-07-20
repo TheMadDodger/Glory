@@ -28,9 +28,15 @@ layout(std430, binding = 4) restrict readonly buffer PerObjectDataSSBO
 	PerObjectData Datas[];
 } PerObjectDatas;
 
+layout(std430, binding = 5) restrict readonly buffer ObjectDataOffsetsSSBO
+{
+	uint Offsets[];
+} ObjectDataOffsets;
+
 void main()
 {
-	PerObjectData objectData = PerObjectDatas.Datas[gl_DrawID];
+	uint index = ObjectDataOffsets.Offsets[gl_DrawID];
+	PerObjectData objectData = PerObjectDatas.Datas[index + gl_InstanceIndex];
 	gl_Position = Object.proj * Object.view * objectData.World * vec4(inPosition, 1.0);
 	normal = vec3(objectData.World * vec4(inNormal, 0.0));
 	outColor = inColor;

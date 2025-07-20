@@ -69,7 +69,15 @@ namespace Glory
 		PipelineRenderData& pipelineRenderData = iter == m_StaticPipelineRenderDatas.end() ?
 			m_StaticPipelineRenderDatas.emplace_back(pipelineID) : *iter;
 
-		pipelineRenderData.m_Meshes.emplace_back(renderData.m_MeshID);
+		auto meshIter = pipelineRenderData.m_Meshes.find(renderData.m_MeshID);
+		if (meshIter == pipelineRenderData.m_Meshes.end())
+			meshIter = pipelineRenderData.m_Meshes.emplace(renderData.m_MeshID, PipelineMeshRenderData{ renderData.m_MeshID }).first;
+
+		meshIter->second.m_Objects.emplace_back(PerObjectData{ renderData.m_SceneID, renderData.m_ObjectID, renderData.m_World });
+		meshIter->second.m_Materials.emplace_back(renderData.m_MaterialID);
+		pipelineRenderData.m_Dirty = true;
+
+		/*pipelineRenderData.m_Meshes.emplace_back(renderData.m_MeshID);
 		pipelineRenderData.m_Materials.emplace_back(renderData.m_MaterialID);
 		pipelineRenderData.m_PerObjectData.emplace_back(PerObjectData{ renderData.m_SceneID, renderData.m_ObjectID, renderData.m_World });
 
@@ -82,12 +90,12 @@ namespace Glory
 		pipelineRenderData.m_IndirectDrawCommands.emplace_back(std::move(command));
 
 		pipelineRenderData.m_pCombinedMesh->Merge(pMesh);
-		pipelineRenderData.m_Dirty = true;
+		pipelineRenderData.m_Dirty = true;*/
 	}
 
 	void RendererModule::UpdateStatic(UUID pipelineID, UUID objectID, glm::mat4 world)
 	{
-		auto pipelineIter = std::find_if(m_StaticPipelineRenderDatas.begin(), m_StaticPipelineRenderDatas.end(),
+		/*auto pipelineIter = std::find_if(m_StaticPipelineRenderDatas.begin(), m_StaticPipelineRenderDatas.end(),
 			[pipelineID](const PipelineRenderData& otherPipeline) { return otherPipeline.m_Pipeline == pipelineID; });
 
 		if (pipelineIter == m_StaticPipelineRenderDatas.end()) return;
@@ -97,12 +105,12 @@ namespace Glory
 
 		if (objectIter == pipelineIter->m_PerObjectData->end()) return;
 		objectIter->m_World = world;
-		pipelineIter->m_PerObjectData.m_Dirty = true;
+		pipelineIter->m_PerObjectData.m_Dirty = true;*/
 	}
 
 	void RendererModule::UnsubmitStatic(UUID pipelineID, UUID objectID)
 	{
-		auto pipelineIter = std::find_if(m_StaticPipelineRenderDatas.begin(), m_StaticPipelineRenderDatas.end(),
+		/*auto pipelineIter = std::find_if(m_StaticPipelineRenderDatas.begin(), m_StaticPipelineRenderDatas.end(),
 			[pipelineID](const PipelineRenderData& otherPipeline) { return otherPipeline.m_Pipeline == pipelineID; });
 
 		if (pipelineIter == m_StaticPipelineRenderDatas.end()) return;
@@ -115,7 +123,7 @@ namespace Glory
 		pipelineIter->m_PerObjectData->erase(objectIter);
 		pipelineIter->m_Meshes->erase(pipelineIter->m_Meshes->begin() + index);
 		pipelineIter->m_Materials->erase(pipelineIter->m_Materials->begin() + index);
-		pipelineIter->m_IndirectDrawCommands->erase(pipelineIter->m_IndirectDrawCommands->begin() + index);
+		pipelineIter->m_IndirectDrawCommands->erase(pipelineIter->m_IndirectDrawCommands->begin() + index);*/
 	}
 
 	void RendererModule::SubmitDynamic(RenderData&& renderData)
@@ -445,6 +453,43 @@ namespace Glory
 	void RendererModule::Render()
 	{
 		GPUResourceManager* gpuResources = m_pEngine->GetMainModule<GraphicsModule>()->GetResourceManager();
+
+		for (size_t i = 0; i < m_StaticPipelineRenderDatas.size(); ++i)
+		{
+			PipelineRenderData& pipelineRenderData = m_StaticPipelineRenderDatas[i];
+			if (!pipelineRenderData.m_Dirty) continue;
+			pipelineRenderData.m_IndirectDrawCommands.clear();
+			pipelineRenderData.m_FinalPerObjectData.clear();
+			pipelineRenderData.m_ObjectDataOffsets.clear();
+			pipelineRenderData.m_pCombinedMesh->ClearIndices();
+			pipelineRenderData.m_pCombinedMesh->ClearVertices();
+
+			for (auto& iter : pipelineRenderData.m_Meshes)
+			{
+				const PipelineMeshRenderData& meshRenderData = iter.second;
+				Resource* pMeshResource = m_pEngine->GetAssetManager().FindResource(meshRenderData.m_Mesh);
+				MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+				const int baseVertex = (int)pipelineRenderData.m_pCombinedMesh->VertexCount();
+				const uint32_t firstIndex = (int)pipelineRenderData.m_pCombinedMesh->IndexCount();
+
+				pipelineRenderData.m_BaseMaterial = meshRenderData.m_Materials[0];
+				pipelineRenderData.m_ObjectDataOffsets.emplace_back(pipelineRenderData.m_FinalPerObjectData->size());
+				pipelineRenderData.m_pCombinedMesh->Merge(pMeshData);
+				const size_t objectDataStart = pipelineRenderData.m_FinalPerObjectData->size();
+				pipelineRenderData.m_FinalPerObjectData.resize(objectDataStart + meshRenderData.m_Objects.size());
+				std::memcpy(&pipelineRenderData.m_FinalPerObjectData.m_Data[objectDataStart], meshRenderData.m_Objects.data(),
+					sizeof(PerObjectData)*meshRenderData.m_Objects.size());
+
+				DrawElementsIndirectCommand command;
+				command.BaseInstance = 0;
+				command.InstanceCount = meshRenderData.m_Objects.size();
+				command.Count = pMeshData->IndexCount();
+				command.BaseVertex = baseVertex;
+				command.FirstIndex = firstIndex;
+				pipelineRenderData.m_IndirectDrawCommands.emplace_back(std::move(command));
+			}
+			pipelineRenderData.m_Dirty = false;
+		}
 
 		if (m_DisplaysDirty)
 		{
@@ -780,7 +825,7 @@ namespace Glory
 			{ AttributeType::Float3, AttributeType::Float3, AttributeType::Float3,
 			AttributeType::Float3 , AttributeType::Float2, AttributeType::Float4 })),
 		m_Dirty(false), m_pIndirectDrawCommandsBuffer(nullptr),
-		m_pIndirectDrawPerObjectDataBuffer(nullptr), m_pIndirectDrawMesh(nullptr)
+		m_pIndirectDrawPerObjectDataBuffer(nullptr), m_pIndirectObjectDataOffsetsBuffer(nullptr)
 	{
 	}
 

@@ -47,6 +47,18 @@ namespace Glory
 			return newElement;
 		}
 
+		void clear()
+		{
+			m_Data.clear();
+			m_Dirty = true;
+		}
+
+		void resize(size_t newSize)
+		{
+			m_Data.resize(newSize);
+			m_Dirty = true;
+		}
+
 		operator bool()
 		{
 			const bool value = m_Dirty;
@@ -58,22 +70,35 @@ namespace Glory
 		bool m_Dirty{ false };
 	};
 
+	struct PipelineMeshRenderData
+	{
+		PipelineMeshRenderData(UUID mesh) : m_Mesh(mesh) {}
+
+		UUID m_Mesh;
+		std::vector<PerObjectData> m_Objects;
+		std::vector<UUID> m_Materials;
+	};
+
 	struct PipelineRenderData
 	{
 		PipelineRenderData(UUID pipeline);
 		virtual ~PipelineRenderData();
+		
+		std::unordered_map<UUID, PipelineMeshRenderData> m_Meshes;
 
 		UUID m_Pipeline;
-		CPUBuffer<UUID> m_Meshes;
-		CPUBuffer<UUID> m_Materials;
-		CPUBuffer<PerObjectData> m_PerObjectData;
+		//CPUBuffer<UUID> m_Meshes;
+		//CPUBuffer<UUID> m_Materials;
+		UUID m_BaseMaterial;
+		CPUBuffer<PerObjectData> m_FinalPerObjectData;
+		CPUBuffer<uint32_t> m_ObjectDataOffsets;
 		MeshData* m_pCombinedMesh;
 		CPUBuffer<DrawElementsIndirectCommand> m_IndirectDrawCommands;
 		bool m_Dirty;
 
 		Buffer* m_pIndirectDrawCommandsBuffer;
 		Buffer* m_pIndirectDrawPerObjectDataBuffer;
-		Mesh* m_pIndirectDrawMesh;
+		Buffer* m_pIndirectObjectDataOffsetsBuffer;
 	};
 
 	class RendererModule : public Module
