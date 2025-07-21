@@ -28,7 +28,7 @@ namespace Glory
         const UUID pipelineID = pMaterial->GetPipelineID(*pMaterials);
 
         Transform& transform = pRegistry->GetComponent<Transform>(entity);
-        REQUIRE_MODULE_CALL(pEngine, RendererModule, UpdateStatic(pipelineID, pScene->GetEntityUUID(entity), transform.MatTransform), );
+        REQUIRE_MODULE_CALL(pEngine, RendererModule, UpdateStatic(pipelineID, pComponent.m_Mesh.AssetUUID(), pScene->GetEntityUUID(entity), transform.MatTransform), );
     }
 
     void MeshRenderSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MeshRenderer& pComponent)
@@ -154,7 +154,7 @@ namespace Glory
 
         const UUID pipelineID = pMaterial->GetPipelineID(*pMaterials);
         const UUID id = pScene->GetEntityUUID(entity);
-        REQUIRE_MODULE_CALL(pEngine, RendererModule, UnsubmitStatic(pipelineID, id), );
+        REQUIRE_MODULE_CALL(pEngine, RendererModule, UnsubmitStatic(pipelineID, pComponent.m_Mesh.AssetUUID(), id), );
     }
 
     void MeshRenderSystem::GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references)

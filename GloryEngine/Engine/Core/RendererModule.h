@@ -89,6 +89,7 @@ namespace Glory
 		virtual ~PipelineRenderData();
 		
 		std::unordered_map<UUID, PipelineMeshRenderData> m_Meshes;
+		std::vector<UUID> m_UniqueMeshOrder;
 
 		UUID m_Pipeline;
 		CPUBuffer<PerObjectData> m_FinalPerObjectData;
@@ -114,8 +115,8 @@ namespace Glory
 		virtual const std::type_info& GetModuleType() override;
 
 		void SubmitStatic(RenderData&& renderData);
-		void UpdateStatic(UUID pipelineID, UUID objectID, glm::mat4 world);
-		void UnsubmitStatic(UUID pipelineID, UUID objectID);
+		void UpdateStatic(UUID pipelineID, UUID meshID, UUID objectID, glm::mat4 world);
+		void UnsubmitStatic(UUID pipelineID, UUID meshID, UUID objectID);
 		void SubmitDynamic(RenderData&& renderData);
 		void SubmitDynamic(TextRenderData&& renderData);
 		void SubmitLate(RenderData&& renderData);

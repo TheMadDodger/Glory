@@ -78,37 +78,49 @@ namespace Glory
 		pipelineRenderData.m_Dirty = true;
 	}
 
-	void RendererModule::UpdateStatic(UUID pipelineID, UUID objectID, glm::mat4 world)
+	void RendererModule::UpdateStatic(UUID pipelineID, UUID meshID, UUID objectID, glm::mat4 world)
 	{
-		/*auto pipelineIter = std::find_if(m_StaticPipelineRenderDatas.begin(), m_StaticPipelineRenderDatas.end(),
+		auto& pipelineIter = std::find_if(m_StaticPipelineRenderDatas.begin(), m_StaticPipelineRenderDatas.end(),
 			[pipelineID](const PipelineRenderData& otherPipeline) { return otherPipeline.m_Pipeline == pipelineID; });
-
 		if (pipelineIter == m_StaticPipelineRenderDatas.end()) return;
 
-		auto objectIter = std::find_if(pipelineIter->m_PerObjectData->begin(), pipelineIter->m_PerObjectData->end(),
-			[objectID](const PerObjectData& obj) { return obj.m_ObjectID == objectID; });
+		auto& meshIter = pipelineIter->m_Meshes.find(meshID);
+		if (meshIter == pipelineIter->m_Meshes.end()) return;
 
-		if (objectIter == pipelineIter->m_PerObjectData->end()) return;
+		PipelineMeshRenderData& meshRenderData = meshIter->second;
+
+		auto objectIter = std::find_if(meshRenderData.m_Objects.begin(), meshRenderData.m_Objects.end(),
+			[objectID](const PerObjectData& obj) { return obj.m_ObjectID == objectID; });
+		if (objectIter == meshRenderData.m_Objects.end()) return;
 		objectIter->m_World = world;
-		pipelineIter->m_PerObjectData.m_Dirty = true;*/
+		
+		auto& drawIDIter = std::find(pipelineIter->m_UniqueMeshOrder.begin(), pipelineIter->m_UniqueMeshOrder.end(), meshID);
+		const size_t drawID = drawIDIter - pipelineIter->m_UniqueMeshOrder.begin();
+		const size_t instanceID = objectIter - meshRenderData.m_Objects.begin();
+		const size_t objectDataIndex = pipelineIter->m_ObjectDataOffsets.m_Data[drawID] + instanceID;
+		pipelineIter->m_FinalPerObjectData.m_Data[objectDataIndex].m_World = world;
+		pipelineIter->m_FinalPerObjectData.m_Dirty = true;
 	}
 
-	void RendererModule::UnsubmitStatic(UUID pipelineID, UUID objectID)
+	void RendererModule::UnsubmitStatic(UUID pipelineID, UUID meshID, UUID objectID)
 	{
-		/*auto pipelineIter = std::find_if(m_StaticPipelineRenderDatas.begin(), m_StaticPipelineRenderDatas.end(),
+		auto pipelineIter = std::find_if(m_StaticPipelineRenderDatas.begin(), m_StaticPipelineRenderDatas.end(),
 			[pipelineID](const PipelineRenderData& otherPipeline) { return otherPipeline.m_Pipeline == pipelineID; });
-
 		if (pipelineIter == m_StaticPipelineRenderDatas.end()) return;
 
-		auto objectIter = std::find_if(pipelineIter->m_PerObjectData->begin(), pipelineIter->m_PerObjectData->end(),
-			[objectID](const PerObjectData& obj) { return obj.m_ObjectID == objectID; });
+		auto& meshIter = pipelineIter->m_Meshes.find(meshID);
+		if (meshIter == pipelineIter->m_Meshes.end()) return;
 
-		if (objectIter == pipelineIter->m_PerObjectData->end()) return;
-		const size_t index = objectIter - pipelineIter->m_PerObjectData->begin();
-		pipelineIter->m_PerObjectData->erase(objectIter);
-		pipelineIter->m_Meshes->erase(pipelineIter->m_Meshes->begin() + index);
-		pipelineIter->m_Materials->erase(pipelineIter->m_Materials->begin() + index);
-		pipelineIter->m_IndirectDrawCommands->erase(pipelineIter->m_IndirectDrawCommands->begin() + index);*/
+		PipelineMeshRenderData& meshRenderData = meshIter->second;
+
+		auto objectIter = std::find_if(meshRenderData.m_Objects.begin(), meshRenderData.m_Objects.end(),
+			[objectID](const PerObjectData& obj) { return obj.m_ObjectID == objectID; });
+		if (objectIter == meshRenderData.m_Objects.end()) return;
+		const size_t index = objectIter - meshRenderData.m_Objects.begin();
+
+		meshRenderData.m_Objects.erase(objectIter);
+		meshRenderData.m_Materials.erase(meshRenderData.m_Materials.begin() + index);
+		pipelineIter->m_Dirty = true;
 	}
 
 	void RendererModule::SubmitDynamic(RenderData&& renderData)
@@ -448,10 +460,13 @@ namespace Glory
 			pipelineRenderData.m_ObjectDataOffsets.clear();
 			pipelineRenderData.m_pCombinedMesh->ClearIndices();
 			pipelineRenderData.m_pCombinedMesh->ClearVertices();
+			pipelineRenderData.m_UniqueMeshOrder.clear();
+			pipelineRenderData.m_UniqueMeshOrder.reserve(pipelineRenderData.m_Meshes.size());
 
 			for (auto& iter : pipelineRenderData.m_Meshes)
 			{
 				PipelineMeshRenderData& meshRenderData = iter.second;
+				pipelineRenderData.m_UniqueMeshOrder.emplace_back(meshRenderData.m_Mesh);
 				Resource* pMeshResource = m_pEngine->GetAssetManager().FindResource(meshRenderData.m_Mesh);
 				MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
 				const int baseVertex = (int)pipelineRenderData.m_pCombinedMesh->VertexCount();
