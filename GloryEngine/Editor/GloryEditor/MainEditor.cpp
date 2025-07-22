@@ -49,6 +49,7 @@
 #include "EntitySceneObjectEditor.h"
 #include "DefaultComponentEditor.h"
 #include "TransformEditor.h"
+#include "MeshRendererEditor.h"
 
 #include "Importer.h"
 #include "MaterialImporter.h"
@@ -569,6 +570,7 @@ namespace Glory::Editor
 		Editor::RegisterEditor<EntitySceneObjectEditor>();
 		Editor::RegisterEditor<DefaultComponentEditor>();
 		Editor::RegisterEditor<TransformEditor>();
+		Editor::RegisterEditor<MeshRendererEditor>();
 		Editor::RegisterEditor<LightComponentEditor>();
 		Editor::RegisterEditor<GSceneEditor>();
 		Editor::RegisterEditor<TextComponentEditor>();

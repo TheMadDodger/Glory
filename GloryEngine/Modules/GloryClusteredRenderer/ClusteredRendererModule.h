@@ -103,6 +103,11 @@ namespace Glory
 		MaterialData* m_pClusterCullLightMaterialData = nullptr;
 		Material* m_pClusterCullLightMaterial = nullptr;
 
+		FileData* m_pFrustumCullingShaderData = nullptr;
+		PipelineData* m_pFrustumCullingPipelineData = nullptr;
+		MaterialData* m_pFrustumCullingMaterialData = nullptr;
+		Material* m_pFrustumCullingMaterial = nullptr;
+
 		// Data for clustering
 		Buffer* m_pScreenToViewSSBO = nullptr;
 		Buffer* m_pLightsSSBO = nullptr;

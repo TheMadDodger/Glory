@@ -462,6 +462,9 @@ namespace Glory
 			pipelineRenderData.m_pCombinedMesh->ClearVertices();
 			pipelineRenderData.m_UniqueMeshOrder.clear();
 			pipelineRenderData.m_UniqueMeshOrder.reserve(pipelineRenderData.m_Meshes.size());
+			pipelineRenderData.m_BoundingBoxBuffer.clear();
+			pipelineRenderData.m_BoundingBoxBuffer->reserve(pipelineRenderData.m_Meshes.size());
+			pipelineRenderData.m_BoundingBoxIndices.clear();
 
 			for (auto& iter : pipelineRenderData.m_Meshes)
 			{
@@ -469,6 +472,9 @@ namespace Glory
 				pipelineRenderData.m_UniqueMeshOrder.emplace_back(meshRenderData.m_Mesh);
 				Resource* pMeshResource = m_pEngine->GetAssetManager().FindResource(meshRenderData.m_Mesh);
 				MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+				const size_t boundingBoxIndex = pipelineRenderData.m_BoundingBoxBuffer->size();
+				pipelineRenderData.m_BoundingBoxBuffer.emplace_back(pMeshData->GetBoundingBox());
+
 				const int baseVertex = (int)pipelineRenderData.m_pCombinedMesh->VertexCount();
 				const uint32_t firstIndex = (int)pipelineRenderData.m_pCombinedMesh->IndexCount();
 
@@ -484,6 +490,8 @@ namespace Glory
 				command.FirstIndex = firstIndex;
 				pipelineRenderData.m_IndirectDrawCommands.emplace_back(std::move(command));
 
+				const size_t start = pipelineRenderData.m_BoundingBoxIndices->size();
+				pipelineRenderData.m_BoundingBoxIndices.resize(start + meshRenderData.m_Materials.size());
 				for (size_t i = 0; i < meshRenderData.m_Materials.size(); ++i)
 				{
 					const UUID materialID = meshRenderData.m_Materials[i];
@@ -492,6 +500,7 @@ namespace Glory
 					const size_t index = hasMaterial ? materialIter - pipelineRenderData.m_UniqueMaterials->begin() : pipelineRenderData.m_UniqueMaterials->size();
 					if (!hasMaterial) pipelineRenderData.m_UniqueMaterials.emplace_back(materialID);
 					meshRenderData.m_Objects[i].m_MaterialIndex = (uint32_t)index;
+					pipelineRenderData.m_BoundingBoxIndices.m_Data[start + i] = boundingBoxIndex;
 				}
 				pipelineRenderData.m_FinalPerObjectData.resize(objectDataStart + meshRenderData.m_Objects.size());
 				std::memcpy(&pipelineRenderData.m_FinalPerObjectData.m_Data[objectDataStart], meshRenderData.m_Objects.data(),
@@ -835,7 +844,8 @@ namespace Glory
 			AttributeType::Float3 , AttributeType::Float2, AttributeType::Float4 })),
 		m_Dirty(false), m_pIndirectDrawCommandsBuffer(nullptr),
 		m_pIndirectDrawPerObjectDataBuffer(nullptr), m_pIndirectObjectDataOffsetsBuffer(nullptr),
-		m_pIndirectMaterialPropertyData(nullptr)
+		m_pIndirectMaterialPropertyData(nullptr), m_pCullingBoundingBoxBuffer(nullptr),
+		m_pCullingBoundingBoxIndicesBuffer(nullptr), m_pCullingResultBuffer(nullptr)
 	{
 	}
 

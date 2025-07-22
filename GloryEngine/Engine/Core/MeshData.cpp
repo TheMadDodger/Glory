@@ -183,4 +183,16 @@ namespace Glory
 		std::memcpy(&m_Indices[indexStart], pOther->m_Indices.data(), pOther->m_Indices.size()*sizeof(uint32_t));
 		m_IsDirty = true;
 	}
+
+	void MeshData::AddBoundingBox(const glm::vec3& min, const glm::vec3& max)
+	{
+		const glm::vec3 halfExtends = (max - min)/2.0f;
+		m_BoundingBox.m_HalfExtends = glm::vec4(halfExtends, 1.0f);
+		m_BoundingBox.m_Center = glm::vec4(min + halfExtends, 1.0f);
+	}
+
+	const BoundingBox& MeshData::GetBoundingBox() const
+	{
+		return m_BoundingBox;
+	}
 }

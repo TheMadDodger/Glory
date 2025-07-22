@@ -191,8 +191,24 @@ namespace Glory
 					pipelineRenderData.m_ObjectDataOffsets.m_Dirty = true;
 				}
 				
+				if (!pipelineRenderData.m_pCullingBoundingBoxBuffer)
+				{
+					pipelineRenderData.m_pCullingBoundingBoxBuffer = pResourceManager->CreateBuffer(1, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 1);
+					pipelineRenderData.m_BoundingBoxBuffer.m_Dirty = true;
+				}
+
+				if (!pipelineRenderData.m_pCullingBoundingBoxIndicesBuffer)
+				{
+					pipelineRenderData.m_pCullingBoundingBoxIndicesBuffer = pResourceManager->CreateBuffer(1, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_STATIC_DRAW, 3);
+					pipelineRenderData.m_BoundingBoxIndices.m_Dirty = true;
+				}
+				
 				if (!pipelineRenderData.m_pIndirectMaterialPropertyData)
 					pipelineRenderData.m_pIndirectMaterialPropertyData = pResourceManager->CreateBuffer(1, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 6);
+				if (!pipelineRenderData.m_pCullingResultBuffer)
+					pipelineRenderData.m_pCullingResultBuffer = pResourceManager->CreateBuffer(sizeof(uint32_t)*(pipelineRenderData.m_FinalPerObjectData->size()+1),
+						BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_COPY, 5);
+				pipelineRenderData.m_pCullingResultBuffer->Assign(NULL);
 
 				if (pipelineRenderData.m_IndirectDrawCommands)
 					pipelineRenderData.m_pIndirectDrawCommandsBuffer->Assign(pipelineRenderData.m_IndirectDrawCommands->data(),
@@ -203,6 +219,12 @@ namespace Glory
 				if (pipelineRenderData.m_ObjectDataOffsets)
 					pipelineRenderData.m_pIndirectObjectDataOffsetsBuffer->Assign(pipelineRenderData.m_ObjectDataOffsets->data(),
 						pipelineRenderData.m_ObjectDataOffsets->size()*sizeof(uint32_t));
+				if (pipelineRenderData.m_BoundingBoxBuffer)
+					pipelineRenderData.m_pCullingBoundingBoxBuffer->Assign(pipelineRenderData.m_BoundingBoxBuffer->data(),
+						pipelineRenderData.m_BoundingBoxBuffer->size()*sizeof(BoundingBox));
+				if (pipelineRenderData.m_BoundingBoxIndices)
+					pipelineRenderData.m_pCullingBoundingBoxIndicesBuffer->Assign(pipelineRenderData.m_BoundingBoxIndices->data(),
+						pipelineRenderData.m_BoundingBoxIndices->size()*sizeof(uint32_t));
 
 				Mesh* pMesh = pResourceManager->CreateMesh(pipelineRenderData.m_pCombinedMesh);
 
@@ -231,9 +253,6 @@ namespace Glory
 						pipelineRenderData.m_PropertiesBuffer->size());
 				}
 
-				Material* pMaterial = pGraphics->UseMaterial(pBaseMaterialData);
-				if (!pMaterial) continue;
-
 				ObjectData object;
 				object.Model = glm::identity<glm::mat4>();
 				object.View = camera.GetView();
@@ -241,10 +260,23 @@ namespace Glory
 				object.ObjectID = 0;
 				object.SceneID = 0;
 
-				//pMaterial->SetProperties(m_pEngine);
-				pMaterial->SetObjectData(object);
-				pGraphics->EnableDepthWrite(true);
+				Material* pCullingMaterial = pGraphics->UseMaterial(m_pFrustumCullingMaterialData);
+				pipelineRenderData.m_pCullingBoundingBoxBuffer->BindForDraw();
+				pipelineRenderData.m_pCullingBoundingBoxIndicesBuffer->BindForDraw();
+				pipelineRenderData.m_pIndirectDrawPerObjectDataBuffer->BindForDraw();
+				pipelineRenderData.m_pCullingResultBuffer->BindForDraw();
+				pCullingMaterial->SetObjectData(object);
+				pGraphics->DispatchCompute(pipelineRenderData.m_BoundingBoxIndices->size(), 1, 1);
+				pipelineRenderData.m_pCullingBoundingBoxBuffer->Unbind();
+				pipelineRenderData.m_pCullingBoundingBoxIndicesBuffer->Unbind();
+				pipelineRenderData.m_pIndirectDrawPerObjectDataBuffer->Unbind();
+				pipelineRenderData.m_pCullingResultBuffer->Unbind();
+				pGraphics->UseMaterial(nullptr);
 
+				Material* pMaterial = pGraphics->UseMaterial(pBaseMaterialData);
+				if (!pMaterial) continue;
+
+				pGraphics->EnableDepthWrite(true);
 				pipelineRenderData.m_pIndirectDrawCommandsBuffer->BindForDraw();
 				pipelineRenderData.m_pIndirectDrawPerObjectDataBuffer->BindForDraw();
 				pipelineRenderData.m_pIndirectObjectDataOffsetsBuffer->BindForDraw();
@@ -289,6 +321,12 @@ namespace Glory
 		m_pClusterCullLightShaderData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
 		m_pClusterCullLightPipelineData = new InternalPipeline({ m_pClusterCullLightShaderData }, { ShaderType::ST_Compute });
 		m_pClusterCullLightMaterialData = new InternalMaterial(m_pClusterCullLightPipelineData);
+
+		// Object culling shader
+		GetResourcePath("Shaders/Compute/FrustumCulling.shader", path);
+		m_pFrustumCullingShaderData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
+		m_pFrustumCullingPipelineData = new InternalPipeline({ m_pFrustumCullingShaderData }, { ShaderType::ST_Compute });
+		m_pFrustumCullingMaterialData = new InternalMaterial(m_pFrustumCullingPipelineData);
 
 		const ModuleSettings& settings = Settings();
 		const UUID screenPipeline = settings.Value<uint64_t>("Screen Pipeline");
@@ -430,6 +468,15 @@ namespace Glory
 
 		delete m_pClusterCullLightMaterialData;
 		m_pClusterCullLightMaterialData = nullptr;
+
+		delete m_pFrustumCullingShaderData;
+		m_pFrustumCullingShaderData = nullptr;
+
+		delete m_pFrustumCullingPipelineData;
+		m_pFrustumCullingPipelineData = nullptr;
+
+		delete m_pFrustumCullingMaterialData;
+		m_pFrustumCullingMaterialData = nullptr;
 
 		delete m_pDeferredCompositeMaterial;
 		m_pDeferredCompositeMaterial = nullptr;

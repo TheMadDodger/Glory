@@ -116,7 +116,8 @@ namespace Glory::Editor
         const aiScene* pScene = importer.ReadFile(path.string(), aiProcess_CalcTangentSpace |
             aiProcess_Triangulate |
             aiProcess_JoinIdenticalVertices |
-            aiProcess_SortByPType);
+            aiProcess_SortByPType |
+            aiProcess_GenBoundingBoxes);
 
         Debug& debug = EditorApplication::GetInstance()->GetEngine()->GetDebug();
 
@@ -596,6 +597,49 @@ namespace Glory::Editor
         stream << mesh->mName.C_Str() << " Material " << mesh->mMaterialIndex;
         MeshData* pMesh = new MeshData(mesh->mNumVertices, vertexSize, verticesVector, (uint32_t)indices.size(), indices, attributes);
         pMesh->SetName(stream.str());
+        aiAABB boundingBoxAABB = mesh->mAABB;
+
+        /* Axes conversion */
+        float temp;
+        switch (context.UpAxis)
+        {
+        case AxisConversion::X:
+            SWAP(boundingBoxAABB.mMin, x, y);
+            SWAP(boundingBoxAABB.mMax, x, y);
+            break;
+        case AxisConversion::Z:
+            SWAP(boundingBoxAABB.mMin, z, y);
+            SWAP(boundingBoxAABB.mMax, z, y);
+            break;
+        default:
+            break;
+        }
+        switch (context.FrontAxis)
+        {
+        case AxisConversion::X: {
+            switch (context.UpAxis)
+            {
+            case AxisConversion::Z:
+                /* Z was already swapped with Y */
+                SWAP(boundingBoxAABB.mMin, x, y);
+                SWAP(boundingBoxAABB.mMax, x, y);
+                break;
+            default:
+                SWAP(boundingBoxAABB.mMin, x, z);
+                SWAP(boundingBoxAABB.mMax, x, z);
+                break;
+            }
+            break;
+        }
+        case AxisConversion::Y:
+            SWAP(boundingBoxAABB.mMin, y, z);
+            SWAP(boundingBoxAABB.mMax, y, z);
+            break;
+        default:
+            break;
+        }
+
+        pMesh->AddBoundingBox(*reinterpret_cast<glm::vec3*>(&boundingBoxAABB.mMin), *reinterpret_cast<glm::vec3*>(&boundingBoxAABB.mMax));
         delete[] vertices;
         return pMesh;
     }

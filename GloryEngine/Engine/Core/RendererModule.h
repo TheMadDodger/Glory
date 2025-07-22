@@ -20,6 +20,7 @@ namespace Glory
 	class MaterialData;
 	class GPUTextureAtlas;
 	struct RenderPass;
+	struct BoundingBox;
 
 	struct PickResult
 	{
@@ -59,6 +60,7 @@ namespace Glory
 
 		void resize(size_t newSize)
 		{
+			if (m_Data.size() == newSize) return;
 			m_Data.resize(newSize);
 			m_Dirty = true;
 		}
@@ -98,12 +100,18 @@ namespace Glory
 		CPUBuffer<DrawElementsIndirectCommand> m_IndirectDrawCommands;
 		CPUBuffer<UUID> m_UniqueMaterials;
 		CPUBuffer<char> m_PropertiesBuffer;
+		CPUBuffer<BoundingBox> m_BoundingBoxBuffer;
+		CPUBuffer<uint32_t> m_BoundingBoxIndices;
 		bool m_Dirty;
 
 		Buffer* m_pIndirectDrawCommandsBuffer;
 		Buffer* m_pIndirectDrawPerObjectDataBuffer;
 		Buffer* m_pIndirectObjectDataOffsetsBuffer;
 		Buffer* m_pIndirectMaterialPropertyData;
+
+		Buffer* m_pCullingBoundingBoxBuffer;
+		Buffer* m_pCullingBoundingBoxIndicesBuffer;
+		Buffer* m_pCullingResultBuffer;
 	};
 
 	class RendererModule : public Module
