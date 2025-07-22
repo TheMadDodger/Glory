@@ -835,7 +835,7 @@ namespace Glory
 			AttributeType::Float3 , AttributeType::Float2, AttributeType::Float4 })),
 		m_Dirty(false), m_pIndirectDrawCommandsBuffer(nullptr),
 		m_pIndirectDrawPerObjectDataBuffer(nullptr), m_pIndirectObjectDataOffsetsBuffer(nullptr),
-		m_pIndirectMaterialPropertyData(nullptr)
+		m_pIndirectMaterialPropertyData(nullptr), m_pIndirectMaterialTexturesData(nullptr)
 	{
 	}
 

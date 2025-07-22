@@ -98,12 +98,14 @@ namespace Glory
 		CPUBuffer<DrawElementsIndirectCommand> m_IndirectDrawCommands;
 		CPUBuffer<UUID> m_UniqueMaterials;
 		CPUBuffer<char> m_PropertiesBuffer;
+		CPUBuffer<uint64_t> m_TexturesBuffer;
 		bool m_Dirty;
 
 		Buffer* m_pIndirectDrawCommandsBuffer;
 		Buffer* m_pIndirectDrawPerObjectDataBuffer;
 		Buffer* m_pIndirectObjectDataOffsetsBuffer;
 		Buffer* m_pIndirectMaterialPropertyData;
+		Buffer* m_pIndirectMaterialTexturesData;
 	};
 
 	class RendererModule : public Module

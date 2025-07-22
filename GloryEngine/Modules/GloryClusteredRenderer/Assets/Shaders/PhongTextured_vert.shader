@@ -2,7 +2,7 @@
 
 #version 460
 #extension GL_ARB_separate_shader_objects : enable
-#extension ARB_shader_draw_parameters : enable
+#extension GL_ARB_shader_draw_parameters : enable
 
 #include "internal/ObjectData.glsl"
 
@@ -15,21 +15,41 @@ layout(location = 5) in vec4 inColor;
 
 layout(location = 0) out vec2 fragTexCoord;
 layout(location = 1) out vec4 outColor;
-layout(location = 2) out mat3 TBN;
+layout(location = 2) out uint outObjectIndex;
+layout(location = 3) out mat3 TBN;
 
-layout(std430, binding = 4) restrict readonly buffer IndirectTransformsSSBO
+struct PerObjectData
 {
-	mat4 World[];
-} IndirectTransforms;
+	uvec4 ObjectID;
+	mat4 World;
+	uint MaterialIndex;
+	uint padding1;
+	uint padding2;
+	uint padding3;
+};
+
+layout(std430, binding = 4) restrict readonly buffer PerObjectDataSSBO
+{
+	PerObjectData Datas[];
+} PerObjectDatas;
+
+layout(std430, binding = 5) restrict readonly buffer ObjectDataOffsetsSSBO
+{
+	uint Offsets[];
+} ObjectDataOffsets;
 
 void main()
 {
-	gl_Position = Object.proj * Object.view * IndirectTransforms.World[gl_DrawID] * vec4(inPosition, 1.0);
+	uint index = ObjectDataOffsets.Offsets[gl_DrawID];
+	outObjectIndex = index + gl_InstanceID;
+	PerObjectData objectData = PerObjectDatas.Datas[outObjectIndex];
+
+	gl_Position = Object.proj * Object.view * objectData.World * vec4(inPosition, 1.0);
 	fragTexCoord = inTexCoord;
 
-	vec3 T = normalize(vec3(IndirectTransforms.World[gl_DrawID] * vec4(inTangent, 0.0)));
-	vec3 B = normalize(vec3(IndirectTransforms.World[gl_DrawID] * vec4(inBitangent, 0.0)));
-	vec3 N = normalize(vec3(IndirectTransforms.World[gl_DrawID] * vec4(inNormal, 0.0)));
+	vec3 T = normalize(vec3(objectData.World * vec4(inTangent, 0.0)));
+	vec3 B = normalize(vec3(objectData.World * vec4(inBitangent, 0.0)));
+	vec3 N = normalize(vec3(objectData.World * vec4(inNormal, 0.0)));
 	TBN = mat3(T, B, N);
 
 	outColor = inColor;

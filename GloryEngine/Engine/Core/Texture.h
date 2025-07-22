@@ -35,6 +35,7 @@ namespace Glory
 		virtual void Create(const void* pixels=nullptr) = 0;
 		void CopyFromBuffer(Buffer* pBuffer);
 		virtual void CopyFromBuffer(Buffer* pBuffer, int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth) = 0;
+		virtual uint64_t BindlessHandle() const = 0;
 
 		const TextureCreateInfo& Info() const;
 

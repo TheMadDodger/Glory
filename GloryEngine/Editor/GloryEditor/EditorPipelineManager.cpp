@@ -473,6 +473,7 @@ namespace Glory::Editor
 			}
 
 			shaderc::CompileOptions options{};
+			options.SetTargetSpirv(shaderc_spirv_version::shaderc_spirv_version_1_6);
 
 			for (size_t j = 0; j < pShaderSource->FeatureCount(); ++j)
 			{

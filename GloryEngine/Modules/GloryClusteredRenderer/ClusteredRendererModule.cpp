@@ -168,6 +168,7 @@ namespace Glory
 			GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 			GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 			MaterialManager& materialManager = m_pEngine->GetMaterialManager();
+			AssetManager& assetManager = m_pEngine->GetAssetManager();
 
 			for (PipelineRenderData& pipelineRenderData : m_StaticPipelineRenderDatas)
 			{
@@ -193,6 +194,11 @@ namespace Glory
 				
 				if (!pipelineRenderData.m_pIndirectMaterialPropertyData)
 					pipelineRenderData.m_pIndirectMaterialPropertyData = pResourceManager->CreateBuffer(1, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 6);
+				if (!pipelineRenderData.m_pIndirectMaterialTexturesData)
+				{
+					pipelineRenderData.m_pIndirectMaterialTexturesData = pResourceManager->CreateBuffer(1, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 7);
+					pipelineRenderData.m_PropertiesBuffer.m_Dirty = true;
+				}
 
 				if (pipelineRenderData.m_IndirectDrawCommands)
 					pipelineRenderData.m_pIndirectDrawCommandsBuffer->Assign(pipelineRenderData.m_IndirectDrawCommands->data(),
@@ -205,31 +211,53 @@ namespace Glory
 						pipelineRenderData.m_ObjectDataOffsets->size()*sizeof(uint32_t));
 
 				Mesh* pMesh = pResourceManager->CreateMesh(pipelineRenderData.m_pCombinedMesh);
-
 				const size_t materialCount = pipelineRenderData.m_UniqueMaterials->size();
 				MaterialData* pBaseMaterialData = materialManager.GetMaterial(pipelineRenderData.m_UniqueMaterials.m_Data[0]);
 				if (!pBaseMaterialData) continue;
 				const size_t propertyDataSize = pBaseMaterialData->PropertyDataSize(materialManager);
+				const size_t textureCount = pBaseMaterialData->ResourceCount();
+				const size_t textureDataSize = textureCount*sizeof(uint64_t);
 				const size_t paddingBytes = 16 - propertyDataSize%16;
 				const size_t finalPropertyDataSize = propertyDataSize + paddingBytes;
 				pipelineRenderData.m_PropertiesBuffer.resize(finalPropertyDataSize*materialCount);
+				pipelineRenderData.m_TexturesBuffer.resize(textureDataSize*materialCount);
 
 				for (size_t i = 0; i < materialCount; ++i)
 				{
 					MaterialData* pMaterialData = materialManager.GetMaterial(pipelineRenderData.m_UniqueMaterials.m_Data[i]);
-					if (std::memcmp(&pipelineRenderData.m_PropertiesBuffer.m_Data[i*finalPropertyDataSize],
-						pMaterialData->GetFinalBufferReference(materialManager).data(), propertyDataSize) == 0)
-						continue;
+					if (std::memcmp(&pipelineRenderData.m_PropertiesBuffer.m_Data[i * finalPropertyDataSize],
+						pMaterialData->GetFinalBufferReference(materialManager).data(), propertyDataSize) != 0)
+					{
+						pMaterialData->CopyProperties(materialManager, &pipelineRenderData.m_PropertiesBuffer.m_Data[i * finalPropertyDataSize]);
+						pipelineRenderData.m_PropertiesBuffer.m_Dirty = true;
+					}
 
-					pMaterialData->CopyProperties(materialManager, &pipelineRenderData.m_PropertiesBuffer.m_Data[i * finalPropertyDataSize]);
-					pipelineRenderData.m_PropertiesBuffer.m_Dirty = true;
+					for (size_t j = 0; j < textureCount; ++j)
+					{
+						const UUID textureID = pMaterialData->GetResourceUUIDPointer(materialManager, j)->AssetUUID();
+						Resource* pTextureResource = assetManager.FindResource(textureID);
+						if (!pTextureResource)
+						{
+							if (pipelineRenderData.m_TexturesBuffer.m_Data[i*textureCount + j] == 0) continue;
+							pipelineRenderData.m_TexturesBuffer.m_Data[i*textureCount + j] = 0;
+							pipelineRenderData.m_TexturesBuffer.m_Dirty = true;
+							continue;
+						}
+						TextureData* pTextureData = static_cast<TextureData*>(pTextureResource);
+						Texture* pTexture = pResourceManager->CreateTexture(pTextureData);
+						const uint64_t handle = pTexture->BindlessHandle();
+						if (pipelineRenderData.m_TexturesBuffer.m_Data[i*textureCount + j] == handle) continue;
+						pipelineRenderData.m_TexturesBuffer.m_Data[i*textureCount + j] = handle;
+						pipelineRenderData.m_TexturesBuffer.m_Dirty = true;
+					}
 				}
 
 				if (pipelineRenderData.m_PropertiesBuffer)
-				{
 					pipelineRenderData.m_pIndirectMaterialPropertyData->Assign(pipelineRenderData.m_PropertiesBuffer->data(),
 						pipelineRenderData.m_PropertiesBuffer->size());
-				}
+				if (pipelineRenderData.m_TexturesBuffer)
+					pipelineRenderData.m_pIndirectMaterialTexturesData->Assign(pipelineRenderData.m_TexturesBuffer->data(),
+						pipelineRenderData.m_TexturesBuffer->size()*sizeof(uint64_t));
 
 				Material* pMaterial = pGraphics->UseMaterial(pBaseMaterialData);
 				if (!pMaterial) continue;

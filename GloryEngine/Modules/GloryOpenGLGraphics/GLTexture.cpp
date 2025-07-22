@@ -10,7 +10,7 @@ namespace Glory
 {
 	GLTexture::GLTexture(TextureCreateInfo&& textureInfo)
 		: Texture(std::move(textureInfo)),
-		m_TextureID(0), m_GLImageType(0)
+		m_TextureID(0), m_GLImageType(0), m_BindlessHandle(0)
 	{
 	}
 
@@ -29,6 +29,11 @@ namespace Glory
 	GLuint GLTexture::GetID() const
 	{
 		return m_TextureID;
+	}
+
+	GLuint64 GLTexture::GetBindlessID() const
+	{
+		return m_BindlessHandle;
 	}
 
 	void GLTexture::Create(TextureData* pTextureData)
@@ -89,6 +94,11 @@ namespace Glory
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glTexParameterf(m_GLImageType, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		m_BindlessHandle = glGetTextureHandleARB(m_TextureID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glMakeTextureHandleResidentARB(m_BindlessHandle);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		glBindTexture(m_GLImageType, NULL);
@@ -160,6 +170,11 @@ namespace Glory
 			OpenGLGraphicsModule::LogGLError(glGetError());
 		}
 
+		m_BindlessHandle = glGetTextureHandleARB(m_TextureID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glMakeTextureHandleResidentARB(m_BindlessHandle);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
 		glBindTexture(m_GLImageType, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
@@ -208,11 +223,21 @@ namespace Glory
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
+		m_BindlessHandle = glGetTextureHandleARB(m_TextureID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glMakeTextureHandleResidentARB(m_BindlessHandle);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
 		glBindTexture(m_GLImageType, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
 	void GLTexture::CopyFromBuffer(Buffer* pBuffer, int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth)
 	{
+	}
+
+	uint64_t GLTexture::BindlessHandle() const
+	{
+		return m_BindlessHandle;
 	}
 }
