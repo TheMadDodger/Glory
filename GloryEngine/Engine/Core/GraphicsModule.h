@@ -10,7 +10,8 @@ namespace Glory
         GraphicsModule();
         virtual ~GraphicsModule();
 
-        virtual const std::type_info& GetModuleType() override;
+        /** @brief GraphicsModule type */
+        const std::type_info& GetBaseModuleType() override;
 
         int GetLastDrawCalls();
         int GetLastVertexCount();
@@ -55,12 +56,12 @@ namespace Glory
 
         virtual GPUResourceManager* CreateGPUResourceManager() = 0;
 
+        virtual void OnBeginFrame() override;
+        virtual void OnEndFrame() override;
+
     private:
         virtual void Initialize() override;
         virtual void Cleanup() override;
-
-        virtual void OnBeginFrame() override;
-        virtual void OnEndFrame() override;
 
     private:
         GPUResourceManager* m_pResourceManager;

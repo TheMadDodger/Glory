@@ -6,7 +6,7 @@
 
 namespace Glory
 {
-	SwapChain::SwapChain(Window* pWindow, Device* pDevice) : m_pWindow(pWindow), m_pDevice(pDevice)
+	SwapChain::SwapChain() : m_pWindow(nullptr), m_pDevice(nullptr)
 	{
 	}
 
@@ -23,8 +23,11 @@ namespace Glory
         m_SwapChainImages.clear();
 	}
 
-	void SwapChain::Initialize(VulkanGraphicsModule* pGraphicsModule)
+	void SwapChain::Initialize(VulkanGraphicsModule* pGraphicsModule, Window* pWindow, Device* pDevice)
 	{
+        m_pWindow = pWindow;
+        m_pDevice = pDevice;
+
         const SwapChainSupportDetails& details = m_pDevice->GetSwapChainSupportDetails();
 
         // Choose best format

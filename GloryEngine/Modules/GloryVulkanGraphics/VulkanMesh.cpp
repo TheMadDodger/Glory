@@ -2,12 +2,18 @@
 
 namespace Glory
 {
-	VulkanMesh::VulkanMesh(size_t vertexCount, size_t indexCount, InputRate inputRate, size_t binding, size_t stride, const std::vector<AttributeType>& attributeTypes) :
+    VulkanMesh::VulkanMesh(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding, uint32_t stride, const std::vector<AttributeType>& attributeTypes):
         Mesh(vertexCount, indexCount, inputRate, binding, stride, attributeTypes)
-	{
-	}
+    {
+    }
 
-	VulkanMesh::~VulkanMesh()
+    VulkanMesh::VulkanMesh(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding,
+        uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes):
+        Mesh(vertexCount, indexCount, inputRate, binding, stride, primitiveType, attributeTypes)
+    {
+    }
+
+    VulkanMesh::~VulkanMesh()
 	{
 	}
 
@@ -28,17 +34,6 @@ namespace Glory
 
     void VulkanMesh::CreateBindingAndAttributeData()
     {
-        CreateBindingDescription();
-        CreateVertexInputAttributeDescriptions();
-    }
-
-    void VulkanMesh::Bind()
-    {
-        // TODO
-    }
-
-    void VulkanMesh::CreateBindingDescription()
-    {
         // Vertex binding and attributes
         m_BindingDescription = vk::VertexInputBindingDescription();
         m_BindingDescription.binding = m_Binding;
@@ -56,12 +51,8 @@ namespace Glory
         default:
             break;
         }
-    }
 
-    void VulkanMesh::CreateVertexInputAttributeDescriptions()
-    {
         m_VertexInputAttributeDescriptions.resize(m_AttributeTypes.size());
-
         uint32_t currentOffset = 0;
         for (size_t i = 0; i < m_VertexInputAttributeDescriptions.size(); i++)
         {
@@ -71,6 +62,11 @@ namespace Glory
             m_VertexInputAttributeDescriptions[i].offset = currentOffset;
             GetNextOffset(m_AttributeTypes[i], currentOffset);
         }
+    }
+
+    void VulkanMesh::BindForDraw()
+    {
+        throw new std::exception("VulkanMesh::BindForDraw() not yet implemented!");
     }
 
     vk::Format VulkanMesh::GetFormat(const AttributeType& atributeType)

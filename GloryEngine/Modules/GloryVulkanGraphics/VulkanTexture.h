@@ -1,19 +1,14 @@
 #pragma once
 #include <Texture.h>
 #include <vulkan/vulkan.hpp>
-#include "VulkanImageSampler.h"
 
 namespace Glory
 {
     class VulkanTexture : public Texture
     {
     public:
-        VulkanTexture(uint32_t width, uint32_t height, const PixelFormat& format, const PixelFormat& internalFormat, const ImageType& imageType, uint32_t usageFlags, uint32_t sharingMode, ImageAspect imageAspectFlags, const SamplerSettings& samplerSettings = SamplerSettings());
+        VulkanTexture(TextureCreateInfo&& textureInfo);
         virtual ~VulkanTexture();
-
-        virtual void Create(ImageData* pImage) override;
-        virtual void Create() override;
-        void CopyFromBuffer(Buffer* pBuffer, int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth) override;
 
         const vk::Image GetTextureImage() const;
         const vk::DeviceMemory GetTextureImageMemory() const;
@@ -21,9 +16,14 @@ namespace Glory
         const vk::Sampler GetTextureSampler();
 
     private:
+        GLORY_API virtual void Create(TextureData* pTextureData) override;
+        GLORY_API virtual void Create(CubemapData* pCubemapData) override;
+        GLORY_API virtual void Create(const void* pixels = nullptr) override;
+        GLORY_API virtual void CopyFromBuffer(Buffer* pBuffer, int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth) override;
+
+    private:
         vk::Image m_TextureImage;
         vk::DeviceMemory m_TextureImageMemory;
         vk::ImageView m_TextureImageView;
-        VulkanImageSampler* m_pSampler;
     };
 }

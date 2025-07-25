@@ -2,21 +2,20 @@
 #include "VulkanGraphicsModule.h"
 #include "VulkanDeviceManager.h"
 #include "Device.h"
-#include "VulkanFrameStates.h"
-#include <Game.h>
+
 #include <Engine.h>
 
 namespace Glory
 {
-    VulkanRenderPass::VulkanRenderPass(const RenderPassCreateInfo& createInfo) : m_CreateInfo(createInfo)
+    VulkanRenderPass::VulkanRenderPass(VulkanGraphicsModule* pGraphics, const RenderPassCreateInfo& createInfo):
+        m_pGraphics(pGraphics), m_CreateInfo(createInfo)
     {
     }
 
     VulkanRenderPass::~VulkanRenderPass()
     {
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        VulkanDeviceManager& deviceManager = m_pGraphics->GetDeviceManager();
+        Device* pDevice = deviceManager.GetSelectedDevice();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
         for (size_t i = 0; i < m_SwapChainFramebuffers.size(); i++)
@@ -35,14 +34,13 @@ namespace Glory
 
     vk::Framebuffer VulkanRenderPass::GetCurrentFrameBuffer()
     {
-        return m_SwapChainFramebuffers[VulkanFrameStates::GetCurrentImageIndex()];
+        return m_SwapChainFramebuffers[m_pGraphics->CurrentImageIndex()];
     }
 
     void VulkanRenderPass::Initialize()
     {
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        VulkanDeviceManager& deviceManager = m_pGraphics->GetDeviceManager();
+        Device* pDevice = deviceManager.GetSelectedDevice();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
         // Create render pass
@@ -109,9 +107,8 @@ namespace Glory
 
     void VulkanRenderPass::CreateSwapChainFrameBuffers()
     {
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        VulkanDeviceManager& deviceManager = m_pGraphics->GetDeviceManager();
+        Device* pDevice = deviceManager.GetSelectedDevice();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
         auto swapchainExtent = m_CreateInfo.Extent;

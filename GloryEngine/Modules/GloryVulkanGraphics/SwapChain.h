@@ -11,10 +11,10 @@ namespace Glory
 	class SwapChain
 	{
 	public:
-		SwapChain(Window* pWindow, Device* pDevice);
+		SwapChain();
 		virtual ~SwapChain();
 
-		void Initialize(VulkanGraphicsModule* pGraphicsModule);
+		void Initialize(VulkanGraphicsModule* pGraphicsModule, Window* pWindow, Device* pDevice);
 
 		const vk::Format& GetFormat() const;
 		const vk::Extent2D& GetExtent() const;

@@ -1,27 +1,27 @@
-#include "VulkanGraphicsPipeline.h"
+#include "VulkanPipeline.h"
 #include "VulkanDeviceManager.h"
 #include "Device.h"
-#include <Game.h>
+
 #include <Engine.h>
 
 namespace Glory
 {
-	VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanRenderPass* pRenderPass, const std::vector<VulkanShader*>& pShaders, VulkanMesh* pMesh, const vk::Extent2D& swapChaindExtent)
-        : m_pShaders(pShaders), m_pMesh(pMesh), m_Extent(swapChaindExtent), m_pRenderPass(pRenderPass)
+	VulkanPipeline::VulkanPipeline(PipelineData* pPipeline, VulkanRenderPass* pRenderPass, VulkanMesh* pMesh, const vk::Extent2D& swapChaindExtent)
+        : Pipeline(pPipeline), m_pMesh(pMesh), m_Extent(swapChaindExtent), m_pRenderPass(pRenderPass)
 	{
 	}
 
-	VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
+	VulkanPipeline::~VulkanPipeline()
 	{
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        VulkanGraphicsModule* pGraphics = m_pOwner->GetEngine()->GetMainModule<VulkanGraphicsModule>();
+        VulkanDeviceManager& deviceManager = pGraphics->GetDeviceManager();
+        Device* pDevice = deviceManager.GetSelectedDevice();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
         deviceData.LogicalDevice.destroyPipeline(m_GraphicsPipeline);
         deviceData.LogicalDevice.destroyPipelineLayout(m_PipelineLayout);
 
-        for (size_t i = 0; i < m_DescriptorSetLayouts.size(); i++)
+        for (size_t i = 0; i < m_DescriptorSetLayouts.size(); ++i)
         {
             deviceData.LogicalDevice.destroyDescriptorSetLayout(m_DescriptorSetLayouts[i]);
         }
@@ -29,27 +29,27 @@ namespace Glory
         m_DescriptorSetLayouts.clear();
 	}
 
-    void VulkanGraphicsPipeline::AddDescriptorSetLayoutInfo(const vk::DescriptorSetLayoutCreateInfo& layoutInfo)
+    void VulkanPipeline::AddDescriptorSetLayoutInfo(const vk::DescriptorSetLayoutCreateInfo& layoutInfo)
     {
         m_DescriptorSetLayoutInfos.push_back(layoutInfo);
     }
 
-    vk::Pipeline VulkanGraphicsPipeline::GetPipeline()
+    vk::Pipeline VulkanPipeline::GetPipeline()
     {
         return m_GraphicsPipeline;
     }
 
-	void VulkanGraphicsPipeline::Initialize()
+	void VulkanPipeline::Initialize()
 	{
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        VulkanGraphicsModule* pGraphics = m_pOwner->GetEngine()->GetMainModule<VulkanGraphicsModule>();
+        VulkanDeviceManager& deviceManager = pGraphics->GetDeviceManager();
+        Device* pDevice = deviceManager.GetSelectedDevice();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
         std::vector<vk::PipelineShaderStageCreateInfo> shaderStages(m_pShaders.size());
         for (size_t i = 0; i < shaderStages.size(); i++)
         {
-            shaderStages[i] = m_pShaders[i]->m_PipelineShaderStageInfo;
+            shaderStages[i] = static_cast<VulkanShader*>(m_pShaders[i])->m_PipelineShaderStageInfo;
         }
 
         // Create descriptor set layout

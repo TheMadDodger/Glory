@@ -10,7 +10,7 @@ namespace Glory
 	{
 	}
 
-	const std::type_info& GraphicsModule::GetModuleType()
+	const std::type_info& GraphicsModule::GetBaseModuleType()
 	{
 		return typeid(GraphicsModule);
 	}
