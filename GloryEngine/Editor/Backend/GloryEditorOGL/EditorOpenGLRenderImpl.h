@@ -2,6 +2,7 @@
 #include "EditorRenderImpl.h"
 #include "EditorPlatform.h"
 #include "imgui_impl_opengl3.h"
+
 #include <GloryOGL.h>
 #include <Glory.h>
 #include <EditorCreateInfo.h>

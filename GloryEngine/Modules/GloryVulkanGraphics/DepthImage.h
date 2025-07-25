@@ -1,4 +1,6 @@
 #pragma once
+#include <Glory.h>
+
 #include <vulkan/vulkan.hpp>
 
 namespace Glory
@@ -11,8 +13,8 @@ namespace Glory
 		DepthImage();
 		virtual ~DepthImage();
 
-		const vk::Format& GetFormat() const;
-		const vk::ImageView& GetImageView() const;
+		GLORY_API const vk::Format& GetFormat() const;
+		GLORY_API const vk::ImageView& GetImageView() const;
 
 	private:
 		void Initialize(VulkanGraphicsModule* pGraphics, vk::Extent2D extent);

@@ -1,9 +1,9 @@
 #pragma once
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+
 #include "VulkanDeviceManager.h"
 #include "QueueFamilyIndices.h"
-#include <vulkan/vulkan.hpp>
 #include "VulkanBuffer.h"
 #include "VulkanMesh.h"
 #include "VulkanTexture.h"
@@ -15,8 +15,10 @@
 
 #include <GraphicsModule.h>
 #include <WindowModule.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <vulkan/vulkan.hpp>
 
 namespace Glory
 {
@@ -44,32 +46,32 @@ namespace Glory
 		VulkanGraphicsModule();
 		virtual ~VulkanGraphicsModule();
 
-		VkSurfaceKHR GetCSurface();
-		vk::SurfaceKHR GetSurface();
+		GLORY_API VkSurfaceKHR GetCSurface();
+		GLORY_API vk::SurfaceKHR GetSurface();
 
-		VkInstance GetCInstance();
-		vk::Instance GetInstance();
+		GLORY_API VkInstance GetCInstance();
+		GLORY_API vk::Instance GetInstance();
 
-		VulkanDeviceManager& GetDeviceManager();
-		SwapChain& GetSwapChain();
-		VulkanCommandBuffers& GetVulkanCommandBuffers();
+		GLORY_API VulkanDeviceManager& GetDeviceManager();
+		GLORY_API SwapChain& GetSwapChain();
+		GLORY_API VulkanCommandBuffers& GetVulkanCommandBuffers();
 
-		const std::vector<const char*>& GetExtensions() const;
-		const std::vector<const char*>& GetValidationLayers() const;
+		GLORY_API const std::vector<const char*>& GetExtensions() const;
+		GLORY_API const std::vector<const char*>& GetValidationLayers() const;
 
 		// Temporary will need to be moved
-		vk::CommandBuffer BeginSingleTimeCommands();
-		void EndSingleTimeCommands(vk::CommandBuffer commandBuffer);
-		void TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags = vk::ImageAspectFlagBits::eColor);
-		void CreateImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory);
-		vk::ImageView CreateImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags);
+		GLORY_API vk::CommandBuffer BeginSingleTimeCommands();
+		GLORY_API void EndSingleTimeCommands(vk::CommandBuffer commandBuffer);
+		GLORY_API void TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags = vk::ImageAspectFlagBits::eColor);
+		GLORY_API void CreateImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory);
+		GLORY_API vk::ImageView CreateImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags);
 
 		/** @brief VulkanGraphicsModule type */
 		const std::type_info& GetModuleType() override;
 
-		vk::Sampler& GetSampler(const SamplerSettings& settings);
+		GLORY_API vk::Sampler& GetSampler(const SamplerSettings& settings);
 
-		uint32_t CurrentImageIndex() const;
+		GLORY_API uint32_t CurrentImageIndex() const;
 
 		GLORY_MODULE_VERSION_H(0, 1, 0);
 
