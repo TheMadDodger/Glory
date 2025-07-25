@@ -25,7 +25,6 @@ namespace Glory
 
     Window* WindowModule::CreateNewWindow(WindowCreateInfo& createInfo)
     {
-        createInfo.pWindowManager = this;
         Window* pWindow = CreateWindow_Internal(createInfo);
         pWindow->Open();
         m_pWindows.push_back(pWindow);

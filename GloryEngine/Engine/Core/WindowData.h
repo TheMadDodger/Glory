@@ -5,14 +5,20 @@ namespace Glory
 {
 	class WindowModule;
 
+	/** @brief Window info */
 	struct WindowCreateInfo
 	{
-		WindowModule* pWindowManager;
+		/** @brief Window name displayed in title bar */
 		std::string WindowName;
+		/** @brief Window width */
 		uint32_t Width;
+		/** @brief Window height */
 		uint32_t Height;
+		/** @brief Window flags */
 		uint32_t WindowFlags;
+		/** @brief Fullscreen */
 		bool Fullscreen;
+		/** @brief Maximize */
 		bool Maximize;
 	};
 

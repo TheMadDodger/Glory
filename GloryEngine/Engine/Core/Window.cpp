@@ -7,10 +7,10 @@
 
 namespace Glory
 {
-	Window::Window(const WindowCreateInfo& createInfo) :
+	Window::Window(const WindowCreateInfo& createInfo, WindowModule* pWindowManager) :
 		m_WindowName(createInfo.WindowName), m_Width(createInfo.Width),
 		m_Height(createInfo.Height), m_WindowFlags(createInfo.WindowFlags),
-		m_pWindowManager(createInfo.pWindowManager), m_ShowCursor(true),
+		m_pWindowManager(pWindowManager), m_ShowCursor(true),
 		m_ForceShowCursor(false), m_ForceUnlockCursor(false), m_GrabInput(false),
 		m_ForceUngrabInput(false), m_HasFocus(false), m_IsShown(false),
 		m_Fullscreen(createInfo.Fullscreen), m_Maximized(createInfo.Maximize)

@@ -718,7 +718,7 @@ namespace Glory
 		SDL_StopTextInput();
 	}
 
-	SDLWindow::SDLWindow(const WindowCreateInfo& createInfo) : Window(createInfo),
+	SDLWindow::SDLWindow(const WindowCreateInfo& createInfo, WindowModule* pWindowManager) : Window(createInfo, pWindowManager),
 		m_pWindow(nullptr), m_GLSDLContext(NULL), m_pWindowSurface(nullptr), m_pSplashScreen(nullptr), m_LAltDown(false), m_RAltDown(false)
 	{}
 

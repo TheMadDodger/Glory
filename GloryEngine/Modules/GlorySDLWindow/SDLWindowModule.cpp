@@ -31,7 +31,7 @@ namespace Glory
 
 	Window* SDLWindowModule::CreateWindow_Internal(const WindowCreateInfo& createInfo)
 	{
-		return new SDLWindow(createInfo);
+		return new SDLWindow(createInfo, this);
 	}
 
 	void SDLWindowModule::OpenMessageBox(const std::string& message)

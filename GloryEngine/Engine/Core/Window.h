@@ -59,7 +59,7 @@ namespace Glory
 		void RemoveInputOverrideHandler(IWindowInputOverrideHandler* handler);
 
 	protected:
-		Window(const WindowCreateInfo& createInfo);
+		Window(const WindowCreateInfo& createInfo, WindowModule* pWindowManager);
 		virtual ~Window();
 
 		virtual void Open() = 0;
