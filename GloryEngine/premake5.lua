@@ -18,7 +18,7 @@ workspace "GloryEngine"
 		"MultiProcessorCompile"
 	}
 
-vulkanDir								= "C:/VulkanSDK/1.2.182.0"
+vulkanDir								= "C:/VulkanSDK/1.4.321.1"
 monoDir									= "C:/Program Files/Mono"
 leakDetectorDir							= "C:/Program Files (x86)/Visual Leak Detector/include"
 
@@ -147,7 +147,7 @@ group "Modules"
 	include "Modules/GloryFSM"
 	include "Modules/GloryLocalize"
 	include "Modules/GloryOverlayConsole"
-	--include "GloryVulkanGraphics"
+	include "Modules/GloryVulkanGraphics"
 group ""
 
 group "Modules/Base"
@@ -171,7 +171,7 @@ group ""
 group "Editor/Backend"
 	include "Editor/Backend/GloryEditorSDL"
 	include "Editor/Backend/GloryEditorOGL"
-	--include "GloryEditorVulkan"
+	include "Editor/Backend/GloryEditorVulkan"
 group ""
 
 group "Editor/Extensions"

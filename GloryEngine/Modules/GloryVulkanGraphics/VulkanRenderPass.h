@@ -1,18 +1,11 @@
 #pragma once
-#include <vulkan/vulkan.hpp>
 #include "SwapChain.h"
 #include "DepthImage.h"
 
+#include <vulkan/vulkan.hpp>
+
 namespace Glory
 {
-	struct AttachmentInfo
-	{
-		AttachmentInfo();
-
-		bool Present;
-
-	};
-
 	struct RenderPassCreateInfo
 	{
 		RenderPassCreateInfo();
@@ -25,10 +18,12 @@ namespace Glory
 		size_t SwapChainImageCount;
 	};
 
+	class VulkanGraphicsModule;
+
 	class VulkanRenderPass
 	{
 	public:
-		VulkanRenderPass(const RenderPassCreateInfo& createInfo);
+		VulkanRenderPass(VulkanGraphicsModule* pGraphics, const RenderPassCreateInfo& createInfo);
 		virtual ~VulkanRenderPass();
 
 		vk::RenderPass GetRenderPass();
@@ -40,7 +35,8 @@ namespace Glory
 
 	private:
 		friend class VulkanGraphicsModule;
-		friend class VulkanGraphicsPipeline;
+		friend class VulkanPipeline;
+		VulkanGraphicsModule* m_pGraphics;
 		vk::RenderPass m_RenderPass;
 		RenderPassCreateInfo m_CreateInfo;
 		std::vector<vk::Framebuffer> m_SwapChainFramebuffers;

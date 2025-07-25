@@ -1,28 +1,29 @@
 #include "VulkanGraphicsModule.h"
-#include <Game.h>
-#include <Engine.h>
-#include <iostream>
 #include "VulkanExceptions.h"
 #include "Device.h"
 #include "SwapChain.h"
-#include <fstream>
 #include "VulkanBuffer.h"
-#include <VertexHelpers.h>
-#include <chrono>
-#include <ImageLoaderModule.h>
-#include <ModelLoaderModule.h>
-#include <FileLoaderModule.h>
 #include "VulkanShader.h"
-#include <ShaderLoaderModule.h>
 #include "RenderPassCommandHandlers.h"
-#include "VulkanFrameStates.h"
 #include "PipelineCommandHandlers.h"
 #include "VulkanResourceManager.h"
+#include "VulkanStructsConverter.h"
+
+#include <fstream>
+#include <chrono>
+#include <iostream>
+
+#include <Engine.h>
+#include <VertexHelpers.h>
 
 namespace Glory
 {
+    GLORY_MODULE_VERSION_CPP(VulkanGraphicsModule);
+
+    const size_t MAX_FRAMES_IN_FLIGHT = 2;
+
     VulkanGraphicsModule::VulkanGraphicsModule() : m_Extensions(std::vector<const char*>()), m_Layers(std::vector<const char*>()), m_AvailableExtensions(std::vector<VkExtensionProperties>()), m_Instance(nullptr),
-        m_cInstance(nullptr), m_Surface(nullptr), m_cSurface(VK_NULL_HANDLE), m_pMainWindow(nullptr), m_pDeviceManager(nullptr), m_pSwapChain(nullptr), m_pRenderPass(nullptr)
+        m_cInstance(nullptr), m_Surface(nullptr), m_cSurface(VK_NULL_HANDLE), m_pMainWindow(nullptr), m_CommandBuffers(this)
     {
     }
 
@@ -50,29 +51,19 @@ namespace Glory
         return m_Instance;
     }
 
-    VulkanDeviceManager* VulkanGraphicsModule::GetDeviceManager()
+    VulkanDeviceManager& VulkanGraphicsModule::GetDeviceManager()
     {
-        return m_pDeviceManager;
+        return m_DeviceManager;
     }
 
-    SwapChain* VulkanGraphicsModule::GetSwapChain()
+    SwapChain& VulkanGraphicsModule::GetSwapChain()
     {
-        return m_pSwapChain;
+        return m_SwapChain;
     }
 
-    VulkanCommandBuffers* VulkanGraphicsModule::GetVulkanCommandBuffers()
+    VulkanCommandBuffers& VulkanGraphicsModule::GetVulkanCommandBuffers()
     {
-        return m_pCommandBuffers;
-    }
-
-    VulkanRenderPass* VulkanGraphicsModule::GetVulkanRenderPass()
-    {
-        return m_pMainRenderPass;
-    }
-
-    VulkanGraphicsPipeline* VulkanGraphicsModule::GetVulkanGraphicsPipeline()
-    {
-        return m_pGraphicsPipeline;
+        return m_CommandBuffers;
     }
 
     const std::vector<const char*>& VulkanGraphicsModule::GetExtensions() const
@@ -93,7 +84,7 @@ namespace Glory
         //compiler.Compile(pShaderData->Data(), pShaderData->Size());
         //
         //// Get the required extensions from the window
-        m_pMainWindow = Game::GetGame().GetEngine()->GetWindowModule()->GetMainWindow();
+        m_pMainWindow = m_pEngine->GetMainModule<WindowModule>()->GetMainWindow();
         m_pMainWindow->GetVulkanRequiredExtensions(m_Extensions);
 
         // Use validation layers if this is a debug build
@@ -103,28 +94,64 @@ namespace Glory
 
         CreateVulkanInstance();
         GetAvailableExtensions();
-        CreateSurface();
-        LoadPhysicalDevices();
-        CreateLogicalDevice();
-        CreateSwapChain();
-        CreateDepthResources();
-        CreateMainRenderPass();
-        CreateTexture();
-        CreateMesh();
-        CreatePipeline();
 
-        m_pCommandBuffers = new VulkanCommandBuffers(this);
-        m_pCommandBuffers->Initialize();
+        /* Create surface */
+        m_pMainWindow->GetVulkanSurface(m_cInstance, &m_cSurface);
+        m_Surface = vk::SurfaceKHR(m_cSurface);
+
+        /* Load device */
+        LoadPhysicalDevices();
+        m_DeviceManager.GetSelectedDevice()->CreateLogicalDevice(this);
+
+        /* Create swapchain and depth image */
+        m_SwapChain.Initialize(this, m_pMainWindow, m_DeviceManager.GetSelectedDevice());
+        m_DepthImage.Initialize(this, m_SwapChain.GetExtent());
+
+        //CreateDepthResources();
+        //CreateMainRenderPass();
+        //CreateTexture();
+        //CreateMesh();
+        //CreatePipeline();
+
+        m_CommandBuffers.Initialize();
 
         //CreateDeferredRenderPassTest();
         //CreateDeferredTestPipeline();
         //CreateCommandPools();
         //CreateSyncObjects();
+
+        LogicalDeviceData deviceData = m_DeviceManager.GetSelectedDevice()->GetLogicalDeviceData();
+
+        /* Create sync objects */
+        m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+        m_ImagesInFlight.resize(m_SwapChain.GetImageCount(), VK_NULL_HANDLE);
+
+        vk::SemaphoreCreateInfo semaphoreCreateInfo = vk::SemaphoreCreateInfo();
+        vk::FenceCreateInfo fenceCreateInfo = vk::FenceCreateInfo()
+            .setFlags(vk::FenceCreateFlagBits::eSignaled);
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        {
+            if (deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]) != vk::Result::eSuccess ||
+                deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]) != vk::Result::eSuccess ||
+                deviceData.LogicalDevice.createFence(&fenceCreateInfo, nullptr, &m_InFlightFences[i]) != vk::Result::eSuccess)
+            {
+                throw std::runtime_error("failed to create sync objects for a frame!");
+            }
+        }
     }
 
     void VulkanGraphicsModule::OnCleanup()
     {
-        m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData().LogicalDevice.waitIdle();
+        for (auto& iter : m_Samplers)
+        {
+            Device* pDevice = m_DeviceManager.GetSelectedDevice();
+            LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
+            deviceData.LogicalDevice.destroySampler(iter.second, nullptr);
+        }
+
+        m_DeviceManager.GetSelectedDevice()->GetLogicalDeviceData().LogicalDevice.waitIdle();
         m_Extensions.clear();
 
 #if defined(_DEBUG)
@@ -136,8 +163,6 @@ namespace Glory
         }
 #endif
 
-        auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
-
         //for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         //{
         //    deviceData.LogicalDevice.destroySemaphore(m_ImageAvailableSemaphores[i]);
@@ -148,20 +173,11 @@ namespace Glory
         //m_RenderFinishedSemaphores.clear();
         //m_InFlightFences.clear();
 
-        delete m_pRenderPipeline;
-        m_pRenderPipeline = nullptr;
+        //delete m_pRenderPipeline;
+        //m_pRenderPipeline = nullptr;
 
-        delete m_pDepthImage;
-        m_pDepthImage = nullptr;
-
-        delete m_pRenderPass;
-        m_pRenderPass = nullptr;
-
-        delete m_pSwapChain;
-        m_pSwapChain = nullptr;
-
-        delete m_pCommandBuffers;
-        m_pCommandBuffers = nullptr;
+        //delete m_pRenderPass;
+        //m_pRenderPass = nullptr;
     }
 
 //    void VulkanGraphicsModule::Initialize()
@@ -398,15 +414,9 @@ namespace Glory
     //    //m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     //}
 
-    FrameStates* VulkanGraphicsModule::CreateFrameStates()
-    {
-        return new VulkanFrameStates(this);
-    }
-
     GPUResourceManager* VulkanGraphicsModule::CreateGPUResourceManager()
     {
-        return nullptr;
-        //return new VulkanResourceManager();
+        return new VulkanResourceManager(m_pEngine);
     }
 
     //void VulkanGraphicsModule::Draw()
@@ -502,9 +512,9 @@ namespace Glory
         vk::ApplicationInfo appInfo = vk::ApplicationInfo()
             .setPApplicationName("Vulkan C++ Windowed Program Template")
             .setApplicationVersion(1)
-            .setPEngineName("LunarG SDK")
+            .setPEngineName("Glory Engine")
             .setEngineVersion(1)
-            .setApiVersion(VK_API_VERSION_1_0);
+            .setApiVersion(VK_API_VERSION_1_2);
 
         // Create debug messenger
 #if defined(_DEBUG)
@@ -565,195 +575,176 @@ namespace Glory
         }
     }
 
-    void VulkanGraphicsModule::CreateSurface()
-    {
-        m_pMainWindow->GetVulkanSurface(m_cInstance, &m_cSurface);
-        m_Surface = vk::SurfaceKHR(m_cSurface);
-    }
-
     void VulkanGraphicsModule::LoadPhysicalDevices()
     {
-        m_pDeviceManager = new VulkanDeviceManager();
-        m_pDeviceManager->Initialize(this);
+        m_DeviceManager.Initialize(this);
 
         // Check for required device extensions
         const std::vector<const char*> deviceExtensions = {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME
         };
 
-        m_pDeviceManager->CheckDeviceSupport(this, deviceExtensions);
+        m_DeviceManager.CheckDeviceSupport(this, deviceExtensions);
 
         // TEMPORARILY force the chosen device to the second index
-        m_pDeviceManager->SelectDevice(1);
+        m_DeviceManager.SelectDevice(1);
     }
 
-    void VulkanGraphicsModule::CreateLogicalDevice()
-    {
-        m_pDeviceManager->GetSelectedDevice()->CreateLogicalDevice(this);
-    }
+    //void VulkanGraphicsModule::CreateDepthResources()
+    //{
+    //    m_pDepthImage = new DepthImage(m_pSwapChain);
+    //    m_pDepthImage->Initialize();
+    //}
 
-    void VulkanGraphicsModule::CreateSwapChain()
-    {
-        m_pSwapChain = new SwapChain(m_pMainWindow, m_pDeviceManager->GetSelectedDevice());
-        m_pSwapChain->Initialize(this);
-    }
+    //void VulkanGraphicsModule::CreateMainRenderPass()
+    //{
+    //    RenderPassCreateInfo createInfo{};
+    //    createInfo.Extent = m_pSwapChain->GetExtent();
+    //    createInfo.Format = m_pSwapChain->GetFormat();
+    //    createInfo.ImageViews = m_pSwapChain->m_SwapChainImageViews;
+    //    createInfo.pDepth = m_pDepthImage;
+    //    createInfo.HasDepth = true;
 
-    void VulkanGraphicsModule::CreateDepthResources()
-    {
-        m_pDepthImage = new DepthImage(m_pSwapChain);
-        m_pDepthImage->Initialize();
-    }
+    //    m_pMainRenderPass = new VulkanRenderPass(createInfo);
+    //    m_pMainRenderPass->Initialize();
+    //}
 
-    void VulkanGraphicsModule::CreateMainRenderPass()
-    {
-        RenderPassCreateInfo createInfo{};
-        createInfo.Extent = m_pSwapChain->GetExtent();
-        createInfo.Format = m_pSwapChain->GetFormat();
-        createInfo.ImageViews = m_pSwapChain->m_SwapChainImageViews;
-        createInfo.pDepth = m_pDepthImage;
-        createInfo.HasDepth = true;
+    //void VulkanGraphicsModule::CreateDeferredRenderPassTest()
+    //{
+    //    RenderPassCreateInfo createInfo{};
+    //    createInfo.Extent = m_pSwapChain->GetExtent();
+    //    createInfo.Format = m_pSwapChain->GetFormat();
+    //    //createInfo.ImageViews = m_pSwapChain->m_SwapChainImageViews;
+    //    createInfo.pDepth = m_pDepthImage;
+    //    createInfo.HasDepth = true;
+    //    createInfo.SwapChainImageCount = m_pSwapChain->GetImageCount();
 
-        m_pMainRenderPass = new VulkanRenderPass(createInfo);
-        m_pMainRenderPass->Initialize();
-    }
+    //    m_pRenderPass = new DeferredRenderPassTest(createInfo);
+    //    m_pRenderPass->Initialize();
+    //}
 
-    void VulkanGraphicsModule::CreateDeferredRenderPassTest()
-    {
-        RenderPassCreateInfo createInfo{};
-        createInfo.Extent = m_pSwapChain->GetExtent();
-        createInfo.Format = m_pSwapChain->GetFormat();
-        //createInfo.ImageViews = m_pSwapChain->m_SwapChainImageViews;
-        createInfo.pDepth = m_pDepthImage;
-        createInfo.HasDepth = true;
-        createInfo.SwapChainImageCount = m_pSwapChain->GetImageCount();
+    //void VulkanGraphicsModule::CreateTexture()
+    //{
+    //    // Create texture
+    //    ImageLoaderModule* pImageLoader = Game::GetGame().GetEngine()->GetModule<ImageLoaderModule>();
+    //    ImageData* pImageData = (ImageData*)pImageLoader->Load("./Resources/viking_room_1.png");
 
-        m_pRenderPass = new DeferredRenderPassTest(createInfo);
-        m_pRenderPass->Initialize();
-    }
+    //    SamplerSettings samplerSettings = SamplerSettings();
+    //    samplerSettings.MagFilter = Filter::F_Linear;
+    //    samplerSettings.MinFilter = Filter::F_Linear;
+    //    samplerSettings.AddressModeU = SamplerAddressMode::SAM_Repeat;
+    //    samplerSettings.AddressModeV = SamplerAddressMode::SAM_Repeat;
+    //    samplerSettings.AddressModeW = SamplerAddressMode::SAM_Repeat;
+    //    samplerSettings.AnisotropyEnable = true;
+    //    samplerSettings.MaxAnisotropy = m_pDeviceManager->GetSelectedDevice()->GetDeviceProperties().limits.maxSamplerAnisotropy;
+    //    samplerSettings.UnnormalizedCoordinates = false;
+    //    samplerSettings.CompareEnable = false;
+    //    samplerSettings.CompareOp = CompareOp::OP_Always;
+    //    samplerSettings.MipmapMode = Filter::F_Linear;
+    //    samplerSettings.MipLODBias = 0.0f;
+    //    samplerSettings.MinLOD = 0.0f;
+    //    samplerSettings.MaxLOD = 0.0f;
 
-    void VulkanGraphicsModule::CreateTexture()
-    {
-        auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
-        // Create texture
-        ImageLoaderModule* pImageLoader = Game::GetGame().GetEngine()->GetModule<ImageLoaderModule>();
-        ImageData* pImageData = (ImageData*)pImageLoader->Load("./Resources/viking_room_1.png");
+    //    vk::ImageUsageFlags imageUsageFlags = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
+    //    m_pTexture = new VulkanTexture(pImageData->GetWidth(), pImageData->GetHeight(), PixelFormat::PF_RGBA, pImageData->GetFormat(), ImageType::IT_2D, (uint32_t)imageUsageFlags, (uint32_t)vk::SharingMode::eExclusive, ImageAspect::IA_Color, samplerSettings);
+    //    m_pTexture->Create(pImageData);
+    //}
 
-        SamplerSettings samplerSettings = SamplerSettings();
-        samplerSettings.MagFilter = Filter::F_Linear;
-        samplerSettings.MinFilter = Filter::F_Linear;
-        samplerSettings.AddressModeU = SamplerAddressMode::SAM_Repeat;
-        samplerSettings.AddressModeV = SamplerAddressMode::SAM_Repeat;
-        samplerSettings.AddressModeW = SamplerAddressMode::SAM_Repeat;
-        samplerSettings.AnisotropyEnable = true;
-        samplerSettings.MaxAnisotropy = m_pDeviceManager->GetSelectedDevice()->GetDeviceProperties().limits.maxSamplerAnisotropy;
-        samplerSettings.UnnormalizedCoordinates = false;
-        samplerSettings.CompareEnable = false;
-        samplerSettings.CompareOp = CompareOp::OP_Always;
-        samplerSettings.MipmapMode = Filter::F_Linear;
-        samplerSettings.MipLODBias = 0.0f;
-        samplerSettings.MinLOD = 0.0f;
-        samplerSettings.MaxLOD = 0.0f;
+    //void VulkanGraphicsModule::CreateMesh()
+    //{
+    //    // Load model
+    //    ModelLoaderModule* pModelLoader = Game::GetGame().GetEngine()->GetModule<ModelLoaderModule>();
+    //    ModelData* pModelData = (ModelData*)pModelLoader->Load("./Models/Cube.fbx");
+    //    MeshData* pMeshData = pModelData->GetMesh(0);
+    //    const float* verticeArray = (const float*)pMeshData->Vertices();
 
-        vk::ImageUsageFlags imageUsageFlags = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
-        m_pTexture = new VulkanTexture(pImageData->GetWidth(), pImageData->GetHeight(), PixelFormat::PF_RGBA, pImageData->GetFormat(), ImageType::IT_2D, (uint32_t)imageUsageFlags, (uint32_t)vk::SharingMode::eExclusive, ImageAspect::IA_Color, samplerSettings);
-        m_pTexture->Create(pImageData);
-    }
+    //    uint32_t bufferSize = pMeshData->VertexSize() * pMeshData->VertexCount();
+    //    vk::MemoryPropertyFlags stagingFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+    //    VulkanBuffer* pStagingBuffer = nullptr;//new VulkanBuffer(bufferSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)stagingFlags);
+    //    pStagingBuffer->CreateBuffer();
+    //    pStagingBuffer->Assign(verticeArray);
 
-    void VulkanGraphicsModule::CreateMesh()
-    {
-        // Load model
-        ModelLoaderModule* pModelLoader = Game::GetGame().GetEngine()->GetModule<ModelLoaderModule>();
-        ModelData* pModelData = (ModelData*)pModelLoader->Load("./Models/Cube.fbx");
-        MeshData* pMeshData = pModelData->GetMesh(0);
-        const float* verticeArray = (const float*)pMeshData->Vertices();
+    //    vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eDeviceLocal;
+    //    vk::BufferUsageFlags usageFlags = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer;
+    //    VulkanBuffer* pVertexBuffer = nullptr;//new VulkanBuffer(bufferSize, (uint32_t)usageFlags, (uint32_t)memoryFlags);
+    //    pVertexBuffer->CreateBuffer();
+    //    pVertexBuffer->CopyFrom(pStagingBuffer, bufferSize);
+    //    m_pVertexBuffer = pVertexBuffer;
+    //    delete pStagingBuffer;
 
-        uint32_t bufferSize = pMeshData->VertexSize() * pMeshData->VertexCount();
-        vk::MemoryPropertyFlags stagingFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
-        VulkanBuffer* pStagingBuffer = nullptr;//new VulkanBuffer(bufferSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)stagingFlags);
-        pStagingBuffer->CreateBuffer();
-        pStagingBuffer->Assign(verticeArray);
+    //    uint32_t indexBufferSize = sizeof(uint32_t) * pMeshData->IndexCount();
+    //    pStagingBuffer = nullptr;//new VulkanBuffer(indexBufferSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)stagingFlags);
+    //    pStagingBuffer->CreateBuffer();
+    //    pStagingBuffer->Assign(pMeshData->Indices());
 
-        vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eDeviceLocal;
-        vk::BufferUsageFlags usageFlags = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer;
-        VulkanBuffer* pVertexBuffer = nullptr;//new VulkanBuffer(bufferSize, (uint32_t)usageFlags, (uint32_t)memoryFlags);
-        pVertexBuffer->CreateBuffer();
-        pVertexBuffer->CopyFrom(pStagingBuffer, bufferSize);
-        m_pVertexBuffer = pVertexBuffer;
-        delete pStagingBuffer;
+    //    usageFlags = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer;
+    //    VulkanBuffer* pIndexBuffer = nullptr;//new VulkanBuffer(indexBufferSize, (uint32_t)usageFlags, (uint32_t)memoryFlags);
+    //    pIndexBuffer->CreateBuffer();
+    //    pIndexBuffer->CopyFrom(pStagingBuffer, indexBufferSize);
+    //    m_pIndexBuffer = pIndexBuffer;
+    //    delete pStagingBuffer;
 
-        uint32_t indexBufferSize = sizeof(uint32_t) * pMeshData->IndexCount();
-        pStagingBuffer = nullptr;//new VulkanBuffer(indexBufferSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)stagingFlags);
-        pStagingBuffer->CreateBuffer();
-        pStagingBuffer->Assign(pMeshData->Indices());
+    //    const std::vector<AttributeType> attributeTypes = {
+    //        AttributeType::Float3,
+    //        AttributeType::Float3,
+    //        AttributeType::Float2,
+    //    };
 
-        usageFlags = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer;
-        VulkanBuffer* pIndexBuffer = nullptr;//new VulkanBuffer(indexBufferSize, (uint32_t)usageFlags, (uint32_t)memoryFlags);
-        pIndexBuffer->CreateBuffer();
-        pIndexBuffer->CopyFrom(pStagingBuffer, indexBufferSize);
-        m_pIndexBuffer = pIndexBuffer;
-        delete pStagingBuffer;
+    //    m_pMesh = new VulkanMesh(pMeshData->VertexCount(), pMeshData->IndexCount(), InputRate::Vertex, 0, pMeshData->VertexSize(), attributeTypes);
+    //    m_pMesh->CreateBindingAndAttributeData();
+    //}
 
-        const std::vector<AttributeType> attributeTypes = {
-            AttributeType::Float3,
-            AttributeType::Float3,
-            AttributeType::Float2,
-        };
+    //void VulkanGraphicsModule::CreatePipeline()
+    //{
+    //    /// Create graphics pipeline
+    //    // Load shaders
+    //    FileLoaderModule* pFileLoader = Game::GetGame().GetEngine()->GetModule<FileLoaderModule>();
+    //    FileImportSettings importSettings{};
+    //    importSettings.Flags = std::ios::ate | std::ios::binary;
+    //    FileData* pVertFileData = (FileData*)pFileLoader->Load("./Shaders/depthbuffertest_vert.spv", importSettings);
+    //    FileData* pFragFileData = (FileData*)pFileLoader->Load("./Shaders/texturetest_frag.spv", importSettings);
 
-        m_pMesh = new VulkanMesh(pMeshData->VertexCount(), pMeshData->IndexCount(), InputRate::Vertex, 0, pMeshData->VertexSize(), attributeTypes);
-        m_pMesh->CreateBindingAndAttributeData();
-    }
+    //    // Create vulkan shaders
+    //    VulkanShader* pVertShader = new VulkanShader(pVertFileData, ShaderType::ST_Vertex, "main");
+    //    pVertShader->Initialize();
+    //    VulkanShader* pFragShader = new VulkanShader(pFragFileData, ShaderType::ST_Fragment, "main");
+    //    pFragShader->Initialize();
 
-    void VulkanGraphicsModule::CreatePipeline()
-    {
-        /// Create graphics pipeline
-        // Load shaders
-        FileLoaderModule* pFileLoader = Game::GetGame().GetEngine()->GetModule<FileLoaderModule>();
-        FileImportSettings importSettings{};
-        importSettings.Flags = std::ios::ate | std::ios::binary;
-        FileData* pVertFileData = (FileData*)pFileLoader->Load("./Shaders/depthbuffertest_vert.spv", importSettings);
-        FileData* pFragFileData = (FileData*)pFileLoader->Load("./Shaders/texturetest_frag.spv", importSettings);
+    //    std::vector<VulkanShader*> pShaders = { pVertShader, pFragShader };
+    //    m_pGraphicsPipeline = new VulkanGraphicsPipeline(m_pMainRenderPass, pShaders, m_pMesh, m_pSwapChain->GetExtent());
 
-        // Create vulkan shaders
-        VulkanShader* pVertShader = new VulkanShader(pVertFileData, ShaderType::ST_Vertex, "main");
-        pVertShader->Initialize();
-        VulkanShader* pFragShader = new VulkanShader(pFragFileData, ShaderType::ST_Fragment, "main");
-        pFragShader->Initialize();
+    //    /// Create descriptor set layout
+    //    vk::DescriptorSetLayoutBinding uboLayoutBinding = vk::DescriptorSetLayoutBinding();
+    //    uboLayoutBinding.binding = 0;
+    //    uboLayoutBinding.descriptorType = vk::DescriptorType::eUniformBuffer;
+    //    uboLayoutBinding.descriptorCount = 1;
+    //    uboLayoutBinding.stageFlags = vk::ShaderStageFlagBits::eVertex;
+    //    uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
 
-        std::vector<VulkanShader*> pShaders = { pVertShader, pFragShader };
-        m_pGraphicsPipeline = new VulkanGraphicsPipeline(m_pMainRenderPass, pShaders, m_pMesh, m_pSwapChain->GetExtent());
+    //    // For the texture sampler
+    //    vk::DescriptorSetLayoutBinding samplerLayoutBinding = vk::DescriptorSetLayoutBinding();
+    //    samplerLayoutBinding.binding = 1;
+    //    samplerLayoutBinding.descriptorCount = 1;
+    //    samplerLayoutBinding.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+    //    samplerLayoutBinding.pImmutableSamplers = nullptr;
+    //    samplerLayoutBinding.stageFlags = vk::ShaderStageFlagBits::eFragment;
 
-        /// Create descriptor set layout
-        vk::DescriptorSetLayoutBinding uboLayoutBinding = vk::DescriptorSetLayoutBinding();
-        uboLayoutBinding.binding = 0;
-        uboLayoutBinding.descriptorType = vk::DescriptorType::eUniformBuffer;
-        uboLayoutBinding.descriptorCount = 1;
-        uboLayoutBinding.stageFlags = vk::ShaderStageFlagBits::eVertex;
-        uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+    //    std::array<vk::DescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
 
-        // For the texture sampler
-        vk::DescriptorSetLayoutBinding samplerLayoutBinding = vk::DescriptorSetLayoutBinding();
-        samplerLayoutBinding.binding = 1;
-        samplerLayoutBinding.descriptorCount = 1;
-        samplerLayoutBinding.descriptorType = vk::DescriptorType::eCombinedImageSampler;
-        samplerLayoutBinding.pImmutableSamplers = nullptr;
-        samplerLayoutBinding.stageFlags = vk::ShaderStageFlagBits::eFragment;
+    //    vk::DescriptorSetLayoutCreateInfo layoutInfo = vk::DescriptorSetLayoutCreateInfo();
+    //    layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+    //    layoutInfo.pBindings = bindings.data();
 
-        std::array<vk::DescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
+    //    m_pGraphicsPipeline->AddDescriptorSetLayoutInfo(layoutInfo);
 
-        vk::DescriptorSetLayoutCreateInfo layoutInfo = vk::DescriptorSetLayoutCreateInfo();
-        layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
-        layoutInfo.pBindings = bindings.data();
+    //    m_pGraphicsPipeline->Initialize();
+    //}
 
-        m_pGraphicsPipeline->AddDescriptorSetLayoutInfo(layoutInfo);
-
-        m_pGraphicsPipeline->Initialize();
-    }
-
-    void VulkanGraphicsModule::CreateDeferredTestPipeline()
-    {
-        m_pRenderPipeline = new DeferredPipelineTest(m_pMesh, m_pRenderPass, m_pTexture, m_pSwapChain->GetExtent());
-        m_pRenderPipeline->Initialize();
-    }
+    //void VulkanGraphicsModule::CreateDeferredTestPipeline()
+    //{
+    //    m_pRenderPipeline = new DeferredPipelineTest(m_pMesh, m_pRenderPass, m_pTexture, m_pSwapChain->GetExtent());
+    //    m_pRenderPipeline->Initialize();
+    //}
 
     //void VulkanGraphicsModule::CreatePipeline()
     //{
@@ -912,8 +903,8 @@ namespace Glory
     //    delete pFragFileData;
     //}
 
-    void VulkanGraphicsModule::CreateCommandPools()
-    {
+    //void VulkanGraphicsModule::CreateCommandPools()
+    //{
         //auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
         //vk::CommandPool commandPool = m_pDeviceManager->GetSelectedDevice()->GetGraphicsCommandPool();
         //
@@ -981,7 +972,7 @@ namespace Glory
         //    m_CommandBuffers[i].endRenderPass();
         //    m_CommandBuffers[i].end();
         //}
-    }
+    //}
 
     //void VulkanGraphicsModule::CreateCommandPools()
     //{
@@ -1046,8 +1037,8 @@ namespace Glory
     //    }
     //}
 
-    void VulkanGraphicsModule::CreateSyncObjects()
-    {
+    //void VulkanGraphicsModule::CreateSyncObjects()
+    //{
         //auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
         //
         //// Create sync objects
@@ -1069,36 +1060,123 @@ namespace Glory
         //        throw std::runtime_error("failed to create sync objects for a frame!");
         //    }
         //}
-    }
+    //}
 
-    void VulkanGraphicsModule::UpdateUniformBuffer(uint32_t imageIndex)
-    {
-        static auto startTime = std::chrono::high_resolution_clock::now();
+    //void VulkanGraphicsModule::UpdateUniformBuffer(uint32_t imageIndex)
+    //{
+    //    static auto startTime = std::chrono::high_resolution_clock::now();
 
-        auto currentTime = std::chrono::high_resolution_clock::now();
-        float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+    //    auto currentTime = std::chrono::high_resolution_clock::now();
+    //    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-        UniformBufferObject ubo{};
-        ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        auto extent = m_pSwapChain->GetExtent();
-        ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
-        ubo.proj[1][1] *= -1; // In OpenGL the Y coordinate of the clip coordinates is inverted, so we must flip it for use in Vulkan
-        m_pRenderPipeline->m_pUniformBufers[imageIndex]->Assign(&ubo);
-    }
+    //    UniformBufferObject ubo{};
+    //    ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    //    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    //    auto extent = m_pSwapChain->GetExtent();
+    //    ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.0f);
+    //    ubo.proj[1][1] *= -1; // In OpenGL the Y coordinate of the clip coordinates is inverted, so we must flip it for use in Vulkan
+    //    m_pRenderPipeline->m_pUniformBufers[imageIndex]->Assign(&ubo);
+    //}
 
-    VKAPI_ATTR VkBool32 VKAPI_CALL VulkanGraphicsModule::DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
+    VKAPI_ATTR VkBool32 VKAPI_CALL VulkanGraphicsModule::DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+        VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
     {
         if (messageSeverity != VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT && messageSeverity != VkDebugUtilsMessageSeverityFlagBitsEXT::VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) return VK_FALSE;
         std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
         return VK_FALSE;
     }
 
+    vk::Sampler& VulkanGraphicsModule::CreateNewSampler(const SamplerSettings& settings)
+    {
+        // Create texture sampler
+        auto samplerCreateInfo = VKConverter::GetVulkanSamplerInfo(settings);
+
+        Device* pDevice = m_DeviceManager.GetSelectedDevice();
+        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
+
+        vk::Sampler newSampler;
+        if (deviceData.LogicalDevice.createSampler(&samplerCreateInfo, nullptr, &newSampler) != vk::Result::eSuccess)
+            throw std::runtime_error("Failed to create texture sampler!");
+        return m_Samplers.emplace(settings, newSampler).first->second;
+    }
+
+    void VulkanGraphicsModule::OnBeginFrame()
+    {
+        GraphicsModule::OnBeginFrame();
+
+        LogicalDeviceData deviceData = m_DeviceManager.GetSelectedDevice()->GetLogicalDeviceData();
+
+        deviceData.LogicalDevice.waitForFences(1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
+        deviceData.LogicalDevice.acquireNextImageKHR(m_SwapChain.GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &m_CurrentImageIndex);
+
+        // Check if a previous frame is using this image (i.e. there is its fence to wait on)
+        if (m_ImagesInFlight[m_CurrentImageIndex] != VK_NULL_HANDLE) {
+            deviceData.LogicalDevice.waitForFences(1, &m_ImagesInFlight[m_CurrentImageIndex], VK_TRUE, UINT64_MAX);
+        }
+        // Mark the image as now being in use by this frame
+        m_ImagesInFlight[m_CurrentImageIndex] = m_InFlightFences[m_CurrentFrame];
+
+        //UpdateUniformBuffer(imageIndex);
+
+        // Begin the current frame command buffer
+        vk::CommandBufferBeginInfo commandBufferBeginInfo = vk::CommandBufferBeginInfo()
+            .setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit)
+            .setPInheritanceInfo(nullptr);
+
+        vk::CommandBuffer commandBuffer = m_CommandBuffers.GetCurrentFrameCommandBuffer();
+        if (commandBuffer.begin(&commandBufferBeginInfo) != vk::Result::eSuccess)
+            throw std::runtime_error("failed to begin recording command buffer!");
+    }
+
+    void VulkanGraphicsModule::OnEndFrame()
+    {
+        GraphicsModule::OnEndFrame();
+
+        LogicalDeviceData deviceData = m_DeviceManager.GetSelectedDevice()->GetLogicalDeviceData();
+
+        // End the current frame command buffer
+        vk::CommandBuffer commandBuffer = m_CommandBuffers.GetCurrentFrameCommandBuffer();
+        commandBuffer.end();
+
+        // Submit command buffer
+        vk::Semaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
+        vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+
+        vk::Semaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
+        vk::SubmitInfo submitInfo = vk::SubmitInfo()
+            .setWaitSemaphoreCount(1)
+            .setPWaitSemaphores(waitSemaphores)
+            .setPWaitDstStageMask(waitStages)
+            .setCommandBufferCount(1)
+            .setPCommandBuffers(&commandBuffer)
+            .setSignalSemaphoreCount(1)
+            .setPSignalSemaphores(signalSemaphores);
+
+        deviceData.LogicalDevice.resetFences(1, &m_InFlightFences[m_CurrentFrame]);
+
+        if (deviceData.GraphicsQueue.submit(1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != vk::Result::eSuccess)
+            throw std::runtime_error("failed to submit draw command buffer!");
+
+        vk::SwapchainKHR swapChains[] = { m_SwapChain.GetSwapChain() };
+        vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR()
+            .setWaitSemaphoreCount(1)
+            .setPWaitSemaphores(signalSemaphores)
+            .setSwapchainCount(1)
+            .setPSwapchains(swapChains)
+            .setPImageIndices(&m_CurrentImageIndex)
+            .setPResults(nullptr);
+
+        if (deviceData.PresentQueue.presentKHR(&presentInfo) != vk::Result::eSuccess)
+            throw std::runtime_error("failed to present!");
+
+        deviceData.PresentQueue.waitIdle();
+
+        m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+    }
+
     vk::CommandBuffer VulkanGraphicsModule::BeginSingleTimeCommands()
     {
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        Device* pDevice = m_DeviceManager.GetSelectedDevice();
         vk::CommandPool commandPool = pDevice->GetGraphicsCommandPool();
 
         vk::CommandBufferAllocateInfo allocInfo = vk::CommandBufferAllocateInfo();
@@ -1120,9 +1198,7 @@ namespace Glory
 
     void VulkanGraphicsModule::EndSingleTimeCommands(vk::CommandBuffer commandBuffer)
     {
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        Device* pDevice = m_DeviceManager.GetSelectedDevice();
         vk::CommandPool commandPool = pDevice->GetGraphicsCommandPool();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
@@ -1213,9 +1289,7 @@ namespace Glory
         imageInfo.samples = vk::SampleCountFlagBits::e1;
         imageInfo.sharingMode = vk::SharingMode::eExclusive;
 
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        Device* pDevice = m_DeviceManager.GetSelectedDevice();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
         if (deviceData.LogicalDevice.createImage(&imageInfo, nullptr, &image) != vk::Result::eSuccess) {
@@ -1238,9 +1312,7 @@ namespace Glory
 
     vk::ImageView VulkanGraphicsModule::CreateImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags)
     {
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        Device* pDevice = m_DeviceManager.GetSelectedDevice();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
         vk::ImageViewCreateInfo viewInfo{};
@@ -1261,27 +1333,135 @@ namespace Glory
         return imageView;
     }
 
-    void VulkanGraphicsModule::Clear(glm::vec4 color)
+    const std::type_info& VulkanGraphicsModule::GetModuleType()
     {
+        return typeid(VulkanGraphicsModule);
+    }
 
+    vk::Sampler& VulkanGraphicsModule::GetSampler(const SamplerSettings& settings)
+    {
+        auto& iter = m_Samplers.find(settings);
+        if (iter != m_Samplers.end())
+        {
+            auto sampler = *iter;
+            return sampler.second;
+        }
+
+        return CreateNewSampler(settings);
+    }
+
+    uint32_t VulkanGraphicsModule::CurrentImageIndex() const
+    {
+        return m_CurrentImageIndex;
+    }
+
+    void VulkanGraphicsModule::Clear(glm::vec4 color, double depth)
+    {
+        throw new std::exception("VulkanGraphicsModule::Clear() not yet implemented!");
     }
 
     void VulkanGraphicsModule::Swap()
     {
-
+        throw new std::exception("VulkanGraphicsModule::Swap() not yet implemented!");
     }
 
     Material* VulkanGraphicsModule::UseMaterial(MaterialData* pMaterialData)
     {
-        return nullptr;
+        throw new std::exception("VulkanGraphicsModule::UseMaterial() not yet implemented!");
+    }
+
+    void VulkanGraphicsModule::OnDrawMesh(Mesh* pMesh, uint32_t vertexOffset, uint32_t vertexCount)
+    {
+        throw new std::exception("VulkanGraphicsModule::OnDrawMesh() not yet implemented!");
+    }
+
+    void VulkanGraphicsModule::DrawScreenQuad()
+    {
+        throw new std::exception("VulkanGraphicsModule::DrawScreenQuad() not yet implemented!");
+    }
+
+    void VulkanGraphicsModule::DrawUnitCube()
+    {
+        throw new std::exception("VulkanGraphicsModule::DrawUnitCube() not yet implemented!");
     }
 
     void VulkanGraphicsModule::DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z)
     {
+        throw new std::exception("VulkanGraphicsModule::DispatchCompute() not yet implemented!");
     }
 
-    void VulkanGraphicsModule::OnDrawMesh(MeshData* pMeshData)
+    void VulkanGraphicsModule::EnableDepthTest(bool enable)
     {
+        throw new std::exception("VulkanGraphicsModule::EnableDepthTest() not yet implemented!");
+    }
 
+    void VulkanGraphicsModule::EnableDepthWrite(bool enable)
+    {
+        throw new std::exception("VulkanGraphicsModule::EnableDepthWrite() not yet implemented!");
+    }
+
+    void VulkanGraphicsModule::EnableStencilTest(bool enable)
+    {
+        throw new std::exception("VulkanGraphicsModule::EnableStencilTest() not yet implemented!");
+    }
+
+    void VulkanGraphicsModule::SetStencilMask(unsigned int mask)
+    {
+        throw new std::exception("VulkanGraphicsModule::SetStencilMask() not yet implemented!");
+    }
+
+    void VulkanGraphicsModule::SetStencilFunc(CompareOp func, int ref, unsigned int mask)
+    {
+        throw new std::exception("VulkanGraphicsModule::SetStencilFunc() not yet implemented!");
+    }
+
+    void VulkanGraphicsModule::SetStencilOP(Func fail, Func dpfail, Func dppass)
+    {
+        throw new std::exception("VulkanGraphicsModule::SetStencilOP() not yet implemented!");
+    }
+
+    void VulkanGraphicsModule::SetColorMask(bool r, bool g, bool b, bool a)
+    {
+        throw new std::exception("VulkanGraphicsModule::SetColorMask() not yet implemented!");
+    }
+
+    void VulkanGraphicsModule::ClearStencil(int value)
+    {
+        throw new std::exception("VulkanGraphicsModule::ClearStencil() not yet implemented!");
+    }
+
+    void VulkanGraphicsModule::SetViewport(int x, int y, uint32_t width, uint32_t height)
+    {
+        throw new std::exception("VulkanGraphicsModule::SetViewport() not yet implemented!");
+    }
+
+    void VulkanGraphicsModule::Scissor(int x, int y, uint32_t width, uint32_t height)
+    {
+        throw new std::exception("VulkanGraphicsModule::Scissor() not yet implemented!");
+    }
+
+    void VulkanGraphicsModule::EndScissor()
+    {
+        throw new std::exception("VulkanGraphicsModule::EndScissor() not yet implemented!");
+    }
+
+    void VulkanGraphicsModule::Blit(RenderTexture* pTexture, glm::uvec4 src, glm::uvec4 dst, Filter filter)
+    {
+        throw new std::exception("VulkanGraphicsModule::Blit() not yet implemented!");
+    }
+
+    void VulkanGraphicsModule::Blit(RenderTexture* pSource, RenderTexture* pDest, glm::uvec4 src, glm::uvec4 dst, Filter filter)
+    {
+        throw new std::exception("VulkanGraphicsModule::Blit() not yet implemented!");
+    }
+
+    void VulkanGraphicsModule::SetCullFace(CullFace cullFace)
+    {
+        throw new std::exception("VulkanGraphicsModule::SetCullFace() not yet implemented!");
+    }
+
+    Material* VulkanGraphicsModule::UsePassthroughMaterial()
+    {
+        throw new std::exception("VulkanGraphicsModule::UsePassthroughMaterial() not yet implemented!");
     }
 }

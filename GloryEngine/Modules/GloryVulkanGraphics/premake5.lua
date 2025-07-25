@@ -17,23 +17,27 @@ project "GloryVulkanGraphics"
 
 	vpaths
 	{
-		["CommandHandlers"] = { "PipelineCommandHandlers.h", "PipelineCommandHandlers.cpp", "RenderPassCommandHandlers.h", "RenderPassCommandHandlers.cpp" },
-		["Device"] = { "Device.h", "Device.cpp", "QueueFamilyIndices.h", "VulkanDeviceManager.h", "VulkanDeviceManager.cpp" },
-		["Graphics"] = { "DeferredPipelineTest.h", "DeferredPipelineTest.cpp", "DeferredRenderPassTest.h", "DeferredRenderPassTest.cpp", "DepthImage.h", "DepthImage.cpp", "SwapChain.h", "SwapChain.cpp", "VulkanGraphicsPipeline.h", "VulkanGraphicsPipeline.cpp", "VulkanImageSampler.h", "VulkanImageSampler.cpp", "VulkanRenderPass.h", "VulkanRenderPass.cpp" },
-		["Module"] = { "GloryVulkan.h", "VulkanExceptions.h", "VulkanGraphicsModule.h", "VulkanGraphicsModule.cpp", "VulkanStructsConverter.h", "VulkanStructsConverter.cpp" },
-		["Resources"] = { "VulkanBuffer.h", "VulkanBuffer.cpp", "VulkanMesh.h", "VulkanMesh.cpp", "VulkanResourceManager.h", "VulkanResourceManager.cpp", "VulkanShader.h", "VulkanShader.cpp", "VulkanTexture.h", "VulkanTexture.cpp" }
+		["CommandHandlers"] = { "PipelineCommandHandlers.*", "RenderPassCommandHandlers.*" },
+		["Device"] = { "Device.*", "QueueFamilyIndices.h", "VulkanDeviceManager.*" },
+		["Graphics"] = { "DepthImage.*", "SwapChain.*", "VulkanGraphicsPipeline.*", "VulkanRenderPass.*" },
+		["Module"] = { "GloryVulkan.*", "VulkanExceptions.h", "VulkanGraphicsModule.*", "VulkanStructsConverter.*" },
+		["Resources"] = { "VulkanBuffer.*", "VulkanMesh.*", "VulkanResourceManager.*", "VulkanShader.*", "VulkanTexture.*" }
 	}
 
 	includedirs
 	{
 		"%{vulkanDir}/include",
 		"%{vulkanDir}/third-party/include",
+		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
 		"%{GloryIncludeDir.core}",
 
 		"%{IncludeDir.Reflect}",
+		"%{IncludeDir.Version}",
+		"%{IncludeDir.Utils}",
+		"%{IncludeDir.ECS}",
 	}
 
 	libdirs
@@ -55,7 +59,13 @@ project "GloryVulkanGraphics"
 		"shaderc_shared",
 		"yaml-cpp",
 
-		"GloryReflectStatic",
+		"GloryReflect",
+		"GloryUtilsVersion",
+		"GloryUtils",
+		"GloryECS",
+
+		"GloryJobs",
+		"GloryThreads",
 	}
 
 	defines
@@ -66,13 +76,11 @@ project "GloryVulkanGraphics"
 	postbuildcommands
 	{
 		("{COPY} ./Module.yaml %{moduleOutDir}"),
-		("{COPY} ./Assets %{moduleOutDir}/Assets"),
-		("{COPY} ./Resources %{moduleOutDir}/Resources"),
 	}
 
 	filter "system:windows"
 		systemversion "10.0.19041.0"
-		toolset "v142"
+		toolset "v143"
 
 		defines
 		{

@@ -1,26 +1,25 @@
 #pragma once
+#include <Shader.h>
 #include <FileData.h>
 #include <GraphicsEnums.h>
+
 #include <vulkan/vulkan.hpp>
 
 namespace Glory
 {
-	class VulkanShader
+	class VulkanShader : public Shader
 	{
 	public:
 		VulkanShader(FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function);
 		virtual ~VulkanShader();
 
 	private:
-		void Initialize();
+		virtual void Initialize() override;
 
 	private:
 		friend class VulkanGraphicsModule;
-		friend class VulkanGraphicsPipeline;
+		friend class VulkanPipeline;
 		friend class DeferredPipelineTest;
-		FileData* m_pShaderFileData;
-		const ShaderType m_ShaderType;
-		const std::string m_Function;
 
 		vk::ShaderModule m_ShaderModule;
 		vk::PipelineShaderStageCreateInfo m_PipelineShaderStageInfo;

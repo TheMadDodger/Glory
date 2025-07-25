@@ -13,6 +13,9 @@ namespace Glory
 		virtual ~OpenGLGraphicsModule();
 		static void LogGLError(const GLenum& err, bool bIncludeTimeStamp = true);
 
+		/** @brief OpenGLGraphicsModule type */
+		const std::type_info& GetModuleType() override;
+
 		GLORY_MODULE_VERSION_H(0,2,0);
 
 	public: // Commands

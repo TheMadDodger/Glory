@@ -234,6 +234,11 @@ namespace Glory
 		}
 	}
 
+	const std::type_info& OpenGLGraphicsModule::GetModuleType()
+	{
+		return typeid(OpenGLGraphicsModule);
+	}
+
 	void OpenGLGraphicsModule::Clear(glm::vec4 color, double depth)
 	{
 		glClearColor(color.r, color.g, color.b, color.a);

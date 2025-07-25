@@ -1,6 +1,5 @@
 #include "VulkanCommandBuffers.h"
 #include "Device.h"
-#include "VulkanFrameStates.h"
 #include "VulkanGraphicsModule.h"
 
 namespace Glory
@@ -11,22 +10,22 @@ namespace Glory
 
 	VulkanCommandBuffers::~VulkanCommandBuffers()
 	{
-        auto pDeviceManager = m_pModule->GetDeviceManager();
-        auto deviceData = pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
-        vk::CommandPool commandPool = pDeviceManager->GetSelectedDevice()->GetGraphicsCommandPool(m_FrameCommandPoolFlags);
+        VulkanDeviceManager& deviceManager = m_pModule->GetDeviceManager();
+        auto deviceData = deviceManager.GetSelectedDevice()->GetLogicalDeviceData();
+        vk::CommandPool commandPool = deviceManager.GetSelectedDevice()->GetGraphicsCommandPool(m_FrameCommandPoolFlags);
         deviceData.LogicalDevice.freeCommandBuffers(commandPool, m_FrameCommandBuffers.size(), m_FrameCommandBuffers.data());
 	}
 
 	void VulkanCommandBuffers::Initialize()
 	{
-        auto pDeviceManager = m_pModule->GetDeviceManager();
-        auto deviceData = pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
-        vk::CommandPool commandPool = pDeviceManager->GetSelectedDevice()->GetGraphicsCommandPool(m_FrameCommandPoolFlags);
+        VulkanDeviceManager& deviceManager = m_pModule->GetDeviceManager();
+        auto deviceData = deviceManager.GetSelectedDevice()->GetLogicalDeviceData();
+        vk::CommandPool commandPool = deviceManager.GetSelectedDevice()->GetGraphicsCommandPool(m_FrameCommandPoolFlags);
 
-        SwapChain* pSwapChain = m_pModule->GetSwapChain();
+        SwapChain& swapChain = m_pModule->GetSwapChain();
 
         // Create command buffers
-        m_FrameCommandBuffers.resize(pSwapChain->GetImageCount());
+        m_FrameCommandBuffers.resize(swapChain.GetImageCount());
 
         vk::CommandBufferAllocateInfo commandBufferAllocateInfo = vk::CommandBufferAllocateInfo()
             .setCommandPool(commandPool)
@@ -39,7 +38,7 @@ namespace Glory
 
     vk::CommandBuffer VulkanCommandBuffers::GetCurrentFrameCommandBuffer()
     {
-        size_t currentFrameIndex = VulkanFrameStates::GetCurrentImageIndex();
+        const size_t currentFrameIndex = m_pModule->CurrentImageIndex();
         return m_FrameCommandBuffers[currentFrameIndex];
     }
 }
