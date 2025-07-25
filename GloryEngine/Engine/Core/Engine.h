@@ -1,6 +1,7 @@
 #pragma once
 #include "Object.h"
 #include "ResourceType.h"
+#include "WindowData.h"
 
 #include "UUIDRemapper.h"
 
@@ -212,6 +213,9 @@ namespace Utils::Reflect
 		std::string_view Organization() const;
 		std::string_view AppName() const;
 
+		void SetMainWindowInfo(WindowCreateInfo&& info);
+		WindowCreateInfo& MainWindowInfo();
+
 	private:
 		void RegisterStandardSerializers();
 		void RegisterBasicTypes();
@@ -221,6 +225,8 @@ namespace Utils::Reflect
 
 		/* Original create info*/
 		const EngineCreateInfo m_CreateInfo;
+
+		WindowCreateInfo m_MainWindowInfo;
 
 		/* Scene Manager */
 		SceneManager* m_pSceneManager;

@@ -20,8 +20,7 @@ int main(int argc, char* argv[])
         windowCreateInfo.WindowName = "Glorious";
         windowCreateInfo.Width = 0.0f;
         windowCreateInfo.Height = 0.0f;
-        //windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
-        windowCreateInfo.WindowFlags = 2 | 32;
+        windowCreateInfo.WindowFlags = Glory::WindowFlags::W_Resizeable;
         windowCreateInfo.Fullscreen = false;
         windowCreateInfo.Maximize = true;
 
@@ -60,19 +59,13 @@ int main(int argc, char* argv[])
         engineConfPath = engineConfPath.parent_path();
         engineConfPath.append("ProjectSettings").append("Engine.yaml");
 
-        Glory::EngineLoader engineLoader(engineConfPath, windowCreateInfo);
+        Glory::EngineLoader engineLoader(engineConfPath);
         Glory::Engine engine = engineLoader.LoadEngine(&console, &debug);
         console.SetEngine(&engine);
         std::filesystem::path moduleSettingsRootPath = engineConfPath.parent_path().parent_path();
         moduleSettingsRootPath.append("Modules");
         engine.LoadModuleSettings(moduleSettingsRootPath);
-
-        //if (pEngine == nullptr)
-        //{
-        //    Glory::m_pEngine->GetDebug().LogError("The projects engine configuration could not be loaded!");
-        //    Glory::GloryContext::DestroyContext();
-        //    return -1;
-        //}
+        engine.SetMainWindowInfo(std::move(windowCreateInfo));
 
         Glory::EditorLoader editorLoader;
         Glory::EditorCreateInfo editorCreateInfo = editorLoader.LoadEditor(&engine, engineLoader);

@@ -8,6 +8,7 @@
 #include "OGLRenderTexture.h"
 
 #include <Engine.h>
+#include <Window.h>
 #include <Debug.h>
 #include <WindowModule.h>
 #include <Debug.h>
@@ -26,6 +27,11 @@ namespace Glory
 
 	OpenGLGraphicsModule::~OpenGLGraphicsModule()
 	{
+	}
+
+	void OpenGLGraphicsModule::PreInitialize()
+	{
+		m_pEngine->MainWindowInfo().WindowFlags |= W_OpenGL;
 	}
 
 	void OpenGLGraphicsModule::OnInitialize()

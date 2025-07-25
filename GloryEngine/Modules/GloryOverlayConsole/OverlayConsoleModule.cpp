@@ -5,6 +5,7 @@
 #include <Console.h>
 #include <MaterialManager.h>
 #include <Engine.h>
+#include <Window.h>
 #include <AssetManager.h>
 #include <GraphicsModule.h>
 #include <GPUResourceManager.h>

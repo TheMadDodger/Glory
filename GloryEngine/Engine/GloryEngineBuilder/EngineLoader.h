@@ -15,7 +15,7 @@ namespace Glory
 	class EngineLoader
 	{
 	public:
-		EngineLoader(const std::filesystem::path& cfgPath, const Glory::WindowCreateInfo& defaultWindow);
+		EngineLoader(const std::filesystem::path& cfgPath);
 		virtual ~EngineLoader();
 
 		Engine LoadEngine(Console* pConsole, Debug* pDebug);
@@ -43,7 +43,6 @@ namespace Glory
 		std::vector<std::string> m_LoadedModuleNames;
 
 		EngineCreateInfo m_EngineInfo;
-		const Glory::WindowCreateInfo m_DefaultWindow;
 		std::vector<Module*> m_pOptionalModules;
 	};
 }

@@ -42,8 +42,7 @@ namespace Glory
         windowCreateInfo.WindowName = m_AppName;
         windowCreateInfo.Width = 0.0f;
         windowCreateInfo.Height = 0.0f;
-        //windowCreateInfo.WindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
-        windowCreateInfo.WindowFlags = 2 | 32;
+        windowCreateInfo.WindowFlags = W_Resizeable;
         windowCreateInfo.Fullscreen = true;
         windowCreateInfo.Maximize = false;
 
@@ -53,7 +52,7 @@ namespace Glory
         m_Console->RegisterConsole(&logs);
         m_Console->RegisterConsole(&windowsConsole);
 
-        m_EngineLoader.reset(new EngineLoader("./Modules", windowCreateInfo));
+        m_EngineLoader.reset(new EngineLoader("./Modules"));
 
         EngineCreateInfo info = m_EngineLoader->LoadEngineInfoFromPath(m_Console.get(), m_Debug.get());
         m_Engine.reset(new Engine(info));
@@ -62,6 +61,7 @@ namespace Glory
         moduleSettingsRootPath = moduleSettingsRootPath.parent_path();
         moduleSettingsRootPath.append("Modules/Config");
         m_Engine->LoadModuleSettings(moduleSettingsRootPath);
+        m_Engine->SetMainWindowInfo(std::move(windowCreateInfo));
 
         m_Runtime.reset(new GloryRuntime(m_Engine.get()));
         m_Runtime->SetDataPath(dataPath);

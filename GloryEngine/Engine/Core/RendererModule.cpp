@@ -16,6 +16,7 @@
 #include "CubemapData.h"
 #include "MaterialManager.h"
 #include "GPUTextureAtlas.h"
+#include "Window.h"
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>

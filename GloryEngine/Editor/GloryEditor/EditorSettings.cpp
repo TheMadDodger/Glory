@@ -71,18 +71,18 @@ namespace Glory::Editor
     void EditorSettings::LoadSettingsFile(Engine* pEngine)
     {
         WindowModule* pWindowModule = pEngine->GetMainModule<WindowModule>();
-        WindowCreateInfo* pMainWindowSettings = pWindowModule->GetMainWindowCreateInfo();
+        WindowCreateInfo& mainWindowSettings = pEngine->MainWindowInfo();
 
         Utils::NodeValueRef window = m_YAMLFile["Window"];
         if (window.IsMap())
         {
-            pMainWindowSettings->Width = window["Width"].As<uint32_t>(1920);
-            pMainWindowSettings->Height = window["Height"].As<uint32_t>(1080);
+            mainWindowSettings.Width = window["Width"].As<uint32_t>(1920);
+            mainWindowSettings.Height = window["Height"].As<uint32_t>(1080);
 
             const glm::vec2 pos = window["Position"].As<glm::vec2>({0, 0});
 
             Window* pMainWindow = pWindowModule->GetMainWindow();
-            pMainWindow->Resize(pMainWindowSettings->Width, pMainWindowSettings->Height);
+            pMainWindow->Resize(mainWindowSettings.Width, mainWindowSettings.Height);
             pMainWindow->SetPosition((int)pos.x, (int)pos.y);
         }
 
@@ -96,10 +96,10 @@ namespace Glory::Editor
     void EditorSettings::LoadDefaultSettings(Engine* pEngine)
     {
         WindowModule* pWindowModule = pEngine->GetMainModule<WindowModule>();
-        WindowCreateInfo* pMainWindowSettings = pWindowModule->GetMainWindowCreateInfo();
-        pWindowModule->GetCurrentScreenResolution(pMainWindowSettings->Width, pMainWindowSettings->Height);
+        WindowCreateInfo& mainWindowSettings = pEngine->MainWindowInfo();
+        pWindowModule->GetCurrentScreenResolution(mainWindowSettings.Width, mainWindowSettings.Height);
         Window* pMainWindow = pWindowModule->GetMainWindow();
-        pMainWindow->Resize(pMainWindowSettings->Width, pMainWindowSettings->Height);
+        pMainWindow->Resize(mainWindowSettings.Width, mainWindowSettings.Height);
         pMainWindow->SetPosition(0, 0);
 
         EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo("Loaded default editor settings");

@@ -11,7 +11,6 @@ namespace Glory
 	SDLWindowModule::SDLWindowModule()
 	{
 	}
-	SDLWindowModule::SDLWindowModule(const WindowCreateInfo& mainWindowCreateInfo) : WindowModule(mainWindowCreateInfo) {}
 	SDLWindowModule::~SDLWindowModule() {}
 
 	void SDLWindowModule::GetCurrentScreenResolution(uint32_t& width, uint32_t& height)
@@ -32,7 +31,7 @@ namespace Glory
 
 	Window* SDLWindowModule::CreateWindow_Internal(const WindowCreateInfo& createInfo)
 	{
-		return new SDLWindow(createInfo);
+		return new SDLWindow(createInfo, this);
 	}
 
 	void SDLWindowModule::OpenMessageBox(const std::string& message)

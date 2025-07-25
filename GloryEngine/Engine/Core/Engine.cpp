@@ -15,6 +15,7 @@
 #include "WindowModule.h"
 #include "EngineProfiler.h"
 #include "LightData.h"
+#include "Input.h"
 
 #include "MaterialInstanceData.h"
 #include "PipelineData.h"
@@ -262,6 +263,13 @@ namespace Glory
 		RegisterStandardSerializers();
 		m_pSceneManager->Initialize();
 
+		for (size_t i = 0; i < m_pAllModules.size(); i++)
+		{
+			if (m_pAllModules[i]->m_IsInitialized) continue;
+			m_pAllModules[i]->m_pEngine = this;
+			m_pAllModules[i]->PreInitialize();
+		}
+
 		for (size_t i = 0; i < m_pPriorityInitializationModules.size(); i++)
 		{
 			m_pPriorityInitializationModules[i]->m_pEngine = this;
@@ -283,7 +291,6 @@ namespace Glory
 			}
 
 			if (m_pAllModules[i]->m_IsInitialized) continue;			
-			m_pAllModules[i]->m_pEngine = this;
 			m_pAllModules[i]->Initialize();
 			m_pAllModules[i]->m_IsInitialized = true;
 		}
@@ -562,6 +569,16 @@ namespace Glory
 	std::string_view Engine::AppName() const
 	{
 		return m_AppName;
+	}
+
+	void Engine::SetMainWindowInfo(WindowCreateInfo&& info)
+	{
+		m_MainWindowInfo = std::move(info);
+	}
+
+	WindowCreateInfo& Engine::MainWindowInfo()
+	{
+		return m_MainWindowInfo;
 	}
 
 	void Engine::RegisterStandardSerializers()

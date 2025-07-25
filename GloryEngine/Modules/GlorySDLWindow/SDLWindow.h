@@ -42,7 +42,7 @@ namespace Glory
 		GLORY_API void HandleWindowSizeEvents(SDL_WindowEvent& event);
 
 	private:
-		SDLWindow(const WindowCreateInfo& createInfo);
+		SDLWindow(const WindowCreateInfo& createInfo, WindowModule* pWindowManager);
 		virtual ~SDLWindow();
 
 		void HandleAllEvents(SDL_Event& event);

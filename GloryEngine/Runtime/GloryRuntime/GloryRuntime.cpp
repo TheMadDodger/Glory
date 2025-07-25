@@ -5,6 +5,7 @@
 #include "RuntimePipelineManager.h"
 
 #include <Engine.h>
+#include <Window.h>
 #include <DisplayManager.h>
 #include <RendererModule.h>
 #include <GraphicsModule.h>

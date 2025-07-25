@@ -1,24 +1,22 @@
 #pragma once
 #include "Module.h"
-#include "Window.h"
 
 #include <vector>
 
 namespace Glory
 {
+	class Window;
+	struct WindowCreateInfo;
+
     class WindowModule : public Module
     {
 	public:
 		WindowModule();
-		WindowModule(const WindowCreateInfo& mainWindowCreateInfo);
 		virtual ~WindowModule();
 
 		Window* GetMainWindow();
 
 		virtual const std::type_info& GetModuleType() override;
-
-		WindowCreateInfo* GetMainWindowCreateInfo();
-		void SetMainWindowCreateInfo(const WindowCreateInfo& mainWindowCreateInfo);
 
 		virtual void GetCurrentScreenResolution(uint32_t& width, uint32_t& height) = 0;
 
@@ -45,6 +43,5 @@ namespace Glory
 		friend class Engine;
 		std::vector<Window*> m_pWindows;
 		Window* m_pMainWindow;
-		WindowCreateInfo m_MainWindowCreateInfo;
     };
 }

@@ -1,14 +1,11 @@
 #include "WindowModule.h"
 #include "Engine.h"
 #include "DisplayManager.h"
+#include "Window.h"
 
 namespace Glory
 {
-    WindowModule::WindowModule() : m_pMainWindow(nullptr), m_pWindows(std::vector<Window*>()), m_MainWindowCreateInfo()
-    {
-    }
-
-    WindowModule::WindowModule(const WindowCreateInfo& mainWindowCreateInfo) : m_pMainWindow(nullptr), m_pWindows(std::vector<Window*>()), m_MainWindowCreateInfo(mainWindowCreateInfo)
+    WindowModule::WindowModule() : m_pMainWindow(nullptr), m_pWindows(std::vector<Window*>())
     {
     }
 
@@ -26,19 +23,8 @@ namespace Glory
         return typeid(WindowModule);
     }
 
-    WindowCreateInfo* WindowModule::GetMainWindowCreateInfo()
-    {
-        return &m_MainWindowCreateInfo;
-    }
-
-    void WindowModule::SetMainWindowCreateInfo(const WindowCreateInfo& mainWindowCreateInfo)
-    {
-        m_MainWindowCreateInfo = mainWindowCreateInfo;
-    }
-
     Window* WindowModule::CreateNewWindow(WindowCreateInfo& createInfo)
     {
-        createInfo.pWindowManager = this;
         Window* pWindow = CreateWindow_Internal(createInfo);
         pWindow->Open();
         m_pWindows.push_back(pWindow);
@@ -50,7 +36,7 @@ namespace Glory
     void WindowModule::Initialize()
     {
         OnInitialize();
-        m_pMainWindow = CreateNewWindow(m_MainWindowCreateInfo);
+        m_pMainWindow = CreateNewWindow(m_pEngine->MainWindowInfo());
 
         int width, height;
         m_pMainWindow->GetDrawableSize(&width, &height);
