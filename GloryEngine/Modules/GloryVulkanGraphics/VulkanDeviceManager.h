@@ -1,4 +1,6 @@
 #pragma once
+#include <Glory.h>
+
 #include <vector>
 
 namespace Glory
@@ -9,9 +11,9 @@ namespace Glory
 	class VulkanDeviceManager
 	{
 	public:
-		size_t GetDeviceCount();
-		Device* GetDevice(size_t index);
-		Device* GetSelectedDevice();
+		GLORY_API size_t GetDeviceCount();
+		GLORY_API Device* GetDevice(size_t index);
+		GLORY_API Device* GetSelectedDevice();
 
 	private:
 		VulkanDeviceManager();

@@ -1,7 +1,8 @@
 #pragma once
-#include <vulkan/vulkan.hpp>
 #include "QueueFamilyIndices.h"
 #include "VulkanGraphicsModule.h"
+
+#include <vulkan/vulkan.hpp>
 
 namespace Glory
 {
@@ -24,19 +25,19 @@ namespace Glory
 	class Device
 	{
 	public:
-		const SwapChainSupportDetails& GetSwapChainSupportDetails() const;
-		const QueueFamilyIndices& GetQueueFamilyIndices() const;
-		const LogicalDeviceData& GetLogicalDeviceData() const;
-		void CreateLogicalDevice(VulkanGraphicsModule* pGraphicsModule);
-		vk::PhysicalDevice GetPhysicalDevice();
-		uint32_t GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags);
+		GLORY_API const SwapChainSupportDetails& GetSwapChainSupportDetails() const;
+		GLORY_API const QueueFamilyIndices& GetQueueFamilyIndices() const;
+		GLORY_API const LogicalDeviceData& GetLogicalDeviceData() const;
+		GLORY_API void CreateLogicalDevice(VulkanGraphicsModule* pGraphicsModule);
+		GLORY_API vk::PhysicalDevice GetPhysicalDevice();
+		GLORY_API uint32_t GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags);
 
-		vk::CommandPool GetGraphicsCommandPool();
-		vk::CommandPool GetGraphicsCommandPool(vk::CommandPoolCreateFlags flags);
-		const vk::PhysicalDeviceProperties& GetDeviceProperties() const;
-		vk::Format FindSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features);
-		vk::Format FindDepthFormat();
-		bool HasStencilComponent(vk::Format format);
+		GLORY_API vk::CommandPool GetGraphicsCommandPool();
+		GLORY_API vk::CommandPool GetGraphicsCommandPool(vk::CommandPoolCreateFlags flags);
+		GLORY_API const vk::PhysicalDeviceProperties& GetDeviceProperties() const;
+		GLORY_API vk::Format FindSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features);
+		GLORY_API vk::Format FindDepthFormat();
+		GLORY_API bool HasStencilComponent(vk::Format format);
 
 	private:
 		Device(vk::PhysicalDevice physicalDevice);

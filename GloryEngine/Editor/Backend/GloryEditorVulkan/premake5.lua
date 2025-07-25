@@ -11,6 +11,8 @@ project "GloryEditorVulkan"
 	{
 		"**.h",
 		"**.cpp",
+		"%{SubmodoleDirs.ImGui}/backends/imgui_impl_vulkan.h",
+		"%{SubmodoleDirs.ImGui}/backends/imgui_impl_vulkan.cpp",
 		"premake5.lua"
 	}
 
@@ -21,36 +23,63 @@ project "GloryEditorVulkan"
 
 	includedirs
 	{
+		"%{DepsIncludeDir}",
+
+		"%{IncludeDir.glm}",
 		"%{vulkanDir}/include",
-		"%{vulkanDir}/third-party/include",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGui}",
 		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.vulkan}",
 		"%{GloryIncludeDir.editor}",
-		
+		"%{GloryIncludeDir.threads}",
+
+		"%{IncludeDir.FA}",
 		"%{IncludeDir.Reflect}",
+		"%{IncludeDir.Version}",
+		"%{IncludeDir.Utils}",
+		"%{IncludeDir.ECS}",
+
+		"%{SubmodoleDirs.ImGui}/backends/",
+
+		"%{rapidjson}",
 	}
 
 	libdirs
 	{
+		"%{DepsLibDir}",
+
 		"%{LibDirs.glory}",
 		"%{LibDirs.glory}/Modules/GloryVulkanGraphics",
 		"%{LibDirs.ImGui}",
+		"%{LibDirs.ImGuizmo}",
+		"%{LibDirs.implot}",
 		"%{LibDirs.yaml_cpp}",
-		
-		"%{LibDirs.GloryECS}",
 	}
 
 	links
 	{
-		"vulkan-1",
 		"GloryCore",
 		"yaml-cpp",
-		"ImGui",
 		"GloryEditor",
 		"GloryVulkanGraphics",
+		"shaderc",
+		"shaderc_combined",
+		"shaderc_shared",
+		"ImGui",
+		"ImGuizmo",
+		"implot",
+		"vulkan-1",
 		
-		"GloryReflectStatic",
+		"GloryECS",
+		"GloryReflect",
+		"GloryUtilsVersion",
+		"GloryUtils",
+
+		--todo: When asset management is contained in its own lib these links are no more needed
+		"GloryJobs",
+		"GloryThreads",
+		"GloryUtils",
 	}
 
 	defines
@@ -60,7 +89,7 @@ project "GloryEditorVulkan"
 
 	filter "system:windows"
 		systemversion "10.0.19041.0"
-		toolset "v142"
+		toolset "v143"
 
 		defines
 		{
@@ -71,8 +100,18 @@ project "GloryEditorVulkan"
 		architecture "x86"
 		defines "WIN32"
 
+		libdirs
+		{
+			"%{vulkanDir}/Lib32",
+		}
+
 	filter "platforms:x64"
 		architecture "x64"
+
+		libdirs
+		{
+			"%{vulkanDir}/Lib",
+		}
 
 	filter "configurations:Debug"
 		runtime "Debug"
