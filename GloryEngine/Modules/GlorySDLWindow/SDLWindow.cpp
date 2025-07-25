@@ -756,7 +756,8 @@ namespace Glory
 		SetFullscreen(m_Fullscreen, false);
 		if (m_Maximized) Maximize();
 
-		if (m_pWindow == NULL) throw new SDLErrorException(SDL_GetError());
+		if (m_pWindow == NULL)
+			m_pWindowManager->GetEngine()->GetDebug().LogFatalError(SDL_GetError());
 
 		m_pWindowSurface = SDL_GetWindowSurface(m_pWindow);
 	}

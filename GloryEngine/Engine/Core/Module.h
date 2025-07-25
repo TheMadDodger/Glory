@@ -82,6 +82,7 @@ namespace Glory
 
 	protected:
 		virtual void LoadSettings(ModuleSettings& settings) {};
+		virtual void PreInitialize() {};
 		virtual void Initialize() = 0;
 		virtual void PostInitialize() {};
 		virtual void Cleanup() = 0;

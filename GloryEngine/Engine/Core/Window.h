@@ -12,20 +12,9 @@ namespace std::filesystem
 
 namespace Glory
 {
-	class WindowModule;
-
-	struct WindowCreateInfo
-	{
-		WindowModule* pWindowManager;
-		std::string WindowName;
-		uint32_t Width;
-		uint32_t Height;
-		uint32_t WindowFlags;
-		bool Fullscreen;
-		bool Maximize;
-	};
-
 	class IWindowInputOverrideHandler;
+	class WindowModule;
+	struct WindowCreateInfo;
 
 	class Window : public Object
 	{

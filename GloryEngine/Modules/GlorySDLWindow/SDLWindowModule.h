@@ -7,7 +7,6 @@ namespace Glory
     {
 	public:
 		SDLWindowModule();
-		SDLWindowModule(const WindowCreateInfo& mainWindowCreateInfo);
 		virtual ~SDLWindowModule();
 
 		virtual void GetCurrentScreenResolution(uint32_t& width, uint32_t& height) override;

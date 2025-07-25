@@ -43,6 +43,7 @@ namespace Glory
 		virtual Material* UsePassthroughMaterial() override;
 
 	protected:
+		virtual void PreInitialize() override;
 		virtual void OnInitialize() override;
 		virtual void OnCleanup() override;
 		virtual GPUResourceManager* CreateGPUResourceManager() override;

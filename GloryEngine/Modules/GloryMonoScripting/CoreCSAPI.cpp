@@ -5,6 +5,7 @@
 #include "ComponentHelpers.h"
 
 #include <Engine.h>
+#include <Window.h>
 #include <SceneManager.h>
 #include <MaterialManager.h>
 #include <Layer.h>

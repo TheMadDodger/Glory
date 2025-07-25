@@ -33,8 +33,8 @@ namespace Glory
 	typedef Module* (__cdecl* OnLoadModuleProc)();
 	typedef bool(__cdecl* OnLoadExtraProc)(const char*, Module*, Module*);
 
-	EngineLoader::EngineLoader(const std::filesystem::path& cfgPath, const Glory::WindowCreateInfo& defaultWindow)
-		: m_CFGPath(cfgPath), m_DefaultWindow(defaultWindow), m_EngineInfo{} {}
+	EngineLoader::EngineLoader(const std::filesystem::path& cfgPath)
+		: m_CFGPath(cfgPath), m_EngineInfo{} {}
 
 	EngineLoader::~EngineLoader()
 	{
@@ -343,12 +343,6 @@ namespace Glory
 	{
 		const ModuleMetaData& metaData = pModule->GetMetaData();
 		const ModuleType moduleType = metaData.Type();
-
-		/* FIXME: There is a better place for this */
-		if (moduleType == ModuleType::MT_Window)
-		{
-			((WindowModule*)pModule)->SetMainWindowCreateInfo(m_DefaultWindow);
-		}
 
 		if (moduleType < ModuleType::MT_Loader)
 		{
