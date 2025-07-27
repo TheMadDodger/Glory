@@ -95,6 +95,11 @@ namespace Glory
 		return m_Attributes.data();
 	}
 
+	const std::vector<AttributeType>& MeshData::AttributeTypesVector() const
+	{
+		return m_Attributes;
+	}
+
 	void MeshData::Serialize(BinaryStream& container) const
 	{
 		container.Write(m_VertexCount);
