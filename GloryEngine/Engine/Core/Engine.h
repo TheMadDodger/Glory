@@ -28,6 +28,7 @@ namespace Utils::Reflect
 	class AssetManager;
 	class MaterialManager;
 	class PipelineManager;
+	class GraphicsDevice;
 
 	class Debug;
 	class Console;
@@ -216,6 +217,9 @@ namespace Utils::Reflect
 		void SetMainWindowInfo(WindowCreateInfo&& info);
 		WindowCreateInfo& MainWindowInfo();
 
+		void AddGraphicsDevice(GraphicsDevice* pGraphicsDevice);
+		GraphicsDevice* ActiveGraphicsDevice();
+
 	private:
 		void RegisterStandardSerializers();
 		void RegisterBasicTypes();
@@ -249,6 +253,9 @@ namespace Utils::Reflect
 		std::vector<LoaderModule*> m_pLoaderModules;
 		std::map<std::type_index, size_t> m_TypeToLoader;
 		std::map<uint32_t, size_t> m_TypeHashToLoader;
+
+		size_t m_ActiveGraphicsDevice;
+		std::vector<GraphicsDevice*> m_pGraphicsDevices;
 
 		/* Threading */
 		ThreadManager* m_pThreadManager;

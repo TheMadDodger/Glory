@@ -1,5 +1,6 @@
 #pragma once
 #include "GLMesh.h"
+#include "OpenGLDevice.h"
 
 #include <GraphicsModule.h>
 #include <GL/glew.h>
@@ -16,7 +17,7 @@ namespace Glory
 		/** @brief OpenGLGraphicsModule type */
 		const std::type_info& GetModuleType() override;
 
-		GLORY_MODULE_VERSION_H(0,2,0);
+		GLORY_MODULE_VERSION_H(0, 2, 0);
 
 	public: // Commands
 		virtual void Clear(glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), double depth=1.0) override;
@@ -58,5 +59,8 @@ namespace Glory
 		GLuint m_UnitCubeVertexbufferID;
 
 		MaterialData* m_pPassthroughMaterial = nullptr;
+
+		/* OpenGL can only have 1 device */
+		OpenGLDevice m_Device;
 	};
 }
