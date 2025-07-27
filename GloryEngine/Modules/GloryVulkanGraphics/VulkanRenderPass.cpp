@@ -2,21 +2,20 @@
 #include "VulkanGraphicsModule.h"
 #include "VulkanDeviceManager.h"
 #include "Device.h"
-#include "VulkanFrameStates.h"
-#include <Game.h>
+
 #include <Engine.h>
 
 namespace Glory
 {
-    VulkanRenderPass::VulkanRenderPass(const RenderPassCreateInfo& createInfo) : m_CreateInfo(createInfo)
+    VulkanRenderPass::VulkanRenderPass(VulkanGraphicsModule* pGraphics, RenderPassCreateInfo&& createInfo):
+        m_pGraphics(pGraphics), m_CreateInfo(std::move(createInfo))
     {
     }
 
     VulkanRenderPass::~VulkanRenderPass()
     {
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        VulkanDeviceManager& deviceManager = m_pGraphics->GetDeviceManager();
+        Device* pDevice = deviceManager.GetSelectedDevice();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
         for (size_t i = 0; i < m_SwapChainFramebuffers.size(); i++)
@@ -28,21 +27,20 @@ namespace Glory
         deviceData.LogicalDevice.destroyRenderPass(m_RenderPass);
     }
 
-    vk::RenderPass VulkanRenderPass::GetRenderPass()
+    vk::RenderPass& VulkanRenderPass::GetRenderPass()
     {
         return m_RenderPass;
     }
 
-    vk::Framebuffer VulkanRenderPass::GetCurrentFrameBuffer()
+    vk::Framebuffer& VulkanRenderPass::GetCurrentFrameBuffer()
     {
-        return m_SwapChainFramebuffers[VulkanFrameStates::GetCurrentImageIndex()];
+        return m_SwapChainFramebuffers[m_pGraphics->CurrentImageIndex()];
     }
 
     void VulkanRenderPass::Initialize()
     {
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        VulkanDeviceManager& deviceManager = m_pGraphics->GetDeviceManager();
+        Device* pDevice = deviceManager.GetSelectedDevice();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
         // Create render pass
@@ -57,7 +55,7 @@ namespace Glory
             .setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
 
         vk::AttachmentDescription depthAttachment = vk::AttachmentDescription()
-            .setFormat(m_CreateInfo.pDepth->m_DepthFormat)
+            .setFormat(m_pGraphics->GetDepthImage().GetFormat())
             .setSamples(vk::SampleCountFlagBits::e1)
             .setLoadOp(vk::AttachmentLoadOp::eClear)
             .setStoreOp(vk::AttachmentStoreOp::eDontCare)
@@ -109,9 +107,8 @@ namespace Glory
 
     void VulkanRenderPass::CreateSwapChainFrameBuffers()
     {
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        VulkanDeviceManager& deviceManager = m_pGraphics->GetDeviceManager();
+        Device* pDevice = deviceManager.GetSelectedDevice();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
         auto swapchainExtent = m_CreateInfo.Extent;
@@ -122,7 +119,7 @@ namespace Glory
         {
             vk::ImageView attachments[] = {
                 m_CreateInfo.ImageViews[i],
-                m_CreateInfo.pDepth->m_DepthImageView,
+                m_pGraphics->GetDepthImage().GetImageView(),
             };
 
             vk::FramebufferCreateInfo frameBufferCreateInfo = vk::FramebufferCreateInfo()
@@ -139,7 +136,8 @@ namespace Glory
         }
     }
 
-    RenderPassCreateInfo::RenderPassCreateInfo() : HasDepth(false), pDepth(nullptr)
+    RenderPassCreateInfo::RenderPassCreateInfo():
+        HasDepth(false), Format(vk::Format::eUndefined), SwapChainImageCount(0)
     {
 
     }

@@ -1,4 +1,6 @@
 #pragma once
+#include <Glory.h>
+
 #include <vulkan/vulkan.hpp>
 
 namespace Glory
@@ -13,7 +15,7 @@ namespace Glory
 
 		void Initialize();
 
-		vk::CommandBuffer GetCurrentFrameCommandBuffer();
+		GLORY_API vk::CommandBuffer GetCurrentFrameCommandBuffer();
 
 	private:
 		VulkanGraphicsModule* m_pModule;

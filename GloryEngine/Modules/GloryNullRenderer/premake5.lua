@@ -1,4 +1,4 @@
-project "GloryVulkanGraphics"
+project "GloryNullRenderer"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
@@ -12,47 +12,40 @@ project "GloryVulkanGraphics"
 		"**.h",
 		"**.cpp",
 		"Module.yaml",
-		"premake5.lua"
+		"premake5.lua",
 	}
 
 	vpaths
 	{
-		["CommandHandlers"] = { "PipelineCommandHandlers.*", "RenderPassCommandHandlers.*" },
-		["Device"] = { "Device.*", "QueueFamilyIndices.h", "VulkanDeviceManager.*" },
-		["Graphics"] = { "DepthImage.*", "SwapChain.*", "VulkanGraphicsPipeline.*", "VulkanRenderPass.*" },
-		["Module"] = { "GloryVulkan.*", "VulkanExceptions.h", "VulkanGraphicsModule.*", "VulkanStructsConverter.*" },
-		["Resources"] = { "VulkanBuffer.*", "VulkanMesh.*", "VulkanResourceManager.*", "VulkanShader.*", "VulkanTexture.*" }
 	}
 
 	includedirs
 	{
-		"%{vulkanDir}/include",
-		"%{vulkanDir}/third-party/include",
+		"%{DepsIncludeDir}",
+
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
-		"%{IncludeDir.shaderc}",
-		"%{IncludeDir.spirv_cross}",
+
 		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.threads}",
+		"%{GloryIncludeDir.jobs}",
 
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
-		"%{IncludeDir.Utils}",
 		"%{IncludeDir.ECS}",
+		"%{IncludeDir.Utils}",
 	}
 
 	libdirs
 	{
-		"%{LibDirs.glory}",
-		"%{LibDirs.shaderc}",
-		"%{LibDirs.spirv_cross}",
-		"%{LibDirs.yaml_cpp}",
+		"%{DepsLibDir}",
 
-		"%{LibDirs.GloryECS}",
+		"%{LibDirs.glory}",
+		"%{LibDirs.yaml_cpp}",
 	}
 
 	links
 	{
-		"vulkan-1",
 		"GloryCore",
 		"shaderc",
 		"shaderc_combined",
@@ -60,12 +53,14 @@ project "GloryVulkanGraphics"
 		"yaml-cpp",
 
 		"GloryReflect",
+		"GloryECS",
 		"GloryUtilsVersion",
 		"GloryUtils",
-		"GloryECS",
 
+		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",
 		"GloryThreads",
+		"GloryUtils",
 	}
 
 	defines
@@ -75,7 +70,7 @@ project "GloryVulkanGraphics"
 
 	postbuildcommands
 	{
-		("{COPY} ./Module.yaml %{moduleOutDir}"),
+		("{COPY} ./Module.yaml %{moduleOutDir}")
 	}
 
 	filter "system:windows"
@@ -91,18 +86,8 @@ project "GloryVulkanGraphics"
 		architecture "x86"
 		defines "WIN32"
 
-		libdirs
-		{
-			"%{vulkanDir}/Lib32",
-		}
-
 	filter "platforms:x64"
 		architecture "x64"
-
-		libdirs
-		{
-			"%{vulkanDir}/Lib",
-		}
 
 	filter "configurations:Debug"
 		runtime "Debug"

@@ -456,6 +456,31 @@ namespace Glory
         B_TEXTURE,
         B_TRANSFORM_FEEDBACK,
         B_UNIFORM,
+
+        //B_TransferSrc = 1 << 0,
+        //B_TransferDst = 1 << 1,
+        //B_UniformTexelBuffer = 1 << 2,
+        //B_StorageTexelBuffer = 1 << 3,
+        //B_UniformBuffer = 1 << 4,
+        //B_StorageBuffer = 1 << 5,
+        //B_IndexBuffer = 1 << 7,
+        //B_VertexBuffer = 1 << 8,
+        //B_IndirectBuffer = 1 << 9,
+        //B_TransformFeedbackBufferEXT = 1 << 15,
+        //B_TransformFeedbackCounterBufferEXT = 1 << 16,
+        //B_ConditionalRenderingEXT = 1 << 2,
+        //B_AccelerationStructureBuildInputReadOnlyKHR = 1 << 17,
+        //B_AccelerationStructureStorageKHR = 1 << 18,
+        //B_ShaderBindingTableKHR = 1 << 19,
+        //B_RayTracingNV = 1 << 20,
+        //B_VideoEncodeDstKHR = 1 << 21,
+        //B_VideoEncodeSrcKHR = 1 << 22,
+        //B_SamplerDescriptorBufferEXT = 1 << 23,
+        //B_ResourceDescriptorBufferEXT = 1 << 24,
+        //B_PushDescriptorsDescriptorBufferEXT = 1 << 25,
+        //B_MicromapBuildInputReadOnlyEXT = 1 << 26,
+        //B_MicromapStorageEXT = 1 << 27,
+        //B_TileMemoryQCOM = 1 << 28,
     };
 
     enum class MemoryUsage
@@ -469,6 +494,16 @@ namespace Glory
         MU_DYNAMIC_DRAW,
         MU_DYNAMIC_READ,
         MU_DYNAMIC_COPY,
+
+        //MU_DeviceLocal = 1 << 0,
+        //MU_HostVisible = 1 << 1,
+        //MU_HostCoherent = 1 << 2,
+        //MU_HostCached = 1 << 3,
+        //MU_LazilyAllocated = 1 << 4,
+        //MU_Protected = 1 << 5,
+        //MU_DeviceCoherentAMD = 1 << 6,
+        //MU_DeviceUncachedAMD = 1 << 7,
+        //MU_RdmaCapableNV = 1 << 8,
     };
 
     enum class PrimitiveType

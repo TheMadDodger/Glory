@@ -10,6 +10,7 @@ namespace Glory
 	public:
 		static vk::ImageViewType GetVulkanImageViewType(const ImageType& imageType);
 		static vk::ImageType GetVulkanImageType(const ImageType& imageType);
+		static vk::ImageUsageFlags GetVulkanImageUsageFlags(const ImageAspect& aspectFlags);
 		static vk::ImageAspectFlags GetVulkanImageAspectFlags(const ImageAspect& aspectFlags);
 		static vk::Filter GetVulkanFilter(const Filter& filter);
 		static vk::CompareOp GetVulkanCompareOp(const CompareOp& op);
@@ -18,8 +19,8 @@ namespace Glory
 		static vk::SamplerCreateInfo GetVulkanSamplerInfo(const SamplerSettings& settings);
 		static vk::Format GetVulkanFormat(const PixelFormat& format);
 		static vk::ShaderStageFlagBits GetShaderStageFlag(const ShaderType& shaderType);
+		static vk::BufferUsageFlags ToBufferUsageFlags(const BufferBindingTarget& bindingTarget);
 
-		static const std::map<BufferBindingTarget, vk::BufferUsageFlags> TO_BUFFERUSAGE;
 		//static const std::map<MemoryUsage, GLuint> TO_GLBUFFERUSAGE;
 
 	private:

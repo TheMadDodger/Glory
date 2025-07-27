@@ -1,4 +1,6 @@
 #pragma once
+#include <Glory.h>
+
 #include <vulkan/vulkan.hpp>
 
 namespace Glory
@@ -11,18 +13,18 @@ namespace Glory
 	class SwapChain
 	{
 	public:
-		SwapChain(Window* pWindow, Device* pDevice);
+		SwapChain();
 		virtual ~SwapChain();
 
-		void Initialize(VulkanGraphicsModule* pGraphicsModule);
+		void Initialize(VulkanGraphicsModule* pGraphicsModule, Window* pWindow, Device* pDevice);
 
-		const vk::Format& GetFormat() const;
-		const vk::Extent2D& GetExtent() const;
+		GLORY_API const vk::Format& GetFormat() const;
+		GLORY_API const vk::Extent2D& GetExtent() const;
 
-		vk::SwapchainKHR GetSwapChain() const;
-		size_t GetImageCount() const;
-		vk::Image GetSwapChainImage(size_t index);
-		vk::ImageView GetSwapChainImageView(size_t index);
+		GLORY_API vk::SwapchainKHR& GetSwapChain();
+		GLORY_API size_t GetImageCount() const;
+		GLORY_API vk::Image GetSwapChainImage(size_t index);
+		GLORY_API vk::ImageView GetSwapChainImageView(size_t index);
 
 	private:
 		vk::SurfaceFormatKHR GetBestFormat(const SwapChainSupportDetails& details);

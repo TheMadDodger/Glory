@@ -1,28 +1,29 @@
 #pragma once
+#include <Glory.h>
+
 #include <vulkan/vulkan.hpp>
-#include "SwapChain.h"
 
 namespace Glory
 {
+	class VulkanGraphicsModule;
+
 	class DepthImage
 	{
 	public:
-		DepthImage(SwapChain* pSwapChain);
+		DepthImage();
 		virtual ~DepthImage();
 
-		const vk::Format& GetFormat() const;
-		const vk::ImageView& GetImageView() const;
+		GLORY_API const vk::Format& GetFormat() const;
+		GLORY_API const vk::ImageView& GetImageView() const;
+
+		void Initialize(VulkanGraphicsModule* pGraphics, vk::Extent2D extent);
 
 	private:
-		void Initialize();
-
-	private:
-		friend class VulkanGraphicsModule;
-		friend class VulkanRenderPass;
-		SwapChain* m_pSwapChain;
+		VulkanGraphicsModule* m_pGraphics;
 		vk::Format m_DepthFormat;
 		vk::Image m_DepthImage;
 		vk::DeviceMemory m_DepthImageMemory;
 		vk::ImageView m_DepthImageView;
+		vk::Extent2D m_Extent;
 	};
 }

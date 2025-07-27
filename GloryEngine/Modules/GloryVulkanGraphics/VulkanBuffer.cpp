@@ -2,7 +2,7 @@
 #include "VulkanGraphicsModule.h"
 #include "Device.h"
 #include "VulkanStructsConverter.h"
-#include <Game.h>
+
 #include <Engine.h>
 
 namespace Glory
@@ -14,9 +14,9 @@ namespace Glory
 
     VulkanBuffer::~VulkanBuffer()
 	{
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        VulkanGraphicsModule* pGraphics = m_pOwner->GetEngine()->GetMainModule<VulkanGraphicsModule>();
+        VulkanDeviceManager& deviceManager = pGraphics->GetDeviceManager();
+        Device* pDevice = deviceManager.GetSelectedDevice();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
         deviceData.LogicalDevice.destroyBuffer(m_Buffer);
@@ -27,12 +27,12 @@ namespace Glory
 	{
         m_BufferCreateInfo = vk::BufferCreateInfo();
         m_BufferCreateInfo.size = (vk::DeviceSize)m_BufferSize;
-        m_BufferCreateInfo.usage = VKConverter::TO_BUFFERUSAGE.at(m_UsageFlag); //vk::BufferUsageFlagBits::eVertexBuffer;
+        m_BufferCreateInfo.usage = VKConverter::ToBufferUsageFlags(m_UsageFlag);
         m_BufferCreateInfo.sharingMode = vk::SharingMode::eExclusive;
 
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        VulkanGraphicsModule* pGraphics = m_pOwner->GetEngine()->GetMainModule<VulkanGraphicsModule>();
+        VulkanDeviceManager& pDeviceManager = pGraphics->GetDeviceManager();
+        Device* pDevice = pDeviceManager.GetSelectedDevice();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
         vk::Result result = deviceData.LogicalDevice.createBuffer(&m_BufferCreateInfo, nullptr, &m_Buffer);
@@ -43,7 +43,7 @@ namespace Glory
         deviceData.LogicalDevice.getBufferMemoryRequirements(m_Buffer, &memRequirements);
 
         uint32_t typeFilter = memRequirements.memoryTypeBits;
-        vk::MemoryPropertyFlags properties = (vk::MemoryPropertyFlagBits)m_MemoryFlags; //vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+        vk::MemoryPropertyFlags properties = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;//(vk::MemoryPropertyFlagBits)m_MemoryFlags;
         uint32_t memoryIndex = pDevice->GetSupportedMemoryIndex(typeFilter, properties);
 
         // Allocate device memory
@@ -60,9 +60,11 @@ namespace Glory
 
     void VulkanBuffer::Assign(const void* data)
     {
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        if (!data) return;
+
+        VulkanGraphicsModule* pGraphics = m_pOwner->GetEngine()->GetMainModule<VulkanGraphicsModule>();
+        VulkanDeviceManager& pDeviceManager = pGraphics->GetDeviceManager();
+        Device* pDevice = pDeviceManager.GetSelectedDevice();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
         void* dstData;
@@ -73,11 +75,16 @@ namespace Glory
         deviceData.LogicalDevice.unmapMemory(m_BufferMemory);
     }
 
+    void VulkanBuffer::Assign(const void* data, uint32_t size)
+    {
+        throw new std::exception("VulkanBuffer::Assign() not yet implemented!");
+    }
+
     void VulkanBuffer::Assign(const void* data, uint32_t offset, uint32_t size)
     {
-        VulkanGraphicsModule* pGraphics = (VulkanGraphicsModule*)Game::GetGame().GetEngine()->GetGraphicsModule();
-        VulkanDeviceManager* pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager->GetSelectedDevice();
+        VulkanGraphicsModule* pGraphics = m_pOwner->GetEngine()->GetMainModule<VulkanGraphicsModule>();
+        VulkanDeviceManager& deviceManager = pGraphics->GetDeviceManager();
+        Device* pDevice = deviceManager.GetSelectedDevice();
         LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
         void* dstData;
@@ -97,7 +104,8 @@ namespace Glory
         // You should use the VK_COMMAND_POOL_CREATE_TRANSIENT_BIT flag
         // during command pool generation in that case.
 
-        vk::CommandBuffer commandBuffer = VulkanGraphicsModule::BeginSingleTimeCommands();
+        VulkanGraphicsModule* pGraphics = m_pOwner->GetEngine()->GetMainModule<VulkanGraphicsModule>();
+        vk::CommandBuffer commandBuffer = pGraphics->BeginSingleTimeCommands();
 
         vk::BufferCopy copyRegion = vk::BufferCopy();
         copyRegion.srcOffset = 0; // Optional
@@ -105,7 +113,7 @@ namespace Glory
         copyRegion.size = size;
         commandBuffer.copyBuffer(((VulkanBuffer*)source)->m_Buffer, m_Buffer, 1, &copyRegion);
 
-        VulkanGraphicsModule::EndSingleTimeCommands(commandBuffer);
+        pGraphics->EndSingleTimeCommands(commandBuffer);
     }
 
     vk::Buffer VulkanBuffer::GetBuffer()
@@ -118,13 +126,28 @@ namespace Glory
         return m_BufferMemory;
     }
 
-    void VulkanBuffer::Bind()
+    void VulkanBuffer::BindForDraw()
     {
-        assert(false);
+        throw new std::exception("VulkanBuffer::BindForDraw() not yet implemented!");
     }
 
     void VulkanBuffer::Unbind()
     {
-        assert(false);
+        throw new std::exception("VulkanBuffer::Unbind() not yet implemented!");
+    }
+
+    void* VulkanBuffer::MapRead(uint32_t offset, uint32_t size)
+    {
+        throw new std::exception("VulkanBuffer::MapRead() not yet implemented!");
+    }
+
+    void VulkanBuffer::Unmap()
+    {
+        throw new std::exception("VulkanBuffer::Unmap() not yet implemented!");
+    }
+
+    void VulkanBuffer::Read(void* data, uint32_t offset, uint32_t size)
+    {
+        throw new std::exception("VulkanBuffer::Read() not yet implemented!");
     }
 }

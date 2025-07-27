@@ -39,12 +39,10 @@ namespace Glory::Editor
 		SetupDearImGuiContext();
 		m_pWindowImpl->SetContext(m_pImguiConext);
 		m_pRenderImpl->SetContext(m_pImguiConext);
-
-		LoadFonts();
-		m_pRenderImpl->UploadImGUIFonts();
-
 		m_pRenderImpl->Initialize();
 		m_pRenderImpl->SetupBackend();
+		LoadFonts();
+		m_pRenderImpl->UploadImGUIFonts();
 	}
 
 	bool EditorPlatform::PollEvents()

@@ -2,11 +2,6 @@
 
 namespace Glory
 {
-    const std::map<BufferBindingTarget, vk::BufferUsageFlags> VKConverter::TO_BUFFERUSAGE
-    {
-
-    };
-
     vk::ImageViewType VKConverter::GetVulkanImageViewType(const ImageType& imageType)
     {
         switch (imageType)
@@ -43,6 +38,15 @@ namespace Glory
         }
 
         return (vk::ImageType)0;
+    }
+
+    vk::ImageUsageFlags VKConverter::GetVulkanImageUsageFlags(const ImageAspect& aspectFlags)
+    {
+        vk::ImageUsageFlags flags = vk::ImageUsageFlags();
+        if ((aspectFlags & ImageAspect::IA_Color) > 0) flags |= vk::ImageUsageFlagBits::eColorAttachment;
+        if ((aspectFlags & ImageAspect::IA_Depth) > 0) flags |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
+        if ((aspectFlags & ImageAspect::IA_Stencil) > 0) flags |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
+        return flags;
     }
 
     vk::ImageAspectFlags VKConverter::GetVulkanImageAspectFlags(const ImageAspect& aspectFlags)
@@ -190,5 +194,42 @@ namespace Glory
         }
 
         return vk::ShaderStageFlagBits();
+    }
+
+    vk::BufferUsageFlags VKConverter::ToBufferUsageFlags(const BufferBindingTarget& bindingTarget)
+    {
+        switch (bindingTarget)
+        {
+            case BufferBindingTarget::B_ARRAY:
+                return vk::BufferUsageFlagBits::eVertexBuffer;
+            case BufferBindingTarget::B_ATOMIC_COUNTER:
+                return vk::BufferUsageFlags(0);
+            case BufferBindingTarget::B_COPY_READ:
+                return vk::BufferUsageFlagBits::eTransferSrc;
+            case BufferBindingTarget::B_COPY_WRITE:
+                return vk::BufferUsageFlagBits::eTransferDst;
+            case BufferBindingTarget::B_DISPATCH_INDIRECT:
+                return vk::BufferUsageFlagBits::eIndexBuffer;
+            case BufferBindingTarget::B_DRAW_INDIRECT:
+                return vk::BufferUsageFlagBits::eIndexBuffer;
+            case BufferBindingTarget::B_ELEMENT_ARRAY:
+                return vk::BufferUsageFlagBits::eIndexBuffer;
+            case BufferBindingTarget::B_PIXEL_PACK:
+                return vk::BufferUsageFlagBits::eStorageTexelBuffer;
+            case BufferBindingTarget::B_PIXEL_UNPACK:
+                return vk::BufferUsageFlagBits::eUniformTexelBuffer;
+            case BufferBindingTarget::B_QUERY:
+                return vk::BufferUsageFlags(0);
+            case BufferBindingTarget::B_SHADER_STORAGE:
+                return vk::BufferUsageFlagBits::eStorageBuffer;
+            case BufferBindingTarget::B_TEXTURE:
+                return vk::BufferUsageFlags(0);
+            case BufferBindingTarget::B_TRANSFORM_FEEDBACK:
+                return vk::BufferUsageFlagBits::eTransformFeedbackBufferEXT;
+            case BufferBindingTarget::B_UNIFORM:
+                return vk::BufferUsageFlagBits::eUniformBuffer;
+        default:
+            break;
+        }
     }
 }
