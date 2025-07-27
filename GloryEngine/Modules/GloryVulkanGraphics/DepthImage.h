@@ -16,12 +16,9 @@ namespace Glory
 		GLORY_API const vk::Format& GetFormat() const;
 		GLORY_API const vk::ImageView& GetImageView() const;
 
-	private:
 		void Initialize(VulkanGraphicsModule* pGraphics, vk::Extent2D extent);
 
 	private:
-		friend class VulkanGraphicsModule;
-		friend class VulkanRenderPass;
 		VulkanGraphicsModule* m_pGraphics;
 		vk::Format m_DepthFormat;
 		vk::Image m_DepthImage;

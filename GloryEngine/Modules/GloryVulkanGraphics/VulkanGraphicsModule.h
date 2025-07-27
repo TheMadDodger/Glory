@@ -54,6 +54,7 @@ namespace Glory
 
 		GLORY_API VulkanDeviceManager& GetDeviceManager();
 		GLORY_API SwapChain& GetSwapChain();
+		GLORY_API DepthImage& GetDepthImage();
 		GLORY_API VulkanCommandBuffers& GetVulkanCommandBuffers();
 
 		GLORY_API const std::vector<const char*>& GetExtensions() const;
@@ -72,6 +73,9 @@ namespace Glory
 		GLORY_API vk::Sampler& GetSampler(const SamplerSettings& settings);
 
 		GLORY_API uint32_t CurrentImageIndex() const;
+		GLORY_API uint32_t ImageCount() const;
+
+		GLORY_API VulkanRenderPass& MainRenderPass() const;
 
 		GLORY_MODULE_VERSION_H(0, 1, 0);
 
@@ -103,6 +107,7 @@ namespace Glory
 		virtual Material* UsePassthroughMaterial() override;
 
 	private:
+		virtual void PreInitialize() override;
 		virtual void OnInitialize() override;
 		virtual void OnCleanup() override;
 		virtual GPUResourceManager* CreateGPUResourceManager() override;
@@ -136,6 +141,7 @@ namespace Glory
 		SwapChain m_SwapChain;
 		DepthImage m_DepthImage;
 		VulkanCommandBuffers m_CommandBuffers;
+		std::unique_ptr<VulkanRenderPass> m_MainRenderPass;
 		
 		std::map<SamplerSettings, vk::Sampler, SamplerSettingsComparer> m_Samplers;
 		
@@ -147,14 +153,9 @@ namespace Glory
 		std::vector<vk::Fence> m_InFlightFences;
 		std::vector<vk::Fence> m_ImagesInFlight;
 		
-		
-		
+
 		//VulkanRenderPass* m_pMainRenderPass;
 		//VulkanGraphicsPipeline* m_pGraphicsPipeline;
-
-
-
-
 
 		//DeferredRenderPassTest* m_pRenderPass;
 		//DeferredPipelineTest* m_pRenderPipeline;

@@ -148,6 +148,7 @@ group "Modules"
 	include "Modules/GloryLocalize"
 	include "Modules/GloryOverlayConsole"
 	include "Modules/GloryVulkanGraphics"
+	include "Modules/GloryNullRenderer"
 group ""
 
 group "Modules/Base"

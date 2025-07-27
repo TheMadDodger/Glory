@@ -7,8 +7,8 @@
 
 namespace Glory
 {
-    VulkanRenderPass::VulkanRenderPass(VulkanGraphicsModule* pGraphics, const RenderPassCreateInfo& createInfo):
-        m_pGraphics(pGraphics), m_CreateInfo(createInfo)
+    VulkanRenderPass::VulkanRenderPass(VulkanGraphicsModule* pGraphics, RenderPassCreateInfo&& createInfo):
+        m_pGraphics(pGraphics), m_CreateInfo(std::move(createInfo))
     {
     }
 
@@ -27,12 +27,12 @@ namespace Glory
         deviceData.LogicalDevice.destroyRenderPass(m_RenderPass);
     }
 
-    vk::RenderPass VulkanRenderPass::GetRenderPass()
+    vk::RenderPass& VulkanRenderPass::GetRenderPass()
     {
         return m_RenderPass;
     }
 
-    vk::Framebuffer VulkanRenderPass::GetCurrentFrameBuffer()
+    vk::Framebuffer& VulkanRenderPass::GetCurrentFrameBuffer()
     {
         return m_SwapChainFramebuffers[m_pGraphics->CurrentImageIndex()];
     }
@@ -55,7 +55,7 @@ namespace Glory
             .setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
 
         vk::AttachmentDescription depthAttachment = vk::AttachmentDescription()
-            .setFormat(m_CreateInfo.pDepth->m_DepthFormat)
+            .setFormat(m_pGraphics->GetDepthImage().GetFormat())
             .setSamples(vk::SampleCountFlagBits::e1)
             .setLoadOp(vk::AttachmentLoadOp::eClear)
             .setStoreOp(vk::AttachmentStoreOp::eDontCare)
@@ -119,7 +119,7 @@ namespace Glory
         {
             vk::ImageView attachments[] = {
                 m_CreateInfo.ImageViews[i],
-                m_CreateInfo.pDepth->m_DepthImageView,
+                m_pGraphics->GetDepthImage().GetImageView(),
             };
 
             vk::FramebufferCreateInfo frameBufferCreateInfo = vk::FramebufferCreateInfo()
@@ -136,7 +136,8 @@ namespace Glory
         }
     }
 
-    RenderPassCreateInfo::RenderPassCreateInfo() : HasDepth(false), pDepth(nullptr)
+    RenderPassCreateInfo::RenderPassCreateInfo():
+        HasDepth(false), Format(vk::Format::eUndefined), SwapChainImageCount(0)
     {
 
     }

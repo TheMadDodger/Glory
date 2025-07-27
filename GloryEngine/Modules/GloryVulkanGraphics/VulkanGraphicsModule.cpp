@@ -14,6 +14,7 @@
 #include <iostream>
 
 #include <Engine.h>
+#include <Window.h>
 #include <VertexHelpers.h>
 
 namespace Glory
@@ -23,7 +24,7 @@ namespace Glory
     const size_t MAX_FRAMES_IN_FLIGHT = 2;
 
     VulkanGraphicsModule::VulkanGraphicsModule() : m_Extensions(std::vector<const char*>()), m_Layers(std::vector<const char*>()), m_AvailableExtensions(std::vector<VkExtensionProperties>()), m_Instance(nullptr),
-        m_cInstance(nullptr), m_Surface(nullptr), m_cSurface(VK_NULL_HANDLE), m_pMainWindow(nullptr), m_CommandBuffers(this)
+        m_cInstance(nullptr), m_Surface(nullptr), m_cSurface(VK_NULL_HANDLE), m_pMainWindow(nullptr), m_CommandBuffers(this), m_MainRenderPass(nullptr)
     {
     }
 
@@ -61,6 +62,11 @@ namespace Glory
         return m_SwapChain;
     }
 
+    DepthImage& VulkanGraphicsModule::GetDepthImage()
+    {
+        return m_DepthImage;
+    }
+
     VulkanCommandBuffers& VulkanGraphicsModule::GetVulkanCommandBuffers()
     {
         return m_CommandBuffers;
@@ -76,18 +82,18 @@ namespace Glory
         return m_Layers;
     }
 
+    void VulkanGraphicsModule::PreInitialize()
+    {
+        m_pEngine->MainWindowInfo().WindowFlags |= W_Vulkan;
+    }
+
     void VulkanGraphicsModule::OnInitialize()
     {
-        //ShaderLoaderModule* pShaderLoader = Game::GetGame().GetEngine()->GetModule<ShaderLoaderModule>();
-        //ShaderData* pShaderData = (ShaderData*)pShaderLoader->Load("./Shaders/loadertest.frag");
-        //ShaderCrossCompiler compiler;
-        //compiler.Compile(pShaderData->Data(), pShaderData->Size());
-        //
-        //// Get the required extensions from the window
+        /* Get the required extensions from the window */
         m_pMainWindow = m_pEngine->GetMainModule<WindowModule>()->GetMainWindow();
         m_pMainWindow->GetVulkanRequiredExtensions(m_Extensions);
 
-        // Use validation layers if this is a debug build
+        /* Use validation layers if this is a debug build */
 #if defined(_DEBUG)
         InitializeValidationLayers();
 #endif
@@ -107,18 +113,24 @@ namespace Glory
         m_SwapChain.Initialize(this, m_pMainWindow, m_DeviceManager.GetSelectedDevice());
         m_DepthImage.Initialize(this, m_SwapChain.GetExtent());
 
+        RenderPassCreateInfo createInfo{};
+        createInfo.Extent = m_SwapChain.GetExtent();
+        createInfo.Format = m_SwapChain.GetFormat();
+        createInfo.ImageViews = m_SwapChain.m_SwapChainImageViews;
+        createInfo.HasDepth = true;
+        m_MainRenderPass.reset(new VulkanRenderPass(this, std::move(createInfo)));
+        m_MainRenderPass->Initialize();
+        m_CommandBuffers.Initialize();
+
         //CreateDepthResources();
         //CreateMainRenderPass();
         //CreateTexture();
         //CreateMesh();
         //CreatePipeline();
 
-        m_CommandBuffers.Initialize();
-
         //CreateDeferredRenderPassTest();
         //CreateDeferredTestPipeline();
         //CreateCommandPools();
-        //CreateSyncObjects();
 
         LogicalDeviceData deviceData = m_DeviceManager.GetSelectedDevice()->GetLogicalDeviceData();
 
@@ -144,10 +156,10 @@ namespace Glory
 
     void VulkanGraphicsModule::OnCleanup()
     {
+        Device* pDevice = m_DeviceManager.GetSelectedDevice();
+        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
         for (auto& iter : m_Samplers)
         {
-            Device* pDevice = m_DeviceManager.GetSelectedDevice();
-            LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
             deviceData.LogicalDevice.destroySampler(iter.second, nullptr);
         }
 
@@ -163,21 +175,15 @@ namespace Glory
         }
 #endif
 
-        //for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-        //{
-        //    deviceData.LogicalDevice.destroySemaphore(m_ImageAvailableSemaphores[i]);
-        //    deviceData.LogicalDevice.destroySemaphore(m_RenderFinishedSemaphores[i]);
-        //    deviceData.LogicalDevice.destroyFence(m_InFlightFences[i]);
-        //}
-        //m_ImageAvailableSemaphores.clear();
-        //m_RenderFinishedSemaphores.clear();
-        //m_InFlightFences.clear();
-
-        //delete m_pRenderPipeline;
-        //m_pRenderPipeline = nullptr;
-
-        //delete m_pRenderPass;
-        //m_pRenderPass = nullptr;
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        {
+            deviceData.LogicalDevice.destroySemaphore(m_ImageAvailableSemaphores[i]);
+            deviceData.LogicalDevice.destroySemaphore(m_RenderFinishedSemaphores[i]);
+            deviceData.LogicalDevice.destroyFence(m_InFlightFences[i]);
+        }
+        m_ImageAvailableSemaphores.clear();
+        m_RenderFinishedSemaphores.clear();
+        m_InFlightFences.clear();
     }
 
 //    void VulkanGraphicsModule::Initialize()
@@ -1037,31 +1043,6 @@ namespace Glory
     //    }
     //}
 
-    //void VulkanGraphicsModule::CreateSyncObjects()
-    //{
-        //auto deviceData = m_pDeviceManager->GetSelectedDevice()->GetLogicalDeviceData();
-        //
-        //// Create sync objects
-        //m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        //m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        //m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-        //m_ImagesInFlight.resize(m_pSwapChain->GetImageCount(), VK_NULL_HANDLE);
-        //
-        //vk::SemaphoreCreateInfo semaphoreCreateInfo = vk::SemaphoreCreateInfo();
-        //vk::FenceCreateInfo fenceCreateInfo = vk::FenceCreateInfo()
-        //    .setFlags(vk::FenceCreateFlagBits::eSignaled);
-        //for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-        //{
-        //    if (deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]) != vk::Result::eSuccess ||
-        //        deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]) != vk::Result::eSuccess ||
-        //        deviceData.LogicalDevice.createFence(&fenceCreateInfo, nullptr, &m_InFlightFences[i]) != vk::Result::eSuccess)
-        //    {
-        //
-        //        throw std::runtime_error("failed to create sync objects for a frame!");
-        //    }
-        //}
-    //}
-
     //void VulkanGraphicsModule::UpdateUniformBuffer(uint32_t imageIndex)
     //{
     //    static auto startTime = std::chrono::high_resolution_clock::now();
@@ -1353,6 +1334,16 @@ namespace Glory
     uint32_t VulkanGraphicsModule::CurrentImageIndex() const
     {
         return m_CurrentImageIndex;
+    }
+
+    uint32_t VulkanGraphicsModule::ImageCount() const
+    {
+        return MAX_FRAMES_IN_FLIGHT;
+    }
+
+    VulkanRenderPass& VulkanGraphicsModule::MainRenderPass() const
+    {
+        return *m_MainRenderPass;
     }
 
     void VulkanGraphicsModule::Clear(glm::vec4 color, double depth)

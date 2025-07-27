@@ -6,7 +6,7 @@
 
 namespace Glory
 {
-	SwapChain::SwapChain() : m_pWindow(nullptr), m_pDevice(nullptr)
+	SwapChain::SwapChain() : m_pWindow(nullptr), m_pDevice(nullptr), m_SwapChain(nullptr)
 	{
 	}
 
@@ -107,7 +107,7 @@ namespace Glory
         return m_SwapChainExtent;
     }
 
-    vk::SwapchainKHR SwapChain::GetSwapChain() const
+    vk::SwapchainKHR& SwapChain::GetSwapChain()
     {
         return m_SwapChain;
     }

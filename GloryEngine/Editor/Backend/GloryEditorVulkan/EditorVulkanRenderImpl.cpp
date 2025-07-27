@@ -41,6 +41,9 @@ namespace Glory::Editor
 		m_pDevice = pGraphicsModule->GetDeviceManager().GetSelectedDevice();
 
 		m_MainWindow = ImGui_ImplVulkanH_Window();
+		//m_MainWindow.Swapchain = pGraphicsModule->GetSwapChain().GetSwapChain();
+		//m_MainWindow.RenderPass = pGraphicsModule->MainRenderPass().GetRenderPass();
+		//m_MainWindow.ImageCount = pGraphicsModule->ImageCount();
 		VkSurfaceKHR surface = pGraphicsModule->GetCSurface();
 		int width, height;
 

@@ -21,7 +21,7 @@ namespace Glory
 		GLORY_API const vk::Format& GetFormat() const;
 		GLORY_API const vk::Extent2D& GetExtent() const;
 
-		GLORY_API vk::SwapchainKHR GetSwapChain() const;
+		GLORY_API vk::SwapchainKHR& GetSwapChain();
 		GLORY_API size_t GetImageCount() const;
 		GLORY_API vk::Image GetSwapChainImage(size_t index);
 		GLORY_API vk::ImageView GetSwapChainImageView(size_t index);

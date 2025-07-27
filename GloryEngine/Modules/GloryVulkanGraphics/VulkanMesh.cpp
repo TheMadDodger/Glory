@@ -71,7 +71,7 @@ namespace Glory
 
     vk::Format VulkanMesh::GetFormat(const AttributeType& atributeType)
     {
-        vk::Format format;
+        vk::Format format = vk::Format::eUndefined;
 
         switch (atributeType)
         {

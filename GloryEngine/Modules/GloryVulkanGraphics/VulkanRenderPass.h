@@ -2,6 +2,8 @@
 #include "SwapChain.h"
 #include "DepthImage.h"
 
+#include <Glory.h>
+
 #include <vulkan/vulkan.hpp>
 
 namespace Glory
@@ -11,7 +13,6 @@ namespace Glory
 		RenderPassCreateInfo();
 
 		bool HasDepth;
-		DepthImage* pDepth;
 		vk::Extent2D Extent;
 		vk::Format Format;
 		std::vector<vk::ImageView> ImageViews;
@@ -23,11 +24,11 @@ namespace Glory
 	class VulkanRenderPass
 	{
 	public:
-		VulkanRenderPass(VulkanGraphicsModule* pGraphics, const RenderPassCreateInfo& createInfo);
+		VulkanRenderPass(VulkanGraphicsModule* pGraphics, RenderPassCreateInfo&& createInfo);
 		virtual ~VulkanRenderPass();
 
-		vk::RenderPass GetRenderPass();
-		vk::Framebuffer GetCurrentFrameBuffer();
+		GLORY_API vk::RenderPass& GetRenderPass();
+		GLORY_API vk::Framebuffer& GetCurrentFrameBuffer();
 
 	private:
 		void Initialize();

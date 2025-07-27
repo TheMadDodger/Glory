@@ -4,6 +4,7 @@
 #include "VulkanBuffer.h"
 #include "VulkanShader.h"
 #include "VulkanTexture.h"
+#include "VulkanRenderTexture.h"
 
 #include <Engine.h>
 #include <CubemapData.h>
@@ -88,6 +89,6 @@ namespace Glory
 
 	RenderTexture* VulkanResourceManager::CreateRenderTexture_Internal(const RenderTextureCreateInfo& createInfo)
 	{
-		return nullptr;
+		return new VulkanRenderTexture(createInfo);
 	}
 }

@@ -109,9 +109,6 @@ namespace Glory
 		Mesh* pMesh = CreateMesh_Internal(vertexCount, indexCount, inputRate, binding, stride, primitiveType, attributeTypes);
 		pMesh->m_pOwner = this;
 		pMesh->m_UUID = UUID();
-		pMesh->BindForDraw();
-		pVertexBuffer->BindForDraw();
-		if(pIndexBuffer) pIndexBuffer->BindForDraw();
 		pMesh->SetBuffers(pVertexBuffer, pIndexBuffer);
 		pMesh->CreateBindingAndAttributeData();
 		m_IDResources[pMesh->m_UUID] = pMesh;

@@ -27,7 +27,7 @@ namespace Glory
 	{
         m_BufferCreateInfo = vk::BufferCreateInfo();
         m_BufferCreateInfo.size = (vk::DeviceSize)m_BufferSize;
-        m_BufferCreateInfo.usage = VKConverter::TO_BUFFERUSAGE.at(m_UsageFlag); //vk::BufferUsageFlagBits::eVertexBuffer;
+        m_BufferCreateInfo.usage = VKConverter::ToBufferUsageFlags(m_UsageFlag);
         m_BufferCreateInfo.sharingMode = vk::SharingMode::eExclusive;
 
         VulkanGraphicsModule* pGraphics = m_pOwner->GetEngine()->GetMainModule<VulkanGraphicsModule>();
@@ -43,7 +43,7 @@ namespace Glory
         deviceData.LogicalDevice.getBufferMemoryRequirements(m_Buffer, &memRequirements);
 
         uint32_t typeFilter = memRequirements.memoryTypeBits;
-        vk::MemoryPropertyFlags properties = (vk::MemoryPropertyFlagBits)m_MemoryFlags; //vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+        vk::MemoryPropertyFlags properties = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;//(vk::MemoryPropertyFlagBits)m_MemoryFlags;
         uint32_t memoryIndex = pDevice->GetSupportedMemoryIndex(typeFilter, properties);
 
         // Allocate device memory
@@ -60,6 +60,8 @@ namespace Glory
 
     void VulkanBuffer::Assign(const void* data)
     {
+        if (!data) return;
+
         VulkanGraphicsModule* pGraphics = m_pOwner->GetEngine()->GetMainModule<VulkanGraphicsModule>();
         VulkanDeviceManager& pDeviceManager = pGraphics->GetDeviceManager();
         Device* pDevice = pDeviceManager.GetSelectedDevice();
