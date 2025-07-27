@@ -204,9 +204,9 @@ namespace Glory
 	}
 
 	Engine::Engine(const EngineCreateInfo& createInfo)
-		: m_pSceneManager(createInfo.pSceneManager), m_pThreadManager(ThreadManager::GetInstance()),
-		m_pJobManager(Jobs::JobManager::GetInstance()), m_Reflection(new Reflect),
-		m_CreateInfo(createInfo), m_ResourceTypes(new ResourceTypes),
+		: m_ActiveGraphicsDevice(0), m_pSceneManager(createInfo.pSceneManager),
+		m_pThreadManager(ThreadManager::GetInstance()), m_pJobManager(Jobs::JobManager::GetInstance()),
+		m_Reflection(new Reflect), m_CreateInfo(createInfo), m_ResourceTypes(new ResourceTypes),
 		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
 		m_pAssetsManager(createInfo.pAssetManager), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
 		m_Serializers(new Serializers(this)), m_CameraManager(new CameraManager(this)), m_DisplayManager(new DisplayManager),
@@ -579,6 +579,17 @@ namespace Glory
 	WindowCreateInfo& Engine::MainWindowInfo()
 	{
 		return m_MainWindowInfo;
+	}
+
+	void Engine::AddGraphicsDevice(GraphicsDevice* pGraphicsDevice)
+	{
+		m_pGraphicsDevices.push_back(pGraphicsDevice);
+	}
+
+	GraphicsDevice* Engine::ActiveGraphicsDevice()
+	{
+		return m_ActiveGraphicsDevice >= m_pGraphicsDevices.size() ?
+			nullptr : m_pGraphicsDevices[m_ActiveGraphicsDevice];
 	}
 
 	void Engine::RegisterStandardSerializers()
