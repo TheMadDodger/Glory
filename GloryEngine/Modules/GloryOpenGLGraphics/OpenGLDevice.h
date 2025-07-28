@@ -36,6 +36,8 @@ namespace Glory
     {
         uint32_t m_GLFramebufferID;
         RenderPassHandle m_RenderPass;
+        std::vector<TextureHandle> m_Textures;
+        std::vector<std::string> m_AttachmentNames;
     };
 
     struct GL_RenderPass
@@ -72,6 +74,8 @@ namespace Glory
         virtual void FreeBuffer(BufferHandle& handle) override;
         virtual void FreeMesh(MeshHandle& handle) override;
         virtual void FreeTexture(TextureHandle& handle) override;
+        virtual void FreeRenderTexture(RenderTextureHandle& handle) override;
+        virtual void FreeRenderPass(RenderPassHandle& handle) override;
 
     private:
         GraphicsResources<GL_Buffer> m_Buffers;
