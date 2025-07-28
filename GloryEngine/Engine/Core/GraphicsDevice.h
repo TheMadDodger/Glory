@@ -17,11 +17,11 @@ namespace Glory
 	class TextureAtlas;
 	class PipelineData;
 
-	struct TextureCreateInfo;
-	struct RenderTextureCreateInfo;
-
 	typedef struct UUID BufferHandle;
 	typedef struct UUID MeshHandle;
+	typedef struct UUID TextureHandle;
+	typedef struct UUID RenderTextureHandle;
+	typedef struct UUID RenderPassHandle;
 
 	enum BufferType
 	{
@@ -76,6 +76,11 @@ namespace Glory
 		std::vector<T> m_Resources;
 	};
 
+	struct RenderPassInfo
+	{
+		RenderTextureCreateInfo RenderTextureInfo;
+	};
+
 	class GraphicsDevice
 	{
 	public:
@@ -105,12 +110,22 @@ namespace Glory
 			uint32_t indexCount, uint32_t stride, PrimitiveType primitiveType,
 			const std::vector<AttributeType>& attributeTypes) = 0;
 
+		/* Texture */
+		virtual TextureHandle CreateTexture(TextureData* pTexture) = 0;
+		virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels = nullptr) = 0;
+		/* Render texture */
+		virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info) = 0;
+		/* Render pass */
+		virtual RenderPassHandle CreateRenderPass(const RenderPassInfo& info) = 0;
+
 		/* Free memory */
 
 		/** @brief Free a buffer from device memory */
 		virtual void FreeBuffer(BufferHandle& handle) = 0;
 		/** @brief Free a mesh from device memory, this also frees any buffers the mesh owns */
 		virtual void FreeMesh(MeshHandle& handle) = 0;
+		/** @brief Free a texture from device memory */
+		virtual void FreeTexture(MeshHandle& handle) = 0;
 
 	protected:
 		Debug& Debug();

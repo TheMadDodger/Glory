@@ -7,14 +7,40 @@ namespace Glory
     {
         size_t m_Size;
         uint32_t m_GLBufferID;
-        uint32_t m_Target;
-        uint32_t m_Usage;
+        uint32_t m_GLTarget;
+        uint32_t m_GLUsage;
     };
 
     struct GL_Mesh
     {
         uint32_t m_GLVertexArrayID;
         std::vector<BufferHandle> m_Buffers;
+    };
+
+    struct GL_Texture
+    {
+        uint32_t m_GLTextureID;
+        uint32_t m_GLTextureType;
+        uint32_t m_GLFormat;
+        uint32_t m_GLInternalFormat;
+        uint32_t m_GLDataType;
+
+        int m_GLMinFilter;
+        int m_GLMagFilter;
+        int m_GLTextureWrapS;
+        int m_GLTextureWrapT;
+        int m_GLTextureWrapR;
+    };
+
+    struct GL_RenderTexture
+    {
+        uint32_t m_GLFramebufferID;
+        RenderPassHandle m_RenderPass;
+    };
+
+    struct GL_RenderPass
+    {
+        RenderTextureHandle m_RenderTexture;
     };
 
     class OpenGLGraphicsModule;
@@ -38,11 +64,20 @@ namespace Glory
             uint32_t indexCount, uint32_t stride, PrimitiveType primitiveType,
             const std::vector<AttributeType>& attributeTypes) override;
 
+        virtual TextureHandle CreateTexture(TextureData* pTexture) override;
+        virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels = nullptr) override;
+        virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info) override;
+        virtual RenderPassHandle CreateRenderPass(const RenderPassInfo& info) override;
+
         virtual void FreeBuffer(BufferHandle& handle) override;
         virtual void FreeMesh(MeshHandle& handle) override;
+        virtual void FreeTexture(TextureHandle& handle) override;
 
     private:
         GraphicsResources<GL_Buffer> m_Buffers;
         GraphicsResources<GL_Mesh> m_Meshes;
+        GraphicsResources<GL_Texture> m_Textures;
+        GraphicsResources<GL_RenderTexture> m_RenderTextures;
+        GraphicsResources<GL_RenderPass> m_RenderPasses;
     };
 }

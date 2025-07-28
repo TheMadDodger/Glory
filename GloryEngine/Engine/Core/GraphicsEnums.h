@@ -877,6 +877,49 @@ namespace Glory
         ShaderType Type;
     };
 
+    struct TextureCreateInfo
+    {
+        uint32_t m_Width;
+        uint32_t m_Height;
+        PixelFormat m_PixelFormat;
+        PixelFormat m_InternalFormat;
+        ImageType m_ImageType;
+        DataType m_Type;
+        uint32_t m_UsageFlags;
+        uint32_t m_SharingMode;
+        ImageAspect m_ImageAspectFlags;
+        SamplerSettings m_SamplerSettings = SamplerSettings();
+    };
+
+    struct Attachment
+    {
+        Attachment(const std::string& name, const PixelFormat& pixelFormat, const PixelFormat& internalFormat,
+            const ImageType& imageType, const ImageAspect& imageAspect, DataType type = DataType::DT_UByte, bool autoBind = true);
+        Attachment(const std::string& name, const TextureCreateInfo& textureInfo, bool autoBind = true);
+
+        //PixelFormat::PF_R8G8B8A8Srgb
+        std::string Name;
+        PixelFormat InternalFormat;
+        PixelFormat Format;
+        ImageType ImageType;
+        ImageAspect ImageAspect;
+        DataType m_Type;
+        bool m_AutoBind;
+    };
+
+    struct RenderTextureCreateInfo
+    {
+    public:
+        RenderTextureCreateInfo();
+        RenderTextureCreateInfo(uint32_t width, uint32_t height, bool hasDepth, bool hasStencil = false);
+
+        uint32_t Width;
+        uint32_t Height;
+        bool HasDepth;
+        bool HasStencil;
+        std::vector<Attachment> Attachments;
+    };
+
     struct ShaderBufferInfo
     {
         std::string Name;
