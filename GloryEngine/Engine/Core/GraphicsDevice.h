@@ -126,6 +126,10 @@ namespace Glory
 		virtual void FreeMesh(MeshHandle& handle) = 0;
 		/** @brief Free a texture from device memory */
 		virtual void FreeTexture(MeshHandle& handle) = 0;
+		/** @brief Free a render texture from device memory */
+		virtual void FreeRenderTexture(RenderTextureHandle& handle) = 0;
+		/** @brief Free a render pass from device memory */
+		virtual void FreeRenderPass(RenderPassHandle& handle) = 0;
 
 	protected:
 		Debug& Debug();

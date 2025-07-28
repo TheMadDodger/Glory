@@ -68,7 +68,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		std::stringstream str;
-		str << "OpenGLDevice: Buffer " << handle << " created with size " << bufferSize;
+		str << "OpenGLDevice: Buffer " << handle << " created with size " << bufferSize << ".";
 		Debug().LogInfo(str.str());
 
 		return handle;
@@ -252,7 +252,7 @@ namespace Glory
 		}
 
 		std::stringstream str;
-		str << "OpenGLDevice: Mesh " << handle << " created";
+		str << "OpenGLDevice: Mesh " << handle << " created.";
 		Debug().LogInfo(str.str());
 
 		return handle;
@@ -388,6 +388,12 @@ namespace Glory
 
 	RenderTextureHandle OpenGLDevice::CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info)
 	{
+		if (info.Width == 0 || info.Height == 0)
+		{
+			Debug().LogError("OpenGLDevice::CreateRenderTexture: Invalid RenderTexture size.");
+			return NULL;
+		}
+
 		GL_RenderPass* glRenderPass = m_RenderPasses.Find(renderPass);
 		if (!glRenderPass)
 		{
@@ -405,101 +411,112 @@ namespace Glory
 		glBindFramebuffer(GL_FRAMEBUFFER, renderTexture.m_GLFramebufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
-
-
-		//m_Names.resize(m_CreateInfo.Attachments.size() + (m_CreateInfo.HasDepth ? 1 : 0) + (m_CreateInfo.HasStencil ? 1 : 0));
+		const size_t numAttachments = info.Attachments.size() + (info.HasDepth ? 1 : 0) + (info.HasStencil ? 1 : 0);
+		renderTexture.m_AttachmentNames.resize(numAttachments);
+		renderTexture.m_Textures.resize(numAttachments);
 
 		SamplerSettings sampler;
 		sampler.MipmapMode = Filter::F_None;
 		sampler.MinFilter = Filter::F_Nearest;
 		sampler.MagFilter = Filter::F_Nearest;
 
-		//size_t textureCounter = 0;
-		//for (size_t i = 0; i < info.Attachments.size(); ++i)
-		//{
-		//	Attachment attachment = info.Attachments[i];
-		//	Texture* pTexture = m_pOwner->CreateTexture({ info.Width, info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler });
-		//	m_pTextures[i] = pTexture;
-		//	m_NameToTextureIndex[attachment.Name] = i;
-		//	m_Names[i] = attachment.Name;
-		//	++textureCounter;
-		//}
+		size_t textureCounter = 0;
+		for (size_t i = 0; i < info.Attachments.size(); ++i)
+		{
+			Attachment attachment = info.Attachments[i];
+			renderTexture.m_Textures[i] = CreateTexture({info.Width, info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler});
+			renderTexture.m_AttachmentNames[i] = attachment.Name;
+			++textureCounter;
+		}
 
-		//if (m_CreateInfo.HasDepth)
-		//{
-		//	const size_t depthIndex = textureCounter;
-		//	Texture* pDepthTexture = m_pOwner->CreateTexture({ m_Width, m_Height, PixelFormat::PF_Depth, PixelFormat::PF_Depth32, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
-		//	m_pTextures[depthIndex] = pDepthTexture;
-		//	m_NameToTextureIndex["Depth"] = depthIndex;
-		//	m_Names[depthIndex] = "Depth";
-		//	++textureCounter;
-		//}
+		size_t depthIndex = 0, stencilIndex = 0;
+		if (info.HasDepth)
+		{
+			depthIndex = textureCounter;
+			renderTexture.m_Textures[depthIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Depth, PixelFormat::PF_Depth32, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
+			renderTexture.m_AttachmentNames[depthIndex] = "Depth";
+			++textureCounter;
+		}
 
-		//if (m_CreateInfo.HasStencil)
-		//{
-		//	const size_t stencilIndex = textureCounter;
-		//	Texture* pDepthTexture = m_pOwner->CreateTexture({ m_Width, m_Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Stencil, sampler });
-		//	m_pTextures[stencilIndex] = pDepthTexture;
-		//	m_NameToTextureIndex["Stencil"] = stencilIndex;
-		//	m_Names[stencilIndex] = "Stencil";
-		//	++textureCounter;
-		//}
+		if (info.HasStencil)
+		{
+			stencilIndex = textureCounter;
+			renderTexture.m_Textures[stencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Stencil, sampler });
+			renderTexture.m_AttachmentNames[stencilIndex] = "Stencil";
+			++textureCounter;
+		}
 
+		// Initialize the framebuffer
+		const size_t attachmentCount = info.Attachments.size();
+		std::vector<GLenum> drawBuffers = std::vector<GLenum>(attachmentCount);
+		for (uint32_t i = 0; i < attachmentCount; i++)
+		{
+			drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+			GL_Texture* glTexture = m_Textures.Find(renderTexture.m_Textures[i]);
+			glFramebufferTexture(GL_FRAMEBUFFER, drawBuffers[i], glTexture->m_GLTextureID, 0);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
 
+		if (info.HasDepth)
+		{
+			GL_Texture* glTexture = m_Textures.Find(renderTexture.m_Textures[depthIndex]);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, glTexture->m_GLTextureID, 0);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+		if (info.HasStencil)
+		{
+			GL_Texture* glTexture = m_Textures.Find(renderTexture.m_Textures[stencilIndex]);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, glTexture->m_GLTextureID, 0);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
 
-		//// Initialize the framebuffer
-		//const size_t attachmentCount = info.Attachments.size();
-		//std::vector<GLenum> drawBuffers = std::vector<GLenum>(attachmentCount);
-		//for (uint32_t i = 0; i < attachmentCount; i++)
-		//{
-		//	drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
-		//	GLTexture* pTexture = (GLTexture*)m_pTextures[i];
-		//	glFramebufferTexture(GL_FRAMEBUFFER, drawBuffers[i], pTexture->GetID(), 0);
-		//	OpenGLGraphicsModule::LogGLError(glGetError());
-		//}
+		if (attachmentCount > 0)
+		{
+			glDrawBuffers(attachmentCount, &drawBuffers[0]);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
 
-		//if (info.HasDepth)
-		//{
-		//	GLTexture* pDepthTexture = (GLTexture*)GetTextureAttachment("Depth");
-		//	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, pDepthTexture->GetID(), 0);
-		//	OpenGLGraphicsModule::LogGLError(glGetError());
-		//}
-		//if (info.HasStencil)
-		//{
-		//	GLTexture* pStencilTexture = (GLTexture*)GetTextureAttachment("Stencil");
-		//	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, pStencilTexture->GetID(), 0);
-		//	OpenGLGraphicsModule::LogGLError(glGetError());
-		//}
-
-		//if (attachmentCount > 0)
-		//{
-		//	glDrawBuffers(attachmentCount, &drawBuffers[0]);
-		//	OpenGLGraphicsModule::LogGLError(glGetError());
-		//}
-
-		//// Check if something went wrong
-		//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		//{
-		//	m_pOwner->GetEngine()->GetDebug().LogError("There was an error when trying to create a frame buffer!");
-		//	return;
-		//}
+		// Check if something went wrong
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		{
+			Debug().LogError("OpenGLDevice::CreateRenderTexture: There was an error when trying to create a frame buffer.");
+			return NULL;
+		}
 
 		glBindTexture(GL_TEXTURE_2D, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindFramebuffer(GL_FRAMEBUFFER, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
-
+		std::stringstream str;
+		str << "OpenGLDevice: RenderTexture " << handle << " created with " << renderTexture.m_Textures.size() << " attachments.";
+		Debug().LogInfo(str.str());
 
 		return handle;
 	}
 
 	RenderPassHandle OpenGLDevice::CreateRenderPass(const RenderPassInfo& info)
 	{
+		if (info.RenderTextureInfo.Width == 0 || info.RenderTextureInfo.Height == 0)
+		{
+			Debug().LogError("OpenGLDevice::CreateRenderPass: Invalid RenderTexture size.");
+			return NULL;
+		}
+
 		RenderPassHandle handle;
 		GL_RenderPass& renderPass = m_RenderPasses.Emplace(handle, GL_RenderPass());
-
 		renderPass.m_RenderTexture = CreateRenderTexture(handle, info.RenderTextureInfo);
+
+		if (renderPass.m_RenderTexture == NULL)
+		{
+			m_RenderPasses.Erase(handle);
+			Debug().LogError("OpenGLDevice::CreateRenderPass: Failed to create RenderTexture for RenderPass.");
+			return NULL;
+		}
+
+		std::stringstream str;
+		str << "OpenGLDevice: RenderPass " << handle << " created.";
+		Debug().LogInfo(str.str());
 
 		return handle;
 	}
@@ -550,20 +567,69 @@ namespace Glory
 
 	void OpenGLDevice::FreeTexture(TextureHandle& handle)
 	{
-		GL_Texture* textures = m_Textures.Find(handle);
-		if (!textures)
+		GL_Texture* texture = m_Textures.Find(handle);
+		if (!texture)
 		{
-			Debug().LogError("OpenGLDevice::FreeMesh: Invalid mesh handle.");
+			Debug().LogError("OpenGLDevice::FreeTexture: Invalid texture handle.");
 			return;
 		}
 
-		glDeleteTextures(1, &textures->m_GLTextureID);
+		glDeleteTextures(1, &texture->m_GLTextureID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		m_Textures.Erase(handle);
 
 		std::stringstream str;
 		str << "OpenGLDevice: Texture " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+
+		handle = 0;
+	}
+
+	void OpenGLDevice::FreeRenderTexture(RenderTextureHandle& handle)
+	{
+		GL_RenderTexture* renderTexture = m_RenderTextures.Find(handle);
+		if (!renderTexture)
+		{
+			Debug().LogError("OpenGLDevice::FreeRenderTexture: Invalid render texture handle.");
+			return;
+		}
+
+		glDeleteFramebuffers(1, &renderTexture->m_GLFramebufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		for (auto texture : renderTexture->m_Textures)
+		{
+			FreeTexture(texture);
+		}
+
+		renderTexture->m_Textures.clear();
+		renderTexture->m_AttachmentNames.clear();
+
+		m_Textures.Erase(handle);
+
+		std::stringstream str;
+		str << "OpenGLDevice: RenderTexture " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+
+		handle = 0;
+	}
+
+	void OpenGLDevice::FreeRenderPass(RenderPassHandle& handle)
+	{
+		GL_RenderPass* renderPass = m_RenderPasses.Find(handle);
+		if (!renderPass)
+		{
+			Debug().LogError("OpenGLDevice::FreeRenderPass: Invalid render pass handle.");
+			return;
+		}
+
+		FreeRenderTexture(renderPass->m_RenderTexture);
+
+		m_Textures.Erase(handle);
+
+		std::stringstream str;
+		str << "OpenGLDevice: RenderPass " << handle << " was freed from device memory.";
 		Debug().LogInfo(str.str());
 
 		handle = 0;
