@@ -177,6 +177,11 @@ namespace Glory
 		return m_pSecondaryOutputTexture;
 	}
 
+	uint64_t& Camera::GetUserHandle(const std::string& name)
+	{
+		return m_UserHandles[name];
+	}
+
 	float Camera::GetNear() const
 	{
 		return m_Near;
