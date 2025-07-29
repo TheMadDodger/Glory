@@ -14,6 +14,9 @@ namespace Glory
     struct GL_Mesh
     {
         uint32_t m_GLVertexArrayID;
+        uint32_t m_GLPrimitiveType;
+        uint32_t m_VertexCount;
+        uint32_t m_IndexCount;
         std::vector<BufferHandle> m_Buffers;
     };
 
@@ -54,6 +57,12 @@ namespace Glory
         virtual ~OpenGLDevice();
 
         OpenGLGraphicsModule* GraphicsModule();
+
+    private: /* Render commands */
+        virtual void BeginRenderPass(RenderPassHandle handle) override;
+        virtual void EndRenderPass() override;
+
+        virtual void DrawMesh(MeshHandle handle) override;
 
     private: /* Resource management */
         virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;

@@ -29,6 +29,49 @@ namespace Glory
 		return static_cast<OpenGLGraphicsModule*>(m_pModule);
 	}
 
+	void OpenGLDevice::BeginRenderPass(RenderPassHandle handle)
+	{
+		GL_RenderPass* renderPass = m_RenderPasses.Find(handle);
+		if (!renderPass)
+		{
+			Debug().LogError("OpenGLDevice::BeginRenderPass: Invalid render pass handle.");
+			return;
+		}
+		GL_RenderTexture* renderTexture = m_RenderTextures.Find(renderPass->m_RenderTexture);
+		if (!renderTexture)
+		{
+			Debug().LogError("OpenGLDevice::BeginRenderPass: Render pass has an invalid render texture handle.");
+			return;
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, renderTexture->m_GLFramebufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OpenGLDevice::EndRenderPass()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OpenGLDevice::DrawMesh(MeshHandle handle)
+	{
+		GL_Mesh* mesh = m_Meshes.Find(handle);
+		if (!mesh)
+		{
+			Debug().LogError("OpenGLDevice::DrawMesh: Invalid mesh handle.");
+			return;
+		}
+
+		glBindVertexArray(mesh->m_GLVertexArrayID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		if (mesh->m_IndexCount == 0) glDrawArrays(mesh->m_GLPrimitiveType, 0, mesh->m_VertexCount);
+		else glDrawElements(mesh->m_GLPrimitiveType, mesh->m_IndexCount, GL_UNSIGNED_INT, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindVertexArray(NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
 #pragma region Resource Management
 
 	BufferHandle OpenGLDevice::CreateBuffer(size_t bufferSize, BufferType type)
@@ -79,7 +122,7 @@ namespace Glory
 		GL_Buffer* buffer = m_Buffers.Find(handle);
 		if (!buffer)
 		{
-			Debug().LogError("OpenGLDevice::AssignBuffer: Invalid buffer handle");
+			Debug().LogError("OpenGLDevice::AssignBuffer: Invalid buffer handle.");
 			return;
 		}
 
@@ -144,6 +187,9 @@ namespace Glory
 		MeshHandle handle;
 		GL_Mesh& mesh = m_Meshes.Emplace(handle, GL_Mesh());
 		mesh.m_Buffers = std::move(buffers);
+		mesh.m_GLPrimitiveType = GLConverter::TO_GLPRIMITIVETYPE.at(primitiveType);
+		mesh.m_VertexCount = vertexCount;
+		mesh.m_IndexCount = indexCount;
 
 		glGenVertexArrays(1, &mesh.m_GLVertexArrayID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
