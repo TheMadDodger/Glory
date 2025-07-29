@@ -87,6 +87,12 @@ namespace Glory
 		GraphicsDevice(Module* pModule);
 		virtual ~GraphicsDevice();
 
+	public: /* Rendering commands */
+		virtual void BeginRenderPass(RenderPassHandle handle) = 0;
+		virtual void EndRenderPass() = 0;
+
+		virtual void DrawMesh(MeshHandle handle) = 0;
+
 	public: /* Resource mamagement */
 		
 		/* Buffer */
