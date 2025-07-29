@@ -59,6 +59,7 @@ namespace Glory
 		}
 
 		void* GetUserDataVoid(const std::string& name);
+		uint64_t& GetUserHandle(const std::string& name);
 
 		float GetNear() const;
 		float GetFar() const;
