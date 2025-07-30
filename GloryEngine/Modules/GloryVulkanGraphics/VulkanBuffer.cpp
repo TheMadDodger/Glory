@@ -3,6 +3,8 @@
 #include "Device.h"
 #include "VulkanStructsConverter.h"
 
+#include "VulkanDevice.h"
+
 #include <Engine.h>
 
 namespace Glory
@@ -14,13 +16,9 @@ namespace Glory
 
     VulkanBuffer::~VulkanBuffer()
 	{
-        VulkanGraphicsModule* pGraphics = m_pOwner->GetEngine()->GetMainModule<VulkanGraphicsModule>();
-        VulkanDeviceManager& deviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = deviceManager.GetSelectedDevice();
-        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
-
-        deviceData.LogicalDevice.destroyBuffer(m_Buffer);
-        deviceData.LogicalDevice.freeMemory(m_BufferMemory);
+        VulkanDevice* pDevice = static_cast<VulkanDevice*>(m_pOwner->GetEngine()->ActiveGraphicsDevice());
+        pDevice->LogicalDevice().destroyBuffer(m_Buffer);
+        pDevice->LogicalDevice().freeMemory(m_BufferMemory);
 	}
 
     void VulkanBuffer::CreateBuffer()
@@ -32,15 +30,14 @@ namespace Glory
 
         VulkanGraphicsModule* pGraphics = m_pOwner->GetEngine()->GetMainModule<VulkanGraphicsModule>();
         VulkanDeviceManager& pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager.GetSelectedDevice();
-        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
+        VulkanDevice* pDevice = static_cast<VulkanDevice*>(m_pOwner->GetEngine()->ActiveGraphicsDevice());
 
-        vk::Result result = deviceData.LogicalDevice.createBuffer(&m_BufferCreateInfo, nullptr, &m_Buffer);
+        vk::Result result = pDevice->LogicalDevice().createBuffer(&m_BufferCreateInfo, nullptr, &m_Buffer);
         if (result != vk::Result::eSuccess)
             throw std::runtime_error("failed to create vertex buffer!");
 
         vk::MemoryRequirements memRequirements;
-        deviceData.LogicalDevice.getBufferMemoryRequirements(m_Buffer, &memRequirements);
+        pDevice->LogicalDevice().getBufferMemoryRequirements(m_Buffer, &memRequirements);
 
         uint32_t typeFilter = memRequirements.memoryTypeBits;
         vk::MemoryPropertyFlags properties = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;//(vk::MemoryPropertyFlagBits)m_MemoryFlags;
@@ -51,11 +48,11 @@ namespace Glory
         allocateInfo.allocationSize = memRequirements.size;
         allocateInfo.memoryTypeIndex = memoryIndex;
 
-        result = deviceData.LogicalDevice.allocateMemory(&allocateInfo, nullptr, &m_BufferMemory);
+        result = pDevice->LogicalDevice().allocateMemory(&allocateInfo, nullptr, &m_BufferMemory);
         if (result != vk::Result::eSuccess)
             throw std::runtime_error("Failed to allocate vertex buffer memory!");
 
-        deviceData.LogicalDevice.bindBufferMemory(m_Buffer, m_BufferMemory, 0);
+        pDevice->LogicalDevice().bindBufferMemory(m_Buffer, m_BufferMemory, 0);
 	}
 
     void VulkanBuffer::Assign(const void* data)
@@ -64,15 +61,14 @@ namespace Glory
 
         VulkanGraphicsModule* pGraphics = m_pOwner->GetEngine()->GetMainModule<VulkanGraphicsModule>();
         VulkanDeviceManager& pDeviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = pDeviceManager.GetSelectedDevice();
-        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
+        VulkanDevice* pDevice = static_cast<VulkanDevice*>(m_pOwner->GetEngine()->ActiveGraphicsDevice());
 
         void* dstData;
-        vk::Result result = deviceData.LogicalDevice.mapMemory(m_BufferMemory, (vk::DeviceSize)0, (vk::DeviceSize)m_BufferCreateInfo.size, (vk::MemoryMapFlags)0, &dstData);
+        vk::Result result = pDevice->LogicalDevice().mapMemory(m_BufferMemory, (vk::DeviceSize)0, (vk::DeviceSize)m_BufferCreateInfo.size, (vk::MemoryMapFlags)0, &dstData);
         if (result != vk::Result::eSuccess)
             throw std::runtime_error("Failed to map memory!");
         memcpy(dstData, data, (size_t)m_BufferCreateInfo.size);
-        deviceData.LogicalDevice.unmapMemory(m_BufferMemory);
+        pDevice->LogicalDevice().unmapMemory(m_BufferMemory);
     }
 
     void VulkanBuffer::Assign(const void* data, uint32_t size)
@@ -84,15 +80,14 @@ namespace Glory
     {
         VulkanGraphicsModule* pGraphics = m_pOwner->GetEngine()->GetMainModule<VulkanGraphicsModule>();
         VulkanDeviceManager& deviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = deviceManager.GetSelectedDevice();
-        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
+        VulkanDevice* pDevice = static_cast<VulkanDevice*>(m_pOwner->GetEngine()->ActiveGraphicsDevice());
 
         void* dstData;
-        vk::Result result = deviceData.LogicalDevice.mapMemory(m_BufferMemory, (vk::DeviceSize)offset, (vk::DeviceSize)size, (vk::MemoryMapFlags)0, &dstData);
+        vk::Result result = pDevice->LogicalDevice().mapMemory(m_BufferMemory, (vk::DeviceSize)offset, (vk::DeviceSize)size, (vk::MemoryMapFlags)0, &dstData);
         if (result != vk::Result::eSuccess)
             throw std::runtime_error("Failed to map memory!");
         memcpy(dstData, data, (size_t)m_BufferCreateInfo.size);
-        deviceData.LogicalDevice.unmapMemory(m_BufferMemory);
+        pDevice->LogicalDevice().unmapMemory(m_BufferMemory);
     }
 
     void VulkanBuffer::CopyFrom(Buffer* source, uint32_t size)

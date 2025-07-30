@@ -19,4 +19,9 @@ namespace Glory
 	{
 		return m_IsDirty;
 	}
+
+	UUID GPUResource::ID() const
+	{
+		return m_UUID;
+	}
 }
