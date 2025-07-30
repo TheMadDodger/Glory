@@ -9,11 +9,14 @@
 #include "VulkanResourceManager.h"
 #include "VulkanStructsConverter.h"
 
+#include "VulkanDevice.h"
+
 #include <fstream>
 #include <chrono>
 #include <iostream>
 
 #include <Engine.h>
+#include <Debug.h>
 #include <Window.h>
 #include <VertexHelpers.h>
 
@@ -105,22 +108,75 @@ namespace Glory
         m_pMainWindow->GetVulkanSurface(m_cInstance, &m_cSurface);
         m_Surface = vk::SurfaceKHR(m_cSurface);
 
+        // Get the physical devices
+        VkInstance instance = m_cInstance;
+        uint32_t deviceCount = 0;
+        vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+        std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
+        vkEnumeratePhysicalDevices(instance, &deviceCount, physicalDevices.data());
+
+        std::stringstream str;
+        str << "Vulkan: Available physical devices: " << deviceCount;
+        m_pEngine->GetDebug().LogInfo(str.str());
+        str.str("");
+
+        if (physicalDevices.size() <= 0)
+        {
+            m_pEngine->GetDebug().LogFatalError("VulkanGraphicsModule::OnInitialize: No physical devices found!");
+            return;
+        }
+
+        m_Devices.reserve(deviceCount);
+
+        const std::vector<const char*> deviceExtensions = {
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME
+        };
+
+        int index = 0;
+        bool supportedDeviceAvailable = false;
+
+        for (const auto& device : physicalDevices)
+        {
+            VulkanDevice& vkDevice = m_Devices.emplace_back(this, (vk::PhysicalDevice)device);
+            vkDevice.LoadData();
+            vkDevice.CheckSupport(deviceExtensions);
+            supportedDeviceAvailable |= vkDevice.SupportCheckPassed();
+
+            str << index << ": " << device;
+            m_pEngine->GetDebug().LogInfo(str.str());
+            str.str("");
+            ++index;
+        }
+
+        if (!supportedDeviceAvailable)
+        {
+            m_pEngine->GetDebug().LogFatalError("VulkanGraphicsModule::OnInitialize: No supported devices found!");
+            return;
+        }
+
+        for (auto& device : m_Devices)
+        {
+            if (!device.SupportCheckPassed()) continue;
+            device.CreateLogicalDevice();
+            m_pEngine->AddGraphicsDevice(&device);
+        }
+
         /* Load device */
-        LoadPhysicalDevices();
-        m_DeviceManager.GetSelectedDevice()->CreateLogicalDevice(this);
+        //LoadPhysicalDevices();
+        //m_DeviceManager.GetSelectedDevice()->CreateLogicalDevice(this);
 
         /* Create swapchain and depth image */
-        m_SwapChain.Initialize(this, m_pMainWindow, m_DeviceManager.GetSelectedDevice());
-        m_DepthImage.Initialize(this, m_SwapChain.GetExtent());
+        //m_SwapChain.Initialize(this, m_pMainWindow, m_DeviceManager.GetSelectedDevice());
+        //m_DepthImage.Initialize(this, m_SwapChain.GetExtent());
 
-        RenderPassCreateInfo createInfo{};
-        createInfo.Extent = m_SwapChain.GetExtent();
-        createInfo.Format = m_SwapChain.GetFormat();
-        createInfo.ImageViews = m_SwapChain.m_SwapChainImageViews;
-        createInfo.HasDepth = true;
-        m_MainRenderPass.reset(new VulkanRenderPass(this, std::move(createInfo)));
-        m_MainRenderPass->Initialize();
-        m_CommandBuffers.Initialize();
+        //RenderPassCreateInfo createInfo{};
+        //createInfo.Extent = m_SwapChain.GetExtent();
+        //createInfo.Format = m_SwapChain.GetFormat();
+        //createInfo.ImageViews = m_SwapChain.m_SwapChainImageViews;
+        //createInfo.HasDepth = true;
+        //m_MainRenderPass.reset(new VulkanRenderPass(this, std::move(createInfo)));
+        //m_MainRenderPass->Initialize();
+        //m_CommandBuffers.Initialize();
 
         //CreateDepthResources();
         //CreateMainRenderPass();
@@ -132,39 +188,39 @@ namespace Glory
         //CreateDeferredTestPipeline();
         //CreateCommandPools();
 
-        LogicalDeviceData deviceData = m_DeviceManager.GetSelectedDevice()->GetLogicalDeviceData();
+        //LogicalDeviceData deviceData = m_DeviceManager.GetSelectedDevice()->GetLogicalDeviceData();
 
         /* Create sync objects */
-        m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-        m_ImagesInFlight.resize(m_SwapChain.GetImageCount(), VK_NULL_HANDLE);
+        //m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        //m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        //m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+        //m_ImagesInFlight.resize(m_SwapChain.GetImageCount(), VK_NULL_HANDLE);
 
-        vk::SemaphoreCreateInfo semaphoreCreateInfo = vk::SemaphoreCreateInfo();
-        vk::FenceCreateInfo fenceCreateInfo = vk::FenceCreateInfo()
-            .setFlags(vk::FenceCreateFlagBits::eSignaled);
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-        {
-            if (deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]) != vk::Result::eSuccess ||
-                deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]) != vk::Result::eSuccess ||
-                deviceData.LogicalDevice.createFence(&fenceCreateInfo, nullptr, &m_InFlightFences[i]) != vk::Result::eSuccess)
-            {
-                throw std::runtime_error("failed to create sync objects for a frame!");
-            }
-        }
+        //vk::SemaphoreCreateInfo semaphoreCreateInfo = vk::SemaphoreCreateInfo();
+        //vk::FenceCreateInfo fenceCreateInfo = vk::FenceCreateInfo()
+        //    .setFlags(vk::FenceCreateFlagBits::eSignaled);
+        //for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        //{
+        //    if (deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]) != vk::Result::eSuccess ||
+        //        deviceData.LogicalDevice.createSemaphore(&semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]) != vk::Result::eSuccess ||
+        //        deviceData.LogicalDevice.createFence(&fenceCreateInfo, nullptr, &m_InFlightFences[i]) != vk::Result::eSuccess)
+        //    {
+        //        throw std::runtime_error("failed to create sync objects for a frame!");
+        //    }
+        //}
     }
 
     void VulkanGraphicsModule::OnCleanup()
     {
-        Device* pDevice = m_DeviceManager.GetSelectedDevice();
-        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
-        for (auto& iter : m_Samplers)
-        {
-            deviceData.LogicalDevice.destroySampler(iter.second, nullptr);
-        }
-
-        m_DeviceManager.GetSelectedDevice()->GetLogicalDeviceData().LogicalDevice.waitIdle();
-        m_Extensions.clear();
+        //Device* pDevice = m_DeviceManager.GetSelectedDevice();
+        //LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
+        //for (auto& iter : m_Samplers)
+        //{
+        //    deviceData.LogicalDevice.destroySampler(iter.second, nullptr);
+        //}
+        //
+        //m_DeviceManager.GetSelectedDevice()->GetLogicalDeviceData().LogicalDevice.waitIdle();
+        //m_Extensions.clear();
 
 #if defined(_DEBUG)
         VkInstance instance = VkInstance(m_Instance);
@@ -175,15 +231,15 @@ namespace Glory
         }
 #endif
 
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-        {
-            deviceData.LogicalDevice.destroySemaphore(m_ImageAvailableSemaphores[i]);
-            deviceData.LogicalDevice.destroySemaphore(m_RenderFinishedSemaphores[i]);
-            deviceData.LogicalDevice.destroyFence(m_InFlightFences[i]);
-        }
-        m_ImageAvailableSemaphores.clear();
-        m_RenderFinishedSemaphores.clear();
-        m_InFlightFences.clear();
+        //for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        //{
+        //    deviceData.LogicalDevice.destroySemaphore(m_ImageAvailableSemaphores[i]);
+        //    deviceData.LogicalDevice.destroySemaphore(m_RenderFinishedSemaphores[i]);
+        //    deviceData.LogicalDevice.destroyFence(m_InFlightFences[i]);
+        //}
+        //m_ImageAvailableSemaphores.clear();
+        //m_RenderFinishedSemaphores.clear();
+        //m_InFlightFences.clear();
     }
 
 //    void VulkanGraphicsModule::Initialize()
@@ -1071,12 +1127,10 @@ namespace Glory
     {
         // Create texture sampler
         auto samplerCreateInfo = VKConverter::GetVulkanSamplerInfo(settings);
-
-        Device* pDevice = m_DeviceManager.GetSelectedDevice();
-        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
+        VulkanDevice* pDevice = static_cast<VulkanDevice*>(m_pEngine->ActiveGraphicsDevice());
 
         vk::Sampler newSampler;
-        if (deviceData.LogicalDevice.createSampler(&samplerCreateInfo, nullptr, &newSampler) != vk::Result::eSuccess)
+        if (pDevice->LogicalDevice().createSampler(&samplerCreateInfo, nullptr, &newSampler) != vk::Result::eSuccess)
             throw std::runtime_error("Failed to create texture sampler!");
         return m_Samplers.emplace(settings, newSampler).first->second;
     }
@@ -1085,79 +1139,79 @@ namespace Glory
     {
         GraphicsModule::OnBeginFrame();
 
-        LogicalDeviceData deviceData = m_DeviceManager.GetSelectedDevice()->GetLogicalDeviceData();
-
-        deviceData.LogicalDevice.waitForFences(1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
-        deviceData.LogicalDevice.acquireNextImageKHR(m_SwapChain.GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &m_CurrentImageIndex);
-
-        // Check if a previous frame is using this image (i.e. there is its fence to wait on)
-        if (m_ImagesInFlight[m_CurrentImageIndex] != VK_NULL_HANDLE) {
-            deviceData.LogicalDevice.waitForFences(1, &m_ImagesInFlight[m_CurrentImageIndex], VK_TRUE, UINT64_MAX);
-        }
-        // Mark the image as now being in use by this frame
-        m_ImagesInFlight[m_CurrentImageIndex] = m_InFlightFences[m_CurrentFrame];
-
-        //UpdateUniformBuffer(imageIndex);
-
-        // Begin the current frame command buffer
-        vk::CommandBufferBeginInfo commandBufferBeginInfo = vk::CommandBufferBeginInfo()
-            .setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit)
-            .setPInheritanceInfo(nullptr);
-
-        vk::CommandBuffer commandBuffer = m_CommandBuffers.GetCurrentFrameCommandBuffer();
-        if (commandBuffer.begin(&commandBufferBeginInfo) != vk::Result::eSuccess)
-            throw std::runtime_error("failed to begin recording command buffer!");
+        //LogicalDeviceData deviceData = m_DeviceManager.GetSelectedDevice()->GetLogicalDeviceData();
+        //
+        //deviceData.LogicalDevice.waitForFences(1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
+        //deviceData.LogicalDevice.acquireNextImageKHR(m_SwapChain.GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &m_CurrentImageIndex);
+        //
+        //// Check if a previous frame is using this image (i.e. there is its fence to wait on)
+        //if (m_ImagesInFlight[m_CurrentImageIndex] != VK_NULL_HANDLE) {
+        //    deviceData.LogicalDevice.waitForFences(1, &m_ImagesInFlight[m_CurrentImageIndex], VK_TRUE, UINT64_MAX);
+        //}
+        //// Mark the image as now being in use by this frame
+        //m_ImagesInFlight[m_CurrentImageIndex] = m_InFlightFences[m_CurrentFrame];
+        //
+        ////UpdateUniformBuffer(imageIndex);
+        //
+        //// Begin the current frame command buffer
+        //vk::CommandBufferBeginInfo commandBufferBeginInfo = vk::CommandBufferBeginInfo()
+        //    .setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit)
+        //    .setPInheritanceInfo(nullptr);
+        //
+        //vk::CommandBuffer commandBuffer = m_CommandBuffers.GetCurrentFrameCommandBuffer();
+        //if (commandBuffer.begin(&commandBufferBeginInfo) != vk::Result::eSuccess)
+        //    throw std::runtime_error("failed to begin recording command buffer!");
     }
 
     void VulkanGraphicsModule::OnEndFrame()
     {
         GraphicsModule::OnEndFrame();
 
-        LogicalDeviceData deviceData = m_DeviceManager.GetSelectedDevice()->GetLogicalDeviceData();
-
-        // End the current frame command buffer
-        vk::CommandBuffer commandBuffer = m_CommandBuffers.GetCurrentFrameCommandBuffer();
-        commandBuffer.end();
-
-        // Submit command buffer
-        vk::Semaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
-        vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
-
-        vk::Semaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
-        vk::SubmitInfo submitInfo = vk::SubmitInfo()
-            .setWaitSemaphoreCount(1)
-            .setPWaitSemaphores(waitSemaphores)
-            .setPWaitDstStageMask(waitStages)
-            .setCommandBufferCount(1)
-            .setPCommandBuffers(&commandBuffer)
-            .setSignalSemaphoreCount(1)
-            .setPSignalSemaphores(signalSemaphores);
-
-        deviceData.LogicalDevice.resetFences(1, &m_InFlightFences[m_CurrentFrame]);
-
-        if (deviceData.GraphicsQueue.submit(1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != vk::Result::eSuccess)
-            throw std::runtime_error("failed to submit draw command buffer!");
-
-        vk::SwapchainKHR swapChains[] = { m_SwapChain.GetSwapChain() };
-        vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR()
-            .setWaitSemaphoreCount(1)
-            .setPWaitSemaphores(signalSemaphores)
-            .setSwapchainCount(1)
-            .setPSwapchains(swapChains)
-            .setPImageIndices(&m_CurrentImageIndex)
-            .setPResults(nullptr);
-
-        if (deviceData.PresentQueue.presentKHR(&presentInfo) != vk::Result::eSuccess)
-            throw std::runtime_error("failed to present!");
-
-        deviceData.PresentQueue.waitIdle();
-
-        m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+        //LogicalDeviceData deviceData = m_DeviceManager.GetSelectedDevice()->GetLogicalDeviceData();
+        //
+        //// End the current frame command buffer
+        //vk::CommandBuffer commandBuffer = m_CommandBuffers.GetCurrentFrameCommandBuffer();
+        //commandBuffer.end();
+        //
+        //// Submit command buffer
+        //vk::Semaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
+        //vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+        //
+        //vk::Semaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
+        //vk::SubmitInfo submitInfo = vk::SubmitInfo()
+        //    .setWaitSemaphoreCount(1)
+        //    .setPWaitSemaphores(waitSemaphores)
+        //    .setPWaitDstStageMask(waitStages)
+        //    .setCommandBufferCount(1)
+        //    .setPCommandBuffers(&commandBuffer)
+        //    .setSignalSemaphoreCount(1)
+        //    .setPSignalSemaphores(signalSemaphores);
+        //
+        //deviceData.LogicalDevice.resetFences(1, &m_InFlightFences[m_CurrentFrame]);
+        //
+        //if (deviceData.GraphicsQueue.submit(1, &submitInfo, m_InFlightFences[m_CurrentFrame]) != vk::Result::eSuccess)
+        //    throw std::runtime_error("failed to submit draw command buffer!");
+        //
+        //vk::SwapchainKHR swapChains[] = { m_SwapChain.GetSwapChain() };
+        //vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR()
+        //    .setWaitSemaphoreCount(1)
+        //    .setPWaitSemaphores(signalSemaphores)
+        //    .setSwapchainCount(1)
+        //    .setPSwapchains(swapChains)
+        //    .setPImageIndices(&m_CurrentImageIndex)
+        //    .setPResults(nullptr);
+        //
+        //if (deviceData.PresentQueue.presentKHR(&presentInfo) != vk::Result::eSuccess)
+        //    throw std::runtime_error("failed to present!");
+        //
+        //deviceData.PresentQueue.waitIdle();
+        //
+        //m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
     vk::CommandBuffer VulkanGraphicsModule::BeginSingleTimeCommands()
     {
-        Device* pDevice = m_DeviceManager.GetSelectedDevice();
+        VulkanDevice* pDevice = static_cast<VulkanDevice*>(m_pEngine->ActiveGraphicsDevice());
         vk::CommandPool commandPool = pDevice->GetGraphicsCommandPool();
 
         vk::CommandBufferAllocateInfo allocInfo = vk::CommandBufferAllocateInfo();
@@ -1166,8 +1220,7 @@ namespace Glory
         allocInfo.commandBufferCount = 1;
 
         vk::CommandBuffer commandBuffer;
-        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
-        if (deviceData.LogicalDevice.allocateCommandBuffers(&allocInfo, &commandBuffer) != vk::Result::eSuccess)
+        if (pDevice->LogicalDevice().allocateCommandBuffers(&allocInfo, &commandBuffer) != vk::Result::eSuccess)
             throw std::runtime_error("Failed to allocate command buffer!");
 
         vk::CommandBufferBeginInfo beginInfo = vk::CommandBufferBeginInfo();
@@ -1179,9 +1232,8 @@ namespace Glory
 
     void VulkanGraphicsModule::EndSingleTimeCommands(vk::CommandBuffer commandBuffer)
     {
-        Device* pDevice = m_DeviceManager.GetSelectedDevice();
+        VulkanDevice* pDevice = static_cast<VulkanDevice*>(m_pEngine->ActiveGraphicsDevice());
         vk::CommandPool commandPool = pDevice->GetGraphicsCommandPool();
-        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
 
         commandBuffer.end();
 
@@ -1189,10 +1241,9 @@ namespace Glory
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &commandBuffer;
 
-        deviceData.GraphicsQueue.submit(1, &submitInfo, VK_NULL_HANDLE);
-        deviceData.GraphicsQueue.waitIdle();
-
-        deviceData.LogicalDevice.freeCommandBuffers(commandPool, 1, &commandBuffer);
+        pDevice->GraphicsQueue().submit(1, &submitInfo, VK_NULL_HANDLE);
+        pDevice->GraphicsQueue().waitIdle();
+        pDevice->LogicalDevice().freeCommandBuffers(commandPool, 1, &commandBuffer);
     }
 
     void VulkanGraphicsModule::TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags)
