@@ -10,10 +10,10 @@ namespace Glory
         VulkanTexture(TextureCreateInfo&& textureInfo);
         virtual ~VulkanTexture();
 
-        const vk::Image GetTextureImage() const;
-        const vk::DeviceMemory GetTextureImageMemory() const;
-        const vk::ImageView GetTextureImageView() const;
-        const vk::Sampler GetTextureSampler();
+        GLORY_API const vk::Image GetTextureImage() const;
+        GLORY_API const vk::DeviceMemory GetTextureImageMemory() const;
+        GLORY_API const vk::ImageView GetTextureImageView() const;
+        GLORY_API const vk::Sampler GetTextureSampler();
 
     private:
         GLORY_API virtual void Create(TextureData* pTextureData) override;
