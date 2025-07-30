@@ -29,6 +29,8 @@ namespace Glory
 		return static_cast<OpenGLGraphicsModule*>(m_pModule);
 	}
 
+#pragma region Commands
+
 	void OpenGLDevice::BeginRenderPass(RenderPassHandle handle)
 	{
 		GL_RenderPass* renderPass = m_RenderPasses.Find(handle);
@@ -45,11 +47,35 @@ namespace Glory
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, renderTexture->m_GLFramebufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glViewport(0, 0, renderTexture->m_Width, renderTexture->m_Height);
+	}
+
+	void OpenGLDevice::BeginPipeline(PipelineHandle handle)
+	{
+		GL_Pipeline* pipeline = m_Pipelines.Find(handle);
+		if (!pipeline)
+		{
+			Debug().LogError("OpenGLDevice::BeginPipeline: Invalid pipeline handle.");
+			return;
+		}
+
+		glUseProgram(pipeline->m_GLProgramID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
 	void OpenGLDevice::EndRenderPass()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OpenGLDevice::EndPipeline()
+	{
+		glUseProgram(NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
@@ -71,6 +97,8 @@ namespace Glory
 		glBindVertexArray(NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
+
+#pragma endregion
 
 #pragma region Resource Management
 
@@ -450,6 +478,8 @@ namespace Glory
 		RenderTextureHandle handle;
 		GL_RenderTexture& renderTexture = m_RenderTextures.Emplace(handle, GL_RenderTexture());
 		renderTexture.m_RenderPass = renderPass;
+		renderTexture.m_Width = info.Width;
+		renderTexture.m_Height = info.Height;
 
 		/* Create framebuffer */
 		glGenFramebuffers(1, &renderTexture.m_GLFramebufferID);
@@ -562,6 +592,98 @@ namespace Glory
 
 		std::stringstream str;
 		str << "OpenGLDevice: RenderPass " << handle << " created.";
+		Debug().LogInfo(str.str());
+
+		return handle;
+	}
+
+	ShaderHandle OpenGLDevice::CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function)
+	{
+		ShaderHandle handle;
+		GL_Shader& shader = m_Shaders.Emplace(handle, GL_Shader());
+		
+		const char* shaderSource = pShaderFileData->Data();
+
+		shader.m_GLShaderType = GLConverter::GetShaderStageFlag(shaderType);
+		shader.m_GLShaderID = glCreateShader(shader.m_GLShaderType);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glShaderSource(shader.m_GLShaderID, 1, &shaderSource, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glCompileShader(shader.m_GLShaderID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		int success;
+		char infoLog[512];
+		glGetShaderiv(shader.m_GLShaderID, GL_COMPILE_STATUS, &success);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		if (!success)
+		{
+			glGetShaderInfoLog(shader.m_GLShaderID, 512, NULL, infoLog);
+			Debug().LogError("OpenGLDevice::CreateShader: Failed to create shader.");
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			Debug().LogError(infoLog);
+		}
+
+		std::stringstream str;
+		str << "OpenGLDevice: Shader " << handle << " created.";
+		Debug().LogInfo(str.str());
+
+		return handle;
+	}
+
+	PipelineHandle OpenGLDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline)
+	{
+		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
+
+		GL_RenderPass* glRenderPass = m_RenderPasses.Find(renderPass);
+		if (!glRenderPass)
+		{
+			Debug().LogError("OpenGLDevice::CreatePipeline: Invalid render pass handle.");
+			return NULL;
+		}
+
+		PipelineHandle handle;
+		GL_Pipeline& pipeline = m_Pipelines.Emplace(handle, GL_Pipeline());
+		pipeline.m_RenderPass = renderPass;
+
+		int success;
+		char infoLog[512];
+
+		pipeline.m_GLProgramID = glCreateProgram();
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		for (size_t i = 0; i < pPipeline->ShaderCount(); ++i)
+		{
+			const FileData* pShader = pPipeline->Shader(pipelines, i);
+			const ShaderType type = pPipeline->GetShaderType(pipelines, i);
+			ShaderHandle shaderHandle = CreateShader(pShader, type, "main");
+			if (!shaderHandle)
+			{
+				Debug().LogError("OpenGLDevice::CreatePipeline: Invalid render pass handle");
+				continue;
+			}
+
+			GL_Shader* shader = m_Shaders.Find(shaderHandle);
+
+			glAttachShader(pipeline.m_GLProgramID, shader->m_GLShaderID);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+
+		glLinkProgram(pipeline.m_GLProgramID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glGetProgramiv(pipeline.m_GLProgramID, GL_LINK_STATUS, &success);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		if (!success)
+		{
+			glGetProgramInfoLog(pipeline.m_GLProgramID, 512, NULL, infoLog);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			Debug().LogError(infoLog);
+		}
+
+		std::stringstream str;
+		str << "OpenGLDevice: Pipeline " << handle << " created.";
 		Debug().LogInfo(str.str());
 
 		return handle;
