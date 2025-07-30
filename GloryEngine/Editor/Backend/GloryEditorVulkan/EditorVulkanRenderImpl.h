@@ -44,10 +44,11 @@ namespace Glory::Editor
         virtual void FramePresent() override;
 
     private:
-        Glory::Device* m_pDevice;
+        VulkanDevice* m_pDevice;
         ImGui_ImplVulkanH_Window m_MainWindow;
         VkDescriptorPool m_DescriptorPool;
         bool m_SwapChainRebuild;
+        std::map<UUID, vk::DescriptorSet> m_DesciptorSets;
 
         const int MINIMAGECOUNT = 2;
     };

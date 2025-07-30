@@ -40,6 +40,8 @@ namespace Glory
 		}
 	};
 
+	class VulkanDevice;
+
 	class VulkanGraphicsModule : public GraphicsModule
 	{
 	public:
@@ -169,6 +171,8 @@ namespace Glory
 		//VulkanTexture* m_pTexture;
 
 		//std::vector<VulkanBuffer*> m_pUniformBufers;
+
+		std::vector<VulkanDevice> m_Devices;
 
 #if defined(_DEBUG)
 		vk::DebugUtilsMessengerEXT m_DebugMessenger;

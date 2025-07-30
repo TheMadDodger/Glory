@@ -101,7 +101,7 @@ namespace Glory::Editor
 
 		const size_t numPixels = width * height;
 
-		PixelFormat pixelFormat = Glory::PixelFormat::PF_R8G8B8Srgb;
+		PixelFormat pixelFormat = Glory::PixelFormat::PF_R8G8B8Unorm;
 		PixelFormat internalFormat = Glory::PixelFormat::PF_RGB;
 		uint8_t bytesPerPixel = pSDLImage->format->BytesPerPixel;
 
@@ -111,24 +111,24 @@ namespace Glory::Editor
 			if (pSDLImage->format->Rmask == 0x000000ff)
 			{
 				pixelFormat = PixelFormat::PF_RGB;
-				internalFormat = PixelFormat::PF_R8G8B8Srgb;
+				internalFormat = PixelFormat::PF_R8G8B8Unorm;
 			}
 			else
 			{
 				pixelFormat = PixelFormat::PF_RGB;
-				internalFormat = PixelFormat::PF_B8G8R8Srgb;
+				internalFormat = PixelFormat::PF_B8G8R8Unorm;
 			}
 			break;
 		case 4:
 			if (pSDLImage->format->Rmask == 0x000000ff)
 			{
 				pixelFormat = PixelFormat::PF_RGBA;
-				internalFormat = PixelFormat::PF_R8G8B8A8Srgb;
+				internalFormat = PixelFormat::PF_R8G8B8A8Unorm;
 			}
 			else
 			{
 				pixelFormat = PixelFormat::PF_RGBA;
-				internalFormat = PixelFormat::PF_B8G8R8A8Srgb;
+				internalFormat = PixelFormat::PF_B8G8R8A8Unorm;
 			}
 			break;
 		default:
