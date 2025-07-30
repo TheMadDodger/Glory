@@ -38,6 +38,8 @@ namespace Glory
     struct GL_RenderTexture
     {
         uint32_t m_GLFramebufferID;
+        uint32_t m_Width;
+        uint32_t m_Height;
         RenderPassHandle m_RenderPass;
         std::vector<TextureHandle> m_Textures;
         std::vector<std::string> m_AttachmentNames;
@@ -46,6 +48,18 @@ namespace Glory
     struct GL_RenderPass
     {
         RenderTextureHandle m_RenderTexture;
+    };
+
+    struct GL_Shader
+    {
+        uint32_t m_GLShaderID;
+        uint32_t m_GLShaderType;
+    };
+
+    struct GL_Pipeline
+    {
+        RenderPassHandle m_RenderPass;
+        uint32_t m_GLProgramID;
     };
 
     class OpenGLGraphicsModule;
@@ -60,7 +74,9 @@ namespace Glory
 
     private: /* Render commands */
         virtual void BeginRenderPass(RenderPassHandle handle) override;
+        virtual void BeginPipeline(PipelineHandle handle) override;
         virtual void EndRenderPass() override;
+        virtual void EndPipeline() override;
 
         virtual void DrawMesh(MeshHandle handle) override;
 
@@ -79,6 +95,8 @@ namespace Glory
         virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels = nullptr) override;
         virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info) override;
         virtual RenderPassHandle CreateRenderPass(const RenderPassInfo& info) override;
+        virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
+        virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline) override;
 
         virtual void FreeBuffer(BufferHandle& handle) override;
         virtual void FreeMesh(MeshHandle& handle) override;
@@ -92,5 +110,7 @@ namespace Glory
         GraphicsResources<GL_Texture> m_Textures;
         GraphicsResources<GL_RenderTexture> m_RenderTextures;
         GraphicsResources<GL_RenderPass> m_RenderPasses;
+        GraphicsResources<GL_Shader> m_Shaders;
+        GraphicsResources<GL_Pipeline> m_Pipelines;
     };
 }

@@ -14,8 +14,8 @@ namespace Glory
         FileData(std::string_view data);
         virtual ~FileData();
 
-        size_t Size();
-        const char* Data();
+        size_t Size() const;
+        const char* Data() const;
 
         std::vector<char>::iterator Begin();
         const std::vector<char>::const_iterator Begin() const;

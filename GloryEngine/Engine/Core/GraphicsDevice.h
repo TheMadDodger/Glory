@@ -22,6 +22,8 @@ namespace Glory
 	typedef struct UUID TextureHandle;
 	typedef struct UUID RenderTextureHandle;
 	typedef struct UUID RenderPassHandle;
+	typedef struct UUID ShaderHandle;
+	typedef struct UUID PipelineHandle;
 
 	enum BufferType
 	{
@@ -89,7 +91,9 @@ namespace Glory
 
 	public: /* Rendering commands */
 		virtual void BeginRenderPass(RenderPassHandle handle) = 0;
+		virtual void BeginPipeline(PipelineHandle handle) = 0;
 		virtual void EndRenderPass() = 0;
+		virtual void EndPipeline() = 0;
 
 		virtual void DrawMesh(MeshHandle handle) = 0;
 
@@ -123,6 +127,10 @@ namespace Glory
 		virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info) = 0;
 		/* Render pass */
 		virtual RenderPassHandle CreateRenderPass(const RenderPassInfo& info) = 0;
+		/* Shader */
+		virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) = 0;
+		/* Pipeline */
+		virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline) = 0;
 
 		/* Free memory */
 
