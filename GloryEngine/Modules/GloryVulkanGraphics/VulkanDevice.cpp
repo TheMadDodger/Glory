@@ -481,17 +481,290 @@ namespace Glory
 
 	TextureHandle VulkanDevice::CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels)
 	{
-		return TextureHandle();
+		TextureHandle handle;
+		VK_Texture& texture = m_Textures.Emplace(handle, VK_Texture());
+
+		vk::Format format = VKConverter::GetVulkanFormat(textureInfo.m_PixelFormat); //vk::Format::eR8G8B8A8Srgb;
+		vk::ImageCreateInfo imageInfo = vk::ImageCreateInfo();
+		vk::ImageType imageType = VKConverter::GetVulkanImageType(textureInfo.m_ImageType);
+		imageInfo.imageType = imageType;
+		imageInfo.extent.width = textureInfo.m_Width;
+		imageInfo.extent.height = textureInfo.m_Height;
+		imageInfo.extent.depth = 1;
+		imageInfo.mipLevels = 1;
+		imageInfo.arrayLayers = 1;
+		imageInfo.format = format;
+		imageInfo.tiling = format == vk::Format::eR8G8B8A8Srgb ? vk::ImageTiling::eOptimal : (vk::ImageTiling)0;
+		imageInfo.initialLayout = vk::ImageLayout::eUndefined;
+		imageInfo.usage = VKConverter::GetVulkanImageUsageFlags(textureInfo.m_ImageAspectFlags);
+		imageInfo.sharingMode = vk::SharingMode::eExclusive;
+		imageInfo.samples = vk::SampleCountFlagBits::e1;
+		imageInfo.flags = (vk::ImageCreateFlags)0;
+
+		if (m_LogicalDevice.createImage(&imageInfo, nullptr, &texture.m_VKImage) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreateTexture: Could not create image.");
+			m_Textures.Erase(handle);
+			return NULL;
+		}
+
+		vk::MemoryRequirements memRequirements;
+		m_LogicalDevice.getImageMemoryRequirements(texture.m_VKImage, &memRequirements);
+
+		uint32_t typeFilter = memRequirements.memoryTypeBits;
+		vk::MemoryPropertyFlags properties = vk::MemoryPropertyFlagBits::eDeviceLocal;
+		uint32_t memoryIndex = GetSupportedMemoryIndex(typeFilter, properties);
+
+		vk::MemoryAllocateInfo imageAllocInfo = vk::MemoryAllocateInfo();
+		imageAllocInfo.allocationSize = memRequirements.size;
+		imageAllocInfo.memoryTypeIndex = memoryIndex;
+
+		if (m_LogicalDevice.allocateMemory(&imageAllocInfo, nullptr, &texture.m_VKMemory) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreateTexture: Could not create image.");
+			m_LogicalDevice.destroyImage(texture.m_VKImage, nullptr);
+			m_Textures.Erase(handle);
+			return NULL;
+		}
+		m_LogicalDevice.bindImageMemory(texture.m_VKImage, texture.m_VKMemory, 0);
+
+		// Copy buffer to image
+		if (pixels)
+		{
+			// Transition image layout
+			//pGraphics->TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+			//
+			//vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+			//BufferHandle stagingBuffer = CreateBuffer(uint32_t(memRequirements.size), BufferType::BT_TransferRead);//new VulkanBuffer(imageSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)memoryFlags);
+			//AssignBuffer(stagingBuffer, pixels);
+			//Texture::CopyFromBuffer(pTextureStagingBuffer);
+			//
+			//// Transtion layout again so it can be sampled
+			//pGraphics->TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
+			//
+			//FreeBuffer(stagingBuffer);
+		}
+
+		// Create texture image view
+		vk::ImageViewCreateInfo viewInfo = vk::ImageViewCreateInfo();
+		viewInfo.image = texture.m_VKImage;
+		viewInfo.viewType = VKConverter::GetVulkanImageViewType(textureInfo.m_ImageType);
+		viewInfo.format = format;
+		viewInfo.subresourceRange.aspectMask = VKConverter::GetVulkanImageAspectFlags(textureInfo.m_ImageAspectFlags);
+		viewInfo.subresourceRange.baseMipLevel = 0;
+		viewInfo.subresourceRange.levelCount = 1;
+		viewInfo.subresourceRange.baseArrayLayer = 0;
+		viewInfo.subresourceRange.layerCount = 1;
+
+		if (m_LogicalDevice.createImageView(&viewInfo, nullptr, &texture.m_VKImageView) != vk::Result::eSuccess)
+			Debug().LogError("VulkanDevice::CreateTexture: Could not create image view.");
+
+		std::stringstream str;
+		str << "VulkanDevice: Texture " << handle << " created.";
+		Debug().LogInfo(str.str());
+
+		return handle;
 	}
 
 	RenderTextureHandle VulkanDevice::CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info)
 	{
-		return RenderTextureHandle();
+		if (info.Width == 0 || info.Height == 0)
+		{
+			Debug().LogError("VulkanDevice::CreateRenderTexture: Invalid RenderTexture size.");
+			return NULL;
+		}
+
+		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(renderPass);
+		if (!vkRenderPass)
+		{
+			Debug().LogError("VulkanDevice::CreateRenderTexture: Invalid render pass handle");
+			return NULL;
+		}
+
+		RenderTextureHandle handle;
+		VK_RenderTexture& renderTexture = m_RenderTextures.Emplace(handle, VK_RenderTexture());
+		renderTexture.m_RenderPass = renderPass;
+		renderTexture.m_Width = info.Width;
+		renderTexture.m_Height = info.Height;
+
+		const size_t numAttachments = info.Attachments.size() + (info.HasDepth ? 1 : 0) + (info.HasStencil ? 1 : 0);
+		renderTexture.m_AttachmentNames.resize(numAttachments);
+		renderTexture.m_Textures.resize(numAttachments);
+
+		SamplerSettings sampler;
+		sampler.MipmapMode = Filter::F_None;
+		sampler.MinFilter = Filter::F_Nearest;
+		sampler.MagFilter = Filter::F_Nearest;
+
+		size_t textureCounter = 0;
+		for (size_t i = 0; i < info.Attachments.size(); ++i)
+		{
+			Attachment attachment = info.Attachments[i];
+			renderTexture.m_Textures[i] = CreateTexture({ info.Width, info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler });
+			renderTexture.m_AttachmentNames[i] = attachment.Name;
+			++textureCounter;
+		}
+
+		size_t depthIndex = 0, stencilIndex = 0;
+		if (info.HasDepth)
+		{
+			depthIndex = textureCounter;
+			renderTexture.m_Textures[depthIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Depth, PixelFormat::PF_Depth32, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
+			renderTexture.m_AttachmentNames[depthIndex] = "Depth";
+			++textureCounter;
+		}
+
+		if (info.HasStencil)
+		{
+			stencilIndex = textureCounter;
+			renderTexture.m_Textures[stencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Stencil, sampler });
+			renderTexture.m_AttachmentNames[stencilIndex] = "Stencil";
+			++textureCounter;
+		}
+
+		std::vector<vk::ImageView> attachments(renderTexture.m_Textures.size());
+		for (size_t i = 0; i < renderTexture.m_Textures.size(); ++i)
+		{
+			TextureHandle textureHandle = renderTexture.m_Textures[i];
+			VK_Texture* texture = m_Textures.Find(textureHandle);
+			attachments[i] = texture->m_VKImageView;
+		}
+
+		if (info.HasDepth)
+		{
+			VK_Texture* texture = m_Textures.Find(renderTexture.m_Textures[depthIndex]);
+			attachments[depthIndex] = texture->m_VKImageView;
+		}
+		if (info.HasStencil)
+		{
+			VK_Texture* texture = m_Textures.Find(renderTexture.m_Textures[stencilIndex]);
+			attachments[stencilIndex] = texture->m_VKImageView;
+		}
+
+		vk::FramebufferCreateInfo frameBufferCreateInfo = vk::FramebufferCreateInfo()
+			.setRenderPass(vkRenderPass->m_VKRenderPass)
+			.setAttachmentCount(attachments.size())
+			.setPAttachments(attachments.data())
+			.setWidth(info.Width)
+			.setHeight(info.Height)
+			.setLayers(1);
+
+		renderTexture.m_VKFramebuffer = m_LogicalDevice.createFramebuffer(frameBufferCreateInfo);
+		if (renderTexture.m_VKFramebuffer == nullptr)
+		{
+			Debug().LogError("VulkanDevice::CreateRenderTexture: There was an error when trying to create a frame buffer.");
+			return NULL;
+		}
+
+		std::stringstream str;
+		str << "VulkanDevice: RenderTexture " << handle << " created with " << renderTexture.m_Textures.size() << " attachments.";
+		Debug().LogInfo(str.str());
+
+		return handle;
 	}
 
 	RenderPassHandle VulkanDevice::CreateRenderPass(const RenderPassInfo& info)
 	{
-		return RenderPassHandle();
+		if (info.RenderTextureInfo.Width == 0 || info.RenderTextureInfo.Height == 0)
+		{
+			Debug().LogError("VulkanDevice::CreateRenderPass: Invalid RenderTexture size.");
+			return NULL;
+		}
+
+		RenderPassHandle handle;
+		VK_RenderPass& renderPass = m_RenderPasses.Emplace(handle, VK_RenderPass());
+
+		std::vector<vk::AttachmentDescription> attachments;
+		std::vector<vk::AttachmentReference> attachmentColorRefs;
+		vk::AttachmentReference attachmentDepthStencilRef;
+		const size_t attachmentCount = info.RenderTextureInfo.Attachments.size();
+		attachments.resize(attachmentCount +
+			info.RenderTextureInfo.HasDepth || info.RenderTextureInfo.HasStencil ? 1 : 0);
+		attachmentColorRefs.resize(attachmentCount);
+		for (size_t i = 0; i < attachmentCount; ++i)
+		{
+			const Attachment& attachment = info.RenderTextureInfo.Attachments[i];
+
+			const vk::Format format = VKConverter::GetVulkanFormat(attachment.Format);
+
+			// Create render pass
+			attachments[i] = vk::AttachmentDescription()
+				.setFormat(format)
+				.setSamples(vk::SampleCountFlagBits::e1)
+				.setLoadOp(vk::AttachmentLoadOp::eClear)
+				.setStoreOp(vk::AttachmentStoreOp::eStore)
+				.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+				.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+				.setInitialLayout(vk::ImageLayout::eUndefined)
+				.setFinalLayout(vk::ImageLayout::eColorAttachmentOptimal);
+
+			attachmentColorRefs[i] = vk::AttachmentReference()
+				.setAttachment(i)
+				.setLayout(vk::ImageLayout::eColorAttachmentOptimal);
+		}
+
+		if (info.RenderTextureInfo.HasDepth || info.RenderTextureInfo.HasStencil)
+		{
+			attachments[attachmentCount] = vk::AttachmentDescription()
+				.setFormat(vk::Format::eD24UnormS8Uint)
+				.setSamples(vk::SampleCountFlagBits::e1)
+				.setLoadOp(vk::AttachmentLoadOp::eClear)
+				.setStoreOp(vk::AttachmentStoreOp::eDontCare)
+				.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+				.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+				.setInitialLayout(vk::ImageLayout::eUndefined)
+				.setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+
+			attachmentDepthStencilRef = vk::AttachmentReference()
+				.setAttachment(attachmentCount)
+				.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+		}
+
+		vk::SubpassDescription subPass = vk::SubpassDescription()
+			.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
+			.setColorAttachmentCount(attachmentColorRefs.size())
+			.setPColorAttachments(attachmentColorRefs.data());
+		if (info.RenderTextureInfo.HasDepth || info.RenderTextureInfo.HasStencil)
+			subPass.setPDepthStencilAttachment(&attachmentDepthStencilRef);
+
+		vk::SubpassDependency dependancy = vk::SubpassDependency()
+			.setSrcSubpass(VK_SUBPASS_EXTERNAL)
+			.setDstSubpass(0)
+			.setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests)
+			.setSrcAccessMask((vk::AccessFlags)0)
+			.setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests)
+			.setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite);
+
+		vk::RenderPassCreateInfo renderPassCreateInfo = vk::RenderPassCreateInfo()
+			.setAttachmentCount(static_cast<uint32_t>(attachments.size()))
+			.setPAttachments(attachments.data())
+			.setSubpassCount(1)
+			.setPSubpasses(&subPass)
+			.setDependencyCount(1)
+			.setPDependencies(&dependancy);
+
+		renderPass.m_VKRenderPass = m_LogicalDevice.createRenderPass(renderPassCreateInfo);
+		if (renderPass.m_VKRenderPass == nullptr)
+		{
+			Debug().LogError("VulkanDevice::CreateRenderPass: Failed to create render pass.");
+			m_RenderPasses.Erase(handle);
+			return NULL;
+		}
+
+		renderPass.m_RenderTexture = CreateRenderTexture(handle, info.RenderTextureInfo);
+
+		if (renderPass.m_RenderTexture == NULL)
+		{
+			m_RenderPasses.Erase(handle);
+			Debug().LogError("VulkanDevice::CreateRenderPass: Failed to create RenderTexture for RenderPass.");
+			return NULL;
+		}
+
+		std::stringstream str;
+		str << "VulkanDevice: RenderPass " << handle << " created.";
+		Debug().LogInfo(str.str());
+
+		return handle;
 	}
 
 	ShaderHandle VulkanDevice::CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function)
@@ -544,14 +817,72 @@ namespace Glory
 
 	void VulkanDevice::FreeTexture(TextureHandle& handle)
 	{
+		VK_Texture* texture = m_Textures.Find(handle);
+		if (!texture)
+		{
+			Debug().LogError("VulkanDevice::FreeTexture: Invalid texture handle.");
+			return;
+		}
+
+		m_LogicalDevice.destroyImageView(texture->m_VKImageView, nullptr);
+		m_LogicalDevice.destroyImage(texture->m_VKImage, nullptr);
+		m_LogicalDevice.freeMemory(texture->m_VKMemory, nullptr);
+
+		m_Textures.Erase(handle);
+
+		std::stringstream str;
+		str << "OpenGLDevice: Texture " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+
+		handle = 0;
 	}
 
 	void VulkanDevice::FreeRenderTexture(RenderTextureHandle& handle)
 	{
+		VK_RenderTexture* renderTexture = m_RenderTextures.Find(handle);
+		if (!renderTexture)
+		{
+			Debug().LogError("VulkanDevice::FreeRenderTexture: Invalid render texture handle.");
+			return;
+		}
+
+		m_LogicalDevice.destroyFramebuffer(renderTexture->m_VKFramebuffer);
+
+		for (auto texture : renderTexture->m_Textures)
+		{
+			FreeTexture(texture);
+		}
+
+		renderTexture->m_Textures.clear();
+		renderTexture->m_AttachmentNames.clear();
+
+		m_RenderTextures.Erase(handle);
+
+		std::stringstream str;
+		str << "VulkanDevice: RenderTexture " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+
+		handle = 0;
 	}
 
 	void VulkanDevice::FreeRenderPass(RenderPassHandle& handle)
 	{
+		VK_RenderPass* renderPass = m_RenderPasses.Find(handle);
+		if (!renderPass)
+		{
+			Debug().LogError("VulkanDevice::FreeRenderPass: Invalid render pass handle.");
+			return;
+		}
 
+		FreeRenderTexture(renderPass->m_RenderTexture);
+		m_LogicalDevice.destroyRenderPass(renderPass->m_VKRenderPass);
+
+		m_RenderPasses.Erase(handle);
+
+		std::stringstream str;
+		str << "VulkanDevice: RenderPass " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+
+		handle = 0;
 	}
 }

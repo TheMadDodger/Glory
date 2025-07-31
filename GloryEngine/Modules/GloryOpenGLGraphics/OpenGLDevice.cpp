@@ -774,7 +774,7 @@ namespace Glory
 		renderTexture->m_Textures.clear();
 		renderTexture->m_AttachmentNames.clear();
 
-		m_Textures.Erase(handle);
+		m_RenderTextures.Erase(handle);
 
 		std::stringstream str;
 		str << "OpenGLDevice: RenderTexture " << handle << " was freed from device memory.";
@@ -794,7 +794,7 @@ namespace Glory
 
 		FreeRenderTexture(renderPass->m_RenderTexture);
 
-		m_Textures.Erase(handle);
+		m_RenderPasses.Erase(handle);
 
 		std::stringstream str;
 		str << "OpenGLDevice: RenderPass " << handle << " was freed from device memory.";
