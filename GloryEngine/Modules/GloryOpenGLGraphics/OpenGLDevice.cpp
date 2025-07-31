@@ -660,7 +660,7 @@ namespace Glory
 			ShaderHandle shaderHandle = CreateShader(pShader, type, "main");
 			if (!shaderHandle)
 			{
-				Debug().LogError("OpenGLDevice::CreatePipeline: Invalid render pass handle");
+				Debug().LogError("OpenGLDevice::CreatePipeline: Invalid render pass handle.");
 				continue;
 			}
 
@@ -694,7 +694,7 @@ namespace Glory
 		GL_Buffer* buffer = m_Buffers.Find(handle);
 		if (!buffer)
 		{
-			Debug().LogError("OpenGLDevice::FreeBuffer: Invalid buffer handle");
+			Debug().LogError("OpenGLDevice::FreeBuffer: Invalid buffer handle.");
 			return;
 		}
 
@@ -703,7 +703,7 @@ namespace Glory
 		m_Buffers.Erase(handle);
 
 		std::stringstream str;
-		str << "OpenGLDevice: Buffer " << handle << " was freed from device memory";
+		str << "OpenGLDevice: Buffer " << handle << " was freed from device memory.";
 		Debug().LogInfo(str.str());
 
 		handle = 0;
@@ -714,7 +714,7 @@ namespace Glory
 		GL_Mesh* mesh = m_Meshes.Find(handle);
 		if (!mesh)
 		{
-			Debug().LogError("OpenGLDevice::FreeMesh: Invalid mesh handle");
+			Debug().LogError("OpenGLDevice::FreeMesh: Invalid mesh handle.");
 			return;
 		}
 
