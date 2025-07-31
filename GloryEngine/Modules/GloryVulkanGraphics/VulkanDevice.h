@@ -13,8 +13,6 @@ namespace Glory
         size_t m_Size;
         vk::Buffer m_VKBuffer;
         vk::DeviceMemory m_VKMemory;
-        uint32_t m_GLTarget;
-        uint32_t m_GLUsage;
     };
 
     struct VK_Mesh
@@ -28,22 +26,14 @@ namespace Glory
 
     struct VK_Texture
     {
-        uint32_t m_GLTextureID;
-        uint32_t m_GLTextureType;
-        uint32_t m_GLFormat;
-        uint32_t m_GLInternalFormat;
-        uint32_t m_GLDataType;
-
-        int m_GLMinFilter;
-        int m_GLMagFilter;
-        int m_GLTextureWrapS;
-        int m_GLTextureWrapT;
-        int m_GLTextureWrapR;
+        vk::Image m_VKImage;
+        vk::ImageView m_VKImageView;
+        vk::DeviceMemory m_VKMemory;
     };
 
     struct VK_RenderTexture
     {
-        uint32_t m_GLFramebufferID;
+        vk::Framebuffer m_VKFramebuffer;
         uint32_t m_Width;
         uint32_t m_Height;
         RenderPassHandle m_RenderPass;
@@ -53,6 +43,7 @@ namespace Glory
 
     struct VK_RenderPass
     {
+        vk::RenderPass m_VKRenderPass;
         RenderTextureHandle m_RenderTexture;
     };
 
