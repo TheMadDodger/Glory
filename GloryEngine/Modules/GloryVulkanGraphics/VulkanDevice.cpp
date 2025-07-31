@@ -1,5 +1,6 @@
 #include "VulkanDevice.h"
 #include "VulkanGraphicsModule.h"
+#include "VulkanStructsConverter.h"
 
 #include <Debug.h>
 
@@ -222,24 +223,255 @@ namespace Glory
 
 	BufferHandle VulkanDevice::CreateBuffer(size_t bufferSize, BufferType type)
 	{
-		return BufferHandle();
+		BufferHandle handle;
+		VK_Buffer& buffer = m_Buffers.Emplace(handle, VK_Buffer());
+		buffer.m_Size = bufferSize;
+
+		vk::BufferCreateInfo bufferInfo = vk::BufferCreateInfo();
+		bufferInfo.size = (vk::DeviceSize)buffer.m_Size;
+		bufferInfo.sharingMode = vk::SharingMode::eExclusive;
+
+		switch (type)
+		{
+		case Glory::BT_TransferRead:
+			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferSrc;
+			break;
+		case Glory::BT_TransferWrite:
+			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferDst;
+			break;
+		case Glory::BT_Vertex:
+			bufferInfo.usage = vk::BufferUsageFlagBits::eVertexBuffer;
+			break;
+		case Glory::BT_Index:
+			bufferInfo.usage = vk::BufferUsageFlagBits::eIndexBuffer;
+			break;
+		default:
+			break;
+		}
+
+		vk::Result result = m_LogicalDevice.createBuffer(&bufferInfo, nullptr, &buffer.m_VKBuffer);
+		if (result != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreateBuffer: Failed to create buffer.");
+			m_Buffers.Erase(handle);
+			return NULL;
+		}
+
+		vk::MemoryRequirements memRequirements;
+		m_LogicalDevice.getBufferMemoryRequirements(buffer.m_VKBuffer, &memRequirements);
+
+		uint32_t typeFilter = memRequirements.memoryTypeBits;
+		vk::MemoryPropertyFlags properties = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;//(vk::MemoryPropertyFlagBits)m_MemoryFlags;
+		uint32_t memoryIndex = GetSupportedMemoryIndex(typeFilter, properties);
+
+		// Allocate device memory
+		vk::MemoryAllocateInfo allocateInfo = vk::MemoryAllocateInfo();
+		allocateInfo.allocationSize = memRequirements.size;
+		allocateInfo.memoryTypeIndex = memoryIndex;
+
+		result = m_LogicalDevice.allocateMemory(&allocateInfo, nullptr, &buffer.m_VKMemory);
+		if (result != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreateBuffer: Failed to create buffer memory.");
+			m_Buffers.Erase(handle);
+			return NULL;
+		}
+
+		m_LogicalDevice.bindBufferMemory(buffer.m_VKBuffer, buffer.m_VKMemory, 0);
+
+		std::stringstream str;
+		str << "VulkanDevice: Buffer " << handle << " created with size " << bufferSize << ".";
+		Debug().LogInfo(str.str());
+
+		return handle;
 	}
 
 	void VulkanDevice::AssignBuffer(BufferHandle handle, const void* data)
 	{
+		if (!data) return;
+
+		VK_Buffer* buffer = m_Buffers.Find(handle);
+		if (!buffer)
+		{
+			Debug().LogError("VulkanDevice::FreeBuffer: Invalid buffer handle.");
+			return;
+		}
+
+		void* dstData;
+		vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)0, (vk::DeviceSize)buffer->m_Size, (vk::MemoryMapFlags)0, &dstData);
+		if (result != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
+			return;
+		}
+		memcpy(dstData, data, buffer->m_Size);
+		m_LogicalDevice.unmapMemory(buffer->m_VKMemory);
 	}
 
 	void VulkanDevice::AssignBuffer(BufferHandle handle, const void* data, uint32_t size)
 	{
+		if (!data) return;
+
+		VK_Buffer* buffer = m_Buffers.Find(handle);
+		if (!buffer)
+		{
+			Debug().LogError("VulkanDevice::FreeBuffer: Invalid buffer handle.");
+			return;
+		}
+
+		void* dstData;
+		vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)0, (vk::DeviceSize)size, (vk::MemoryMapFlags)0, &dstData);
+		if (result != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
+			return;
+		}
+		memcpy(dstData, data, size);
+		m_LogicalDevice.unmapMemory(buffer->m_VKMemory);
 	}
 
 	void VulkanDevice::AssignBuffer(BufferHandle handle, const void* data, uint32_t offset, uint32_t size)
 	{
+		if (!data) return;
+
+		VK_Buffer* buffer = m_Buffers.Find(handle);
+		if (!buffer)
+		{
+			Debug().LogError("VulkanDevice::FreeBuffer: Invalid buffer handle.");
+			return;
+		}
+
+		void* dstData;
+		vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)offset, (vk::DeviceSize)size, (vk::MemoryMapFlags)0, &dstData);
+		if (result != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
+			return;
+		}
+		memcpy(dstData, data, size);
+		m_LogicalDevice.unmapMemory(buffer->m_VKMemory);
+	}
+
+	vk::Format GetFormat(const AttributeType& atributeType)
+	{
+		vk::Format format = vk::Format::eUndefined;
+
+		switch (atributeType)
+		{
+		case AttributeType::Float:
+			format = vk::Format::eR32Sfloat;
+			break;
+		case AttributeType::Float2:
+			format = vk::Format::eR32G32Sfloat;
+			break;
+		case AttributeType::Float3:
+			format = vk::Format::eR32G32B32Sfloat;
+			break;
+		case AttributeType::Float4:
+			format = vk::Format::eR32G32B32A32Sfloat;
+			break;
+		case AttributeType::UINT:
+			format = vk::Format::eR32Uint;
+			break;
+		case AttributeType::UINT2:
+			format = vk::Format::eR32G32Uint;
+			break;
+		case AttributeType::UINT3:
+			format = vk::Format::eR32G32B32Uint;
+			break;
+		case AttributeType::UINT4:
+			format = vk::Format::eR32G32B32A32Uint;
+			break;
+		case AttributeType::SINT:
+			format = vk::Format::eR32Sint;
+			break;
+		case AttributeType::SINT2:
+			format = vk::Format::eR32G32Sint;
+			break;
+		case AttributeType::SINT3:
+			format = vk::Format::eR32G32B32Sint;
+			break;
+		case AttributeType::SINT4:
+			format = vk::Format::eR32G32B32A32Sint;
+			break;
+		}
+
+		return format;
+	}
+
+	void GetNextOffset(const AttributeType& atributeType, uint32_t& offest)
+	{
+		switch (atributeType)
+		{
+		case AttributeType::Float:
+			offest += sizeof(float);
+			break;
+		case AttributeType::Float2:
+			offest += (sizeof(float)*2);
+			break;
+		case AttributeType::Float3:
+			offest += (sizeof(float)*3);
+			break;
+		case AttributeType::Float4:
+			offest += (sizeof(float)*4);
+			break;
+		case AttributeType::UINT:
+			offest += (sizeof(uint32_t));
+			break;
+		case AttributeType::UINT2:
+			offest += (sizeof(uint32_t)*2);
+			break;
+		case AttributeType::UINT3:
+			offest += (sizeof(uint32_t)*3);
+			break;
+		case AttributeType::UINT4:
+			offest += (sizeof(uint32_t)*4);
+			break;
+		case AttributeType::SINT:
+			offest += (sizeof(int32_t));
+			break;
+		case AttributeType::SINT2:
+			offest += (sizeof(int32_t)*2);
+			break;
+		case AttributeType::SINT3:
+			offest += (sizeof(int32_t)*3);
+			break;
+		case AttributeType::SINT4:
+			offest += (sizeof(int32_t)*4);
+			break;
+		}
 	}
 
 	MeshHandle VulkanDevice::CreateMesh(std::vector<BufferHandle>&& buffers, uint32_t vertexCount, uint32_t indexCount, uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes)
 	{
-		return MeshHandle();
+		MeshHandle handle;
+		VK_Mesh& mesh = m_Meshes.Emplace(handle, VK_Mesh());
+		mesh.m_Buffers = std::move(buffers);
+		mesh.m_VertexCount = vertexCount;
+		mesh.m_IndexCount = indexCount;
+
+		const uint32_t binding = 0;
+
+		mesh.m_VertexDescription.binding = binding;
+		mesh.m_VertexDescription.stride = stride;
+		mesh.m_VertexDescription.inputRate = vk::VertexInputRate::eVertex;
+
+		mesh.m_AttributeDescriptions.resize(attributeTypes.size());
+		uint32_t currentOffset = 0;
+		for (size_t i = 0; i < mesh.m_AttributeDescriptions.size(); i++)
+		{
+			mesh.m_AttributeDescriptions[i].binding = binding;
+			mesh.m_AttributeDescriptions[i].location = i;
+			mesh.m_AttributeDescriptions[i].format = GetFormat(attributeTypes[i]);
+			mesh.m_AttributeDescriptions[i].offset = currentOffset;
+			GetNextOffset(attributeTypes[i], currentOffset);
+		}
+
+		std::stringstream str;
+		str << "VulkanDevice: Mesh " << handle << " created.";
+		Debug().LogInfo(str.str());
+
+		return handle;
 	}
 
 	TextureHandle VulkanDevice::CreateTexture(TextureData* pTexture)
@@ -274,10 +506,40 @@ namespace Glory
 
 	void VulkanDevice::FreeBuffer(BufferHandle& handle)
 	{
+		VK_Buffer* buffer = m_Buffers.Find(handle);
+		if (!buffer)
+		{
+			Debug().LogError("VulkanDevice::FreeBuffer: Invalid buffer handle.");
+			return;
+		}
+
+		m_LogicalDevice.destroyBuffer(buffer->m_VKBuffer);
+		m_LogicalDevice.freeMemory(buffer->m_VKMemory);
+
+		std::stringstream str;
+		str << "VulkanDevice: Buffer " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
 	}
 
 	void VulkanDevice::FreeMesh(MeshHandle& handle)
 	{
+		VK_Mesh* mesh = m_Meshes.Find(handle);
+		if (!mesh)
+		{
+			Debug().LogError("VulkanDevice::FreeMesh: Invalid mesh handle.");
+			return;
+		}
+
+		for (auto& buffer : mesh->m_Buffers)
+			FreeBuffer(buffer);
+
+		m_Meshes.Erase(handle);
+
+		std::stringstream str;
+		str << "VulkanDevice: Mesh " << handle << " was freed.";
+		Debug().LogInfo(str.str());
+
+		handle = 0;
 	}
 
 	void VulkanDevice::FreeTexture(TextureHandle& handle)
@@ -290,5 +552,6 @@ namespace Glory
 
 	void VulkanDevice::FreeRenderPass(RenderPassHandle& handle)
 	{
+
 	}
 }

@@ -11,17 +11,18 @@ namespace Glory
     struct VK_Buffer
     {
         size_t m_Size;
-        uint32_t m_GLBufferID;
+        vk::Buffer m_VKBuffer;
+        vk::DeviceMemory m_VKMemory;
         uint32_t m_GLTarget;
         uint32_t m_GLUsage;
     };
 
     struct VK_Mesh
     {
-        uint32_t m_GLVertexArrayID;
-        uint32_t m_GLPrimitiveType;
-        uint32_t m_VertexCount;
-        uint32_t m_IndexCount;
+        vk::VertexInputBindingDescription m_VertexDescription;
+        std::vector<vk::VertexInputAttributeDescription> m_AttributeDescriptions;
+        uint64_t m_VertexCount;
+        uint64_t m_IndexCount;
         std::vector<BufferHandle> m_Buffers;
     };
 
