@@ -3,6 +3,8 @@
 #include "VulkanStructsConverter.h"
 
 #include <Debug.h>
+#include <Engine.h>
+#include <PipelineData.h>
 
 namespace Glory
 {
@@ -769,12 +771,220 @@ namespace Glory
 
 	ShaderHandle VulkanDevice::CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function)
 	{
-		return ShaderHandle();
+		ShaderHandle handle;
+		VK_Shader& shader = m_Shaders.Emplace(handle, VK_Shader());
+
+		vk::ShaderModuleCreateInfo shaderModuleCreateInfo = vk::ShaderModuleCreateInfo()
+			.setCodeSize(pShaderFileData->Size())
+			.setPCode(reinterpret_cast<const uint32_t*>(pShaderFileData->Data()));
+		shader.m_Function = function;
+		shader.m_VKStage = VKConverter::GetShaderStageFlag(shaderType);
+		shader.m_VKModule = m_LogicalDevice.createShaderModule(shaderModuleCreateInfo, nullptr);
+
+		std::stringstream str;
+		str << "VulkanDevice: Shader " << handle << " created.";
+		Debug().LogInfo(str.str());
+
+		return handle;
 	}
 
-	PipelineHandle VulkanDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline)
+	PipelineHandle VulkanDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, size_t stride, const std::vector<AttributeType>& attributeTypes)
 	{
-		return PipelineHandle();
+		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
+
+		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(renderPass);
+		if (!vkRenderPass)
+		{
+			Debug().LogError("VulkanDevice::CreatePipeline: Invalid render pass handle.");
+			return NULL;
+		}
+
+		VK_RenderTexture* vkRenderTexture = m_RenderTextures.Find(vkRenderPass->m_RenderTexture);
+		if (!vkRenderTexture)
+		{
+			Debug().LogError("VulkanDevice::CreatePipeline: Invalid render texture handle in render pass.");
+			return NULL;
+		}
+
+		PipelineHandle handle;
+		VK_Pipeline& pipeline = m_Pipelines.Emplace(handle, VK_Pipeline());
+		pipeline.m_RenderPass = renderPass;
+
+		const uint32_t binding = 0;
+
+		pipeline.m_VertexDescription.binding = binding;
+		pipeline.m_VertexDescription.stride = stride;
+		pipeline.m_VertexDescription.inputRate = vk::VertexInputRate::eVertex;
+
+		pipeline.m_AttributeDescriptions.resize(attributeTypes.size());
+		uint32_t currentOffset = 0;
+		for (size_t i = 0; i < pipeline.m_AttributeDescriptions.size(); i++)
+		{
+			pipeline.m_AttributeDescriptions[i].binding = binding;
+			pipeline.m_AttributeDescriptions[i].location = i;
+			pipeline.m_AttributeDescriptions[i].format = GetFormat(attributeTypes[i]);
+			pipeline.m_AttributeDescriptions[i].offset = currentOffset;
+			GetNextOffset(attributeTypes[i], currentOffset);
+		}
+
+		pipeline.m_Shaders.resize(pPipeline->ShaderCount());
+		for (size_t i = 0; i < pipeline.m_Shaders.size(); ++i)
+		{
+			pipeline.m_Shaders[i] = CreateShader(pPipeline->Shader(pipelines, i), pPipeline->GetShaderType(pipelines, i), "main");
+		}
+
+		std::vector<vk::PipelineShaderStageCreateInfo> shaderStages(pPipeline->ShaderCount());
+		for (size_t i = 0; i < shaderStages.size(); ++i)
+		{
+			VK_Shader* shader = m_Shaders.Find(pipeline.m_Shaders[i]);
+			shaderStages[i] = vk::PipelineShaderStageCreateInfo()
+				.setStage(shader->m_VKStage)
+				.setModule(shader->m_VKModule)
+				.setPName(shader->m_Function.data());
+		}
+
+		// Create descriptor set layout
+		//m_DescriptorSetLayouts.resize(m_DescriptorSetLayoutInfos.size());
+		//
+		//for (size_t i = 0; i < m_DescriptorSetLayoutInfos.size(); ++i)
+		//{
+		//	if (m_LogicalDevice.createDescriptorSetLayout(&m_DescriptorSetLayoutInfos[i], nullptr, &m_DescriptorSetLayouts[i]) != vk::Result::eSuccess)
+		//		throw std::runtime_error("Failed to create descriptor set layout!");
+		//}
+
+		// Vertex input state
+		vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo()
+			.setVertexBindingDescriptionCount(1)
+			.setPVertexBindingDescriptions(&pipeline.m_VertexDescription)
+			.setVertexAttributeDescriptionCount(static_cast<uint32_t>(pipeline.m_AttributeDescriptions.size()))
+			.setPVertexAttributeDescriptions(pipeline.m_AttributeDescriptions.data());
+
+		// Input assembly
+		vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo()
+			.setTopology(vk::PrimitiveTopology::eTriangleList)
+			.setPrimitiveRestartEnable(VK_FALSE);
+
+		// Viewport and scissor
+		vk::Viewport viewport = vk::Viewport()
+			.setX(0.0f)
+			.setY(0.0f)
+			.setWidth((float)vkRenderTexture->m_Width)
+			.setHeight((float)vkRenderTexture->m_Height)
+			.setMinDepth(0.0f)
+			.setMaxDepth(1.0f);
+
+		vk::Rect2D scissor = vk::Rect2D()
+			.setOffset({ 0,0 })
+			.setExtent({ vkRenderTexture->m_Width, vkRenderTexture->m_Height });
+
+		vk::PipelineViewportStateCreateInfo viewportStateCreateInfo = vk::PipelineViewportStateCreateInfo()
+			.setViewportCount(1)
+			.setPViewports(&viewport)
+			.setScissorCount(1)
+			.setPScissors(&scissor);
+
+		// Rasterizer state
+		vk::PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = vk::PipelineRasterizationStateCreateInfo()
+			.setDepthClampEnable(VK_FALSE) // Requires a GPU feature
+			.setRasterizerDiscardEnable(VK_FALSE)
+			.setPolygonMode(vk::PolygonMode::eFill)
+			.setLineWidth(1.0f)
+			.setCullMode(vk::CullModeFlagBits::eBack)
+			.setFrontFace(vk::FrontFace::eCounterClockwise)
+			.setDepthBiasEnable(VK_FALSE)
+			.setDepthBiasConstantFactor(0.0f)
+			.setDepthBiasClamp(0.0f)
+			.setDepthBiasSlopeFactor(0.0f);
+
+		// Multisampling state
+		vk::PipelineMultisampleStateCreateInfo multisampleStateCreateInfo = vk::PipelineMultisampleStateCreateInfo()
+			.setSampleShadingEnable(VK_FALSE)
+			.setRasterizationSamples(vk::SampleCountFlagBits::e1)
+			.setMinSampleShading(1.0f)
+			.setPSampleMask(nullptr)
+			.setAlphaToCoverageEnable(VK_FALSE)
+			.setAlphaToOneEnable(VK_FALSE);
+
+		// Blend state
+		vk::PipelineColorBlendAttachmentState colorBlendAttachmentCreateInfo = vk::PipelineColorBlendAttachmentState()
+			.setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA)
+			.setBlendEnable(VK_FALSE)
+			.setSrcColorBlendFactor(vk::BlendFactor::eOne)
+			.setDstColorBlendFactor(vk::BlendFactor::eZero)
+			.setColorBlendOp(vk::BlendOp::eAdd)
+			.setSrcAlphaBlendFactor(vk::BlendFactor::eOne)
+			.setDstAlphaBlendFactor(vk::BlendFactor::eZero)
+			.setAlphaBlendOp(vk::BlendOp::eAdd);
+
+		vk::PipelineColorBlendStateCreateInfo colorBlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo()
+			.setLogicOpEnable(VK_FALSE)
+			.setLogicOp(vk::LogicOp::eCopy)
+			.setAttachmentCount(1)
+			.setPAttachments(&colorBlendAttachmentCreateInfo)
+			.setBlendConstants({ 0.0f, 0.0f, 0.0f, 0.0f });
+
+		vk::PipelineDepthStencilStateCreateInfo depthStencil = vk::PipelineDepthStencilStateCreateInfo();
+		depthStencil.depthTestEnable = VK_TRUE;
+		depthStencil.depthWriteEnable = VK_TRUE;
+		depthStencil.depthCompareOp = vk::CompareOp::eLess;
+		depthStencil.depthBoundsTestEnable = VK_FALSE;
+		depthStencil.minDepthBounds = 0.0f; // Optional
+		depthStencil.maxDepthBounds = 1.0f; // Optional
+		depthStencil.stencilTestEnable = VK_FALSE;
+		//depthStencil.front = {}; // Optional
+		//depthStencil.back = {}; // Optional
+
+		// Dynamic state
+		//vk::DynamicState dynamicStates[] = {
+		//    vk::DynamicState::eViewport,
+		//    vk::DynamicState::eLineWidth
+		//};
+		//
+		//vk::PipelineDynamicStateCreateInfo dynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
+		//    .setDynamicStateCount(2)
+		//    .setPDynamicStates(dynamicStates);
+
+		vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
+			.setSetLayoutCount(static_cast<uint32_t>(0))
+			.setPSetLayouts(nullptr)
+			.setPushConstantRangeCount(0)
+			.setPPushConstantRanges(nullptr);
+
+		pipeline.m_VKLayout = m_LogicalDevice.createPipelineLayout(pipelineLayoutCreateInfo);
+		if (pipeline.m_VKLayout == nullptr)
+		{
+			throw std::runtime_error("failed to create pipeline layout!");
+		}
+
+		// Create the pipeline
+		vk::GraphicsPipelineCreateInfo pipelineCreateInfo = vk::GraphicsPipelineCreateInfo()
+			.setStageCount(static_cast<uint32_t>(shaderStages.size()))
+			.setPStages(shaderStages.data())
+			.setPVertexInputState(&vertexInputStateCreateInfo)
+			.setPInputAssemblyState(&inputAssemblyStateCreateInfo)
+			.setPViewportState(&viewportStateCreateInfo)
+			.setPRasterizationState(&rasterizationStateCreateInfo)
+			.setPMultisampleState(&multisampleStateCreateInfo)
+			.setPDepthStencilState(&depthStencil)
+			.setPColorBlendState(&colorBlendStateCreateInfo)
+			.setPDynamicState(nullptr)
+			.setLayout(pipeline.m_VKLayout)
+			.setRenderPass(vkRenderPass->m_VKRenderPass)
+			.setSubpass(0)
+			.setBasePipelineHandle(VK_NULL_HANDLE)
+			.setBasePipelineIndex(-1);
+
+		if (m_LogicalDevice.createGraphicsPipelines(VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &pipeline.m_VKPipeline) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreatePipeline: Failed to create graphics pipeline.");
+			return NULL;
+		}
+
+		std::stringstream str;
+		str << "VulkanDevice: Pipeline " << handle << " created.";
+		Debug().LogInfo(str.str());
+
+		return handle;
 	}
 
 	void VulkanDevice::FreeBuffer(BufferHandle& handle)
@@ -831,7 +1041,7 @@ namespace Glory
 		m_Textures.Erase(handle);
 
 		std::stringstream str;
-		str << "OpenGLDevice: Texture " << handle << " was freed from device memory.";
+		str << "VulkanDevice: Texture " << handle << " was freed from device memory.";
 		Debug().LogInfo(str.str());
 
 		handle = 0;
@@ -881,6 +1091,46 @@ namespace Glory
 
 		std::stringstream str;
 		str << "VulkanDevice: RenderPass " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+
+		handle = 0;
+	}
+
+	void VulkanDevice::FreeShader(ShaderHandle& handle)
+	{
+		VK_Shader* shader = m_Shaders.Find(handle);
+		if (!shader)
+		{
+			Debug().LogError("VulkanDevice::FreeShader: Invalid shader handle.");
+			return;
+		}
+
+		m_LogicalDevice.destroyShaderModule(shader->m_VKModule);
+
+		m_Shaders.Erase(handle);
+
+		std::stringstream str;
+		str << "OpenGLDevice: Shader " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+
+		handle = 0;
+	}
+
+	void VulkanDevice::FreePipeline(PipelineHandle& handle)
+	{
+		VK_Pipeline* pipeline = m_Pipelines.Find(handle);
+		if (!pipeline)
+		{
+			Debug().LogError("VulkanDevice::FreePipeline: Invalid pipeline handle.");
+			return;
+		}
+
+		m_LogicalDevice.destroyPipeline(pipeline->m_VKPipeline);
+		m_LogicalDevice.destroyPipelineLayout(pipeline->m_VKLayout);
+		m_Pipelines.Erase(handle);
+
+		std::stringstream str;
+		str << "VulkanDevice: Pipeline " << handle << " was freed from device memory.";
 		Debug().LogInfo(str.str());
 
 		handle = 0;
