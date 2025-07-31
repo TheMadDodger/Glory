@@ -632,7 +632,7 @@ namespace Glory
 		return handle;
 	}
 
-	PipelineHandle OpenGLDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline)
+	PipelineHandle OpenGLDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, size_t, const std::vector<AttributeType>&)
 	{
 		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
 
@@ -798,6 +798,48 @@ namespace Glory
 
 		std::stringstream str;
 		str << "OpenGLDevice: RenderPass " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+
+		handle = 0;
+	}
+
+	void OpenGLDevice::FreeShader(ShaderHandle& handle)
+	{
+		GL_Shader* shader = m_Shaders.Find(handle);
+		if (!shader)
+		{
+			Debug().LogError("OpenGLDevice::FreeShader: Invalid shader handle.");
+			return;
+		}
+
+		glDeleteShader(shader->m_GLShaderID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		m_Shaders.Erase(handle);
+
+		std::stringstream str;
+		str << "OpenGLDevice: Shader " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+
+		handle = 0;
+	}
+
+	void OpenGLDevice::FreePipeline(PipelineHandle& handle)
+	{
+		GL_Pipeline* pipeline = m_Pipelines.Find(handle);
+		if (!pipeline)
+		{
+			Debug().LogError("OpenGLDevice::FreePipeline: Invalid pipeline handle.");
+			return;
+		}
+
+		glDeleteProgram(pipeline->m_GLProgramID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		m_Pipelines.Erase(handle);
+
+		std::stringstream str;
+		str << "OpenGLDevice: Pipeline " << handle << " was freed from device memory.";
 		Debug().LogInfo(str.str());
 
 		handle = 0;
