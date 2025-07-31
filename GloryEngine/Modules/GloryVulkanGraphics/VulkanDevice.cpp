@@ -149,6 +149,33 @@ namespace Glory
 		m_PresentQueue = m_LogicalDevice.getQueue(m_PresentFamily.value(), 0);
 
 		CreateGraphicsCommandPool();
+		CreateCommandBuffer();
+	}
+
+	void VulkanDevice::CreateCommandBuffer()
+	{
+		vk::CommandPool commandPool = GetGraphicsCommandPool(vk::CommandPoolCreateFlagBits::eTransient | vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
+
+		// Create command buffers
+		m_FrameCommandBuffers.resize(1);
+
+		vk::CommandBufferAllocateInfo commandBufferAllocateInfo = vk::CommandBufferAllocateInfo()
+			.setCommandPool(commandPool)
+			.setLevel(vk::CommandBufferLevel::ePrimary)
+			.setCommandBufferCount((uint32_t)m_FrameCommandBuffers.size());
+
+		if (m_LogicalDevice.allocateCommandBuffers(&commandBufferAllocateInfo, m_FrameCommandBuffers.data()) != vk::Result::eSuccess)
+		{
+			Debug().LogError("Vulkan: Failed to allocate command buffer.");
+		}
+
+		vk::FenceCreateInfo fenceCreateInfo = vk::FenceCreateInfo()
+			.setFlags((vk::FenceCreateFlagBits)0);
+
+		if (m_LogicalDevice.createFence(&fenceCreateInfo, nullptr, &m_Fence) != vk::Result::eSuccess)
+		{
+			throw std::runtime_error("failed to create sync objects for a frame!");
+		}
 	}
 
 	uint32_t VulkanDevice::GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags)
@@ -203,16 +230,100 @@ namespace Glory
 		return m_GraphicsCommandPools[flags];
 	}
 
+	void VulkanDevice::Begin()
+	{
+		vk::CommandBufferBeginInfo commandBeginInfo = vk::CommandBufferBeginInfo()
+			.setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse)
+			.setPInheritanceInfo(nullptr);
+
+		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
+		commandBuffer.begin(commandBeginInfo);
+	}
+
 	void VulkanDevice::BeginRenderPass(RenderPassHandle handle)
 	{
+		VK_RenderPass* renderPass = m_RenderPasses.Find(handle);
+		if (!renderPass)
+		{
+			Debug().LogError("VulkanDevice::BeginRenderPass: Invalid render pass handle.");
+			return;
+		}
+		VK_RenderTexture* renderTexture = m_RenderTextures.Find(renderPass->m_RenderTexture);
+		if (!renderTexture)
+		{
+			Debug().LogError("VulkanDevice::BeginRenderPass: Render pass has an invalid render texture handle.");
+			return;
+		}
+
+		// Start a render pass
+        vk::Rect2D renderArea = vk::Rect2D()
+            .setOffset(vk::Offset2D(0, 0))
+            .setExtent(vk::Extent2D(renderTexture->m_Width, renderTexture->m_Height));
+
+        std::vector<vk::ClearValue> clearColors = std::vector<vk::ClearValue>(renderTexture->m_Textures.size());
+        for (size_t i = 0; i < clearColors.size(); ++i)
+        {
+			glm::vec4 value{0.0f, 0.0f, 0.0f, 1.0f};
+            vk::ClearColorValue clearColor;
+            memcpy(&clearColor, (const void*)&value, sizeof(float) * 4);
+            clearColors[i].setColor(clearColor);
+			//clearColors[i].setDepthStencil(vk::ClearDepthStencilValue(0.0f, 0));
+        }
+
+        vk::RenderPassBeginInfo renderPassBeginInfo = vk::RenderPassBeginInfo()
+            .setRenderPass(renderPass->m_VKRenderPass)
+            .setFramebuffer(renderTexture->m_VKFramebuffer)
+            .setRenderArea(renderArea)
+            .setClearValueCount(static_cast<uint32_t>(clearColors.size()))
+            .setPClearValues(clearColors.data());
+
+        vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
+        commandBuffer.beginRenderPass(&renderPassBeginInfo, vk::SubpassContents::eInline);
 	}
 
 	void VulkanDevice::BeginPipeline(PipelineHandle handle)
 	{
+		VK_Pipeline* pipeline = m_Pipelines.Find(handle);
+		if (!pipeline)
+		{
+			Debug().LogError("VulkanDevice::BeginPipeline: Invalid pipeline handle.");
+			return;
+		}
+
+		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
+		commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->m_VKPipeline);
+	}
+
+	void VulkanDevice::End()
+	{
+		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
+		commandBuffer.end();
+
+		// Submit command buffer
+	    //vk::Semaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
+	    vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+
+	    //vk::Semaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
+	    vk::SubmitInfo submitInfo = vk::SubmitInfo()
+	        .setWaitSemaphoreCount(0)
+	        .setPWaitSemaphores(nullptr)
+	        .setPWaitDstStageMask(waitStages)
+	        .setCommandBufferCount(1)
+	        .setPCommandBuffers(&m_FrameCommandBuffers[0])
+	        .setSignalSemaphoreCount(0)
+	        .setPSignalSemaphores(nullptr);
+
+		if (m_GraphicsQueue.submit(1, &submitInfo, m_Fence) != vk::Result::eSuccess)
+			throw std::runtime_error("failed to submit draw command buffer!");
+
+		m_LogicalDevice.waitForFences(1, &m_Fence, VK_TRUE, UINT64_MAX);
+		m_LogicalDevice.resetFences(1, &m_Fence);
 	}
 
 	void VulkanDevice::EndRenderPass()
 	{
+		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
+		commandBuffer.endRenderPass();
 	}
 
 	void VulkanDevice::EndPipeline()
@@ -221,6 +332,36 @@ namespace Glory
 
 	void VulkanDevice::DrawMesh(MeshHandle handle)
 	{
+		VK_Mesh* mesh = m_Meshes.Find(handle);
+		if (!mesh)
+		{
+			Debug().LogError("VulkanDevice::DrawMesh: Invalid mesh handle.");
+			return;
+		}
+
+		const bool hasIndexBuffer = mesh->m_IndexCount > 0;
+		const size_t vertexBufferCount = mesh->m_Buffers.size() - hasIndexBuffer ? 1 : 0;
+
+		std::vector<vk::Buffer> vertexBuffers(vertexBufferCount);
+		std::vector<vk::DeviceSize> offsets(vertexBufferCount);
+		for (size_t i = 0; i < mesh->m_Buffers.size() - hasIndexBuffer ? 1 : 0; ++i)
+		{
+			VK_Buffer* buffer = m_Buffers.Find(mesh->m_Buffers[i]);
+			vertexBuffers[i] = buffer->m_VKBuffer;
+			offsets[i] = 0;
+		}
+
+		VK_Buffer* indexBuffer = mesh->m_IndexCount > 0 ? m_Buffers.Find(mesh->m_Buffers.back()) : nullptr;
+
+		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
+		commandBuffer.bindVertexBuffers(0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+		if (indexBuffer)
+			commandBuffer.bindIndexBuffer(indexBuffer->m_VKBuffer, 0, vk::IndexType::eUint32);
+
+		if (hasIndexBuffer)
+			commandBuffer.drawIndexed(mesh->m_IndexCount, 1, 0, 0, 0);
+		else
+			commandBuffer.draw(mesh->m_VertexCount, 1, 0, 0);
 	}
 
 	BufferHandle VulkanDevice::CreateBuffer(size_t bufferSize, BufferType type)
@@ -486,7 +627,7 @@ namespace Glory
 		TextureHandle handle;
 		VK_Texture& texture = m_Textures.Emplace(handle, VK_Texture());
 
-		vk::Format format = VKConverter::GetVulkanFormat(textureInfo.m_PixelFormat); //vk::Format::eR8G8B8A8Srgb;
+		vk::Format format = VKConverter::GetVulkanFormat(textureInfo.m_InternalFormat); //vk::Format::eR8G8B8A8Srgb;
 		vk::ImageCreateInfo imageInfo = vk::ImageCreateInfo();
 		vk::ImageType imageType = VKConverter::GetVulkanImageType(textureInfo.m_ImageType);
 		imageInfo.imageType = imageType;
@@ -924,8 +1065,8 @@ namespace Glory
 			.setBlendConstants({ 0.0f, 0.0f, 0.0f, 0.0f });
 
 		vk::PipelineDepthStencilStateCreateInfo depthStencil = vk::PipelineDepthStencilStateCreateInfo();
-		depthStencil.depthTestEnable = VK_TRUE;
-		depthStencil.depthWriteEnable = VK_TRUE;
+		depthStencil.depthTestEnable = VK_FALSE;
+		depthStencil.depthWriteEnable = VK_FALSE;
 		depthStencil.depthCompareOp = vk::CompareOp::eLess;
 		depthStencil.depthBoundsTestEnable = VK_FALSE;
 		depthStencil.minDepthBounds = 0.0f; // Optional
