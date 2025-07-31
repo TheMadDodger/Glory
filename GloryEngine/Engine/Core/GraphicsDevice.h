@@ -130,7 +130,7 @@ namespace Glory
 		/* Shader */
 		virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) = 0;
 		/* Pipeline */
-		virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline) = 0;
+		virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, size_t stride, const std::vector<AttributeType>& attributeTypes) = 0;
 
 		/* Free memory */
 
@@ -144,6 +144,10 @@ namespace Glory
 		virtual void FreeRenderTexture(RenderTextureHandle& handle) = 0;
 		/** @brief Free a render pass from device memory */
 		virtual void FreeRenderPass(RenderPassHandle& handle) = 0;
+		/** @brief Free a shader from device memory */
+		virtual void FreeShader(ShaderHandle& handle) = 0;
+		/** @brief Free a pipeline from device memory */
+		virtual void FreePipeline(PipelineHandle& handle) = 0;
 
 	protected:
 		Debug& Debug();
