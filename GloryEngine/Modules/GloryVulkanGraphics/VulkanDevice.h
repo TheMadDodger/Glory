@@ -19,8 +19,8 @@ namespace Glory
     {
         vk::VertexInputBindingDescription m_VertexDescription;
         std::vector<vk::VertexInputAttributeDescription> m_AttributeDescriptions;
-        uint64_t m_VertexCount;
-        uint64_t m_IndexCount;
+        uint32_t m_VertexCount;
+        uint32_t m_IndexCount;
         std::vector<BufferHandle> m_Buffers;
     };
 
@@ -78,6 +78,7 @@ namespace Glory
         void CheckSupport(std::vector<const char*> extensions);
         bool SupportCheckPassed() const;
         void CreateLogicalDevice();
+        void CreateCommandBuffer();
         uint32_t VulkanDevice::GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags);
 
         GLORY_API uint32_t GraphicsFamily() const { return m_GraphicsFamily.value(); }
@@ -95,8 +96,10 @@ namespace Glory
         GLORY_API vk::CommandPool GetGraphicsCommandPool(vk::CommandPoolCreateFlags flags);
 
     private: /* Render commands */
+        virtual void Begin() override;
         virtual void BeginRenderPass(RenderPassHandle handle) override;
         virtual void BeginPipeline(PipelineHandle handle) override;
+        virtual void End() override;
         virtual void EndRenderPass() override;
         virtual void EndPipeline() override;
 
@@ -149,8 +152,12 @@ namespace Glory
         std::vector<const char*> m_DeviceExtensions;
         vk::CommandPool m_GraphicsCommandPool;
         std::map<vk::CommandPoolCreateFlags, vk::CommandPool> m_GraphicsCommandPools;
+        std::vector<vk::CommandBuffer> m_FrameCommandBuffers;
+
         vk::PhysicalDeviceFeatures m_Features;
         vk::PhysicalDeviceProperties m_DeviceProperties;
+
+        vk::Fence m_Fence;
 
         GraphicsResources<VK_Buffer> m_Buffers;
         GraphicsResources<VK_Mesh> m_Meshes;

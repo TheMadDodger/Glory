@@ -90,8 +90,10 @@ namespace Glory
 		virtual ~GraphicsDevice();
 
 	public: /* Rendering commands */
+		virtual void Begin() = 0;
 		virtual void BeginRenderPass(RenderPassHandle handle) = 0;
 		virtual void BeginPipeline(PipelineHandle handle) = 0;
+		virtual void End() = 0;
 		virtual void EndRenderPass() = 0;
 		virtual void EndPipeline() = 0;
 
