@@ -73,8 +73,10 @@ namespace Glory
         OpenGLGraphicsModule* GraphicsModule();
 
     private: /* Render commands */
+        virtual void Begin() override;
         virtual void BeginRenderPass(RenderPassHandle handle) override;
         virtual void BeginPipeline(PipelineHandle handle) override;
+        virtual void End() override;
         virtual void EndRenderPass() override;
         virtual void EndPipeline() override;
 

@@ -31,6 +31,10 @@ namespace Glory
 
 #pragma region Commands
 
+	void OpenGLDevice::Begin()
+	{
+	}
+
 	void OpenGLDevice::BeginRenderPass(RenderPassHandle handle)
 	{
 		GL_RenderPass* renderPass = m_RenderPasses.Find(handle);
@@ -65,6 +69,10 @@ namespace Glory
 
 		glUseProgram(pipeline->m_GLProgramID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OpenGLDevice::End()
+	{
 	}
 
 	void OpenGLDevice::EndRenderPass()
