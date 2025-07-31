@@ -49,14 +49,19 @@ namespace Glory
 
     struct VK_Shader
     {
-        uint32_t m_GLShaderID;
-        uint32_t m_GLShaderType;
+        vk::ShaderModule m_VKModule;
+        vk::ShaderStageFlagBits m_VKStage;
+        std::string m_Function;
     };
 
     struct VK_Pipeline
     {
         RenderPassHandle m_RenderPass;
-        uint32_t m_GLProgramID;
+        vk::PipelineLayout m_VKLayout;
+        vk::Pipeline m_VKPipeline;
+        vk::VertexInputBindingDescription m_VertexDescription;
+        std::vector<vk::VertexInputAttributeDescription> m_AttributeDescriptions;
+        std::vector<ShaderHandle> m_Shaders;
     };
 
     class VulkanGraphicsModule;
@@ -113,13 +118,15 @@ namespace Glory
         virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info) override;
         virtual RenderPassHandle CreateRenderPass(const RenderPassInfo& info) override;
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
-        virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline) override;
+        virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, size_t stride, const std::vector<AttributeType>& attributeTypes) override;
 
         virtual void FreeBuffer(BufferHandle& handle) override;
         virtual void FreeMesh(MeshHandle& handle) override;
         virtual void FreeTexture(TextureHandle& handle) override;
         virtual void FreeRenderTexture(RenderTextureHandle& handle) override;
         virtual void FreeRenderPass(RenderPassHandle& handle) override;
+        virtual void FreeShader(ShaderHandle& handle) override;
+        virtual void FreePipeline(PipelineHandle& handle) override;
 
     private:
         vk::PhysicalDevice m_VKDevice;
