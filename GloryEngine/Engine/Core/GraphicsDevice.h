@@ -99,6 +99,10 @@ namespace Glory
 
 		virtual void DrawMesh(MeshHandle handle) = 0;
 
+	public: /* Resource caching */
+		PipelineHandle AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline, size_t stride, const std::vector<AttributeType>& attributeTypes);
+		MeshHandle AcquireCachedMesh(MeshData* pMesh);
+
 	public: /* Resource mamagement */
 		
 		/* Buffer */
@@ -156,5 +160,10 @@ namespace Glory
 
 	protected:
 		Module* m_pModule;
+
+	private:
+		/* Cached handles */
+		std::map<UUID, PipelineHandle> m_PipelineHandles;
+		std::map<UUID, MeshHandle> m_MeshHandles;
 	};
 }
