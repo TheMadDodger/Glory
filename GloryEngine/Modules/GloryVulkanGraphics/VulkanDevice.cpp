@@ -95,6 +95,7 @@ namespace Glory
 		// Check feature support
 		m_VKDevice.getFeatures(&m_Features);
 		if (!m_Features.samplerAnisotropy) return;
+		if (!m_Features.shaderInt64) return;
 
 		m_DidLastSupportCheckPass = true;
 	}
@@ -120,14 +121,18 @@ namespace Glory
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
 
+		vk::PhysicalDeviceVulkan12Features vk12Features = vk::PhysicalDeviceVulkan12Features();
 		vk::PhysicalDeviceFeatures deviceFeatures = vk::PhysicalDeviceFeatures();
 		vk::DeviceCreateInfo deviceCreateInfo = vk::DeviceCreateInfo()
 			.setPQueueCreateInfos(queueCreateInfos.data())
 			.setQueueCreateInfoCount(static_cast<uint32_t>(queueCreateInfos.size()))
 			.setPEnabledFeatures(&deviceFeatures)
 			.setEnabledExtensionCount(static_cast<uint32_t>(m_DeviceExtensions.size()))
-			.setPpEnabledExtensionNames(m_DeviceExtensions.data());
+			.setPpEnabledExtensionNames(m_DeviceExtensions.data())
+			.setPNext(&vk12Features);
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
+		deviceFeatures.shaderInt64 = VK_TRUE;
+		vk12Features.separateDepthStencilLayouts = VK_TRUE;
 
 #if defined(_DEBUG)
 		const std::vector<const char*>& validationLayers = GraphicsModule()->GetValidationLayers();
@@ -730,7 +735,7 @@ namespace Glory
 		renderTexture.m_Width = info.Width;
 		renderTexture.m_Height = info.Height;
 
-		const size_t numAttachments = info.Attachments.size() + (info.HasDepth ? 1 : 0) + (info.HasStencil ? 1 : 0);
+		const size_t numAttachments = info.Attachments.size() + (info.HasDepth || info.HasStencil ? 1 : 0);
 		renderTexture.m_AttachmentNames.resize(numAttachments);
 		renderTexture.m_Textures.resize(numAttachments);
 
@@ -748,20 +753,27 @@ namespace Glory
 			++textureCounter;
 		}
 
-		size_t depthIndex = 0, stencilIndex = 0;
-		if (info.HasDepth)
+		size_t depthStencilIndex = 0;
+
+		if (info.HasDepth && info.HasStencil)
 		{
-			depthIndex = textureCounter;
-			renderTexture.m_Textures[depthIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Depth, PixelFormat::PF_Depth32, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
-			renderTexture.m_AttachmentNames[depthIndex] = "Depth";
+			depthStencilIndex = textureCounter;
+			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32SfloatS8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
+			renderTexture.m_AttachmentNames[depthStencilIndex] = "DepthStencil";
 			++textureCounter;
 		}
-
-		if (info.HasStencil)
+		else if (info.HasDepth)
 		{
-			stencilIndex = textureCounter;
-			renderTexture.m_Textures[stencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Stencil, sampler });
-			renderTexture.m_AttachmentNames[stencilIndex] = "Stencil";
+			depthStencilIndex = textureCounter;
+			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32Sfloat, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
+			renderTexture.m_AttachmentNames[depthStencilIndex] = "Depth";
+			++textureCounter;
+		}
+		else if (info.HasStencil)
+		{
+			depthStencilIndex = textureCounter;
+			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Stencil, sampler });
+			renderTexture.m_AttachmentNames[depthStencilIndex] = "Stencil";
 			++textureCounter;
 		}
 
@@ -773,15 +785,10 @@ namespace Glory
 			attachments[i] = texture->m_VKImageView;
 		}
 
-		if (info.HasDepth)
+		if (info.HasDepth || info.HasStencil)
 		{
-			VK_Texture* texture = m_Textures.Find(renderTexture.m_Textures[depthIndex]);
-			attachments[depthIndex] = texture->m_VKImageView;
-		}
-		if (info.HasStencil)
-		{
-			VK_Texture* texture = m_Textures.Find(renderTexture.m_Textures[stencilIndex]);
-			attachments[stencilIndex] = texture->m_VKImageView;
+			VK_Texture* texture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
+			attachments[depthStencilIndex] = texture->m_VKImageView;
 		}
 
 		vk::FramebufferCreateInfo frameBufferCreateInfo = vk::FramebufferCreateInfo()
@@ -821,14 +828,14 @@ namespace Glory
 		std::vector<vk::AttachmentReference> attachmentColorRefs;
 		vk::AttachmentReference attachmentDepthStencilRef;
 		const size_t attachmentCount = info.RenderTextureInfo.Attachments.size();
-		attachments.resize(attachmentCount +
-			info.RenderTextureInfo.HasDepth || info.RenderTextureInfo.HasStencil ? 1 : 0);
+		attachments.resize(attachmentCount + (
+			info.RenderTextureInfo.HasDepth || info.RenderTextureInfo.HasStencil ? 1 : 0));
 		attachmentColorRefs.resize(attachmentCount);
 		for (size_t i = 0; i < attachmentCount; ++i)
 		{
 			const Attachment& attachment = info.RenderTextureInfo.Attachments[i];
 
-			const vk::Format format = VKConverter::GetVulkanFormat(attachment.Format);
+			const vk::Format format = VKConverter::GetVulkanFormat(attachment.InternalFormat);
 
 			// Create render pass
 			attachments[i] = vk::AttachmentDescription()
@@ -846,10 +853,10 @@ namespace Glory
 				.setLayout(vk::ImageLayout::eColorAttachmentOptimal);
 		}
 
-		if (info.RenderTextureInfo.HasDepth || info.RenderTextureInfo.HasStencil)
+		if (info.RenderTextureInfo.HasDepth && info.RenderTextureInfo.HasStencil)
 		{
 			attachments[attachmentCount] = vk::AttachmentDescription()
-				.setFormat(vk::Format::eD24UnormS8Uint)
+				.setFormat(vk::Format::eD32SfloatS8Uint)
 				.setSamples(vk::SampleCountFlagBits::e1)
 				.setLoadOp(vk::AttachmentLoadOp::eClear)
 				.setStoreOp(vk::AttachmentStoreOp::eDontCare)
@@ -861,6 +868,38 @@ namespace Glory
 			attachmentDepthStencilRef = vk::AttachmentReference()
 				.setAttachment(attachmentCount)
 				.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+		}
+		else if (info.RenderTextureInfo.HasDepth)
+		{
+			attachments[attachmentCount] = vk::AttachmentDescription()
+				.setFormat(vk::Format::eD32Sfloat)
+				.setSamples(vk::SampleCountFlagBits::e1)
+				.setLoadOp(vk::AttachmentLoadOp::eClear)
+				.setStoreOp(vk::AttachmentStoreOp::eDontCare)
+				.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+				.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+				.setInitialLayout(vk::ImageLayout::eUndefined)
+				.setFinalLayout(vk::ImageLayout::eDepthAttachmentOptimal);
+
+			attachmentDepthStencilRef = vk::AttachmentReference()
+				.setAttachment(attachmentCount)
+				.setLayout(vk::ImageLayout::eDepthAttachmentOptimal);
+		}
+		else if (info.RenderTextureInfo.HasStencil)
+		{
+			attachments[attachmentCount] = vk::AttachmentDescription()
+				.setFormat(vk::Format::eS8Uint)
+				.setSamples(vk::SampleCountFlagBits::e1)
+				.setLoadOp(vk::AttachmentLoadOp::eClear)
+				.setStoreOp(vk::AttachmentStoreOp::eDontCare)
+				.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+				.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+				.setInitialLayout(vk::ImageLayout::eUndefined)
+				.setFinalLayout(vk::ImageLayout::eStencilAttachmentOptimal);
+
+			attachmentDepthStencilRef = vk::AttachmentReference()
+				.setAttachment(attachmentCount)
+				.setLayout(vk::ImageLayout::eStencilAttachmentOptimal);
 		}
 
 		vk::SubpassDescription subPass = vk::SubpassDescription()
@@ -1061,6 +1100,7 @@ namespace Glory
 			.setAlphaToOneEnable(VK_FALSE);
 
 		// Blend state
+		/* @todo: Create 1 per attachment and match it with the render pass settings */
 		vk::PipelineColorBlendAttachmentState colorBlendAttachmentCreateInfo = vk::PipelineColorBlendAttachmentState()
 			.setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA)
 			.setBlendEnable(VK_FALSE)
@@ -1079,8 +1119,8 @@ namespace Glory
 			.setBlendConstants({ 0.0f, 0.0f, 0.0f, 0.0f });
 
 		vk::PipelineDepthStencilStateCreateInfo depthStencil = vk::PipelineDepthStencilStateCreateInfo();
-		depthStencil.depthTestEnable = VK_FALSE;
-		depthStencil.depthWriteEnable = VK_FALSE;
+		depthStencil.depthTestEnable = VK_TRUE;
+		depthStencil.depthWriteEnable = VK_TRUE;
 		depthStencil.depthCompareOp = vk::CompareOp::eLess;
 		depthStencil.depthBoundsTestEnable = VK_FALSE;
 		depthStencil.minDepthBounds = 0.0f; // Optional

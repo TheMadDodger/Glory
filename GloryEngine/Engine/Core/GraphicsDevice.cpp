@@ -38,6 +38,38 @@ namespace Glory
 		m_pModule = nullptr;
 	}
 
+	PipelineHandle GraphicsDevice::AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline, size_t stride, const std::vector<AttributeType>& attributeTypes)
+	{
+		auto iter = m_PipelineHandles.find(pPipeline->GetGPUUUID());
+		if (iter == m_PipelineHandles.end())
+		{
+			PipelineHandle newPipeline = CreatePipeline(renderPass, pPipeline, stride, attributeTypes);
+			iter = m_PipelineHandles.emplace(pPipeline->GetGPUUUID(), newPipeline).first;
+		}
+
+		PipelineHandle pipeline = iter->second;
+
+		/* @todo: Update and/or move pipeline if needed */
+
+		return pipeline;
+	}
+
+	MeshHandle GraphicsDevice::AcquireCachedMesh(MeshData* pMesh)
+	{
+		auto iter = m_MeshHandles.find(pMesh->GetGPUUUID());
+		if (iter == m_MeshHandles.end())
+		{
+			MeshHandle newMesh = CreateMesh(pMesh);
+			iter = m_MeshHandles.emplace(pMesh->GetGPUUUID(), newMesh).first;
+		}
+
+		MeshHandle mesh = iter->second;
+
+		/* @todo: Update mesh if needed */
+
+		return mesh;
+	}
+
 	MeshHandle GraphicsDevice::CreateMesh(MeshData* pMeshData)
 	{
 		std::vector<BufferHandle> buffers(2);
