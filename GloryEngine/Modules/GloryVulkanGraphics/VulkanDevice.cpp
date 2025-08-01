@@ -984,14 +984,28 @@ namespace Glory
 				.setPName(shader->m_Function.data());
 		}
 
-		// Create descriptor set layout
-		//m_DescriptorSetLayouts.resize(m_DescriptorSetLayoutInfos.size());
-		//
-		//for (size_t i = 0; i < m_DescriptorSetLayoutInfos.size(); ++i)
-		//{
-		//	if (m_LogicalDevice.createDescriptorSetLayout(&m_DescriptorSetLayoutInfos[i], nullptr, &m_DescriptorSetLayouts[i]) != vk::Result::eSuccess)
-		//		throw std::runtime_error("Failed to create descriptor set layout!");
-		//}
+		std::vector<vk::DescriptorSetLayoutBinding> ssboLayoutBindings(3);
+		ssboLayoutBindings[0].binding = 1;
+		ssboLayoutBindings[0].descriptorType = vk::DescriptorType::eStorageBuffer;
+		ssboLayoutBindings[0].descriptorCount = 1;
+		ssboLayoutBindings[0].stageFlags = vk::ShaderStageFlagBits::eFragment;
+
+		ssboLayoutBindings[1].binding = 2;
+		ssboLayoutBindings[1].descriptorType = vk::DescriptorType::eStorageBuffer;
+		ssboLayoutBindings[1].descriptorCount = 1;
+		ssboLayoutBindings[1].stageFlags = vk::ShaderStageFlagBits::eVertex;
+
+		ssboLayoutBindings[2].binding = 3;
+		ssboLayoutBindings[2].descriptorType = vk::DescriptorType::eStorageBuffer;
+		ssboLayoutBindings[2].descriptorCount = 1;
+		ssboLayoutBindings[2].stageFlags = vk::ShaderStageFlagBits::eFragment;
+
+		vk::DescriptorSetLayoutCreateInfo layoutInfo{};
+		layoutInfo.bindingCount = ssboLayoutBindings.size();
+		layoutInfo.pBindings = ssboLayoutBindings.data();
+
+		if (m_LogicalDevice.createDescriptorSetLayout(&layoutInfo, nullptr, &pipeline.m_VKDescriptorSetLayouts) != vk::Result::eSuccess)
+			throw std::runtime_error("Failed to create descriptor set layout!");
 
 		// Vertex input state
 		vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo()
@@ -1086,8 +1100,8 @@ namespace Glory
 		//    .setPDynamicStates(dynamicStates);
 
 		vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
-			.setSetLayoutCount(static_cast<uint32_t>(0))
-			.setPSetLayouts(nullptr)
+			.setSetLayoutCount(1)
+			.setPSetLayouts(&pipeline.m_VKDescriptorSetLayouts)
 			.setPushConstantRangeCount(0)
 			.setPPushConstantRanges(nullptr);
 
@@ -1266,6 +1280,7 @@ namespace Glory
 			return;
 		}
 
+		m_LogicalDevice.destroyDescriptorSetLayout(pipeline->m_VKDescriptorSetLayouts);
 		m_LogicalDevice.destroyPipeline(pipeline->m_VKPipeline);
 		m_LogicalDevice.destroyPipelineLayout(pipeline->m_VKLayout);
 		m_Pipelines.Erase(handle);

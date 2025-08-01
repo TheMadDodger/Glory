@@ -57,6 +57,8 @@ namespace Glory
     struct VK_Pipeline
     {
         RenderPassHandle m_RenderPass;
+        vk::DescriptorSetLayout m_VKDescriptorSetLayouts;
+        std::vector<BufferHandle> m_Buffers;
         vk::PipelineLayout m_VKLayout;
         vk::Pipeline m_VKPipeline;
         vk::VertexInputBindingDescription m_VertexDescription;
