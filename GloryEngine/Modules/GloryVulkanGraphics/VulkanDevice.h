@@ -39,6 +39,7 @@ namespace Glory
         RenderPassHandle m_RenderPass;
         std::vector<TextureHandle> m_Textures;
         std::vector<std::string> m_AttachmentNames;
+        bool m_HasDepthOrStencil;
     };
 
     struct VK_RenderPass
@@ -60,6 +61,8 @@ namespace Glory
         vk::DescriptorSetLayout m_VKDescriptorSetLayouts;
         std::vector<BufferHandle> m_Buffers;
         vk::PipelineLayout m_VKLayout;
+
+        /* @todo: Create one per render pass it is being attached to? */
         vk::Pipeline m_VKPipeline;
         vk::VertexInputBindingDescription m_VertexDescription;
         std::vector<vk::VertexInputAttributeDescription> m_AttributeDescriptions;

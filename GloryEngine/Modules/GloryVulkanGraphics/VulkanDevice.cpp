@@ -96,6 +96,8 @@ namespace Glory
 		m_VKDevice.getFeatures(&m_Features);
 		if (!m_Features.samplerAnisotropy) return;
 		if (!m_Features.shaderInt64) return;
+		if (!m_Features.vertexPipelineStoresAndAtomics) return;
+		if (!m_Features.fragmentStoresAndAtomics) return;
 
 		m_DidLastSupportCheckPass = true;
 	}
@@ -132,6 +134,8 @@ namespace Glory
 			.setPNext(&vk12Features);
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
 		deviceFeatures.shaderInt64 = VK_TRUE;
+		deviceFeatures.vertexPipelineStoresAndAtomics = VK_TRUE;
+		deviceFeatures.fragmentStoresAndAtomics = VK_TRUE;
 		vk12Features.separateDepthStencilLayouts = VK_TRUE;
 
 #if defined(_DEBUG)
@@ -734,8 +738,9 @@ namespace Glory
 		renderTexture.m_RenderPass = renderPass;
 		renderTexture.m_Width = info.Width;
 		renderTexture.m_Height = info.Height;
+		renderTexture.m_HasDepthOrStencil = info.HasDepth || info.HasStencil;
 
-		const size_t numAttachments = info.Attachments.size() + (info.HasDepth || info.HasStencil ? 1 : 0);
+		const size_t numAttachments = info.Attachments.size() + (renderTexture.m_HasDepthOrStencil ? 1 : 0);
 		renderTexture.m_AttachmentNames.resize(numAttachments);
 		renderTexture.m_Textures.resize(numAttachments);
 
@@ -1032,7 +1037,7 @@ namespace Glory
 		ssboLayoutBindings[1].binding = 2;
 		ssboLayoutBindings[1].descriptorType = vk::DescriptorType::eStorageBuffer;
 		ssboLayoutBindings[1].descriptorCount = 1;
-		ssboLayoutBindings[1].stageFlags = vk::ShaderStageFlagBits::eVertex;
+		ssboLayoutBindings[1].stageFlags = vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment;
 
 		ssboLayoutBindings[2].binding = 3;
 		ssboLayoutBindings[2].descriptorType = vk::DescriptorType::eStorageBuffer;
@@ -1101,21 +1106,27 @@ namespace Glory
 
 		// Blend state
 		/* @todo: Create 1 per attachment and match it with the render pass settings */
-		vk::PipelineColorBlendAttachmentState colorBlendAttachmentCreateInfo = vk::PipelineColorBlendAttachmentState()
-			.setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA)
-			.setBlendEnable(VK_FALSE)
-			.setSrcColorBlendFactor(vk::BlendFactor::eOne)
-			.setDstColorBlendFactor(vk::BlendFactor::eZero)
-			.setColorBlendOp(vk::BlendOp::eAdd)
-			.setSrcAlphaBlendFactor(vk::BlendFactor::eOne)
-			.setDstAlphaBlendFactor(vk::BlendFactor::eZero)
-			.setAlphaBlendOp(vk::BlendOp::eAdd);
+
+		const size_t attachmentCount = vkRenderTexture->m_Textures.size() - (vkRenderTexture->m_HasDepthOrStencil ? 1 : 0);
+		std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates(attachmentCount);
+		for (size_t i = 0; i < attachmentCount; ++i)
+		{
+			colorBlendAttachmentStates[i] = vk::PipelineColorBlendAttachmentState()
+				.setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA)
+				.setBlendEnable(VK_FALSE)
+				.setSrcColorBlendFactor(vk::BlendFactor::eOne)
+				.setDstColorBlendFactor(vk::BlendFactor::eZero)
+				.setColorBlendOp(vk::BlendOp::eAdd)
+				.setSrcAlphaBlendFactor(vk::BlendFactor::eOne)
+				.setDstAlphaBlendFactor(vk::BlendFactor::eZero)
+				.setAlphaBlendOp(vk::BlendOp::eAdd);
+		}
 
 		vk::PipelineColorBlendStateCreateInfo colorBlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo()
 			.setLogicOpEnable(VK_FALSE)
 			.setLogicOp(vk::LogicOp::eCopy)
-			.setAttachmentCount(1)
-			.setPAttachments(&colorBlendAttachmentCreateInfo)
+			.setAttachmentCount(colorBlendAttachmentStates.size())
+			.setPAttachments(colorBlendAttachmentStates.data())
 			.setBlendConstants({ 0.0f, 0.0f, 0.0f, 0.0f });
 
 		vk::PipelineDepthStencilStateCreateInfo depthStencil = vk::PipelineDepthStencilStateCreateInfo();
