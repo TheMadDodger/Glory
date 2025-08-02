@@ -20,7 +20,6 @@
 #include <PipelineData.h>
 
 #include <shaderc/shaderc.hpp>
-#include <spirv_cross/spirv_glsl.hpp>
 
 namespace Glory::Editor
 {
@@ -390,9 +389,8 @@ namespace Glory::Editor
 			m_ShaderTypes[i].reserve(pEditorPipeline->m_EditorPlatformShaders.size());
 			for (size_t j = 0; j < pEditorPipeline->m_EditorPlatformShaders.size(); ++j)
 			{
-				const std::string_view compiledShader = pEditorPipeline->m_EditorPlatformShaders[j];
 				const size_t index = m_CompiledShaders[i].size();
-				m_CompiledShaders[i].push_back(FileData(compiledShader));
+				m_CompiledShaders[i].push_back(FileData(pEditorPipeline->m_EditorPlatformShaders[j]));
 				m_ShaderTypes[i].push_back(pEditorPipeline->m_EditorShaderDatas[j].m_ShaderType);
 				m_CompiledShaders[i][index].SetMetaData(PipelineShaderMetaData{ m_Pipelines[i], m_ShaderTypes[i][index] });
 			}
@@ -431,7 +429,7 @@ namespace Glory::Editor
 		std::vector<EditorShaderData> compiledShaders(pPipeline->ShaderCount());
 
 		/* Check if cache is available and not outdated */
-		const std::filesystem::path cachePath = GetCompiledPipelineSPVCachePath(pPipeline->GetUUID());
+		const std::filesystem::path cachePath = GetCompiledPipelineCachePath(pPipeline->GetUUID());
 		bool validCacheAvailable = std::filesystem::exists(cachePath);
 		for (size_t i = 0; i < pPipeline->ShaderCount() && validCacheAvailable; ++i)
 		{
@@ -525,21 +523,26 @@ namespace Glory::Editor
 
 	void EditorPipelineManager::CompileForEditorPlatform(EditorPipeline* pEditorPipeline)
 	{
+		EditorRenderImpl* pEditorRenderer = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
+
 		pEditorPipeline->m_EditorPlatformShaders.clear();
 		pEditorPipeline->m_EditorPlatformShaders.resize(pEditorPipeline->m_EditorShaderDatas.size());
 		for (size_t i = 0; i < pEditorPipeline->m_EditorShaderDatas.size(); ++i)
 		{
 			const EditorShaderData& editorShader = pEditorPipeline->m_EditorShaderDatas[i];
-			spirv_cross::CompilerGLSL compiler(editorShader.Data(), editorShader.Size());
-			pEditorPipeline->m_EditorPlatformShaders[i] = compiler.compile();
+			pEditorRenderer->CompileShaderForEditor(editorShader, pEditorPipeline->m_EditorPlatformShaders[i]);
 		}
 	}
 
-	std::filesystem::path EditorPipelineManager::GetCompiledPipelineSPVCachePath(UUID uuid)
+	std::filesystem::path EditorPipelineManager::GetCompiledPipelineCachePath(UUID uuid)
 	{
+		EditorRenderImpl* pEditorRenderer = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
 		std::filesystem::path cachedShaderSourceFile = pProject->CachePath();
-		cachedShaderSourceFile.append("CompiledPipelines").append(std::to_string(uuid));
+		cachedShaderSourceFile.append("CompiledPipelines").append(pEditorRenderer->ShadingLanguage());
+		if (!std::filesystem::exists(cachedShaderSourceFile))
+			std::filesystem::create_directories(cachedShaderSourceFile);
+		cachedShaderSourceFile.append(std::to_string(uuid));
 		return cachedShaderSourceFile;
 	}
 
@@ -663,7 +666,7 @@ namespace Glory::Editor
 
 	void EditorPipelineManager::DeletePipelineCache(UUID pipelineID)
 	{
-		const std::filesystem::path path = GetCompiledPipelineSPVCachePath(pipelineID);
+		const std::filesystem::path path = GetCompiledPipelineCachePath(pipelineID);
 		std::filesystem::remove(path);
 	}
 }

@@ -20,6 +20,6 @@ namespace Glory::Editor
 	private:
 		friend class EditorPipelineManager;
 		std::vector<EditorShaderData> m_EditorShaderDatas;
-		std::vector<std::string> m_EditorPlatformShaders;
+		std::vector<std::vector<char>> m_EditorPlatformShaders;
 	};
 }

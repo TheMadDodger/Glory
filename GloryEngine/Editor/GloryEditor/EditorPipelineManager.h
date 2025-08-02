@@ -134,7 +134,7 @@ namespace Glory::Editor
 		void CompileForEditorPlatform(EditorPipeline* pEditorPipeline);
 
 		/** @brief Get path to compiled pipeline cache file */
-		std::filesystem::path GetCompiledPipelineSPVCachePath(UUID uuid);
+		std::filesystem::path GetCompiledPipelineCachePath(UUID uuid);
 
 		/** @brief Load the original and processed shader source */
 		ShaderSourceData* LoadOriginalShader(UUID uuid);

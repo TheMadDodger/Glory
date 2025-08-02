@@ -10,6 +10,7 @@ namespace Glory
         FileData();
         FileData(FileData* pFileData);
         FileData(std::vector<char>&& data);
+        FileData(const std::vector<char>& data);
         FileData(std::string_view data);
         virtual ~FileData();
 

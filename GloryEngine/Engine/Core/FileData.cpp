@@ -18,6 +18,13 @@ namespace Glory
 		APPEND_TYPE(FileData);
 	}
 
+	FileData::FileData(const std::vector<char>& data)
+	{
+		APPEND_TYPE(FileData);
+		m_Data.resize(data.size());
+		std::memcpy(m_Data.data(), data.data(), data.size());
+	}
+
 	FileData::FileData(std::string_view data): m_Data(data.begin(), data.end())
 	{
 		APPEND_TYPE(FileData);

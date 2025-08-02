@@ -18,6 +18,9 @@ namespace Glory::Editor
         virtual ~EditorOpenGLRenderImpl();
 
     private:
+        virtual std::string ShadingLanguage() override;
+        virtual void CompileShaderForEditor(const EditorShaderData& editorShader, std::vector<char>& out) override;
+
         virtual void SetContext(ImGuiContext* pImguiConext) override;
         virtual void Setup() override;
         virtual void SetupBackend() override;
