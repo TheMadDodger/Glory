@@ -1,6 +1,7 @@
 #include "EditorVulkanRenderImpl.h"
 
 #include <EditorApplication.h>
+#include <EditorShaderData.h>
 
 #include <VulkanTexture.h>
 
@@ -27,6 +28,17 @@ namespace Glory::Editor
 	void* EditorVulkanRenderImpl::GetTextureID(Texture* pTexture)
 	{
 		return nullptr;
+	}
+
+	std::string EditorVulkanRenderImpl::ShadingLanguage()
+	{
+		return "spv";
+	}
+
+	void EditorVulkanRenderImpl::CompileShaderForEditor(const EditorShaderData& editorShader, std::vector<char>& out)
+	{
+		out.resize(editorShader.Size()*sizeof(uint32_t));
+		std::memcpy(out.data(), editorShader.Data(), editorShader.Size()*sizeof(uint32_t));
 	}
 
 	void EditorVulkanRenderImpl::SetContext(ImGuiContext* pImguiConext)

@@ -6,6 +6,8 @@
 namespace Glory::Editor
 {
 	class EditorPlatform;
+	class EditorPipeline;
+	class EditorShaderData;
 
 	class EditorRenderImpl
 	{
@@ -14,6 +16,8 @@ namespace Glory::Editor
 		GLORY_EDITOR_API virtual ~EditorRenderImpl();
 
 		virtual void* GetTextureID(Texture* pTexture) = 0;
+		virtual std::string ShadingLanguage() = 0;
+		virtual void CompileShaderForEditor(const EditorShaderData& editorShader, std::vector<char>& out) = 0;
 
 	protected:
 		virtual void SetContext(ImGuiContext* pImguiConext) = 0;

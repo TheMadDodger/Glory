@@ -5,11 +5,30 @@
 #include <GL/glew.h>
 #include <GLTexture.h>
 
+#include <EditorShaderData.h>
+
+#include <shaderc/shaderc.hpp>
+#include <spirv_cross/spirv_glsl.hpp>
+
 namespace Glory::Editor
 {
 	EditorOpenGLRenderImpl::EditorOpenGLRenderImpl() {}
 
 	EditorOpenGLRenderImpl::~EditorOpenGLRenderImpl() {}
+
+	std::string EditorOpenGLRenderImpl::ShadingLanguage()
+	{
+		return "glsl";
+	}
+
+	void EditorOpenGLRenderImpl::CompileShaderForEditor(const EditorShaderData& editorShader, std::vector<char>& out)
+	{
+		spirv_cross::CompilerGLSL compiler(editorShader.Data(), editorShader.Size());
+		const std::string compiledShader = compiler.compile();
+		out.resize(compiledShader.length() + 1);
+		std::memcpy(out.data(), compiledShader.data(), compiledShader.length());
+		out.back() = '\0';
+	}
 
 	void EditorOpenGLRenderImpl::SetContext(ImGuiContext* pImguiConext)
 	{

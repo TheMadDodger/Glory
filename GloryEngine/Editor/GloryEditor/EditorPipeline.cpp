@@ -27,7 +27,11 @@ namespace Glory::Editor
 		{
 			m_EditorShaderDatas[i].Serialize(container);
 		}
-		container.Write(m_EditorPlatformShaders);
+
+		for (auto& platformShader : m_EditorPlatformShaders)
+		{
+			container.Write(platformShader);
+		}
 	}
 
 	void EditorPipeline::Deserialize(BinaryStream& container)
@@ -40,6 +44,12 @@ namespace Glory::Editor
 		{
 			m_EditorShaderDatas[i].Deserialize(container);
 		}
-		container.Read(m_EditorPlatformShaders);
+		m_EditorPlatformShaders.resize(numShaders);
+		for (auto& platformShader : m_EditorPlatformShaders)
+		{
+			size_t size = 0;
+			container.Read(size);
+			container.Read(platformShader, size);
+		}
 	}
 }

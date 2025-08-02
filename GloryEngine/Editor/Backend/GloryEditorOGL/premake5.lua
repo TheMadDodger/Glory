@@ -108,9 +108,33 @@ project "GloryEditorOGL"
 
 		links "glew32d"
 
+		links
+		{
+			"glew32d",
+			"spirv-cross-cd",
+			"spirv-cross-cored",
+			--"spirv-cross-cppd",
+			"spirv-cross-glsld",
+			--"spirv-cross-hlsld",
+			--"spirv-cross-msld",
+			--"spirv-cross-reflectd",
+			--"spirv-cross-utild",
+		}
+
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
 
-		links "glew32"
+		links
+		{
+			"glew32",
+			"spirv-cross-c",
+			"spirv-cross-core",
+			--"spirv-cross-cpp",
+			"spirv-cross-glsl",
+			--"spirv-cross-hlsl",
+			--"spirv-cross-msl",
+			--"spirv-cross-reflect",
+			--"spirv-cross-util",
+		}
