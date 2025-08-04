@@ -5,7 +5,7 @@
 
 #include "internal/ObjectData.glsl"
 
-layout(binding = 1, std430) buffer PropertiesSSBO
+layout(binding = 1, std430) readonly buffer PropertiesSSBO
 {
 	vec4 Color;
 	float Shininess;

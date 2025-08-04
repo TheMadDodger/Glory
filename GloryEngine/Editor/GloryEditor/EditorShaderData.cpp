@@ -90,6 +90,18 @@ namespace Glory::Editor
 			const BasicTypeData* pType = types.GetBasicTypeData(info.m_TypeHash);
 			pPipeline->AddProperty(info.m_Name, info.m_Name, pType->m_TypeHash, pType->m_Size, 0);
 		}
+
+		for (size_t i = 0; i < m_UniformBuffers.size(); ++i)
+		{
+			const std::string& uniformBuffer = m_UniformBuffers[i];
+			pPipeline->AddUniformBuffer(uniformBuffer, m_ShaderType);
+		}
+
+		for (size_t i = 0; i < m_StorageBuffers.size(); ++i)
+		{
+			const std::string& storageBuffer = m_StorageBuffers[i];
+			pPipeline->AddStorageBuffer(storageBuffer, m_ShaderType);
+		}
 	}
 
 	void EditorShaderData::Serialize(BinaryStream& container) const
@@ -101,6 +113,8 @@ namespace Glory::Editor
 			const PropertyInfo& prop = m_PropertyInfos[i];
 			container.Write(prop.m_Name).Write(prop.m_TypeHash);
 		}
+		container.Write(m_UniformBuffers);
+		container.Write(m_StorageBuffers);
 		container.Write(m_Features);
 	}
 
@@ -115,6 +129,8 @@ namespace Glory::Editor
 			PropertyInfo& prop = m_PropertyInfos[i];
 			container.Read(prop.m_Name).Read(prop.m_TypeHash);
 		}
+		container.Read(m_UniformBuffers);
+		container.Read(m_StorageBuffers);
 		container.Read(m_Features);
 	}
 

@@ -107,6 +107,48 @@ namespace Glory
 		m_CurrentOffset = 0;
 	}
 
+	void PipelineData::AddUniformBuffer(const std::string& name, ShaderType shaderType)
+	{
+		auto iter = std::find_if(m_UniformBuffers.begin(), m_UniformBuffers.end(), [&name](const ShaderBufferInfo& bufferInfo) { return bufferInfo.Name == name; });
+		if (iter == m_UniformBuffers.end())
+		{
+			m_UniformBuffers.emplace_back(ShaderBufferInfo{ name, ShaderTypeToFlag[size_t(shaderType)] });
+			return;
+		}
+		iter->ShaderFlags = ShaderTypeFlag(iter->ShaderFlags | ShaderTypeToFlag[size_t(shaderType)]);
+	}
+
+	void PipelineData::AddStorageBuffer(const std::string& name, ShaderType shaderType)
+	{
+		auto iter = std::find_if(m_StorageBuffers.begin(), m_StorageBuffers.end(), [&name](const ShaderBufferInfo& bufferInfo) { return bufferInfo.Name == name; });
+		if (iter == m_StorageBuffers.end())
+		{
+			m_StorageBuffers.emplace_back(ShaderBufferInfo{ name, ShaderTypeToFlag[size_t(shaderType)] });
+			return;
+		}
+		iter->ShaderFlags = ShaderTypeFlag(iter->ShaderFlags | ShaderTypeToFlag[size_t(shaderType)]);
+	}
+
+	size_t PipelineData::UniformBufferCount() const
+	{
+		return m_UniformBuffers.size();
+	}
+
+	size_t PipelineData::StorageBufferCount() const
+	{
+		return m_StorageBuffers.size();
+	}
+
+	const ShaderBufferInfo& PipelineData::UniformBuffer(size_t index) const
+	{
+		return m_UniformBuffers[index];
+	}
+
+	const ShaderBufferInfo& PipelineData::StorageBuffer(size_t index) const
+	{
+		return m_StorageBuffers[index];
+	}
+
 	size_t PipelineData::ResourcePropertyCount() const
 	{
 		return m_ResourcePropertyInfoIndices.size();
@@ -151,6 +193,20 @@ namespace Glory
 			container.Write(prop.GetTextureType());
 			container.Write(prop.Flags());
 		}
+
+		/* Write buffer infos */
+		container.Write(m_UniformBuffers.size());
+		for (size_t i = 0; i < m_UniformBuffers.size(); ++i)
+		{
+			container.Write(m_UniformBuffers[i].Name).
+				Write(uint8_t(m_UniformBuffers[i].ShaderFlags));
+		}
+		container.Write(m_StorageBuffers.size());
+		for (size_t i = 0; i < m_StorageBuffers.size(); ++i)
+		{
+			container.Write(m_StorageBuffers[i].Name).
+				Write(uint8_t(m_StorageBuffers[i].ShaderFlags));
+		}
 	}
 
 	void PipelineData::Deserialize(BinaryStream& container)
@@ -182,6 +238,24 @@ namespace Glory
 
 			if (!prop.m_TextureType) continue;
 			m_ResourcePropertyInfoIndices.push_back(i);
+		}
+
+		/* Read buffer infos */
+		size_t numUniformBuffers;
+		container.Read(numUniformBuffers);
+		m_UniformBuffers.resize(numUniformBuffers);
+		for (size_t i = 0; i < m_UniformBuffers.size(); ++i)
+		{
+			container.Read(m_UniformBuffers[i].Name).
+				Read(reinterpret_cast<uint8_t&>(m_UniformBuffers[i].ShaderFlags));
+		}
+		size_t numStorageBuffers;
+		container.Read(numStorageBuffers);
+		m_StorageBuffers.resize(numStorageBuffers);
+		for (size_t i = 0; i < m_StorageBuffers.size(); ++i)
+		{
+			container.Read(m_StorageBuffers[i].Name).
+				Read(reinterpret_cast<uint8_t&>(m_StorageBuffers[i].ShaderFlags));
 		}
 	}
 

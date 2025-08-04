@@ -6,7 +6,7 @@
 #include "internal/ObjectData.glsl"
 #include "internal/Textured.glsl"
 
-layout(std430, binding = 1) buffer PropertiesSSBO
+layout(std430, binding = 1) readonly buffer PropertiesSSBO
 {
 	vec4 Color;
 	float Shininess;
