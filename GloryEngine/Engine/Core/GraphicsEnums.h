@@ -437,8 +437,31 @@ namespace Glory
         ST_TessEval,
         ST_Compute,
 
-        ST_Count
+        ST_Count,
     };
+
+    enum ShaderTypeFlag : uint8_t
+    {
+        STF_Vertex = 1 << 0,
+        STF_Fragment = 1 << 1,
+        STF_Geomtery = 1 << 2,
+        STF_TessControl = 1 << 3,
+        STF_TessEval = 1 << 4,
+        STF_Compute = 1 << 5,
+    };
+
+    constexpr size_t ShaderTypeToFlagCount = 7;
+    constexpr ShaderTypeFlag ShaderTypeToFlag[ShaderTypeToFlagCount] = {
+        ShaderTypeFlag(0),
+        ShaderTypeFlag::STF_Vertex,
+        ShaderTypeFlag::STF_Fragment,
+        ShaderTypeFlag::STF_Geomtery,
+        ShaderTypeFlag::STF_TessControl,
+        ShaderTypeFlag::STF_TessEval,
+        ShaderTypeFlag::STF_Compute,
+    };
+
+    static_assert(ShaderTypeToFlagCount == (size_t)ShaderType::ST_Count);
 
     enum class BufferBindingTarget
     {
@@ -848,5 +871,11 @@ namespace Glory
     {
         uint64_t PipelineID;
         ShaderType Type;
+    };
+
+    struct ShaderBufferInfo
+    {
+        std::string Name;
+        ShaderTypeFlag ShaderFlags;
     };
 }

@@ -610,20 +610,28 @@ namespace Glory::Editor
 
 		for (size_t i = 0; i < resources.storage_buffers.size(); ++i)
 		{
-			spirv_cross::Resource storageBuffer = resources.storage_buffers[i];
+			const spirv_cross::Resource storageBuffer = resources.storage_buffers[i];
+			pEditorShader->m_StorageBuffers.push_back(storageBuffer.name);
 			if (storageBuffer.name != "PropertiesSSBO") continue;
 			const spirv_cross::SPIRType& base_type = compiler.get_type(storageBuffer.base_type_id);
 			const spirv_cross::SPIRType& type = compiler.get_type(storageBuffer.type_id);
 
 			if (base_type.basetype != spirv_cross::SPIRType::Struct) break;
-			for (uint32_t j = 0; j < (uint32_t)base_type.member_types.size(); j++)
+			for (uint32_t j = 0; j < (uint32_t)base_type.member_types.size(); ++j)
 			{
 				spirv_cross::TypeID memberType = base_type.member_types[j];
 				const spirv_cross::SPIRType& type = compiler.get_type(memberType);
 				const std::string& name = compiler.get_member_name(storageBuffer.base_type_id, j);
-				uint32_t hash = type.vecsize - 1 < SpirBaseTypeToHashOne[type.basetype].size() ? SpirBaseTypeToHashOne[type.basetype][type.vecsize - 1] : 0;
+				const uint32_t hash = type.vecsize - 1 < SpirBaseTypeToHashOne[type.basetype].size() ?
+					SpirBaseTypeToHashOne[type.basetype][type.vecsize - 1] : 0;
 				pEditorShader->m_PropertyInfos.push_back(EditorShaderData::PropertyInfo(name, hash));
 			}
+		}
+
+		for (size_t i = 0; i < resources.uniform_buffers.size(); ++i)
+		{
+			const spirv_cross::Resource uniformBuffer = resources.uniform_buffers[i];
+			pEditorShader->m_UniformBuffers.push_back(uniformBuffer.name);
 		}
 	}
 

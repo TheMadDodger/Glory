@@ -64,6 +64,31 @@ namespace Glory
         /** @brief Clear all property infos */
         void ClearProperties();
 
+        /** @brief Add information on a uniform buffer to this pipeline
+         * @param name Name of the buffer
+         * @param shaderType Shader stage that uses this buffer
+         *
+         * Will update the ShaderTypeFlag bits if the buffer was already added.
+         */
+        void AddUniformBuffer(const std::string& name, ShaderType shaderType);
+        /** @brief Add information on a storage buffer to this pipeline
+         * @param name Name of the buffer
+         * @param shaderType Shader stage that uses this buffer
+         *
+         * Will update the ShaderTypeFlag bits if the buffer was already added.
+         */
+        void AddStorageBuffer(const std::string& name, ShaderType shaderType);
+
+        /** @brief Number of uniform buffers in this pipeline */
+        size_t UniformBufferCount() const;
+        /** @brief Number of storage buffers in this pipeline */
+        size_t StorageBufferCount() const;
+
+        /** @brief Get the info for a uniform buffer in this pipeline */
+        const ShaderBufferInfo& UniformBuffer(size_t index) const;
+        /** @brief Get the info for a storage buffer in this pipeline */
+        const ShaderBufferInfo& StorageBuffer(size_t index) const;
+
         size_t ResourcePropertyCount() const;
         MaterialPropertyInfo* ResourcePropertyInfo(size_t resourceIndex);
 
@@ -92,6 +117,9 @@ namespace Glory
          */
         void AddFeature(std::string_view feature, bool isOn);
 
+        /** @brief Get the index of a feature
+         * @param feature Name of the feature
+         */
         size_t FeatureIndex(std::string_view feature) const;
 
         /** @brief Number of available features for this pipeline */
@@ -118,6 +146,8 @@ namespace Glory
         std::vector<MaterialPropertyInfo> m_PropertyInfos;
         std::vector<size_t> m_ResourcePropertyInfoIndices;
         std::unordered_map<uint32_t, size_t> m_HashToPropertyInfoIndex;
+        std::vector<ShaderBufferInfo> m_UniformBuffers;
+        std::vector<ShaderBufferInfo> m_StorageBuffers;
         std::vector<std::string> m_Features;
         Utils::BitSet m_FeaturesEnabled;
 

@@ -56,6 +56,8 @@ namespace Glory::Editor
 		std::vector<std::string> m_SamplerNames;
 		std::vector<ImageType> m_SamplerTypes;
 		std::vector<PropertyInfo> m_PropertyInfos;
+		std::vector<std::string> m_UniformBuffers;
+		std::vector<std::string> m_StorageBuffers;
 
 		std::vector<std::string> m_Features;
 	};
