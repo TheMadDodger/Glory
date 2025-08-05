@@ -237,7 +237,11 @@ namespace Glory
 		m_pComponentTypesInstance->RegisterInvokaction<LookAt>(Glory::Utils::ECS::InvocationType::Update, LookAtSystem::OnUpdate);
 
 		// MeshRenderer
+		m_pComponentTypesInstance->RegisterInvokaction<MeshRenderer>(Glory::Utils::ECS::InvocationType::OnDirty, MeshRenderSystem::OnDirty);
 		m_pComponentTypesInstance->RegisterInvokaction<MeshRenderer>(Glory::Utils::ECS::InvocationType::Draw, MeshRenderSystem::OnDraw);
+		m_pComponentTypesInstance->RegisterInvokaction<MeshRenderer>(Glory::Utils::ECS::InvocationType::OnValidate, MeshRenderSystem::OnValidate);
+		m_pComponentTypesInstance->RegisterInvokaction<MeshRenderer>(Glory::Utils::ECS::InvocationType::OnEnableDraw, MeshRenderSystem::OnEnable);
+		m_pComponentTypesInstance->RegisterInvokaction<MeshRenderer>(Glory::Utils::ECS::InvocationType::OnDisableDraw, MeshRenderSystem::OnDisable);
 		m_pComponentTypesInstance->RegisterReferencesCallback<MeshRenderer>(MeshRenderSystem::GetReferences);
 
 		// Spin

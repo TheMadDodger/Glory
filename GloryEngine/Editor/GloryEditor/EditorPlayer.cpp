@@ -12,6 +12,7 @@
 
 #include <IconsFontAwesome6.h>
 #include <Components.h>
+#include <RendererModule.h>
 
 namespace Glory::Editor
 {
@@ -39,6 +40,8 @@ namespace Glory::Editor
 		ProjectSettings::OnStartPlay();
 
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		if (pRenderer) pRenderer->Reset();
 		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
 		{
 			IPlayModeHandler* pPlayModeHandler = m_pSceneLoopHandlers[i];

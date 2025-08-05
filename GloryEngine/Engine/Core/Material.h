@@ -42,6 +42,7 @@ namespace Glory
 		virtual void SetMatrix4(const std::string& name, const glm::mat4& value) const = 0;
 		/** @brief Resets the texture counter */
 		virtual void ResetTextureCounter() = 0;
+		virtual void Reset() = 0;
 
 	protected:
 		virtual Buffer* CreatePropertiesBuffer(uint32_t size) = 0;

@@ -2,6 +2,7 @@
 
 #include <AssetManager.h>
 #include <MaterialManager.h>
+#include <PipelineManager.h>
 #include <Engine.h>
 #include <GraphicsModule.h>
 #include <GPUResourceManager.h>
@@ -16,6 +17,7 @@
 #include <FontDataStructs.h>
 #include <Console.h>
 #include <GPUTextureAtlas.h>
+#include <Pipeline.h>
 
 #include <DistributedRandom.h>
 
@@ -162,6 +164,83 @@ namespace Glory
 		AddRenderPass(RP_PreCompositePass, RenderPass{ "Shadows Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			ShadowMapsPass(camera, frame);
 			m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS*sizeof(LightData));
+		} });
+		
+		AddRenderPass(RP_ObjectPass, RenderPass{ "Static Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
+			GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+			GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+			MaterialManager& materialManager = m_pEngine->GetMaterialManager();
+			PipelineManager& pipelines = m_pEngine->GetPipelineManager();
+			AssetManager& assets = m_pEngine->GetAssetManager();
+
+			pGraphics->EnableDepthWrite(true);
+			for (PipelineBatch& pipelineRenderData : m_StaticPipelineRenderDatas)
+			{
+				PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineRenderData.m_PipelineID);
+				if (!pPipelineData) continue;
+				Pipeline* pPipeline = pResourceManager->CreatePipeline(pPipelineData);
+				pPipeline->Use();
+
+				for (UUID uniqueMeshID : pipelineRenderData.m_UniqueMeshOrder)
+				{
+					const PipelineMeshBatch& meshBatch = pipelineRenderData.m_Meshes.at(uniqueMeshID);
+					Resource* pMeshResource = assets.FindResource(meshBatch.m_Mesh);
+					if (!pMeshResource) continue;
+					MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+					Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
+					if (!pMesh) continue;
+
+					for (size_t i = 0; i < meshBatch.m_Materials.size(); ++i)
+					{
+						MaterialData* pMaterialData = materialManager.GetMaterial(meshBatch.m_Materials[i]);
+						if (!pMaterialData) continue;
+						Material* pMaterial = pResourceManager->CreateMaterial(pMaterialData);
+						if (!pMaterial) continue;
+
+						const auto& ids = meshBatch.m_ObjectIDs[i];
+						const auto& world = meshBatch.m_Worlds[i];
+
+						pMaterial->Reset();
+
+						ObjectData object;
+						object.Model = world;
+						object.View = camera.GetView();
+						object.Projection = camera.GetProjection();
+						object.ObjectID = ids.second;
+						object.SceneID = ids.first;
+
+						pMaterial->SetProperties(m_pEngine);
+						pMaterial->SetObjectData(object);
+						pGraphics->DrawMesh(pMesh, pMeshData->VertexCount(), pMeshData->IndexCount());
+					}
+				}
+
+				/*const size_t materialCount = pipelineRenderData.m_UniqueMaterials->size();
+				MaterialData* pBaseMaterialData = materialManager.GetMaterial(pipelineRenderData.m_UniqueMaterials.m_Data[0]);
+				if (!pBaseMaterialData) continue;
+				const size_t propertyDataSize = pBaseMaterialData->PropertyDataSize(materialManager);
+				const size_t paddingBytes = 16 - propertyDataSize%16;
+				const size_t finalPropertyDataSize = propertyDataSize + paddingBytes;
+				pipelineRenderData.m_PropertiesBuffer.resize(finalPropertyDataSize*materialCount);
+
+				for (size_t i = 0; i < materialCount; ++i)
+				{
+					MaterialData* pMaterialData = materialManager.GetMaterial(pipelineRenderData.m_UniqueMaterials.m_Data[i]);
+					if (std::memcmp(&pipelineRenderData.m_PropertiesBuffer.m_Data[i*finalPropertyDataSize],
+						pMaterialData->GetFinalBufferReference(materialManager).data(), propertyDataSize) == 0)
+						continue;
+
+					pMaterialData->CopyProperties(materialManager, &pipelineRenderData.m_PropertiesBuffer.m_Data[i * finalPropertyDataSize]);
+					pipelineRenderData.m_PropertiesBuffer.m_Dirty = true;
+				}
+
+				if (pipelineRenderData.m_PropertiesBuffer)
+				{
+					pipelineRenderData.m_pIndirectMaterialPropertyData->Assign(pipelineRenderData.m_PropertiesBuffer->data(),
+						pipelineRenderData.m_PropertiesBuffer->size());
+				}*/
+			}
+			pGraphics->EnableDepthWrite(true);
 		} });
 	}
 

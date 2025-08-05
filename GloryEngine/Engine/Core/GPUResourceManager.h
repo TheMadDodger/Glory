@@ -38,6 +38,8 @@ namespace Glory
 		Texture* CreateTexture(TextureCreateInfo&& textureInfo, const void* pixels=nullptr);
 		Texture* CreateCubemapTexture(CubemapData* pCubemap);
 		RenderTexture* CreateRenderTexture(const RenderTextureCreateInfo& createInfo);
+		virtual Buffer* CreateVertexBuffer(uint32_t bufferSize) = 0;
+		virtual Buffer* CreateIndexBuffer(uint32_t bufferSize) = 0;
 
 		void Free(GPUResource* pResource);
 		void Free(Buffer* pBuffer);
@@ -49,8 +51,6 @@ namespace Glory
 		Engine* GetEngine();
 
 	protected: // Internal functions
-		virtual Buffer* CreateVertexBuffer(uint32_t bufferSize) = 0;
-		virtual Buffer* CreateIndexBuffer(uint32_t bufferSize) = 0;
 		virtual Buffer* CreateBuffer_Internal(uint32_t bufferSize, BufferBindingTarget usageFlag, MemoryUsage memoryFlags, uint32_t bindIndex) = 0;
 		virtual Mesh* CreateMesh_Internal(MeshData* pMeshData) = 0;
 		virtual Mesh* CreateMesh_Internal(uint32_t vertexCount, uint32_t indexCount, InputRate inputRate, uint32_t binding, uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes) = 0;

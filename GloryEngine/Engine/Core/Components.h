@@ -69,14 +69,18 @@ namespace Glory
 	struct MeshRenderer
 	{
 		MeshRenderer(MeshData* pMesh, MaterialData* pMaterial)
-			: m_Mesh(pMesh != nullptr ? pMesh->GetUUID() : 0), m_Material(pMaterial != nullptr ? pMaterial->GetUUID() : 0) {}
+			: m_Mesh(pMesh != nullptr ? pMesh->GetUUID() : 0), m_Material(pMaterial != nullptr ? pMaterial->GetUUID() : 0),
+			m_RenderStatic(true) {}
 		MeshRenderer()
-			: m_Mesh(0), m_Material(0) {}
+			: m_Mesh(0), m_Material(0), m_RenderStatic(true), m_WasSubmittedForStatic(false) {}
 
 		REFLECTABLE(MeshRenderer,
-			(AssetReference<MeshData>) (m_Mesh),
-			(AssetReference<MaterialData>)	(m_Material)
-		)
+			(AssetReference<MeshData>)(m_Mesh),
+			(AssetReference<MaterialData>)(m_Material),
+			(bool)(m_RenderStatic)
+		);
+
+		bool m_WasSubmittedForStatic;
 	};
 
 	struct ModelRenderer
