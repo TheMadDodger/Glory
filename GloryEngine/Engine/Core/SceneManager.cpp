@@ -220,7 +220,8 @@ namespace Glory
 
 		// Register Invocations
 		// Transform
-		m_pComponentTypesInstance->RegisterInvokaction<Transform>(Glory::Utils::ECS::InvocationType::Start, TransformSystem::OnStart);
+		m_pComponentTypesInstance->RegisterInvokaction<Transform>(Glory::Utils::ECS::InvocationType::OnValidate, TransformSystem::OnValidate);
+		m_pComponentTypesInstance->RegisterInvokaction<Transform>(Glory::Utils::ECS::InvocationType::OnEnableDraw, TransformSystem::OnEnable);
 		m_pComponentTypesInstance->RegisterInvokaction<Transform>(Glory::Utils::ECS::InvocationType::Update, TransformSystem::OnUpdate);
 
 		// Camera

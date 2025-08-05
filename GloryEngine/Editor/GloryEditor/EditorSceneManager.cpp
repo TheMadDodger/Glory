@@ -123,6 +123,14 @@ namespace Glory::Editor
 			pScene->GetRegistry().EnableAllIndividualCallbacks();
 			pScene->Start();
 		}
+		else
+		{
+			pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::OnEnableDraw,
+			[](Utils::ECS::BaseTypeView* pTypeView, Utils::ECS::EntityView* pEntity, size_t componentIndex) {
+				const bool isActive = pEntity->IsActive() && pTypeView->IsActiveByIndex(componentIndex);
+				return isActive;
+			});
+		}
 
 		AssetLocation location;
 		if (EditorAssetDatabase::GetAssetLocation(uuid, location))
@@ -166,11 +174,11 @@ namespace Glory::Editor
 		m_pOpenScenes.push_back(pScene);
 		m_OpenedSceneIDs.push_back(uuid);
 
-		if (m_pApplication->IsInPlayMode())
-		{
-			pScene->GetRegistry().EnableAllIndividualCallbacks();
-			pScene->Start();
-		}
+		pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::OnEnableDraw,
+		[](Utils::ECS::BaseTypeView* pTypeView, Utils::ECS::EntityView* pEntity, size_t componentIndex) {
+			const bool isActive = pEntity->IsActive() && pTypeView->IsActiveByIndex(componentIndex);
+			return isActive;
+		});
 
 		GScene* pActiveScene = SceneManager::GetActiveScene();
 		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
