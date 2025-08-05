@@ -440,4 +440,16 @@ namespace Glory
             break;
         }
     }
+
+    vk::ShaderStageFlags VKConverter::ToShaderStageFlags(const ShaderTypeFlag& flags)
+    {
+        vk::ShaderStageFlags stageFlags{0};
+        if ((flags & STF_Vertex) > 0) stageFlags |= vk::ShaderStageFlagBits::eVertex;
+        if ((flags & STF_Fragment) > 0) stageFlags |= vk::ShaderStageFlagBits::eFragment;
+        if ((flags & STF_Geomtery) > 0) stageFlags |= vk::ShaderStageFlagBits::eGeometry;
+        if ((flags & STF_TessControl) > 0) stageFlags |= vk::ShaderStageFlagBits::eTessellationControl;
+        if ((flags & STF_TessEval) > 0) stageFlags |= vk::ShaderStageFlagBits::eTessellationEvaluation;
+        if ((flags & STF_Compute) > 0) stageFlags |= vk::ShaderStageFlagBits::eCompute;
+        return stageFlags;
+    }
 }
