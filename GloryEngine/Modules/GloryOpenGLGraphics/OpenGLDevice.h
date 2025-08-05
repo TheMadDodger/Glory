@@ -79,6 +79,7 @@ namespace Glory
         virtual void End() override;
         virtual void EndRenderPass() override;
         virtual void EndPipeline() override;
+        virtual void BindBuffer(BufferHandle buffer) override;
 
         virtual void DrawMesh(MeshHandle handle) override;
 

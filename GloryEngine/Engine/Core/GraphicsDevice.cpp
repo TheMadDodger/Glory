@@ -1,6 +1,7 @@
 #include "GraphicsDevice.h"
 #include "Module.h"
 #include "Engine.h"
+#include "Debug.h"
 #include "EngineProfiler.h"
 
 #include "Buffer.h"
@@ -38,6 +39,22 @@ namespace Glory
 		m_pModule = nullptr;
 	}
 
+	void GraphicsDevice::AddBindingIndex(std::string&& name, uint32_t index)
+	{
+		m_BindingIndices.emplace(std::move(name), index);
+	}
+
+	uint32_t GraphicsDevice::BindingIndex(const std::string& name) const
+	{
+		auto iter = m_BindingIndices.find(name);
+		if (iter == m_BindingIndices.end())
+		{
+			m_pModule->GetEngine()->GetDebug().LogError("GraphicsDevice::BindingIndex: No binding index was set for " + name);
+			return 0;
+		}
+		return iter->second;
+	}
+
 	PipelineHandle GraphicsDevice::AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline, size_t stride, const std::vector<AttributeType>& attributeTypes)
 	{
 		auto iter = m_PipelineHandles.find(pPipeline->GetGPUUUID());
@@ -68,6 +85,20 @@ namespace Glory
 		/* @todo: Update mesh if needed */
 
 		return mesh;
+	}
+
+	BufferHandle GraphicsDevice::AcquireCachedPipelineBuffer(PipelineHandle pipeline, UUID bufferID, size_t bufferSize, BufferType type)
+	{
+		const UUID combinedID = UUID(pipeline) + bufferID;
+		auto iter = m_BufferHandles.find(combinedID);
+		if (iter == m_BufferHandles.end())
+		{
+			MeshHandle newBuffer = CreateBuffer(bufferSize, type);
+			iter = m_MeshHandles.emplace(combinedID, newBuffer).first;
+		}
+
+		BufferHandle buffer = iter->second;
+		return buffer;
 	}
 
 	MeshHandle GraphicsDevice::CreateMesh(MeshData* pMeshData)

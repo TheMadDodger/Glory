@@ -87,6 +87,10 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
+	void OpenGLDevice::BindBuffer(BufferHandle buffer)
+	{
+	}
+
 	void OpenGLDevice::DrawMesh(MeshHandle handle)
 	{
 		GL_Mesh* mesh = m_Meshes.Find(handle);
@@ -134,6 +138,14 @@ namespace Glory
 		case Glory::BT_Index:
 			buffer.m_GLTarget = GL_ELEMENT_ARRAY_BUFFER;
 			buffer.m_GLUsage = GL_STATIC_DRAW;
+			break;
+		case Glory::BT_Storage:
+			buffer.m_GLTarget = GL_SHADER_STORAGE_BUFFER;
+			buffer.m_GLUsage = GL_STATIC_DRAW;
+			break;
+		case Glory::BT_Uniform:
+			buffer.m_GLTarget = GL_UNIFORM_BUFFER;
+			buffer.m_GLUsage = GL_DYNAMIC_DRAW;
 			break;
 		default:
 			break;

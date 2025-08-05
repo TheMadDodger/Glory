@@ -339,6 +339,10 @@ namespace Glory
 	{
 	}
 
+	void VulkanDevice::BindBuffer(BufferHandle buffer)
+	{
+	}
+
 	void VulkanDevice::DrawMesh(MeshHandle handle)
 	{
 		VK_Mesh* mesh = m_Meshes.Find(handle);
@@ -396,6 +400,12 @@ namespace Glory
 			break;
 		case Glory::BT_Index:
 			bufferInfo.usage = vk::BufferUsageFlagBits::eIndexBuffer;
+			break;
+		case Glory::BT_Storage:
+			bufferInfo.usage = vk::BufferUsageFlagBits::eStorageBuffer;
+			break;
+		case Glory::BT_Uniform:
+			bufferInfo.usage = vk::BufferUsageFlagBits::eUniformBuffer;
 			break;
 		default:
 			break;
@@ -1028,28 +1038,51 @@ namespace Glory
 				.setPName(shader->m_Function.data());
 		}
 
-		std::vector<vk::DescriptorSetLayoutBinding> ssboLayoutBindings(3);
-		ssboLayoutBindings[0].binding = 1;
-		ssboLayoutBindings[0].descriptorType = vk::DescriptorType::eStorageBuffer;
-		ssboLayoutBindings[0].descriptorCount = 1;
-		ssboLayoutBindings[0].stageFlags = vk::ShaderStageFlagBits::eFragment;
+		std::vector<vk::DescriptorPoolSize> poolSizes;
 
-		ssboLayoutBindings[1].binding = 2;
-		ssboLayoutBindings[1].descriptorType = vk::DescriptorType::eStorageBuffer;
-		ssboLayoutBindings[1].descriptorCount = 1;
-		ssboLayoutBindings[1].stageFlags = vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment;
+		const size_t numLayouts = pPipeline->UniformBufferCount() + pPipeline->StorageBufferCount();
+		std::vector<vk::DescriptorSetLayoutBinding> layoutBindings(numLayouts);
+		size_t layoutIndex = 0;
+		for (size_t i = 0; i < pPipeline->UniformBufferCount(); ++i)
+		{
+			const ShaderBufferInfo& bufferInfo = pPipeline->UniformBuffer(i);
+			layoutBindings[layoutIndex].binding = BindingIndex(bufferInfo.Name);
+			layoutBindings[layoutIndex].descriptorType = vk::DescriptorType::eUniformBuffer;
+			layoutBindings[layoutIndex].descriptorCount = 1;
+			layoutBindings[layoutIndex].stageFlags = VKConverter::ToShaderStageFlags(bufferInfo.ShaderFlags);
+			++layoutIndex;
+		}
 
-		ssboLayoutBindings[2].binding = 3;
-		ssboLayoutBindings[2].descriptorType = vk::DescriptorType::eStorageBuffer;
-		ssboLayoutBindings[2].descriptorCount = 1;
-		ssboLayoutBindings[2].stageFlags = vk::ShaderStageFlagBits::eFragment;
+		for (size_t i = 0; i < pPipeline->StorageBufferCount(); ++i)
+		{
+			const ShaderBufferInfo& bufferInfo = pPipeline->StorageBuffer(i);
+			layoutBindings[layoutIndex].binding = BindingIndex(bufferInfo.Name);
+			layoutBindings[layoutIndex].descriptorType = vk::DescriptorType::eStorageBuffer;
+			layoutBindings[layoutIndex].descriptorCount = 1;
+			layoutBindings[layoutIndex].stageFlags = VKConverter::ToShaderStageFlags(bufferInfo.ShaderFlags);
+			++layoutIndex;
+		}
 
 		vk::DescriptorSetLayoutCreateInfo layoutInfo{};
-		layoutInfo.bindingCount = ssboLayoutBindings.size();
-		layoutInfo.pBindings = ssboLayoutBindings.data();
+		layoutInfo.bindingCount = layoutBindings.size();
+		layoutInfo.pBindings = layoutBindings.data();
 
 		if (m_LogicalDevice.createDescriptorSetLayout(&layoutInfo, nullptr, &pipeline.m_VKDescriptorSetLayouts) != vk::Result::eSuccess)
 			throw std::runtime_error("Failed to create descriptor set layout!");
+
+		vk::DescriptorPoolSize poolSize{};
+		poolSize.type = vk::DescriptorType::eStorageBuffer;
+		poolSize.descriptorCount = 1;
+
+		vk::DescriptorPoolCreateInfo poolInfo{};
+		poolInfo.poolSizeCount = 1;
+		poolInfo.pPoolSizes = &poolSize;
+		poolInfo.maxSets = 1;
+
+		vk::DescriptorPool descriptorPool;
+		if (m_LogicalDevice.createDescriptorPool(&poolInfo, nullptr, &descriptorPool) != vk::Result::eSuccess) {
+			throw std::runtime_error("failed to create descriptor pool!");
+		}
 
 		// Vertex input state
 		vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo()
@@ -1105,8 +1138,6 @@ namespace Glory
 			.setAlphaToOneEnable(VK_FALSE);
 
 		// Blend state
-		/* @todo: Create 1 per attachment and match it with the render pass settings */
-
 		const size_t attachmentCount = vkRenderTexture->m_Textures.size() - (vkRenderTexture->m_HasDepthOrStencil ? 1 : 0);
 		std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates(attachmentCount);
 		for (size_t i = 0; i < attachmentCount; ++i)
