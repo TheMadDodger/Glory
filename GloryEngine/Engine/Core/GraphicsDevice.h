@@ -30,7 +30,9 @@ namespace Glory
 		BT_TransferRead,
 		BT_TransferWrite,
 		BT_Vertex,
-		BT_Index
+		BT_Index,
+		BT_Storage,
+		BT_Uniform,
 	};
 
 	template<class T>
@@ -89,6 +91,11 @@ namespace Glory
 		GraphicsDevice(Module* pModule);
 		virtual ~GraphicsDevice();
 
+		void AddBindingIndex(std::string&& name, uint32_t index);
+		uint32_t BindingIndex(const std::string& name) const;
+
+		Debug& Debug();
+
 	public: /* Rendering commands */
 		virtual void Begin() = 0;
 		virtual void BeginRenderPass(RenderPassHandle handle) = 0;
@@ -96,12 +103,14 @@ namespace Glory
 		virtual void End() = 0;
 		virtual void EndRenderPass() = 0;
 		virtual void EndPipeline() = 0;
+		virtual void BindBuffer(BufferHandle buffer) = 0;
 
 		virtual void DrawMesh(MeshHandle handle) = 0;
 
 	public: /* Resource caching */
 		PipelineHandle AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline, size_t stride, const std::vector<AttributeType>& attributeTypes);
 		MeshHandle AcquireCachedMesh(MeshData* pMesh);
+		BufferHandle AcquireCachedPipelineBuffer(PipelineHandle pipeline, UUID bufferID, size_t bufferSize, BufferType type);
 
 	public: /* Resource mamagement */
 		
@@ -156,14 +165,14 @@ namespace Glory
 		virtual void FreePipeline(PipelineHandle& handle) = 0;
 
 	protected:
-		Debug& Debug();
-
-	protected:
 		Module* m_pModule;
 
 	private:
 		/* Cached handles */
 		std::map<UUID, PipelineHandle> m_PipelineHandles;
 		std::map<UUID, MeshHandle> m_MeshHandles;
+		std::map<UUID, BufferHandle> m_BufferHandles;
+
+		std::map<std::string, uint32_t> m_BindingIndices;
 	};
 }

@@ -20,6 +20,7 @@ namespace Glory
 		static vk::Format GetVulkanFormat(const PixelFormat& format);
 		static vk::ShaderStageFlagBits GetShaderStageFlag(const ShaderType& shaderType);
 		static vk::BufferUsageFlags ToBufferUsageFlags(const BufferBindingTarget& bindingTarget);
+		static vk::ShaderStageFlags ToShaderStageFlags(const ShaderTypeFlag& flags);
 
 		//static const std::map<MemoryUsage, GLuint> TO_GLBUFFERUSAGE;
 
