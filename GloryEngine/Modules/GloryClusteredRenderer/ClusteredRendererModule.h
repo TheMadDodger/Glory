@@ -36,6 +36,19 @@ namespace Glory
 
 	class ClusteredRendererModule : public RendererModule
 	{
+	private:
+		struct PipelineBatchData
+		{
+			CPUBuffer<glm::mat4> m_Worlds;
+			Buffer* m_pWorldsBuffer;
+
+			std::vector<uint32_t> m_MaterialIndices;
+			CPUBuffer<char> m_MaterialDatas;
+			CPUBuffer<uint32_t> m_TextureBits;
+			Buffer* m_pMaterialsBuffer;
+			Buffer* m_pTextureBitsBuffer;
+		};
+
 	public:
 		ClusteredRendererModule();
 		virtual ~ClusteredRendererModule();
@@ -73,9 +86,10 @@ namespace Glory
 		void GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera);
 		void GenerateDomeSamplePointsSSBO(GPUResourceManager* pResourceManager, uint32_t size);
 
-		void RenderBatches(const std::vector<PipelineBatch>& batches, const glm::mat4& view, const glm::mat4& projection);
+		void RenderBatches(const std::vector<PipelineBatch>& batches, const std::vector<PipelineBatchData>& batchDatas, size_t cameraIndex);
 
-		void ShadowMapsPass(CameraRef camera, const RenderFrame& frameData);
+		void PrepareDataPass();
+		void ShadowMapsPass(uint32_t cameraIndex);
 		void RenderShadows(size_t lightIndex, const RenderFrame& frameData);
 		//void RenderShadow(size_t lightIndex, const RenderFrame& frameData, const RenderData& objectToRender);
 
@@ -84,11 +98,11 @@ namespace Glory
 		void ResizeShadowMapLODResolutions(uint32_t minSize, uint32_t maxSize);
 		void ResizeShadowAtlas(uint32_t newSize);
 
-		void StaticObjectsPass(CameraRef camera, const RenderFrame& frame);
-		void DynamicObjectsPass(CameraRef camera, const RenderFrame& frame);
-		void SkyboxPass(CameraRef camera, const RenderFrame& frame);
-		void DynamicLateObjectPass(CameraRef camera, const RenderFrame& frame);
-		void DeferredCompositePass(CameraRef camera, const RenderFrame& frame);
+		void StaticObjectsPass(uint32_t cameraIndex);
+		void DynamicObjectsPass(uint32_t cameraIndex);
+		void SkyboxPass(uint32_t cameraIndex);
+		void DynamicLateObjectPass(uint32_t cameraIndex);
+		void DeferredCompositePass(uint32_t cameraIndex);
 
 	private:
 		// Compute shaders
@@ -163,5 +177,15 @@ namespace Glory
 		std::vector<glm::uvec2> m_ShadowMapResolutions;
 
 		GPUTextureAtlas* m_pShadowAtlas;
+
+		std::vector<PipelineBatchData> m_StaticBatchData;
+		std::vector<PipelineBatchData> m_DynamicBatchData;
+		std::vector<PipelineBatchData> m_DynamicLateBatchData;
+
+		CPUBuffer<PerCameraData> m_CameraDatas;
+		CPUBuffer<PerCameraData> m_LightCameraDatas;
+		Buffer* m_pCameraDatasBuffer;
+		Buffer* m_pLightCameraDatasBuffer;
+		Buffer* m_pRenderConstantsBuffer;
 	};
 }

@@ -5,7 +5,7 @@
 
 namespace Glory
 {
-	PipelineData::PipelineData()
+	PipelineData::PipelineData() : m_TotalPropertiesByteSize(0)
 	{
 		APPEND_TYPE(PipelineData);
 	}
@@ -69,6 +69,7 @@ namespace Glory
 		m_PropertyInfos.emplace_back(MaterialPropertyInfo(displayName, shaderName, typeHash, size, m_CurrentOffset, flags));
 		m_CurrentOffset = m_PropertyInfos[index].EndOffset();
 		m_HashToPropertyInfoIndex[hash] = index;
+		m_TotalPropertiesByteSize += size;
 	}
 
 	void PipelineData::AddResourceProperty(const std::string& displayName, const std::string& shaderName, uint32_t typeHash, TextureType textureType)
@@ -105,6 +106,7 @@ namespace Glory
 		m_NumResources = 0;
 		m_HashToPropertyInfoIndex.clear();
 		m_CurrentOffset = 0;
+		m_TotalPropertiesByteSize = 0;
 	}
 
 	void PipelineData::AddUniformBuffer(const std::string& name, ShaderType shaderType)
@@ -207,6 +209,8 @@ namespace Glory
 			container.Write(m_StorageBuffers[i].Name).
 				Write(uint8_t(m_StorageBuffers[i].ShaderFlags));
 		}
+
+		container.Write(m_TotalPropertiesByteSize);
 	}
 
 	void PipelineData::Deserialize(BinaryStream& container)
@@ -257,6 +261,8 @@ namespace Glory
 			container.Read(m_StorageBuffers[i].Name).
 				Read(reinterpret_cast<uint8_t&>(m_StorageBuffers[i].ShaderFlags));
 		}
+
+		container.Read(m_TotalPropertiesByteSize);
 	}
 
 	void PipelineData::LoadIntoMaterial(MaterialData* pMaterial) const
@@ -325,5 +331,9 @@ namespace Glory
 	{
 		m_Features.clear();
 		m_FeaturesEnabled.Clear();
+	}
+	size_t PipelineData::TotalPropertiesByteSize() const
+	{
+		return m_TotalPropertiesByteSize;
 	}
 }

@@ -37,7 +37,7 @@ namespace Glory
 	Buffer* OGLMaterial::CreatePropertiesBuffer(uint32_t size)
 	{
 		return m_pOwner->GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()
-			->CreateBuffer(size, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 1);
+			->CreateBuffer(size, BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 4);
 	}
 
 	Buffer* OGLMaterial::CreateHasTexturesBuffer(uint32_t bindingIndex)

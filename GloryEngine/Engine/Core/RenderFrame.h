@@ -97,9 +97,10 @@ namespace Glory
 		RP_Count
 	};
 
+	class RendererModule;
 	struct RenderPass
 	{
 		std::string m_Name;
-		std::function<void(CameraRef, const RenderFrame&)> m_Callback;
+		std::function<void(uint32_t, RendererModule*)> m_Callback;
 	};
 }

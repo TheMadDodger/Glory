@@ -204,16 +204,16 @@ namespace Glory
 		m_pComponentTypes->RegisterInvokaction<UIScrollView>(Glory::Utils::ECS::InvocationType::Update, UIScrollViewSystem::OnUpdate);
 
 		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
-		pRenderer->AddRenderPass(RenderPassType::RP_Prepass, { "UI Prepass", [this](CameraRef camera, const RenderFrame& frame) {
-			UIPrepass(camera, frame);
+		pRenderer->AddRenderPass(RenderPassType::RP_Prepass, { "UI Prepass", [this](uint32_t, RendererModule*) {
+			UIPrepass();
 		} });
 
-		pRenderer->AddRenderPass(RenderPassType::RP_CameraCompositePass, { "UI Overlay Pass", [this](CameraRef camera, const RenderFrame& frame) {
-			UIOverlayPass(camera, frame);
+		pRenderer->AddRenderPass(RenderPassType::RP_CameraCompositePass, { "UI Overlay Pass", [this](uint32_t cameraIndex, RendererModule* pRenderer) {
+			UIOverlayPass(cameraIndex, pRenderer);
 		} });
 
-		pRenderer->AddRenderPass(RenderPassType::RP_ObjectPass, { "UI Worldspace Quad Pass", [this](CameraRef camera, const RenderFrame& frame) {
-			UIWorldSpaceQuadPass(camera, frame);
+		pRenderer->AddRenderPass(RenderPassType::RP_ObjectPass, { "UI Worldspace Quad Pass", [this](uint32_t cameraIndex, RendererModule* pRenderer) {
+			UIWorldSpaceQuadPass(cameraIndex, pRenderer);
 		} });
 
 		LocalizeModuleBase* pLocalize = m_pEngine->GetOptionalModule<LocalizeModuleBase>();
@@ -294,7 +294,7 @@ namespace Glory
 		Utils::ECS::ComponentTypes::DestroyInstance();
 	}
 
-	void UIRendererModule::UIPrepass(CameraRef, const RenderFrame&)
+	void UIRendererModule::UIPrepass()
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -318,8 +318,9 @@ namespace Glory
 		}
 	}
 
-	void UIRendererModule::UIWorldSpaceQuadPass(CameraRef camera, const RenderFrame&)
+	void UIRendererModule::UIWorldSpaceQuadPass(uint32_t cameraIndex, RendererModule* pRenderer)
 	{
+		CameraRef camera = pRenderer->GetActiveCamera(cameraIndex);
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 
 		for (auto& data : m_Frame)
@@ -354,8 +355,9 @@ namespace Glory
 		}
 	}
 
-	void UIRendererModule::UIOverlayPass(CameraRef camera, const RenderFrame&)
+	void UIRendererModule::UIOverlayPass(uint32_t cameraIndex, RendererModule* pRenderer)
 	{
+		CameraRef camera = pRenderer->GetActiveCamera(cameraIndex);
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 

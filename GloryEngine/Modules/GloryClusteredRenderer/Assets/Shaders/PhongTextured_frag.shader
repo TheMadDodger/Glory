@@ -3,10 +3,18 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-#include "internal/ObjectData.glsl"
-#include "internal/Textured.glsl"
+#include "Internal/RenderConstants.glsl"
+#include "internal/Textured1.glsl"
 
-layout(std430, binding = 1) readonly buffer PropertiesSSBO
+struct Material
+{
+	vec4 Color;
+	float Shininess;
+};
+
+#include "Internal/Material.glsl"
+
+layout(std430, binding = 10) readonly buffer PropertiesSSBO
 {
 	vec4 Color;
 	float Shininess;
@@ -27,16 +35,18 @@ layout(location = 5) out vec4 outData;
 
 void main()
 {
-	vec4 baseColor = TextureEnabled(0) ? texture(texSampler, fragTexCoord) : Properties.Color;
+	Material mat = GetMaterial();
+
+	vec4 baseColor = TextureEnabled(0) ? texture(texSampler, fragTexCoord) : mat.Color;
 	if (baseColor.a == 0.0) discard;
 	baseColor.a = 1.0;
 
 	vec3 normal = TextureEnabled(1) ? (texture(normalSampler, fragTexCoord).xyz * 2.0 - 1.0) : TBN[2];
-	float shininess = TextureEnabled(2) ? texture(shininessSampler, fragTexCoord).r : Properties.Shininess;
+	float shininess = TextureEnabled(2) ? texture(shininessSampler, fragTexCoord).r : mat.Shininess;
 	normal = TextureEnabled(1) ? normalize(TBN * normal) : normal;
 
 	outColor = baseColor * inColor;
 	outNormal = vec4((normalize(normal) + 1.0) * 0.5, 1.0);
-	outID = Object.ObjectID;
+	outID = Constants.ObjectID;
 	outData = vec4(1.0, shininess, 1.0, 1.0);
 }

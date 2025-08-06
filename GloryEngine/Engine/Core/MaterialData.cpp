@@ -10,7 +10,7 @@
 namespace Glory
 {
 	MaterialData::MaterialData()
-		: m_Pipeline(0), m_CurrentOffset(0), m_TextureTypeIndices(TT_Count)
+		: m_Pipeline(0), m_CurrentOffset(0), m_TextureTypeIndices(TT_Count), m_TextureSetBits(0)
 	{
 		APPEND_TYPE(MaterialData);
 	}
@@ -43,6 +43,10 @@ namespace Glory
 			const size_t index = m_HashToPropertyInfoIndex.at(hash);
 			const size_t resourceOffset = m_PropertyInfos[index].Offset();
 			m_Resources[resourceOffset] = resourceUUID;
+			if (resourceUUID)
+				m_TextureSetBits |= 1u << index;
+			else
+				m_TextureSetBits &= ~(1u << index);
 			return;
 		}
 
@@ -52,6 +56,10 @@ namespace Glory
 		m_ResourcePropertyInfoIndices.push_back(index);
 		m_HashToPropertyInfoIndex[hash] = index;
 		m_Resources.push_back(resourceUUID);
+		if (resourceUUID)
+			m_TextureSetBits |= 1u << index;
+		else
+			m_TextureSetBits &= ~(1u << index);
 		m_TextureTypeIndices[size_t(textureType)].push_back(textureIndex);
 	}
 
@@ -68,6 +76,7 @@ namespace Glory
 			const size_t textureIndex = m_ResourcePropertyInfoIndices.size();
 			m_ResourcePropertyInfoIndices.push_back(index);
 			m_Resources.push_back(0);
+			m_TextureSetBits &= ~(1u << index);
 			m_TextureTypeIndices[size_t(other.m_TextureType)].push_back(textureIndex);
 		}
 		else
@@ -169,6 +178,7 @@ namespace Glory
 		m_Resources.clear();
 		m_HashToPropertyInfoIndex.clear();
 		m_CurrentOffset = 0;
+		m_TextureSetBits = 0;
 
 		for (size_t i = 0; i < m_TextureTypeIndices.size(); ++i)
 		{
@@ -210,6 +220,7 @@ namespace Glory
 		{
 			container.Write(m_Resources[i].AssetUUID());
 		}
+		container.Write(m_TextureSetBits);
 	}
 
 	void MaterialData::Deserialize(BinaryStream& container)
@@ -255,6 +266,7 @@ namespace Glory
 		{
 			container.Read(*m_Resources[i].AssetUUIDMember());
 		}
+		container.Read(m_TextureSetBits);
 	}
 
 	void MaterialData::References(Engine* pEngine, std::vector<UUID>& references) const
@@ -294,6 +306,11 @@ namespace Glory
 		return pCopy;
 	}
 
+	uint32_t MaterialData::TextureSetBits() const
+	{
+		return m_TextureSetBits;
+	}
+
 	void* MaterialData::Address(size_t index)
 	{
 		return m_PropertyInfos[index].Address(m_PropertyBuffer);
@@ -313,6 +330,11 @@ namespace Glory
 		if (!pPropertyInfo->IsResource()) return;
 		const size_t resourceIndex = pPropertyInfo->Offset();
 		m_Resources[resourceIndex] = uuid;
+
+		if (uuid)
+			m_TextureSetBits |= 1u << index;
+		else
+			m_TextureSetBits &= ~(1u << index);
 	}
 
 	void MaterialData::SetTexture(TextureType textureType, size_t texIndex, UUID uuid)
@@ -323,6 +345,11 @@ namespace Glory
 		if (!pPropertyInfo->IsResource()) return;
 		const size_t resourceIndex = pPropertyInfo->Offset();
 		m_Resources[resourceIndex] = uuid;
+
+		if (uuid)
+			m_TextureSetBits |= 1u << index;
+		else
+			m_TextureSetBits &= ~(1u << index);
 	}
 
 	bool MaterialData::GetTexture(const std::string& name, TextureData** value, AssetManager* pManager)

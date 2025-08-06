@@ -37,6 +37,8 @@ namespace Glory
 
 	void Material::SetSamplers(Engine* pEngine)
 	{
+		if (m_pMaterialData == nullptr) return;
+
 		m_TextureSetBits = 0;
 		for (size_t i = 0; i < m_pMaterialData->GetResourcePropertyCount(); i++)
 		{
@@ -58,10 +60,14 @@ namespace Glory
 			if (m_pPropertiesBuffer == nullptr) m_pPropertiesBuffer = CreatePropertiesBuffer((uint32_t)propertyBuffer.size());
 			m_pPropertiesBuffer->Assign((const void*)propertyBuffer.data());
 		}
+		SetTextureBitsBuffer(pEngine, hasTexturesBinding);
+		if (m_pPropertiesBuffer) m_pPropertiesBuffer->BindForDraw();
+	}
+
+	void Material::SetTextureBitsBuffer(Engine* pEngine, uint32_t hasTexturesBinding)
+	{
 		if (m_pHasTexturesBuffer == nullptr) m_pHasTexturesBuffer = CreateHasTexturesBuffer(hasTexturesBinding);
 		m_pHasTexturesBuffer->Assign((const void*)&m_TextureSetBits);
-
-		if (m_pPropertiesBuffer) m_pPropertiesBuffer->BindForDraw();
 		m_pHasTexturesBuffer->BindForDraw();
 	}
 }
