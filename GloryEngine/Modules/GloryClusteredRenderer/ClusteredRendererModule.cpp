@@ -161,12 +161,7 @@ namespace Glory
 		});
 
 		AddRenderPass(RP_Prepass, RenderPass{ "Prepare Data Pass", [this](CameraRef, const RenderFrame& frame) {
-			/* Update light data */
-			const uint32_t count = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
-			m_pLightCountSSBO->Assign(&count, 0, sizeof(uint32_t));
-			m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS*sizeof(LightData));
-			m_pLightSpaceTransformsSSBO->Assign(m_FrameData.LightSpaceTransforms.data(), 0, MAX_LIGHTS*sizeof(glm::mat4));
-			m_pLightDistancesSSBO->Assign(ResetLightDistances);
+			PrepareDataPass();
 		} });
 
 		AddRenderPass(RP_PreCompositePass, RenderPass{ "Shadows Pass", [this](CameraRef camera, const RenderFrame& frame) {
@@ -311,6 +306,11 @@ namespace Glory
 
 		GenerateShadowLODDivisions(m_MaxShadowLODs);
 		GenerateShadowMapLODResolutions();
+
+		m_pRenderConstantsBuffer = pResourceManager->CreateBuffer(sizeof(RenderConstants), BufferBindingTarget::B_UNIFORM, MemoryUsage::MU_DYNAMIC_DRAW, 2);
+		m_pRenderConstantsBuffer->Assign(NULL);
+		m_pCameraDatasBuffer = pResourceManager->CreateBuffer(sizeof(PerCameraData)*100, BufferBindingTarget::B_UNIFORM, MemoryUsage::MU_DYNAMIC_DRAW, 4);
+		m_pCameraDatasBuffer->Assign(NULL);
 	}
 
 	void ClusteredRendererModule::Update()
@@ -767,6 +767,71 @@ namespace Glory
 		m_pSampleNoiseTexture = m_pEngine->GetMainModule<GraphicsModule>()->GetResourceManager()->CreateTexture(std::move(textureInfo), static_cast<const void*>(ssaoNoise.data()));
 	}
 
+	void ClusteredRendererModule::PrepareDataPass()
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+
+		/* Update light data */
+		const uint32_t count = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
+		m_pLightCountSSBO->Assign(&count, 0, sizeof(uint32_t));
+		m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS * sizeof(LightData));
+		m_pLightSpaceTransformsSSBO->Assign(m_FrameData.LightSpaceTransforms.data(), 0, MAX_LIGHTS*sizeof(glm::mat4));
+		m_pLightDistancesSSBO->Assign(ResetLightDistances);
+
+		/* Prepare dynamic data */
+		size_t batchIndex = 0;
+		m_PipelineBatchData.reserve(m_DynamicPipelineRenderDatas.size());
+		for (auto& pipelineBatch : m_DynamicPipelineRenderDatas)
+		{
+			if (batchIndex >= m_PipelineBatchData.size())
+				m_PipelineBatchData.emplace_back(PipelineBatchData{});
+
+			PipelineBatchData& batchData = m_PipelineBatchData.at(batchIndex);
+			size_t meshIndex = 0;
+			for (const UUID meshID : pipelineBatch.m_UniqueMeshOrder)
+			{
+				const PipelineMeshBatch& meshBatch = pipelineBatch.m_Meshes.at(meshID);
+				if (batchData.m_Worlds->size() < meshIndex + meshBatch.m_Worlds.size())
+					batchData.m_Worlds.resize(meshIndex + meshBatch.m_Worlds.size());
+
+				if (std::memcmp(&batchData.m_Worlds.m_Data[meshIndex], meshBatch.m_Worlds.data(), meshBatch.m_Worlds.size()*sizeof(glm::mat4)) != 0)
+				{
+					std::memcpy(&batchData.m_Worlds.m_Data[meshIndex], meshBatch.m_Worlds.data(), meshBatch.m_Worlds.size()*sizeof(glm::mat4));
+					batchData.m_Worlds.m_Dirty = true;
+				}
+				meshIndex += meshBatch.m_Worlds.size();
+			}
+
+			if (!batchData.m_pWorldsBuffer)
+			{
+				batchData.m_pWorldsBuffer = pResourceManager->CreateBuffer(batchData.m_Worlds->size()*sizeof(glm::mat4),
+					BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 6);
+				batchData.m_pWorldsBuffer->Assign(NULL);
+				batchData.m_Worlds.m_Dirty = true;
+			}
+			if (batchData.m_Worlds)
+				batchData.m_pWorldsBuffer->Assign(batchData.m_Worlds->data(), batchData.m_Worlds->size()*sizeof(glm::mat4));
+		}
+
+		/* Prepare cameras */
+		if (m_CameraDatas->size() < m_FrameData.ActiveCameras.size())
+			m_CameraDatas.resize(m_FrameData.ActiveCameras.size());
+		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
+		{
+			const PerCameraData cameraData{ m_FrameData.ActiveCameras[i].GetProjection(),
+				m_FrameData.ActiveCameras[i].GetView() };
+
+			if (std::memcmp(&m_CameraDatas.m_Data[i], &cameraData, sizeof(PerCameraData)) == 0)
+			{
+				std::memcpy(&m_CameraDatas.m_Data[i], &cameraData, sizeof(PerCameraData));
+				m_CameraDatas.m_Dirty = true;
+			}
+		}
+		if (m_CameraDatas)
+			m_pCameraDatasBuffer->Assign(m_CameraDatas->data(), m_CameraDatas->size());
+	}
+
 	void ClusteredRendererModule::ShadowMapsPass(CameraRef camera, const RenderFrame& frameData)
 	{
 		if (m_FrameData.ActiveLights.count() == 0) return;
@@ -1129,14 +1194,28 @@ namespace Glory
 		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
 		AssetManager& assets = m_pEngine->GetAssetManager();
 
+		m_pRenderConstantsBuffer->BindForDraw();
+		m_pCameraDatasBuffer->BindForDraw();
+
+		RenderConstants constants;
+		constants.m_CameraIndex = 0;
+
 		pGraphics->EnableDepthWrite(true);
+		size_t batchIndex = 0;
 		for (PipelineBatch& pipelineRenderData : m_DynamicPipelineRenderDatas)
 		{
+			const PipelineBatchData& batchData = m_PipelineBatchData.at(batchIndex);
+			++batchIndex;
+
 			PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineRenderData.m_PipelineID);
 			if (!pPipelineData) continue;
 			Pipeline* pPipeline = pResourceManager->CreatePipeline(pPipelineData);
+			if (!pPipeline) continue;
 			pPipeline->Use();
 
+			batchData.m_pWorldsBuffer->BindForDraw();
+
+			uint32_t objectIndex = 0;
 			for (UUID uniqueMeshID : pipelineRenderData.m_UniqueMeshOrder)
 			{
 				const PipelineMeshBatch& meshBatch = pipelineRenderData.m_Meshes.at(uniqueMeshID);
@@ -1146,27 +1225,24 @@ namespace Glory
 				Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
 				if (!pMesh) continue;
 
-				for (size_t i = 0; i < meshBatch.m_Materials.size(); ++i)
+				for (size_t i = 0; i < meshBatch.m_Worlds.size(); ++i)
 				{
+					const uint32_t currentObject = objectIndex;
+					++objectIndex;
+
 					MaterialData* pMaterialData = materialManager.GetMaterial(meshBatch.m_Materials[i]);
 					if (!pMaterialData) continue;
 					Material* pMaterial = pResourceManager->CreateMaterial(pMaterialData);
 					if (!pMaterial) continue;
 
 					const auto& ids = meshBatch.m_ObjectIDs[i];
-					const auto& world = meshBatch.m_Worlds[i];
-
 					pMaterial->Reset();
+					constants.m_ObjectID = ids.second;
+					constants.m_SceneID = ids.first;
+					constants.m_ObjectDataIndex = currentObject;
 
-					ObjectData object;
-					object.Model = world;
-					object.View = camera.GetView();
-					object.Projection = camera.GetProjection();
-					object.ObjectID = ids.second;
-					object.SceneID = ids.first;
-
+					m_pRenderConstantsBuffer->Assign(&constants);
 					pMaterial->SetProperties(m_pEngine);
-					pMaterial->SetObjectData(object);
 					pGraphics->DrawMesh(pMesh, pMeshData->VertexCount(), pMeshData->IndexCount());
 				}
 			}
@@ -1224,9 +1300,13 @@ namespace Glory
 				pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
 			}
 
+			batchData.m_pWorldsBuffer->Unbind();
 			pPipeline->UnUse();
 		}
 		pGraphics->EnableDepthWrite(true);
+
+		m_pRenderConstantsBuffer->Unbind();
+		m_pCameraDatasBuffer->Unbind();
 	}
 
 	void ClusteredRendererModule::SkyboxPass(CameraRef camera, const RenderFrame&)

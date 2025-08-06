@@ -73,6 +73,7 @@ namespace Glory
 		void GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera);
 		void GenerateDomeSamplePointsSSBO(GPUResourceManager* pResourceManager, uint32_t size);
 
+		void PrepareDataPass();
 		void ShadowMapsPass(CameraRef camera, const RenderFrame& frameData);
 		void RenderShadows(size_t lightIndex, const RenderFrame& frameData);
 		//void RenderShadow(size_t lightIndex, const RenderFrame& frameData, const RenderData& objectToRender);
@@ -161,5 +162,16 @@ namespace Glory
 		std::vector<glm::uvec2> m_ShadowMapResolutions;
 
 		GPUTextureAtlas* m_pShadowAtlas;
+
+		struct PipelineBatchData
+		{
+			CPUBuffer<glm::mat4> m_Worlds;
+			Buffer* m_pWorldsBuffer;
+		};
+		std::vector<PipelineBatchData> m_PipelineBatchData;
+
+		CPUBuffer<PerCameraData> m_CameraDatas;
+		Buffer* m_pCameraDatasBuffer;
+		Buffer* m_pRenderConstantsBuffer;
 	};
 }
