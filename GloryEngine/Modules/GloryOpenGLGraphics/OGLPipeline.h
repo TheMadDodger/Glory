@@ -16,6 +16,7 @@ namespace Glory
 
         /** @brief Use this pipeline */
         void Use() override;
+        virtual void UnUse() override;
 
         /** @brief Get the program ID of the pipeline */
         GLuint ProgramID();

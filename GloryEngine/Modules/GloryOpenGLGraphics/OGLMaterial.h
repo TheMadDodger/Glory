@@ -27,6 +27,7 @@ namespace Glory
         virtual void SetTexture(const std::string& name, Texture* value) override;
         virtual void SetCubemapTexture(const std::string& name, Texture* value) override;
         virtual void ResetTextureCounter() override;
+        virtual void Reset() override;
 
     public: // Set shader vars
         virtual void SetFloat(const std::string& name, float value) const override;

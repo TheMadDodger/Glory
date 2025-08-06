@@ -29,6 +29,79 @@ namespace Glory
 		const glm::vec3 m_Normal;
 	};
 
+	struct PerCameraData
+	{
+		glm::mat4 m_View;
+		glm::mat4 m_Projection;
+	};
+
+	struct RenderConstants
+	{
+		UUID m_SceneID;
+		UUID m_ObjectID;
+		uint64_t m_ObjectDataIndex;
+		uint64_t m_CameraIndex;
+	};
+
+	template<typename T>
+	struct CPUBuffer
+	{
+		template <class... _Valty>
+		decltype(auto) emplace_back(_Valty&&... _Val)
+		{
+			T& newElement = m_Data.emplace_back(std::forward<_Valty>(_Val)...);
+			m_Dirty = true;
+			return newElement;
+		}
+
+		void clear()
+		{
+			m_Data.clear();
+			m_Dirty = true;
+		}
+
+		void resize(size_t newSize)
+		{
+			m_Data.resize(newSize);
+			m_Dirty = true;
+		}
+
+		operator bool()
+		{
+			const bool value = m_Dirty;
+			m_Dirty = false;
+			return value;
+		}
+		std::vector<T>* operator->() { return &m_Data; }
+		std::vector<T> m_Data;
+		bool m_Dirty{ false };
+	};
+
+	struct PipelineMeshBatch
+	{
+		PipelineMeshBatch(UUID mesh) : m_Mesh(mesh) {}
+
+		UUID m_Mesh;
+		std::vector<glm::mat4> m_Worlds;
+		std::vector<std::pair<UUID, UUID>> m_ObjectIDs;
+		std::vector<UUID> m_Materials;
+	};
+
+	struct PipelineBatch
+	{
+		PipelineBatch(UUID pipeline);
+		virtual ~PipelineBatch();
+		
+		void Reset();
+
+		UUID m_PipelineID;
+		std::unordered_map<UUID, PipelineMeshBatch> m_Meshes;
+		std::vector<UUID> m_UniqueMeshOrder;
+		std::vector<UUID> m_UniqueMaterials;
+		std::vector<TextRenderData> m_Texts;
+		bool m_Dirty;
+	};
+
 	class RendererModule : public Module
 	{
 	public:
@@ -37,8 +110,11 @@ namespace Glory
 
 		virtual const std::type_info& GetModuleType() override;
 
-		void Submit(RenderData&& renderData);
-		void Submit(TextRenderData&& renderData);
+		void SubmitStatic(RenderData&& renderData);
+		void UpdateStatic(UUID pipelineID, UUID meshID, UUID objectID, glm::mat4 world);
+		void UnsubmitStatic(UUID pipelineID, UUID meshID, UUID objectID);
+		void SubmitDynamic(RenderData&& renderData);
+		void SubmitDynamic(TextRenderData&& renderData);
 		void SubmitLate(RenderData&& renderData);
 		void Submit(CameraRef camera);
 		size_t Submit(const glm::ivec2& pickPos, UUID cameraID);
@@ -81,15 +157,17 @@ namespace Glory
 		void AddRenderPass(RenderPassType type, RenderPass&& pass);
 		void RemoveRenderPass(RenderPassType type, std::string_view name);
 
-		void RenderObject(CameraRef camera, const RenderData& renderData);
-
 		void RenderOnBackBuffer(RenderTexture* pTexture);
 
 		GPUTextureAtlas* CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, bool depth=false);
 
+		void Reset();
+
+		virtual UUID TextPipelineID() const = 0;
+
 	protected:
-		virtual void OnSubmit(const RenderData& renderData) {}
-		virtual void OnSubmit(const TextRenderData& renderData) {}
+		virtual void OnSubmitDynamic(const RenderData& renderData) {}
+		virtual void OnSubmitDynamic(const TextRenderData& renderData) {}
 		virtual void OnSubmit(CameraRef camera) {}
 		virtual void OnSubmit(const LightData& light) {}
 
@@ -97,8 +175,6 @@ namespace Glory
 		virtual void Initialize() override;
 		virtual void PostInitialize() override;
 		virtual void Cleanup() = 0;
-		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) = 0;
-		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) = 0;
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) = 0;
 		virtual void OnRenderSkybox(CameraRef camera, CubemapData* pCubemap) = 0;
 		virtual void OnDoCompositing(CameraRef camera, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) = 0;
@@ -123,12 +199,6 @@ namespace Glory
 		void CreateLineBuffer();
 		void RenderLines(CameraRef camera);
 
-		void MainObjectPass(CameraRef camera, const RenderFrame& frame);
-		void SkyboxPass(CameraRef camera, const RenderFrame& frame);
-		void MainTextPass(CameraRef camera, const RenderFrame& frame);
-		void MainLateObjectPass(CameraRef camera, const RenderFrame& frame);
-		void DeferredCompositePass(CameraRef camera, const RenderFrame& frame);
-
 	protected:
 		RenderFrame m_FrameData;
 		size_t m_LastSubmittedObjectCount;
@@ -152,5 +222,10 @@ namespace Glory
 		std::vector<std::vector<RenderPass>> m_RenderPasses;
 
 		std::vector<GPUTextureAtlas> m_GPUTextureAtlases;
+
+		std::vector<RenderData> m_ToProcessStaticRenderData;
+		std::vector<PipelineBatch> m_StaticPipelineRenderDatas;
+		std::vector<PipelineBatch> m_DynamicPipelineRenderDatas;
+		std::vector<PipelineBatch> m_DynamicLatePipelineRenderDatas;
 	};
 }

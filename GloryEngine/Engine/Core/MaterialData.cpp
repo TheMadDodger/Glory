@@ -275,6 +275,17 @@ namespace Glory
 		}
 	}
 
+	void MaterialData::CopyProperties(MaterialManager& materialManager, void* dst)
+	{
+		auto& buffer = GetFinalBufferReference(materialManager);
+		std::memcpy(dst, buffer.data(), buffer.size());
+	}
+
+	size_t MaterialData::PropertyDataSize(const MaterialManager& materialManager)
+	{
+		return GetBufferReference(materialManager).size();
+	}
+
 	void* MaterialData::Address(MaterialManager& materialManager, size_t index)
 	{
 		return m_PropertyInfos[index].Address(GetPropertyBuffer(materialManager, index));

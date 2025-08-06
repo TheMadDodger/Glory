@@ -94,7 +94,7 @@ layout(std430, binding = 6) buffer ssaoSettings
     float Contrast;
 };
 
-layout(std430, binding = 7) buffer HasTextureSSBO
+layout(std430, binding = 7) readonly buffer HasTextureSSBO
 {
     uint64_t HasTexture;
 };

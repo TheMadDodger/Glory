@@ -55,6 +55,11 @@ namespace Glory
         return m_Settings;
     }
 
+    const ModuleSettings& Module::Settings() const
+    {
+        return m_Settings;
+    }
+
     void Module::LoadSettings(const std::filesystem::path& settingsFile)
     {
         if (!std::filesystem::exists(settingsFile))
