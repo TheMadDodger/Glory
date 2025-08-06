@@ -39,8 +39,8 @@ namespace Glory
 	{
 		UUID m_SceneID;
 		UUID m_ObjectID;
-		uint64_t m_ObjectDataIndex;
-		uint64_t m_CameraIndex;
+		uint32_t m_ObjectDataIndex;
+		uint32_t m_CameraIndex;
 	};
 
 	template<typename T>

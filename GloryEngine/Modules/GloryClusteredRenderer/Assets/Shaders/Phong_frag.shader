@@ -3,13 +3,18 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-#include "internal/ObjectData.glsl"
-
 layout(binding = 1, std430) readonly buffer PropertiesSSBO
 {
 	vec4 Color;
 	float Shininess;
 } Properties;
+
+layout(std140, binding = 2) readonly uniform ObjectData
+{
+	uvec4 ObjectID;
+	uint ObjectDataIndex;
+	uint CameraIndex;
+};
 
 layout(location = 0) in vec3 normal;
 layout(location = 1) in vec4 inColor;
@@ -23,7 +28,7 @@ void main()
 {
 	outColor = inColor * Properties.Color;
 	outNormal = vec4((normalize(normal) + 1.0) * 0.5, 1.0);
-	outID = Object.ObjectID;
+	outID = ObjectID;
 	outData.g = Properties.Shininess;
 	outData.a = 1.0;
 }
