@@ -869,6 +869,8 @@ namespace Glory
 					pGraphics->DrawMesh(pMesh, pMeshData->VertexCount(), pMeshData->IndexCount());
 				}
 			}
+
+			pPipeline->UnUse();
 		}
 
 		for (PipelineBatch& pipelineRenderData : m_DynamicPipelineRenderDatas)
@@ -958,6 +960,8 @@ namespace Glory
 				Mesh* pMesh = pResourceManager->CreateMesh(iter->second.get());
 				pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
 			}
+
+			pPipeline->UnUse();
 		}
 		pGraphics->EnableDepthWrite(true);
 	}
@@ -1088,6 +1092,7 @@ namespace Glory
 				}
 			}
 
+			pPipeline->UnUse();
 			/*const size_t materialCount = pipelineRenderData.m_UniqueMaterials->size();
 			MaterialData* pBaseMaterialData = materialManager.GetMaterial(pipelineRenderData.m_UniqueMaterials.m_Data[0]);
 			if (!pBaseMaterialData) continue;
@@ -1218,6 +1223,8 @@ namespace Glory
 				Mesh* pMesh = pResourceManager->CreateMesh(iter->second.get());
 				pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
 			}
+
+			pPipeline->UnUse();
 		}
 		pGraphics->EnableDepthWrite(true);
 	}
@@ -1339,6 +1346,8 @@ namespace Glory
 				Mesh* pMesh = pResourceManager->CreateMesh(iter->second.get());
 				pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
 			}
+
+			pPipeline->UnUse();
 		}
 		pGraphics->EnableDepthWrite(true);
 	}

@@ -2,7 +2,7 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-layout(std430, binding = 2) buffer ObjectData
+layout(std430, binding = 2) readonly buffer ObjectData
 {
 	mat4 model;
 	mat4 view;

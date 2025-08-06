@@ -18,6 +18,13 @@ namespace Glory
 	void OGLPipeline::Use()
 	{
 		glUseProgram(m_ProgramID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OGLPipeline::UnUse()
+	{
+		glUseProgram(NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
 	GLuint OGLPipeline::ProgramID()

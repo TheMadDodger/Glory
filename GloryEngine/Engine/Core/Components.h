@@ -70,9 +70,9 @@ namespace Glory
 	{
 		MeshRenderer(MeshData* pMesh, MaterialData* pMaterial)
 			: m_Mesh(pMesh != nullptr ? pMesh->GetUUID() : 0), m_Material(pMaterial != nullptr ? pMaterial->GetUUID() : 0),
-			m_RenderStatic(true) {}
+			m_RenderStatic(false), m_WasSubmittedForStatic(false) {}
 		MeshRenderer()
-			: m_Mesh(0), m_Material(0), m_RenderStatic(true), m_WasSubmittedForStatic(false) {}
+			: m_Mesh(0), m_Material(0), m_RenderStatic(false), m_WasSubmittedForStatic(false) {}
 
 		REFLECTABLE(MeshRenderer,
 			(AssetReference<MeshData>)(m_Mesh),

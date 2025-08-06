@@ -18,6 +18,7 @@ namespace Glory
 
 		/** @brief Use this pipeline */
 		virtual void Use() = 0;
+		virtual void UnUse() = 0;
 
 	protected:
 		/** @brief Initialize the pipeline */
