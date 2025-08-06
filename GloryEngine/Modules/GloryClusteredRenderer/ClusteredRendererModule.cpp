@@ -1,9 +1,11 @@
 #include "ClusteredRendererModule.h"
 
 #include <AssetManager.h>
+#include <DisplayManager.h>
 #include <MaterialManager.h>
 #include <PipelineManager.h>
 #include <Engine.h>
+#include <EngineProfiler.h>
 #include <GraphicsModule.h>
 #include <GPUResourceManager.h>
 #include <FileLoaderModule.h>
@@ -121,6 +123,12 @@ namespace Glory
 		}
 	}
 
+	UUID ClusteredRendererModule::TextPipelineID() const
+	{
+		const ModuleSettings& settings = Settings();
+		return settings.Value<uint64_t>("Text Pipeline");
+	}
+
 	void ClusteredRendererModule::Initialize()
 	{
 		RendererModule::Initialize();
@@ -165,82 +173,25 @@ namespace Glory
 			ShadowMapsPass(camera, frame);
 			m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS*sizeof(LightData));
 		} });
-		
-		AddRenderPass(RP_ObjectPass, RenderPass{ "Static Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
-			GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-			GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
-			MaterialManager& materialManager = m_pEngine->GetMaterialManager();
-			PipelineManager& pipelines = m_pEngine->GetPipelineManager();
-			AssetManager& assets = m_pEngine->GetAssetManager();
 
-			pGraphics->EnableDepthWrite(true);
-			for (PipelineBatch& pipelineRenderData : m_StaticPipelineRenderDatas)
-			{
-				PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineRenderData.m_PipelineID);
-				if (!pPipelineData) continue;
-				Pipeline* pPipeline = pResourceManager->CreatePipeline(pPipelineData);
-				pPipeline->Use();
+		m_RenderPasses[RP_ObjectPass].push_back(RenderPass{ "Skybox Pass", [this](CameraRef camera, const RenderFrame& frame) {
+			SkyboxPass(camera, frame);
+		} });
 
-				for (UUID uniqueMeshID : pipelineRenderData.m_UniqueMeshOrder)
-				{
-					const PipelineMeshBatch& meshBatch = pipelineRenderData.m_Meshes.at(uniqueMeshID);
-					Resource* pMeshResource = assets.FindResource(meshBatch.m_Mesh);
-					if (!pMeshResource) continue;
-					MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
-					Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
-					if (!pMesh) continue;
+		m_RenderPasses[RP_ObjectPass].push_back(RenderPass{ "Static Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
+			StaticObjectsPass(camera, frame);
+		} });
 
-					for (size_t i = 0; i < meshBatch.m_Materials.size(); ++i)
-					{
-						MaterialData* pMaterialData = materialManager.GetMaterial(meshBatch.m_Materials[i]);
-						if (!pMaterialData) continue;
-						Material* pMaterial = pResourceManager->CreateMaterial(pMaterialData);
-						if (!pMaterial) continue;
+		m_RenderPasses[RP_ObjectPass].push_back(RenderPass{ "Dynamic Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
+			DynamicObjectsPass(camera, frame);
+		} });
 
-						const auto& ids = meshBatch.m_ObjectIDs[i];
-						const auto& world = meshBatch.m_Worlds[i];
+		m_RenderPasses[RP_LateobjectPass].push_back(RenderPass{ "Dynamic Late Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
+			DynamicLateObjectPass(camera, frame);
+		} });
 
-						pMaterial->Reset();
-
-						ObjectData object;
-						object.Model = world;
-						object.View = camera.GetView();
-						object.Projection = camera.GetProjection();
-						object.ObjectID = ids.second;
-						object.SceneID = ids.first;
-
-						pMaterial->SetProperties(m_pEngine);
-						pMaterial->SetObjectData(object);
-						pGraphics->DrawMesh(pMesh, pMeshData->VertexCount(), pMeshData->IndexCount());
-					}
-				}
-
-				/*const size_t materialCount = pipelineRenderData.m_UniqueMaterials->size();
-				MaterialData* pBaseMaterialData = materialManager.GetMaterial(pipelineRenderData.m_UniqueMaterials.m_Data[0]);
-				if (!pBaseMaterialData) continue;
-				const size_t propertyDataSize = pBaseMaterialData->PropertyDataSize(materialManager);
-				const size_t paddingBytes = 16 - propertyDataSize%16;
-				const size_t finalPropertyDataSize = propertyDataSize + paddingBytes;
-				pipelineRenderData.m_PropertiesBuffer.resize(finalPropertyDataSize*materialCount);
-
-				for (size_t i = 0; i < materialCount; ++i)
-				{
-					MaterialData* pMaterialData = materialManager.GetMaterial(pipelineRenderData.m_UniqueMaterials.m_Data[i]);
-					if (std::memcmp(&pipelineRenderData.m_PropertiesBuffer.m_Data[i*finalPropertyDataSize],
-						pMaterialData->GetFinalBufferReference(materialManager).data(), propertyDataSize) == 0)
-						continue;
-
-					pMaterialData->CopyProperties(materialManager, &pipelineRenderData.m_PropertiesBuffer.m_Data[i * finalPropertyDataSize]);
-					pipelineRenderData.m_PropertiesBuffer.m_Dirty = true;
-				}
-
-				if (pipelineRenderData.m_PropertiesBuffer)
-				{
-					pipelineRenderData.m_pIndirectMaterialPropertyData->Assign(pipelineRenderData.m_PropertiesBuffer->data(),
-						pipelineRenderData.m_PropertiesBuffer->size());
-				}*/
-			}
-			pGraphics->EnableDepthWrite(true);
+		m_RenderPasses[RP_CameraCompositePass].push_back(RenderPass{ "Deferred Composite Pass", [this](CameraRef camera, const RenderFrame& frame) {
+			DeferredCompositePass(camera, frame);
 		} });
 	}
 
@@ -445,85 +396,6 @@ namespace Glory
 
 		delete m_pShadowAtlas;
 		m_pShadowAtlas = nullptr;
-	}
-
-	void ClusteredRendererModule::OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>&)
-	{
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-
-		Resource* pMeshResource = m_pEngine->GetAssetManager().FindResource(renderData.m_MeshID);
-		if (!pMeshResource) return;
-		MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
-		MaterialData* pMaterialData = m_pEngine->GetMaterialManager().GetMaterial(renderData.m_MaterialID);
-		if (!pMaterialData) return;
-		Material* pMaterial = pGraphics->UseMaterial(pMaterialData);
-		if (!pMaterial) return;
-
-		ObjectData object;
-		object.Model = renderData.m_World;
-		object.View = camera.GetView();
-		object.Projection = camera.GetProjection();
-		object.ObjectID = renderData.m_ObjectID;
-		object.SceneID = renderData.m_SceneID;
-
-		pMaterial->SetProperties(m_pEngine);
-		pMaterial->SetObjectData(object);
-		pGraphics->EnableDepthWrite(renderData.m_DepthWrite);
-		pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
-		pGraphics->EnableDepthWrite(true);
-	}
-
-	void ClusteredRendererModule::OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<LightData>& lights)
-	{
-		if (renderData.m_Text.empty()) return;
-
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
-
-		Resource* pFontResource = m_pEngine->GetAssetManager().FindResource(renderData.m_FontID);
-		if (!pFontResource) return;
-		FontData* pFontData = static_cast<FontData*>(pFontResource);
-		if (!pFontData) return;
-		if (!m_pTextMaterialData) return;
-
-		if (!m_pTextMaterial)
-		{
-			m_pTextMaterial = pResourceManager->CreateMaterial(m_pTextMaterialData);
-			if (!m_pTextMaterial) return;
-		}
-		m_pTextMaterial->Use();
-
-		ObjectData object;
-		object.Model = renderData.m_World;
-		object.View = camera.GetView();
-		object.Projection = camera.GetProjection();
-		object.ObjectID = renderData.m_ObjectID;
-		object.SceneID = renderData.m_SceneID;
-
-		m_pTextMaterial->SetProperties(m_pEngine);
-		m_pTextMaterial->SetObjectData(object);
-
-		InternalTexture* pTextureData = pFontData->GetGlyphTexture();
-		if (!pTextureData) return;
-
-		Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
-		if (pTexture) m_pTextMaterial->SetTexture("texSampler", pTexture);
-
-		auto iter = m_pTextMeshes.find(renderData.m_ObjectID);
-		const bool exists = iter != m_pTextMeshes.end();
-		if (!exists)
-		{
-			MeshData* pMesh = new MeshData(renderData.m_Text.size()*4, sizeof(VertexPosColorTex),
-				{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
-			iter = m_pTextMeshes.emplace(renderData.m_ObjectID, pMesh).first;
-		}
-
-		const float textWrap = renderData.m_TextWrap*renderData.m_Scale*pFontData->FontHeight();
-		if (renderData.m_TextDirty || !exists)
-			Utils::GenerateTextMesh(iter->second.get(), pFontData, renderData, textWrap);
-
-		Mesh* pMesh = pResourceManager->CreateMesh(iter->second.get());
-		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
 	}
 
 	void ClusteredRendererModule::OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture)
@@ -939,11 +811,7 @@ namespace Glory
 			pGraphics->EnableDepthWrite(true);
 			pGraphics->EnableDepthTest(true);
 			m_pShadowAtlas->BindChunk(chunkID);
-			for (size_t j = 0; j < m_FrameData.ObjectsToRender.size(); ++j)
-			{
-				const auto& objectToRender = m_FrameData.ObjectsToRender[j];
-				RenderShadow(i, m_FrameData, objectToRender);
-			}
+			RenderShadows(i, m_FrameData);
 			pGraphics->SetColorMask(true, true, true, true);
 			pGraphics->SetCullFace(CullFace::None);
 			lightData.shadowCoords = m_pShadowAtlas->GetChunkCoords(lightID);
@@ -951,31 +819,174 @@ namespace Glory
 		m_pShadowAtlas->Unbind();
 	}
 
-	void ClusteredRendererModule::RenderShadow(size_t lightIndex, const RenderFrame& frameData, const RenderData& objectToRender)
+	void ClusteredRendererModule::RenderShadows(size_t lightIndex, const RenderFrame& frameData)
 	{
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-
-		Resource* pMeshResource = m_pEngine->GetAssetManager().FindResource(objectToRender.m_MeshID);
-		if (!pMeshResource) return;
-		MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
-		MaterialData* pMaterialData = m_pEngine->GetMaterialManager().GetMaterial(objectToRender.m_MaterialID);
-		if (!pMaterialData) return;
-		/* @todo Check if attached pipeline has the TRANSPARENT feature enabled */
-		Material* pMaterial = pGraphics->UseMaterial(m_pShadowsMaterialData);
-		if (!pMaterial) return;
-
 		ObjectData object;
-		object.Model = objectToRender.m_World;
 		object.View = frameData.LightSpaceTransforms[lightIndex];
 		object.Projection = glm::identity<glm::mat4>();
-		object.ObjectID = objectToRender.m_ObjectID;
-		object.SceneID = objectToRender.m_SceneID;
-		pMaterial->SetProperties(m_pEngine);
-		pMaterial->SetObjectData(object);
-		pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
 
-		pGraphics->UseMaterial(nullptr);
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+		MaterialManager& materialManager = m_pEngine->GetMaterialManager();
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
+		AssetManager& assets = m_pEngine->GetAssetManager();
+
+		pGraphics->EnableDepthWrite(true);
+		for (PipelineBatch& pipelineRenderData : m_StaticPipelineRenderDatas)
+		{
+			PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineRenderData.m_PipelineID);
+			if (!pPipelineData) continue;
+			Pipeline* pPipeline = pResourceManager->CreatePipeline(pPipelineData);
+			pPipeline->Use();
+
+			for (UUID uniqueMeshID : pipelineRenderData.m_UniqueMeshOrder)
+			{
+				const PipelineMeshBatch& meshBatch = pipelineRenderData.m_Meshes.at(uniqueMeshID);
+				Resource* pMeshResource = assets.FindResource(meshBatch.m_Mesh);
+				if (!pMeshResource) continue;
+				MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+				Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
+				if (!pMesh) continue;
+
+				for (size_t i = 0; i < meshBatch.m_Materials.size(); ++i)
+				{
+					MaterialData* pMaterialData = materialManager.GetMaterial(meshBatch.m_Materials[i]);
+					if (!pMaterialData) continue;
+					Material* pMaterial = pResourceManager->CreateMaterial(pMaterialData);
+					if (!pMaterial) continue;
+
+					const auto& ids = meshBatch.m_ObjectIDs[i];
+					const auto& world = meshBatch.m_Worlds[i];
+
+					pMaterial->Reset();
+
+					object.Model = world;
+					object.ObjectID = ids.second;
+					object.SceneID = ids.first;
+
+					pMaterial->SetProperties(m_pEngine);
+					pMaterial->SetObjectData(object);
+					pGraphics->DrawMesh(pMesh, pMeshData->VertexCount(), pMeshData->IndexCount());
+				}
+			}
+		}
+
+		for (PipelineBatch& pipelineRenderData : m_DynamicPipelineRenderDatas)
+		{
+			PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineRenderData.m_PipelineID);
+			if (!pPipelineData) continue;
+			Pipeline* pPipeline = pResourceManager->CreatePipeline(pPipelineData);
+			pPipeline->Use();
+
+			for (UUID uniqueMeshID : pipelineRenderData.m_UniqueMeshOrder)
+			{
+				const PipelineMeshBatch& meshBatch = pipelineRenderData.m_Meshes.at(uniqueMeshID);
+				Resource* pMeshResource = assets.FindResource(meshBatch.m_Mesh);
+				if (!pMeshResource) continue;
+				MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+				Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
+				if (!pMesh) continue;
+
+				for (size_t i = 0; i < meshBatch.m_Materials.size(); ++i)
+				{
+					MaterialData* pMaterialData = materialManager.GetMaterial(meshBatch.m_Materials[i]);
+					if (!pMaterialData) continue;
+					Material* pMaterial = pResourceManager->CreateMaterial(pMaterialData);
+					if (!pMaterial) continue;
+
+					const auto& ids = meshBatch.m_ObjectIDs[i];
+					const auto& world = meshBatch.m_Worlds[i];
+
+					pMaterial->Reset();
+
+					object.Model = world;
+					object.ObjectID = ids.second;
+					object.SceneID = ids.first;
+
+					pMaterial->SetProperties(m_pEngine);
+					pMaterial->SetObjectData(object);
+					pGraphics->DrawMesh(pMesh, pMeshData->VertexCount(), pMeshData->IndexCount());
+				}
+			}
+
+			for (const TextRenderData& text : pipelineRenderData.m_Texts)
+			{
+				if (text.m_Text.empty()) return;
+
+				GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+				GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+
+				Resource* pFontResource = m_pEngine->GetAssetManager().FindResource(text.m_FontID);
+				if (!pFontResource) return;
+				FontData* pFontData = static_cast<FontData*>(pFontResource);
+				if (!pFontData) return;
+				if (!m_pTextMaterialData) return;
+
+				if (!m_pTextMaterial)
+				{
+					m_pTextMaterial = pResourceManager->CreateMaterial(m_pTextMaterialData);
+					if (!m_pTextMaterial) return;
+				}
+				m_pTextMaterial->Use();
+
+				object.Model = text.m_World;
+				object.ObjectID = text.m_ObjectID;
+				object.SceneID = text.m_SceneID;
+
+				m_pTextMaterial->SetProperties(m_pEngine);
+				m_pTextMaterial->SetObjectData(object);
+
+				InternalTexture* pTextureData = pFontData->GetGlyphTexture();
+				if (!pTextureData) return;
+
+				Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
+				if (pTexture) m_pTextMaterial->SetTexture("texSampler", pTexture);
+
+				auto iter = m_pTextMeshes.find(text.m_ObjectID);
+				const bool exists = iter != m_pTextMeshes.end();
+				if (!exists)
+				{
+					MeshData* pMesh = new MeshData(text.m_Text.size()*4, sizeof(VertexPosColorTex),
+						{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+					iter = m_pTextMeshes.emplace(text.m_ObjectID, pMesh).first;
+				}
+
+				const float textWrap = text.m_TextWrap*text.m_Scale*pFontData->FontHeight();
+				if (text.m_TextDirty || !exists)
+					Utils::GenerateTextMesh(iter->second.get(), pFontData, text, textWrap);
+
+				Mesh* pMesh = pResourceManager->CreateMesh(iter->second.get());
+				pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
+			}
+		}
+		pGraphics->EnableDepthWrite(true);
 	}
+
+	//void ClusteredRendererModule::RenderShadow(size_t lightIndex, const RenderFrame& frameData, const RenderData& objectToRender)
+	//{
+	//	GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+
+	//	Resource* pMeshResource = m_pEngine->GetAssetManager().FindResource(objectToRender.m_MeshID);
+	//	if (!pMeshResource) return;
+	//	MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+	//	MaterialData* pMaterialData = m_pEngine->GetMaterialManager().GetMaterial(objectToRender.m_MaterialID);
+	//	if (!pMaterialData) return;
+	//	/* @todo Check if attached pipeline has the TRANSPARENT feature enabled */
+	//	Material* pMaterial = pGraphics->UseMaterial(m_pShadowsMaterialData);
+	//	if (!pMaterial) return;
+
+	//	ObjectData object;
+	//	object.Model = objectToRender.m_World;
+	//	object.View = frameData.LightSpaceTransforms[lightIndex];
+	//	object.Projection = glm::identity<glm::mat4>();
+	//	object.ObjectID = objectToRender.m_ObjectID;
+	//	object.SceneID = objectToRender.m_SceneID;
+	//	pMaterial->SetProperties(m_pEngine);
+	//	pMaterial->SetObjectData(object);
+	//	pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
+
+	//	pGraphics->UseMaterial(nullptr);
+	//}
 
 	void ClusteredRendererModule::GenerateShadowLODDivisions(uint32_t maxLODs)
 	{
@@ -1024,5 +1035,344 @@ namespace Glory
 		m_ShadowAtlasResolution = newSize;
 		if (!m_pShadowAtlas) return;
 		m_pShadowAtlas->Resize(m_ShadowAtlasResolution);
+	}
+
+	void ClusteredRendererModule::StaticObjectsPass(CameraRef camera, const RenderFrame& frame)
+	{
+		/* Render objects */
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+		MaterialManager& materialManager = m_pEngine->GetMaterialManager();
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
+		AssetManager& assets = m_pEngine->GetAssetManager();
+
+		pGraphics->EnableDepthWrite(true);
+		for (PipelineBatch& pipelineRenderData : m_StaticPipelineRenderDatas)
+		{
+			PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineRenderData.m_PipelineID);
+			if (!pPipelineData) continue;
+			Pipeline* pPipeline = pResourceManager->CreatePipeline(pPipelineData);
+			pPipeline->Use();
+
+			for (UUID uniqueMeshID : pipelineRenderData.m_UniqueMeshOrder)
+			{
+				const PipelineMeshBatch& meshBatch = pipelineRenderData.m_Meshes.at(uniqueMeshID);
+				Resource* pMeshResource = assets.FindResource(meshBatch.m_Mesh);
+				if (!pMeshResource) continue;
+				MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+				Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
+				if (!pMesh) continue;
+
+				for (size_t i = 0; i < meshBatch.m_Materials.size(); ++i)
+				{
+					MaterialData* pMaterialData = materialManager.GetMaterial(meshBatch.m_Materials[i]);
+					if (!pMaterialData) continue;
+					Material* pMaterial = pResourceManager->CreateMaterial(pMaterialData);
+					if (!pMaterial) continue;
+
+					const auto& ids = meshBatch.m_ObjectIDs[i];
+					const auto& world = meshBatch.m_Worlds[i];
+
+					pMaterial->Reset();
+
+					ObjectData object;
+					object.Model = world;
+					object.View = camera.GetView();
+					object.Projection = camera.GetProjection();
+					object.ObjectID = ids.second;
+					object.SceneID = ids.first;
+
+					pMaterial->SetProperties(m_pEngine);
+					pMaterial->SetObjectData(object);
+					pGraphics->DrawMesh(pMesh, pMeshData->VertexCount(), pMeshData->IndexCount());
+				}
+			}
+
+			/*const size_t materialCount = pipelineRenderData.m_UniqueMaterials->size();
+			MaterialData* pBaseMaterialData = materialManager.GetMaterial(pipelineRenderData.m_UniqueMaterials.m_Data[0]);
+			if (!pBaseMaterialData) continue;
+			const size_t propertyDataSize = pBaseMaterialData->PropertyDataSize(materialManager);
+			const size_t paddingBytes = 16 - propertyDataSize%16;
+			const size_t finalPropertyDataSize = propertyDataSize + paddingBytes;
+			pipelineRenderData.m_PropertiesBuffer.resize(finalPropertyDataSize*materialCount);
+
+			for (size_t i = 0; i < materialCount; ++i)
+			{
+				MaterialData* pMaterialData = materialManager.GetMaterial(pipelineRenderData.m_UniqueMaterials.m_Data[i]);
+				if (std::memcmp(&pipelineRenderData.m_PropertiesBuffer.m_Data[i*finalPropertyDataSize],
+					pMaterialData->GetFinalBufferReference(materialManager).data(), propertyDataSize) == 0)
+					continue;
+
+				pMaterialData->CopyProperties(materialManager, &pipelineRenderData.m_PropertiesBuffer.m_Data[i * finalPropertyDataSize]);
+				pipelineRenderData.m_PropertiesBuffer.m_Dirty = true;
+			}
+
+			if (pipelineRenderData.m_PropertiesBuffer)
+			{
+				pipelineRenderData.m_pIndirectMaterialPropertyData->Assign(pipelineRenderData.m_PropertiesBuffer->data(),
+					pipelineRenderData.m_PropertiesBuffer->size());
+			}*/
+		}
+		pGraphics->EnableDepthWrite(true);
+	}
+
+	void ClusteredRendererModule::DynamicObjectsPass(CameraRef camera, const RenderFrame& frame)
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+		MaterialManager& materialManager = m_pEngine->GetMaterialManager();
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
+		AssetManager& assets = m_pEngine->GetAssetManager();
+
+		pGraphics->EnableDepthWrite(true);
+		for (PipelineBatch& pipelineRenderData : m_DynamicPipelineRenderDatas)
+		{
+			PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineRenderData.m_PipelineID);
+			if (!pPipelineData) continue;
+			Pipeline* pPipeline = pResourceManager->CreatePipeline(pPipelineData);
+			pPipeline->Use();
+
+			for (UUID uniqueMeshID : pipelineRenderData.m_UniqueMeshOrder)
+			{
+				const PipelineMeshBatch& meshBatch = pipelineRenderData.m_Meshes.at(uniqueMeshID);
+				Resource* pMeshResource = assets.FindResource(meshBatch.m_Mesh);
+				if (!pMeshResource) continue;
+				MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+				Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
+				if (!pMesh) continue;
+
+				for (size_t i = 0; i < meshBatch.m_Materials.size(); ++i)
+				{
+					MaterialData* pMaterialData = materialManager.GetMaterial(meshBatch.m_Materials[i]);
+					if (!pMaterialData) continue;
+					Material* pMaterial = pResourceManager->CreateMaterial(pMaterialData);
+					if (!pMaterial) continue;
+
+					const auto& ids = meshBatch.m_ObjectIDs[i];
+					const auto& world = meshBatch.m_Worlds[i];
+
+					pMaterial->Reset();
+
+					ObjectData object;
+					object.Model = world;
+					object.View = camera.GetView();
+					object.Projection = camera.GetProjection();
+					object.ObjectID = ids.second;
+					object.SceneID = ids.first;
+
+					pMaterial->SetProperties(m_pEngine);
+					pMaterial->SetObjectData(object);
+					pGraphics->DrawMesh(pMesh, pMeshData->VertexCount(), pMeshData->IndexCount());
+				}
+			}
+
+			for (const TextRenderData& text : pipelineRenderData.m_Texts)
+			{
+				if (text.m_Text.empty()) return;
+
+				GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+				GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+
+				Resource* pFontResource = m_pEngine->GetAssetManager().FindResource(text.m_FontID);
+				if (!pFontResource) return;
+				FontData* pFontData = static_cast<FontData*>(pFontResource);
+				if (!pFontData) return;
+				if (!m_pTextMaterialData) return;
+
+				if (!m_pTextMaterial)
+				{
+					m_pTextMaterial = pResourceManager->CreateMaterial(m_pTextMaterialData);
+					if (!m_pTextMaterial) return;
+				}
+				m_pTextMaterial->Use();
+
+				ObjectData object;
+				object.Model = text.m_World;
+				object.View = camera.GetView();
+				object.Projection = camera.GetProjection();
+				object.ObjectID = text.m_ObjectID;
+				object.SceneID = text.m_SceneID;
+
+				m_pTextMaterial->SetProperties(m_pEngine);
+				m_pTextMaterial->SetObjectData(object);
+
+				InternalTexture* pTextureData = pFontData->GetGlyphTexture();
+				if (!pTextureData) return;
+
+				Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
+				if (pTexture) m_pTextMaterial->SetTexture("texSampler", pTexture);
+
+				auto iter = m_pTextMeshes.find(text.m_ObjectID);
+				const bool exists = iter != m_pTextMeshes.end();
+				if (!exists)
+				{
+					MeshData* pMesh = new MeshData(text.m_Text.size()*4, sizeof(VertexPosColorTex),
+						{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+					iter = m_pTextMeshes.emplace(text.m_ObjectID, pMesh).first;
+				}
+
+				const float textWrap = text.m_TextWrap*text.m_Scale*pFontData->FontHeight();
+				if (text.m_TextDirty || !exists)
+					Utils::GenerateTextMesh(iter->second.get(), pFontData, text, textWrap);
+
+				Mesh* pMesh = pResourceManager->CreateMesh(iter->second.get());
+				pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
+			}
+		}
+		pGraphics->EnableDepthWrite(true);
+	}
+
+	void ClusteredRendererModule::SkyboxPass(CameraRef camera, const RenderFrame&)
+	{
+		GScene* pActiveScene = m_pEngine->GetSceneManager()->GetActiveScene();
+		if (!pActiveScene) return;
+		const UUID skyboxID = pActiveScene->Settings().m_LightingSettings.m_Skybox;
+		if (!skyboxID) return;
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(skyboxID);
+		if (!pResource) return;
+		CubemapData* pCubemap = static_cast<CubemapData*>(pResource);
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		pGraphics->EnableDepthWrite(false);
+		OnRenderSkybox(camera, pCubemap);
+		pGraphics->EnableDepthWrite(true);
+	}
+
+	void ClusteredRendererModule::DynamicLateObjectPass(CameraRef camera, const RenderFrame& frame)
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+		MaterialManager& materialManager = m_pEngine->GetMaterialManager();
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
+		AssetManager& assets = m_pEngine->GetAssetManager();
+
+		pGraphics->EnableDepthWrite(true);
+		for (PipelineBatch& pipelineRenderData : m_DynamicLatePipelineRenderDatas)
+		{
+			PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineRenderData.m_PipelineID);
+			if (!pPipelineData) continue;
+			Pipeline* pPipeline = pResourceManager->CreatePipeline(pPipelineData);
+			pPipeline->Use();
+
+			for (UUID uniqueMeshID : pipelineRenderData.m_UniqueMeshOrder)
+			{
+				const PipelineMeshBatch& meshBatch = pipelineRenderData.m_Meshes.at(uniqueMeshID);
+				Resource* pMeshResource = assets.FindResource(meshBatch.m_Mesh);
+				if (!pMeshResource) continue;
+				MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+				Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
+				if (!pMesh) continue;
+
+				for (size_t i = 0; i < meshBatch.m_Materials.size(); ++i)
+				{
+					MaterialData* pMaterialData = materialManager.GetMaterial(meshBatch.m_Materials[i]);
+					if (!pMaterialData) continue;
+					Material* pMaterial = pResourceManager->CreateMaterial(pMaterialData);
+					if (!pMaterial) continue;
+
+					const auto& ids = meshBatch.m_ObjectIDs[i];
+					const auto& world = meshBatch.m_Worlds[i];
+
+					pMaterial->Reset();
+
+					ObjectData object;
+					object.Model = world;
+					object.View = camera.GetView();
+					object.Projection = camera.GetProjection();
+					object.ObjectID = ids.second;
+					object.SceneID = ids.first;
+
+					pMaterial->SetProperties(m_pEngine);
+					pMaterial->SetObjectData(object);
+					pGraphics->DrawMesh(pMesh, pMeshData->VertexCount(), pMeshData->IndexCount());
+				}
+			}
+
+			for (const TextRenderData& text : pipelineRenderData.m_Texts)
+			{
+				if (text.m_Text.empty()) return;
+
+				GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+				GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+
+				Resource* pFontResource = m_pEngine->GetAssetManager().FindResource(text.m_FontID);
+				if (!pFontResource) return;
+				FontData* pFontData = static_cast<FontData*>(pFontResource);
+				if (!pFontData) return;
+				if (!m_pTextMaterialData) return;
+
+				if (!m_pTextMaterial)
+				{
+					m_pTextMaterial = pResourceManager->CreateMaterial(m_pTextMaterialData);
+					if (!m_pTextMaterial) return;
+				}
+				m_pTextMaterial->Use();
+
+				ObjectData object;
+				object.Model = text.m_World;
+				object.View = camera.GetView();
+				object.Projection = camera.GetProjection();
+				object.ObjectID = text.m_ObjectID;
+				object.SceneID = text.m_SceneID;
+
+				m_pTextMaterial->SetProperties(m_pEngine);
+				m_pTextMaterial->SetObjectData(object);
+
+				InternalTexture* pTextureData = pFontData->GetGlyphTexture();
+				if (!pTextureData) return;
+
+				Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
+				if (pTexture) m_pTextMaterial->SetTexture("texSampler", pTexture);
+
+				auto iter = m_pTextMeshes.find(text.m_ObjectID);
+				const bool exists = iter != m_pTextMeshes.end();
+				if (!exists)
+				{
+					MeshData* pMesh = new MeshData(text.m_Text.size()*4, sizeof(VertexPosColorTex),
+						{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+					iter = m_pTextMeshes.emplace(text.m_ObjectID, pMesh).first;
+				}
+
+				const float textWrap = text.m_TextWrap*text.m_Scale*pFontData->FontHeight();
+				if (text.m_TextDirty || !exists)
+					Utils::GenerateTextMesh(iter->second.get(), pFontData, text, textWrap);
+
+				Mesh* pMesh = pResourceManager->CreateMesh(iter->second.get());
+				pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
+			}
+		}
+		pGraphics->EnableDepthWrite(true);
+	}
+
+	void ClusteredRendererModule::DeferredCompositePass(CameraRef camera, const RenderFrame& frame)
+	{
+		/* Composite to cameras render texture */
+		RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
+		RenderTexture* pOutputTexture = camera.GetOutputTexture();
+		RenderTexture* pSecondaryOutputTexture = camera.GetSecondaryOutputTexture();
+		const glm::uvec2& resolution = camera.GetResolution();
+		if (pOutputTexture == nullptr)
+		{
+			pOutputTexture = m_pEngine->GetDisplayManager().CreateOutputTexture(m_pEngine, resolution.x, resolution.y);
+			camera.SetOutputTexture(pOutputTexture);
+		}
+		if (pSecondaryOutputTexture == nullptr)
+		{
+			pSecondaryOutputTexture = m_pEngine->GetDisplayManager().CreateOutputTexture(m_pEngine, resolution.x, resolution.y);
+			camera.SetSecondaryOutputTexture(pSecondaryOutputTexture);
+		}
+		uint32_t width, height;
+		pOutputTexture->GetDimensions(width, height);
+		if (width != resolution.x || height != resolution.y)
+		{
+			pOutputTexture->Resize(resolution.x, resolution.y);
+			pSecondaryOutputTexture->Resize(resolution.x, resolution.y);
+			pOutputTexture->GetDimensions(width, height);
+		}
+
+		m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Output Rendering");
+		pOutputTexture->BindForDraw();
+		OnDoCompositing(camera, width, height, pRenderTexture);
+		pOutputTexture->UnBindForDraw();
+		m_pEngine->Profiler().EndSample();
 	}
 }

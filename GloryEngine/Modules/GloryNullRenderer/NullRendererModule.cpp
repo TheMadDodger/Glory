@@ -33,6 +33,11 @@ namespace Glory
 	{
 	}
 
+	UUID NullRendererModule::TextPipelineID() const
+	{
+		return 0;
+	}
+
 	void NullRendererModule::Initialize()
 	{
 		RendererModule::Initialize();
@@ -47,14 +52,6 @@ namespace Glory
 	}
 
 	void NullRendererModule::Cleanup()
-	{
-	}
-
-	void NullRendererModule::OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>&)
-	{
-	}
-
-	void NullRendererModule::OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<LightData>& lights)
 	{
 	}
 

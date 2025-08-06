@@ -47,6 +47,8 @@ namespace Glory
 
 		virtual void CollectReferences(std::vector<UUID>& references) override;
 
+		virtual UUID TextPipelineID() const override;
+
 		GLORY_MODULE_VERSION_H(0,5,0);
 
 	private:
@@ -55,8 +57,6 @@ namespace Glory
 		virtual void OnPostInitialize() override;
 		virtual void Update() override;
 
-		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) override;
-		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) override;
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) override;
 		virtual void OnDoCompositing(CameraRef camera, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
 		virtual void OnDisplayCopy(RenderTexture* pRenderTexture, uint32_t width, uint32_t height) override;
@@ -74,12 +74,19 @@ namespace Glory
 		void GenerateDomeSamplePointsSSBO(GPUResourceManager* pResourceManager, uint32_t size);
 
 		void ShadowMapsPass(CameraRef camera, const RenderFrame& frameData);
-		void RenderShadow(size_t lightIndex, const RenderFrame& frameData, const RenderData& objectToRender);
+		void RenderShadows(size_t lightIndex, const RenderFrame& frameData);
+		//void RenderShadow(size_t lightIndex, const RenderFrame& frameData, const RenderData& objectToRender);
 
 		void GenerateShadowLODDivisions(uint32_t maxLODs);
 		void GenerateShadowMapLODResolutions();
 		void ResizeShadowMapLODResolutions(uint32_t minSize, uint32_t maxSize);
 		void ResizeShadowAtlas(uint32_t newSize);
+
+		void StaticObjectsPass(CameraRef camera, const RenderFrame& frame);
+		void DynamicObjectsPass(CameraRef camera, const RenderFrame& frame);
+		void SkyboxPass(CameraRef camera, const RenderFrame& frame);
+		void DynamicLateObjectPass(CameraRef camera, const RenderFrame& frame);
+		void DeferredCompositePass(CameraRef camera, const RenderFrame& frame);
 
 	private:
 		// Compute shaders

@@ -47,6 +47,8 @@ namespace Glory
 
 		virtual void CollectReferences(std::vector<UUID>& references) override;
 
+		virtual UUID TextPipelineID() const override;
+
 		GLORY_MODULE_VERSION_H(0, 1, 0);
 
 	private:
@@ -55,8 +57,6 @@ namespace Glory
 		virtual void OnPostInitialize() override;
 		virtual void Update() override;
 
-		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) override;
-		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) override;
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) override;
 		virtual void OnDoCompositing(CameraRef camera, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
 		virtual void OnDisplayCopy(RenderTexture* pRenderTexture, uint32_t width, uint32_t height) override;

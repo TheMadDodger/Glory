@@ -121,25 +121,84 @@ namespace Glory
 	void RendererModule::SubmitDynamic(RenderData&& renderData)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(RenderData)" };
-		const size_t index = m_FrameData.ObjectsToRender.size();
-		m_FrameData.ObjectsToRender.push_back(std::move(renderData));
-		OnSubmitDynamic(m_FrameData.ObjectsToRender[index]);
+
+		Resource* pMaterialResource = m_pEngine->GetAssetManager().FindResource(renderData.m_MaterialID);
+		if (!pMaterialResource) return;
+
+		MaterialData* pMaterial = static_cast<MaterialData*>(pMaterialResource);
+
+		const UUID pipelineID = pMaterial->GetPipelineID(m_pEngine->GetMaterialManager());
+		/* Can't render anything without a pipeline */
+		if (!pipelineID) return;
+
+		auto& iter = std::find_if(m_DynamicPipelineRenderDatas.begin(), m_DynamicPipelineRenderDatas.end(),
+			[pipelineID](const PipelineBatch& data) { return data.m_PipelineID == pipelineID; });
+		PipelineBatch& pipelineRenderData = iter == m_DynamicPipelineRenderDatas.end() ?
+			m_DynamicPipelineRenderDatas.emplace_back(pipelineID) : *iter;
+
+		auto meshIter = pipelineRenderData.m_Meshes.find(renderData.m_MeshID);
+		if (meshIter == pipelineRenderData.m_Meshes.end())
+		{
+			meshIter = pipelineRenderData.m_Meshes.emplace(renderData.m_MeshID, PipelineMeshBatch{ renderData.m_MeshID }).first;
+			pipelineRenderData.m_UniqueMeshOrder.push_back(renderData.m_MeshID);
+		}
+
+		meshIter->second.m_Worlds.emplace_back(renderData.m_World);
+		meshIter->second.m_ObjectIDs.emplace_back(renderData.m_SceneID, renderData.m_ObjectID);
+		meshIter->second.m_Materials.emplace_back(renderData.m_MaterialID);
+		pipelineRenderData.m_Dirty = true;
+
+		OnSubmitDynamic(renderData);
 	}
 
 	void RendererModule::SubmitDynamic(TextRenderData&& renderData)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(TextRenderData)" };
-		const size_t index = m_FrameData.TextsToRender.size();
-		m_FrameData.TextsToRender.push_back(std::move(renderData));
-		OnSubmitDynamic(m_FrameData.TextsToRender[index]);
+
+		const UUID pipelineID = TextPipelineID();
+		/* Can't render anything without a pipeline */
+		if (!pipelineID) return;
+
+		auto& iter = std::find_if(m_DynamicPipelineRenderDatas.begin(), m_DynamicPipelineRenderDatas.end(),
+			[pipelineID](const PipelineBatch& data) { return data.m_PipelineID == pipelineID; });
+		PipelineBatch& pipelineRenderData = iter == m_DynamicPipelineRenderDatas.end() ?
+			m_DynamicPipelineRenderDatas.emplace_back(pipelineID) : *iter;
+
+		pipelineRenderData.m_Texts.emplace_back(std::move(renderData));
+		pipelineRenderData.m_Dirty = true;
 	}
 
 	void RendererModule::SubmitLate(RenderData&& renderData)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::SubmitLate(RenderData)" };
-		const size_t index = m_FrameData.ObjectsToRenderLate.size();
-		m_FrameData.ObjectsToRenderLate.push_back(std::move(renderData));
-		OnSubmitDynamic(m_FrameData.ObjectsToRenderLate[index]);
+
+		Resource* pMaterialResource = m_pEngine->GetAssetManager().FindResource(renderData.m_MaterialID);
+		if (!pMaterialResource) return;
+
+		MaterialData* pMaterial = static_cast<MaterialData*>(pMaterialResource);
+
+		const UUID pipelineID = pMaterial->GetPipelineID(m_pEngine->GetMaterialManager());
+		/* Can't render anything without a pipeline */
+		if (!pipelineID) return;
+
+		auto& iter = std::find_if(m_DynamicLatePipelineRenderDatas.begin(), m_DynamicLatePipelineRenderDatas.end(),
+			[pipelineID](const PipelineBatch& data) { return data.m_PipelineID == pipelineID; });
+		PipelineBatch& pipelineRenderData = iter == m_DynamicLatePipelineRenderDatas.end() ?
+			m_DynamicLatePipelineRenderDatas.emplace_back(pipelineID) : *iter;
+
+		auto meshIter = pipelineRenderData.m_Meshes.find(renderData.m_MeshID);
+		if (meshIter == pipelineRenderData.m_Meshes.end())
+		{
+			meshIter = pipelineRenderData.m_Meshes.emplace(renderData.m_MeshID, PipelineMeshBatch{ renderData.m_MeshID }).first;
+			pipelineRenderData.m_UniqueMeshOrder.push_back(renderData.m_MeshID);
+		}
+
+		meshIter->second.m_Worlds.emplace_back(renderData.m_World);
+		meshIter->second.m_ObjectIDs.emplace_back(renderData.m_SceneID, renderData.m_ObjectID);
+		meshIter->second.m_Materials.emplace_back(renderData.m_MaterialID);
+		pipelineRenderData.m_Dirty = true;
+
+		OnSubmitDynamic(renderData);
 	}
 
 	void RendererModule::Submit(CameraRef camera)
@@ -198,6 +257,8 @@ namespace Glory
 
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::StartFrame" };
 		m_FrameData.Reset();
+		std::for_each(m_DynamicPipelineRenderDatas.begin(), m_DynamicPipelineRenderDatas.end(), [](PipelineBatch& batch) { batch.Reset(); });
+		std::for_each(m_DynamicLatePipelineRenderDatas.begin(), m_DynamicLatePipelineRenderDatas.end(), [](PipelineBatch& batch) { batch.Reset(); });
 	}
 
 	size_t RendererModule::LastSubmittedObjectCount()
@@ -365,11 +426,6 @@ namespace Glory
 		m_RenderPasses[type].erase(iter);
 	}
 
-	void RendererModule::RenderObject(CameraRef camera, const RenderData& renderData)
-	{
-		OnRender(camera, renderData);
-	}
-
 	void RendererModule::RenderOnBackBuffer(RenderTexture* pTexture)
 	{
 		REQUIRE_MODULE_CALL(m_pEngine, GraphicsModule, Blit(pTexture), );
@@ -391,6 +447,8 @@ namespace Glory
 	{
 		m_StaticPipelineRenderDatas.clear();
 		m_DynamicPipelineRenderDatas.clear();
+		m_DynamicLatePipelineRenderDatas.clear();
+		m_FrameData.Reset();
 	}
 
 	void RendererModule::Initialize()
@@ -410,28 +468,8 @@ namespace Glory
 		m_pLinesMaterialData = new MaterialData();
 		m_pLinesMaterialData->SetPipeline(linesPipeline);
 
-		m_RenderPasses[RP_ObjectPass].push_back(RenderPass{ "Skybox Pass", [this](CameraRef camera, const RenderFrame& frame) {
-			SkyboxPass(camera, frame);
-		} });
-
-		m_RenderPasses[RP_ObjectPass].push_back(RenderPass{ "Main Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
-			MainObjectPass(camera, frame);
-		} });
-
-		m_RenderPasses[RP_ObjectPass].push_back(RenderPass{ "Main Text Pass", [this](CameraRef camera, const RenderFrame& frame) {
-			MainTextPass(camera, frame);
-		} });
-
-		m_RenderPasses[RP_LateobjectPass].push_back(RenderPass{ "Main Late Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
-			MainLateObjectPass(camera, frame);
-		} });
-
 		m_RenderPasses[RP_LateobjectPass].push_back(RenderPass{ "Line Pass", [this](CameraRef camera, const RenderFrame& frame) {
 			RenderLines(camera);
-		} });
-
-		m_RenderPasses[RP_CameraCompositePass].push_back(RenderPass{ "Deferred Composite Pass", [this](CameraRef camera, const RenderFrame& frame) {
-			DeferredCompositePass(camera, frame);
 		} });
 	}
 
@@ -552,7 +590,7 @@ namespace Glory
 			pass.m_Callback(nullptr, m_FrameData);
 		}
 
-		m_LastSubmittedObjectCount = m_FrameData.ObjectsToRender.size();
+		//m_LastSubmittedObjectCount = m_FrameData.ObjectsToRender.size();
 		m_LastSubmittedCameraCount = m_FrameData.ActiveCameras.size();
 
 		std::scoped_lock lock(m_PickLock);
@@ -648,92 +686,6 @@ namespace Glory
 		m_pLineVertex = m_pLineVertices;
 	}
 
-	void RendererModule::MainObjectPass(CameraRef camera, const RenderFrame& frame)
-	{
-		/* Render objects */
-		for (size_t j = 0; j < m_FrameData.ObjectsToRender.size(); ++j)
-		{
-			LayerMask mask = camera.GetLayerMask();
-			if (mask != 0 && (mask & m_FrameData.ObjectsToRender[j].m_LayerMask) == 0) continue;
-			m_pEngine->Profiler().BeginSample("RendererModule::OnRender");
-			OnRender(camera, m_FrameData.ObjectsToRender[j]);
-			m_pEngine->Profiler().EndSample();
-		}
-	}
-
-	void RendererModule::SkyboxPass(CameraRef camera, const RenderFrame&)
-	{
-		GScene* pActiveScene = m_pEngine->GetSceneManager()->GetActiveScene();
-		if (!pActiveScene) return;
-		const UUID skyboxID = pActiveScene->Settings().m_LightingSettings.m_Skybox;
-		if (!skyboxID) return;
-		Resource* pResource = m_pEngine->GetAssetManager().FindResource(skyboxID);
-		if (!pResource) return;
-		CubemapData* pCubemap = static_cast<CubemapData*>(pResource);
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-		pGraphics->EnableDepthWrite(false);
-		OnRenderSkybox(camera, pCubemap);
-		pGraphics->EnableDepthWrite(true);
-	}
-
-	void RendererModule::MainTextPass(CameraRef camera, const RenderFrame& frame)
-	{
-		/* Render texts */
-		for (size_t j = 0; j < m_FrameData.TextsToRender.size(); ++j)
-		{
-			LayerMask mask = camera.GetLayerMask();
-			if (mask != 0 && (mask & m_FrameData.TextsToRender[j].m_LayerMask) == 0) continue;
-			m_pEngine->Profiler().BeginSample("RendererModule::OnRender rendering text object");
-			OnRender(camera, m_FrameData.TextsToRender[j]);
-			m_pEngine->Profiler().EndSample();
-		}
-	}
-
-	void RendererModule::MainLateObjectPass(CameraRef camera, const RenderFrame& frame)
-	{
-		for (size_t j = 0; j < m_FrameData.ObjectsToRenderLate.size(); ++j)
-		{
-			LayerMask mask = camera.GetLayerMask();
-			if (mask != 0 && (mask & m_FrameData.ObjectsToRenderLate[j].m_LayerMask) == 0) continue;
-			m_pEngine->Profiler().BeginSample("RendererModule::OnRender with late render object");
-			OnRender(camera, m_FrameData.ObjectsToRenderLate[j]);
-			m_pEngine->Profiler().EndSample();
-		}
-	}
-
-	void RendererModule::DeferredCompositePass(CameraRef camera, const RenderFrame& frame)
-	{
-		/* Composite to cameras render texture */
-		RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
-		RenderTexture* pOutputTexture = camera.GetOutputTexture();
-		RenderTexture* pSecondaryOutputTexture = camera.GetSecondaryOutputTexture();
-		const glm::uvec2& resolution = camera.GetResolution();
-		if (pOutputTexture == nullptr)
-		{
-			pOutputTexture = m_pEngine->GetDisplayManager().CreateOutputTexture(m_pEngine, resolution.x, resolution.y);
-			camera.SetOutputTexture(pOutputTexture);
-		}
-		if (pSecondaryOutputTexture == nullptr)
-		{
-			pSecondaryOutputTexture = m_pEngine->GetDisplayManager().CreateOutputTexture(m_pEngine, resolution.x, resolution.y);
-			camera.SetSecondaryOutputTexture(pSecondaryOutputTexture);
-		}
-		uint32_t width, height;
-		pOutputTexture->GetDimensions(width, height);
-		if (width != resolution.x || height != resolution.y)
-		{
-			pOutputTexture->Resize(resolution.x, resolution.y);
-			pSecondaryOutputTexture->Resize(resolution.x, resolution.y);
-			pOutputTexture->GetDimensions(width, height);
-		}
-
-		m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Output Rendering");
-		pOutputTexture->BindForDraw();
-		OnDoCompositing(camera, width, height, pRenderTexture);
-		pOutputTexture->UnBindForDraw();
-		m_pEngine->Profiler().EndSample();
-	}
-
 	void RendererModule::CreateCameraRenderTextures(uint32_t width, uint32_t height, std::vector<RenderTexture*>& renderTextures)
 	{
 		GPUResourceManager* pResourceManager = m_pEngine->GetMainModule<GraphicsModule>()->GetResourceManager();
@@ -780,5 +732,14 @@ namespace Glory
 
 	PipelineBatch::~PipelineBatch()
 	{
+	}
+
+	void PipelineBatch::Reset()
+	{
+		m_Meshes.clear();
+		m_UniqueMeshOrder.clear();
+		m_UniqueMaterials.clear();
+		m_Texts.clear();
+		m_Dirty = true;
 	}
 }

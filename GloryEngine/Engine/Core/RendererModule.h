@@ -92,10 +92,13 @@ namespace Glory
 		PipelineBatch(UUID pipeline);
 		virtual ~PipelineBatch();
 		
+		void Reset();
+
 		UUID m_PipelineID;
 		std::unordered_map<UUID, PipelineMeshBatch> m_Meshes;
 		std::vector<UUID> m_UniqueMeshOrder;
 		std::vector<UUID> m_UniqueMaterials;
+		std::vector<TextRenderData> m_Texts;
 		bool m_Dirty;
 	};
 
@@ -154,13 +157,13 @@ namespace Glory
 		void AddRenderPass(RenderPassType type, RenderPass&& pass);
 		void RemoveRenderPass(RenderPassType type, std::string_view name);
 
-		void RenderObject(CameraRef camera, const RenderData& renderData);
-
 		void RenderOnBackBuffer(RenderTexture* pTexture);
 
 		GPUTextureAtlas* CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, bool depth=false);
 
 		void Reset();
+
+		virtual UUID TextPipelineID() const = 0;
 
 	protected:
 		virtual void OnSubmitDynamic(const RenderData& renderData) {}
@@ -172,8 +175,6 @@ namespace Glory
 		virtual void Initialize() override;
 		virtual void PostInitialize() override;
 		virtual void Cleanup() = 0;
-		virtual void OnRender(CameraRef camera, const RenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) = 0;
-		virtual void OnRender(CameraRef camera, const TextRenderData& renderData, const std::vector<LightData>& lights = std::vector<LightData>()) = 0;
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) = 0;
 		virtual void OnRenderSkybox(CameraRef camera, CubemapData* pCubemap) = 0;
 		virtual void OnDoCompositing(CameraRef camera, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) = 0;
@@ -197,12 +198,6 @@ namespace Glory
 		void DoPicking(const glm::ivec2& pos, CameraRef camera);
 		void CreateLineBuffer();
 		void RenderLines(CameraRef camera);
-
-		void MainObjectPass(CameraRef camera, const RenderFrame& frame);
-		void SkyboxPass(CameraRef camera, const RenderFrame& frame);
-		void MainTextPass(CameraRef camera, const RenderFrame& frame);
-		void MainLateObjectPass(CameraRef camera, const RenderFrame& frame);
-		void DeferredCompositePass(CameraRef camera, const RenderFrame& frame);
 
 	protected:
 		RenderFrame m_FrameData;
@@ -231,8 +226,6 @@ namespace Glory
 		std::vector<RenderData> m_ToProcessStaticRenderData;
 		std::vector<PipelineBatch> m_StaticPipelineRenderDatas;
 		std::vector<PipelineBatch> m_DynamicPipelineRenderDatas;
-
-		std::vector<UUID> m_ActiveCameras;
-		CPUBuffer<PerCameraData> m_CameraDatas;
+		std::vector<PipelineBatch> m_DynamicLatePipelineRenderDatas;
 	};
 }

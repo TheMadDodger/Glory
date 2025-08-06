@@ -73,6 +73,7 @@ namespace Glory
 		virtual const Version& ModuleVersion() const;
 
 		ModuleSettings& Settings();
+		const ModuleSettings& Settings() const;
 
 		void LoadSettings(const std::filesystem::path& settingsFile);
 
