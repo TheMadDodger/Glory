@@ -74,7 +74,7 @@ namespace Glory
 		void GenerateDomeSamplePointsSSBO(GPUResourceManager* pResourceManager, uint32_t size);
 
 		void PrepareDataPass();
-		void ShadowMapsPass(CameraRef camera, const RenderFrame& frameData);
+		void ShadowMapsPass(uint32_t cameraIndex);
 		void RenderShadows(size_t lightIndex, const RenderFrame& frameData);
 		//void RenderShadow(size_t lightIndex, const RenderFrame& frameData, const RenderData& objectToRender);
 
@@ -83,11 +83,11 @@ namespace Glory
 		void ResizeShadowMapLODResolutions(uint32_t minSize, uint32_t maxSize);
 		void ResizeShadowAtlas(uint32_t newSize);
 
-		void StaticObjectsPass(CameraRef camera, const RenderFrame& frame);
-		void DynamicObjectsPass(CameraRef camera, const RenderFrame& frame);
-		void SkyboxPass(CameraRef camera, const RenderFrame& frame);
-		void DynamicLateObjectPass(CameraRef camera, const RenderFrame& frame);
-		void DeferredCompositePass(CameraRef camera, const RenderFrame& frame);
+		void StaticObjectsPass(uint32_t cameraIndex);
+		void DynamicObjectsPass(uint32_t cameraIndex);
+		void SkyboxPass(uint32_t cameraIndex);
+		void DynamicLateObjectPass(uint32_t cameraIndex);
+		void DeferredCompositePass(uint32_t cameraIndex);
 
 	private:
 		// Compute shaders

@@ -160,33 +160,33 @@ namespace Glory
 			ResizeShadowMapLODResolutions(m_MinShadowResolution, m_MaxShadowResolution);
 		});
 
-		AddRenderPass(RP_Prepass, RenderPass{ "Prepare Data Pass", [this](CameraRef, const RenderFrame& frame) {
+		AddRenderPass(RP_Prepass, RenderPass{ "Prepare Data Pass", [this](uint32_t, RendererModule*) {
 			PrepareDataPass();
 		} });
 
-		AddRenderPass(RP_PreCompositePass, RenderPass{ "Shadows Pass", [this](CameraRef camera, const RenderFrame& frame) {
-			ShadowMapsPass(camera, frame);
+		AddRenderPass(RP_PreCompositePass, RenderPass{ "Shadows Pass", [this](uint32_t cameraIndex, RendererModule*) {
+			ShadowMapsPass(cameraIndex);
 			m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS*sizeof(LightData));
 		} });
 
-		m_RenderPasses[RP_ObjectPass].push_back(RenderPass{ "Skybox Pass", [this](CameraRef camera, const RenderFrame& frame) {
-			SkyboxPass(camera, frame);
+		m_RenderPasses[RP_ObjectPass].push_back(RenderPass{ "Skybox Pass", [this](uint32_t cameraIndex, RendererModule*) {
+			SkyboxPass(cameraIndex);
 		} });
 
-		m_RenderPasses[RP_ObjectPass].push_back(RenderPass{ "Static Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
-			StaticObjectsPass(camera, frame);
+		m_RenderPasses[RP_ObjectPass].push_back(RenderPass{ "Static Object Pass", [this](uint32_t cameraIndex, RendererModule*) {
+			StaticObjectsPass(cameraIndex);
 		} });
 
-		m_RenderPasses[RP_ObjectPass].push_back(RenderPass{ "Dynamic Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
-			DynamicObjectsPass(camera, frame);
+		m_RenderPasses[RP_ObjectPass].push_back(RenderPass{ "Dynamic Object Pass", [this](uint32_t cameraIndex, RendererModule*) {
+			DynamicObjectsPass(cameraIndex);
 		} });
 
-		m_RenderPasses[RP_LateobjectPass].push_back(RenderPass{ "Dynamic Late Object Pass", [this](CameraRef camera, const RenderFrame& frame) {
-			DynamicLateObjectPass(camera, frame);
+		m_RenderPasses[RP_LateobjectPass].push_back(RenderPass{ "Dynamic Late Object Pass", [this](uint32_t cameraIndex, RendererModule*) {
+			DynamicLateObjectPass(cameraIndex);
 		} });
 
-		m_RenderPasses[RP_CameraCompositePass].push_back(RenderPass{ "Deferred Composite Pass", [this](CameraRef camera, const RenderFrame& frame) {
-			DeferredCompositePass(camera, frame);
+		m_RenderPasses[RP_CameraCompositePass].push_back(RenderPass{ "Deferred Composite Pass", [this](uint32_t cameraIndex, RendererModule*) {
+			DeferredCompositePass(cameraIndex);
 		} });
 	}
 
@@ -833,7 +833,7 @@ namespace Glory
 			m_pCameraDatasBuffer->Assign(m_CameraDatas->data(), m_CameraDatas->size()*sizeof(PerCameraData));
 	}
 
-	void ClusteredRendererModule::ShadowMapsPass(CameraRef camera, const RenderFrame& frameData)
+	void ClusteredRendererModule::ShadowMapsPass(uint32_t cameraIndex)
 	{
 		if (m_FrameData.ActiveLights.count() == 0) return;
 
@@ -1107,8 +1107,10 @@ namespace Glory
 		m_pShadowAtlas->Resize(m_ShadowAtlasResolution);
 	}
 
-	void ClusteredRendererModule::StaticObjectsPass(CameraRef camera, const RenderFrame& frame)
+	void ClusteredRendererModule::StaticObjectsPass(uint32_t cameraIndex)
 	{
+		CameraRef camera = m_FrameData.ActiveCameras[cameraIndex];
+
 		/* Render objects */
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -1187,8 +1189,10 @@ namespace Glory
 		pGraphics->EnableDepthWrite(true);
 	}
 
-	void ClusteredRendererModule::DynamicObjectsPass(CameraRef camera, const RenderFrame& frame)
+	void ClusteredRendererModule::DynamicObjectsPass(uint32_t cameraIndex)
 	{
+		CameraRef camera = m_FrameData.ActiveCameras[cameraIndex];
+
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 		MaterialManager& materialManager = m_pEngine->GetMaterialManager();
@@ -1199,7 +1203,7 @@ namespace Glory
 		m_pCameraDatasBuffer->BindForDraw();
 
 		RenderConstants constants;
-		constants.m_CameraIndex = 0;
+		constants.m_CameraIndex = cameraIndex;
 
 		pGraphics->EnableDepthWrite(true);
 		size_t batchIndex = 0;
@@ -1310,7 +1314,7 @@ namespace Glory
 		m_pCameraDatasBuffer->Unbind();
 	}
 
-	void ClusteredRendererModule::SkyboxPass(CameraRef camera, const RenderFrame&)
+	void ClusteredRendererModule::SkyboxPass(uint32_t cameraIndex)
 	{
 		GScene* pActiveScene = m_pEngine->GetSceneManager()->GetActiveScene();
 		if (!pActiveScene) return;
@@ -1321,17 +1325,19 @@ namespace Glory
 		CubemapData* pCubemap = static_cast<CubemapData*>(pResource);
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		pGraphics->EnableDepthWrite(false);
-		OnRenderSkybox(camera, pCubemap);
+		OnRenderSkybox(m_FrameData.ActiveCameras[cameraIndex], pCubemap);
 		pGraphics->EnableDepthWrite(true);
 	}
 
-	void ClusteredRendererModule::DynamicLateObjectPass(CameraRef camera, const RenderFrame& frame)
+	void ClusteredRendererModule::DynamicLateObjectPass(uint32_t cameraIndex)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 		MaterialManager& materialManager = m_pEngine->GetMaterialManager();
 		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
 		AssetManager& assets = m_pEngine->GetAssetManager();
+
+		CameraRef camera = m_FrameData.ActiveCameras[cameraIndex];
 
 		pGraphics->EnableDepthWrite(true);
 		for (PipelineBatch& pipelineRenderData : m_DynamicLatePipelineRenderDatas)
@@ -1433,9 +1439,10 @@ namespace Glory
 		pGraphics->EnableDepthWrite(true);
 	}
 
-	void ClusteredRendererModule::DeferredCompositePass(CameraRef camera, const RenderFrame& frame)
+	void ClusteredRendererModule::DeferredCompositePass(uint32_t cameraIndex)
 	{
 		/* Composite to cameras render texture */
+		CameraRef camera = m_FrameData.ActiveCameras[cameraIndex];
 		RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
 		RenderTexture* pOutputTexture = camera.GetOutputTexture();
 		RenderTexture* pSecondaryOutputTexture = camera.GetSecondaryOutputTexture();

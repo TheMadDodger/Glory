@@ -432,7 +432,7 @@ namespace Glory
 
 		for (auto& pass : m_RenderPasses[RP_Postblit])
 		{
-			pass.m_Callback(nullptr, {0});
+			pass.m_Callback(0, this);
 		}
 	}
 
@@ -449,6 +449,11 @@ namespace Glory
 		m_DynamicPipelineRenderDatas.clear();
 		m_DynamicLatePipelineRenderDatas.clear();
 		m_FrameData.Reset();
+	}
+
+	CameraRef RendererModule::GetActiveCamera(uint32_t cameraIndex) const
+	{
+		return m_FrameData.ActiveCameras[cameraIndex];
 	}
 
 	void RendererModule::Initialize()
@@ -468,8 +473,8 @@ namespace Glory
 		m_pLinesMaterialData = new MaterialData();
 		m_pLinesMaterialData->SetPipeline(linesPipeline);
 
-		m_RenderPasses[RP_LateobjectPass].push_back(RenderPass{ "Line Pass", [this](CameraRef camera, const RenderFrame& frame) {
-			RenderLines(camera);
+		m_RenderPasses[RP_LateobjectPass].push_back(RenderPass{ "Line Pass", [this](uint32_t cameraIndex, RendererModule*) {
+			RenderLines(m_FrameData.ActiveCameras[cameraIndex]);
 		} });
 	}
 
@@ -499,7 +504,7 @@ namespace Glory
 
 		for (auto& pass : m_RenderPasses[RP_Prepass])
 		{
-			pass.m_Callback(nullptr, m_FrameData);
+			pass.m_Callback(0, this);
 		}
 
 		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
@@ -512,14 +517,14 @@ namespace Glory
 
 			for (auto& pass : m_RenderPasses[RP_CameraPrepass])
 			{
-				pass.m_Callback(camera, m_FrameData);
+				pass.m_Callback(i, this);
 			}
 
 			OnStartCameraRender(camera, m_FrameData.ActiveLights);
 
 			for (auto& pass : m_RenderPasses[RP_ObjectPass])
 			{
-				pass.m_Callback(camera, m_FrameData);
+				pass.m_Callback(i, this);
 			}
 
 			/* Picking */
@@ -533,7 +538,7 @@ namespace Glory
 			pRenderTexture->BindForDraw();
 			for (auto& pass : m_RenderPasses[RP_LateobjectPass])
 			{
-				pass.m_Callback(camera, m_FrameData);
+				pass.m_Callback(i, this);
 			}
 
 			OnEndCameraRender(camera, m_FrameData.ActiveLights);
@@ -542,13 +547,13 @@ namespace Glory
 
 			for (auto& pass : m_RenderPasses[RP_CameraPostpass])
 			{
-				pass.m_Callback(camera, m_FrameData);
+				pass.m_Callback(i, this);
 			}
 		}
 
 		for (auto& pass : m_RenderPasses[RP_PreCompositePass])
 		{
-			pass.m_Callback(nullptr, m_FrameData);
+			pass.m_Callback(0, this);
 		}
 
 		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
@@ -559,7 +564,7 @@ namespace Glory
 			pRenderTexture->BindForDraw();
 			for (auto& pass : m_RenderPasses[RP_CameraCompositePass])
 			{
-				pass.m_Callback(camera, m_FrameData);
+				pass.m_Callback(i, this);
 			}
 			pRenderTexture->UnBindForDraw();
 
@@ -582,12 +587,12 @@ namespace Glory
 
 		for (auto& pass : m_RenderPasses[RP_PostCompositePass])
 		{
-			pass.m_Callback(nullptr, m_FrameData);
+			pass.m_Callback(0, this);
 		}
 
 		for (auto& pass : m_RenderPasses[RP_Postpass])
 		{
-			pass.m_Callback(nullptr, m_FrameData);
+			pass.m_Callback(0, this);
 		}
 
 		//m_LastSubmittedObjectCount = m_FrameData.ObjectsToRender.size();
