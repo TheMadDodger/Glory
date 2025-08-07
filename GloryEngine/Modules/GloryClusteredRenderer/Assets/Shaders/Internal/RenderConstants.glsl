@@ -1,7 +1,7 @@
 #ifdef PUSH_CONSTANTS
-layout(push_constant) uniform RenderConstants
+layout(push_constant) uniform RenderConstantsUBO
 #else
-layout(std140, binding = 1) readonly uniform RenderConstants
+layout(std140, binding = 1) readonly uniform RenderConstantsUBO
 #endif
 {
 	uvec4 ObjectID;
