@@ -3,28 +3,8 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-layout(std140, binding = 2) readonly uniform ObjectData
-{
-	uvec4 ObjectID;
-	uint ObjectDataIndex;
-	uint CameraIndex;
-};
-
-layout(std430, binding = 3) readonly buffer WorldTransforms
-{
-	mat4 Worlds[];
-};
-
-struct CameraData
-{
-	mat4 View;
-	mat4 Projection;
-};
-
-layout(std140, binding = 4) readonly uniform CameraDatas
-{
-	CameraData Cameras[100];
-};
+#include "Internal/RenderConstants.glsl"
+#include "Internal/PerObjectData.glsl"
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
@@ -38,7 +18,7 @@ layout(location = 1) out vec4 outColor;
 
 void main()
 {
-	gl_Position = Cameras[CameraIndex].Projection*Cameras[CameraIndex].View*Worlds[ObjectDataIndex]*vec4(inPosition, 1.0);
-	normal = vec3(Worlds[ObjectDataIndex]*vec4(inNormal, 0.0));
+	gl_Position = Cameras[Constants.CameraIndex].Projection*Cameras[Constants.CameraIndex].View*Worlds[Constants.ObjectDataIndex]*vec4(inPosition, 1.0);
+	normal = vec3(Worlds[Constants.ObjectDataIndex]*vec4(inNormal, 0.0));
 	outColor = inColor;
 }
