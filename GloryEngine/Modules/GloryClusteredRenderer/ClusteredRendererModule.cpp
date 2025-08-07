@@ -307,9 +307,9 @@ namespace Glory
 		GenerateShadowLODDivisions(m_MaxShadowLODs);
 		GenerateShadowMapLODResolutions();
 
-		m_pRenderConstantsBuffer = pResourceManager->CreateBuffer(sizeof(RenderConstants), BufferBindingTarget::B_UNIFORM, MemoryUsage::MU_DYNAMIC_DRAW, 2);
+		m_pRenderConstantsBuffer = pResourceManager->CreateBuffer(sizeof(RenderConstants), BufferBindingTarget::B_UNIFORM, MemoryUsage::MU_DYNAMIC_DRAW, 1);
 		m_pRenderConstantsBuffer->Assign(NULL);
-		m_pCameraDatasBuffer = pResourceManager->CreateBuffer(sizeof(PerCameraData)*100, BufferBindingTarget::B_UNIFORM, MemoryUsage::MU_DYNAMIC_DRAW, 4);
+		m_pCameraDatasBuffer = pResourceManager->CreateBuffer(sizeof(PerCameraData)*100, BufferBindingTarget::B_UNIFORM, MemoryUsage::MU_DYNAMIC_DRAW, 2);
 		m_pCameraDatasBuffer->Assign(NULL);
 	}
 
@@ -806,7 +806,7 @@ namespace Glory
 			if (!batchData.m_pWorldsBuffer)
 			{
 				batchData.m_pWorldsBuffer = pResourceManager->CreateBuffer(batchData.m_Worlds->size()*sizeof(glm::mat4),
-					BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 6);
+					BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 3);
 				batchData.m_pWorldsBuffer->Assign(NULL);
 				batchData.m_Worlds.m_Dirty = true;
 			}
@@ -819,17 +819,18 @@ namespace Glory
 			m_CameraDatas.resize(m_FrameData.ActiveCameras.size());
 		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
 		{
-			const PerCameraData cameraData{ m_FrameData.ActiveCameras[i].GetProjection(),
-				m_FrameData.ActiveCameras[i].GetView() };
+			const PerCameraData cameraData{ m_FrameData.ActiveCameras[i].GetView(),
+				m_FrameData.ActiveCameras[i].GetProjection() };
 
-			if (std::memcmp(&m_CameraDatas.m_Data[i], &cameraData, sizeof(PerCameraData)) == 0)
+			if (m_CameraDatas.m_Data[i].m_Projection != cameraData.m_Projection ||
+				m_CameraDatas.m_Data[i].m_View != cameraData.m_View)
 			{
 				std::memcpy(&m_CameraDatas.m_Data[i], &cameraData, sizeof(PerCameraData));
 				m_CameraDatas.m_Dirty = true;
 			}
 		}
 		if (m_CameraDatas)
-			m_pCameraDatasBuffer->Assign(m_CameraDatas->data(), m_CameraDatas->size());
+			m_pCameraDatasBuffer->Assign(m_CameraDatas->data(), m_CameraDatas->size()*sizeof(PerCameraData));
 	}
 
 	void ClusteredRendererModule::ShadowMapsPass(CameraRef camera, const RenderFrame& frameData)
