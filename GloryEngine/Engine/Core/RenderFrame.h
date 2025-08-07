@@ -75,9 +75,6 @@ namespace Glory
 		void Reset();
 
 	public:
-		//std::vector<RenderData> ObjectsToRender;
-		//std::vector<TextRenderData> TextsToRender;
-		//std::vector<RenderData> ObjectsToRenderLate;
 		std::vector<CameraRef> ActiveCameras;
 		std::vector<std::pair<glm::ivec2, UUID>> Picking;
 		FrameData<LightData> ActiveLights;
@@ -100,9 +97,10 @@ namespace Glory
 		RP_Count
 	};
 
+	class RendererModule;
 	struct RenderPass
 	{
 		std::string m_Name;
-		std::function<void(CameraRef, const RenderFrame&)> m_Callback;
+		std::function<void(uint32_t, RendererModule*)> m_Callback;
 	};
 }

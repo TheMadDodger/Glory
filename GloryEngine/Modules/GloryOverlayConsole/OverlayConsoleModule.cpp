@@ -148,7 +148,7 @@ namespace Glory
 			return;
 		}
 
-		pRenderer->AddRenderPass(RenderPassType::RP_Postblit, { "Console Pass", [this](CameraRef, const RenderFrame&) {
+		pRenderer->AddRenderPass(RenderPassType::RP_Postblit, { "Console Pass", [this](uint32_t, RendererModule*) {
 			OverlayPass();
 		} });
 

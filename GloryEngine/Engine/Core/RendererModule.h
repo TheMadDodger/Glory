@@ -165,6 +165,8 @@ namespace Glory
 
 		virtual UUID TextPipelineID() const = 0;
 
+		CameraRef GetActiveCamera(uint32_t cameraIndex) const;
+
 	protected:
 		virtual void OnSubmitDynamic(const RenderData& renderData) {}
 		virtual void OnSubmitDynamic(const TextRenderData& renderData) {}
