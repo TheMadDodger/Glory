@@ -18,7 +18,9 @@ layout(location = 1) out vec4 outColor;
 
 void main()
 {
-	gl_Position = Cameras[Constants.CameraIndex].Projection*Cameras[Constants.CameraIndex].View*Worlds[Constants.ObjectDataIndex]*vec4(inPosition, 1.0);
-	normal = vec3(Worlds[Constants.ObjectDataIndex]*vec4(inNormal, 0.0));
+	CameraData camera = CurrentCamera();
+	mat4 world = WorldTransform();
+	gl_Position = camera.Projection*camera.View*world*vec4(inPosition, 1.0);
+	normal = vec3(world*vec4(inNormal, 0.0));
 	outColor = inColor;
 }
