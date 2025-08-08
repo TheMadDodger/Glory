@@ -136,12 +136,17 @@ namespace Glory
         /** @brief Remove all features */
         void ClearFeatures();
 
+        /** @brief Get total size of properties buffer in bytes */
+        size_t TotalPropertiesByteSize() const;
+
     private:
         virtual void References(Engine*, std::vector<UUID>&) const override {}
 
     protected:
         PipelineType m_Type = PT_Phong;
         std::vector<UUID> m_Shaders;
+
+        size_t m_TotalPropertiesByteSize;
 
         std::vector<MaterialPropertyInfo> m_PropertyInfos;
         std::vector<size_t> m_ResourcePropertyInfoIndices;

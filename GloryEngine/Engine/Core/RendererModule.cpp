@@ -75,7 +75,16 @@ namespace Glory
 
 		meshIter->second.m_Worlds.emplace_back(renderData.m_World);
 		meshIter->second.m_ObjectIDs.emplace_back(renderData.m_SceneID, renderData.m_ObjectID);
-		meshIter->second.m_Materials.emplace_back(renderData.m_MaterialID);
+
+		uint32_t materialIndex = 0;
+		auto materialIter = std::find(pipelineRenderData.m_UniqueMaterials.begin(), pipelineRenderData.m_UniqueMaterials.end(), renderData.m_MaterialID);
+		if (materialIter == pipelineRenderData.m_UniqueMaterials.end())
+		{
+			materialIndex = pipelineRenderData.m_UniqueMaterials.size();
+			pipelineRenderData.m_UniqueMaterials.emplace_back(renderData.m_MaterialID);
+		}
+		else materialIndex = materialIter - pipelineRenderData.m_UniqueMaterials.begin();
+		meshIter->second.m_MaterialIndices.emplace_back(materialIndex);
 		pipelineRenderData.m_Dirty = true;
 	}
 
@@ -114,7 +123,7 @@ namespace Glory
 		const size_t index = objectIter - meshRenderData.m_ObjectIDs.begin();
 
 		meshRenderData.m_ObjectIDs.erase(objectIter);
-		meshRenderData.m_Materials.erase(meshRenderData.m_Materials.begin() + index);
+		meshRenderData.m_MaterialIndices.erase(meshRenderData.m_MaterialIndices.begin() + index);
 		pipelineIter->m_Dirty = true;
 	}
 
@@ -145,7 +154,16 @@ namespace Glory
 
 		meshIter->second.m_Worlds.emplace_back(renderData.m_World);
 		meshIter->second.m_ObjectIDs.emplace_back(renderData.m_SceneID, renderData.m_ObjectID);
-		meshIter->second.m_Materials.emplace_back(renderData.m_MaterialID);
+
+		uint32_t materialIndex = 0;
+		auto materialIter = std::find(pipelineRenderData.m_UniqueMaterials.begin(), pipelineRenderData.m_UniqueMaterials.end(), renderData.m_MaterialID);
+		if (materialIter == pipelineRenderData.m_UniqueMaterials.end())
+		{
+			materialIndex = pipelineRenderData.m_UniqueMaterials.size();
+			pipelineRenderData.m_UniqueMaterials.emplace_back(renderData.m_MaterialID);
+		}
+		else materialIndex = materialIter - pipelineRenderData.m_UniqueMaterials.begin();
+		meshIter->second.m_MaterialIndices.emplace_back(materialIndex);
 		pipelineRenderData.m_Dirty = true;
 
 		OnSubmitDynamic(renderData);
@@ -195,7 +213,16 @@ namespace Glory
 
 		meshIter->second.m_Worlds.emplace_back(renderData.m_World);
 		meshIter->second.m_ObjectIDs.emplace_back(renderData.m_SceneID, renderData.m_ObjectID);
-		meshIter->second.m_Materials.emplace_back(renderData.m_MaterialID);
+
+		uint32_t materialIndex = 0;
+		auto materialIter = std::find(pipelineRenderData.m_UniqueMaterials.begin(), pipelineRenderData.m_UniqueMaterials.end(), renderData.m_MaterialID);
+		if (materialIter == pipelineRenderData.m_UniqueMaterials.end())
+		{
+			materialIndex = pipelineRenderData.m_UniqueMaterials.size();
+			pipelineRenderData.m_UniqueMaterials.emplace_back(renderData.m_MaterialID);
+		}
+		else materialIndex = materialIter - pipelineRenderData.m_UniqueMaterials.begin();
+		meshIter->second.m_MaterialIndices.emplace_back(materialIndex);
 		pipelineRenderData.m_Dirty = true;
 
 		OnSubmitDynamic(renderData);
