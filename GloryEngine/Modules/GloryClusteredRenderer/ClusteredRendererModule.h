@@ -167,6 +167,10 @@ namespace Glory
 		{
 			CPUBuffer<glm::mat4> m_Worlds;
 			Buffer* m_pWorldsBuffer;
+
+			std::vector<uint32_t> m_MaterialIndices;
+			CPUBuffer<char> m_MaterialDatas;
+			Buffer* m_pMaterialsBuffer;
 		};
 		std::vector<PipelineBatchData> m_PipelineBatchData;
 

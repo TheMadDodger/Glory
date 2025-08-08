@@ -771,6 +771,8 @@ namespace Glory
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+		MaterialManager& materials = m_pEngine->GetMaterialManager();
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
 
 		/* Update light data */
 		const uint32_t count = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
@@ -786,6 +788,9 @@ namespace Glory
 		{
 			if (batchIndex >= m_PipelineBatchData.size())
 				m_PipelineBatchData.emplace_back(PipelineBatchData{});
+
+			PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineBatch.m_PipelineID);
+			if (!pPipelineData) continue;
 
 			PipelineBatchData& batchData = m_PipelineBatchData.at(batchIndex);
 			size_t meshIndex = 0;
@@ -803,6 +808,25 @@ namespace Glory
 				meshIndex += meshBatch.m_Worlds.size();
 			}
 
+			const size_t bufferSize = pPipelineData->TotalPropertiesByteSize();
+			const size_t paddedBufferSize = size_t(std::ceil(float(bufferSize)/sizeof(uint64_t))*sizeof(uint64_t));
+			const size_t totalBufferSize = paddedBufferSize*pipelineBatch.m_UniqueMaterials.size();
+			if (batchData.m_MaterialDatas->size() < totalBufferSize)
+				batchData.m_MaterialDatas.resize(totalBufferSize);
+
+			for (size_t i = 0; i < pipelineBatch.m_UniqueMaterials.size(); ++i)
+			{
+				const UUID materialID = pipelineBatch.m_UniqueMaterials[i];
+				MaterialData* pMaterialData = materials.GetMaterial(materialID);
+				if (!pMaterialData) continue;
+				const auto& buffer = pMaterialData->GetFinalBufferReference(materials);
+				if (std::memcmp(&batchData.m_MaterialDatas.m_Data[i*paddedBufferSize], buffer.data(), buffer.size()) != 0)
+				{
+					std::memcpy(&batchData.m_MaterialDatas.m_Data[i*paddedBufferSize], buffer.data(), buffer.size());
+					batchData.m_MaterialDatas.m_Dirty = true;
+				}
+			}
+
 			if (!batchData.m_pWorldsBuffer)
 			{
 				batchData.m_pWorldsBuffer = pResourceManager->CreateBuffer(batchData.m_Worlds->size()*sizeof(glm::mat4),
@@ -812,6 +836,16 @@ namespace Glory
 			}
 			if (batchData.m_Worlds)
 				batchData.m_pWorldsBuffer->Assign(batchData.m_Worlds->data(), batchData.m_Worlds->size()*sizeof(glm::mat4));
+			
+			if (!batchData.m_pMaterialsBuffer)
+			{
+				batchData.m_pMaterialsBuffer = pResourceManager->CreateBuffer(batchData.m_MaterialDatas->size(),
+					BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 4);
+				batchData.m_pMaterialsBuffer->Assign(NULL);
+				batchData.m_MaterialDatas.m_Dirty = true;
+			}
+			if (batchData.m_MaterialDatas)
+				batchData.m_pMaterialsBuffer->Assign(batchData.m_MaterialDatas->data(), batchData.m_MaterialDatas->size());
 		}
 
 		/* Prepare cameras */
@@ -914,9 +948,10 @@ namespace Glory
 				Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
 				if (!pMesh) continue;
 
-				for (size_t i = 0; i < meshBatch.m_Materials.size(); ++i)
+				for (size_t i = 0; i < meshBatch.m_Worlds.size(); ++i)
 				{
-					MaterialData* pMaterialData = materialManager.GetMaterial(meshBatch.m_Materials[i]);
+					const UUID materialID = pipelineRenderData.m_UniqueMaterials[meshBatch.m_MaterialIndices[i]];
+					MaterialData* pMaterialData = materialManager.GetMaterial(materialID);
 					if (!pMaterialData) continue;
 					Material* pMaterial = pResourceManager->CreateMaterial(pMaterialData);
 					if (!pMaterial) continue;
@@ -955,9 +990,10 @@ namespace Glory
 				Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
 				if (!pMesh) continue;
 
-				for (size_t i = 0; i < meshBatch.m_Materials.size(); ++i)
+				for (size_t i = 0; i < meshBatch.m_Worlds.size(); ++i)
 				{
-					MaterialData* pMaterialData = materialManager.GetMaterial(meshBatch.m_Materials[i]);
+					const UUID materialID = pipelineRenderData.m_UniqueMaterials[meshBatch.m_MaterialIndices[i]];
+					MaterialData* pMaterialData = materialManager.GetMaterial(materialID);
 					if (!pMaterialData) continue;
 					Material* pMaterial = pResourceManager->CreateMaterial(pMaterialData);
 					if (!pMaterial) continue;
@@ -1135,9 +1171,10 @@ namespace Glory
 				Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
 				if (!pMesh) continue;
 
-				for (size_t i = 0; i < meshBatch.m_Materials.size(); ++i)
+				for (size_t i = 0; i < meshBatch.m_Worlds.size(); ++i)
 				{
-					MaterialData* pMaterialData = materialManager.GetMaterial(meshBatch.m_Materials[i]);
+					const UUID materialID = pipelineRenderData.m_UniqueMaterials[meshBatch.m_MaterialIndices[i]];
+					MaterialData* pMaterialData = materialManager.GetMaterial(materialID);
 					if (!pMaterialData) continue;
 					Material* pMaterial = pResourceManager->CreateMaterial(pMaterialData);
 					if (!pMaterial) continue;
@@ -1235,7 +1272,8 @@ namespace Glory
 					const uint32_t currentObject = objectIndex;
 					++objectIndex;
 
-					MaterialData* pMaterialData = materialManager.GetMaterial(meshBatch.m_Materials[i]);
+					const UUID materialID = pipelineRenderData.m_UniqueMaterials[meshBatch.m_MaterialIndices[i]];
+					MaterialData* pMaterialData = materialManager.GetMaterial(materialID);
 					if (!pMaterialData) continue;
 					Material* pMaterial = pResourceManager->CreateMaterial(pMaterialData);
 					if (!pMaterial) continue;
@@ -1245,6 +1283,7 @@ namespace Glory
 					constants.m_ObjectID = ids.second;
 					constants.m_SceneID = ids.first;
 					constants.m_ObjectDataIndex = currentObject;
+					constants.m_MaterialIndex = meshBatch.m_MaterialIndices[i];
 
 					m_pRenderConstantsBuffer->Assign(&constants);
 					pMaterial->SetProperties(m_pEngine);
@@ -1356,9 +1395,10 @@ namespace Glory
 				Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
 				if (!pMesh) continue;
 
-				for (size_t i = 0; i < meshBatch.m_Materials.size(); ++i)
+				for (size_t i = 0; i < meshBatch.m_Worlds.size(); ++i)
 				{
-					MaterialData* pMaterialData = materialManager.GetMaterial(meshBatch.m_Materials[i]);
+					const UUID materialID = pipelineRenderData.m_UniqueMaterials[meshBatch.m_MaterialIndices[i]];
+					MaterialData* pMaterialData = materialManager.GetMaterial(materialID);
 					if (!pMaterialData) continue;
 					Material* pMaterial = pResourceManager->CreateMaterial(pMaterialData);
 					if (!pMaterial) continue;
