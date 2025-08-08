@@ -808,9 +808,10 @@ namespace Glory
 				meshIndex += meshBatch.m_Worlds.size();
 			}
 
-			const size_t bufferSize = pPipelineData->TotalPropertiesByteSize();
-			const size_t paddedBufferSize = size_t(std::ceil(float(bufferSize)/sizeof(uint64_t))*sizeof(uint64_t));
-			const size_t totalBufferSize = paddedBufferSize*pipelineBatch.m_UniqueMaterials.size();
+			const size_t propertyDataSize = pPipelineData->TotalPropertiesByteSize();
+			const size_t paddingBytes = 16 - propertyDataSize%16;
+			const size_t finalPropertyDataSize = propertyDataSize + paddingBytes;
+			const size_t totalBufferSize = finalPropertyDataSize*pipelineBatch.m_UniqueMaterials.size();
 			if (batchData.m_MaterialDatas->size() < totalBufferSize)
 				batchData.m_MaterialDatas.resize(totalBufferSize);
 
@@ -820,9 +821,9 @@ namespace Glory
 				MaterialData* pMaterialData = materials.GetMaterial(materialID);
 				if (!pMaterialData) continue;
 				const auto& buffer = pMaterialData->GetFinalBufferReference(materials);
-				if (std::memcmp(&batchData.m_MaterialDatas.m_Data[i*paddedBufferSize], buffer.data(), buffer.size()) != 0)
+				if (std::memcmp(&batchData.m_MaterialDatas.m_Data[i*finalPropertyDataSize], buffer.data(), buffer.size()) != 0)
 				{
-					std::memcpy(&batchData.m_MaterialDatas.m_Data[i*paddedBufferSize], buffer.data(), buffer.size());
+					std::memcpy(&batchData.m_MaterialDatas.m_Data[i*finalPropertyDataSize], buffer.data(), buffer.size());
 					batchData.m_MaterialDatas.m_Dirty = true;
 				}
 			}
@@ -1256,6 +1257,7 @@ namespace Glory
 			pPipeline->Use();
 
 			batchData.m_pWorldsBuffer->BindForDraw();
+			batchData.m_pMaterialsBuffer->BindForDraw();
 
 			uint32_t objectIndex = 0;
 			for (UUID uniqueMeshID : pipelineRenderData.m_UniqueMeshOrder)
@@ -1286,7 +1288,7 @@ namespace Glory
 					constants.m_MaterialIndex = meshBatch.m_MaterialIndices[i];
 
 					m_pRenderConstantsBuffer->Assign(&constants);
-					pMaterial->SetProperties(m_pEngine);
+					pMaterial->SetSamplers(m_pEngine);
 					pGraphics->DrawMesh(pMesh, pMeshData->VertexCount(), pMeshData->IndexCount());
 				}
 			}
@@ -1345,6 +1347,7 @@ namespace Glory
 			}
 
 			batchData.m_pWorldsBuffer->Unbind();
+			batchData.m_pMaterialsBuffer->Unbind();
 			pPipeline->UnUse();
 		}
 		pGraphics->EnableDepthWrite(true);

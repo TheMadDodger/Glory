@@ -37,6 +37,8 @@ namespace Glory
 
 	void Material::SetSamplers(Engine* pEngine)
 	{
+		if (m_pMaterialData == nullptr) return;
+
 		m_TextureSetBits = 0;
 		for (size_t i = 0; i < m_pMaterialData->GetResourcePropertyCount(); i++)
 		{

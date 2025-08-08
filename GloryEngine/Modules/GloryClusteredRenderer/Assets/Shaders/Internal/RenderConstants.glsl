@@ -7,4 +7,5 @@ layout(std140, binding = 1) readonly uniform RenderConstantsUBO
 	uvec4 ObjectID;
 	uint ObjectDataIndex;
 	uint CameraIndex;
+	uint MaterialIndex;
 } Constants;
