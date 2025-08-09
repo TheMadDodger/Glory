@@ -933,7 +933,7 @@ namespace Glory
 		AssetManager& assets = m_pEngine->GetAssetManager();
 
 		pGraphics->EnableDepthWrite(true);
-		for (PipelineBatch& pipelineRenderData : m_StaticPipelineRenderDatas)
+		/*for (PipelineBatch& pipelineRenderData : m_StaticPipelineRenderDatas)
 		{
 			PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineRenderData.m_PipelineID);
 			if (!pPipelineData) continue;
@@ -973,7 +973,7 @@ namespace Glory
 			}
 
 			pPipeline->UnUse();
-		}
+		}*/
 
 		for (PipelineBatch& pipelineRenderData : m_DynamicPipelineRenderDatas)
 		{
@@ -1146,6 +1146,8 @@ namespace Glory
 
 	void ClusteredRendererModule::StaticObjectsPass(uint32_t cameraIndex)
 	{
+		return;
+
 		CameraRef camera = m_FrameData.ActiveCameras[cameraIndex];
 
 		/* Render objects */
@@ -1289,6 +1291,7 @@ namespace Glory
 
 					m_pRenderConstantsBuffer->Assign(&constants);
 					pMaterial->SetSamplers(m_pEngine);
+					pMaterial->SetTextureBitsBuffer(m_pEngine);
 					pGraphics->DrawMesh(pMesh, pMeshData->VertexCount(), pMeshData->IndexCount());
 				}
 			}
