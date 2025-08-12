@@ -6,15 +6,21 @@
 #include "EditableResource.h"
 
 #include <TextureData.h>
+#include <MaterialData.h>
 #include <Debug.h>
 #include <PrefabData.h>
-#include <MaterialInstanceData.h>
 
 #include <JSONRef.h>
 #include <NodeRef.h>
 #include <YAML_GLM.h>
 
 #include <stack>
+
+namespace Glory
+{
+    /* For legacy migrations */
+    class MaterialInstanceData {};
+}
 
 namespace Glory::Editor
 {
@@ -45,6 +51,12 @@ namespace Glory::Editor
             Migrate_0_3_0_ModuleAssetIDS(pProject);
             Migrate_0_3_0_MaterialPipelines(pProject);
             Migrate_0_3_0_PrefabScenes(pProject);
+        }
+        
+        /* Perform 0.6.0 migrations */
+        if (Version::Compare(version, { 0,6,0,0 }, true) < 0)
+        {
+            Migrate_0_6_0_MaterialInstances(pProject);
         }
 
         /* Update version to current */
@@ -552,6 +564,51 @@ namespace Glory::Editor
             root.Remove("Components");
             root.Remove("Children");
             EditorAssetDatabase::SetAssetDirty(uuid);
+        }
+    }
+
+    void Migrate_0_6_0_MaterialInstances(ProjectSpace* pProject)
+    {
+        EditorApplication* pApplication = EditorApplication::GetInstance();
+
+        pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Migrating material property arrays to maps");
+
+        const uint32_t materialDataHash = ResourceTypes::GetHash<MaterialData>();
+        const uint32_t materialInstanceDataHash = ResourceTypes::GetHash<MaterialInstanceData>();
+
+        JSONFileRef& projectFile = pProject->ProjectFile();
+        JSONValueRef assets = projectFile["Assets"];
+        if (!assets.Exists() || !assets.IsObject()) return;
+        std::vector<std::string_view> materialInstanceAssets;
+
+        for (rapidjson::Value::ConstMemberIterator itor = assets.begin(); itor != assets.end(); ++itor)
+        {
+            JSONValueRef asset = assets[itor->name.GetString()];
+            const uint32_t hash = asset["Metadata/Hash"].AsUInt();
+            if (hash != materialInstanceDataHash) continue;
+            materialInstanceAssets.push_back(itor->name.GetString());
+            asset["Metadata/Hash"].SetUInt(materialDataHash);
+
+            /* Change file extension */
+            std::filesystem::path path = asset["Location/Path"].AsString();
+            std::filesystem::path newPath = path;
+            newPath.replace_extension(".gmat");
+            std::filesystem::path newAbsolutePath = EditorAssetDatabase::GetAbsoluteAssetPath(newPath.string());
+            path = EditorAssetDatabase::GetAbsoluteAssetPath(path.string());
+            //std::filesystem::rename(path, newAbsolutePath);
+            //asset["Location/Path"].SetString(newPath.string());
+
+            /* Update resource */
+            const UUID uuid = asset["Metadata/UUID"].AsUInt64();
+            EditableResource* pResource = pApplication->GetResourceManager().GetEditableResource(uuid);
+            if (!pResource)
+            {
+                pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Failed to migrate a material");
+                continue;
+            }
+
+            YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(pResource);
+            Utils::YAMLFileRef& file = **pMaterial;
         }
     }
 }

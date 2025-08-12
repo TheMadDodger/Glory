@@ -224,10 +224,20 @@ namespace GloryEngine
         /// Create a material instance from this material
         /// </summary>
         /// <returns>The newly created material instance</returns>
+        [System.Obsolete("Material.CreateMaterialInstance has been deprecated, please use Material.CreateCopy instead.")]
         public MaterialInstance CreateMaterialInstance()
         {
-            UInt64 instanceID = Material_CreateInstance(_objectID);
-            return instanceID != 0 ? Manager.MakeResource<MaterialInstance>(instanceID) : null;
+            throw new System.Exception("Material.CreateMaterialInstance has been deprecated, please use Material.CreateCopy instead.");
+        }
+
+        /// <summary>
+        /// Create a runtime copy from this material
+        /// </summary>
+        /// <returns>The newly created material</returns>
+        public Material CreateCopy()
+        {
+            UInt64 instanceID = Material_CreateCopy(_objectID);
+            return instanceID != 0 ? Manager.MakeResource<Material>(instanceID) : null;
         }
 
         #endregion
@@ -281,7 +291,7 @@ namespace GloryEngine
         private static extern bool Material_GetTexture(UInt64 materialID, string propertyName, out UInt64 value);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern UInt64 Material_CreateInstance(UInt64 materialID);
+        private static extern UInt64 Material_CreateCopy(UInt64 materialID);
 
         #endregion
     }

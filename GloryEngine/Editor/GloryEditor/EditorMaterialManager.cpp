@@ -4,7 +4,6 @@
 #include "Importer.h"
 #include "ProjectSpace.h"
 #include "MaterialData.h"
-#include "MaterialInstanceData.h"
 #include "EditorPipelineManager.h"
 #include "ResourceType.h"
 #include "EditorApplication.h"
@@ -12,7 +11,6 @@
 #include "EditableResource.h"
 #include "Dispatcher.h"
 #include "EditorShaderData.h"
-#include "MaterialInstanceImporter.h"
 #include "AssetManager.h"
 
 #include <PipelineData.h>
@@ -34,8 +32,6 @@ namespace Glory::Editor
 	EditorMaterialManager::~EditorMaterialManager()
 	{
 		m_Materials.clear();
-		m_MaterialInstances.clear();
-		m_WaitingMaterialInstances.clear();
 	}
 
 	void EditorMaterialManager::Initialize()
@@ -66,13 +62,6 @@ namespace Glory::Editor
 		ReadPropertiesInto(properties, pMaterial);
 	}
 
-	void EditorMaterialManager::LoadIntoMaterial(Utils::YAMLFileRef& file, MaterialInstanceData*& pMaterial) const
-	{
-		const UUID baseMaterial = file["BaseMaterial"].As<uint64_t>();
-		pMaterial = new MaterialInstanceData(baseMaterial);
-		ReadPropertiesInto(file["Overrides"], pMaterial);
-	}
-
 	void EditorMaterialManager::SetMaterialPipeline(UUID materialID, UUID pipelineID)
 	{
 		Resource* pResource = m_pEngine->GetAssetManager().FindResource(materialID);
@@ -87,25 +76,6 @@ namespace Glory::Editor
 		UpdateMaterial(pMaterial);
 	}
 
-	void EditorMaterialManager::SetMaterialInstanceBaseMaterial(UUID materialInstanceID, UUID baseMaterialID)
-	{
-		Resource* pResource = m_pEngine->GetAssetManager().FindResource(materialInstanceID);
-		if (!pResource) return;
-		MaterialInstanceData* pMaterial = static_cast<MaterialInstanceData*>(pResource);
-
-		pResource = m_pEngine->GetAssetManager().FindResource(baseMaterialID);
-		if (!pResource) return;
-		MaterialData* pBaseMaterial = static_cast<MaterialData*>(pResource);
-
-		YAMLResource<MaterialInstanceData>* pMaterialInstanceData = static_cast<YAMLResource<MaterialInstanceData>*>(
-			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(materialInstanceID));
-		Utils::YAMLFileRef& file = **pMaterialInstanceData;
-		file["BaseMaterial"].Set(uint64_t(baseMaterialID));
-		pMaterial->SetBaseMaterialID(baseMaterialID);
-
-		ReadPropertiesInto(file["Overrides"], pBaseMaterial);
-	}
-
 	MaterialData* EditorMaterialManager::GetMaterial(UUID materialID) const
 	{
 		Resource* pResource = m_pEngine->GetAssetManager().FindResource(materialID);
@@ -113,14 +83,13 @@ namespace Glory::Editor
 		return static_cast<MaterialData*>(pResource);
 	}
 
-	MaterialInstanceData* EditorMaterialManager::CreateRuntimeMaterialInstance(UUID baseMaterial)
+	MaterialData* EditorMaterialManager::CreateRuntimeMaterial(UUID baseMaterial)
 	{
 		AssetManager& asset = m_pEngine->GetAssetManager();
 		Resource* pResource = asset.FindResource(baseMaterial);
 		if (!pResource) return nullptr;
 		MaterialData* pBaseMaterial = static_cast<MaterialData*>(pResource);
-		MaterialInstanceData* pMaterialData = new MaterialInstanceData(baseMaterial);
-		pMaterialData->Resize(*this, pBaseMaterial);
+		MaterialData* pMaterialData = pBaseMaterial->CreateCopy();
 		m_RuntimeMaterials.push_back(pMaterialData->GetUUID());
 		asset.AddLoadedResource(pMaterialData);
 		return pMaterialData;
@@ -156,7 +125,6 @@ namespace Glory::Editor
 
 		const uint32_t typeHash = meta.Hash();
 		static const size_t materialDataHash = ResourceTypes::GetHash<MaterialData>();
-		static const size_t materialInstanceDataHash = ResourceTypes::GetHash<MaterialInstanceData>();
 		if (typeHash == materialDataHash)
 		{
 			Resource* pResource = m_pEngine->GetAssetManager().FindResource(callback.m_UUID);
@@ -179,59 +147,6 @@ namespace Glory::Editor
 			MaterialData* pMaterial = static_cast<MaterialData*>(pResource);
 			pMaterial->SetResourceUUID(callback.m_UUID);
 			m_Materials.push_back(callback.m_UUID);
-
-			/* Update material instances that were waiting for this material */
-			auto itor = m_WaitingMaterialInstances.find(callback.m_UUID);
-			if (itor == m_WaitingMaterialInstances.end()) return;
-			for (size_t i = 0; i < itor->second.size(); ++i)
-			{
-				const UUID matInstance = itor->second[i];
-				MaterialInstanceData* pMatInst = GetMaterialInstance(matInstance);
-				if (!pMatInst) continue;
-				MaterialInstanceImporter* pImporter = static_cast<MaterialInstanceImporter*>(Importer::GetImporter(".gminst"));
-				if (!pImporter) continue;
-				EditableResource* pEditResource = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(matInstance);
-				Utils::YAMLFileRef& file = **static_cast<YAMLResource<MaterialInstanceData>*>(pEditResource);
-				ReadPropertiesInto(file["Overrides"], pMatInst);
-			}
-			itor->second.clear();
-			m_WaitingMaterialInstances.erase(itor);
-		}
-		else if (typeHash == materialInstanceDataHash)
-		{
-			Resource* pResource = m_pEngine->GetAssetManager().FindResource(callback.m_UUID);
-			if (!pResource)
-			{
-				MaterialInstanceData* pMaterialData = nullptr;
-				YAMLResource<MaterialInstanceData>* pMaterial = static_cast<YAMLResource<MaterialInstanceData>*>(resourceManager.GetEditableResource(callback.m_UUID));
-				if (!pMaterial)
-				{
-					delete pMaterialData;
-					return;
-				}
-				LoadIntoMaterial(**pMaterial, pMaterialData);
-				pResource = pMaterialData;
-				pResource->SetResourceUUID(callback.m_UUID);
-				m_pEngine->GetAssetManager().AddLoadedResource(pResource);
-			}
-
-			MaterialInstanceData* pMaterial = static_cast<MaterialInstanceData*>(pResource);
-			pMaterial->SetResourceUUID(callback.m_UUID);
-			m_MaterialInstances.push_back(callback.m_UUID);
-
-			/* If the base material isnt loaded we must update it when it is */
-			const UUID baseMaterial = pMaterial->BaseMaterialID();
-			if (!baseMaterial || !EditorAssetDatabase::AssetExists(baseMaterial)) return;
-
-			pResource = m_pEngine->GetAssetManager().FindResource(baseMaterial);
-			if (!pResource) return;
-			MaterialData* pBaseMaterial = static_cast<MaterialData*>(pResource);
-			if (pBaseMaterial)
-			{
-				pMaterial->Resize(*this, pBaseMaterial);
-				return;
-			}
-			m_WaitingMaterialInstances[baseMaterial].push_back(callback.m_UUID);
 		}
 	}
 
@@ -241,7 +156,6 @@ namespace Glory::Editor
 		EditorAssetDatabase::GetAssetMetadata(callback.m_UUID, meta);
 		const uint32_t typeHash = meta.Hash();
 		static const size_t shaderSourceDataHash = ResourceTypes::GetHash<MaterialData>();
-		static const size_t materialInstanceDataHash = ResourceTypes::GetHash<MaterialInstanceData>();
 		if (typeHash != shaderSourceDataHash) return;
 	}
 
@@ -252,7 +166,7 @@ namespace Glory::Editor
 			Resource* pResource = m_pEngine->GetAssetManager().FindResource(materialID);
 			if (!pResource) continue;
 			MaterialData* pMaterial = static_cast<MaterialData*>(pResource);
-			if (pMaterial->GetPipelineID(*this) != pPipeline->GetUUID()) continue;
+			if (pMaterial->GetPipelineID() != pPipeline->GetUUID()) continue;
 			UpdateMaterial(pMaterial);
 		}
 	}
@@ -277,9 +191,9 @@ namespace Glory::Editor
 			{
 				pMaterial->AddProperty(displayName, name, type, typeData != nullptr ? typeData->m_Size : 4, 0);
 				size_t index = 0;
-				pMaterial->GetPropertyInfoIndex(*this, displayName, index);
-				const size_t offset = pMaterial->GetPropertyInfoAt(*this, index)->Offset();
-				m_pEngine->GetSerializers().DeserializeProperty(pMaterial->GetBufferReference(*this), type, offset, typeData != nullptr ? typeData->m_Size : 4, value);
+				pMaterial->GetPropertyInfoIndex(displayName, index);
+				const size_t offset = pMaterial->GetPropertyInfoAt(index)->Offset();
+				m_pEngine->GetSerializers().DeserializeProperty(pMaterial->GetBufferReference(), type, offset, typeData != nullptr ? typeData->m_Size : 4, value);
 			}
 			else
 			{
@@ -294,9 +208,9 @@ namespace Glory::Editor
 	{
 		if (!properties.IsMap()) properties.SetMap();
 
-		for (size_t i = 0; i < pMaterial->PropertyInfoCount(*this); ++i)
+		for (size_t i = 0; i < pMaterial->PropertyInfoCount(); ++i)
 		{
-			const MaterialPropertyInfo* propInfo = pMaterial->GetPropertyInfoAt(*this, i);
+			const MaterialPropertyInfo* propInfo = pMaterial->GetPropertyInfoAt(i);
 			const uint32_t type = propInfo->TypeHash();
 			const BasicTypeData* typeData = m_pEngine->GetResourceTypes().GetBasicTypeData(type);
 
@@ -311,57 +225,15 @@ namespace Glory::Editor
 			if (!isResource)
 			{
 				const size_t offset = propInfo->Offset();
-				m_pEngine->GetSerializers().SerializeProperty(pMaterial->GetBufferReference(*this), type, offset, typeData != nullptr ? typeData->m_Size : 4, value);
+				m_pEngine->GetSerializers().SerializeProperty(pMaterial->GetBufferReference(), type, offset, typeData != nullptr ? typeData->m_Size : 4, value);
 			}
 			else
 			{
-				const UUID id = *pMaterial->GetResourceUUIDPointer(*this, propInfo->Offset());
+				const UUID id = *pMaterial->GetResourceUUIDPointer(propInfo->Offset());
 				value.Set(uint64_t(id));
 			}
 		}
 	}
-
-	void EditorMaterialManager::ReadPropertiesInto(Utils::NodeValueRef& properties, MaterialInstanceData* pMaterialData, bool clearProperties) const
-	{
-		MaterialManager& manager = EditorApplication::GetInstance()->GetEngine()->GetMaterialManager();
-
-		MaterialData* baseMaterial = GetMaterial(pMaterialData->BaseMaterialID());
-		if (!baseMaterial) return;
-		pMaterialData->Resize(manager, baseMaterial);
-
-		if (!properties.IsMap()) return;
-
-		for (auto itor = properties.Begin(); itor != properties.End(); ++itor)
-		{
-			const std::string displayName = *itor;
-			auto prop = properties[displayName];
-			const bool enable = prop["Enable"].As<bool>();
-			if (!prop.Exists()) continue;
-
-			size_t propertyIndex = 0;
-			if (!pMaterialData->GetPropertyInfoIndex(manager, displayName, propertyIndex)) continue;
-			if (enable) pMaterialData->EnableProperty(propertyIndex);
-
-			MaterialPropertyInfo* propertyInfo = pMaterialData->GetPropertyInfoAt(manager, propertyIndex);
-
-			auto value = prop["Value"];
-
-			if (!propertyInfo->IsResource())
-			{
-				const uint32_t typeHash = propertyInfo->TypeHash();
-				const size_t offset = propertyInfo->Offset();
-				const size_t size = propertyInfo->Size();
-				EditorApplication::GetInstance()->GetEngine()->GetSerializers().DeserializeProperty(pMaterialData->GetBufferReference(manager), typeHash, offset, size, value);
-			}
-			else
-			{
-				if (!value.Exists() || !value.IsScalar()) continue;
-				const UUID id = value.As<uint64_t>();
-				size_t resourceIndex = propertyInfo->Offset();
-				if (pMaterialData->ResourceCount() > resourceIndex) *pMaterialData->GetResourceUUIDPointer(manager, resourceIndex) = id;
-			}
-		}
- 	}
 
 	void EditorMaterialManager::UpdateMaterial(MaterialData* pMaterial)
 	{
@@ -369,7 +241,7 @@ namespace Glory::Editor
 
 		pMaterial->ClearProperties();
 		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
-		PipelineData* pPipeline = pMaterial->GetPipeline(*this, pipelines);
+		PipelineData* pPipeline = pMaterial->GetPipeline(pipelines);
 		pPipeline->LoadIntoMaterial(pMaterial);
 
 		EditableResource* pResource = pApplication->GetResourceManager().GetEditableResource(pMaterial->GetUUID());
@@ -380,27 +252,5 @@ namespace Glory::Editor
 		ReadPropertiesInto(file["Properties"], pMaterial, false);
 		/* Update properties in YAML */
 		WritePropertiesTo(file["Properties"], pMaterial);
-
-		/* Find and update material instances */
-		for (const UUID materialID : m_MaterialInstances)
-		{
-			Resource* pResource = m_pEngine->GetAssetManager().FindResource(materialID);
-			if (!pResource) continue;
-			MaterialInstanceData* pMaterialInstance = static_cast<MaterialInstanceData*>(pResource);
-			if (pMaterialInstance->BaseMaterialID() != pMaterial->GetUUID()) continue;
-
-			EditableResource* pInstanceResource = pApplication->GetResourceManager().GetEditableResource(pMaterialInstance->GetUUID());
-			if (!pInstanceResource || !pInstanceResource->IsEditable()) return;
-			YAMLResource<MaterialInstanceData>* pEditorMaterialInstanceData = static_cast<YAMLResource<MaterialInstanceData>*>(pInstanceResource);
-			Utils::YAMLFileRef& instanceFile = **pEditorMaterialInstanceData;
-			ReadPropertiesInto(instanceFile["Overrides"], pMaterialInstance);
-		}
-	}
-
-	MaterialInstanceData* EditorMaterialManager::GetMaterialInstance(UUID materialID) const
-	{
-		Resource* pResource = m_pEngine->GetAssetManager().FindResource(materialID);
-		if (!pResource) return nullptr;
-		return static_cast<MaterialInstanceData*>(pResource);
 	}
 }

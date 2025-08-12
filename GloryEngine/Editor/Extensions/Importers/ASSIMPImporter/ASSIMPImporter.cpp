@@ -221,9 +221,9 @@ namespace Glory::Editor
                     PipelineData* pPipeline = pipelines.GetPipelineData(pipelineID);
                     pPipeline->LoadIntoMaterial(pMaterial);
 
-                    for (size_t i = 0; i < pMaterial->PropertyInfoCount(materials); ++i)
+                    for (size_t i = 0; i < pMaterial->PropertyInfoCount(); ++i)
                     {
-                        MaterialPropertyInfo* info = pMaterial->GetPropertyInfoAt(materials, i);
+                        MaterialPropertyInfo* info = pMaterial->GetPropertyInfoAt(i);
                         /* Match names */
                         if (info->IsResource()) continue;
                         const size_t components = info->Size()/4;
@@ -239,7 +239,7 @@ namespace Glory::Editor
                                 if (name != comparator) continue;
                                 float value;
                                 if (material->Get(key.data(), 0, 0, value) != aiReturn_SUCCESS) continue;
-                                pMaterial->Set(materials, info->ShaderName(), value);
+                                pMaterial->Set(info->ShaderName(), value);
                                 break;
                             }
                             break;
@@ -254,7 +254,7 @@ namespace Glory::Editor
                                 if (name != comparator && name != "olor") continue;
                                 if (name == "olor" && key != "$clr.diffuse" && key != "$clr.base") continue;
                                 if (material->Get(key.data(), 0, 0, color) != aiReturn_SUCCESS) continue;
-                                pMaterial->Set(materials, info->ShaderName(), glm::vec4(color.r, color.g, color.b, 1.0f));
+                                pMaterial->Set(info->ShaderName(), glm::vec4(color.r, color.g, color.b, 1.0f));
                                 break;
                             }
                             break;
@@ -268,7 +268,7 @@ namespace Glory::Editor
                     const TextureType textureType = TextureType(textureTypeI);
                     const aiTextureType aiTexType = aiTextureType(textureType);
                     const size_t texCount = std::min<size_t>(material->GetTextureCount(aiTexType),
-                        pMaterial->TextureCount(materials, textureType));
+                        pMaterial->TextureCount(textureType));
                     for (size_t j = 0; j < texCount; ++j)
                     {
                         aiString texPath;
@@ -288,7 +288,7 @@ namespace Glory::Editor
                                     continue;
                                 }
                                 TextureData* pTexture = context.Textures[index];
-                                pMaterial->SetTexture(materials, textureType, j, pTexture ? pTexture->GetUUID() : 0);
+                                pMaterial->SetTexture(textureType, j, pTexture ? pTexture->GetUUID() : 0);
                             }
                             catch (const std::exception&)
                             {
@@ -300,7 +300,7 @@ namespace Glory::Editor
                         std::filesystem::path texturePath = path.parent_path();
                         texturePath.append(texPath.C_Str());
                         const UUID texID = EditorAssetDatabase::ReserveAssetUUID(texturePath.string(), "Default").first;
-                        pMaterial->SetTexture(materials, textureType, j, texID);
+                        pMaterial->SetTexture(textureType, j, texID);
                     }
                 }
 

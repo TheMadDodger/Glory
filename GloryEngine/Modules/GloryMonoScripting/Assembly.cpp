@@ -12,7 +12,6 @@
 #include <ModelData.h>
 #include <ImageData.h>
 #include <MaterialData.h>
-#include <MaterialInstanceData.h>
 #include <PrefabData.h>
 #include <AudioData.h>
 #include <FontData.h>
@@ -35,7 +34,6 @@ namespace Glory
 		{"System.Int32", ResourceTypes::GetHash<int>()},
 		{"System.Boolean", ResourceTypes::GetHash<bool>()},
 		{"GloryEngine.Material", SerializedType::ST_Asset},
-		{"GloryEngine.MaterialInstance", SerializedType::ST_Asset},
 		{"GloryEngine.Model", SerializedType::ST_Asset},
 		{"GloryEngine.Image", SerializedType::ST_Asset},
 		{"GloryEngine.Prefab", SerializedType::ST_Asset},
@@ -51,7 +49,6 @@ namespace Glory
 
 	std::map<std::string, uint32_t> MonoTypeToElementHash = {
 		{"GloryEngine.Material", ResourceTypes::GetHash<MaterialData>()},
-		{"GloryEngine.MaterialInstance", ResourceTypes::GetHash<MaterialInstanceData>()},
 		{"GloryEngine.Model", ResourceTypes::GetHash<ModelData>()},
 		{"GloryEngine.Image", ResourceTypes::GetHash<ImageData>()},
 		{"GloryEngine.Prefab", ResourceTypes::GetHash<PrefabData>()},

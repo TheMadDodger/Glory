@@ -14,7 +14,7 @@ namespace Glory
 
 	private:
 		virtual MaterialData* GetMaterial(UUID materialID) const override;
-		virtual MaterialInstanceData* CreateRuntimeMaterialInstance(UUID baseMaterial) override;
+		virtual MaterialData* CreateRuntimeMaterial(UUID baseMaterial) override;
 		virtual void DestroyRuntimeMaterials() override;
 
 	private:

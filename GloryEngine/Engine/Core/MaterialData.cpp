@@ -89,42 +89,37 @@ namespace Glory
 		m_Pipeline = pipelineID;
 	}
 
-	PipelineData* MaterialData::GetPipeline(const MaterialManager& manager, const PipelineManager& pipelineManager) const
+	PipelineData* MaterialData::GetPipeline(const PipelineManager& pipelineManager) const
 	{
 		return m_Pipeline ? pipelineManager.GetPipelineData(m_Pipeline) : nullptr;
 	}
 
-	UUID MaterialData::GetPipelineID(const MaterialManager&) const
+	UUID MaterialData::GetPipelineID() const
 	{
 		return m_Pipeline;
 	}
 
-	size_t MaterialData::PropertyInfoCount(const MaterialManager&) const
+	size_t MaterialData::PropertyInfoCount() const
 	{
 		return m_PropertyInfos.size();
 	}
 
-	MaterialPropertyInfo* MaterialData::GetPropertyInfoAt(const MaterialManager& , size_t index)
+	MaterialPropertyInfo* MaterialData::GetPropertyInfoAt(size_t index)
 	{
 		return &m_PropertyInfos[index];
 	}
 
-	size_t MaterialData::GetCurrentBufferOffset(const MaterialManager&) const
+	size_t MaterialData::GetCurrentBufferOffset() const
 	{
 		return m_CurrentOffset;
 	}
 
-	std::vector<char>& MaterialData::GetBufferReference(const MaterialManager&)
+	std::vector<char>& MaterialData::GetBufferReference()
 	{
 		return m_PropertyBuffer;
 	}
 
-	std::vector<char>& MaterialData::GetFinalBufferReference(MaterialManager&)
-	{
-		return m_PropertyBuffer;
-	}
-
-	bool MaterialData::GetPropertyInfoIndex(const MaterialManager&, const std::string& name, size_t& index) const
+	bool MaterialData::GetPropertyInfoIndex(const std::string& name, size_t& index) const
 	{
 		const uint32_t hash = Reflect::Hash(name.data());
 		if (m_HashToPropertyInfoIndex.find(hash) == m_HashToPropertyInfoIndex.end()) return false;
@@ -132,7 +127,7 @@ namespace Glory
 		return true;
 	}
 
-	bool MaterialData::GetPropertyInfoIndex(const MaterialManager& materialManager, TextureType textureType, size_t texIndex, size_t& index) const
+	bool MaterialData::GetPropertyInfoIndex(TextureType textureType, size_t texIndex, size_t& index) const
 	{
 		if (m_TextureTypeIndices[textureType].size() <= texIndex) return false;
 		const size_t resourceIndex = m_TextureTypeIndices[textureType][texIndex];
@@ -145,23 +140,23 @@ namespace Glory
 		return m_Resources.size();
 	}
 
-	AssetReference<TextureData>* MaterialData::GetResourceUUIDPointer(MaterialManager&, size_t index)
+	AssetReference<TextureData>* MaterialData::GetResourceUUIDPointer(size_t index)
 	{
 		return &m_Resources[index];
 	}
 
-	size_t MaterialData::GetResourcePropertyCount(MaterialManager&) const
+	size_t MaterialData::GetResourcePropertyCount() const
 	{
 		return m_ResourcePropertyInfoIndices.size();
 	}
 
-	MaterialPropertyInfo* MaterialData::GetResourcePropertyInfo(MaterialManager&, size_t index)
+	MaterialPropertyInfo* MaterialData::GetResourcePropertyInfo(size_t index)
 	{
 		size_t propertyIndex = m_ResourcePropertyInfoIndices[index];
 		return &m_PropertyInfos[index];
 	}
 
-	size_t MaterialData::GetPropertyIndexFromResourceIndex(MaterialManager&, size_t index) const
+	size_t MaterialData::GetPropertyIndexFromResourceIndex(size_t index) const
 	{
 		return m_ResourcePropertyInfoIndices[index];
 	}
@@ -181,7 +176,7 @@ namespace Glory
 		}
 	}
 
-	size_t MaterialData::TextureCount(MaterialManager&, TextureType textureType) const
+	size_t MaterialData::TextureCount(TextureType textureType) const
 	{
 		return m_TextureTypeIndices[size_t(textureType)].size();
 	}
@@ -275,67 +270,69 @@ namespace Glory
 		}
 	}
 
-	void MaterialData::CopyProperties(MaterialManager& materialManager, void* dst)
+	void MaterialData::CopyProperties(void* dst)
 	{
-		auto& buffer = GetFinalBufferReference(materialManager);
+		auto& buffer = m_PropertyBuffer;
 		std::memcpy(dst, buffer.data(), buffer.size());
 	}
 
-	size_t MaterialData::PropertyDataSize(const MaterialManager& materialManager)
+	size_t MaterialData::PropertyDataSize()
 	{
-		return GetBufferReference(materialManager).size();
+		return m_PropertyBuffer.size();
 	}
 
-	void* MaterialData::Address(MaterialManager& materialManager, size_t index)
+	MaterialData* MaterialData::CreateCopy() const
 	{
-		return m_PropertyInfos[index].Address(GetPropertyBuffer(materialManager, index));
+		MaterialData* pCopy = new MaterialData();
+		pCopy->m_Pipeline = m_Pipeline;
+		for (auto& prop : m_PropertyInfos)
+			pCopy->AddProperty(prop);
+
+		pCopy->m_PropertyBuffer.resize(m_PropertyBuffer.size());
+		std::memcpy(pCopy->m_PropertyBuffer.data(), m_PropertyBuffer.data(), m_PropertyBuffer.size());
+		std::memcpy(pCopy->m_Resources.data(), m_Resources.data(), m_Resources.size()*sizeof(UUID));
+		return pCopy;
 	}
 
-	void MaterialData::SetTexture(MaterialManager& materialManager, const std::string& name, TextureData* value)
+	void* MaterialData::Address(size_t index)
+	{
+		return m_PropertyInfos[index].Address(m_PropertyBuffer);
+	}
+
+	void MaterialData::SetTexture(const std::string& name, TextureData* value)
 	{
 		const UUID uuid = value ? value->GetUUID() : 0;
-		SetTexture(materialManager, name, uuid);
+		SetTexture(name, uuid);
 	}
 
-	void MaterialData::SetTexture(MaterialManager& materialManager, const std::string& name, UUID uuid)
+	void MaterialData::SetTexture(const std::string& name, UUID uuid)
 	{
 		size_t index;
-		if (!GetPropertyInfoIndex(materialManager, name, index)) return;
-		EnableProperty(index);
-		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(materialManager, index);
+		if (!GetPropertyInfoIndex(name, index)) return;
+		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(index);
 		if (!pPropertyInfo->IsResource()) return;
 		const size_t resourceIndex = pPropertyInfo->Offset();
 		m_Resources[resourceIndex] = uuid;
 	}
 
-	void MaterialData::SetTexture(MaterialManager& materialManager, TextureType textureType, size_t texIndex, UUID uuid)
+	void MaterialData::SetTexture(TextureType textureType, size_t texIndex, UUID uuid)
 	{
 		size_t index;
-		if (!GetPropertyInfoIndex(materialManager, textureType, texIndex, index)) return;
-		EnableProperty(index);
-		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(materialManager, index);
+		if (!GetPropertyInfoIndex(textureType, texIndex, index)) return;
+		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(index);
 		if (!pPropertyInfo->IsResource()) return;
 		const size_t resourceIndex = pPropertyInfo->Offset();
 		m_Resources[resourceIndex] = uuid;
 	}
 
-	bool MaterialData::GetTexture(MaterialManager& materialManager, const std::string& name, TextureData** value, AssetManager* pManager)
+	bool MaterialData::GetTexture(const std::string& name, TextureData** value, AssetManager* pManager)
 	{
 		size_t index;
-		if (!GetPropertyInfoIndex(materialManager, name, index)) return false;
-		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(materialManager, index);
+		if (!GetPropertyInfoIndex(name, index)) return false;
+		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(index);
 		if (!pPropertyInfo->IsResource()) return false;
 		const size_t resourceIndex = pPropertyInfo->Offset();
 		*value = m_Resources[resourceIndex].Get(pManager);
 		return *value;
-	}
-
-	void MaterialData::EnableProperty(size_t)
-	{
-	}
-
-	std::vector<char>& MaterialData::GetPropertyBuffer(MaterialManager&, size_t)
-	{
-		return m_PropertyBuffer;
 	}
 }

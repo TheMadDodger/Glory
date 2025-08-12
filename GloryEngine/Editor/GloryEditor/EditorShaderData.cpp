@@ -63,7 +63,7 @@ namespace Glory::Editor
 			pMaterial->AddResourceProperty(m_SamplerNames[i], m_SamplerNames[i], hash, 0, textureType, 0);
 		}
 
-		if (pMaterial->GetCurrentBufferOffset(manager) > 0) return; // Already added from other shader
+		if (pMaterial->GetCurrentBufferOffset() > 0) return; // Already added from other shader
 		for (size_t i = 0; i < m_PropertyInfos.size(); ++i)
 		{
 			const EditorShaderData::PropertyInfo& info = m_PropertyInfos[i];

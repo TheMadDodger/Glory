@@ -18,7 +18,6 @@
 #include <WindowModule.h>
 
 #include <MaterialData.h>
-#include <MaterialInstanceData.h>
 #include <PrefabData.h>
 #include <TextFileData.h>
 
@@ -218,7 +217,7 @@ namespace Glory
 			return;
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
-		pMaterial->Set<T>(Core_EngineInstance->GetMaterialManager(), propNameStr, value);
+		pMaterial->Set<T>(propNameStr, value);
 	}
 
 	template<typename T>
@@ -231,7 +230,7 @@ namespace Glory
 			return false;
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
-		return pMaterial->Get<T>(Core_EngineInstance->GetMaterialManager(), propNameStr, value);
+		return pMaterial->Get<T>(propNameStr, value);
 	}
 
 	void Material_SetTexture(uint64_t matID, MonoString* propName, uint64_t value)
@@ -244,7 +243,7 @@ namespace Glory
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
 		TextureData* pImage = value ? Core_EngineInstance->GetAssetManager().GetAssetImmediate<TextureData>(value) : nullptr;
-		pMaterial->SetTexture(Core_EngineInstance->GetMaterialManager(), propNameStr, pImage);
+		pMaterial->SetTexture(propNameStr, pImage);
 	}
 
 	bool Material_GetTexture(uint64_t matID, MonoString* propName, uint64_t& value)
@@ -258,12 +257,12 @@ namespace Glory
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
 		TextureData* pImage = nullptr;
-		if (!pMaterial->GetTexture(Core_EngineInstance->GetMaterialManager(), propNameStr, &pImage, &pManager)) return false;
+		if (!pMaterial->GetTexture(propNameStr, &pImage, &pManager)) return false;
 		value = pImage ? pImage->GetUUID() : 0;
 		return true;
 	}
 	
-	uint64_t Material_CreateInstance(uint64_t matID)
+	uint64_t Material_CreateCopy(uint64_t matID)
 	{
 		AssetManager& pManager = Core_EngineInstance->GetAssetManager();
 		MaterialManager& materials = Core_EngineInstance->GetMaterialManager();
@@ -273,16 +272,7 @@ namespace Glory
 			Core_EngineInstance->GetDebug().LogError("Material does not exist!");
 			return 0;
 		}
-		if (pMaterial->IsInstance())
-		{
-			pMaterial = static_cast<MaterialInstanceData*>(pMaterial)->GetBaseMaterial(materials);
-		}
-		if (!pMaterial)
-		{
-			Core_EngineInstance->GetDebug().LogError("Material does not exist!");
-			return 0;
-		}
-		MaterialInstanceData* pInstance = materials.CreateRuntimeMaterialInstance(pMaterial->GetUUID());
+		MaterialData* pInstance = materials.CreateRuntimeMaterial(pMaterial->GetUUID());
 		return pInstance->GetUUID();
 	}
 
@@ -732,7 +722,7 @@ namespace Glory
 		BIND("GloryEngine.Material::Material_SetTexture", Material_SetTexture);
 		BIND("GloryEngine.Material::Material_GetTexture", Material_GetTexture);
 
-		BIND("GloryEngine.Material::Material_CreateInstance", Material_CreateInstance);
+		BIND("GloryEngine.Material::Material_CreateCopy", Material_CreateCopy);
 
 		/* Text files */
 		BIND("GloryEngine.TextFile::TextFile_GetFullBody", TextFile_GetFullBody);

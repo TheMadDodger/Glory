@@ -18,8 +18,8 @@
 #include <AssetDatabase.h>
 #include <Engine.h>
 #include <SceneManager.h>
-#include <MaterialInstanceData.h>
 #include <PipelineData.h>
+#include <MaterialData.h>
 #include <Debug.h>
 
 namespace Glory::Editor
@@ -420,27 +420,6 @@ namespace Glory::Editor
 
 			MaterialData* pMaterialData = new MaterialData();
 			EditorAssetDatabase::CreateAsset(pMaterialData, finalPath.string());
-			FileBrowserItem::GetSelectedFolder()->Refresh();
-			FileBrowserItem::GetSelectedFolder()->SortChildren();
-		});
-	}
-
-	OBJECTMENU_CALLBACK(CreateNewMaterialInstanceCallback)
-	{
-		MaterialData* pMaterial = (MaterialData*)pObject;
-		if (dynamic_cast<MaterialInstanceData*>(pMaterial)) pMaterial = nullptr;
-		std::filesystem::path path = FileBrowser::GetCurrentPath();
-		std::string fileName = pMaterial ? pMaterial->Name() + "Instance.gminst" : "NewMaterialInstance.gminst";
-		path = path.append(fileName);
-		path = GetUnqiueFilePath(path);
-
-		const UUID baseMaterial = pMaterial ? pMaterial->GetUUID() : 0;
-		FileBrowser::BeginCreate(path.filename().replace_extension("").string(), "", [baseMaterial](std::filesystem::path& finalPath) {
-			finalPath.replace_extension("gminst");
-			if (std::filesystem::exists(finalPath)) return;
-
-			MaterialInstanceData* pMaterialData = new MaterialInstanceData(baseMaterial);
-			EditorAssetDatabase::CreateAsset(pMaterialData, finalPath.replace_extension("gminst").string());
 			FileBrowserItem::GetSelectedFolder()->Refresh();
 			FileBrowserItem::GetSelectedFolder()->SortChildren();
 		});

@@ -12,7 +12,6 @@
 namespace Glory
 {
     class FileData;
-    class MaterialManager;
     class PipelineData;
     class PipelineManager;
 
@@ -28,69 +27,62 @@ namespace Glory
 
         void SetPipeline(PipelineData* pPipeline);
         void SetPipeline(UUID pipelineID);
-        virtual PipelineData* GetPipeline(const MaterialManager&, const PipelineManager& pipelineManager) const;
-        virtual UUID GetPipelineID(const MaterialManager&) const;
+        virtual PipelineData* GetPipeline(const PipelineManager& pipelineManager) const;
+        virtual UUID GetPipelineID() const;
 
-        [[nodiscard]]virtual size_t PropertyInfoCount(const MaterialManager& materialManager) const;
-        virtual MaterialPropertyInfo* GetPropertyInfoAt(const MaterialManager& materialManager, size_t index);
-        [[nodiscard]]virtual size_t GetCurrentBufferOffset(const MaterialManager& materialManager) const;
-        virtual std::vector<char>& GetBufferReference(const MaterialManager& materialManager);
-        virtual std::vector<char>& GetFinalBufferReference(MaterialManager& materialManager);
-        virtual bool GetPropertyInfoIndex(const MaterialManager& materialManager, const std::string& name, size_t& index) const;
-        virtual bool GetPropertyInfoIndex(const MaterialManager& materialManager, TextureType textureType, size_t texIndex, size_t& index) const;
+        [[nodiscard]]virtual size_t PropertyInfoCount() const;
+        virtual MaterialPropertyInfo* GetPropertyInfoAt(size_t index);
+        [[nodiscard]]virtual size_t GetCurrentBufferOffset() const;
+        std::vector<char>& GetBufferReference();
+        bool GetPropertyInfoIndex(const std::string& name, size_t& index) const;
+        bool GetPropertyInfoIndex(TextureType textureType, size_t texIndex, size_t& index) const;
         [[nodiscard]]size_t ResourceCount() const;
-        virtual AssetReference<TextureData>* GetResourceUUIDPointer(MaterialManager& materialManager, size_t index);
-        [[nodiscard]]virtual size_t GetResourcePropertyCount(MaterialManager& materialManager) const;
-        virtual MaterialPropertyInfo* GetResourcePropertyInfo(MaterialManager& materialManager, size_t index);
-        [[nodiscard]]virtual size_t GetPropertyIndexFromResourceIndex(MaterialManager& materialManager, size_t index) const;
+        AssetReference<TextureData>* GetResourceUUIDPointer(size_t index);
+        [[nodiscard]]virtual size_t GetResourcePropertyCount() const;
+        MaterialPropertyInfo* GetResourcePropertyInfo(size_t index);
+        [[nodiscard]]virtual size_t GetPropertyIndexFromResourceIndex(size_t index) const;
         void ClearProperties();
 
-        virtual size_t TextureCount(MaterialManager&, TextureType textureType) const;
+        size_t TextureCount(TextureType textureType) const;
 
         void Serialize(BinaryStream& container) const override;
         void Deserialize(BinaryStream& container) override;
 
-        virtual void References(Engine* pEngine, std::vector<UUID>& references) const override;
+        void References(Engine* pEngine, std::vector<UUID>& references) const override;
 
-        virtual bool IsInstance() const { return false; }
+        void CopyProperties(void* dst);
+        size_t PropertyDataSize();
 
-        void CopyProperties(MaterialManager& materialManager, void* dst);
-        size_t PropertyDataSize(const MaterialManager& materialManager);
+        MaterialData* CreateCopy() const;
 
     public: // Properties
         // Setters
         template<typename T>
-        void Set(MaterialManager& materialManager, const std::string& name, const T& value)
+        void Set(const std::string& name, const T& value)
         {
             size_t index;
-            if (!GetPropertyInfoIndex(materialManager, name, index)) return;
-            EnableProperty(index);
-            GetPropertyInfoAt(materialManager, index)->Write<T>(GetPropertyBuffer(materialManager, index), value);
+            if (!GetPropertyInfoIndex(name, index)) return;
+            GetPropertyInfoAt(index)->Write<T>(m_PropertyBuffer, value);
         }
 
         // Getters
         template<typename T>
-        bool Get(MaterialManager& materialManager, const std::string& name, T& value)
+        bool Get(const std::string& name, T& value)
         {
             size_t index;
-            if (!GetPropertyInfoIndex(materialManager, name, index)) return false;
-            return GetPropertyInfoAt(materialManager, index)->Read<T>(GetPropertyBuffer(materialManager, index), value);
+            if (!GetPropertyInfoIndex(name, index)) return false;
+            return GetPropertyInfoAt(index)->Read<T>(m_PropertyBuffer, value);
         }
 
-        void* Address(MaterialManager& materialManager, size_t index);
+        GLORY_API void* Address(size_t index);
 
-        virtual void SetTexture(MaterialManager& materialManager, const std::string& name, TextureData* value);
-        virtual void SetTexture(MaterialManager& materialManager, const std::string& name, UUID uuid);
-        virtual void SetTexture(MaterialManager& materialManager, TextureType textureType, size_t texIndex, UUID uuid);
-        virtual bool GetTexture(MaterialManager& materialManager, const std::string& name, TextureData** value, AssetManager* pManager);
-
-    protected:
-        virtual void EnableProperty(size_t index);
-        virtual std::vector<char>& GetPropertyBuffer(MaterialManager& pManager, size_t index);
+        GLORY_API void SetTexture(const std::string& name, TextureData* value);
+        GLORY_API void SetTexture(const std::string& name, UUID uuid);
+        GLORY_API void SetTexture(TextureType textureType, size_t texIndex, UUID uuid);
+        GLORY_API bool GetTexture(const std::string& name, TextureData** value, AssetManager* pManager);
 
     protected:
         friend class PipelineData;
-        friend class MaterialInstanceData;
 
         UUID m_Pipeline;
         std::vector<MaterialPropertyInfo> m_PropertyInfos;

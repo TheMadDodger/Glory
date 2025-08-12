@@ -23,7 +23,6 @@ namespace Glory::Editor
 	OBJECTMENU_CALLBACK(CreateNewTextureCallback);
 	OBJECTMENU_CALLBACK(CreateNewPipelineCallback);
 	OBJECTMENU_CALLBACK(CreateNewMaterialCallback);
-	OBJECTMENU_CALLBACK(CreateNewMaterialInstanceCallback);
 	OBJECTMENU_CALLBACK(CreateNewFolderCallback);
 	OBJECTMENU_CALLBACK(RenameItemCallback);
 	OBJECTMENU_CALLBACK(SaveScene);

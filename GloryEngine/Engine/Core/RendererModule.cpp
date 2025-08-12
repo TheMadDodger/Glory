@@ -57,7 +57,7 @@ namespace Glory
 
 		MaterialData* pMaterial = static_cast<MaterialData*>(pMaterialResource);
 
-		const UUID pipelineID = pMaterial->GetPipelineID(m_pEngine->GetMaterialManager());
+		const UUID pipelineID = pMaterial->GetPipelineID();
 		/* Can't render anything without a pipeline */
 		if (!pipelineID) return;
 
@@ -127,7 +127,7 @@ namespace Glory
 
 		MaterialData* pMaterial = static_cast<MaterialData*>(pMaterialResource);
 
-		const UUID pipelineID = pMaterial->GetPipelineID(m_pEngine->GetMaterialManager());
+		const UUID pipelineID = pMaterial->GetPipelineID();
 		/* Can't render anything without a pipeline */
 		if (!pipelineID) return;
 
@@ -177,7 +177,7 @@ namespace Glory
 
 		MaterialData* pMaterial = static_cast<MaterialData*>(pMaterialResource);
 
-		const UUID pipelineID = pMaterial->GetPipelineID(m_pEngine->GetMaterialManager());
+		const UUID pipelineID = pMaterial->GetPipelineID();
 		/* Can't render anything without a pipeline */
 		if (!pipelineID) return;
 

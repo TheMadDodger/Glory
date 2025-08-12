@@ -40,7 +40,6 @@
 #include "SettingsEnums.h"
 
 #include "MaterialEditor.h"
-#include "MaterialInstanceEditor.h"
 #include "PipelineEditor.h"
 #include "GSceneEditor.h"
 #include "TextComponentEditor.h"
@@ -52,7 +51,6 @@
 
 #include "Importer.h"
 #include "MaterialImporter.h"
-#include "MaterialInstanceImporter.h"
 #include "TextureImporter.h"
 #include "EntityPrefabImporter.h"
 #include "ShaderImporter.h"
@@ -173,7 +171,6 @@ namespace Glory::Editor
 
 		Importer::Register<PipelineImporter>();
 		Importer::Register<MaterialImporter>();
-		Importer::Register<MaterialInstanceImporter>();
 		Importer::Register<TextureImporter>();
 		Importer::Register<EntityPrefabImporter>();
 		Importer::Register<ShaderImporter>();
@@ -480,7 +477,6 @@ namespace Glory::Editor
 		ObjectMenu::AddMenuItem("Create/Texture", CreateNewTextureCallback, T_ContentBrowser | T_Resource);
 		ObjectMenu::AddMenuItem("Create/Pipeline", CreateNewPipelineCallback, T_ContentBrowser);
 		ObjectMenu::AddMenuItem("Create/Material", CreateNewMaterialCallback, T_ContentBrowser | T_Resource);
-		ObjectMenu::AddMenuItem("Create/Material Instance", CreateNewMaterialInstanceCallback, T_ContentBrowser | T_Resource);
 		ObjectMenu::AddMenuItem("Create/Folder", CreateNewFolderCallback, T_ContentBrowser | T_Resource);
 		ObjectMenu::AddMenuItemMainWindow("Rename", RenameItemCallback, T_Resource | T_Folder, Shortcut_Rename);
 		ObjectMenu::AddMenuItem("Reimport", ReimportAssetCallback, T_Resource);
@@ -564,7 +560,6 @@ namespace Glory::Editor
 		Editor::RegisterEditor<PipelineEditor>();
 		Editor::RegisterEditor<MaterialEditor>();
 		Editor::RegisterEditor<StaticMaterialEditor>();
-		Editor::RegisterEditor<MaterialInstanceEditor>();
 
 		Editor::RegisterEditor<EntitySceneObjectEditor>();
 		Editor::RegisterEditor<DefaultComponentEditor>();
