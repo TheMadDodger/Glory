@@ -170,7 +170,9 @@ namespace Glory
 
 			std::vector<uint32_t> m_MaterialIndices;
 			CPUBuffer<char> m_MaterialDatas;
+			CPUBuffer<uint32_t> m_TextureBits;
 			Buffer* m_pMaterialsBuffer;
+			Buffer* m_pTextureBitsBuffer;
 		};
 		std::vector<PipelineBatchData> m_PipelineBatchData;
 

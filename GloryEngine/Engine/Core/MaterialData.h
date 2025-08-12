@@ -55,6 +55,8 @@ namespace Glory
 
         MaterialData* CreateCopy() const;
 
+        virtual uint32_t TextureSetBits() const;
+
     public: // Properties
         // Setters
         template<typename T>
@@ -90,6 +92,7 @@ namespace Glory
 
         std::vector<size_t> m_ResourcePropertyInfoIndices;
         std::vector<AssetReference<TextureData>> m_Resources;
+        uint32_t m_TextureSetBits;
         std::unordered_map<uint32_t, size_t> m_HashToPropertyInfoIndex;
 
         std::vector<std::vector<size_t>> m_TextureTypeIndices;

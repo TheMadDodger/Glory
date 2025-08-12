@@ -809,22 +809,31 @@ namespace Glory
 			}
 
 			const size_t propertyDataSize = pPipelineData->TotalPropertiesByteSize();
+			const size_t textureCount = pPipelineData->ResourcePropertyCount();
 			const size_t paddingBytes = 16 - propertyDataSize%16;
 			const size_t finalPropertyDataSize = propertyDataSize + paddingBytes;
 			const size_t totalBufferSize = finalPropertyDataSize*pipelineBatch.m_UniqueMaterials.size();
 			if (batchData.m_MaterialDatas->size() < totalBufferSize)
 				batchData.m_MaterialDatas.resize(totalBufferSize);
+			if (textureCount && batchData.m_TextureBits->size() < pipelineBatch.m_UniqueMaterials.size())
+				batchData.m_TextureBits.resize(pipelineBatch.m_UniqueMaterials.size());
 
 			for (size_t i = 0; i < pipelineBatch.m_UniqueMaterials.size(); ++i)
 			{
 				const UUID materialID = pipelineBatch.m_UniqueMaterials[i];
 				MaterialData* pMaterialData = materials.GetMaterial(materialID);
 				if (!pMaterialData) continue;
-				const auto& buffer = pMaterialData->GetFinalBufferReference(materials);
+				const auto& buffer = pMaterialData->GetBufferReference();
 				if (std::memcmp(&batchData.m_MaterialDatas.m_Data[i*finalPropertyDataSize], buffer.data(), buffer.size()) != 0)
 				{
 					std::memcpy(&batchData.m_MaterialDatas.m_Data[i*finalPropertyDataSize], buffer.data(), buffer.size());
 					batchData.m_MaterialDatas.m_Dirty = true;
+				}
+				const uint32_t textureBits = pMaterialData->TextureSetBits();
+				if (textureCount && batchData.m_TextureBits.m_Data[i] != textureBits)
+				{
+					batchData.m_TextureBits.m_Data[i] = textureBits;
+					batchData.m_TextureBits.m_Dirty = true;
 				}
 			}
 
@@ -847,6 +856,16 @@ namespace Glory
 			}
 			if (batchData.m_MaterialDatas)
 				batchData.m_pMaterialsBuffer->Assign(batchData.m_MaterialDatas->data(), batchData.m_MaterialDatas->size());
+
+			if (textureCount && !batchData.m_pTextureBitsBuffer)
+			{
+				batchData.m_pTextureBitsBuffer = pResourceManager->CreateBuffer(batchData.m_TextureBits->size()*sizeof(uint32_t),
+					BufferBindingTarget::B_SHADER_STORAGE, MemoryUsage::MU_DYNAMIC_DRAW, 6);
+				batchData.m_pTextureBitsBuffer->Assign(NULL);
+				batchData.m_TextureBits.m_Dirty = true;
+			}
+			if (textureCount && batchData.m_TextureBits)
+				batchData.m_pTextureBitsBuffer->Assign(batchData.m_TextureBits->data(), batchData.m_TextureBits->size()*sizeof(uint32_t));
 		}
 
 		/* Prepare cameras */
@@ -1260,6 +1279,8 @@ namespace Glory
 
 			batchData.m_pWorldsBuffer->BindForDraw();
 			batchData.m_pMaterialsBuffer->BindForDraw();
+			if (batchData.m_pTextureBitsBuffer)
+				batchData.m_pTextureBitsBuffer->BindForDraw();
 
 			uint32_t objectIndex = 0;
 			for (UUID uniqueMeshID : pipelineRenderData.m_UniqueMeshOrder)
@@ -1351,6 +1372,8 @@ namespace Glory
 
 			batchData.m_pWorldsBuffer->Unbind();
 			batchData.m_pMaterialsBuffer->Unbind();
+			if (batchData.m_pTextureBitsBuffer)
+				batchData.m_pTextureBitsBuffer->Unbind();
 			pPipeline->UnUse();
 		}
 		pGraphics->EnableDepthWrite(true);

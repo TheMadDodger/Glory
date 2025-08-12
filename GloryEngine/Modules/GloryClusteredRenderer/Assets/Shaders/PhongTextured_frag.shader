@@ -3,8 +3,8 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-#include "internal/Textured.glsl"
 #include "Internal/RenderConstants.glsl"
+#include "internal/Textured1.glsl"
 
 struct Material
 {
