@@ -571,44 +571,84 @@ namespace Glory::Editor
     {
         EditorApplication* pApplication = EditorApplication::GetInstance();
 
-        pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Migrating material property arrays to maps");
+        pApplication->GetEngine()->GetDebug().LogInfo("0.6.0> Migrating material instances to regular materials");
 
         const uint32_t materialDataHash = ResourceTypes::GetHash<MaterialData>();
+        const uint32_t textureDataHash = ResourceTypes::GetHash<TextureData>();
         const uint32_t materialInstanceDataHash = ResourceTypes::GetHash<MaterialInstanceData>();
 
         JSONFileRef& projectFile = pProject->ProjectFile();
         JSONValueRef assets = projectFile["Assets"];
         if (!assets.Exists() || !assets.IsObject()) return;
-        std::vector<std::string_view> materialInstanceAssets;
 
         for (rapidjson::Value::ConstMemberIterator itor = assets.begin(); itor != assets.end(); ++itor)
         {
             JSONValueRef asset = assets[itor->name.GetString()];
             const uint32_t hash = asset["Metadata/Hash"].AsUInt();
             if (hash != materialInstanceDataHash) continue;
-            materialInstanceAssets.push_back(itor->name.GetString());
             asset["Metadata/Hash"].SetUInt(materialDataHash);
-
-            /* Change file extension */
-            std::filesystem::path path = asset["Location/Path"].AsString();
-            std::filesystem::path newPath = path;
-            newPath.replace_extension(".gmat");
-            std::filesystem::path newAbsolutePath = EditorAssetDatabase::GetAbsoluteAssetPath(newPath.string());
-            path = EditorAssetDatabase::GetAbsoluteAssetPath(path.string());
-            //std::filesystem::rename(path, newAbsolutePath);
-            //asset["Location/Path"].SetString(newPath.string());
 
             /* Update resource */
             const UUID uuid = asset["Metadata/UUID"].AsUInt64();
+            EditorAssetDatabase::SetAssetDirty(uuid);
             EditableResource* pResource = pApplication->GetResourceManager().GetEditableResource(uuid);
             if (!pResource)
             {
-                pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Failed to migrate a material");
+                pApplication->GetEngine()->GetDebug().LogInfo("0.6.0> Failed to migrate a material");
                 continue;
             }
 
             YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(pResource);
             Utils::YAMLFileRef& file = **pMaterial;
+
+            const UUID baseMaterialID = file["BaseMaterial"].As<uint64_t>();
+            if (!baseMaterialID)
+            {
+                file.RootNodeRef().ValueRef().SetMap();
+                file["Properties"].SetMap();
+                file["Pipeline"].Set(0ull);
+                continue;
+            }
+
+            pResource = pApplication->GetResourceManager().GetEditableResource(baseMaterialID);
+            if (!pResource)
+            {
+                file.RootNodeRef().ValueRef().SetMap();
+                file["Properties"].SetMap();
+                file["Pipeline"].Set(0ull);
+                continue;
+            }
+
+            YAMLResource<MaterialData>* pBaseMaterial = static_cast<YAMLResource<MaterialData>*>(pResource);
+            Utils::YAMLFileRef& baseFile = **pBaseMaterial;
+
+            auto basePipeline = baseFile["Pipeline"];
+            file["Pipeline"].Set(basePipeline.Exists() ? basePipeline.As<uint64_t>() : 0ull);
+
+            auto baseProperties = baseFile["Properties"];
+            auto properties = file["Properties"];
+            properties.SetMap();
+
+            std::vector<uint64_t> ids;
+
+            for (auto iter = baseProperties.Begin(); iter != baseProperties.End(); ++iter)
+            {
+                const std::string key = *iter;
+                auto baseProperty = baseProperties[key];
+                auto property = properties[key];
+                auto override = file["Overrides"][key];
+
+                property["DisplayName"].Set(baseProperty["DisplayName"].As<std::string>());
+                auto type = property["TypeHash"];
+                type.Set(baseProperty["TypeHash"].As<uint32_t>());
+                if (override.Exists() && override["Enable"].As<bool>())
+                    property["Value"].Set(override["Value"].Node());
+                else
+                    property["Value"].Set(baseProperty["Value"].Node());
+            }
+
+            file["BaseMaterial"].Erase();
+            file["Overrides"].Erase();
         }
     }
 }

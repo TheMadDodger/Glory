@@ -229,7 +229,7 @@ namespace Glory::Editor
 			}
 			else
 			{
-				const UUID id = *pMaterial->GetResourceUUIDPointer(propInfo->Offset());
+				const UUID id = pMaterial->GetResourceUUIDPointer(propInfo->Offset())->AssetUUID();
 				value.Set(uint64_t(id));
 			}
 		}

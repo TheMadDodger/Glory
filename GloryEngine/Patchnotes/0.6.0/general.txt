@@ -1,7 +1,11 @@
 Runtime:
 
 Engine:
+- Removed material instances
 
 Editor:
+- Added migration that converts material instances to materials
 
 Scripting:
+- Deprecated Material.CreateInstance() and MaterialInstance
+- Added Material.CreateCopy()
