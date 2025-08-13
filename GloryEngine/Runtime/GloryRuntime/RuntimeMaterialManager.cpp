@@ -3,7 +3,6 @@
 #include <Engine.h>
 #include <AssetManager.h>
 #include <MaterialData.h>
-#include <MaterialInstanceData.h>
 
 namespace Glory
 {
@@ -19,14 +18,13 @@ namespace Glory
 		return pMaterial;
 	}
 
-	MaterialInstanceData* RuntimeMaterialManager::CreateRuntimeMaterialInstance(UUID baseMaterial)
+	MaterialData* RuntimeMaterialManager::CreateRuntimeMaterial(UUID baseMaterial)
 	{
 		AssetManager& asset = m_pEngine->GetAssetManager();
 		Resource* pResource = asset.FindResource(baseMaterial);
 		if (!pResource) return nullptr;
 		MaterialData* pBaseMaterial = static_cast<MaterialData*>(pResource);
-		MaterialInstanceData* pMaterialData = new MaterialInstanceData(baseMaterial);
-		pMaterialData->Resize(*this, pBaseMaterial);
+		MaterialData* pMaterialData = pBaseMaterial->CreateCopy();
 		m_RuntimeMaterials.push_back(pMaterialData->GetUUID());
 		asset.AddLoadedResource(pMaterialData);
 		return pMaterialData;

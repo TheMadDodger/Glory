@@ -25,7 +25,7 @@ namespace Glory
         MaterialData* pMaterial = pMaterials->GetMaterial(pComponent.m_Material.AssetUUID());
         if (!pMaterial) return;
 
-        const UUID pipelineID = pMaterial->GetPipelineID(*pMaterials);
+        const UUID pipelineID = pMaterial->GetPipelineID();
 
         Transform& transform = pRegistry->GetComponent<Transform>(entity);
         REQUIRE_MODULE_CALL(pEngine, RendererModule, UpdateStatic(pipelineID, pComponent.m_Mesh.AssetUUID(), pScene->GetEntityUUID(entity), transform.MatTransform), );
@@ -153,7 +153,7 @@ namespace Glory
         MaterialData* pMaterial = pMaterials->GetMaterial(pComponent.m_Material.AssetUUID());
         if (!pMaterial) return;
 
-        const UUID pipelineID = pMaterial->GetPipelineID(*pMaterials);
+        const UUID pipelineID = pMaterial->GetPipelineID();
         const UUID id = pScene->GetEntityUUID(entity);
         REQUIRE_MODULE_CALL(pEngine, RendererModule, UnsubmitStatic(pipelineID, pComponent.m_Mesh.AssetUUID(), id), );
         pComponent.m_WasSubmittedForStatic = false;

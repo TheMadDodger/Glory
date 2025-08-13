@@ -5,6 +5,7 @@ namespace GloryEngine
     /// <summary>
     /// Material instance handle
     /// </summary>
+    [System.Obsolete()]
     public class MaterialInstance : Material
     {
         #region Constructor

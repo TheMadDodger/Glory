@@ -25,7 +25,7 @@ project "GloryEditor"
 		["Editor/Playmode"] = { "EditorPlayer.*", "IPlayModeHandler.*" },
 		["Editor/Tumbnails"] = { "ImageTumbnailGenerator.*", "HDRTumbnailGenerator.*", "AudioTumbnailGenerator.*", "FontTumbnailGenerator.*", "TextureTumbnailGenerator.*", "Tumbnail.*", "TumbnailGenerator.*", "SceneTumbnailGenerator.*" },
 		["Editor/PropertyDrawers"] = { "MeshMaterialPropertyDrawer.*", "SceneObjectPropertyDrawer.*", "StructPropertyDrawer.*", "EnumPropertyDrawer.*", "ArrayPropertyDrawer.*", "AssetReferencePropertyDrawer.*", "PropertyDrawer.*", "StandardPropertyDrawers.*", "ShapePropertyDrawer.*" },
-		["Editor/Editors"] = { "TextureDataEditor.*", "GloryEditor.*", "GloryEditorVersion.*", "FileDialog.*", "EditorSettings.*", "BehaviorTreeEditor.*", "ComponentEditor.*", "Editor.*", "SceneObjectEditor.*", "ScriptableObjectEditor.*", "MaterialEditor.*", "MaterialInstanceEditor.*" },
+		["Editor/Editors"] = { "TextureDataEditor.*", "GloryEditor.*", "GloryEditorVersion.*", "FileDialog.*", "EditorSettings.*", "BehaviorTreeEditor.*", "ComponentEditor.*", "Editor.*", "SceneObjectEditor.*", "ScriptableObjectEditor.*", "MaterialEditor.*" },
 		["Editor/Editors/Component"] = { "TransformEditor.*", "DefaultComponentEditor.*", "EntityComponentEditor.*", "EntityComponentPopup.*", "EntitySceneObjectEditor.*", "LightComponentEditor.*" },
 		["Helpers"] = { "ImGuiHelpers.*" },
 		["Popups"] = { "VersionPopup.*", "ObjectPicker.*", "AssetPicker.*", "PopupManager.*", "ProjectPopup.*", "AssetPickerPopup.*" },
@@ -42,7 +42,7 @@ project "GloryEditor"
 		["ProjectSettings"] = { "ProjectSettings.*", "ProjectSettings.*", "InputSettings.cpp", "EngineSettings.cpp", "LayerSettings.cpp", "PhysicsSettings.cpp", "GeneralSettings.cpp" },
 		["Asset Management"] = { "EditorSceneSerializer*", "EditorAssetsWatcher.*", "JSONRef.*", "AssetCompiler.*", "EditorAssetDatabase.*", "EditorAssetLoader.*", "EditorSceneManager.*", "EditorAssetCallbacks.*" },
 		["Asset Management/Importer"] = { "Importer.*", "ImporterTemplate.*", "ImportedResource.*" },
-		["Asset Management/Importer/Internal"] = { "MaterialImporter.*", "MaterialInstanceImporter.*", "TextureImporter.*", "EntityPrefabImporter.*" },
+		["Asset Management/Importer/Internal"] = { "MaterialImporter.*", "TextureImporter.*", "EntityPrefabImporter.*" },
 		["Migration"] = { "ProjectMigrations.*" }
 	}
 

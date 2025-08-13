@@ -134,13 +134,13 @@ namespace Glory::Editor
 
 				size_t materialPropertyIndexOne = 0;
 				size_t materialPropertyIndexTwo = 0;
-				if (!pMaterialData->GetPropertyInfoIndex(materialManager, propInfoOne->ShaderName(), materialPropertyIndexOne))
+				if (!pMaterialData->GetPropertyInfoIndex(propInfoOne->ShaderName(), materialPropertyIndexOne))
 					continue;
-				if (!pMaterialData->GetPropertyInfoIndex(materialManager, propInfoTwo->ShaderName(), materialPropertyIndexTwo))
+				if (!pMaterialData->GetPropertyInfoIndex(propInfoTwo->ShaderName(), materialPropertyIndexTwo))
 					continue;
 
-				MaterialPropertyInfo* pMaterialPropertyOne = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndexOne);
-				MaterialPropertyInfo* pMaterialPropertyTwo = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndexTwo);
+				MaterialPropertyInfo* pMaterialPropertyOne = pMaterialData->GetPropertyInfoAt(materialPropertyIndexOne);
+				MaterialPropertyInfo* pMaterialPropertyTwo = pMaterialData->GetPropertyInfoAt(materialPropertyIndexTwo);
 
 				auto propOne = properties[propInfoOne->ShaderName()];
 				if (!propOne.Exists()) {
@@ -163,7 +163,7 @@ namespace Glory::Editor
 				/* Deserialize new value into buffer */
 				if (propertyChange)
 				{
-					serializers.DeserializeProperty(pMaterialData->GetBufferReference(materialManager),
+					serializers.DeserializeProperty(pMaterialData->GetBufferReference(),
 						pMaterialPropertyOne->TypeHash(), pMaterialPropertyOne->Offset(), pMaterialPropertyOne->Size(), propValueOne);
 					change = true;
 				}
@@ -193,7 +193,7 @@ namespace Glory::Editor
 				{
 					Undo::ApplyYAMLEdit(file, propTwo["Value"].Path(), uint64_t(oldValue), uint64_t(value));
 					const UUID newUUID = propValueTwo.As<uint64_t>();
-					pMaterialData->SetTexture(materialManager, sampler, newUUID);
+					pMaterialData->SetTexture(sampler, newUUID);
 					change = true;
 				}
 				continue;
@@ -203,10 +203,10 @@ namespace Glory::Editor
 			const MaterialPropertyInfo* propInfo = pPipeline->GetPropertyInfoAt(i);
 
 			size_t materialPropertyIndex = 0;
-			if (!pMaterialData->GetPropertyInfoIndex(materialManager, propInfo->ShaderName(), materialPropertyIndex))
+			if (!pMaterialData->GetPropertyInfoIndex(propInfo->ShaderName(), materialPropertyIndex))
 				continue;
 
-			MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndex);
+			MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialPropertyIndex);
 
 			if (propInfo->IsResource())
 			{
@@ -233,7 +233,7 @@ namespace Glory::Editor
 				if (changed)
 				{
 					const UUID newUUID = propValue.As<uint64_t>();
-					pMaterialData->SetTexture(materialManager, sampler, newUUID);
+					pMaterialData->SetTexture(sampler, newUUID);
 					change = true;
 				}
 				continue;
@@ -253,7 +253,7 @@ namespace Glory::Editor
 			/* Deserialize new value into buffer */
 			if (changed)
 			{
-				serializers.DeserializeProperty(pMaterialData->GetBufferReference(materialManager),
+				serializers.DeserializeProperty(pMaterialData->GetBufferReference(),
 					pMaterialProperty->TypeHash(), pMaterialProperty->Offset(), pMaterialProperty->Size(), propValue);
 				change = true;
 			}
@@ -280,7 +280,7 @@ namespace Glory::Editor
 		EditorMaterialManager& materialManager = EditorApplication::GetInstance()->GetMaterialManager();
 		MaterialData* pMaterialData = static_cast<MaterialData*>(m_pTarget);
 
-		UUID pipelineID = pMaterialData->GetPipelineID(materialManager);
+		UUID pipelineID = pMaterialData->GetPipelineID();
 
 		ImGui::BeginDisabled(true);
 		AssetPicker::ResourceDropdown("Pipeline", ResourceTypes::GetHash<PipelineData>(), &pipelineID);
@@ -305,7 +305,7 @@ namespace Glory::Editor
 		Serializers& serializers = EditorApplication::GetInstance()->GetEngine()->GetSerializers();
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 
-		const UUID pipelineID = pMaterialData->GetPipelineID(materialManager);
+		const UUID pipelineID = pMaterialData->GetPipelineID();
 		if (pipelineID == 0)
 			return;
 		PipelineData* pPipeline = pipelineManager.GetPipelineData(pipelineID);
@@ -334,19 +334,19 @@ namespace Glory::Editor
 
 				size_t materialPropertyIndexOne = 0;
 				size_t materialPropertyIndexTwo = 0;
-				if (!pMaterialData->GetPropertyInfoIndex(materialManager, propInfoOne->ShaderName(), materialPropertyIndexOne))
+				if (!pMaterialData->GetPropertyInfoIndex(propInfoOne->ShaderName(), materialPropertyIndexOne))
 					continue;
-				if (!pMaterialData->GetPropertyInfoIndex(materialManager, propInfoTwo->ShaderName(), materialPropertyIndexTwo))
+				if (!pMaterialData->GetPropertyInfoIndex(propInfoTwo->ShaderName(), materialPropertyIndexTwo))
 					continue;
 
-				MaterialPropertyInfo* pMaterialPropertyOne = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndexOne);
-				MaterialPropertyInfo* pMaterialPropertyTwo = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndexTwo);
+				MaterialPropertyInfo* pMaterialPropertyOne = pMaterialData->GetPropertyInfoAt(materialPropertyIndexOne);
+				MaterialPropertyInfo* pMaterialPropertyTwo = pMaterialData->GetPropertyInfoAt(materialPropertyIndexTwo);
 
 				const float start = ImGui::GetCursorPosX();
 				const float totalWidth = ImGui::GetContentRegionAvail().x;
 
 				ImGui::PushID(propInfoOne->ShaderName().data());
-				void* pAddress = pMaterialData->Address(materialManager, materialPropertyIndexOne);
+				void* pAddress = pMaterialData->Address(materialPropertyIndexOne);
 				EditorUI::PushFlag(EditorUI::Flag::HasSmallButton);
 				EditorUI::RemoveButtonPadding = 34.0f;
 				PropertyDrawer::DrawProperty(propInfoOne->DisplayName(), pAddress, propInfoOne->TypeHash(), pMaterialPropertyOne->Flags() | PropertyFlags::Color);
@@ -355,7 +355,7 @@ namespace Glory::Editor
 				ImGui::PopID();
 
 				const std::string& sampler = propInfoTwo->ShaderName();
-				auto resourceId = pMaterialData->GetResourceUUIDPointer(materialManager, pMaterialPropertyTwo->Offset());
+				auto resourceId = pMaterialData->GetResourceUUIDPointer(pMaterialPropertyTwo->Offset());
 				ImGui::SameLine();
 				ImGui::PushID(sampler.data());
 				const bool textureChange = AssetPicker::ResourceTumbnailButton("value", 18.0f, start, totalWidth, textureDataHash, resourceId->AssetUUIDMember());
@@ -371,14 +371,14 @@ namespace Glory::Editor
 			const MaterialPropertyInfo* propInfo = pPipeline->GetPropertyInfoAt(i);
 
 			size_t materialPropertyIndex = 0;
-			if (!pMaterialData->GetPropertyInfoIndex(materialManager, propInfo->ShaderName(), materialPropertyIndex))
+			if (!pMaterialData->GetPropertyInfoIndex(propInfo->ShaderName(), materialPropertyIndex))
 				continue;
 
-			MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialManager, materialPropertyIndex);
+			MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialPropertyIndex);
 
 			if (propInfo->IsResource())
 			{
-				auto resourceId = pMaterialData->GetResourceUUIDPointer(materialManager, pMaterialProperty->Offset());
+				auto resourceId = pMaterialData->GetResourceUUIDPointer(pMaterialProperty->Offset());
 				const std::string& sampler = propInfo->ShaderName();
 				PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(ST_Asset);
 
@@ -392,7 +392,7 @@ namespace Glory::Editor
 			}
 
 			ImGui::PushID(propInfo->ShaderName().data());
-			void* pAddress = pMaterialData->Address(materialManager, i);
+			void* pAddress = pMaterialData->Address(i);
 			PropertyDrawer::DrawProperty(propInfo->DisplayName(), pAddress, propInfo->TypeHash(), pMaterialProperty->Flags() | PropertyFlags::Color);
 			ImGui::PopID();
 		}

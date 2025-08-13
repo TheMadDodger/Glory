@@ -7,12 +7,12 @@ namespace Glory
 	{
 	}
 
-	PipelineData* InternalMaterial::GetPipeline(const MaterialManager&, const PipelineManager& pipelineManager) const
+	PipelineData* InternalMaterial::GetPipeline(const PipelineManager& pipelineManager) const
 	{
 		return m_pPipeline;
 	}
 
-	UUID InternalMaterial::GetPipelineID(const MaterialManager&) const
+	UUID InternalMaterial::GetPipelineID() const
 	{
 		return m_pPipeline ? m_pPipeline->GetUUID() : 0;
 	}

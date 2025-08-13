@@ -123,8 +123,8 @@ namespace Glory
 		object.Projection = pDocument->Projection();
 
 		MaterialData* pPrepassMaterial = pUIRenderer->PrepassMaterial();
-		pPrepassMaterial->Set(materials, "Color", pComponent.m_Color);
-		pPrepassMaterial->Set(materials, "HasTexture", glm::vec4{ 1.0f });
+		pPrepassMaterial->Set("Color", pComponent.m_Color);
+		pPrepassMaterial->Set("HasTexture", glm::vec4{ 1.0f });
 
 		Material* pMaterial = pGraphics->UseMaterial(pPrepassMaterial);
 		pMaterial->SetProperties(pEngine);
@@ -275,8 +275,8 @@ namespace Glory
 		object.Projection = pDocument->Projection();
 
 		MaterialData* pPrepassMaterial = pUIRenderer->PrepassMaterial();
-		pPrepassMaterial->Set(materials, "Color", pComponent.m_Color);
-		pPrepassMaterial->Set(materials, "HasTexture", glm::vec4{ 0.0f });
+		pPrepassMaterial->Set("Color", pComponent.m_Color);
+		pPrepassMaterial->Set("HasTexture", glm::vec4{ 0.0f });
 
 		Material* pMaterial = pGraphics->UseMaterial(pPrepassMaterial);
 		pMaterial->SetProperties(pEngine);

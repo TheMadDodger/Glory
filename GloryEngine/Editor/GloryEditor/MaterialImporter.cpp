@@ -26,7 +26,7 @@ namespace Glory::Editor
 
 	bool MaterialImporter::SupportsExtension(const std::filesystem::path& extension) const
 	{
-		return extension.compare(".gmat") == 0;
+		return extension.compare(".gmat") == 0 || extension.compare(".gminst") == 0;
 	}
 
 	ImportedResource MaterialImporter::LoadResource(const std::filesystem::path& path, void*) const
@@ -48,7 +48,7 @@ namespace Glory::Editor
 	void MaterialImporter::SaveMaterialData(MaterialData* pMaterialData, Utils::NodeValueRef data) const
 	{
 		data.SetMap();
-		data["Pipeline"].Set(uint64_t(pMaterialData->GetPipelineID(EditorApplication::GetInstance()->GetMaterialManager())));
+		data["Pipeline"].Set(uint64_t(pMaterialData->GetPipelineID()));
 		WritePropertyData(data, pMaterialData);
 	}
 
@@ -59,12 +59,12 @@ namespace Glory::Editor
 		auto properties = data["Properties"];
 
 		size_t resourceIndex = 0;
-		for (size_t i = 0; i < pMaterialData->PropertyInfoCount(manager); i++)
+		for (size_t i = 0; i < pMaterialData->PropertyInfoCount(); i++)
 		{
 			properties.PushBack(YAML::Node(YAML::NodeType::Map));
 			auto property = properties[i];
 
-			MaterialPropertyInfo* pPropertyInfo = pMaterialData->GetPropertyInfoAt(manager, i);
+			MaterialPropertyInfo* pPropertyInfo = pMaterialData->GetPropertyInfoAt(i);
 			property["DisplayName"].Set(pPropertyInfo->DisplayName());
 			property["ShaderName"].Set(pPropertyInfo->ShaderName());
 			property["TypeHash"].Set(pPropertyInfo->TypeHash());
@@ -72,13 +72,13 @@ namespace Glory::Editor
 			bool isResource = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().IsResource(pPropertyInfo->TypeHash());
 			if (!isResource)
 			{
-				EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty(pMaterialData->GetBufferReference(manager), pPropertyInfo->TypeHash(), pPropertyInfo->Offset(), pPropertyInfo->Size(), property["Value"]);
+				EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty(pMaterialData->GetBufferReference(), pPropertyInfo->TypeHash(), pPropertyInfo->Offset(), pPropertyInfo->Size(), property["Value"]);
 			}
 			else
 			{
-				size_t index = pMaterialData->GetPropertyIndexFromResourceIndex(manager, resourceIndex);
+				size_t index = pMaterialData->GetPropertyIndexFromResourceIndex(resourceIndex);
 				++resourceIndex;
-				const uint64_t uuid = pMaterialData->GetResourceUUIDPointer(manager, index)->AssetUUID();
+				const uint64_t uuid = pMaterialData->GetResourceUUIDPointer(index)->AssetUUID();
 				property["Value"].Set(uuid);
 			}
 		}

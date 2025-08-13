@@ -1,6 +1,5 @@
 #include "GPUResourceManager.h"
 #include "EngineProfiler.h"
-#include "MaterialInstanceData.h"
 #include "Engine.h"
 #include "EngineProfiler.h"
 #include "Pipeline.h"
@@ -133,7 +132,7 @@ namespace Glory
 		if (!pMaterialData->IsDirty() && pMaterial && pMaterial->m_Complete)
 		{
 			PipelineData* pPipelineData =
-				pMaterialData->GetPipeline(m_pEngine->GetMaterialManager(), m_pEngine->GetPipelineManager());
+				pMaterialData->GetPipeline(m_pEngine->GetPipelineManager());
 			if (pMaterial->m_pPipeline->m_pPipelineData != pPipelineData)
 				pMaterial->m_pPipeline = CreatePipeline(pPipelineData);
 
@@ -150,9 +149,9 @@ namespace Glory
 		pMaterial->m_pOwner = this;
 		pMaterial->m_pMaterialData = pMaterialData;
 		pMaterial->m_UUID = pMaterialData->GetGPUUUID();
-		if (pMaterialData->GetPipelineID(m_pEngine->GetMaterialManager()))
+		if (pMaterialData->GetPipelineID())
 		{
-			PipelineData* pPipelineData = pMaterialData->GetPipeline(m_pEngine->GetMaterialManager(), m_pEngine->GetPipelineManager());
+			PipelineData* pPipelineData = pMaterialData->GetPipeline(m_pEngine->GetPipelineManager());
 			pMaterial->m_pPipeline = CreatePipeline(pPipelineData);
 			pMaterial->m_Complete = pMaterial->m_pPipeline != nullptr;
 		}

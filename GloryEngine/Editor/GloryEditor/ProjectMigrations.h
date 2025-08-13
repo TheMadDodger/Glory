@@ -43,4 +43,9 @@ namespace Glory::Editor
 	 * @param pProject Project to migrate prefabs in
 	 */
 	GLORY_EDITOR_API void Migrate_0_3_0_PrefabScenes(ProjectSpace* pProject);
+
+	/** @brief Convert material instances to regular materials
+	 * @param pProject Project to migrate material instances in
+	 */
+	GLORY_EDITOR_API void Migrate_0_6_0_MaterialInstances(ProjectSpace* pProject);
 }

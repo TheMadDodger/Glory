@@ -12,8 +12,8 @@ namespace Glory
         /** @brief Constructor */
         InternalMaterial(PipelineData* pPipeline);
 
-        virtual PipelineData* GetPipeline(const MaterialManager&, const PipelineManager& pipelineManager) const override;
-        virtual UUID GetPipelineID(const MaterialManager&) const override;
+        virtual PipelineData* GetPipeline(const PipelineManager& pipelineManager) const override;
+        virtual UUID GetPipelineID() const override;
 
     private:
         PipelineData* m_pPipeline;
