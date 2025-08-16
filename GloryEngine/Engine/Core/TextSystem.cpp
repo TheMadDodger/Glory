@@ -33,19 +33,22 @@ namespace Glory
 			mask = layer.m_Layer.Layer(pLayers) != nullptr ? layer.m_Layer.Layer(pLayers)->m_Mask : 0;
 		}
 
-		TextRenderData renderData;
-		renderData.m_FontID = pComponent.m_Font.AssetUUID();
+		const UUID fontID = pComponent.m_Font.AssetUUID();
+
+		TextData textData;
+		textData.m_Text = pComponent.m_Text;
+		textData.m_TextDirty = pComponent.m_Dirty;
+		textData.m_Scale = pComponent.m_Scale;
+		textData.m_Alignment = pComponent.m_Alignment;
+		textData.m_TextWrap = pComponent.m_WrapWidth;
+		textData.m_Color = pComponent.m_Color;
+		pComponent.m_Dirty = false;
+
+		RenderData renderData;
 		renderData.m_World = transform.MatTransform;
 		renderData.m_LayerMask = mask;
 		renderData.m_ObjectID = pScene->GetEntityUUID(entity);
 		renderData.m_SceneID = pScene->GetUUID();
-		renderData.m_Text = pComponent.m_Text;
-		renderData.m_TextDirty = pComponent.m_Dirty;
-		renderData.m_Scale = pComponent.m_Scale;
-		renderData.m_Alignment = pComponent.m_Alignment;
-		renderData.m_TextWrap = pComponent.m_WrapWidth;
-		renderData.m_Color = pComponent.m_Color;
-		pComponent.m_Dirty = false;
 
 		REQUIRE_MODULE_CALL(pEngine, RendererModule, SubmitDynamic(std::move(renderData)), );
 	}

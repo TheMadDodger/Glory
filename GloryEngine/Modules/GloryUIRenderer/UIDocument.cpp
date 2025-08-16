@@ -171,15 +171,15 @@ namespace Glory
 		return m_Projection;
 	}
 
-	MeshData* UIDocument::GetTextMesh(const TextRenderData& data, FontData* pFont)
+	MeshData* UIDocument::GetTextMesh(UUID objectID, const TextData& data, FontData* pFont)
 	{
-		auto iter = m_pTextMeshes.find(data.m_ObjectID);
+		auto iter = m_pTextMeshes.find(objectID);
 		const bool exists = iter != m_pTextMeshes.end();
 		if (!exists)
 		{
 			MeshData* pMesh = new MeshData(data.m_Text.size() * 4, sizeof(VertexPosColorTex),
 				{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
-			iter = m_pTextMeshes.emplace(data.m_ObjectID, pMesh).first;
+			iter = m_pTextMeshes.emplace(objectID, pMesh).first;
 		}
 
 		if (data.m_TextDirty || !exists)

@@ -98,7 +98,6 @@ namespace Glory
 		std::unordered_map<UUID, PipelineMeshBatch> m_Meshes;
 		std::vector<UUID> m_UniqueMeshOrder;
 		std::vector<UUID> m_UniqueMaterials;
-		std::vector<TextRenderData> m_Texts;
 		bool m_Dirty;
 	};
 
@@ -114,7 +113,6 @@ namespace Glory
 		void UpdateStatic(UUID pipelineID, UUID meshID, UUID objectID, glm::mat4 world);
 		void UnsubmitStatic(UUID pipelineID, UUID meshID, UUID objectID);
 		void SubmitDynamic(RenderData&& renderData);
-		void SubmitDynamic(TextRenderData&& renderData);
 		void SubmitLate(RenderData&& renderData);
 		void Submit(CameraRef camera);
 		size_t Submit(const glm::ivec2& pickPos, UUID cameraID);
@@ -167,7 +165,6 @@ namespace Glory
 
 	protected:
 		virtual void OnSubmitDynamic(const RenderData& renderData) {}
-		virtual void OnSubmitDynamic(const TextRenderData& renderData) {}
 		virtual void OnSubmit(CameraRef camera) {}
 		virtual void OnSubmit(const LightData& light) {}
 

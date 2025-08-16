@@ -9,7 +9,7 @@
 
 namespace Glory::Utils
 {
-	void GenerateTextMesh(MeshData* pMesh, FontData* pFontData, const TextRenderData& renderData, float textWrap)
+	void GenerateTextMesh(MeshData* pMesh, FontData* pFontData, const TextData& renderData, float textWrap)
 	{
 		const std::string_view text = renderData.m_Text;
 		const glm::vec4& color = renderData.m_Color;

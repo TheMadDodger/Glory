@@ -911,7 +911,7 @@ namespace Glory
 				}
 			}
 
-			for (const TextRenderData& text : pipelineRenderData.m_Texts)
+			/*for (const TextRenderData& text : pipelineRenderData.m_Texts)
 			{
 				if (text.m_Text.empty()) return;
 
@@ -959,7 +959,7 @@ namespace Glory
 
 				Mesh* pMesh = pResourceManager->CreateMesh(iter->second.get());
 				pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
-			}
+			}*/
 
 			pPipeline->UnUse();
 		}
@@ -1171,7 +1171,7 @@ namespace Glory
 				}
 			}
 
-			for (const TextRenderData& text : pipelineRenderData.m_Texts)
+			/*for (const TextRenderData& text : pipelineRenderData.m_Texts)
 			{
 				if (text.m_Text.empty()) return;
 
@@ -1222,7 +1222,7 @@ namespace Glory
 
 				Mesh* pMesh = pResourceManager->CreateMesh(iter->second.get());
 				pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
-			}
+			}*/
 
 			pPipeline->UnUse();
 		}
@@ -1294,7 +1294,7 @@ namespace Glory
 				}
 			}
 
-			for (const TextRenderData& text : pipelineRenderData.m_Texts)
+			/*for (const TextRenderData& text : pipelineRenderData.m_Texts)
 			{
 				if (text.m_Text.empty()) return;
 
@@ -1345,7 +1345,7 @@ namespace Glory
 
 				Mesh* pMesh = pResourceManager->CreateMesh(iter->second.get());
 				pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
-			}
+			}*/
 
 			pPipeline->UnUse();
 		}
