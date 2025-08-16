@@ -179,6 +179,7 @@ namespace Glory
 		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 		AssetManager& assets = pEngine->GetAssetManager();
+		const UUID objectID = pDocument->EntityUUID(entity);
 
 		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
 		const glm::vec2 size{ transform.m_Width, transform.m_Height };
@@ -189,9 +190,7 @@ namespace Glory
 
 		Constraints::ProcessConstraint(pComponent.m_Scale, size, transform.m_ParentSize, screenSize);
 
-		TextRenderData textData;
-		textData.m_FontID = pComponent.m_Font.AssetUUID();
-		textData.m_ObjectID = entity;
+		TextData textData;
 		textData.m_Text = pComponent.m_Text;
 		textData.m_TextDirty = pComponent.m_Dirty;
 		textData.m_Scale = float(pComponent.m_Scale);
@@ -202,7 +201,7 @@ namespace Glory
 
 		FontData* pFont = pComponent.m_Font.Get(&assets);
 		if (!pFont) return;
-		MeshData* pMeshData = pDocument->GetTextMesh(textData, pFont);
+		MeshData* pMeshData = pDocument->GetTextMesh(objectID, textData, pFont);
 		Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
 
 		const uint32_t height = pFont->FontHeight();
@@ -231,7 +230,7 @@ namespace Glory
 		pMaterial->SetProperties(pEngine);
 		pMaterial->SetObjectData(object);
 
-		InternalTexture* pTextureData = pFont->GetGlyphTexture();
+		TextureData* pTextureData = pFont->GetGlyphTexture(assets);
 		if (!pTextureData) return;
 
 		Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);

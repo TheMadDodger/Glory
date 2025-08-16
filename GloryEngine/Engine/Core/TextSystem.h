@@ -17,6 +17,7 @@ namespace Glory
     class TextSystem
     {
     public:
+        static void OnDisableDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, TextComponent& pComponent);
         static void OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, TextComponent& pComponent);
         static void GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references);
     };

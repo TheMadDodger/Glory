@@ -151,23 +151,6 @@ namespace Glory
 		OnSubmitDynamic(renderData);
 	}
 
-	void RendererModule::SubmitDynamic(TextRenderData&& renderData)
-	{
-		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(TextRenderData)" };
-
-		const UUID pipelineID = TextPipelineID();
-		/* Can't render anything without a pipeline */
-		if (!pipelineID) return;
-
-		auto& iter = std::find_if(m_DynamicPipelineRenderDatas.begin(), m_DynamicPipelineRenderDatas.end(),
-			[pipelineID](const PipelineBatch& data) { return data.m_PipelineID == pipelineID; });
-		PipelineBatch& pipelineRenderData = iter == m_DynamicPipelineRenderDatas.end() ?
-			m_DynamicPipelineRenderDatas.emplace_back(pipelineID) : *iter;
-
-		pipelineRenderData.m_Texts.emplace_back(std::move(renderData));
-		pipelineRenderData.m_Dirty = true;
-	}
-
 	void RendererModule::SubmitLate(RenderData&& renderData)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::SubmitLate(RenderData)" };
@@ -739,7 +722,6 @@ namespace Glory
 		m_Meshes.clear();
 		m_UniqueMeshOrder.clear();
 		m_UniqueMaterials.clear();
-		m_Texts.clear();
 		m_Dirty = true;
 	}
 }

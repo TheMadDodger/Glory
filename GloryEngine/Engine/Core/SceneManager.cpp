@@ -248,6 +248,7 @@ namespace Glory
 		m_pComponentTypesInstance->RegisterInvokaction<Spin>(Glory::Utils::ECS::InvocationType::Update, SpinSystem::OnUpdate);
 
 		/* Text Renderer */
+		m_pComponentTypesInstance->RegisterInvokaction<TextComponent>(Glory::Utils::ECS::InvocationType::OnDisableDraw, TextSystem::OnDisableDraw);
 		m_pComponentTypesInstance->RegisterInvokaction<TextComponent>(Glory::Utils::ECS::InvocationType::Draw, TextSystem::OnDraw);
 		m_pComponentTypesInstance->RegisterReferencesCallback<TextComponent>(TextSystem::GetReferences);
 
