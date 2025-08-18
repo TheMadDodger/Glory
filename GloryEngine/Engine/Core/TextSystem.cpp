@@ -7,12 +7,21 @@
 #include "Engine.h"
 #include "Components.h"
 #include "RenderData.h"
+#include "AssetManager.h"
 
 #include <TypeView.h>
 #include <EntityRegistry.h>
 
 namespace Glory
 {
+	void TextSystem::OnDisableDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, TextComponent& pComponent)
+	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		const UUID meshID = pScene->GetEntityUUID(entity);
+		pEngine->GetAssetManager().UnloadAsset(meshID);
+	}
+
 	void TextSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, TextComponent& pComponent)
 	{
 		if (!pComponent.m_Font || pComponent.m_Text.empty()) return;
@@ -33,19 +42,41 @@ namespace Glory
 			mask = layer.m_Layer.Layer(pLayers) != nullptr ? layer.m_Layer.Layer(pLayers)->m_Mask : 0;
 		}
 
-		TextRenderData renderData;
-		renderData.m_FontID = pComponent.m_Font.AssetUUID();
+		const UUID fontID = pComponent.m_Font.AssetUUID();
+
+		TextData textData;
+		textData.m_Text = pComponent.m_Text;
+		textData.m_TextDirty = pComponent.m_Dirty;
+		textData.m_Scale = pComponent.m_Scale;
+		textData.m_Alignment = pComponent.m_Alignment;
+		textData.m_TextWrap = pComponent.m_WrapWidth;
+		textData.m_Color = pComponent.m_Color;
+		pComponent.m_Dirty = false;
+
+		RenderData renderData;
 		renderData.m_World = transform.MatTransform;
 		renderData.m_LayerMask = mask;
 		renderData.m_ObjectID = pScene->GetEntityUUID(entity);
 		renderData.m_SceneID = pScene->GetUUID();
-		renderData.m_Text = pComponent.m_Text;
-		renderData.m_TextDirty = pComponent.m_Dirty;
-		renderData.m_Scale = pComponent.m_Scale;
-		renderData.m_Alignment = pComponent.m_Alignment;
-		renderData.m_TextWrap = pComponent.m_WrapWidth;
-		renderData.m_Color = pComponent.m_Color;
-		pComponent.m_Dirty = false;
+		renderData.m_MeshID = renderData.m_ObjectID;
+		renderData.m_MaterialID = pFont->Material();
+
+		Resource* pMeshResource = pEngine->GetAssetManager().FindResource(renderData.m_MeshID);
+		if (!pMeshResource)
+		{
+			pMeshResource = new MeshData(textData.m_Text.size()*4, sizeof(VertexPosColorTex),
+				{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+			pMeshResource->SetResourceUUID(renderData.m_MeshID);
+			pEngine->GetAssetManager().AddLoadedResource(pMeshResource);
+			textData.m_TextDirty = true;
+		}
+
+		if (textData.m_TextDirty)
+		{
+			MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+			const float textWrap = textData.m_TextWrap*textData.m_Scale*pFont->FontHeight();
+			Utils::GenerateTextMesh(pMeshData, pFont, textData, textWrap);
+		}
 
 		REQUIRE_MODULE_CALL(pEngine, RendererModule, SubmitDynamic(std::move(renderData)), );
 	}

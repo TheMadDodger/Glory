@@ -73,6 +73,8 @@ namespace Glory
 		void GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera);
 		void GenerateDomeSamplePointsSSBO(GPUResourceManager* pResourceManager, uint32_t size);
 
+		void RenderBatches(const std::vector<PipelineBatch>& batches, const glm::mat4& view, const glm::mat4& projection);
+
 		void ShadowMapsPass(CameraRef camera, const RenderFrame& frameData);
 		void RenderShadows(size_t lightIndex, const RenderFrame& frameData);
 		//void RenderShadow(size_t lightIndex, const RenderFrame& frameData, const RenderData& objectToRender);

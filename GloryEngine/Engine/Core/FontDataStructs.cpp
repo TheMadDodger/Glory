@@ -9,15 +9,15 @@
 
 namespace Glory::Utils
 {
-	void GenerateTextMesh(MeshData* pMesh, FontData* pFontData, const TextRenderData& renderData, float textWrap)
+	void GenerateTextMesh(MeshData* pMesh, FontData* pFontData, const TextData& textData, float textWrap)
 	{
-		const std::string_view text = renderData.m_Text;
-		const glm::vec4& color = renderData.m_Color;
-		const float scale = renderData.m_Scale;
-		const Alignment alignment = renderData.m_Alignment;
-		textWrap = textWrap > 0.0f ? textWrap : renderData.m_TextWrap/scale;
+		const std::string_view text = textData.m_Text;
+		const glm::vec4& color = textData.m_Color;
+		const float scale = textData.m_Scale;
+		const Alignment alignment = textData.m_Alignment;
+		textWrap = textWrap > 0.0f ? textWrap : textData.m_TextWrap/scale;
 
-		if (!renderData.m_Append)
+		if (!textData.m_Append)
 		{
 			pMesh->ClearVertices();
 			pMesh->ClearIndices();
@@ -73,8 +73,8 @@ namespace Glory::Utils
 
 				if (!glyph) continue;
 
-				const float xpos = renderData.m_Offsets.x + writeX + glyph->Bearing.x * scale;
-				const float ypos = renderData.m_Offsets.y + writeY - (glyph->Size.y - glyph->Bearing.y) * scale;
+				const float xpos = textData.m_Offsets.x + writeX + glyph->Bearing.x * scale;
+				const float ypos = textData.m_Offsets.y + writeY - (glyph->Size.y - glyph->Bearing.y) * scale;
 
 				const float w = glyph->Size.x * scale;
 				const float h = glyph->Size.y * scale;

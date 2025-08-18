@@ -1,10 +1,13 @@
 #include "FontImporter.h"
+#include "EditorPipelineManager.h"
 
 #include <EditorApplication.h>
 #include <Engine.h>
 #include <Debug.h>
 #include <FileLoaderModule.h>
 #include <InternalTexture.h>
+#include <MaterialData.h>
+#include <PipelineData.h>
 
 #include <glm/ext/vector_int2.hpp>
 #include <freetype2/ft2build.h>
@@ -102,15 +105,32 @@ namespace Glory::Editor
 
 		ImageData* pImageData = new ImageData(width, height,
 			PixelFormat::PF_R, PixelFormat::PF_R, 1, std::move(texturePixels), width*height);
-		InternalTexture* pTexture = new InternalTexture(pImageData);
+
+		FontData* pFont = new FontData(fontHeight, std::move(characterCodes), std::move(glyphs));
+		ImportedResource resource = { path, pFont };
+		resource.AddChild(pImageData, "Image");
+		TextureData* pTexture = new TextureData(pImageData);
 		SamplerSettings& sampler = pTexture->GetSamplerSettings();
 		sampler.MipmapMode = Filter::F_None;
-
-		FontData* pFont = new FontData(fontHeight, std::move(characterCodes), std::move(glyphs), pTexture);
+		resource.AddChild(pTexture, "Texture");
+		pFont->SetTexture(pTexture->GetUUID());
 
 		FT_Done_Face(face);
 		delete pFileData;
-		return { path, pFont };
+
+		EditorPipelineManager& pipelines = EditorApplication::GetInstance()->GetPipelineManager();
+		const UUID pipelineID = pipelines.FindPipeline(PipelineType::PT_Text, true);
+
+		if (!pipelineID) return resource;
+		PipelineData* pPipeline = pipelines.GetPipelineData(pipelineID);
+		MaterialData* pDefaultMaterial = new MaterialData();
+		pDefaultMaterial->SetPipeline(pipelineID);
+		pPipeline->LoadIntoMaterial(pDefaultMaterial);
+		resource.AddChild(pDefaultMaterial, "Material");
+		pFont->SetMaterial(pDefaultMaterial->GetUUID());
+		pDefaultMaterial->SetTexture("texSampler", pTexture->GetUUID());
+
+		return resource;
 	}
 
 	void FontImporter::Initialize()

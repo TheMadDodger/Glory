@@ -261,10 +261,9 @@ namespace Glory
 			m_pInputTextBracketMesh.reset(new MeshData(4, sizeof(VertexPosColorTex),
 				{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }));
 
-			TextRenderData textData;
+			TextData textData;
 			textData.m_Color = glm::vec4(1.0f);
 			textData.m_Text = "]";
-			textData.m_FontID = consoleFont;
 			textData.m_TextWrap = 0.0f;
 			textData.m_Alignment = Alignment::Left;
 			textData.m_Scale = textScale;
@@ -279,10 +278,9 @@ namespace Glory
 			m_pInputTextCursorMesh.reset(new MeshData(4, sizeof(VertexPosColorTex),
 				{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 }));
 
-			TextRenderData textData;
+			TextData textData;
 			textData.m_Color = glm::vec4(1.0f);
 			textData.m_Text = "|";
-			textData.m_FontID = consoleFont;
 			textData.m_TextWrap = 0.0f;
 			textData.m_Alignment = Alignment::Left;
 			textData.m_Scale = textScale;
@@ -303,10 +301,9 @@ namespace Glory
 
 			for (size_t i = 0; i < lastLine - firstLine; ++i)
 			{
-				TextRenderData textData;
+				TextData textData;
 				textData.m_Color = console.LineColor(firstLine + i);
 				textData.m_Text = console.Line(firstLine + i);
-				textData.m_FontID = consoleFont;
 				textData.m_TextWrap = 0.0f;
 				textData.m_Alignment = Alignment::Left;
 				textData.m_Scale = textScale;
@@ -320,10 +317,9 @@ namespace Glory
 
 		if (m_InputTextDirty && m_CursorPos > 0)
 		{
-			TextRenderData textData;
+			TextData textData;
 			textData.m_Color = glm::vec4(1.0f);
 			textData.m_Text = m_ConsoleInput;
-			textData.m_FontID = consoleFont;
 			textData.m_TextWrap = 0.0f;
 			textData.m_Alignment = Alignment::Left;
 			textData.m_Scale = textScale;
@@ -369,7 +365,7 @@ namespace Glory
 		object.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, windowHeight + animatedConsoleHeight - textStart, 0.0f));
 		pMaterial->SetObjectData(object);
 
-		InternalTexture* pTextureData = pFont->GetGlyphTexture();
+		TextureData* pTextureData = pFont->GetGlyphTexture(m_pEngine->GetAssetManager());
 		if (!pTextureData) return;
 
 		Texture* pTexture = pGPUResourceManager->CreateTexture((TextureData*)pTextureData);

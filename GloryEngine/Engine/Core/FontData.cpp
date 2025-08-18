@@ -1,17 +1,19 @@
 #include "FontData.h"
 #include "BinaryStream.h"
-#include "InternalTexture.h"
+#include "AssetManager.h"
+#include "TextureData.h"
 
 namespace Glory
 {
-	FontData::FontData(): m_FontHeight(0), m_pTexture(nullptr)
+	FontData::FontData(): m_FontHeight(0), m_Texture(0), m_Material(0)
 	{
 		APPEND_TYPE(FontData);
 	}
 	
 	FontData::FontData(uint32_t height, std::vector<uint64_t>&& characterCodes,
-		std::vector<GlyphData>&& chars, InternalTexture* pTexture):
-		m_FontHeight(height), m_CharacterCodes(std::move(characterCodes)), m_Glyphs(std::move(chars)), m_pTexture(pTexture)
+		std::vector<GlyphData>&& chars):
+		m_FontHeight(height), m_CharacterCodes(std::move(characterCodes)),
+		m_Glyphs(std::move(chars)), m_Texture(0), m_Material(0)
 	{
 		APPEND_TYPE(FontData);
 	}
@@ -19,11 +21,6 @@ namespace Glory
 	FontData::~FontData()
 	{
 		m_Glyphs.clear();
-		if (m_pTexture)
-		{
-			delete m_pTexture;
-			m_pTexture = nullptr;
-		}
 	}
 
 	uint32_t FontData::FontHeight() const
@@ -44,24 +41,50 @@ namespace Glory
 		return &m_Glyphs[index];
 	}
 
-	InternalTexture* FontData::GetGlyphTexture() const
+	TextureData* FontData::GetGlyphTexture(AssetManager& assets) const
 	{
-		return m_pTexture;
+		Resource* pResource = assets.FindResource(m_Texture);
+		return pResource ? static_cast<TextureData*>(pResource) : nullptr;
+	}
+
+	void FontData::SetTexture(UUID texture)
+	{
+		m_Texture = texture;
+	}
+
+	void FontData::SetMaterial(UUID material)
+	{
+		m_Material = material;
+	}
+
+	UUID FontData::Texture()
+	{
+		return m_Texture;
+	}
+
+	UUID FontData::Material()
+	{
+		return m_Material;
 	}
 
 	void FontData::Serialize(BinaryStream& container) const
 	{
-		container.Write(m_FontHeight).Write(m_Glyphs);
-		m_pTexture->Serialize(container);
+		container.Write(m_FontHeight).Write(m_Glyphs).
+			Write(m_Texture).Write(m_Material);
 	}
 
 	void FontData::Deserialize(BinaryStream& container)
 	{
-		container.Read(m_FontHeight).Read(m_Glyphs);
-		if (!m_pTexture) m_pTexture = new InternalTexture();
-		m_pTexture->Deserialize(container);
+		container.Read(m_FontHeight).Read(m_Glyphs).
+			Read(m_Texture).Read(m_Material);
 		m_CharacterCodes.resize(m_Glyphs.size());
 		for (size_t i = 0; i < m_CharacterCodes.size(); ++i)
 			m_CharacterCodes[i] = m_Glyphs[i].Code;
+	}
+
+	void FontData::References(Engine* pEngine, std::vector<UUID>& references) const
+	{
+		if (m_Texture) references.push_back(m_Texture);
+		if (m_Material) references.push_back(m_Material);
 	}
 }

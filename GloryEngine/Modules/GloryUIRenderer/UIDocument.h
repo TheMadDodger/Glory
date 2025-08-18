@@ -16,7 +16,7 @@ namespace Glory
 	class MeshData;
 	class FontData;
 	class GraphicsModule;
-	struct TextRenderData;
+	struct TextData;
 
 	/** @brief Renderable copy of a UI document */
 	class UIDocument
@@ -36,7 +36,7 @@ namespace Glory
 		GLORY_API glm::mat4& Projection();
 		GLORY_API const glm::mat4& Projection() const;
 
-		GLORY_API MeshData* GetTextMesh(const TextRenderData& data, FontData* pFont);
+		GLORY_API MeshData* GetTextMesh(UUID objectID, const TextData& data, FontData* pFont);
 
 		GLORY_API void SetRenderTexture(RenderTexture* pTexture);
 
