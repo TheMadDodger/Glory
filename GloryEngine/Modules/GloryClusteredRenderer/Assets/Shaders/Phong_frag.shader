@@ -13,12 +13,6 @@ struct Material
 
 #include "Internal/Material.glsl"
 
-layout(binding = 10, std430) readonly buffer PropertiesSSBO
-{
-	vec4 Color;
-	float Shininess;
-} Properties;
-
 layout(location = 0) in vec3 normal;
 layout(location = 1) in vec4 inColor;
 

@@ -14,12 +14,6 @@ struct Material
 
 #include "Internal/Material.glsl"
 
-layout(std430, binding = 10) readonly buffer PropertiesSSBO
-{
-	vec4 Color;
-	float Shininess;
-} Properties;
-
 layout(binding = 0) uniform sampler2D texSampler;
 layout(binding = 1) uniform sampler2D normalSampler;
 layout(binding = 2) uniform sampler2D shininessSampler;

@@ -34,7 +34,6 @@ project "GloryCore"
 		["Modules/ResourceLoading/Base"] = { "ImportSettings.*", "Resource.*", "ResourceLoaderModule.*" },
 		["Modules/ResourceLoading/File"] = { "FileLoaderModule.*" },
 		["Modules/ResourceLoading/Models"] = { "ModelLoaderModule.*" },
-		["Modules/ResourceLoading/Shaders"] = { "ShaderCrossCompiler.*" },
 		["Modules/ResourceLoading/Textures"] = { "TextureDataLoaderModule.*" },
 		["Modules/Window"] = { "Window.*", "WindowModule.*" },
 		["Modules/Input"] = { "InputModule.*", "Input.*", "KeyEnums.*", "PlayerInput.*" },
