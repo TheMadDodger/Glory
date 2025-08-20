@@ -89,9 +89,9 @@ namespace Glory
 		void RenderBatches(const std::vector<PipelineBatch>& batches, const std::vector<PipelineBatchData>& batchDatas, size_t cameraIndex);
 
 		void PrepareDataPass();
+		void PrepareBatches(const std::vector<PipelineBatch>& batches, std::vector<PipelineBatchData>& batchDatas);
 		void ShadowMapsPass(uint32_t cameraIndex);
 		void RenderShadows(size_t lightIndex, const RenderFrame& frameData);
-		//void RenderShadow(size_t lightIndex, const RenderFrame& frameData, const RenderData& objectToRender);
 
 		void GenerateShadowLODDivisions(uint32_t maxLODs);
 		void GenerateShadowMapLODResolutions();

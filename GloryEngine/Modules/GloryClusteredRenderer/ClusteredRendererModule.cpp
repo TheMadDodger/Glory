@@ -490,14 +490,14 @@ namespace Glory
 		float zNear = camera.GetNear();
 		float zFar = camera.GetFar();
 
-		const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x / (float)gridSize.x), (uint32_t)std::ceilf(resolution.y / (float)gridSize.y));
+		const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x/(float)gridSize.x), (uint32_t)std::ceilf(resolution.y/(float)gridSize.y));
 		ScreenToView screenToView;
 		screenToView.ProjectionInverse = camera.GetProjectionInverse();
 		screenToView.ViewInverse = camera.GetViewInverse();
 		screenToView.ScreenDimensions = resolution;
 		screenToView.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
-		screenToView.Scale = (float)gridSize.z / std::log2f(zFar / zNear);
-		screenToView.Bias = -((float)gridSize.z * std::log2f(zNear) / std::log2f(zFar / zNear));
+		screenToView.Scale = (float)gridSize.z/std::log2f(zFar/zNear);
+		screenToView.Bias = -((float)gridSize.z*std::log2f(zNear)/std::log2f(zFar/zNear));
 		screenToView.zNear = zNear;
 		screenToView.zFar = zFar;
 
@@ -627,14 +627,14 @@ namespace Glory
 		float zNear = camera.GetNear();
 		float zFar = camera.GetFar();
 
-		const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x / (float)gridSize.x), (uint32_t)std::ceilf(resolution.y / (float)gridSize.y));
+		const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x/(float)gridSize.x), (uint32_t)std::ceilf(resolution.y/(float)gridSize.y));
 		ScreenToView screenToView;
 		screenToView.ProjectionInverse = camera.GetProjectionInverse();
 		screenToView.ViewInverse = camera.GetViewInverse();
 		screenToView.ScreenDimensions = resolution;
 		screenToView.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
-		screenToView.Scale = (float)gridSize.z / std::log2f(zFar / zNear);
-		screenToView.Bias = -((float)gridSize.z * std::log2f(zNear) / std::log2f(zFar / zNear));
+		screenToView.Scale = (float)gridSize.z/std::log2f(zFar/zNear);
+		screenToView.Bias = -((float)gridSize.z*std::log2f(zNear)/std::log2f(zFar/zNear));
 		screenToView.zNear = zNear;
 		screenToView.zFar = zFar;
 
@@ -688,14 +688,14 @@ namespace Glory
 		const float zNear = camera.GetNear();
 		const float zFar = camera.GetFar();
 
-		const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x / (float)gridSize.x), (uint32_t)std::ceilf(resolution.y / (float)gridSize.y));
+		const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x/(float)gridSize.x), (uint32_t)std::ceilf(resolution.y/(float)gridSize.y));
 		ScreenToView screenToView;
 		screenToView.ProjectionInverse = camera.GetProjectionInverse();
 		screenToView.ViewInverse = camera.GetViewInverse();
 		screenToView.ScreenDimensions = resolution;
 		screenToView.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
-		screenToView.Scale = (float)gridSize.z / std::log2f(zFar / zNear);
-		screenToView.Bias = -((float)gridSize.z * std::log2f(zNear) / std::log2f(zFar / zNear));
+		screenToView.Scale = (float)gridSize.z/std::log2f(zFar/zNear);
+		screenToView.Bias = -((float)gridSize.z*std::log2f(zNear)/std::log2f(zFar/zNear));
 		screenToView.zNear = zNear;
 		screenToView.zFar = zFar;
 
@@ -731,8 +731,8 @@ namespace Glory
 		for (unsigned int i = 0; i < m_SSAOKernelSize; ++i)
 		{
 			samplePoints[i] = glm::vec3{
-				randomFloats(generator) * 2.0 - 1.0,
-				randomFloats(generator) * 2.0 - 1.0,
+				randomFloats(generator)*2.0 - 1.0,
+				randomFloats(generator)*2.0 - 1.0,
 				randomFloats(generator)
 			};
 			samplePoints[i] = glm::normalize(samplePoints[i]);
@@ -744,7 +744,7 @@ namespace Glory
 		}
 
 		m_pSamplePointsDomeSSBO->BindForDraw();
-		m_pSamplePointsDomeSSBO->Assign(samplePoints.data(), 0, sizeof(glm::vec3) * m_SSAOKernelSize);
+		m_pSamplePointsDomeSSBO->Assign(samplePoints.data(), 0, sizeof(glm::vec3)*m_SSAOKernelSize);
 		m_pSamplePointsDomeSSBO->Unbind();
 
 		const size_t textureSize = 4;
@@ -753,8 +753,8 @@ namespace Glory
 		for (unsigned int i = 0; i < textureSize*textureSize; ++i)
 		{
 			glm::vec3 noise(
-				randomFloats(generator) * 2.0 - 1.0,
-				randomFloats(generator) * 2.0 - 1.0,
+				randomFloats(generator)*2.0 - 1.0,
+				randomFloats(generator)*2.0 - 1.0,
 				0.0f);
 			ssaoNoise.push_back(noise);
 		}
@@ -853,7 +853,7 @@ namespace Glory
 					pMaterialData->GetFinalBufferReference(materialManager).data(), propertyDataSize) == 0)
 					continue;
 
-				pMaterialData->CopyProperties(materialManager, &pipelineRenderData.m_PropertiesBuffer.m_Data[i * finalPropertyDataSize]);
+				pMaterialData->CopyProperties(materialManager, &pipelineRenderData.m_PropertiesBuffer.m_Data[i*finalPropertyDataSize]);
 				pipelineRenderData.m_PropertiesBuffer.m_Dirty = true;
 			}
 
@@ -867,45 +867,25 @@ namespace Glory
 		}
 	}
 
-	void ClusteredRendererModule::PrepareDataPass()
+	void ClusteredRendererModule::PrepareBatches(const std::vector<PipelineBatch>& batches, std::vector<PipelineBatchData>& batchDatas)
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 		MaterialManager& materials = m_pEngine->GetMaterialManager();
 		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
 
-		/* Update light data */
-		const uint32_t count = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
-		m_pLightCountSSBO->Assign(&count, 0, sizeof(uint32_t));
-		m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS * sizeof(LightData));
-		m_pLightSpaceTransformsSSBO->Assign(m_FrameData.LightSpaceTransforms.data(), 0, MAX_LIGHTS*sizeof(glm::mat4));
-		m_pLightDistancesSSBO->Assign(ResetLightDistances);
-
-		if (m_LightCameraDatas->size() < m_FrameData.LightSpaceTransforms.count()) m_LightCameraDatas.resize(m_FrameData.LightSpaceTransforms.count());
-		for (size_t i = 0; i < m_FrameData.LightSpaceTransforms.count(); ++i)
-		{
-			m_LightCameraDatas.m_Data[i].m_View = glm::identity<glm::mat4>();
-			if (m_LightCameraDatas.m_Data[i].m_Projection != m_FrameData.LightSpaceTransforms[i])
-			{
-				m_LightCameraDatas.m_Data[i].m_Projection = m_FrameData.LightSpaceTransforms[i];
-				m_LightCameraDatas.m_Dirty = true;
-			}
-		}
-		if (m_LightCameraDatas)
-			m_pLightCameraDatasBuffer->Assign(m_LightCameraDatas->data(), m_LightCameraDatas->size()*sizeof(PerCameraData));
-
 		/* Prepare dynamic data */
 		size_t batchIndex = 0;
-		m_DynamicBatchData.reserve(m_DynamicPipelineRenderDatas.size());
-		for (auto& pipelineBatch : m_DynamicPipelineRenderDatas)
+		batchDatas.reserve(batches.size());
+		for (const auto& pipelineBatch : batches)
 		{
-			if (batchIndex >= m_DynamicBatchData.size())
-				m_DynamicBatchData.emplace_back(PipelineBatchData{});
+			if (batchIndex >= batchDatas.size())
+				batchDatas.emplace_back(PipelineBatchData{});
 
 			PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineBatch.m_PipelineID);
 			if (!pPipelineData) continue;
 
-			PipelineBatchData& batchData = m_DynamicBatchData.at(batchIndex);
+			PipelineBatchData& batchData = batchDatas.at(batchIndex);
 			++batchIndex;
 			size_t meshIndex = 0;
 			for (const UUID meshID : pipelineBatch.m_UniqueMeshOrder)
@@ -924,7 +904,7 @@ namespace Glory
 
 			const size_t propertyDataSize = pPipelineData->TotalPropertiesByteSize();
 			const size_t textureCount = pPipelineData->ResourcePropertyCount();
-			const size_t paddingBytes = 16 - propertyDataSize%16;
+			const size_t paddingBytes = 16 - propertyDataSize % 16;
 			const size_t finalPropertyDataSize = propertyDataSize + paddingBytes;
 			const size_t totalBufferSize = finalPropertyDataSize*pipelineBatch.m_UniqueMaterials.size();
 			if (batchData.m_MaterialDatas->size() < totalBufferSize)
@@ -960,7 +940,7 @@ namespace Glory
 			}
 			if (batchData.m_Worlds)
 				batchData.m_pWorldsBuffer->Assign(batchData.m_Worlds->data(), batchData.m_Worlds->size()*sizeof(glm::mat4));
-			
+
 			if (!batchData.m_pMaterialsBuffer)
 			{
 				batchData.m_pMaterialsBuffer = pResourceManager->CreateBuffer(batchData.m_MaterialDatas->size(),
@@ -981,6 +961,14 @@ namespace Glory
 			if (textureCount && batchData.m_TextureBits)
 				batchData.m_pTextureBitsBuffer->Assign(batchData.m_TextureBits->data(), batchData.m_TextureBits->size()*sizeof(uint32_t));
 		}
+	}
+
+	void ClusteredRendererModule::PrepareDataPass()
+	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+		MaterialManager& materials = m_pEngine->GetMaterialManager();
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
 
 		/* Prepare cameras */
 		if (m_CameraDatas->size() < m_FrameData.ActiveCameras.size())
@@ -999,6 +987,29 @@ namespace Glory
 		}
 		if (m_CameraDatas)
 			m_pCameraDatasBuffer->Assign(m_CameraDatas->data(), m_CameraDatas->size()*sizeof(PerCameraData));
+
+		/* Update light data */
+		const uint32_t count = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
+		m_pLightCountSSBO->Assign(&count, 0, sizeof(uint32_t));
+		m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS*sizeof(LightData));
+		m_pLightSpaceTransformsSSBO->Assign(m_FrameData.LightSpaceTransforms.data(), 0, MAX_LIGHTS*sizeof(glm::mat4));
+		m_pLightDistancesSSBO->Assign(ResetLightDistances);
+
+		if (m_LightCameraDatas->size() < m_FrameData.LightSpaceTransforms.count()) m_LightCameraDatas.resize(m_FrameData.LightSpaceTransforms.count());
+		for (size_t i = 0; i < m_FrameData.LightSpaceTransforms.count(); ++i)
+		{
+			m_LightCameraDatas.m_Data[i].m_View = glm::identity<glm::mat4>();
+			if (m_LightCameraDatas.m_Data[i].m_Projection != m_FrameData.LightSpaceTransforms[i])
+			{
+				m_LightCameraDatas.m_Data[i].m_Projection = m_FrameData.LightSpaceTransforms[i];
+				m_LightCameraDatas.m_Dirty = true;
+			}
+		}
+		if (m_LightCameraDatas)
+			m_pLightCameraDatasBuffer->Assign(m_LightCameraDatas->data(), m_LightCameraDatas->size()*sizeof(PerCameraData));
+
+		PrepareBatches(m_DynamicPipelineRenderDatas, m_DynamicBatchData);
+		PrepareBatches(m_DynamicLatePipelineRenderDatas, m_DynamicLateBatchData);
 	}
 
 	void ClusteredRendererModule::ShadowMapsPass(uint32_t cameraIndex)
@@ -1176,7 +1187,7 @@ namespace Glory
 		pGraphics->EnableDepthWrite(true);
 		m_pRenderConstantsBuffer->BindForDraw();
 		m_pCameraDatasBuffer->BindForDraw();
-		RenderBatches(m_DynamicPipelineRenderDatas, m_DynamicLateBatchData, cameraIndex);
+		RenderBatches(m_DynamicLatePipelineRenderDatas, m_DynamicLateBatchData, cameraIndex);
 		m_pRenderConstantsBuffer->Unbind();
 		m_pCameraDatasBuffer->Unbind();
 		pGraphics->EnableDepthWrite(true);
