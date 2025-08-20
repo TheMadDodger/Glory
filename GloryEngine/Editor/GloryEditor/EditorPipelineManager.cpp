@@ -612,18 +612,18 @@ namespace Glory::Editor
 		{
 			const spirv_cross::Resource storageBuffer = resources.storage_buffers[i];
 			pEditorShader->m_StorageBuffers.push_back(storageBuffer.name);
-			if (storageBuffer.name != "PropertiesSSBO") continue;
-			const spirv_cross::SPIRType& base_type = compiler.get_type(storageBuffer.base_type_id);
-			const spirv_cross::SPIRType& type = compiler.get_type(storageBuffer.type_id);
+			if (storageBuffer.name != "MaterialSSBO") continue;
+			const spirv_cross::SPIRType& baseType = compiler.get_type(storageBuffer.base_type_id);
+			const spirv_cross::SPIRType& materialArrayType = compiler.get_type(baseType.member_types[0]);
+			if (baseType.basetype != spirv_cross::SPIRType::Struct) break;
 
-			if (base_type.basetype != spirv_cross::SPIRType::Struct) break;
-			for (uint32_t j = 0; j < (uint32_t)base_type.member_types.size(); ++j)
+			for (uint32_t j = 0; j < (uint32_t)materialArrayType.member_types.size(); ++j)
 			{
-				spirv_cross::TypeID memberType = base_type.member_types[j];
-				const spirv_cross::SPIRType& type = compiler.get_type(memberType);
-				const std::string& name = compiler.get_member_name(storageBuffer.base_type_id, j);
-				const uint32_t hash = type.vecsize - 1 < SpirBaseTypeToHashOne[type.basetype].size() ?
-					SpirBaseTypeToHashOne[type.basetype][type.vecsize - 1] : 0;
+				spirv_cross::TypeID memberTypeID = materialArrayType.member_types[j];
+				const spirv_cross::SPIRType& memberType = compiler.get_type(memberTypeID);
+				const std::string& name = compiler.get_member_name(materialArrayType.self, j);
+				const uint32_t hash = memberType.vecsize - 1 < SpirBaseTypeToHashOne[memberType.basetype].size() ?
+					SpirBaseTypeToHashOne[memberType.basetype][memberType.vecsize - 1] : 0;
 				pEditorShader->m_PropertyInfos.push_back(EditorShaderData::PropertyInfo(name, hash));
 			}
 		}

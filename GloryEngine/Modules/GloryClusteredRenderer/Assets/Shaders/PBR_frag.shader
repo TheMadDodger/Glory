@@ -19,14 +19,6 @@ struct Material
 #define FEATURE_TEXTURED
 #define FEATURE_TRANSPARENT
 
-layout(std430, binding = 10) readonly buffer PropertiesSSBO
-{
-	vec4 Color;
-	float AmbientOcclusion;
-	float RoughnessFactor;
-	float MetallicFactor;
-} Properties;
-
 #ifdef WITH_TEXTURED
 layout(binding = 0) uniform sampler2D texSampler;
 layout(binding = 1) uniform sampler2D normalSampler;
