@@ -5,13 +5,8 @@
 
 #define FEATURE_TEXTURED
 
-layout(std430, binding = 2) readonly buffer ObjectData
-{
-	mat4 model;
-	mat4 view;
-	mat4 proj;
-	uvec4 ObjectID;
-} Object;
+#include "Internal/RenderConstants.glsl"
+#include "Internal/PerObjectData.glsl"
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
@@ -30,16 +25,19 @@ layout(location = 2) out vec3 outNormal;
 
 void main()
 {
-	gl_Position = Object.proj * Object.view * Object.model * vec4(inPosition, 1.0);
+	CameraData camera = CurrentCamera();
+	mat4 world = WorldTransform();
+
+	gl_Position = camera.Projection*camera.View*world*vec4(inPosition, 1.0);
 	fragTexCoord = inTexCoord;
 
 #ifdef WITH_TEXTURED
-	vec3 T = normalize(vec3(Object.model * vec4(inTangent, 0.0)));
-	vec3 B = normalize(vec3(Object.model * vec4(inBitangent, 0.0)));
-	vec3 N = normalize(vec3(Object.model * vec4(inNormal, 0.0)));
+	vec3 T = normalize(vec3(world*vec4(inTangent, 0.0)));
+	vec3 B = normalize(vec3(world*vec4(inBitangent, 0.0)));
+	vec3 N = normalize(vec3(world*vec4(inNormal, 0.0)));
 	TBN = mat3(T, B, N);
 #else
-	outNormal = normalize(vec3(Object.model * vec4(inNormal, 0.0)));
+	outNormal = normalize(vec3(world*vec4(inNormal, 0.0)));
 #endif
 
 	outColor = inColor;

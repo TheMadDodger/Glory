@@ -3,7 +3,8 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-#include "internal/ObjectData.glsl"
+#include "Internal/RenderConstants.glsl"
+#include "Internal/PerObjectData.glsl"
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
@@ -17,7 +18,9 @@ layout(location = 1) out vec4 outColor;
 
 void main()
 {
-	gl_Position = Object.proj * Object.view * Object.model * vec4(inPosition, 1.0);
-	normal = vec3(Object.model * vec4(inNormal, 0.0));
+	CameraData camera = CurrentCamera();
+	mat4 world = WorldTransform();
+	gl_Position = camera.Projection*camera.View*world*vec4(inPosition, 1.0);
+	normal = vec3(world*vec4(inNormal, 0.0));
 	outColor = inColor;
 }

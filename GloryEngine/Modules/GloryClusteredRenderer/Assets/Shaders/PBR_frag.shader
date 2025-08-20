@@ -3,13 +3,23 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-#include "Internal/ObjectData.glsl"
-#include "Internal/Textured.glsl"
+#include "Internal/RenderConstants.glsl"
+#include "internal/Textured1.glsl"
+
+struct Material
+{
+	vec4 Color;
+	float AmbientOcclusion;
+	float RoughnessFactor;
+	float MetallicFactor;
+};
+
+#include "Internal/Material.glsl"
 
 #define FEATURE_TEXTURED
 #define FEATURE_TRANSPARENT
 
-layout(std430, binding = 1) readonly buffer PropertiesSSBO
+layout(std430, binding = 10) readonly buffer PropertiesSSBO
 {
 	vec4 Color;
 	float AmbientOcclusion;
@@ -40,26 +50,28 @@ layout(location = 5) out vec4 outData;
 
 void main()
 {
+	Material mat = GetMaterial();
+
 #ifdef WITH_TEXTURED
 
 	vec4 texColor = texture(texSampler, fragTexCoord);
 #ifdef WITH_TRANSPARENT
 	if (texColor.a < 1.0) discard;
 #endif
-	outColor = (TextureEnabled(0) ? vec4(pow(texColor.rgb, vec3(2.2)), texColor.a) : Properties.Color) * inColor;
-	vec3 normal = TextureEnabled(1) ? normalize(TBN * (texture(normalSampler, fragTexCoord).xyz * 2.0 - 1.0)) : TBN[2];
-	float ambient = TextureEnabled(2) ? texture(ambientSampler, fragTexCoord).r : Properties.AmbientOcclusion;
-	float roughness = TextureEnabled(3) ? texture(roughnessSampler, fragTexCoord).g : Properties.RoughnessFactor;
-	float metalic = TextureEnabled(4) ? texture(metalnessSampler, fragTexCoord).b : Properties.MetallicFactor;
+	outColor = (TextureEnabled(0) ? vec4(pow(texColor.rgb, vec3(2.2)), texColor.a) : mat.Color) * inColor;
+	vec3 normal = TextureEnabled(1) ? normalize(TBN*(texture(normalSampler, fragTexCoord).xyz * 2.0 - 1.0)) : TBN[2];
+	float ambient = TextureEnabled(2) ? texture(ambientSampler, fragTexCoord).r : mat.AmbientOcclusion;
+	float roughness = TextureEnabled(3) ? texture(roughnessSampler, fragTexCoord).g : mat.RoughnessFactor;
+	float metalic = TextureEnabled(4) ? texture(metalnessSampler, fragTexCoord).b : mat.MetallicFactor;
 #else
-	outColor = inColor * Properties.Color;
+	outColor = inColor*mat.Color;
 	vec3 normal = inNormal;
-	float ambient = Properties.AmbientOcclusion;
-	float roughness = Properties.RoughnessFactor;
-	float metalic = Properties.MetallicFactor;
+	float ambient = mat.AmbientOcclusion;
+	float roughness = mat.RoughnessFactor;
+	float metalic = mat.MetallicFactor;
 #endif
-	outNormal = vec4((normalize(normal) + 1.0) * 0.5, 1.0);
-	outID = Object.ObjectID;
+	outNormal = vec4((normalize(normal) + 1.0)*0.5, 1.0);
+	outID = Constants.ObjectID;
 
 	vec4 data;
 	data.r = ambient;

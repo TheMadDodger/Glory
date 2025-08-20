@@ -29,7 +29,9 @@ namespace Glory
 		/** @brief Update only samplers */
 		void SetSamplers(Engine* pEngine);
 		/** @brief Update only propertties buffer and texture bits */
-		void SetPropertiesBuffer(Engine* pEngine, uint32_t hasTexturesBinding=3);
+		void SetPropertiesBuffer(Engine* pEngine, uint32_t hasTexturesBinding=5);
+		/** @brief Update only texture bits buffer */
+		void SetTextureBitsBuffer(Engine* pEngine, uint32_t hasTexturesBinding=5);
 
 		/** @brief Set texture on material */
 		virtual void SetTexture(const std::string& name, Texture* value) = 0;

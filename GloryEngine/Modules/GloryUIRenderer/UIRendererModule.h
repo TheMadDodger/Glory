@@ -71,9 +71,9 @@ namespace Glory
 		virtual void PostInitialize() override;
 		virtual void Update() override;
 		virtual void Cleanup() override;
-		virtual void UIPrepass(CameraRef, const RenderFrame&);
-		virtual void UIWorldSpaceQuadPass(CameraRef camera, const RenderFrame&);
-		virtual void UIOverlayPass(CameraRef camera, const RenderFrame&);
+		virtual void UIPrepass();
+		virtual void UIWorldSpaceQuadPass(uint32_t cameraIndex, RendererModule* pRenderer);
+		virtual void UIOverlayPass(uint32_t cameraIndex, RendererModule* pRenderer);
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
 

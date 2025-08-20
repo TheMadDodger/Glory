@@ -39,8 +39,9 @@ namespace Glory
 	{
 		UUID m_SceneID;
 		UUID m_ObjectID;
-		uint64_t m_ObjectDataIndex;
-		uint64_t m_CameraIndex;
+		uint32_t m_ObjectDataIndex;
+		uint32_t m_CameraIndex;
+		uint32_t m_MaterialIndex;
 	};
 
 	template<typename T>
@@ -84,7 +85,7 @@ namespace Glory
 		UUID m_Mesh;
 		std::vector<glm::mat4> m_Worlds;
 		std::vector<std::pair<UUID, UUID>> m_ObjectIDs;
-		std::vector<UUID> m_Materials;
+		std::vector<uint32_t> m_MaterialIndices;
 	};
 
 	struct PipelineBatch
@@ -163,6 +164,8 @@ namespace Glory
 
 		virtual UUID TextPipelineID() const = 0;
 
+		CameraRef GetActiveCamera(uint32_t cameraIndex) const;
+
 	protected:
 		virtual void OnSubmitDynamic(const RenderData& renderData) {}
 		virtual void OnSubmit(CameraRef camera) {}
@@ -188,6 +191,7 @@ namespace Glory
 
 	protected:
 		static const uint32_t MAX_LIGHTS = 3000;
+		static const uint32_t MAX_CAMERAS = 100;
 
 	private:
 		// Run on Graphics Thread

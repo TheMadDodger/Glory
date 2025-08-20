@@ -79,7 +79,7 @@ namespace Glory::Editor
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
 		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
-		pRenderer->AddRenderPass(RenderPassType::RP_Postpass, { EnvironmentPassName, [this](CameraRef, const RenderFrame&) { EnvironmentPass(); } });
+		pRenderer->AddRenderPass(RenderPassType::RP_Postpass, { EnvironmentPassName, [this](uint32_t, RendererModule*) { EnvironmentPass(); } });
 
 		RenderTextureCreateInfo textureInfo;
 		textureInfo.HasDepth = true;

@@ -3,9 +3,17 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-#include "internal/ObjectData.glsl"
+#include "Internal/RenderConstants.glsl"
 
-layout(binding = 1, std430) readonly buffer PropertiesSSBO
+struct Material
+{
+	vec4 Color;
+	float Shininess;
+};
+
+#include "Internal/Material.glsl"
+
+layout(binding = 10, std430) readonly buffer PropertiesSSBO
 {
 	vec4 Color;
 	float Shininess;
@@ -21,9 +29,11 @@ layout(location = 5) out vec4 outData;
 
 void main()
 {
-	outColor = inColor * Properties.Color;
-	outNormal = vec4((normalize(normal) + 1.0) * 0.5, 1.0);
-	outID = Object.ObjectID;
-	outData.g = Properties.Shininess;
+	Material mat = GetMaterial();
+
+	outColor = inColor*mat.Color;
+	outNormal = vec4((normalize(normal) + 1.0)*0.5, 1.0);
+	outID = Constants.ObjectID;
+	outData.g = mat.Shininess;
 	outData.a = 1.0;
 }
