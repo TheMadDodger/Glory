@@ -4,12 +4,12 @@ struct CameraData
 	mat4 Projection;
 };
 
-layout(std140, binding = 2) readonly uniform CameraDatasUBO
+layout(set = 0, std140, binding = 2) readonly uniform CameraDatasUBO
 {
 	CameraData Cameras[100];
 };
 
-layout(std430, binding = 3) readonly buffer WorldTransformsSSBO
+layout(set = 1, std430, binding = 3) readonly buffer WorldTransformsSSBO
 {
 	mat4 Worlds[];
 };

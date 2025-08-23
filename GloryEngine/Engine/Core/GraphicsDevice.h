@@ -24,6 +24,7 @@ namespace Glory
 	typedef struct UUID RenderPassHandle;
 	typedef struct UUID ShaderHandle;
 	typedef struct UUID PipelineHandle;
+	typedef struct UUID DescriptorSetHandle;
 
 	enum BufferType
 	{
@@ -104,13 +105,14 @@ namespace Glory
 		virtual void EndRenderPass() = 0;
 		virtual void EndPipeline() = 0;
 		virtual void BindBuffer(BufferHandle buffer) = 0;
+		virtual void BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets) = 0;
 
 		virtual void DrawMesh(MeshHandle handle) = 0;
 
 	public: /* Resource caching */
-		PipelineHandle AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline, size_t stride, const std::vector<AttributeType>& attributeTypes);
+		PipelineHandle AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetHandle>&& descriptorSets,
+			size_t stride, const std::vector<AttributeType>& attributeTypes);
 		MeshHandle AcquireCachedMesh(MeshData* pMesh);
-		BufferHandle AcquireCachedPipelineBuffer(PipelineHandle pipeline, UUID bufferID, size_t bufferSize, BufferType type);
 
 	public: /* Resource mamagement */
 		
@@ -118,10 +120,11 @@ namespace Glory
 
 		/**
 		 * @brief Create a buffer on this device
+		 * @param name Name of the buffer
 		 * @param bufferSize Size of the buffer in bytes
 		 * @param type Type of the buffer
 		 */
-		virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) = 0;
+		virtual BufferHandle CreateBuffer(std::string&& name, size_t bufferSize, BufferType type) = 0;
 
 		virtual void AssignBuffer(BufferHandle handle, const void* data) = 0;
 		virtual void AssignBuffer(BufferHandle handle, const void* data, uint32_t size) = 0;
@@ -145,7 +148,10 @@ namespace Glory
 		/* Shader */
 		virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) = 0;
 		/* Pipeline */
-		virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, size_t stride, const std::vector<AttributeType>& attributeTypes) = 0;
+		virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetHandle>&& descriptorSets,
+			size_t stride, const std::vector<AttributeType>& attributeTypes) = 0;
+
+		virtual DescriptorSetHandle CreateDescriptorSet(std::vector<BufferHandle>&& bufferHandles) = 0;
 
 		/* Free memory */
 
@@ -171,7 +177,6 @@ namespace Glory
 		/* Cached handles */
 		std::map<UUID, PipelineHandle> m_PipelineHandles;
 		std::map<UUID, MeshHandle> m_MeshHandles;
-		std::map<UUID, BufferHandle> m_BufferHandles;
 
 		std::map<std::string, uint32_t> m_BindingIndices;
 	};

@@ -1,6 +1,7 @@
 #include "VulkanDevice.h"
 #include "VulkanGraphicsModule.h"
 #include "VulkanStructsConverter.h"
+#include "DescriptorAllocator.h"
 
 #include <Debug.h>
 #include <Engine.h>
@@ -9,7 +10,7 @@
 namespace Glory
 {
 	VulkanDevice::VulkanDevice(VulkanGraphicsModule* pModule, vk::PhysicalDevice physicalDevice):
-		GraphicsDevice(pModule), m_VKDevice(physicalDevice), m_DidLastSupportCheckPass(false)
+		GraphicsDevice(pModule), m_VKDevice(physicalDevice), m_DidLastSupportCheckPass(false), m_DescriptorAllocator(this)
 	{
 	}
 
@@ -341,6 +342,33 @@ namespace Glory
 
 	void VulkanDevice::BindBuffer(BufferHandle buffer)
 	{
+		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
+
+	}
+
+	void VulkanDevice::BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets)
+	{
+		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
+		if (!vkPipeline)
+		{
+			Debug().LogError("VulkanDevice::BindDescriptorSet: Invalid pipeline handle.");
+			return;
+		}
+
+		std::vector<vk::DescriptorSet> setsToBind(sets.size());
+		for (size_t i = 0; i < sets.size(); ++i)
+		{
+			VK_DescriptorSet* vkSet = m_DescriptorSets.Find(sets[i]);
+			if (!vkSet)
+			{
+				Debug().LogError("VulkanDevice::BindDescriptorSet: Invalid set handle.");
+				return;
+			}
+			setsToBind[i] = vkSet->m_VKDescriptorSet;
+		}
+
+		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
+		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, vkPipeline->m_VKLayout, 0, setsToBind.size(), setsToBind.data(), 0, nullptr);
 	}
 
 	void VulkanDevice::DrawMesh(MeshHandle handle)
@@ -377,10 +405,11 @@ namespace Glory
 			commandBuffer.draw(mesh->m_VertexCount, 1, 0, 0);
 	}
 
-	BufferHandle VulkanDevice::CreateBuffer(size_t bufferSize, BufferType type)
+	BufferHandle VulkanDevice::CreateBuffer(std::string&& name, size_t bufferSize, BufferType type)
 	{
 		BufferHandle handle;
 		VK_Buffer& buffer = m_Buffers.Emplace(handle, VK_Buffer());
+		buffer.m_Name = std::move(name);
 		buffer.m_Size = bufferSize;
 
 		vk::BufferCreateInfo bufferInfo = vk::BufferCreateInfo();
@@ -390,22 +419,22 @@ namespace Glory
 		switch (type)
 		{
 		case Glory::BT_TransferRead:
-			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferSrc;
+			buffer.m_VKUsage = bufferInfo.usage = vk::BufferUsageFlagBits::eTransferSrc;
 			break;
 		case Glory::BT_TransferWrite:
-			bufferInfo.usage = vk::BufferUsageFlagBits::eTransferDst;
+			buffer.m_VKUsage = bufferInfo.usage = vk::BufferUsageFlagBits::eTransferDst;
 			break;
 		case Glory::BT_Vertex:
-			bufferInfo.usage = vk::BufferUsageFlagBits::eVertexBuffer;
+			buffer.m_VKUsage = bufferInfo.usage = vk::BufferUsageFlagBits::eVertexBuffer;
 			break;
 		case Glory::BT_Index:
-			bufferInfo.usage = vk::BufferUsageFlagBits::eIndexBuffer;
+			buffer.m_VKUsage = bufferInfo.usage = vk::BufferUsageFlagBits::eIndexBuffer;
 			break;
 		case Glory::BT_Storage:
-			bufferInfo.usage = vk::BufferUsageFlagBits::eStorageBuffer;
+			buffer.m_VKUsage = bufferInfo.usage = vk::BufferUsageFlagBits::eStorageBuffer;
 			break;
 		case Glory::BT_Uniform:
-			bufferInfo.usage = vk::BufferUsageFlagBits::eUniformBuffer;
+			buffer.m_VKUsage = bufferInfo.usage = vk::BufferUsageFlagBits::eUniformBuffer;
 			break;
 		default:
 			break;
@@ -983,7 +1012,8 @@ namespace Glory
 		return handle;
 	}
 
-	PipelineHandle VulkanDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, size_t stride, const std::vector<AttributeType>& attributeTypes)
+	PipelineHandle VulkanDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
+		std::vector<DescriptorSetHandle>&& descriptorSets, size_t stride, const std::vector<AttributeType>& attributeTypes)
 	{
 		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
 
@@ -999,6 +1029,18 @@ namespace Glory
 		{
 			Debug().LogError("VulkanDevice::CreatePipeline: Invalid render texture handle in render pass.");
 			return NULL;
+		}
+
+		std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(descriptorSets.size());
+		for (size_t i = 0; i < descriptorSets.size(); ++i)
+		{
+			VK_DescriptorSet* vkSet = m_DescriptorSets.Find(descriptorSets[i]);
+			if (!vkSet)
+			{
+				Debug().LogError("VulkanDevice::CreatePipeline: Invalid descriptor set handle.");
+				return NULL;
+			}
+			descriptorSetLayouts[i] = vkSet->m_VKLayout;
 		}
 
 		PipelineHandle handle;
@@ -1038,9 +1080,7 @@ namespace Glory
 				.setPName(shader->m_Function.data());
 		}
 
-		std::vector<vk::DescriptorPoolSize> poolSizes;
-
-		const size_t numLayouts = pPipeline->UniformBufferCount() + pPipeline->StorageBufferCount();
+		/*const size_t numLayouts = pPipeline->UniformBufferCount() + pPipeline->StorageBufferCount();
 		std::vector<vk::DescriptorSetLayoutBinding> layoutBindings(numLayouts);
 		size_t layoutIndex = 0;
 		for (size_t i = 0; i < pPipeline->UniformBufferCount(); ++i)
@@ -1068,21 +1108,9 @@ namespace Glory
 		layoutInfo.pBindings = layoutBindings.data();
 
 		if (m_LogicalDevice.createDescriptorSetLayout(&layoutInfo, nullptr, &pipeline.m_VKDescriptorSetLayouts) != vk::Result::eSuccess)
-			throw std::runtime_error("Failed to create descriptor set layout!");
+			throw std::runtime_error("Failed to create descriptor set layout!");*/
 
-		vk::DescriptorPoolSize poolSize{};
-		poolSize.type = vk::DescriptorType::eStorageBuffer;
-		poolSize.descriptorCount = 1;
-
-		vk::DescriptorPoolCreateInfo poolInfo{};
-		poolInfo.poolSizeCount = 1;
-		poolInfo.pPoolSizes = &poolSize;
-		poolInfo.maxSets = 1;
-
-		vk::DescriptorPool descriptorPool;
-		if (m_LogicalDevice.createDescriptorPool(&poolInfo, nullptr, &descriptorPool) != vk::Result::eSuccess) {
-			throw std::runtime_error("failed to create descriptor pool!");
-		}
+		//m_DescriptorAllocator.Allocate(&pipeline.m_VKBuffersDescriptorSet, pipeline.m_VKDescriptorSetLayouts);
 
 		// Vertex input state
 		vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo()
@@ -1182,8 +1210,8 @@ namespace Glory
 		//    .setPDynamicStates(dynamicStates);
 
 		vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
-			.setSetLayoutCount(1)
-			.setPSetLayouts(&pipeline.m_VKDescriptorSetLayouts)
+			.setSetLayoutCount(static_cast<uint32_t>(descriptorSetLayouts.size()))
+			.setPSetLayouts(descriptorSetLayouts.data())
 			.setPushConstantRangeCount(0)
 			.setPPushConstantRanges(nullptr);
 
@@ -1220,6 +1248,70 @@ namespace Glory
 		std::stringstream str;
 		str << "VulkanDevice: Pipeline " << handle << " created.";
 		Debug().LogInfo(str.str());
+
+		return handle;
+	}
+
+	DescriptorSetHandle VulkanDevice::CreateDescriptorSet(std::vector<BufferHandle>&& bufferHandles)
+	{
+		std::vector<vk::DescriptorSetLayoutBinding> layoutBindings(bufferHandles.size());
+		std::vector<vk::WriteDescriptorSet> descriptorWrites(bufferHandles.size());
+		std::vector<vk::DescriptorBufferInfo> bufferInfos(bufferHandles.size());
+		for (size_t i = 0; i < bufferHandles.size(); ++i)
+		{
+			VK_Buffer* vkBuffer = m_Buffers.Find(bufferHandles[i]);
+			if (!vkBuffer)
+			{
+				Debug().LogError("VulkanDevice::CreateDescriptorSet: Invalid buffer handle.");
+				return NULL;
+			}
+
+			if (vkBuffer->m_VKUsage & vk::BufferUsageFlagBits::eUniformBuffer)
+			{
+				layoutBindings[i].descriptorType = vk::DescriptorType::eUniformBuffer;
+			}
+			else if (vkBuffer->m_VKUsage & vk::BufferUsageFlagBits::eStorageBuffer)
+			{
+				layoutBindings[i].descriptorType = vk::DescriptorType::eStorageBuffer;
+			}
+			else
+				layoutBindings[i].descriptorType = vk::DescriptorType(0);
+
+			layoutBindings[i].binding = BindingIndex(vkBuffer->m_Name);
+			layoutBindings[i].descriptorCount = 1;
+			/** @todo: Pass for which shaders stages the buffer is meant for */
+			layoutBindings[i].stageFlags = vk::FlagTraits<vk::ShaderStageFlagBits>::allFlags;
+
+			bufferInfos[i].buffer = vkBuffer->m_VKBuffer;
+			bufferInfos[i].offset = 0;
+			bufferInfos[i].range = vkBuffer->m_Size;
+
+			descriptorWrites[i].dstBinding = layoutBindings[i].binding;
+			descriptorWrites[i].dstArrayElement = 0;
+			descriptorWrites[i].descriptorType = layoutBindings[i].descriptorType;
+			descriptorWrites[i].descriptorCount = 1;
+			descriptorWrites[i].pBufferInfo = &bufferInfos[i];
+			descriptorWrites[i].pImageInfo = nullptr;
+			descriptorWrites[i].pTexelBufferView = nullptr;
+		}
+
+		vk::DescriptorSetLayoutCreateInfo layoutInfo{};
+		layoutInfo.bindingCount = layoutBindings.size();
+		layoutInfo.pBindings = layoutBindings.data();
+
+		DescriptorSetHandle handle;
+		VK_DescriptorSet& set = m_DescriptorSets.Emplace(handle, VK_DescriptorSet());
+
+		if (m_LogicalDevice.createDescriptorSetLayout(&layoutInfo, nullptr, &set.m_VKLayout) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreateDescriptorSet: Failed to create descriptor set layout.");
+			return NULL;
+		}
+
+		m_DescriptorAllocator.Allocate(&set.m_VKDescriptorSet, set.m_VKLayout);
+		for (size_t i = 0; i < descriptorWrites.size(); ++i)
+			descriptorWrites[i].dstSet = set.m_VKDescriptorSet;
+		m_LogicalDevice.updateDescriptorSets(descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
 
 		return handle;
 	}

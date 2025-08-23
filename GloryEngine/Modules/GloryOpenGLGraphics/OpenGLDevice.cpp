@@ -89,6 +89,54 @@ namespace Glory
 
 	void OpenGLDevice::BindBuffer(BufferHandle buffer)
 	{
+		GL_Buffer* glBuffer = m_Buffers.Find(buffer);
+		if (!glBuffer)
+		{
+			Debug().LogError("OpenGLDevice::BindBuffer: Invalid buffer handle.");
+			return;
+		}
+
+		glBindBuffer(glBuffer->m_GLTarget, glBuffer->m_GLBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		const uint32_t bindingIndex = BindingIndex(glBuffer->m_Name);
+		if (bindingIndex)
+		{
+			glBindBufferBase(glBuffer->m_GLTarget, (GLuint)bindingIndex, glBuffer->m_GLBufferID);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+	}
+
+	void OpenGLDevice::BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets)
+	{
+		for (size_t i = 0; i < sets.size(); ++i)
+		{
+			GL_DescriptorSet* glSet = m_Sets.Find(sets[i]);
+			if (!glSet)
+			{
+				Debug().LogError("OpenGLDevice::BindDescriptorSets: Invalid set handle.");
+				return;
+			}
+
+			for (size_t i = 0; i < glSet->m_Buffers.size(); ++i)
+			{
+				GL_Buffer* glBuffer = m_Buffers.Find(glSet->m_Buffers[i]);
+				if (!glBuffer)
+				{
+					Debug().LogError("OpenGLDevice::BindDescriptorSet: Invalid buffer handle.");
+					return;
+				}
+
+				glBindBuffer(glBuffer->m_GLTarget, glBuffer->m_GLBufferID);
+				OpenGLGraphicsModule::LogGLError(glGetError());
+
+				if (glSet->m_BindingIndices[i])
+				{
+					glBindBufferBase(glBuffer->m_GLTarget, (GLuint)glSet->m_BindingIndices[i], glBuffer->m_GLBufferID);
+					OpenGLGraphicsModule::LogGLError(glGetError());
+				}
+			}
+		}
 	}
 
 	void OpenGLDevice::DrawMesh(MeshHandle handle)
@@ -114,10 +162,12 @@ namespace Glory
 
 #pragma region Resource Management
 
-	BufferHandle OpenGLDevice::CreateBuffer(size_t bufferSize, BufferType type)
+	BufferHandle OpenGLDevice::CreateBuffer(std::string&& name, size_t bufferSize, BufferType type)
 	{
 		BufferHandle handle;
 		GL_Buffer& buffer = m_Buffers.Emplace(handle, GL_Buffer());
+		buffer.m_Name = std::move(name);
+
 		glGenBuffers(1, &buffer.m_GLBufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
@@ -652,7 +702,7 @@ namespace Glory
 		return handle;
 	}
 
-	PipelineHandle OpenGLDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, size_t, const std::vector<AttributeType>&)
+	PipelineHandle OpenGLDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetHandle>&&, size_t, const std::vector<AttributeType>&)
 	{
 		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
 
@@ -704,6 +754,35 @@ namespace Glory
 
 		std::stringstream str;
 		str << "OpenGLDevice: Pipeline " << handle << " created.";
+		Debug().LogInfo(str.str());
+
+		return handle;
+	}
+
+	DescriptorSetHandle OpenGLDevice::CreateDescriptorSet(std::vector<BufferHandle>&& bufferHandles)
+	{
+		std::vector<uint32_t> bindingIndices;
+		bindingIndices.resize(bufferHandles.size());
+
+		for (size_t i = 0; i < bufferHandles.size(); ++i)
+		{
+			GL_Buffer* glBuffer = m_Buffers.Find(bufferHandles[i]);
+			if (!glBuffer)
+			{
+				Debug().LogError("OpenGLDevice::CreateDescriptorSet: Invalid buffer handle.");
+				return NULL;
+			}
+
+			bindingIndices[i] = BindingIndex(glBuffer->m_Name);
+		}
+
+		DescriptorSetHandle handle;
+		GL_DescriptorSet& set = m_Sets.Emplace(handle, GL_DescriptorSet());
+		set.m_Buffers = std::move(bufferHandles);
+		set.m_BindingIndices = std::move(bindingIndices);
+
+		std::stringstream str;
+		str << "OpenGLDevice: Descriptor set " << handle << " created.";
 		Debug().LogInfo(str.str());
 
 		return handle;

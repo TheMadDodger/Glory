@@ -146,6 +146,7 @@ namespace Glory
             m_pEngine->GetDebug().LogInfo(str.str());
             str.str("");
             ++index;
+            break;
         }
 
         if (!supportedDeviceAvailable)
