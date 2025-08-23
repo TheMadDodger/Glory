@@ -4,9 +4,19 @@
 #include <MaterialData.h>
 #include <FileData.h>
 #include <glm/glm.hpp>
+#include <vector>
 
 namespace Glory
 {
+	typedef struct UUID MeshHandle;
+	typedef struct UUID PipelineHandle;
+	typedef struct UUID BufferHandle;
+	typedef struct UUID TextureHandle;
+	typedef struct UUID RenderTextureHandle;
+	typedef struct UUID RenderPassHandle;
+	typedef struct UUID ShaderHandle;
+	typedef struct UUID DescriptorSetHandle;
+
 	class PipelineData;
 	class TextureAtlas;
 
@@ -37,6 +47,21 @@ namespace Glory
 	class NullRendererModule : public RendererModule
 	{
 	public:
+		struct PipelineBatchData
+		{
+			CPUBuffer<glm::mat4> m_Worlds;
+			BufferHandle m_WorldsBuffer = 0;
+
+			std::vector<uint32_t> m_MaterialIndices;
+			CPUBuffer<char> m_MaterialDatas;
+			CPUBuffer<uint32_t> m_TextureBits;
+			BufferHandle m_MaterialsBuffer = 0;
+			BufferHandle m_TextureBitsBuffer = 0;
+
+			PipelineHandle m_Pipeline = 0;
+			DescriptorSetHandle m_Set = 0;
+		};
+
 		NullRendererModule();
 		virtual ~NullRendererModule();
 
@@ -56,6 +81,7 @@ namespace Glory
 		virtual void Initialize() override;
 		virtual void OnPostInitialize() override;
 		virtual void Update() override;
+		//virtual void Draw() override;
 
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) override;
 		virtual void OnDoCompositing(CameraRef camera, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
@@ -66,5 +92,21 @@ namespace Glory
 		virtual void OnEndCameraRender(CameraRef camera, const FrameData<LightData>& lights) override;
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
+
+		void RenderBatches(const std::vector<PipelineBatch>& batches, const std::vector<PipelineBatchData>& batchDatas, size_t cameraIndex);
+		void PrepareDataPass();
+		void PrepareBatches(const std::vector<PipelineBatch>& batches, std::vector<PipelineBatchData>& batchDatas);
+
+		void DynamicObjectsPass(uint32_t cameraIndex);
+
+	private:
+		std::vector<PipelineBatchData> m_DynamicBatchData;
+		CPUBuffer<PerCameraData> m_CameraDatas;
+		CPUBuffer<PerCameraData> m_LightCameraDatas;
+		BufferHandle m_CameraDatasBuffer = 0;
+		//BufferHandle m_LightCameraDatasBuffer = 0;
+		BufferHandle m_RenderConstantsBuffer = 0;
+
+		DescriptorSetHandle m_GlobalSet;
 	};
 }

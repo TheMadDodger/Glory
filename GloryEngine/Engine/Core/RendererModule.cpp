@@ -17,6 +17,7 @@
 #include "MaterialManager.h"
 #include "GPUTextureAtlas.h"
 #include "Window.h"
+#include "GraphicsDevice.h"
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -668,8 +669,8 @@ namespace Glory
 	{
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		if (!pGraphics) return;
-		m_pLineBuffer = pGraphics->GetResourceManager()->CreateBuffer(sizeof(LineVertex) * MAX_LINE_VERTICES, BufferBindingTarget::B_ARRAY, MemoryUsage::MU_STATIC_DRAW, 0);
-		m_pLineMesh = pGraphics->GetResourceManager()->CreateMesh(MAX_LINE_VERTICES, 0, InputRate::Vertex, 0, sizeof(LineVertex), PrimitiveType::PT_Lines, { AttributeType::Float3, AttributeType::Float4 }, m_pLineBuffer, nullptr);
+		//m_pLineBuffer = pGraphics->GetResourceManager()->CreateBuffer(sizeof(LineVertex) * MAX_LINE_VERTICES, BufferBindingTarget::B_ARRAY, MemoryUsage::MU_STATIC_DRAW, 0);
+		//m_pLineMesh = pGraphics->GetResourceManager()->CreateMesh(MAX_LINE_VERTICES, 0, InputRate::Vertex, 0, sizeof(LineVertex), PrimitiveType::PT_Lines, { AttributeType::Float3, AttributeType::Float4 }, m_pLineBuffer, nullptr);
 	}
 
 	void RendererModule::RenderLines(CameraRef camera)
@@ -703,18 +704,18 @@ namespace Glory
 
 	void RendererModule::CreateCameraRenderTextures(uint32_t width, uint32_t height, std::vector<RenderTexture*>& renderTextures)
 	{
-		GPUResourceManager* pResourceManager = m_pEngine->GetMainModule<GraphicsModule>()->GetResourceManager();
-		std::vector<RenderTextureCreateInfo> renderTextureInfos;
-		GetCameraRenderTextureInfos(renderTextureInfos);
-
-		renderTextures.resize(renderTextureInfos.size());
-
-		for (size_t i = 0; i < renderTextureInfos.size(); ++i)
-		{
-			renderTextureInfos[i].Width = width;
-			renderTextureInfos[i].Height = height;
-			renderTextures[i] = pResourceManager->CreateRenderTexture(renderTextureInfos[i]);
-		}
+		//GPUResourceManager* pResourceManager = m_pEngine->GetMainModule<GraphicsModule>()->GetResourceManager();
+		//std::vector<RenderTextureCreateInfo> renderTextureInfos;
+		//GetCameraRenderTextureInfos(renderTextureInfos);
+		//
+		//renderTextures.resize(renderTextureInfos.size());
+		//
+		//for (size_t i = 0; i < renderTextureInfos.size(); ++i)
+		//{
+		//	renderTextureInfos[i].Width = width;
+		//	renderTextureInfos[i].Height = height;
+		//	renderTextures[i] = pResourceManager->CreateRenderTexture(renderTextureInfos[i]);
+		//}
 	}
 
 	void RendererModule::GetCameraRenderTextureInfos(std::vector<RenderTextureCreateInfo>& infos)
@@ -731,8 +732,144 @@ namespace Glory
 
 	void RendererModule::Draw()
 	{
-		m_pEngine->GetDebug().SubmitLines(this, &m_pEngine->Time());
-		Render();
+		//m_pEngine->GetDebug().SubmitLines(this, &m_pEngine->Time());
+		//Render();
+
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+		if (!pDevice) return;
+
+		/* Make sure every camera has a render pass */
+		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
+		{
+			CameraRef camera = m_FrameData.ActiveCameras[i];
+
+			RenderPassHandle& renderPass = reinterpret_cast<UUID&>(camera.GetUserHandle("RenderPass"));
+			if (renderPass) continue;
+			RenderPassInfo renderPassInfo;
+			renderPassInfo.RenderTextureInfo.Width = camera.GetResolution().x;
+			renderPassInfo.RenderTextureInfo.Height = camera.GetResolution().y;
+			renderPassInfo.RenderTextureInfo.HasDepth = true;
+			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("object", PixelFormat::PF_RGBAI, PixelFormat::PF_R32G32B32A32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UInt, false));
+			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Debug", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Normal", PixelFormat::PF_RGBA, PixelFormat::PF_R16G16B16A16Sfloat, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("AOBlurred", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Data", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+			renderPass = pDevice->CreateRenderPass(renderPassInfo);
+		}
+
+		pDevice->Begin();
+
+		m_PickResults.clear();
+
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Render" };
+
+		for (auto& pass : m_RenderPasses[RP_Prepass])
+		{
+			pass.m_Callback(0, this);
+		}
+
+		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
+		{
+			CameraRef camera = m_FrameData.ActiveCameras[i];
+
+			RenderPassHandle& renderPass = reinterpret_cast<UUID&>(camera.GetUserHandle("RenderPass"));
+			pDevice->BeginRenderPass(renderPass);
+
+			//RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
+			//pRenderTexture->BindForDraw();
+			//pGraphics->Clear(camera.GetClearColor());
+
+			for (auto& pass : m_RenderPasses[RP_CameraPrepass])
+			{
+				pass.m_Callback(i, this);
+			}
+
+			//OnStartCameraRender(camera, m_FrameData.ActiveLights);
+
+			for (auto& pass : m_RenderPasses[RP_ObjectPass])
+			{
+				pass.m_Callback(i, this);
+			}
+
+			/* Picking */
+			/*for (size_t j = 0; j < m_FrameData.Picking.size(); ++j)
+			{
+				const auto& picking = m_FrameData.Picking[j];
+				if (picking.second != camera.GetUUID()) continue;
+				DoPicking(picking.first, camera);
+			}*/
+
+			//pRenderTexture->BindForDraw();
+			for (auto& pass : m_RenderPasses[RP_LateobjectPass])
+			{
+				pass.m_Callback(i, this);
+			}
+
+			/*OnEndCameraRender(camera, m_FrameData.ActiveLights);
+			pRenderTexture->UnBindForDraw();
+			OnRenderEffects(camera, pRenderTexture);*/
+
+			for (auto& pass : m_RenderPasses[RP_CameraPostpass])
+			{
+				pass.m_Callback(i, this);
+			}
+
+			pDevice->EndRenderPass();
+		}
+
+		for (auto& pass : m_RenderPasses[RP_PreCompositePass])
+		{
+			pass.m_Callback(0, this);
+		}
+
+		//for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
+		//{
+		//	CameraRef camera = m_FrameData.ActiveCameras[i];
+
+		//	RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
+		//	pRenderTexture->BindForDraw();
+		//	for (auto& pass : m_RenderPasses[RP_CameraCompositePass])
+		//	{
+		//		pass.m_Callback(i, this);
+		//	}
+		//	pRenderTexture->UnBindForDraw();
+
+		//	/* Copy to display */
+		//	int displayIndex = camera.GetDisplayIndex();
+		//	if (displayIndex == -1) continue;
+
+		//	RenderTexture* pOutputTexture = camera.GetOutputTexture();
+		//	uint32_t width, height;
+		//	pOutputTexture->GetDimensions(width, height);
+
+		//	RenderTexture* pDisplayRenderTexture = m_pEngine->GetDisplayManager().GetDisplayRenderTexture(displayIndex);
+		//	if (pDisplayRenderTexture == nullptr) continue;
+		//	m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Blit to Display");
+		//	pDisplayRenderTexture->BindForDraw();
+		//	OnDisplayCopy(pOutputTexture, width, height);
+		//	pDisplayRenderTexture->UnBindForDraw();
+		//	m_pEngine->Profiler().EndSample();
+		//}
+
+		for (auto& pass : m_RenderPasses[RP_PostCompositePass])
+		{
+			pass.m_Callback(0, this);
+		}
+
+		for (auto& pass : m_RenderPasses[RP_Postpass])
+		{
+			pass.m_Callback(0, this);
+		}
+
+		pDevice->End();
+
+		//m_LastSubmittedObjectCount = m_FrameData.ObjectsToRender.size();
+		//m_LastSubmittedCameraCount = m_FrameData.ActiveCameras.size();
+
+		//std::scoped_lock lock(m_PickLock);
+		//m_LastFramePickResults.resize(m_PickResults.size());
+		//std::memcpy(m_LastFramePickResults.data(), m_PickResults.data(), m_PickResults.size() * sizeof(PickResult));
 	}
 
 	void RendererModule::LoadSettings(ModuleSettings& settings)

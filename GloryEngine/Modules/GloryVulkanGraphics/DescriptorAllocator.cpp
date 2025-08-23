@@ -53,6 +53,7 @@ namespace Glory
 		poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
 		poolInfo.pPoolSizes = poolSizes.data();
 		poolInfo.flags = createFlags;
+		poolInfo.maxSets = count;
 
 		vk::DescriptorPool descriptorPool;
 		if (m_pDevice->LogicalDevice().createDescriptorPool(&poolInfo, nullptr, &descriptorPool) != vk::Result::eSuccess)

@@ -1,4 +1,6 @@
 #pragma once
+#include "DescriptorAllocator.h"
+
 #include <Glory.h>
 #include <GraphicsDevice.h>
 
@@ -10,9 +12,11 @@ namespace Glory
 {
     struct VK_Buffer
     {
+        std::string m_Name;
         size_t m_Size;
         vk::Buffer m_VKBuffer;
         vk::DeviceMemory m_VKMemory;
+        vk::BufferUsageFlags m_VKUsage;
     };
 
     struct VK_Mesh
@@ -59,14 +63,20 @@ namespace Glory
     {
         RenderPassHandle m_RenderPass;
         vk::DescriptorSetLayout m_VKDescriptorSetLayouts;
-        std::vector<BufferHandle> m_Buffers;
         vk::PipelineLayout m_VKLayout;
+        vk::DescriptorSet m_VKBuffersDescriptorSet;
 
         /* @todo: Create one per render pass it is being attached to? */
         vk::Pipeline m_VKPipeline;
         vk::VertexInputBindingDescription m_VertexDescription;
         std::vector<vk::VertexInputAttributeDescription> m_AttributeDescriptions;
         std::vector<ShaderHandle> m_Shaders;
+    };
+
+    struct VK_DescriptorSet
+    {
+        vk::DescriptorSetLayout m_VKLayout;
+        vk::DescriptorSet m_VKDescriptorSet;
     };
 
     class VulkanGraphicsModule;
@@ -108,11 +118,12 @@ namespace Glory
         virtual void EndRenderPass() override;
         virtual void EndPipeline() override;
         virtual void BindBuffer(BufferHandle buffer) override;
+        virtual void BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets) override;
 
         virtual void DrawMesh(MeshHandle handle) override;
 
     private: /* Resource management */
-        virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;
+        virtual BufferHandle CreateBuffer(std::string&& name, size_t bufferSize, BufferType type) override;
 
         virtual void AssignBuffer(BufferHandle handle, const void* data) override;
         virtual void AssignBuffer(BufferHandle handle, const void* data, uint32_t size) override;
@@ -127,7 +138,9 @@ namespace Glory
         virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info) override;
         virtual RenderPassHandle CreateRenderPass(const RenderPassInfo& info) override;
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
-        virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, size_t stride, const std::vector<AttributeType>& attributeTypes) override;
+        virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
+            std::vector<DescriptorSetHandle>&& descriptorSets, size_t stride, const std::vector<AttributeType>& attributeTypes) override;
+        virtual DescriptorSetHandle CreateDescriptorSet(std::vector<BufferHandle>&& bufferHandles) override;
 
         virtual void FreeBuffer(BufferHandle& handle) override;
         virtual void FreeMesh(MeshHandle& handle) override;
@@ -172,5 +185,8 @@ namespace Glory
         GraphicsResources<VK_RenderPass> m_RenderPasses;
         GraphicsResources<VK_Shader> m_Shaders;
         GraphicsResources<VK_Pipeline> m_Pipelines;
+        GraphicsResources<VK_DescriptorSet> m_DescriptorSets;
+
+        DescriptorAllocator m_DescriptorAllocator;
     };
 }

@@ -49,18 +49,19 @@ namespace Glory
 		auto iter = m_BindingIndices.find(name);
 		if (iter == m_BindingIndices.end())
 		{
-			m_pModule->GetEngine()->GetDebug().LogError("GraphicsDevice::BindingIndex: No binding index was set for " + name);
+			m_pModule->GetEngine()->GetDebug().LogWarning("GraphicsDevice::BindingIndex: No binding index was set for " + name);
 			return 0;
 		}
 		return iter->second;
 	}
 
-	PipelineHandle GraphicsDevice::AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline, size_t stride, const std::vector<AttributeType>& attributeTypes)
+	PipelineHandle GraphicsDevice::AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
+		std::vector<DescriptorSetHandle>&& descriptorSets, size_t stride, const std::vector<AttributeType>& attributeTypes)
 	{
 		auto iter = m_PipelineHandles.find(pPipeline->GetGPUUUID());
 		if (iter == m_PipelineHandles.end())
 		{
-			PipelineHandle newPipeline = CreatePipeline(renderPass, pPipeline, stride, attributeTypes);
+			PipelineHandle newPipeline = CreatePipeline(renderPass, pPipeline, std::move(descriptorSets), stride, attributeTypes);
 			iter = m_PipelineHandles.emplace(pPipeline->GetGPUUUID(), newPipeline).first;
 		}
 
@@ -87,25 +88,11 @@ namespace Glory
 		return mesh;
 	}
 
-	BufferHandle GraphicsDevice::AcquireCachedPipelineBuffer(PipelineHandle pipeline, UUID bufferID, size_t bufferSize, BufferType type)
-	{
-		const UUID combinedID = UUID(pipeline) + bufferID;
-		auto iter = m_BufferHandles.find(combinedID);
-		if (iter == m_BufferHandles.end())
-		{
-			MeshHandle newBuffer = CreateBuffer(bufferSize, type);
-			iter = m_MeshHandles.emplace(combinedID, newBuffer).first;
-		}
-
-		BufferHandle buffer = iter->second;
-		return buffer;
-	}
-
 	MeshHandle GraphicsDevice::CreateMesh(MeshData* pMeshData)
 	{
 		std::vector<BufferHandle> buffers(2);
-		buffers[0] = CreateBuffer(pMeshData->VertexCount()*pMeshData->VertexSize(), BufferType::BT_Vertex);
-		buffers[1] = CreateBuffer(pMeshData->IndexCount()*sizeof(uint32_t), BufferType::BT_Index);
+		buffers[0] = CreateBuffer("VertexBuffer", pMeshData->VertexCount()*pMeshData->VertexSize(), BufferType::BT_Vertex);
+		buffers[1] = CreateBuffer("IndexBuffer", pMeshData->IndexCount()*sizeof(uint32_t), BufferType::BT_Index);
 		AssignBuffer(buffers[0], pMeshData->Vertices(), pMeshData->VertexCount()*pMeshData->VertexSize());
 		AssignBuffer(buffers[1], pMeshData->Indices(), pMeshData->IndexCount()*sizeof(uint32_t));
 		return CreateMesh(std::move(buffers), pMeshData->VertexCount(), pMeshData->IndexCount(),

@@ -14,10 +14,10 @@ namespace Glory
 		virtual ~DescriptorAllocator();
 
 		void ResetPools();
+		void Allocate(vk::DescriptorSet* set, vk::DescriptorSetLayout layout);
 
 	private:
 		void CreatePool(size_t count, vk::DescriptorPoolCreateFlags createFlags=vk::DescriptorPoolCreateFlags(0));
-		void Allocate(vk::DescriptorSet* set, vk::DescriptorSetLayout layout);
 
 	private:
 		VulkanDevice* m_pDevice;
