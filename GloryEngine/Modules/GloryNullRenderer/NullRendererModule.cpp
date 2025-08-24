@@ -82,12 +82,26 @@ namespace Glory
 		pDevice->AddBindingIndex(MaterialBufferName, 4);
 		pDevice->AddBindingIndex(HasTextureBufferName, 6);
 
-		std::vector<BufferHandle> globalSetBuffers(2, 0);
-
-		m_RenderConstantsBuffer = globalSetBuffers[0] = pDevice->CreateBuffer(RenderConstantsBufferName, sizeof(RenderConstants), BufferType::BT_Uniform);
-		m_CameraDatasBuffer = globalSetBuffers[1] = pDevice->CreateBuffer(CameraDatasBufferName, sizeof(PerCameraData)*MAX_CAMERAS, BufferType::BT_Uniform);
+		const bool usePushConstants = pDevice->IsSupported(APIFeatures::PushConstants);
+		DescriptorSetInfo setInfo;
+		setInfo.m_Buffers.resize(usePushConstants ? 1 : 2);
+		if (!usePushConstants)
+		{
+			m_RenderConstantsBuffer = setInfo.m_Buffers[0].m_BufferHandle = pDevice->CreateBuffer(RenderConstantsBufferName, sizeof(RenderConstants), BufferType::BT_Uniform);
+			setInfo.m_Buffers[0].m_Offset = 0;
+			setInfo.m_Buffers[0].m_Size = sizeof(RenderConstants);
+		}
+		else
+		{
+			setInfo.m_PushConstantRange.m_Offset = 0;
+			setInfo.m_PushConstantRange.m_Size = sizeof(RenderConstants);
+		}
+		const size_t cameraDatasBufferIndex = usePushConstants ? 0 : 1;
+		m_CameraDatasBuffer = setInfo.m_Buffers[cameraDatasBufferIndex].m_BufferHandle = pDevice->CreateBuffer(CameraDatasBufferName, sizeof(PerCameraData)*MAX_CAMERAS, BufferType::BT_Uniform);
+		setInfo.m_Buffers[cameraDatasBufferIndex].m_Offset = 0;
+		setInfo.m_Buffers[cameraDatasBufferIndex].m_Size = sizeof(PerCameraData)*MAX_CAMERAS;
 		//m_LightCameraDatasBuffer = pDevice->CreateBuffer(CameraDatasBufferName, sizeof(PerCameraData)*MAX_LIGHTS, BufferType::BT_Uniform);
-		m_GlobalSet = pDevice->CreateDescriptorSet(std::move(globalSetBuffers));
+		m_GlobalSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 	}
 
 	void NullRendererModule::Update()
@@ -210,9 +224,11 @@ namespace Glory
 		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
 		AssetManager& assets = m_pEngine->GetAssetManager();
 
+		const bool usePushConstants = pDevice->IsSupported(APIFeatures::PushConstants);
+
 		RenderConstants constants;
 		constants.m_CameraIndex = cameraIndex;
-		pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(RenderConstants));
+		if (!usePushConstants) pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(RenderConstants));
 
 		size_t batchIndex = 0;
 		for (const PipelineBatch& pipelineRenderData : batches)
@@ -254,7 +270,10 @@ namespace Glory
 					constants.m_ObjectDataIndex = currentObject;
 					constants.m_MaterialIndex = meshBatch.m_MaterialIndices[i];
 
-					pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(RenderConstants));
+					if (usePushConstants)
+						pDevice->PushConstants(batchData.m_Pipeline, 0, sizeof(RenderConstants), &constants);
+					else
+						pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(RenderConstants));
 					//pMaterial->SetSamplers(m_pEngine);
 					//pMaterial->SetTextureBitsBuffer(m_pEngine);
 					pDevice->DrawMesh(mesh);
@@ -437,12 +456,21 @@ namespace Glory
 
 			if (!batchData.m_Set)
 			{
-				std::vector<BufferHandle> setBuffers(2 + (textureCount > 0 ? 1 : 0));
-				setBuffers[0] = batchData.m_WorldsBuffer;
-				setBuffers[1] = batchData.m_MaterialsBuffer;
+				DescriptorSetInfo setInfo;
+				setInfo.m_Buffers.resize(2 + (textureCount > 0 ? 1 : 0));
+				setInfo.m_Buffers[0].m_BufferHandle = batchData.m_WorldsBuffer;
+				setInfo.m_Buffers[0].m_Offset = 0;
+				setInfo.m_Buffers[0].m_Size = batchData.m_Worlds->size()*sizeof(glm::mat4);
+				setInfo.m_Buffers[1].m_BufferHandle = batchData.m_MaterialsBuffer;
+				setInfo.m_Buffers[1].m_Offset = 0;
+				setInfo.m_Buffers[1].m_Size = batchData.m_MaterialDatas->size();
 				if (batchData.m_TextureBitsBuffer)
-					setBuffers[2] = batchData.m_TextureBitsBuffer;
-				batchData.m_Set = pDevice->CreateDescriptorSet(std::move(setBuffers));
+				{
+					setInfo.m_Buffers[2].m_BufferHandle = batchData.m_TextureBitsBuffer;
+					setInfo.m_Buffers[2].m_Offset = 0;
+					setInfo.m_Buffers[2].m_Size = batchData.m_TextureBits->size()*sizeof(uint32_t);
+				}
+				batchData.m_Set = pDevice->CreateDescriptorSet(std::move(setInfo));
 			}
 
 			if (!batchData.m_Pipeline)

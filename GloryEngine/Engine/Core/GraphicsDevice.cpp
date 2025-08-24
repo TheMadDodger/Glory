@@ -30,7 +30,7 @@ void GraphicsDevice::Free<type##Handle>(type##Handle& handle)\
 
 namespace Glory
 {
-	GraphicsDevice::GraphicsDevice(Module* pModule): m_pModule(pModule)
+	GraphicsDevice::GraphicsDevice(Module* pModule): m_pModule(pModule), m_APIFeatures(APIFeatures::None)
 	{
 	}
 
@@ -102,5 +102,10 @@ namespace Glory
 	Debug& GraphicsDevice::Debug()
 	{
 		return m_pModule->GetEngine()->GetDebug();
+	}
+
+	bool GraphicsDevice::IsSupported(const APIFeatures& features) const
+	{
+		return m_APIFeatures.HasFlag(features);
 	}
 }

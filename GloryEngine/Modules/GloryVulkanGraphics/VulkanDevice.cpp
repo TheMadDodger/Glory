@@ -12,6 +12,7 @@ namespace Glory
 	VulkanDevice::VulkanDevice(VulkanGraphicsModule* pModule, vk::PhysicalDevice physicalDevice):
 		GraphicsDevice(pModule), m_VKDevice(physicalDevice), m_DidLastSupportCheckPass(false), m_DescriptorAllocator(this)
 	{
+		m_APIFeatures = APIFeatures::All;
 	}
 
 	VulkanDevice::~VulkanDevice()
@@ -280,6 +281,11 @@ namespace Glory
 			//clearColors[i].setDepthStencil(vk::ClearDepthStencilValue(0.0f, 0));
         }
 
+		if (renderTexture->m_HasDepthOrStencil)
+		{
+			clearColors.back().setDepthStencil(vk::ClearDepthStencilValue(1.0f, 0));
+		}
+
         vk::RenderPassBeginInfo renderPassBeginInfo = vk::RenderPassBeginInfo()
             .setRenderPass(renderPass->m_VKRenderPass)
             .setFramebuffer(renderTexture->m_VKFramebuffer)
@@ -369,6 +375,19 @@ namespace Glory
 
 		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
 		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, vkPipeline->m_VKLayout, 0, setsToBind.size(), setsToBind.data(), 0, nullptr);
+	}
+
+	void VulkanDevice::PushConstants(PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data)
+	{
+		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
+		if (!vkPipeline)
+		{
+			Debug().LogError("VulkanDevice::PushConstants: Invalid pipeline handle.");
+			return;
+		}
+
+		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
+		commandBuffer.pushConstants(vkPipeline->m_VKLayout, vk::FlagTraits<vk::ShaderStageFlagBits>::allFlags, offset, size, data);
 	}
 
 	void VulkanDevice::DrawMesh(MeshHandle handle)
@@ -1016,6 +1035,7 @@ namespace Glory
 		std::vector<DescriptorSetHandle>&& descriptorSets, size_t stride, const std::vector<AttributeType>& attributeTypes)
 	{
 		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
+		std::vector<vk::PushConstantRange> pushConstants;
 
 		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(renderPass);
 		if (!vkRenderPass)
@@ -1041,6 +1061,9 @@ namespace Glory
 				return NULL;
 			}
 			descriptorSetLayouts[i] = vkSet->m_VKLayout;
+
+			if (vkSet->m_PushConstantRange.size)
+				pushConstants.push_back(vkSet->m_PushConstantRange);
 		}
 
 		PipelineHandle handle;
@@ -1150,7 +1173,7 @@ namespace Glory
 			.setPolygonMode(vk::PolygonMode::eFill)
 			.setLineWidth(1.0f)
 			.setCullMode(vk::CullModeFlagBits::eBack)
-			.setFrontFace(vk::FrontFace::eCounterClockwise)
+			.setFrontFace(vk::FrontFace::eClockwise)
 			.setDepthBiasEnable(VK_FALSE)
 			.setDepthBiasConstantFactor(0.0f)
 			.setDepthBiasClamp(0.0f)
@@ -1212,8 +1235,8 @@ namespace Glory
 		vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
 			.setSetLayoutCount(static_cast<uint32_t>(descriptorSetLayouts.size()))
 			.setPSetLayouts(descriptorSetLayouts.data())
-			.setPushConstantRangeCount(0)
-			.setPPushConstantRanges(nullptr);
+			.setPushConstantRangeCount(static_cast<uint32_t>(pushConstants.size()))
+			.setPPushConstantRanges(pushConstants.data());
 
 		pipeline.m_VKLayout = m_LogicalDevice.createPipelineLayout(pipelineLayoutCreateInfo);
 		if (pipeline.m_VKLayout == nullptr)
@@ -1252,14 +1275,15 @@ namespace Glory
 		return handle;
 	}
 
-	DescriptorSetHandle VulkanDevice::CreateDescriptorSet(std::vector<BufferHandle>&& bufferHandles)
+	DescriptorSetHandle VulkanDevice::CreateDescriptorSet(DescriptorSetInfo&& setInfo)
 	{
-		std::vector<vk::DescriptorSetLayoutBinding> layoutBindings(bufferHandles.size());
-		std::vector<vk::WriteDescriptorSet> descriptorWrites(bufferHandles.size());
-		std::vector<vk::DescriptorBufferInfo> bufferInfos(bufferHandles.size());
-		for (size_t i = 0; i < bufferHandles.size(); ++i)
+		std::vector<vk::DescriptorSetLayoutBinding> layoutBindings(setInfo.m_Buffers.size());
+		std::vector<vk::WriteDescriptorSet> descriptorWrites(setInfo.m_Buffers.size());
+		std::vector<vk::DescriptorBufferInfo> bufferInfos(setInfo.m_Buffers.size());
+		for (size_t i = 0; i < setInfo.m_Buffers.size(); ++i)
 		{
-			VK_Buffer* vkBuffer = m_Buffers.Find(bufferHandles[i]);
+			auto& bufferInfo = setInfo.m_Buffers[i];
+			VK_Buffer* vkBuffer = m_Buffers.Find(setInfo.m_Buffers[i].m_BufferHandle);
 			if (!vkBuffer)
 			{
 				Debug().LogError("VulkanDevice::CreateDescriptorSet: Invalid buffer handle.");
@@ -1283,8 +1307,8 @@ namespace Glory
 			layoutBindings[i].stageFlags = vk::FlagTraits<vk::ShaderStageFlagBits>::allFlags;
 
 			bufferInfos[i].buffer = vkBuffer->m_VKBuffer;
-			bufferInfos[i].offset = 0;
-			bufferInfos[i].range = vkBuffer->m_Size;
+			bufferInfos[i].offset = bufferInfo.m_Offset;
+			bufferInfos[i].range = bufferInfo.m_Size;
 
 			descriptorWrites[i].dstBinding = layoutBindings[i].binding;
 			descriptorWrites[i].dstArrayElement = 0;
@@ -1312,6 +1336,10 @@ namespace Glory
 		for (size_t i = 0; i < descriptorWrites.size(); ++i)
 			descriptorWrites[i].dstSet = set.m_VKDescriptorSet;
 		m_LogicalDevice.updateDescriptorSets(descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
+
+		set.m_PushConstantRange.offset = setInfo.m_PushConstantRange.m_Offset;
+		set.m_PushConstantRange.size = setInfo.m_PushConstantRange.m_Size;
+		set.m_PushConstantRange.stageFlags = vk::FlagTraits<vk::ShaderStageFlagBits>::allFlags;
 
 		return handle;
 	}

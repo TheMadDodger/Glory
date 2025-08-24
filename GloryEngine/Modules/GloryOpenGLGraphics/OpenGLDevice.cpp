@@ -16,6 +16,7 @@ namespace Glory
 {
 	OpenGLDevice::OpenGLDevice(OpenGLGraphicsModule* pModule): GraphicsDevice(pModule)
 	{
+		m_APIFeatures = APIFeatures::All & ~APIFeatures::PushConstants;
 	}
 
 	OpenGLDevice::~OpenGLDevice()
@@ -137,6 +138,11 @@ namespace Glory
 				}
 			}
 		}
+	}
+
+	void OpenGLDevice::PushConstants(PipelineHandle, uint32_t, uint32_t, const void*)
+	{
+		Debug().LogError("OpenGLDevice::PushConstants: Not supported on OpenGL device.");
 	}
 
 	void OpenGLDevice::DrawMesh(MeshHandle handle)
@@ -759,14 +765,16 @@ namespace Glory
 		return handle;
 	}
 
-	DescriptorSetHandle OpenGLDevice::CreateDescriptorSet(std::vector<BufferHandle>&& bufferHandles)
+	DescriptorSetHandle OpenGLDevice::CreateDescriptorSet(DescriptorSetInfo&& setInfo)
 	{
 		std::vector<uint32_t> bindingIndices;
-		bindingIndices.resize(bufferHandles.size());
+		std::vector<BufferHandle> bufferHandles;
+		bindingIndices.resize(setInfo.m_Buffers.size());
+		bufferHandles.resize(setInfo.m_Buffers.size());
 
-		for (size_t i = 0; i < bufferHandles.size(); ++i)
+		for (size_t i = 0; i < setInfo.m_Buffers.size(); ++i)
 		{
-			GL_Buffer* glBuffer = m_Buffers.Find(bufferHandles[i]);
+			GL_Buffer* glBuffer = m_Buffers.Find(setInfo.m_Buffers[i].m_BufferHandle);
 			if (!glBuffer)
 			{
 				Debug().LogError("OpenGLDevice::CreateDescriptorSet: Invalid buffer handle.");
@@ -774,6 +782,7 @@ namespace Glory
 			}
 
 			bindingIndices[i] = BindingIndex(glBuffer->m_Name);
+			bufferHandles[i] = setInfo.m_Buffers[i].m_BufferHandle;
 		}
 
 		DescriptorSetHandle handle;

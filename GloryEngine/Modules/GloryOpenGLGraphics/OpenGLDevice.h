@@ -88,6 +88,7 @@ namespace Glory
         virtual void EndPipeline() override;
         virtual void BindBuffer(BufferHandle buffer) override;
         virtual void BindDescriptorSets(PipelineHandle, std::vector<DescriptorSetHandle> sets) override;
+        virtual void PushConstants(PipelineHandle, uint32_t, uint32_t, const void*) override;
 
         virtual void DrawMesh(MeshHandle handle) override;
 
@@ -109,7 +110,7 @@ namespace Glory
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
         virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetHandle>&&,
             size_t, const std::vector<AttributeType>&) override;
-        virtual DescriptorSetHandle CreateDescriptorSet(std::vector<BufferHandle>&& bufferHandles) override;
+        virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) override;
 
         virtual void FreeBuffer(BufferHandle& handle) override;
         virtual void FreeMesh(MeshHandle& handle) override;

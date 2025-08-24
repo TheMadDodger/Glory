@@ -1,6 +1,7 @@
 #pragma once
 #include "VertexDefinitions.h"
 #include "GraphicsEnums.h"
+#include "GraphicsFeatures.h"
 #include "UUID.h"
 
 namespace Glory
@@ -86,6 +87,25 @@ namespace Glory
 		RenderTextureCreateInfo RenderTextureInfo;
 	};
 
+	struct BufferDescriptor
+	{
+		BufferHandle m_BufferHandle;
+		uint32_t m_Offset;
+		uint32_t m_Size;
+	};
+
+	struct PushConstantsRange
+	{
+		uint32_t m_Offset = 0;
+		uint32_t m_Size = 0;
+	};
+
+	struct DescriptorSetInfo
+	{
+		PushConstantsRange m_PushConstantRange;
+		std::vector<BufferDescriptor> m_Buffers;
+	};
+
 	class GraphicsDevice
 	{
 	public:
@@ -97,6 +117,8 @@ namespace Glory
 
 		Debug& Debug();
 
+		virtual bool IsSupported(const APIFeatures& features) const;
+
 	public: /* Rendering commands */
 		virtual void Begin() = 0;
 		virtual void BeginRenderPass(RenderPassHandle handle) = 0;
@@ -106,6 +128,7 @@ namespace Glory
 		virtual void EndPipeline() = 0;
 		virtual void BindBuffer(BufferHandle buffer) = 0;
 		virtual void BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets) = 0;
+		virtual void PushConstants(PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data) = 0;
 
 		virtual void DrawMesh(MeshHandle handle) = 0;
 
@@ -151,7 +174,7 @@ namespace Glory
 		virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetHandle>&& descriptorSets,
 			size_t stride, const std::vector<AttributeType>& attributeTypes) = 0;
 
-		virtual DescriptorSetHandle CreateDescriptorSet(std::vector<BufferHandle>&& bufferHandles) = 0;
+		virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) = 0;
 
 		/* Free memory */
 
@@ -172,6 +195,7 @@ namespace Glory
 
 	protected:
 		Module* m_pModule;
+		APIFeatures m_APIFeatures;
 
 	private:
 		/* Cached handles */
