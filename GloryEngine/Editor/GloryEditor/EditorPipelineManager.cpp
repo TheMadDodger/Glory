@@ -422,6 +422,7 @@ namespace Glory::Editor
 
 	EditorPipeline* EditorPipelineManager::CompilePipelineForEditor(PipelineData* pPipeline)
 	{
+		EditorRenderImpl* pEditorRenderer = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 		Debug& debug = m_pEngine->GetDebug();
 
 		static const size_t featureLength = strlen("FEATURE_");
@@ -483,6 +484,9 @@ namespace Glory::Editor
 				const std::string definition = "WITH_" + std::string(actualName);
 				options.AddMacroDefinition(definition);
 			}
+
+			if (pEditorRenderer->PushConstantsSupported())
+				options.AddMacroDefinition("PUSH_CONSTANTS");
 
 			compiledShaders[i].m_ShaderType = shaderType;
 			shaderc::Compiler compiler;

@@ -16,7 +16,10 @@ namespace Glory::Editor
 		GLORY_EDITOR_API virtual ~EditorRenderImpl();
 
 		virtual void* GetTextureID(Texture* pTexture) = 0;
+		/** @todo: Use a platform system to determine this */
 		virtual std::string ShadingLanguage() = 0;
+		/** @todo: Use a platform system to determine this */
+		virtual bool PushConstantsSupported() { return true; }
 		virtual void CompileShaderForEditor(const EditorShaderData& editorShader, std::vector<char>& out) = 0;
 
 	protected:
