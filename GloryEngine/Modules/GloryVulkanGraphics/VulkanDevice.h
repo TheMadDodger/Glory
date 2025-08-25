@@ -12,7 +12,6 @@ namespace Glory
 {
     struct VK_Buffer
     {
-        std::string m_Name;
         size_t m_Size;
         vk::Buffer m_VKBuffer;
         vk::DeviceMemory m_VKMemory;
@@ -73,10 +72,18 @@ namespace Glory
         std::vector<ShaderHandle> m_Shaders;
     };
 
-    struct VK_DescriptorSet
+    struct VK_DescriptorSetLayout
     {
         vk::PushConstantRange m_PushConstantRange;
         vk::DescriptorSetLayout m_VKLayout;
+        std::vector<uint32_t> m_BindingIndices;
+        std::vector<vk::DescriptorType> m_DescriptorTypes;
+    };
+
+    struct VK_DescriptorSet
+    {
+        DescriptorSetLayoutHandle m_Layout;
+        vk::PushConstantRange m_PushConstantRange;
         vk::DescriptorSet m_VKDescriptorSet;
     };
 
@@ -118,14 +125,13 @@ namespace Glory
         virtual void End() override;
         virtual void EndRenderPass() override;
         virtual void EndPipeline() override;
-        virtual void BindBuffer(BufferHandle buffer) override;
         virtual void BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets) override;
         virtual void PushConstants(PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data) override;
 
         virtual void DrawMesh(MeshHandle handle) override;
 
     private: /* Resource management */
-        virtual BufferHandle CreateBuffer(std::string&& name, size_t bufferSize, BufferType type) override;
+        virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;
 
         virtual void AssignBuffer(BufferHandle handle, const void* data) override;
         virtual void AssignBuffer(BufferHandle handle, const void* data, uint32_t size) override;
@@ -136,12 +142,13 @@ namespace Glory
             const std::vector<AttributeType>& attributeTypes) override;
 
         virtual TextureHandle CreateTexture(TextureData* pTexture) override;
-        virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels = nullptr) override;
+        virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) override;
         virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info) override;
         virtual RenderPassHandle CreateRenderPass(const RenderPassInfo& info) override;
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
         virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
-            std::vector<DescriptorSetHandle>&& descriptorSets, size_t stride, const std::vector<AttributeType>& attributeTypes) override;
+            std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride, const std::vector<AttributeType>& attributeTypes) override;
+        virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(const DescriptorSetLayoutInfo& setLayoutInfo) override;
         virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) override;
 
         virtual void FreeBuffer(BufferHandle& handle) override;
@@ -151,6 +158,15 @@ namespace Glory
         virtual void FreeRenderPass(RenderPassHandle& handle) override;
         virtual void FreeShader(ShaderHandle& handle) override;
         virtual void FreePipeline(PipelineHandle& handle) override;
+
+    private:/* Internal */
+        vk::CommandBuffer BeginSingleTimeCommands();
+        void EndSingleTimeCommands(vk::CommandBuffer commandBuffer);
+        void TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags);
+        void CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags,
+            uint32_t width, uint32_t height);
+        void CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags,
+            int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth);
 
     private:
         vk::PhysicalDevice m_VKDevice;
@@ -187,7 +203,10 @@ namespace Glory
         GraphicsResources<VK_RenderPass> m_RenderPasses;
         GraphicsResources<VK_Shader> m_Shaders;
         GraphicsResources<VK_Pipeline> m_Pipelines;
+        GraphicsResources<VK_DescriptorSetLayout> m_DescriptorSetLayouts;
         GraphicsResources<VK_DescriptorSet> m_DescriptorSets;
+
+        std::unordered_map<DescriptorSetLayoutInfo, DescriptorSetLayoutHandle> m_CachedDescriptorSetLayouts;
 
         DescriptorAllocator m_DescriptorAllocator;
     };

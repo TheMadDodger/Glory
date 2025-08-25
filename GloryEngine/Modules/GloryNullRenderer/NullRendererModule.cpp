@@ -14,11 +14,14 @@ namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(NullRendererModule);
 
-	static constexpr char* RenderConstantsBufferName = "RenderConstantsUBO";
-	static constexpr char* CameraDatasBufferName = "CameraDatasUBO";
-	static constexpr char* WorldTransformsBufferName = "WorldTransformsSSBO";
-	static constexpr char* MaterialBufferName = "MaterialSSBO";
-	static constexpr char* HasTextureBufferName = "HasTextureSSBO";
+	enum class BindingIndices : uint32_t
+	{
+		RenderConstants = 1,
+		CameraDatas = 2,
+		WorldTransforms = 3,
+		Materials = 4,
+		HasTexture = 5,
+	};
 
 	NullRendererModule::NullRendererModule()
 	{
@@ -76,31 +79,33 @@ namespace Glory
 			return;
 		}
 
-		pDevice->AddBindingIndex(RenderConstantsBufferName, 1);
-		pDevice->AddBindingIndex(CameraDatasBufferName, 2);
-		pDevice->AddBindingIndex(WorldTransformsBufferName, 3);
-		pDevice->AddBindingIndex(MaterialBufferName, 4);
-		pDevice->AddBindingIndex(HasTextureBufferName, 6);
-
 		const bool usePushConstants = pDevice->IsSupported(APIFeatures::PushConstants);
+		DescriptorSetLayoutInfo setLayoutInfo;
 		DescriptorSetInfo setInfo;
+		setLayoutInfo.m_Buffers.resize(usePushConstants ? 1 : 2);
 		setInfo.m_Buffers.resize(usePushConstants ? 1 : 2);
 		if (!usePushConstants)
 		{
-			m_RenderConstantsBuffer = setInfo.m_Buffers[0].m_BufferHandle = pDevice->CreateBuffer(RenderConstantsBufferName, sizeof(RenderConstants), BufferType::BT_Uniform);
+			m_RenderConstantsBuffer = setInfo.m_Buffers[0].m_BufferHandle = pDevice->CreateBuffer(sizeof(RenderConstants), BufferType::BT_Uniform);
 			setInfo.m_Buffers[0].m_Offset = 0;
 			setInfo.m_Buffers[0].m_Size = sizeof(RenderConstants);
+			setLayoutInfo.m_Buffers[0].m_BindingIndex = uint32_t(BindingIndices::RenderConstants);
+			setLayoutInfo.m_Buffers[0].m_Type = BufferType::BT_Uniform;
 		}
 		else
 		{
-			setInfo.m_PushConstantRange.m_Offset = 0;
-			setInfo.m_PushConstantRange.m_Size = sizeof(RenderConstants);
+			setLayoutInfo.m_PushConstantRange.m_Offset = 0;
+			setLayoutInfo.m_PushConstantRange.m_Size = sizeof(RenderConstants);
 		}
 		const size_t cameraDatasBufferIndex = usePushConstants ? 0 : 1;
-		m_CameraDatasBuffer = setInfo.m_Buffers[cameraDatasBufferIndex].m_BufferHandle = pDevice->CreateBuffer(CameraDatasBufferName, sizeof(PerCameraData)*MAX_CAMERAS, BufferType::BT_Uniform);
+		m_CameraDatasBuffer = setInfo.m_Buffers[cameraDatasBufferIndex].m_BufferHandle = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_CAMERAS, BufferType::BT_Uniform);
+		setLayoutInfo.m_Buffers[cameraDatasBufferIndex].m_BindingIndex = uint32_t(BindingIndices::CameraDatas);
+		setLayoutInfo.m_Buffers[cameraDatasBufferIndex].m_Type = BufferType::BT_Uniform;
 		setInfo.m_Buffers[cameraDatasBufferIndex].m_Offset = 0;
 		setInfo.m_Buffers[cameraDatasBufferIndex].m_Size = sizeof(PerCameraData)*MAX_CAMERAS;
 		//m_LightCameraDatasBuffer = pDevice->CreateBuffer(CameraDatasBufferName, sizeof(PerCameraData)*MAX_LIGHTS, BufferType::BT_Uniform);
+
+		m_GlobalSetLayout = setInfo.m_Layout = pDevice->CreateDescriptorSetLayout(setLayoutInfo);
 		m_GlobalSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 	}
 
@@ -428,11 +433,21 @@ namespace Glory
 					batchData.m_TextureBits.m_Data[i] = textureBits;
 					batchData.m_TextureBits.m_Dirty = true;
 				}
+
+				/* Textures */
+				for (size_t i = 0; i < pMaterialData->ResourceCount(); ++i)
+				{
+					const UUID textureID = pMaterialData->GetResourceUUIDPointer(i)->AssetUUID();
+					Resource* pResource = assets.FindResource(textureID);
+					if (!pResource) continue;
+					TextureData* pTexture = static_cast<TextureData*>(pResource);
+					TextureHandle texture = pDevice->AcquireCachedTexture(pTexture);
+				}
 			}
 
 			if (!batchData.m_WorldsBuffer)
 			{
-				batchData.m_WorldsBuffer = pDevice->CreateBuffer(WorldTransformsBufferName, batchData.m_Worlds->size()*sizeof(glm::mat4), BT_Storage);
+				batchData.m_WorldsBuffer = pDevice->CreateBuffer(batchData.m_Worlds->size()*sizeof(glm::mat4), BT_Storage);
 				batchData.m_Worlds.m_Dirty = true;
 			}
 			if (batchData.m_Worlds)
@@ -440,7 +455,7 @@ namespace Glory
 
 			if (!batchData.m_MaterialsBuffer)
 			{
-				batchData.m_MaterialsBuffer = pDevice->CreateBuffer(MaterialBufferName, batchData.m_Worlds->size()*sizeof(glm::mat4), BT_Storage);
+				batchData.m_MaterialsBuffer = pDevice->CreateBuffer(batchData.m_Worlds->size()*sizeof(glm::mat4), BT_Storage);
 				batchData.m_MaterialDatas.m_Dirty = true;
 			}
 			if (batchData.m_MaterialDatas)
@@ -448,7 +463,7 @@ namespace Glory
 
 			if (textureCount && !batchData.m_TextureBitsBuffer)
 			{
-				batchData.m_TextureBitsBuffer = pDevice->CreateBuffer(HasTextureBufferName, batchData.m_TextureBits->size()*sizeof(uint32_t), BT_Storage);
+				batchData.m_TextureBitsBuffer = pDevice->CreateBuffer(batchData.m_TextureBits->size()*sizeof(uint32_t), BT_Storage);
 				batchData.m_TextureBits.m_Dirty = true;
 			}
 			if (textureCount && batchData.m_TextureBits)
@@ -456,28 +471,38 @@ namespace Glory
 
 			if (!batchData.m_Set)
 			{
+				DescriptorSetLayoutInfo setLayoutInfo;
 				DescriptorSetInfo setInfo;
 				setInfo.m_Buffers.resize(2 + (textureCount > 0 ? 1 : 0));
+				setLayoutInfo.m_Buffers.resize(2 + (textureCount > 0 ? 1 : 0));
+				setLayoutInfo.m_Buffers[0].m_BindingIndex = uint32_t(BindingIndices::WorldTransforms);
+				setLayoutInfo.m_Buffers[0].m_Type = BT_Storage;
 				setInfo.m_Buffers[0].m_BufferHandle = batchData.m_WorldsBuffer;
 				setInfo.m_Buffers[0].m_Offset = 0;
 				setInfo.m_Buffers[0].m_Size = batchData.m_Worlds->size()*sizeof(glm::mat4);
+
+				setLayoutInfo.m_Buffers[1].m_BindingIndex = uint32_t(BindingIndices::Materials);
+				setLayoutInfo.m_Buffers[1].m_Type = BT_Storage;
 				setInfo.m_Buffers[1].m_BufferHandle = batchData.m_MaterialsBuffer;
 				setInfo.m_Buffers[1].m_Offset = 0;
 				setInfo.m_Buffers[1].m_Size = batchData.m_MaterialDatas->size();
 				if (batchData.m_TextureBitsBuffer)
 				{
+					setLayoutInfo.m_Buffers[2].m_BindingIndex = uint32_t(BindingIndices::HasTexture);
+					setLayoutInfo.m_Buffers[2].m_Type = BT_Storage;
 					setInfo.m_Buffers[2].m_BufferHandle = batchData.m_TextureBitsBuffer;
 					setInfo.m_Buffers[2].m_Offset = 0;
 					setInfo.m_Buffers[2].m_Size = batchData.m_TextureBits->size()*sizeof(uint32_t);
 				}
+				batchData.m_SetLayout = setInfo.m_Layout = pDevice->CreateDescriptorSetLayout(setLayoutInfo);
 				batchData.m_Set = pDevice->CreateDescriptorSet(std::move(setInfo));
 			}
 
 			if (!batchData.m_Pipeline)
 			{
-				std::vector<DescriptorSetHandle> descriptorSets(2);
-				descriptorSets[0] = m_GlobalSet;
-				descriptorSets[1] = batchData.m_Set;
+				std::vector<DescriptorSetLayoutHandle> descriptorSetLayouts(2);
+				descriptorSetLayouts[0] = m_GlobalSetLayout;
+				descriptorSetLayouts[1] = batchData.m_SetLayout;
 
 				PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineBatch.m_PipelineID);
 				if (!pPipelineData) continue;
@@ -485,7 +510,7 @@ namespace Glory
 				if (!pMeshResource) continue;
 				MeshData* pMesh = static_cast<MeshData*>(pMeshResource);
 				batchData.m_Pipeline = pDevice->AcquireCachedPipeline(defaultRenderPass, pPipelineData,
-					std::move(descriptorSets), pMesh->VertexSize(), pMesh->AttributeTypesVector());
+					std::move(descriptorSetLayouts), pMesh->VertexSize(), pMesh->AttributeTypesVector());
 			}
 		}
 	}

@@ -6,6 +6,84 @@
 
 namespace Glory
 {
+	enum BufferType
+	{
+		BT_TransferRead,
+		BT_TransferWrite,
+		BT_Vertex,
+		BT_Index,
+		BT_Storage,
+		BT_Uniform,
+	};
+
+	struct PushConstantsRange
+	{
+		uint32_t m_Offset = 0;
+		uint32_t m_Size = 0;
+	};
+
+	struct BufferDescriptorLayout
+	{
+		BufferType m_Type;
+		uint32_t m_BindingIndex;
+	};
+
+	struct SamplerDescritporLayout
+	{
+
+	};
+
+	struct DescriptorSetLayoutInfo
+	{
+		PushConstantsRange m_PushConstantRange;
+		std::vector<BufferDescriptorLayout> m_Buffers;
+		std::vector<SamplerDescritporLayout> m_Samplers;
+
+		bool operator==(const DescriptorSetLayoutInfo& other) const
+		{
+			return std::memcmp(&m_PushConstantRange, &other.m_PushConstantRange, sizeof(PushConstantsRange)) == 0 &&
+				m_Buffers.size() == other.m_Buffers.size() &&
+				std::memcmp(m_Buffers.data(), other.m_Buffers.data(), sizeof(BufferDescriptorLayout) * m_Buffers.size()) == 0 &&
+				m_Samplers.size() == other.m_Samplers.size() &&
+				std::memcmp(m_Samplers.data(), other.m_Samplers.data(), sizeof(SamplerDescritporLayout) * m_Samplers.size()) == 0;
+		}
+	};
+}
+
+namespace std
+{
+	template <class T>
+	inline void CombineHash(size_t& hash, const T& v)
+	{
+		std::hash<T> h;
+		hash ^= h(v) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+	}
+
+	template <>
+	struct hash<Glory::DescriptorSetLayoutInfo>
+	{
+		size_t operator()(const Glory::DescriptorSetLayoutInfo& info) const noexcept
+		{
+			size_t hash = 0;
+			CombineHash(hash, info.m_PushConstantRange.m_Offset);
+			CombineHash(hash, info.m_PushConstantRange.m_Size);
+
+			for (auto& buffer : info.m_Buffers)
+			{
+				CombineHash(hash, buffer.m_BindingIndex);
+				CombineHash(hash, buffer.m_Type);
+			}
+
+			for (auto& sampler : info.m_Samplers)
+			{
+			}
+			return hash;
+		}
+	};
+}
+
+namespace Glory
+{
 	class Module;
 	class Debug;
 
@@ -25,17 +103,8 @@ namespace Glory
 	typedef struct UUID RenderPassHandle;
 	typedef struct UUID ShaderHandle;
 	typedef struct UUID PipelineHandle;
+	typedef struct UUID DescriptorSetLayoutHandle;
 	typedef struct UUID DescriptorSetHandle;
-
-	enum BufferType
-	{
-		BT_TransferRead,
-		BT_TransferWrite,
-		BT_Vertex,
-		BT_Index,
-		BT_Storage,
-		BT_Uniform,
-	};
 
 	template<class T>
 	struct GraphicsResources
@@ -94,15 +163,9 @@ namespace Glory
 		uint32_t m_Size;
 	};
 
-	struct PushConstantsRange
-	{
-		uint32_t m_Offset = 0;
-		uint32_t m_Size = 0;
-	};
-
 	struct DescriptorSetInfo
 	{
-		PushConstantsRange m_PushConstantRange;
+		DescriptorSetLayoutHandle m_Layout;
 		std::vector<BufferDescriptor> m_Buffers;
 	};
 
@@ -111,9 +174,6 @@ namespace Glory
 	public:
 		GraphicsDevice(Module* pModule);
 		virtual ~GraphicsDevice();
-
-		void AddBindingIndex(std::string&& name, uint32_t index);
-		uint32_t BindingIndex(const std::string& name) const;
 
 		Debug& Debug();
 
@@ -126,7 +186,6 @@ namespace Glory
 		virtual void End() = 0;
 		virtual void EndRenderPass() = 0;
 		virtual void EndPipeline() = 0;
-		virtual void BindBuffer(BufferHandle buffer) = 0;
 		virtual void BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets) = 0;
 		virtual void PushConstants(PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data) = 0;
 
@@ -136,6 +195,7 @@ namespace Glory
 		PipelineHandle AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetHandle>&& descriptorSets,
 			size_t stride, const std::vector<AttributeType>& attributeTypes);
 		MeshHandle AcquireCachedMesh(MeshData* pMesh);
+		TextureHandle AcquireCachedTexture(TextureData* pTexture);
 
 	public: /* Resource mamagement */
 		
@@ -147,7 +207,7 @@ namespace Glory
 		 * @param bufferSize Size of the buffer in bytes
 		 * @param type Type of the buffer
 		 */
-		virtual BufferHandle CreateBuffer(std::string&& name, size_t bufferSize, BufferType type) = 0;
+		virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) = 0;
 
 		virtual void AssignBuffer(BufferHandle handle, const void* data) = 0;
 		virtual void AssignBuffer(BufferHandle handle, const void* data, uint32_t size) = 0;
@@ -163,7 +223,7 @@ namespace Glory
 
 		/* Texture */
 		virtual TextureHandle CreateTexture(TextureData* pTexture) = 0;
-		virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels = nullptr) = 0;
+		virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) = 0;
 		/* Render texture */
 		virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info) = 0;
 		/* Render pass */
@@ -171,9 +231,10 @@ namespace Glory
 		/* Shader */
 		virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) = 0;
 		/* Pipeline */
-		virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetHandle>&& descriptorSets,
+		virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts,
 			size_t stride, const std::vector<AttributeType>& attributeTypes) = 0;
 
+		virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(const DescriptorSetLayoutInfo& setLayoutInfo) = 0;
 		virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) = 0;
 
 		/* Free memory */
@@ -201,6 +262,7 @@ namespace Glory
 		/* Cached handles */
 		std::map<UUID, PipelineHandle> m_PipelineHandles;
 		std::map<UUID, MeshHandle> m_MeshHandles;
+		std::map<UUID, TextureHandle> m_TextureHandles;
 
 		std::map<std::string, uint32_t> m_BindingIndices;
 	};

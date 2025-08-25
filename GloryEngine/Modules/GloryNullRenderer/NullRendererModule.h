@@ -16,6 +16,7 @@ namespace Glory
 	typedef struct UUID RenderPassHandle;
 	typedef struct UUID ShaderHandle;
 	typedef struct UUID DescriptorSetHandle;
+	typedef struct UUID DescriptorSetLayoutHandle;
 
 	class PipelineData;
 	class TextureAtlas;
@@ -59,6 +60,7 @@ namespace Glory
 			BufferHandle m_TextureBitsBuffer = 0;
 
 			PipelineHandle m_Pipeline = 0;
+			DescriptorSetLayoutHandle m_SetLayout = 0;
 			DescriptorSetHandle m_Set = 0;
 		};
 
@@ -108,5 +110,6 @@ namespace Glory
 		BufferHandle m_RenderConstantsBuffer = 0;
 
 		DescriptorSetHandle m_GlobalSet;
+		DescriptorSetLayoutHandle m_GlobalSetLayout;
 	};
 }

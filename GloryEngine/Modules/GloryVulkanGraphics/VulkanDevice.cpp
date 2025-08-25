@@ -346,12 +346,6 @@ namespace Glory
 	{
 	}
 
-	void VulkanDevice::BindBuffer(BufferHandle buffer)
-	{
-		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
-
-	}
-
 	void VulkanDevice::BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets)
 	{
 		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
@@ -424,40 +418,58 @@ namespace Glory
 			commandBuffer.draw(mesh->m_VertexCount, 1, 0, 0);
 	}
 
-	BufferHandle VulkanDevice::CreateBuffer(std::string&& name, size_t bufferSize, BufferType type)
+	vk::BufferUsageFlags GetBufferUsageFlags(BufferType bufferType)
+	{
+		switch (bufferType)
+		{
+		case Glory::BT_TransferRead:
+			return vk::BufferUsageFlagBits::eTransferSrc;
+		case Glory::BT_TransferWrite:
+			return vk::BufferUsageFlagBits::eTransferDst;
+		case Glory::BT_Vertex:
+			return vk::BufferUsageFlagBits::eVertexBuffer;
+		case Glory::BT_Index:
+			return vk::BufferUsageFlagBits::eIndexBuffer;
+		case Glory::BT_Storage:
+			return vk::BufferUsageFlagBits::eStorageBuffer;
+		case Glory::BT_Uniform:
+			return vk::BufferUsageFlagBits::eUniformBuffer;
+		default:
+			return vk::BufferUsageFlagBits(0);
+		}
+	}
+
+	vk::DescriptorType GetDescriptorType(BufferType bufferType)
+	{
+		switch (bufferType)
+		{
+		case Glory::BT_TransferRead:
+			return vk::DescriptorType::eStorageBuffer;
+		case Glory::BT_TransferWrite:
+			return vk::DescriptorType::eStorageBuffer;
+		case Glory::BT_Vertex:
+			return vk::DescriptorType::eStorageBuffer;
+		case Glory::BT_Index:
+			return vk::DescriptorType::eStorageBuffer;
+		case Glory::BT_Storage:
+			return vk::DescriptorType::eStorageBuffer;
+		case Glory::BT_Uniform:
+			return vk::DescriptorType::eUniformBuffer;
+		default:
+			return vk::DescriptorType(0);
+		}
+	}
+
+	BufferHandle VulkanDevice::CreateBuffer(size_t bufferSize, BufferType type)
 	{
 		BufferHandle handle;
 		VK_Buffer& buffer = m_Buffers.Emplace(handle, VK_Buffer());
-		buffer.m_Name = std::move(name);
 		buffer.m_Size = bufferSize;
 
 		vk::BufferCreateInfo bufferInfo = vk::BufferCreateInfo();
 		bufferInfo.size = (vk::DeviceSize)buffer.m_Size;
 		bufferInfo.sharingMode = vk::SharingMode::eExclusive;
-
-		switch (type)
-		{
-		case Glory::BT_TransferRead:
-			buffer.m_VKUsage = bufferInfo.usage = vk::BufferUsageFlagBits::eTransferSrc;
-			break;
-		case Glory::BT_TransferWrite:
-			buffer.m_VKUsage = bufferInfo.usage = vk::BufferUsageFlagBits::eTransferDst;
-			break;
-		case Glory::BT_Vertex:
-			buffer.m_VKUsage = bufferInfo.usage = vk::BufferUsageFlagBits::eVertexBuffer;
-			break;
-		case Glory::BT_Index:
-			buffer.m_VKUsage = bufferInfo.usage = vk::BufferUsageFlagBits::eIndexBuffer;
-			break;
-		case Glory::BT_Storage:
-			buffer.m_VKUsage = bufferInfo.usage = vk::BufferUsageFlagBits::eStorageBuffer;
-			break;
-		case Glory::BT_Uniform:
-			buffer.m_VKUsage = bufferInfo.usage = vk::BufferUsageFlagBits::eUniformBuffer;
-			break;
-		default:
-			break;
-		}
+		bufferInfo.usage = buffer.m_VKUsage = GetBufferUsageFlags(type);
 
 		vk::Result result = m_LogicalDevice.createBuffer(&bufferInfo, nullptr, &buffer.m_VKBuffer);
 		if (result != vk::Result::eSuccess)
@@ -686,10 +698,27 @@ namespace Glory
 
 	TextureHandle VulkanDevice::CreateTexture(TextureData* pTexture)
 	{
-		return TextureHandle();
+		ImageData* pImage = pTexture->GetImageData(&m_pModule->GetEngine()->GetAssetManager());
+		if (!pImage)
+		{
+			Debug().LogError("VulkanDevice::CreateTexture(TextureData): Could not get ImageData.");
+			return NULL;
+		}
+
+		TextureCreateInfo createInfo;
+		createInfo.m_Width = pImage->GetWidth();
+		createInfo.m_Height = pImage->GetHeight();
+		createInfo.m_ImageAspectFlags = IA_Color;
+		createInfo.m_ImageType = ImageType::IT_2D;
+		createInfo.m_InternalFormat = pImage->GetInternalFormat();
+		createInfo.m_PixelFormat = pImage->GetFormat();
+		createInfo.m_Type = pImage->GetDataType();
+		createInfo.m_SamplerSettings = pTexture->GetSamplerSettings();
+
+		return CreateTexture(createInfo, pImage->GetPixels(), pImage->DataSize());
 	}
 
-	TextureHandle VulkanDevice::CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels)
+	TextureHandle VulkanDevice::CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels, size_t dataSize)
 	{
 		TextureHandle handle;
 		VK_Texture& texture = m_Textures.Emplace(handle, VK_Texture());
@@ -710,6 +739,8 @@ namespace Glory
 		imageInfo.sharingMode = vk::SharingMode::eExclusive;
 		imageInfo.samples = vk::SampleCountFlagBits::e1;
 		imageInfo.flags = (vk::ImageCreateFlags)0;
+
+		const vk::ImageAspectFlags imageAspect = VKConverter::GetVulkanImageAspectFlags(textureInfo.m_ImageAspectFlags);
 
 		if (m_LogicalDevice.createImage(&imageInfo, nullptr, &texture.m_VKImage) != vk::Result::eSuccess)
 		{
@@ -742,17 +773,18 @@ namespace Glory
 		if (pixels)
 		{
 			// Transition image layout
-			//pGraphics->TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
-			//
-			//vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
-			//BufferHandle stagingBuffer = CreateBuffer(uint32_t(memRequirements.size), BufferType::BT_TransferRead);//new VulkanBuffer(imageSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)memoryFlags);
-			//AssignBuffer(stagingBuffer, pixels);
-			//Texture::CopyFromBuffer(pTextureStagingBuffer);
-			//
-			//// Transtion layout again so it can be sampled
-			//pGraphics->TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
-			//
-			//FreeBuffer(stagingBuffer);
+			TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, imageAspect);
+
+			const vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+			BufferHandle stagingBuffer = CreateBuffer(uint32_t(dataSize), BufferType::BT_TransferRead);//new VulkanBuffer(imageSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)memoryFlags);
+			VK_Buffer* vkStagingBuffer = m_Buffers.Find(stagingBuffer);
+			AssignBuffer(stagingBuffer, pixels);
+			CopyFromBuffer(vkStagingBuffer->m_VKBuffer, texture.m_VKImage, imageAspect, textureInfo.m_Width, textureInfo.m_Height);
+
+			// Transtion layout again so it can be sampled
+			TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, imageAspect);
+			
+			FreeBuffer(stagingBuffer);
 		}
 
 		// Create texture image view
@@ -760,7 +792,7 @@ namespace Glory
 		viewInfo.image = texture.m_VKImage;
 		viewInfo.viewType = VKConverter::GetVulkanImageViewType(textureInfo.m_ImageType);
 		viewInfo.format = format;
-		viewInfo.subresourceRange.aspectMask = VKConverter::GetVulkanImageAspectFlags(textureInfo.m_ImageAspectFlags);
+		viewInfo.subresourceRange.aspectMask = imageAspect;
 		viewInfo.subresourceRange.baseMipLevel = 0;
 		viewInfo.subresourceRange.levelCount = 1;
 		viewInfo.subresourceRange.baseArrayLayer = 0;
@@ -1032,7 +1064,7 @@ namespace Glory
 	}
 
 	PipelineHandle VulkanDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
-		std::vector<DescriptorSetHandle>&& descriptorSets, size_t stride, const std::vector<AttributeType>& attributeTypes)
+		std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride, const std::vector<AttributeType>& attributeTypes)
 	{
 		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
 		std::vector<vk::PushConstantRange> pushConstants;
@@ -1051,19 +1083,19 @@ namespace Glory
 			return NULL;
 		}
 
-		std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(descriptorSets.size());
-		for (size_t i = 0; i < descriptorSets.size(); ++i)
+		std::vector<vk::DescriptorSetLayout> vkDescriptorSetLayouts(descriptorSetLayouts.size());
+		for (size_t i = 0; i < descriptorSetLayouts.size(); ++i)
 		{
-			VK_DescriptorSet* vkSet = m_DescriptorSets.Find(descriptorSets[i]);
-			if (!vkSet)
+			VK_DescriptorSetLayout* vkSetLayout = m_DescriptorSetLayouts.Find(descriptorSetLayouts[i]);
+			if (!vkSetLayout)
 			{
-				Debug().LogError("VulkanDevice::CreatePipeline: Invalid descriptor set handle.");
+				Debug().LogError("VulkanDevice::CreatePipeline: Invalid descriptor set layout handle.");
 				return NULL;
 			}
-			descriptorSetLayouts[i] = vkSet->m_VKLayout;
+			vkDescriptorSetLayouts[i] = vkSetLayout->m_VKLayout;
 
-			if (vkSet->m_PushConstantRange.size)
-				pushConstants.push_back(vkSet->m_PushConstantRange);
+			if (vkSetLayout->m_PushConstantRange.size)
+				pushConstants.push_back(vkSetLayout->m_PushConstantRange);
 		}
 
 		PipelineHandle handle;
@@ -1089,9 +1121,7 @@ namespace Glory
 
 		pipeline.m_Shaders.resize(pPipeline->ShaderCount());
 		for (size_t i = 0; i < pipeline.m_Shaders.size(); ++i)
-		{
 			pipeline.m_Shaders[i] = CreateShader(pPipeline->Shader(pipelines, i), pPipeline->GetShaderType(pipelines, i), "main");
-		}
 
 		std::vector<vk::PipelineShaderStageCreateInfo> shaderStages(pPipeline->ShaderCount());
 		for (size_t i = 0; i < shaderStages.size(); ++i)
@@ -1233,8 +1263,8 @@ namespace Glory
 		//    .setPDynamicStates(dynamicStates);
 
 		vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
-			.setSetLayoutCount(static_cast<uint32_t>(descriptorSetLayouts.size()))
-			.setPSetLayouts(descriptorSetLayouts.data())
+			.setSetLayoutCount(static_cast<uint32_t>(vkDescriptorSetLayouts.size()))
+			.setPSetLayouts(vkDescriptorSetLayouts.data())
 			.setPushConstantRangeCount(static_cast<uint32_t>(pushConstants.size()))
 			.setPPushConstantRanges(pushConstants.data());
 
@@ -1275,11 +1305,65 @@ namespace Glory
 		return handle;
 	}
 
+	DescriptorSetLayoutHandle VulkanDevice::CreateDescriptorSetLayout(const DescriptorSetLayoutInfo& setLayoutInfo)
+	{
+		auto iter = m_CachedDescriptorSetLayouts.find(setLayoutInfo);
+		if (iter == m_CachedDescriptorSetLayouts.end())
+		{
+			std::vector<uint32_t> bindingIndices;
+			std::vector<vk::DescriptorType> descriptorTypes;
+			std::vector<vk::DescriptorSetLayoutBinding> layoutBindings(setLayoutInfo.m_Buffers.size());
+			for (size_t i = 0; i < setLayoutInfo.m_Buffers.size(); ++i)
+			{
+				auto& bufferInfo = setLayoutInfo.m_Buffers[i];
+
+				layoutBindings[i].descriptorType = GetDescriptorType(bufferInfo.m_Type);
+
+				layoutBindings[i].binding = bufferInfo.m_BindingIndex;
+				layoutBindings[i].descriptorCount = 1;
+				/** @todo: Pass for which shaders stages the buffer is meant for */
+				layoutBindings[i].stageFlags = vk::FlagTraits<vk::ShaderStageFlagBits>::allFlags;
+				bindingIndices.emplace_back(bufferInfo.m_BindingIndex);
+				descriptorTypes.emplace_back(layoutBindings[i].descriptorType);
+			}
+
+			vk::DescriptorSetLayout layout = nullptr;
+			if (!layoutBindings.empty())
+			{
+				vk::DescriptorSetLayoutCreateInfo layoutInfo{};
+				layoutInfo.bindingCount = layoutBindings.size();
+				layoutInfo.pBindings = layoutBindings.data();
+				if (m_LogicalDevice.createDescriptorSetLayout(&layoutInfo, nullptr, &layout) != vk::Result::eSuccess)
+				{
+					Debug().LogError("VulkanDevice::CreateDescriptorSet: Failed to create descriptor set layout.");
+					return NULL;
+				}
+			}
+
+			iter = m_CachedDescriptorSetLayouts.emplace(setLayoutInfo, UUID()).first;
+			VK_DescriptorSetLayout& setLayout = m_DescriptorSetLayouts.Emplace(iter->second, VK_DescriptorSetLayout());
+			setLayout.m_VKLayout = layout;
+			setLayout.m_PushConstantRange.offset = setLayoutInfo.m_PushConstantRange.m_Offset;
+			setLayout.m_PushConstantRange.size = setLayoutInfo.m_PushConstantRange.m_Size;
+			setLayout.m_PushConstantRange.stageFlags = vk::FlagTraits<vk::ShaderStageFlagBits>::allFlags;
+			setLayout.m_BindingIndices = std::move(bindingIndices);
+			setLayout.m_DescriptorTypes = std::move(descriptorTypes);
+		}
+		return iter->second;
+	}
+
 	DescriptorSetHandle VulkanDevice::CreateDescriptorSet(DescriptorSetInfo&& setInfo)
 	{
-		std::vector<vk::DescriptorSetLayoutBinding> layoutBindings(setInfo.m_Buffers.size());
+		VK_DescriptorSetLayout* vkDescriptorSetLayout = m_DescriptorSetLayouts.Find(setInfo.m_Layout);
+		if (!vkDescriptorSetLayout)
+		{
+			Debug().LogError("VulkanDevice::CreateDescriptorSet: Invalid descriptor set layout handle.");
+			return NULL;
+		}
+
 		std::vector<vk::WriteDescriptorSet> descriptorWrites(setInfo.m_Buffers.size());
 		std::vector<vk::DescriptorBufferInfo> bufferInfos(setInfo.m_Buffers.size());
+		uint32_t descriptorIndex = 0;
 		for (size_t i = 0; i < setInfo.m_Buffers.size(); ++i)
 		{
 			auto& bufferInfo = setInfo.m_Buffers[i];
@@ -1290,56 +1374,35 @@ namespace Glory
 				return NULL;
 			}
 
-			if (vkBuffer->m_VKUsage & vk::BufferUsageFlagBits::eUniformBuffer)
-			{
-				layoutBindings[i].descriptorType = vk::DescriptorType::eUniformBuffer;
-			}
-			else if (vkBuffer->m_VKUsage & vk::BufferUsageFlagBits::eStorageBuffer)
-			{
-				layoutBindings[i].descriptorType = vk::DescriptorType::eStorageBuffer;
-			}
-			else
-				layoutBindings[i].descriptorType = vk::DescriptorType(0);
-
-			layoutBindings[i].binding = BindingIndex(vkBuffer->m_Name);
-			layoutBindings[i].descriptorCount = 1;
-			/** @todo: Pass for which shaders stages the buffer is meant for */
-			layoutBindings[i].stageFlags = vk::FlagTraits<vk::ShaderStageFlagBits>::allFlags;
-
 			bufferInfos[i].buffer = vkBuffer->m_VKBuffer;
 			bufferInfos[i].offset = bufferInfo.m_Offset;
 			bufferInfos[i].range = bufferInfo.m_Size;
 
-			descriptorWrites[i].dstBinding = layoutBindings[i].binding;
+			descriptorWrites[i].dstBinding = vkDescriptorSetLayout->m_BindingIndices[descriptorIndex];
 			descriptorWrites[i].dstArrayElement = 0;
-			descriptorWrites[i].descriptorType = layoutBindings[i].descriptorType;
+			descriptorWrites[i].descriptorType = vkDescriptorSetLayout->m_DescriptorTypes[descriptorIndex];
 			descriptorWrites[i].descriptorCount = 1;
 			descriptorWrites[i].pBufferInfo = &bufferInfos[i];
 			descriptorWrites[i].pImageInfo = nullptr;
 			descriptorWrites[i].pTexelBufferView = nullptr;
+			++descriptorIndex;
 		}
 
-		vk::DescriptorSetLayoutCreateInfo layoutInfo{};
-		layoutInfo.bindingCount = layoutBindings.size();
-		layoutInfo.pBindings = layoutBindings.data();
+		//vk::DescriptorSetLayoutBinding samplerLayoutBinding{};
+		//samplerLayoutBinding.binding = 1;
+		//samplerLayoutBinding.descriptorCount = 1;
+		//samplerLayoutBinding.descriptorType = vk::DescriptorType::eCombinedImageSampler;
+		//samplerLayoutBinding.pImmutableSamplers = nullptr;
+		//samplerLayoutBinding.stageFlags = vk::ShaderStageFlagBits::eAll;
 
 		DescriptorSetHandle handle;
 		VK_DescriptorSet& set = m_DescriptorSets.Emplace(handle, VK_DescriptorSet());
+		set.m_Layout = setInfo.m_Layout;
 
-		if (m_LogicalDevice.createDescriptorSetLayout(&layoutInfo, nullptr, &set.m_VKLayout) != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::CreateDescriptorSet: Failed to create descriptor set layout.");
-			return NULL;
-		}
-
-		m_DescriptorAllocator.Allocate(&set.m_VKDescriptorSet, set.m_VKLayout);
+		m_DescriptorAllocator.Allocate(&set.m_VKDescriptorSet, vkDescriptorSetLayout->m_VKLayout);
 		for (size_t i = 0; i < descriptorWrites.size(); ++i)
 			descriptorWrites[i].dstSet = set.m_VKDescriptorSet;
 		m_LogicalDevice.updateDescriptorSets(descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
-
-		set.m_PushConstantRange.offset = setInfo.m_PushConstantRange.m_Offset;
-		set.m_PushConstantRange.size = setInfo.m_PushConstantRange.m_Size;
-		set.m_PushConstantRange.stageFlags = vk::FlagTraits<vk::ShaderStageFlagBits>::allFlags;
 
 		return handle;
 	}
@@ -1492,5 +1555,126 @@ namespace Glory
 		Debug().LogInfo(str.str());
 
 		handle = 0;
+	}
+
+	vk::CommandBuffer VulkanDevice::BeginSingleTimeCommands()
+	{
+		vk::CommandPool commandPool = GetGraphicsCommandPool();
+
+		vk::CommandBufferAllocateInfo allocInfo = vk::CommandBufferAllocateInfo();
+		allocInfo.level = vk::CommandBufferLevel::ePrimary;
+		allocInfo.commandPool = commandPool;
+		allocInfo.commandBufferCount = 1;
+
+		vk::CommandBuffer commandBuffer;
+		if (m_LogicalDevice.allocateCommandBuffers(&allocInfo, &commandBuffer) != vk::Result::eSuccess)
+			throw std::runtime_error("Failed to allocate command buffer!");
+
+		vk::CommandBufferBeginInfo beginInfo = vk::CommandBufferBeginInfo();
+		beginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+
+		commandBuffer.begin(beginInfo);
+		return commandBuffer;
+	}
+
+	void VulkanDevice::EndSingleTimeCommands(vk::CommandBuffer commandBuffer)
+	{
+		vk::CommandPool commandPool = GetGraphicsCommandPool();
+
+		commandBuffer.end();
+
+		vk::SubmitInfo submitInfo = vk::SubmitInfo();
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &commandBuffer;
+
+		GraphicsQueue().submit(1, &submitInfo, VK_NULL_HANDLE);
+		GraphicsQueue().waitIdle();
+		m_LogicalDevice.freeCommandBuffers(commandPool, 1, &commandBuffer);
+	}
+
+	void VulkanDevice::TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags)
+	{
+		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+		vk::ImageMemoryBarrier barrier = vk::ImageMemoryBarrier();
+		barrier.oldLayout = oldLayout;
+		barrier.newLayout = newLayout;
+		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.image = image;
+		barrier.subresourceRange.aspectMask = aspectFlags;
+		barrier.subresourceRange.baseMipLevel = 0;
+		barrier.subresourceRange.levelCount = 1;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount = 1;
+
+		vk::PipelineStageFlags sourceStage;
+		vk::PipelineStageFlags destinationStage;
+
+		if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eTransferDstOptimal)
+		{
+			barrier.srcAccessMask = (vk::AccessFlags)0;
+			barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+
+			sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+			destinationStage = vk::PipelineStageFlagBits::eTransfer;
+		}
+		else if (oldLayout == vk::ImageLayout::eTransferDstOptimal && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
+		{
+			barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+			barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+			sourceStage = vk::PipelineStageFlagBits::eTransfer;
+			destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
+		}
+		else if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eDepthStencilAttachmentOptimal)
+		{
+			barrier.srcAccessMask = (vk::AccessFlags)0;
+			barrier.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+
+			sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+			destinationStage = vk::PipelineStageFlagBits::eEarlyFragmentTests;
+		}
+		else
+		{
+			throw std::invalid_argument("Unsupported layout transition!");
+		}
+
+		commandBuffer.pipelineBarrier(
+			sourceStage, destinationStage,
+			(vk::DependencyFlags)0,
+			0, nullptr,
+			0, nullptr,
+			1, &barrier
+		);
+
+		EndSingleTimeCommands(commandBuffer);
+	}
+
+	void VulkanDevice::CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags, uint32_t width, uint32_t height)
+	{
+		CopyFromBuffer(buffer, image, aspectFlags, 0, 0, 0, width, height, 1);
+	}
+
+	void VulkanDevice::CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags, int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth)
+	{
+		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+		vk::BufferImageCopy copyRegion = vk::BufferImageCopy();
+		copyRegion.bufferOffset = 0;
+		copyRegion.bufferRowLength = 0;
+		copyRegion.bufferImageHeight = 0;
+
+		copyRegion.imageSubresource.aspectMask = aspectFlags;
+		copyRegion.imageSubresource.mipLevel = 0;
+		copyRegion.imageSubresource.baseArrayLayer = 0;
+		copyRegion.imageSubresource.layerCount = 1;
+
+		copyRegion.imageOffset = vk::Offset3D(offsetX, offsetY, offsetZ);
+		copyRegion.imageExtent = vk::Extent3D(width, height, depth);
+
+		commandBuffer.copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal, 1, &copyRegion);
+
+		EndSingleTimeCommands(commandBuffer);
 	}
 }

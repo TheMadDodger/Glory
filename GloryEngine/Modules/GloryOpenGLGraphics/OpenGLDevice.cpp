@@ -88,26 +88,6 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
-	void OpenGLDevice::BindBuffer(BufferHandle buffer)
-	{
-		GL_Buffer* glBuffer = m_Buffers.Find(buffer);
-		if (!glBuffer)
-		{
-			Debug().LogError("OpenGLDevice::BindBuffer: Invalid buffer handle.");
-			return;
-		}
-
-		glBindBuffer(glBuffer->m_GLTarget, glBuffer->m_GLBufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		const uint32_t bindingIndex = BindingIndex(glBuffer->m_Name);
-		if (bindingIndex)
-		{
-			glBindBufferBase(glBuffer->m_GLTarget, (GLuint)bindingIndex, glBuffer->m_GLBufferID);
-			OpenGLGraphicsModule::LogGLError(glGetError());
-		}
-	}
-
 	void OpenGLDevice::BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets)
 	{
 		for (size_t i = 0; i < sets.size(); ++i)
@@ -119,6 +99,14 @@ namespace Glory
 				return;
 			}
 
+			GL_DescriptorSetLayout* glSetLayout = m_SetLayouts.Find(glSet->m_Layout);
+			if (!glSetLayout)
+			{
+				Debug().LogError("OpenGLDevice::BindDescriptorSets: Invalid set layout handle.");
+				return;
+			}
+
+			size_t index = 0;
 			for (size_t i = 0; i < glSet->m_Buffers.size(); ++i)
 			{
 				GL_Buffer* glBuffer = m_Buffers.Find(glSet->m_Buffers[i]);
@@ -131,11 +119,12 @@ namespace Glory
 				glBindBuffer(glBuffer->m_GLTarget, glBuffer->m_GLBufferID);
 				OpenGLGraphicsModule::LogGLError(glGetError());
 
-				if (glSet->m_BindingIndices[i])
+				if (glSetLayout->m_BindingIndices[index])
 				{
-					glBindBufferBase(glBuffer->m_GLTarget, (GLuint)glSet->m_BindingIndices[i], glBuffer->m_GLBufferID);
+					glBindBufferBase(glBuffer->m_GLTarget, (GLuint)glSetLayout->m_BindingIndices[index], glBuffer->m_GLBufferID);
 					OpenGLGraphicsModule::LogGLError(glGetError());
 				}
+				++index;
 			}
 		}
 	}
@@ -168,11 +157,10 @@ namespace Glory
 
 #pragma region Resource Management
 
-	BufferHandle OpenGLDevice::CreateBuffer(std::string&& name, size_t bufferSize, BufferType type)
+	BufferHandle OpenGLDevice::CreateBuffer(size_t bufferSize, BufferType type)
 	{
 		BufferHandle handle;
 		GL_Buffer& buffer = m_Buffers.Emplace(handle, GL_Buffer());
-		buffer.m_Name = std::move(name);
 
 		glGenBuffers(1, &buffer.m_GLBufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
@@ -475,7 +463,7 @@ namespace Glory
 		return handle;
 	}
 
-	TextureHandle OpenGLDevice::CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels)
+	TextureHandle OpenGLDevice::CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels, size_t)
 	{
 		TextureHandle handle;
 		GL_Texture& texture = m_Textures.Emplace(handle, GL_Texture());
@@ -765,11 +753,22 @@ namespace Glory
 		return handle;
 	}
 
+	DescriptorSetLayoutHandle OpenGLDevice::CreateDescriptorSetLayout(const DescriptorSetLayoutInfo& setLayoutInfo)
+	{
+		auto iter = m_CachedDescriptorSetLayouts.find(setLayoutInfo);
+		if (iter == m_CachedDescriptorSetLayouts.end())
+		{
+			iter = m_CachedDescriptorSetLayouts.emplace(setLayoutInfo, UUID()).first;
+			GL_DescriptorSetLayout& setLayout = m_SetLayouts.Emplace(iter->second, GL_DescriptorSetLayout());
+			for (size_t i = 0; i < setLayoutInfo.m_Buffers.size(); ++i)
+				setLayout.m_BindingIndices.emplace_back(setLayoutInfo.m_Buffers[i].m_BindingIndex);
+		}
+		return iter->second;
+	}
+
 	DescriptorSetHandle OpenGLDevice::CreateDescriptorSet(DescriptorSetInfo&& setInfo)
 	{
-		std::vector<uint32_t> bindingIndices;
 		std::vector<BufferHandle> bufferHandles;
-		bindingIndices.resize(setInfo.m_Buffers.size());
 		bufferHandles.resize(setInfo.m_Buffers.size());
 
 		for (size_t i = 0; i < setInfo.m_Buffers.size(); ++i)
@@ -781,14 +780,13 @@ namespace Glory
 				return NULL;
 			}
 
-			bindingIndices[i] = BindingIndex(glBuffer->m_Name);
 			bufferHandles[i] = setInfo.m_Buffers[i].m_BufferHandle;
 		}
 
 		DescriptorSetHandle handle;
 		GL_DescriptorSet& set = m_Sets.Emplace(handle, GL_DescriptorSet());
 		set.m_Buffers = std::move(bufferHandles);
-		set.m_BindingIndices = std::move(bindingIndices);
+		set.m_Layout = setInfo.m_Layout;
 
 		std::stringstream str;
 		str << "OpenGLDevice: Descriptor set " << handle << " created.";
