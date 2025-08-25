@@ -346,7 +346,7 @@ namespace Glory
 	{
 	}
 
-	void VulkanDevice::BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets)
+	void VulkanDevice::BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t firstSet)
 	{
 		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
 		if (!vkPipeline)
@@ -368,7 +368,8 @@ namespace Glory
 		}
 
 		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
-		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, vkPipeline->m_VKLayout, 0, setsToBind.size(), setsToBind.data(), 0, nullptr);
+		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, vkPipeline->m_VKLayout,
+			firstSet, setsToBind.size(), setsToBind.data(), 0, nullptr);
 	}
 
 	void VulkanDevice::PushConstants(PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data)
@@ -799,7 +800,25 @@ namespace Glory
 		viewInfo.subresourceRange.layerCount = 1;
 
 		if (m_LogicalDevice.createImageView(&viewInfo, nullptr, &texture.m_VKImageView) != vk::Result::eSuccess)
+		{
 			Debug().LogError("VulkanDevice::CreateTexture: Could not create image view.");
+			return NULL;
+		}
+
+		auto samplerIter = m_CachedSamlers.find(textureInfo.m_SamplerSettings);
+		if (samplerIter == m_CachedSamlers.end())
+		{
+			auto samplerCreateInfo = VKConverter::GetVulkanSamplerInfo(textureInfo.m_SamplerSettings);
+
+			vk::Sampler newSampler;
+			if (m_LogicalDevice.createSampler(&samplerCreateInfo, nullptr, &newSampler) != vk::Result::eSuccess)
+			{
+				Debug().LogError("VulkanDevice::CreateTexture: Could not create image sampler.");
+				return NULL;
+			}
+			samplerIter = m_CachedSamlers.emplace(textureInfo.m_SamplerSettings, newSampler).first;
+		}
+		texture.m_VKSampler = samplerIter->second;
 
 		std::stringstream str;
 		str << "VulkanDevice: Texture " << handle << " created.";
@@ -1312,19 +1331,31 @@ namespace Glory
 		{
 			std::vector<uint32_t> bindingIndices;
 			std::vector<vk::DescriptorType> descriptorTypes;
-			std::vector<vk::DescriptorSetLayoutBinding> layoutBindings(setLayoutInfo.m_Buffers.size());
+			std::vector<vk::DescriptorSetLayoutBinding> layoutBindings(setLayoutInfo.m_Buffers.size() +
+				setLayoutInfo.m_Samplers.size());
 			for (size_t i = 0; i < setLayoutInfo.m_Buffers.size(); ++i)
 			{
 				auto& bufferInfo = setLayoutInfo.m_Buffers[i];
 
 				layoutBindings[i].descriptorType = GetDescriptorType(bufferInfo.m_Type);
-
 				layoutBindings[i].binding = bufferInfo.m_BindingIndex;
 				layoutBindings[i].descriptorCount = 1;
 				/** @todo: Pass for which shaders stages the buffer is meant for */
 				layoutBindings[i].stageFlags = vk::FlagTraits<vk::ShaderStageFlagBits>::allFlags;
 				bindingIndices.emplace_back(bufferInfo.m_BindingIndex);
 				descriptorTypes.emplace_back(layoutBindings[i].descriptorType);
+			}
+
+			for (size_t i = 0; i < setLayoutInfo.m_Samplers.size(); ++i)
+			{
+				const size_t index = setLayoutInfo.m_Buffers.size() + i;
+				layoutBindings[index].binding = setLayoutInfo.m_Samplers[i].m_BindingIndex;
+				layoutBindings[index].descriptorCount = 1;
+				layoutBindings[index].descriptorType = vk::DescriptorType::eCombinedImageSampler;
+				layoutBindings[index].pImmutableSamplers = nullptr;
+				layoutBindings[index].stageFlags = vk::ShaderStageFlagBits::eAll;
+				bindingIndices.emplace_back(layoutBindings[index].binding);
+				descriptorTypes.emplace_back(layoutBindings[index].descriptorType);
 			}
 
 			vk::DescriptorSetLayout layout = nullptr;
@@ -1361,8 +1392,9 @@ namespace Glory
 			return NULL;
 		}
 
-		std::vector<vk::WriteDescriptorSet> descriptorWrites(setInfo.m_Buffers.size());
+		std::vector<vk::WriteDescriptorSet> descriptorWrites(setInfo.m_Buffers.size() + setInfo.m_Samplers.size());
 		std::vector<vk::DescriptorBufferInfo> bufferInfos(setInfo.m_Buffers.size());
+		std::vector<vk::DescriptorImageInfo> imageInfos(setInfo.m_Samplers.size());
 		uint32_t descriptorIndex = 0;
 		for (size_t i = 0; i < setInfo.m_Buffers.size(); ++i)
 		{
@@ -1388,12 +1420,23 @@ namespace Glory
 			++descriptorIndex;
 		}
 
-		//vk::DescriptorSetLayoutBinding samplerLayoutBinding{};
-		//samplerLayoutBinding.binding = 1;
-		//samplerLayoutBinding.descriptorCount = 1;
-		//samplerLayoutBinding.descriptorType = vk::DescriptorType::eCombinedImageSampler;
-		//samplerLayoutBinding.pImmutableSamplers = nullptr;
-		//samplerLayoutBinding.stageFlags = vk::ShaderStageFlagBits::eAll;
+		for (size_t i = 0; i < setInfo.m_Samplers.size(); ++i)
+		{
+			const size_t index = setInfo.m_Buffers.size() + i;
+			auto& samplerInfo = setInfo.m_Samplers[i];
+			VK_Texture* vkTexture = m_Textures.Find(setInfo.m_Samplers[i].m_TextureHandle);
+
+			imageInfos[i].imageLayout = vkTexture ? vkTexture->m_VKLayout : vk::ImageLayout::eUndefined;
+			imageInfos[i].imageView = vkTexture ? vkTexture->m_VKImageView : nullptr;
+			imageInfos[i].sampler = vkTexture ? vkTexture->m_VKSampler : nullptr;
+
+			descriptorWrites[index].dstBinding = vkDescriptorSetLayout->m_BindingIndices[descriptorIndex];
+			descriptorWrites[index].dstArrayElement = 0;
+			descriptorWrites[index].descriptorType = vkDescriptorSetLayout->m_DescriptorTypes[descriptorIndex];
+			descriptorWrites[index].descriptorCount = 1;
+			descriptorWrites[index].pImageInfo = &imageInfos[i];
+			++descriptorIndex;
+		}
 
 		DescriptorSetHandle handle;
 		VK_DescriptorSet& set = m_DescriptorSets.Emplace(handle, VK_DescriptorSet());

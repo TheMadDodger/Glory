@@ -61,7 +61,9 @@ namespace Glory
 
 			PipelineHandle m_Pipeline = 0;
 			DescriptorSetLayoutHandle m_SetLayout = 0;
+			DescriptorSetLayoutHandle m_TextureSetLayout = 0;
 			DescriptorSetHandle m_Set = 0;
+			std::vector<DescriptorSetHandle> m_TextureSets;
 		};
 
 		NullRendererModule();

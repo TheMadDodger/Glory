@@ -3,6 +3,7 @@
 
 #include <Glory.h>
 #include <GraphicsDevice.h>
+#include <GraphicsEnums.h>
 
 #include <vulkan/vulkan.hpp>
 
@@ -29,9 +30,11 @@ namespace Glory
 
     struct VK_Texture
     {
+        vk::ImageLayout m_VKLayout;
         vk::Image m_VKImage;
         vk::ImageView m_VKImageView;
         vk::DeviceMemory m_VKMemory;
+        vk::Sampler m_VKSampler;
     };
 
     struct VK_RenderTexture
@@ -125,7 +128,7 @@ namespace Glory
         virtual void End() override;
         virtual void EndRenderPass() override;
         virtual void EndPipeline() override;
-        virtual void BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets) override;
+        virtual void BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t firstSet=0) override;
         virtual void PushConstants(PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data) override;
 
         virtual void DrawMesh(MeshHandle handle) override;
@@ -206,6 +209,7 @@ namespace Glory
         GraphicsResources<VK_DescriptorSetLayout> m_DescriptorSetLayouts;
         GraphicsResources<VK_DescriptorSet> m_DescriptorSets;
 
+        std::unordered_map<SamplerSettings, vk::Sampler> m_CachedSamlers;
         std::unordered_map<DescriptorSetLayoutInfo, DescriptorSetLayoutHandle> m_CachedDescriptorSetLayouts;
 
         DescriptorAllocator m_DescriptorAllocator;

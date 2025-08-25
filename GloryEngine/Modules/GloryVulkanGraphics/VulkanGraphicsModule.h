@@ -15,6 +15,7 @@
 
 #include <GraphicsModule.h>
 #include <WindowModule.h>
+#include <GraphicsEnums.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -29,15 +30,6 @@ namespace Glory
 		alignas(16) glm::mat4 model;
 		alignas(16) glm::mat4 view;
 		alignas(16) glm::mat4 proj;
-	};
-
-	struct SamplerSettingsComparer
-	{
-	public:
-		bool operator()(const SamplerSettings& a, const SamplerSettings& b) const
-		{
-			return std::memcmp(&a, &b, sizeof(SamplerSettings) == 0);
-		}
 	};
 
 	class VulkanDevice;

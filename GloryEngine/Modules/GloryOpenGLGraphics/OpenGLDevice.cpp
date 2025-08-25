@@ -88,7 +88,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
-	void OpenGLDevice::BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets)
+	void OpenGLDevice::BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t)
 	{
 		for (size_t i = 0; i < sets.size(); ++i)
 		{

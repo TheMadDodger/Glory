@@ -30,7 +30,7 @@ namespace Glory
 
 	struct SamplerDescritporLayout
 	{
-
+		uint32_t m_BindingIndex;
 	};
 
 	struct DescriptorSetLayoutInfo
@@ -52,13 +52,6 @@ namespace Glory
 
 namespace std
 {
-	template <class T>
-	inline void CombineHash(size_t& hash, const T& v)
-	{
-		std::hash<T> h;
-		hash ^= h(v) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
-	}
-
 	template <>
 	struct hash<Glory::DescriptorSetLayoutInfo>
 	{
@@ -76,6 +69,7 @@ namespace std
 
 			for (auto& sampler : info.m_Samplers)
 			{
+				CombineHash(hash, sampler.m_BindingIndex);
 			}
 			return hash;
 		}
@@ -163,10 +157,16 @@ namespace Glory
 		uint32_t m_Size;
 	};
 
+	struct SamplerDescriptor
+	{
+		TextureHandle m_TextureHandle;
+	};
+
 	struct DescriptorSetInfo
 	{
 		DescriptorSetLayoutHandle m_Layout;
 		std::vector<BufferDescriptor> m_Buffers;
+		std::vector<SamplerDescriptor> m_Samplers;
 	};
 
 	class GraphicsDevice
@@ -186,7 +186,7 @@ namespace Glory
 		virtual void End() = 0;
 		virtual void EndRenderPass() = 0;
 		virtual void EndPipeline() = 0;
-		virtual void BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets) = 0;
+		virtual void BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t firstSet=0) = 0;
 		virtual void PushConstants(PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data) = 0;
 
 		virtual void DrawMesh(MeshHandle handle) = 0;

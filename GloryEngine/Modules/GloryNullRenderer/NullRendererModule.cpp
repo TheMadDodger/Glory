@@ -20,7 +20,7 @@ namespace Glory
 		CameraDatas = 2,
 		WorldTransforms = 3,
 		Materials = 4,
-		HasTexture = 5,
+		HasTexture = 6,
 	};
 
 	NullRendererModule::NullRendererModule()
@@ -265,11 +265,8 @@ namespace Glory
 					const UUID materialID = pipelineRenderData.m_UniqueMaterials[meshBatch.m_MaterialIndices[i]];
 					MaterialData* pMaterialData = materialManager.GetMaterial(materialID);
 					if (!pMaterialData) continue;
-					//Material* pMaterial = pDevice->CreateMaterial(pMaterialData);
-					//if (!pMaterial) continue;
 
 					const auto& ids = meshBatch.m_ObjectIDs[i];
-					//pMaterial->Reset();
 					constants.m_ObjectID = ids.second;
 					constants.m_SceneID = ids.first;
 					constants.m_ObjectDataIndex = currentObject;
@@ -279,8 +276,8 @@ namespace Glory
 						pDevice->PushConstants(batchData.m_Pipeline, 0, sizeof(RenderConstants), &constants);
 					else
 						pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(RenderConstants));
-					//pMaterial->SetSamplers(m_pEngine);
-					//pMaterial->SetTextureBitsBuffer(m_pEngine);
+					if (!batchData.m_TextureSets.empty())
+						pDevice->BindDescriptorSets(batchData.m_Pipeline, { batchData.m_TextureSets[constants.m_MaterialIndex] }, 2);
 					pDevice->DrawMesh(mesh);
 				}
 			}
@@ -416,6 +413,16 @@ namespace Glory
 			if (textureCount && batchData.m_TextureBits->size() < pipelineBatch.m_UniqueMaterials.size())
 				batchData.m_TextureBits.resize(pipelineBatch.m_UniqueMaterials.size());
 
+			if (textureCount)
+			{
+				DescriptorSetLayoutInfo texturesSetLayoutInfo;
+				texturesSetLayoutInfo.m_Samplers.resize(textureCount);
+				for (size_t i = 0; i < texturesSetLayoutInfo.m_Samplers.size(); ++i)
+					texturesSetLayoutInfo.m_Samplers[i].m_BindingIndex = i;
+				batchData.m_TextureSetLayout = pDevice->CreateDescriptorSetLayout(texturesSetLayoutInfo);
+				batchData.m_TextureSets.resize(pipelineBatch.m_UniqueMaterials.size(), 0ull);
+			}
+
 			for (size_t i = 0; i < pipelineBatch.m_UniqueMaterials.size(); ++i)
 			{
 				const UUID materialID = pipelineBatch.m_UniqueMaterials[i];
@@ -434,14 +441,27 @@ namespace Glory
 					batchData.m_TextureBits.m_Dirty = true;
 				}
 
+				if (textureCount == 0) continue;
+
 				/* Textures */
-				for (size_t i = 0; i < pMaterialData->ResourceCount(); ++i)
+				if (!batchData.m_TextureSets[i])
 				{
-					const UUID textureID = pMaterialData->GetResourceUUIDPointer(i)->AssetUUID();
-					Resource* pResource = assets.FindResource(textureID);
-					if (!pResource) continue;
-					TextureData* pTexture = static_cast<TextureData*>(pResource);
-					TextureHandle texture = pDevice->AcquireCachedTexture(pTexture);
+					DescriptorSetInfo setInfo;
+					setInfo.m_Layout = batchData.m_TextureSetLayout;
+					setInfo.m_Samplers.resize(textureCount);
+					for (size_t j = 0; j < textureCount; ++j)
+					{
+						const UUID textureID = pMaterialData->GetResourceUUIDPointer(j)->AssetUUID();
+						Resource* pResource = assets.FindResource(textureID);
+						if (!pResource)
+						{
+							setInfo.m_Samplers[j].m_TextureHandle = 0;
+							continue;
+						}
+						TextureData* pTexture = static_cast<TextureData*>(pResource);
+						setInfo.m_Samplers[j].m_TextureHandle = pDevice->AcquireCachedTexture(pTexture);
+					}
+					batchData.m_TextureSets[i] = pDevice->CreateDescriptorSet(std::move(setInfo));
 				}
 			}
 
@@ -494,15 +514,17 @@ namespace Glory
 					setInfo.m_Buffers[2].m_Offset = 0;
 					setInfo.m_Buffers[2].m_Size = batchData.m_TextureBits->size()*sizeof(uint32_t);
 				}
+
 				batchData.m_SetLayout = setInfo.m_Layout = pDevice->CreateDescriptorSetLayout(setLayoutInfo);
 				batchData.m_Set = pDevice->CreateDescriptorSet(std::move(setInfo));
 			}
 
 			if (!batchData.m_Pipeline)
 			{
-				std::vector<DescriptorSetLayoutHandle> descriptorSetLayouts(2);
+				std::vector<DescriptorSetLayoutHandle> descriptorSetLayouts(textureCount ? 3 : 2);
 				descriptorSetLayouts[0] = m_GlobalSetLayout;
 				descriptorSetLayouts[1] = batchData.m_SetLayout;
+				if (textureCount) descriptorSetLayouts[2] = batchData.m_TextureSetLayout;
 
 				PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineBatch.m_PipelineID);
 				if (!pPipelineData) continue;

@@ -90,7 +90,7 @@ namespace Glory
         virtual void End() override;
         virtual void EndRenderPass() override;
         virtual void EndPipeline() override;
-        virtual void BindDescriptorSets(PipelineHandle, std::vector<DescriptorSetHandle> sets) override;
+        virtual void BindDescriptorSets(PipelineHandle, std::vector<DescriptorSetHandle> sets, uint32_t firstSet=0) override;
         virtual void PushConstants(PipelineHandle, uint32_t, uint32_t, const void*) override;
 
         virtual void DrawMesh(MeshHandle handle) override;
