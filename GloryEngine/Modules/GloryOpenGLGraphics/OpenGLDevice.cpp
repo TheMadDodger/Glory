@@ -90,6 +90,13 @@ namespace Glory
 
 	void OpenGLDevice::BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t)
 	{
+		GL_Pipeline* glPipeline = m_Pipelines.Find(pipeline);
+		if (!glPipeline)
+		{
+			Debug().LogError("OpenGLDevice::BindDescriptorSet: Invalid pipeline handle.");
+			return;
+		}
+
 		for (size_t i = 0; i < sets.size(); ++i)
 		{
 			GL_DescriptorSet* glSet = m_Sets.Find(sets[i]);
@@ -125,6 +132,24 @@ namespace Glory
 					OpenGLGraphicsModule::LogGLError(glGetError());
 				}
 				++index;
+			}
+
+			for (size_t i = 0; i < glSet->m_Textures.size(); ++i)
+			{
+				GL_Texture* glTexture = m_Textures.Find(glSet->m_Textures[i]);
+
+				GLuint texLocation = glGetUniformLocation(glPipeline->m_GLProgramID, glSetLayout->m_SamplerNames[i].c_str());
+				OpenGLGraphicsModule::LogGLError(glGetError());
+				glUniform1i(texLocation, i);
+				OpenGLGraphicsModule::LogGLError(glGetError());
+
+				glActiveTexture(GL_TEXTURE0 + i);
+				OpenGLGraphicsModule::LogGLError(glGetError());
+				glBindTexture(GL_TEXTURE_2D, glTexture ? glTexture->m_GLTextureID : 0);
+				OpenGLGraphicsModule::LogGLError(glGetError());
+
+				glActiveTexture(GL_TEXTURE0);
+				OpenGLGraphicsModule::LogGLError(glGetError());
 			}
 		}
 	}
@@ -753,7 +778,7 @@ namespace Glory
 		return handle;
 	}
 
-	DescriptorSetLayoutHandle OpenGLDevice::CreateDescriptorSetLayout(const DescriptorSetLayoutInfo& setLayoutInfo)
+	DescriptorSetLayoutHandle OpenGLDevice::CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo)
 	{
 		auto iter = m_CachedDescriptorSetLayouts.find(setLayoutInfo);
 		if (iter == m_CachedDescriptorSetLayouts.end())
@@ -762,6 +787,7 @@ namespace Glory
 			GL_DescriptorSetLayout& setLayout = m_SetLayouts.Emplace(iter->second, GL_DescriptorSetLayout());
 			for (size_t i = 0; i < setLayoutInfo.m_Buffers.size(); ++i)
 				setLayout.m_BindingIndices.emplace_back(setLayoutInfo.m_Buffers[i].m_BindingIndex);
+			setLayout.m_SamplerNames = std::move(setLayoutInfo.m_SamplerNames);
 		}
 		return iter->second;
 	}
@@ -769,7 +795,9 @@ namespace Glory
 	DescriptorSetHandle OpenGLDevice::CreateDescriptorSet(DescriptorSetInfo&& setInfo)
 	{
 		std::vector<BufferHandle> bufferHandles;
+		std::vector<TextureHandle> textureHandles;
 		bufferHandles.resize(setInfo.m_Buffers.size());
+		textureHandles.resize(setInfo.m_Samplers.size());
 
 		for (size_t i = 0; i < setInfo.m_Buffers.size(); ++i)
 		{
@@ -783,9 +811,22 @@ namespace Glory
 			bufferHandles[i] = setInfo.m_Buffers[i].m_BufferHandle;
 		}
 
+		for (size_t i = 0; i < setInfo.m_Samplers.size(); ++i)
+		{
+			GL_Texture* glTexture = m_Textures.Find(setInfo.m_Samplers[i].m_TextureHandle);
+			if (!glTexture)
+			{
+				textureHandles[i] = NULL;
+				continue;
+			}
+
+			textureHandles[i] = setInfo.m_Samplers[i].m_TextureHandle;
+		}
+
 		DescriptorSetHandle handle;
 		GL_DescriptorSet& set = m_Sets.Emplace(handle, GL_DescriptorSet());
 		set.m_Buffers = std::move(bufferHandles);
+		set.m_Textures = std::move(textureHandles);
 		set.m_Layout = setInfo.m_Layout;
 
 		std::stringstream str;

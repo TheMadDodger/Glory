@@ -151,7 +151,7 @@ namespace Glory
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
         virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
             std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride, const std::vector<AttributeType>& attributeTypes) override;
-        virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(const DescriptorSetLayoutInfo& setLayoutInfo) override;
+        virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo) override;
         virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) override;
 
         virtual void FreeBuffer(BufferHandle& handle) override;

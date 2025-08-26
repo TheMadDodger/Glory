@@ -108,17 +108,6 @@ namespace Glory::Editor
 		switch (bytesPerPixel)
 		{
 		case 3:
-			if (pSDLImage->format->Rmask == 0x000000ff)
-			{
-				pixelFormat = PixelFormat::PF_RGB;
-				internalFormat = PixelFormat::PF_R8G8B8Unorm;
-			}
-			else
-			{
-				pixelFormat = PixelFormat::PF_RGB;
-				internalFormat = PixelFormat::PF_B8G8R8Unorm;
-			}
-			break;
 		case 4:
 			if (pSDLImage->format->Rmask == 0x000000ff)
 			{
@@ -137,8 +126,17 @@ namespace Glory::Editor
 			return nullptr;
 		}
 
-		char* data = new char[bytesPerPixel * numPixels];
-		std::memcpy(data, pSDLImage->pixels, bytesPerPixel * numPixels);
+		/* Copy pixels into a 4 bytes per pixel buffer regardless of channel count */
+		char* data = new char[4*numPixels];
+		char* pixels = (char*)pSDLImage->pixels;
+		for (size_t i = 0; i < numPixels; ++i)
+		{
+			char* currentPixel = pixels + bytesPerPixel*i;
+			std::memcpy(&data[4*i], currentPixel, bytesPerPixel);
+			if (bytesPerPixel == 3)
+				data[4*i + 3] = 255;
+		}
+		bytesPerPixel = 4;
 
 		ImageData* pData = new ImageData(width, height, internalFormat, pixelFormat, bytesPerPixel, std::move(data), bytesPerPixel*numPixels);
 		ImportedResource importedResource{ path, pData };

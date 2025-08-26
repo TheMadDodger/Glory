@@ -65,12 +65,14 @@ namespace Glory
     struct GL_DescriptorSetLayout
     {
         std::vector<uint32_t> m_BindingIndices;
+        std::vector<std::string> m_SamplerNames;
     };
 
     struct GL_DescriptorSet
     {
         DescriptorSetLayoutHandle m_Layout;
         std::vector<BufferHandle> m_Buffers;
+        std::vector<TextureHandle> m_Textures;
     };
 
     class OpenGLGraphicsModule;
@@ -113,7 +115,7 @@ namespace Glory
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
         virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetHandle>&&,
             size_t, const std::vector<AttributeType>&) override;
-        virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(const DescriptorSetLayoutInfo& setLayoutInfo) override;
+        virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo) override;
         virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) override;
 
         virtual void FreeBuffer(BufferHandle& handle) override;

@@ -719,14 +719,31 @@ namespace Glory
 		return CreateTexture(createInfo, pImage->GetPixels(), pImage->DataSize());
 	}
 
+	void EnsureSupportedFormat(vk::Format& format, vk::ImageViewCreateInfo& viewInfo)
+	{
+		switch (format)
+		{
+		case vk::Format::eR8G8B8Unorm:
+			format = vk::Format::eR8G8B8A8Unorm;
+			viewInfo.components.a = vk::ComponentSwizzle::eOne;
+			break;
+		case vk::Format::eR8G8B8Srgb:
+			format = vk::Format::eR8G8B8A8Srgb;
+			viewInfo.components.a = vk::ComponentSwizzle::eOne;
+			break;
+		default:
+			break;
+		}
+	}
+
 	TextureHandle VulkanDevice::CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels, size_t dataSize)
 	{
 		TextureHandle handle;
 		VK_Texture& texture = m_Textures.Emplace(handle, VK_Texture());
 
-		vk::Format format = VKConverter::GetVulkanFormat(textureInfo.m_InternalFormat); //vk::Format::eR8G8B8A8Srgb;
+		const vk::Format format = VKConverter::GetVulkanFormat(textureInfo.m_InternalFormat); //vk::Format::eR8G8B8A8Srgb;
+		const vk::ImageType imageType = VKConverter::GetVulkanImageType(textureInfo.m_ImageType);
 		vk::ImageCreateInfo imageInfo = vk::ImageCreateInfo();
-		vk::ImageType imageType = VKConverter::GetVulkanImageType(textureInfo.m_ImageType);
 		imageInfo.imageType = imageType;
 		imageInfo.extent.width = textureInfo.m_Width;
 		imageInfo.extent.height = textureInfo.m_Height;
@@ -734,12 +751,15 @@ namespace Glory
 		imageInfo.mipLevels = 1;
 		imageInfo.arrayLayers = 1;
 		imageInfo.format = format;
-		imageInfo.tiling = format == vk::Format::eR8G8B8A8Srgb ? vk::ImageTiling::eOptimal : (vk::ImageTiling)0;
+		imageInfo.tiling = vk::ImageTiling::eOptimal;
 		imageInfo.initialLayout = vk::ImageLayout::eUndefined;
 		imageInfo.usage = VKConverter::GetVulkanImageUsageFlags(textureInfo.m_ImageAspectFlags);
 		imageInfo.sharingMode = vk::SharingMode::eExclusive;
 		imageInfo.samples = vk::SampleCountFlagBits::e1;
 		imageInfo.flags = (vk::ImageCreateFlags)0;
+
+		vk::ImageViewCreateInfo viewInfo = vk::ImageViewCreateInfo();
+		EnsureSupportedFormat(imageInfo.format, viewInfo);
 
 		const vk::ImageAspectFlags imageAspect = VKConverter::GetVulkanImageAspectFlags(textureInfo.m_ImageAspectFlags);
 
@@ -753,9 +773,9 @@ namespace Glory
 		vk::MemoryRequirements memRequirements;
 		m_LogicalDevice.getImageMemoryRequirements(texture.m_VKImage, &memRequirements);
 
-		uint32_t typeFilter = memRequirements.memoryTypeBits;
-		vk::MemoryPropertyFlags properties = vk::MemoryPropertyFlagBits::eDeviceLocal;
-		uint32_t memoryIndex = GetSupportedMemoryIndex(typeFilter, properties);
+		const uint32_t typeFilter = memRequirements.memoryTypeBits;
+		const vk::MemoryPropertyFlags properties = vk::MemoryPropertyFlagBits::eDeviceLocal;
+		const uint32_t memoryIndex = GetSupportedMemoryIndex(typeFilter, properties);
 
 		vk::MemoryAllocateInfo imageAllocInfo = vk::MemoryAllocateInfo();
 		imageAllocInfo.allocationSize = memRequirements.size;
@@ -770,26 +790,25 @@ namespace Glory
 		}
 		m_LogicalDevice.bindImageMemory(texture.m_VKImage, texture.m_VKMemory, 0);
 
-		// Copy buffer to image
+		/* Copy buffer to image */
 		if (pixels)
 		{
-			// Transition image layout
+			/* Transition image layout */
 			TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, imageAspect);
 
 			const vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
-			BufferHandle stagingBuffer = CreateBuffer(uint32_t(dataSize), BufferType::BT_TransferRead);//new VulkanBuffer(imageSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)memoryFlags);
+			BufferHandle stagingBuffer = CreateBuffer(memRequirements.size, BufferType::BT_TransferRead);//new VulkanBuffer(imageSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)memoryFlags);
 			VK_Buffer* vkStagingBuffer = m_Buffers.Find(stagingBuffer);
-			AssignBuffer(stagingBuffer, pixels);
+			AssignBuffer(stagingBuffer, pixels, uint32_t(dataSize));
 			CopyFromBuffer(vkStagingBuffer->m_VKBuffer, texture.m_VKImage, imageAspect, textureInfo.m_Width, textureInfo.m_Height);
 
-			// Transtion layout again so it can be sampled
+			/* Transtion layout again so it can be sampled */
 			TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, imageAspect);
 			
 			FreeBuffer(stagingBuffer);
 		}
 
-		// Create texture image view
-		vk::ImageViewCreateInfo viewInfo = vk::ImageViewCreateInfo();
+		/* Create texture image view */
 		viewInfo.image = texture.m_VKImage;
 		viewInfo.viewType = VKConverter::GetVulkanImageViewType(textureInfo.m_ImageType);
 		viewInfo.format = format;
@@ -1324,7 +1343,7 @@ namespace Glory
 		return handle;
 	}
 
-	DescriptorSetLayoutHandle VulkanDevice::CreateDescriptorSetLayout(const DescriptorSetLayoutInfo& setLayoutInfo)
+	DescriptorSetLayoutHandle VulkanDevice::CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo)
 	{
 		auto iter = m_CachedDescriptorSetLayouts.find(setLayoutInfo);
 		if (iter == m_CachedDescriptorSetLayouts.end())

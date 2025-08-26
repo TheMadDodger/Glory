@@ -38,6 +38,7 @@ namespace Glory
 		PushConstantsRange m_PushConstantRange;
 		std::vector<BufferDescriptorLayout> m_Buffers;
 		std::vector<SamplerDescritporLayout> m_Samplers;
+		std::vector<std::string> m_SamplerNames;
 
 		bool operator==(const DescriptorSetLayoutInfo& other) const
 		{
@@ -234,7 +235,7 @@ namespace Glory
 		virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts,
 			size_t stride, const std::vector<AttributeType>& attributeTypes) = 0;
 
-		virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(const DescriptorSetLayoutInfo& setLayoutInfo) = 0;
+		virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo) = 0;
 		virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) = 0;
 
 		/* Free memory */

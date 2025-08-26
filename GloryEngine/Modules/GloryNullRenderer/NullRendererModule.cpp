@@ -105,7 +105,7 @@ namespace Glory
 		setInfo.m_Buffers[cameraDatasBufferIndex].m_Size = sizeof(PerCameraData)*MAX_CAMERAS;
 		//m_LightCameraDatasBuffer = pDevice->CreateBuffer(CameraDatasBufferName, sizeof(PerCameraData)*MAX_LIGHTS, BufferType::BT_Uniform);
 
-		m_GlobalSetLayout = setInfo.m_Layout = pDevice->CreateDescriptorSetLayout(setLayoutInfo);
+		m_GlobalSetLayout = setInfo.m_Layout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
 		m_GlobalSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 	}
 
@@ -417,9 +417,13 @@ namespace Glory
 			{
 				DescriptorSetLayoutInfo texturesSetLayoutInfo;
 				texturesSetLayoutInfo.m_Samplers.resize(textureCount);
+				texturesSetLayoutInfo.m_SamplerNames.resize(textureCount);
 				for (size_t i = 0; i < texturesSetLayoutInfo.m_Samplers.size(); ++i)
+				{
+					texturesSetLayoutInfo.m_SamplerNames[i] = pPipelineData->ResourcePropertyInfo(i)->ShaderName();
 					texturesSetLayoutInfo.m_Samplers[i].m_BindingIndex = i;
-				batchData.m_TextureSetLayout = pDevice->CreateDescriptorSetLayout(texturesSetLayoutInfo);
+				}
+				batchData.m_TextureSetLayout = pDevice->CreateDescriptorSetLayout(std::move(texturesSetLayoutInfo));
 				batchData.m_TextureSets.resize(pipelineBatch.m_UniqueMaterials.size(), 0ull);
 			}
 
@@ -515,7 +519,7 @@ namespace Glory
 					setInfo.m_Buffers[2].m_Size = batchData.m_TextureBits->size()*sizeof(uint32_t);
 				}
 
-				batchData.m_SetLayout = setInfo.m_Layout = pDevice->CreateDescriptorSetLayout(setLayoutInfo);
+				batchData.m_SetLayout = setInfo.m_Layout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
 				batchData.m_Set = pDevice->CreateDescriptorSet(std::move(setInfo));
 			}
 
