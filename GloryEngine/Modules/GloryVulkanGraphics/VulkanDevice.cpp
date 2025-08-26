@@ -741,6 +741,7 @@ namespace Glory
 		TextureHandle handle;
 		VK_Texture& texture = m_Textures.Emplace(handle, VK_Texture());
 
+		const uint32_t mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(textureInfo.m_Width, textureInfo.m_Height)))) + 1;
 		const vk::Format format = VKConverter::GetVulkanFormat(textureInfo.m_InternalFormat); //vk::Format::eR8G8B8A8Srgb;
 		const vk::ImageType imageType = VKConverter::GetVulkanImageType(textureInfo.m_ImageType);
 		vk::ImageCreateInfo imageInfo = vk::ImageCreateInfo();
@@ -748,7 +749,6 @@ namespace Glory
 		imageInfo.extent.width = textureInfo.m_Width;
 		imageInfo.extent.height = textureInfo.m_Height;
 		imageInfo.extent.depth = 1;
-		imageInfo.mipLevels = 1;
 		imageInfo.arrayLayers = 1;
 		imageInfo.format = format;
 		imageInfo.tiling = vk::ImageTiling::eOptimal;
@@ -757,6 +757,9 @@ namespace Glory
 		imageInfo.sharingMode = vk::SharingMode::eExclusive;
 		imageInfo.samples = vk::SampleCountFlagBits::e1;
 		imageInfo.flags = (vk::ImageCreateFlags)0;
+		imageInfo.mipLevels = textureInfo.m_SamplerSettings.MipmapMode == Filter::F_None ? 1 : mipLevels;
+		if (imageInfo.mipLevels > 1)
+			imageInfo.usage |= vk::ImageUsageFlagBits::eTransferSrc;
 
 		vk::ImageViewCreateInfo viewInfo = vk::ImageViewCreateInfo();
 		EnsureSupportedFormat(imageInfo.format, viewInfo);
@@ -794,16 +797,19 @@ namespace Glory
 		if (pixels)
 		{
 			/* Transition image layout */
-			TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, imageAspect);
+			TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, imageAspect, imageInfo.mipLevels);
 
 			const vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
-			BufferHandle stagingBuffer = CreateBuffer(memRequirements.size, BufferType::BT_TransferRead);//new VulkanBuffer(imageSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)memoryFlags);
+			BufferHandle stagingBuffer = CreateBuffer(memRequirements.size, BufferType::BT_TransferRead);
 			VK_Buffer* vkStagingBuffer = m_Buffers.Find(stagingBuffer);
 			AssignBuffer(stagingBuffer, pixels, uint32_t(dataSize));
 			CopyFromBuffer(vkStagingBuffer->m_VKBuffer, texture.m_VKImage, imageAspect, textureInfo.m_Width, textureInfo.m_Height);
 
 			/* Transtion layout again so it can be sampled */
-			TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, imageAspect);
+			if (imageInfo.mipLevels > 1)
+				GenerateMipMaps(texture.m_VKImage, textureInfo.m_Width, textureInfo.m_Height, imageInfo.mipLevels);
+			else
+				TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, imageAspect, imageInfo.mipLevels);
 			
 			FreeBuffer(stagingBuffer);
 		}
@@ -814,7 +820,7 @@ namespace Glory
 		viewInfo.format = format;
 		viewInfo.subresourceRange.aspectMask = imageAspect;
 		viewInfo.subresourceRange.baseMipLevel = 0;
-		viewInfo.subresourceRange.levelCount = 1;
+		viewInfo.subresourceRange.levelCount = imageInfo.mipLevels;
 		viewInfo.subresourceRange.baseArrayLayer = 0;
 		viewInfo.subresourceRange.layerCount = 1;
 
@@ -1654,7 +1660,7 @@ namespace Glory
 		m_LogicalDevice.freeCommandBuffers(commandPool, 1, &commandBuffer);
 	}
 
-	void VulkanDevice::TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags)
+	void VulkanDevice::TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags, uint32_t mipLevels)
 	{
 		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
 
@@ -1666,7 +1672,7 @@ namespace Glory
 		barrier.image = image;
 		barrier.subresourceRange.aspectMask = aspectFlags;
 		barrier.subresourceRange.baseMipLevel = 0;
-		barrier.subresourceRange.levelCount = 1;
+		barrier.subresourceRange.levelCount = mipLevels;
 		barrier.subresourceRange.baseArrayLayer = 0;
 		barrier.subresourceRange.layerCount = 1;
 
@@ -1709,6 +1715,75 @@ namespace Glory
 			0, nullptr,
 			1, &barrier
 		);
+
+		EndSingleTimeCommands(commandBuffer);
+	}
+
+	void VulkanDevice::GenerateMipMaps(vk::Image image, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
+	{
+		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+		vk::ImageMemoryBarrier barrier{};
+		barrier.image = image;
+		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount = 1;
+		barrier.subresourceRange.levelCount = 1;
+
+		int32_t mipWidth = texWidth;
+		int32_t mipHeight = texHeight;
+
+		for (uint32_t i = 1; i < mipLevels; ++i)
+		{
+			barrier.subresourceRange.baseMipLevel = i - 1;
+			barrier.oldLayout = vk::ImageLayout::eTransferDstOptimal;
+			barrier.newLayout = vk::ImageLayout::eTransferSrcOptimal;
+			barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+			barrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
+
+			commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+				vk::PipelineStageFlagBits::eTransfer, (vk::DependencyFlags)0,
+				0, nullptr, 0, nullptr, 1, &barrier);
+
+			vk::ImageBlit blit{};
+			blit.srcOffsets[0] = vk::Offset3D{ 0, 0, 0 };
+			blit.srcOffsets[1] = vk::Offset3D{ mipWidth, mipHeight, 1 };
+			blit.srcSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+			blit.srcSubresource.mipLevel = i - 1;
+			blit.srcSubresource.baseArrayLayer = 0;
+			blit.srcSubresource.layerCount = 1;
+			blit.dstOffsets[0] = vk::Offset3D{ 0, 0, 0 };
+			blit.dstOffsets[1] = vk::Offset3D{ mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1 };
+			blit.dstSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+			blit.dstSubresource.mipLevel = i;
+			blit.dstSubresource.baseArrayLayer = 0;
+			blit.dstSubresource.layerCount = 1;
+
+			commandBuffer.blitImage(image, vk::ImageLayout::eTransferSrcOptimal,
+				image, vk::ImageLayout::eTransferDstOptimal, 1, &blit, vk::Filter::eLinear);
+
+			barrier.oldLayout = vk::ImageLayout::eTransferSrcOptimal;
+			barrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+			barrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
+			barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+			commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eFragmentShader,
+				(vk::DependencyFlags)0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+			if (mipWidth > 1) mipWidth /= 2;
+			if (mipHeight > 1) mipHeight /= 2;
+		}
+
+		barrier.subresourceRange.baseMipLevel = mipLevels - 1;
+		barrier.oldLayout = vk::ImageLayout::eTransferDstOptimal;
+		barrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+		barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+		commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eFragmentShader,
+			(vk::DependencyFlags)0, 0, nullptr, 0, nullptr, 1, &barrier);
 
 		EndSingleTimeCommands(commandBuffer);
 	}

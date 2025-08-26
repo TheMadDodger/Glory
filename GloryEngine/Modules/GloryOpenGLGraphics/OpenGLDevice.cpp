@@ -471,10 +471,17 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glTexParameteri(texture.m_GLTextureType, GL_TEXTURE_WRAP_R, texture.m_GLTextureWrapR);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_MIN_LOD, sampler.MinLOD);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_MAX_LOD, sampler.MaxLOD);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_LOD_BIAS, 0.0);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		float aniso = 0.0f;
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+		aniso = std::min(sampler.MaxAnisotropy, aniso);
 		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
@@ -532,10 +539,17 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glTexParameteri(texture.m_GLTextureType, GL_TEXTURE_WRAP_R, texture.m_GLTextureWrapR);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_MIN_LOD, sampler.MinLOD);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_MAX_LOD, sampler.MaxLOD);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_LOD_BIAS, 0.0);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		float aniso = 0.0f;
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+		aniso = std::min(sampler.MaxAnisotropy, aniso);
 		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 

@@ -34,7 +34,6 @@ namespace Glory
         pTexture->m_SamplerSettings.AddressModeU = sampler["AddressModeU"].AsEnum<SamplerAddressMode>();
         pTexture->m_SamplerSettings.AddressModeV = sampler["AddressModeV"].AsEnum<SamplerAddressMode>();
         pTexture->m_SamplerSettings.AddressModeW = sampler["AddressModeW"].AsEnum<SamplerAddressMode>();
-        pTexture->m_SamplerSettings.AnisotropyEnable = sampler["AnisotropyEnable"].As<bool>();
         pTexture->m_SamplerSettings.MaxAnisotropy = sampler["MaxAnisotropy"].As<float>();
         pTexture->m_SamplerSettings.UnnormalizedCoordinates = sampler["UnnormalizedCoordinates"].As<bool>();
         pTexture->m_SamplerSettings.CompareEnable = sampler["CompareEnable"].As<bool>();
@@ -63,7 +62,6 @@ namespace Glory
         sampler["AddressModeU"].SetEnum<SamplerAddressMode>(pResource->m_SamplerSettings.AddressModeU);
         sampler["AddressModeV"].SetEnum<SamplerAddressMode>(pResource->m_SamplerSettings.AddressModeV);
         sampler["AddressModeW"].SetEnum<SamplerAddressMode>(pResource->m_SamplerSettings.AddressModeW);
-        sampler["AnisotropyEnable"].Set(pResource->m_SamplerSettings.AnisotropyEnable);
         sampler["MaxAnisotropy"].Set(pResource->m_SamplerSettings.MaxAnisotropy);
         sampler["UnnormalizedCoordinates"].Set(pResource->m_SamplerSettings.UnnormalizedCoordinates);
         sampler["CompareEnable"].Set(pResource->m_SamplerSettings.CompareEnable);

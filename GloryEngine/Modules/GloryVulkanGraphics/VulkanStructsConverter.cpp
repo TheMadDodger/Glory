@@ -364,7 +364,7 @@ namespace Glory
         samplerInfo.addressModeU = GetSamplerAddressMode(settings.AddressModeU);
         samplerInfo.addressModeV = GetSamplerAddressMode(settings.AddressModeV);
         samplerInfo.addressModeW = GetSamplerAddressMode(settings.AddressModeW);
-        samplerInfo.anisotropyEnable = settings.AnisotropyEnable ? VK_TRUE : VK_FALSE;
+        samplerInfo.anisotropyEnable = settings.MaxAnisotropy > 0.f ? VK_TRUE : VK_FALSE;
         samplerInfo.maxAnisotropy = settings.MaxAnisotropy;
         samplerInfo.borderColor = vk::BorderColor::eIntOpaqueBlack;
         samplerInfo.unnormalizedCoordinates = settings.UnnormalizedCoordinates ? VK_TRUE : VK_FALSE;
