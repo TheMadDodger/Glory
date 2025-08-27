@@ -20,6 +20,7 @@ namespace Glory
 
 	class PipelineData;
 	class TextureAtlas;
+	class GraphicsDevice;
 
 	struct VolumeTileAABB
 	{
@@ -102,7 +103,7 @@ namespace Glory
 
 		void DynamicObjectsPass(uint32_t cameraIndex);
 
-		void GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera);
+		void GenerateClusterSSBO(GraphicsDevice* pDevice, CameraRef camera, DescriptorSetHandle clusterSet);
 
 	private:
 		std::vector<PipelineBatchData> m_DynamicBatchData;
@@ -111,6 +112,7 @@ namespace Glory
 		BufferHandle m_CameraDatasBuffer = 0;
 		//BufferHandle m_LightCameraDatasBuffer = 0;
 		BufferHandle m_RenderConstantsBuffer = 0;
+		BufferHandle m_ScreenToViewBuffer = 0;
 
 		DescriptorSetHandle m_GlobalSet;
 		DescriptorSetLayoutHandle m_GlobalSetLayout;
@@ -128,24 +130,7 @@ namespace Glory
 		static const size_t MAX_KERNEL_SIZE = 1024;
 
 		/* Compute shaders */
-		FileData* m_pClusterShaderData = nullptr;
-		PipelineData* m_pClusterShaderPipelineData = nullptr;
 		DescriptorSetLayoutHandle m_ClusterSetLayout;
 		PipelineHandle m_ClusterPipeline = 0;
-
-		//FileData* m_pMarkActiveClustersShaderData = nullptr;
-		//PipelineData* m_pMarkActiveClustersPipelineData = nullptr;
-		//MaterialData* m_pMarkActiveClustersMaterialData = nullptr;
-		//Material* m_pMarkActiveClustersMaterial = nullptr;
-		//
-		//FileData* m_pCompactClustersShaderData = nullptr;
-		//PipelineData* m_pCompactClustersPipelineData = nullptr;
-		//MaterialData* m_pCompactClustersMaterialData = nullptr;
-		//Material* m_pCompactClustersMaterial = nullptr;
-		//
-		//FileData* m_pClusterCullLightShaderData = nullptr;
-		//PipelineData* m_pClusterCullLightPipelineData = nullptr;
-		//MaterialData* m_pClusterCullLightMaterialData = nullptr;
-		//Material* m_pClusterCullLightMaterial = nullptr;
 	};
 }

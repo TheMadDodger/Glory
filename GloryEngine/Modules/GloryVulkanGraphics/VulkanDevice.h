@@ -66,6 +66,7 @@ namespace Glory
         RenderPassHandle m_RenderPass;
         vk::PipelineLayout m_VKLayout;
         vk::Pipeline m_VKPipeline;
+        vk::PipelineBindPoint m_VKBindPoint;
         vk::VertexInputBindingDescription m_VertexDescription;
         std::vector<vk::VertexInputAttributeDescription> m_AttributeDescriptions;
         std::vector<ShaderHandle> m_Shaders;
@@ -128,6 +129,7 @@ namespace Glory
         virtual void PushConstants(PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data) override;
 
         virtual void DrawMesh(MeshHandle handle) override;
+        virtual void Dispatch(uint32_t x, uint32_t y, uint32_t z) override;
 
     private: /* Resource management */
         virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;

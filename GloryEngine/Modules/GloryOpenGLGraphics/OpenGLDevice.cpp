@@ -178,6 +178,10 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
+	void OpenGLDevice::Dispatch(uint32_t x, uint32_t y, uint32_t z)
+	{
+	}
+
 #pragma endregion
 
 #pragma region Resource Management

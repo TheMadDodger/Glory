@@ -191,6 +191,7 @@ namespace Glory
 		virtual void PushConstants(PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data) = 0;
 
 		virtual void DrawMesh(MeshHandle handle) = 0;
+		virtual void Dispatch(uint32_t x, uint32_t y, uint32_t z) = 0;
 
 	public: /* Resource caching */
 		PipelineHandle AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetHandle>&& descriptorSets,

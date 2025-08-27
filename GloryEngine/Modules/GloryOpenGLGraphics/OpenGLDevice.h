@@ -96,6 +96,7 @@ namespace Glory
         virtual void PushConstants(PipelineHandle, uint32_t, uint32_t, const void*) override;
 
         virtual void DrawMesh(MeshHandle handle) override;
+        virtual void Dispatch(uint32_t x, uint32_t y, uint32_t z) override;
 
     private: /* Resource management */
         virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;

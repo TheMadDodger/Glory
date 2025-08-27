@@ -758,8 +758,6 @@ namespace Glory
 			renderPass = pDevice->CreateRenderPass(renderPassInfo);
 		}
 
-		pDevice->Begin();
-
 		m_PickResults.clear();
 
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Render" };
@@ -768,6 +766,8 @@ namespace Glory
 		{
 			pass.m_Callback(0, this);
 		}
+
+		pDevice->Begin();
 
 		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
 		{
@@ -785,7 +785,7 @@ namespace Glory
 				pass.m_Callback(i, this);
 			}
 
-			//OnStartCameraRender(camera, m_FrameData.ActiveLights);
+			OnStartCameraRender(camera, m_FrameData.ActiveLights);
 
 			for (auto& pass : m_RenderPasses[RP_ObjectPass])
 			{

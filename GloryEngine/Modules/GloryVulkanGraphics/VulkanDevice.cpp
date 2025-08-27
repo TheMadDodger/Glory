@@ -307,7 +307,7 @@ namespace Glory
 		}
 
 		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
-		commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->m_VKPipeline);
+		commandBuffer.bindPipeline(pipeline->m_VKBindPoint, pipeline->m_VKPipeline);
 	}
 
 	void VulkanDevice::End()
@@ -368,7 +368,7 @@ namespace Glory
 		}
 
 		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
-		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, vkPipeline->m_VKLayout,
+		commandBuffer.bindDescriptorSets(vkPipeline->m_VKBindPoint, vkPipeline->m_VKLayout,
 			firstSet, setsToBind.size(), setsToBind.data(), 0, nullptr);
 	}
 
@@ -417,6 +417,12 @@ namespace Glory
 			commandBuffer.drawIndexed(mesh->m_IndexCount, 1, 0, 0, 0);
 		else
 			commandBuffer.draw(mesh->m_VertexCount, 1, 0, 0);
+	}
+
+	void VulkanDevice::Dispatch(uint32_t x, uint32_t y, uint32_t z)
+	{
+		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
+		commandBuffer.dispatch(x, y, z);
 	}
 
 	vk::BufferUsageFlags GetBufferUsageFlags(BufferType bufferType)
@@ -1145,6 +1151,7 @@ namespace Glory
 		PipelineHandle handle;
 		VK_Pipeline& pipeline = m_Pipelines.Emplace(handle, VK_Pipeline());
 		pipeline.m_RenderPass = renderPass;
+		pipeline.m_VKBindPoint = vk::PipelineBindPoint::eGraphics;
 
 		const uint32_t binding = 0;
 
@@ -1379,6 +1386,7 @@ namespace Glory
 		PipelineHandle handle;
 		VK_Pipeline& pipeline = m_Pipelines.Emplace(handle, VK_Pipeline());
 		pipeline.m_RenderPass = 0;
+		pipeline.m_VKBindPoint = vk::PipelineBindPoint::eCompute;
 
 		pipeline.m_Shaders.resize(1);
 		pipeline.m_Shaders[0] = CreateShader(pPipeline->Shader(pipelines, 0), ShaderType::ST_Compute, "main");
@@ -1414,7 +1422,7 @@ namespace Glory
 		}
 
 		std::stringstream str;
-		str << "VulkanDevice: Pipeline " << handle << " created.";
+		str << "VulkanDevice: Compute pipeline " << handle << " created.";
 		Debug().LogInfo(str.str());
 
 		return handle;
