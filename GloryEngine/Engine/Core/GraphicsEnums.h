@@ -643,6 +643,9 @@ namespace Glory
         /** @brief For rendering shadow maps */
         PT_Shadow = 17,
 
+        /** @brief For compute pipelines */
+        PT_Compute = 18,
+
         /** @brief Number of pipeline types */
         PT_Count,
     };
@@ -665,6 +668,7 @@ namespace Glory
         "Other",
         "Skybox",
         "Shadow",
+        "Compute",
     };
 
     const size_t Enum<PipelineType>::m_NumValues = PT_Count;

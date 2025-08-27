@@ -106,25 +106,10 @@ namespace Glory
 
 	private:
 		// Compute shaders
-		FileData* m_pClusterShaderData = nullptr;
-		PipelineData* m_pClusterShaderPipelineData = nullptr;
 		MaterialData* m_pClusterShaderMaterialData = nullptr;
-		Material* m_pClusterShaderMaterial = nullptr;
-
-		FileData* m_pMarkActiveClustersShaderData = nullptr;
-		PipelineData* m_pMarkActiveClustersPipelineData = nullptr;
 		MaterialData* m_pMarkActiveClustersMaterialData = nullptr;
-		Material* m_pMarkActiveClustersMaterial = nullptr;
-
-		FileData* m_pCompactClustersShaderData = nullptr;
-		PipelineData* m_pCompactClustersPipelineData = nullptr;
 		MaterialData* m_pCompactClustersMaterialData = nullptr;
-		Material* m_pCompactClustersMaterial = nullptr;
-
-		FileData* m_pClusterCullLightShaderData = nullptr;
-		PipelineData* m_pClusterCullLightPipelineData = nullptr;
 		MaterialData* m_pClusterCullLightMaterialData = nullptr;
-		Material* m_pClusterCullLightMaterial = nullptr;
 
 		// Data for clustering
 		Buffer* m_pScreenToViewSSBO = nullptr;

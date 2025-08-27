@@ -84,3 +84,15 @@
   ID: 38
 - Path: "Pipelines\\ShadowsTransparentTextured.gpln"
   ID: 39
+- Path: "Shaders\\Compute\\ClusterShader.shader"
+  ID: 40
+- Path: "Shaders\\Compute\\ClusterCullLight.shader"
+  ID: 41
+- Path: "Shaders\\Compute\\MarkActiveClusters.shader"
+  ID: 42
+- Path: "Shaders\\Compute\\BuildCompactClusterList.shader"
+  ID: 43
+- Path: "Pipelines\\Compute\\ClusterGenerator.gpln"
+  ID: 44
+- Path: "Pipelines\\Compute\\ClusterCullLight.gpln"
+  ID: 45

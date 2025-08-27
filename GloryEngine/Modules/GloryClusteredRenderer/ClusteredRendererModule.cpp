@@ -107,6 +107,9 @@ namespace Glory
 		newReferences.push_back(settings.Value<uint64_t>("Shadows Pipeline"));
 		newReferences.push_back(settings.Value<uint64_t>("Shadows Transparent Textured Pipeline"));
 
+		newReferences.push_back(settings.Value<uint64_t>("Cluster Generator"));
+		newReferences.push_back(settings.Value<uint64_t>("Cluster Cull Light"));
+
 		for (size_t i = 0; i < newReferences.size(); ++i)
 		{
 			if (!newReferences[i]) continue;
@@ -192,35 +195,6 @@ namespace Glory
 
 	void ClusteredRendererModule::OnPostInitialize()
 	{
-		FileImportSettings importSettings;
-		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
-		importSettings.AddNullTerminateAtEnd = true;
-
-		// Cluster generator shader
-		std::filesystem::path path;
-		GetResourcePath("Shaders/Compute/ClusterShader.shader", path);
-		m_pClusterShaderData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
-		m_pClusterShaderPipelineData = new InternalPipeline({ m_pClusterShaderData }, { ShaderType::ST_Compute });
-		m_pClusterShaderMaterialData = new InternalMaterial(m_pClusterShaderPipelineData);
-
-		// Active cluster marker shader
-		GetResourcePath("Shaders/Compute/MarkActiveClusters.shader", path);
-		m_pMarkActiveClustersShaderData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
-		m_pMarkActiveClustersPipelineData = new InternalPipeline({ m_pMarkActiveClustersShaderData }, { ShaderType::ST_Compute });
-		m_pMarkActiveClustersMaterialData = new InternalMaterial(m_pMarkActiveClustersPipelineData);
-
-		// Compact active clusters shader
-		GetResourcePath("Shaders/Compute/BuildCompactClusterList.shader", path);
-		m_pCompactClustersShaderData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
-		m_pCompactClustersPipelineData = new InternalPipeline({ m_pCompactClustersShaderData }, { ShaderType::ST_Compute });
-		m_pCompactClustersMaterialData = new InternalMaterial(m_pCompactClustersPipelineData);
-
-		// Light culling shader
-		GetResourcePath("Shaders/Compute/ClusterCullLight.shader", path);
-		m_pClusterCullLightShaderData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
-		m_pClusterCullLightPipelineData = new InternalPipeline({ m_pClusterCullLightShaderData }, { ShaderType::ST_Compute });
-		m_pClusterCullLightMaterialData = new InternalMaterial(m_pClusterCullLightPipelineData);
-
 		const ModuleSettings& settings = Settings();
 		const UUID screenPipeline = settings.Value<uint64_t>("Screen Pipeline");
 		const UUID SSAOPrePassPipeline = settings.Value<uint64_t>("SSAO Prepass Pipeline");
@@ -231,6 +205,8 @@ namespace Glory
 		const UUID irradiancePipeline = settings.Value<uint64_t>("Irradiance Pipeline");
 		const UUID shadowsPipeline = settings.Value<uint64_t>("Shadows Pipeline");
 		const UUID shadowsTransparentPipeline = settings.Value<uint64_t>("Shadows Transparent Textured Pipeline");
+		const UUID clusterGeneratorPipeline = settings.Value<uint64_t>("Cluster Generator");
+		const UUID clusterCullLightPipeline = settings.Value<uint64_t>("Cluster Cull Light");
 
 		m_pDeferredCompositeMaterial = new MaterialData();
 		m_pDeferredCompositeMaterial->SetPipeline(screenPipeline);
@@ -251,6 +227,10 @@ namespace Glory
 		m_pShadowsMaterialData->SetPipeline(shadowsPipeline);
 		m_pShadowsTransparentMaterialData = new MaterialData();
 		m_pShadowsTransparentMaterialData->SetPipeline(shadowsTransparentPipeline);
+		m_pClusterShaderMaterialData = new MaterialData();
+		m_pClusterShaderMaterialData->SetPipeline(clusterGeneratorPipeline);
+		m_pClusterCullLightMaterialData = new MaterialData();
+		m_pClusterCullLightMaterialData->SetPipeline(clusterCullLightPipeline);
 
 		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
@@ -275,11 +255,6 @@ namespace Glory
 		m_pSSAOSettingsSSBO->Assign(NULL);
 
 		GenerateDomeSamplePointsSSBO(pResourceManager, 64);
-
-		m_pClusterShaderMaterial = pResourceManager->CreateMaterial(m_pClusterShaderMaterialData);
-		m_pMarkActiveClustersMaterial = pResourceManager->CreateMaterial(m_pMarkActiveClustersMaterialData);
-		m_pCompactClustersMaterial = pResourceManager->CreateMaterial(m_pCompactClustersMaterialData);
-		m_pClusterCullLightMaterial = pResourceManager->CreateMaterial(m_pClusterCullLightMaterialData);
 
 		const uint32_t vertexBufferSize = 4*sizeof(VertexPosColorTex);
 		const uint32_t indexBufferSize = 6*sizeof(uint32_t);
@@ -329,6 +304,8 @@ namespace Glory
 		const UUID irradiancePipeline = settings.Value<uint64_t>("Irradiance Pipeline");
 		const UUID shadowsPipeline = settings.Value<uint64_t>("Shadows Pipeline");
 		const UUID shadowsTransparentPipeline = settings.Value<uint64_t>("Shadows Transparent Textured Pipeline");
+		const UUID clusterGeneratorPipeline = settings.Value<uint64_t>("Cluster Generator");
+		const UUID clusterCullLightPipeline = settings.Value<uint64_t>("Cluster Cull Light");
 
 		m_pDeferredCompositeMaterial->SetPipeline(screenPipeline);
 		m_pDisplayCopyMaterial->SetPipeline(displayPipeline);
@@ -339,24 +316,14 @@ namespace Glory
 		m_pIrradianceMaterialData->SetPipeline(irradiancePipeline);
 		m_pShadowsMaterialData->SetPipeline(shadowsPipeline);
 		m_pShadowsTransparentMaterialData->SetPipeline(shadowsTransparentPipeline);
+		m_pClusterShaderMaterialData->SetPipeline(clusterGeneratorPipeline);
+		m_pClusterCullLightMaterialData->SetPipeline(clusterCullLightPipeline);
 
 		settings.SetDirty(false);
 	}
 
 	void ClusteredRendererModule::Cleanup()
 	{
-		delete m_pClusterShaderData;
-		m_pClusterShaderData = nullptr;
-
-		delete m_pMarkActiveClustersShaderData;
-		m_pMarkActiveClustersShaderData = nullptr;
-
-		delete m_pCompactClustersShaderData;
-		m_pCompactClustersShaderData = nullptr;
-
-		delete m_pClusterCullLightShaderData;
-		m_pClusterCullLightShaderData = nullptr;
-
 		delete m_pClusterShaderMaterialData;
 		m_pClusterShaderMaterialData = nullptr;
 
@@ -640,8 +607,8 @@ namespace Glory
 
 		m_pScreenToViewSSBO->Assign((void*)&screenToView);
 
-		m_pClusterCullLightMaterial->Use();
-		m_pClusterCullLightMaterial->SetMatrix4("viewMatrix", camera.GetView());
+		Material* pClusterCullLightMaterial = pGraphics->UseMaterial(m_pClusterCullLightMaterialData);
+		if (!pClusterCullLightMaterial) return;
 		pClusterSSBO->BindForDraw();
 		m_pScreenToViewSSBO->BindForDraw();
 		m_pLightsSSBO->BindForDraw();
@@ -671,6 +638,8 @@ namespace Glory
 		settings.RegisterAssetReference<PipelineData>("Irradiance Pipeline", 35);
 		settings.RegisterAssetReference<PipelineData>("Shadows Pipeline", 38);
 		settings.RegisterAssetReference<PipelineData>("Shadows Transparent Textured Pipeline", 39);
+		settings.RegisterAssetReference<PipelineData>("Cluster Generator", 44);
+		settings.RegisterAssetReference<PipelineData>("Cluster Cull Light", 45);
 	}
 
 	size_t ClusteredRendererModule::GetGCD(size_t a, size_t b)
@@ -682,6 +651,8 @@ namespace Glory
 
 	void ClusteredRendererModule::GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera)
 	{
+		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
+
 		const glm::uvec2 resolution = camera.GetResolution();
 		const glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
 
@@ -701,7 +672,7 @@ namespace Glory
 
 		m_pScreenToViewSSBO->Assign((void*)&screenToView);
 
-		m_pClusterShaderMaterial->Use();
+		pGraphics->UseMaterial(m_pClusterShaderMaterialData);
 		pBuffer->BindForDraw();
 		m_pScreenToViewSSBO->BindForDraw();
 		m_pEngine->GetMainModule<GraphicsModule>()->DispatchCompute(gridSize.x, gridSize.y, gridSize.z);
