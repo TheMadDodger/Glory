@@ -234,6 +234,7 @@ namespace Glory
 		/* Pipeline */
 		virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts,
 			size_t stride, const std::vector<AttributeType>& attributeTypes) = 0;
+		virtual PipelineHandle CreateComputePipeline(PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts) = 0;
 
 		virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo) = 0;
 		virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) = 0;

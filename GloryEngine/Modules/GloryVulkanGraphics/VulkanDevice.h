@@ -64,11 +64,7 @@ namespace Glory
     struct VK_Pipeline
     {
         RenderPassHandle m_RenderPass;
-        vk::DescriptorSetLayout m_VKDescriptorSetLayouts;
         vk::PipelineLayout m_VKLayout;
-        vk::DescriptorSet m_VKBuffersDescriptorSet;
-
-        /* @todo: Create one per render pass it is being attached to? */
         vk::Pipeline m_VKPipeline;
         vk::VertexInputBindingDescription m_VertexDescription;
         std::vector<vk::VertexInputAttributeDescription> m_AttributeDescriptions;
@@ -107,12 +103,12 @@ namespace Glory
         void CreateCommandBuffer();
         uint32_t VulkanDevice::GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags);
 
-        GLORY_API uint32_t GraphicsFamily() const { return m_GraphicsFamily.value(); }
+        GLORY_API uint32_t GraphicsFamily() const { return m_GraphicsAndComputeFamily.value(); }
         GLORY_API uint32_t PresentFamily() const { return m_PresentFamily.value(); }
 
         GLORY_API vk::PhysicalDevice PhysicalDevice() { return m_VKDevice; }
         GLORY_API vk::Device LogicalDevice() { return m_LogicalDevice; }
-        GLORY_API vk::Queue GraphicsQueue() { return m_GraphicsQueue; }
+        GLORY_API vk::Queue GraphicsQueue() { return m_GraphicsAndComputeQueue; }
         GLORY_API vk::Queue PresentQueue() { return m_PresentQueue; }
 
         GLORY_API void CreateGraphicsCommandPool();
@@ -151,6 +147,7 @@ namespace Glory
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
         virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
             std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride, const std::vector<AttributeType>& attributeTypes) override;
+        virtual PipelineHandle CreateComputePipeline(PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts) override;
         virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo) override;
         virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) override;
 
@@ -179,7 +176,7 @@ namespace Glory
         std::vector<VkExtensionProperties> m_AvailableExtensions;
         bool m_DidLastSupportCheckPass;
 
-        std::optional<uint32_t> m_GraphicsFamily;
+        std::optional<uint32_t> m_GraphicsAndComputeFamily;
         std::optional<uint32_t> m_PresentFamily;
 
         vk::SurfaceCapabilitiesKHR m_SwapChainCapabilities;
@@ -187,7 +184,7 @@ namespace Glory
         std::vector<vk::PresentModeKHR> m_SwapChainPresentModes;
 
         vk::Device m_LogicalDevice;
-        vk::Queue m_GraphicsQueue;
+        vk::Queue m_GraphicsAndComputeQueue;
         vk::Queue m_PresentQueue;
 
         std::vector<const char*> m_DeviceExtensions;

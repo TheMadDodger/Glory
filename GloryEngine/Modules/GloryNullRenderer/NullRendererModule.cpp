@@ -79,6 +79,20 @@ namespace Glory
 			return;
 		}
 
+		FileImportSettings importSettings;
+		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
+		importSettings.AddNullTerminateAtEnd = true;
+
+		// Cluster generator shader
+		std::filesystem::path path;
+		GetResourcePath("Shaders/Compute/ClusterShader.shader", path);
+		m_pClusterShaderData = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load(path.string(), importSettings);
+		m_pClusterShaderPipelineData = new InternalPipeline({ m_pClusterShaderData }, { ShaderType::ST_Compute });
+
+		//RenderPassInfo clusterGeneratorPassInfo;
+		//RenderPassHandle clusterGeneratorPass = pDevice->CreateRenderPass(clusterGeneratorPassInfo);
+		//pDevice->CreatePipeline(clusterGeneratorPass, );
+
 		const bool usePushConstants = pDevice->IsSupported(APIFeatures::PushConstants);
 		DescriptorSetLayoutInfo setLayoutInfo;
 		DescriptorSetInfo setInfo;
@@ -107,85 +121,25 @@ namespace Glory
 
 		m_GlobalSetLayout = setInfo.m_Layout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
 		m_GlobalSet = pDevice->CreateDescriptorSet(std::move(setInfo));
+
+		setLayoutInfo = DescriptorSetLayoutInfo();
+		setLayoutInfo.m_Buffers.resize(2);
+		setLayoutInfo.m_Buffers[0].m_BindingIndex = 1;
+		setLayoutInfo.m_Buffers[0].m_Type = BufferType::BT_Storage;
+		setLayoutInfo.m_Buffers[1].m_BindingIndex = 2;
+		setLayoutInfo.m_Buffers[1].m_Type = BufferType::BT_Storage;
+		m_ClusterSetLayout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
+		m_ClusterPipeline = pDevice->CreateComputePipeline(m_pClusterShaderPipelineData, { m_ClusterSetLayout });
+
+		//m_LightsSSBO = pDevice->CreateBuffer(sizeof(LightData)*MAX_LIGHTS, BufferType::BT_Storage);
+		//m_LightCountSSBO = pDevice->CreateBuffer(sizeof(uint32_t), BufferType::BT_Storage);
+		//m_LightSpaceTransformsSSBO = pDevice->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferType::BT_Storage);
+		//m_LightDistancesSSBO = pDevice->CreateBuffer(sizeof(uint32_t)*MAX_LIGHTS, BufferType::BT_Storage);
 	}
 
 	void NullRendererModule::Update()
 	{
 	}
-
-	//void NullRendererModule::Draw()
-	//{
-	//	GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
-	//	if (!pDevice) return;
-
-	//	AssetManager& assets = m_pEngine->GetAssetManager();
-	//	MaterialManager& materials = m_pEngine->GetMaterialManager();
-
-	//	pDevice->Begin();
-	//	for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
-	//	{
-	//		CameraRef camera = m_FrameData.ActiveCameras[i];
-	//		RenderPassHandle& renderPass = reinterpret_cast<UUID&>(camera.GetUserHandle("RenderPass"));
-	//		if (!renderPass)
-	//		{
-	//			RenderPassInfo renderPassInfo;
-	//			renderPassInfo.RenderTextureInfo.Width = camera.GetResolution().x;
-	//			renderPassInfo.RenderTextureInfo.Height = camera.GetResolution().y;
-	//			renderPassInfo.RenderTextureInfo.HasDepth = true;
-	//			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("object", PixelFormat::PF_RGBAI, PixelFormat::PF_R32G32B32A32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UInt, false));
-	//			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Debug", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-	//			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-	//			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Normal", PixelFormat::PF_RGBA, PixelFormat::PF_R16G16B16A16Sfloat, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-	//			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("AOBlurred", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-	//			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Data", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-	//			renderPass = pDevice->CreateRenderPass(renderPassInfo);
-
-	//			//FileImportSettings importSettings;
-	//			//importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
-	//			//importSettings.AddNullTerminateAtEnd = false;
-
-	//			//std::filesystem::path path;
-	//			//FileData* pVertShader = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("Triangle_vert.spv", importSettings);
-	//			//FileData* pFragShader = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("Triangle_frag.spv", importSettings);
-
-	//			//FileData* pVertShader = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("Triangle_vert.shader", importSettings);
-	//			//FileData* pFragShader = (FileData*)m_pEngine->GetLoaderModule<FileData>()->Load("Triangle_frag.shader", importSettings);
-
-	//			//InternalPipeline pipeline({ pVertShader, pFragShader }, { ShaderType::ST_Vertex, ShaderType::ST_Fragment });
-
-	//			//m_Pipeline = pDevice->CreatePipeline(renderPass, &pipeline, sizeof(glm::vec2), {AttributeType::Float2});
-	//		}
-	//		pDevice->BeginRenderPass(renderPass);
-
-	//		/*for (RenderData& renderData : m_FrameData.ObjectsToRender)
-	//		{
-	//			Resource* pMaterialResource = m_pEngine->GetAssetManager().FindResource(renderData.m_MaterialID);
-	//			if (!pMaterialResource) continue;
-	//			Resource* pMeshResource = m_pEngine->GetAssetManager().FindResource(renderData.m_MeshID);
-	//			if (!pMeshResource) continue;
-	//			MaterialData* pMaterialData = static_cast<MaterialData*>(pMaterialResource);
-	//			MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
-	//			PipelineData* pPipelineData = pMaterialData->GetPipeline(m_pEngine->GetMaterialManager(), m_pEngine->GetPipelineManager());
-	//			if (!pPipelineData) continue;
-
-	//			PipelineHandle pipeline = pDevice->AcquireCachedPipeline(renderPass, pPipelineData, sizeof(DefaultVertex3D), { AttributeType::Float3, AttributeType::Float3,
-	//				AttributeType::Float3, AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 });
-
-	//			const std::vector<char>& propertiesData = pMaterialData->GetBufferReference(materials);
-	//			BufferHandle propertiesBuffer = pDevice->AcquireCachedPipelineBuffer(pipeline, 1, propertiesData.size(), BufferType::BT_Storage);
-	//			BufferHandle objectDataBuffer = pDevice->AcquireCachedPipelineBuffer(pipeline, 2, sizeof(ObjectData), BufferType::BT_Storage);
-	//			pDevice->AssignBuffer(propertiesBuffer, propertiesData.data());
-
-	//			MeshHandle mesh = pDevice->AcquireCachedMesh(pMeshData);
-
-	//			pDevice->BeginPipeline(pipeline);
-	//			pDevice->DrawMesh(mesh);
-	//			pDevice->EndPipeline();
-	//		}*/
-	//		pDevice->EndRenderPass();
-	//	}
-	//	pDevice->End();
-	//}
 
 	void NullRendererModule::Cleanup()
 	{
@@ -211,6 +165,20 @@ namespace Glory
 
 	void NullRendererModule::OnStartCameraRender(CameraRef camera, const FrameData<LightData>& lights)
 	{
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+
+		BufferHandle& clusterSSBOHandle = reinterpret_cast<BufferHandle&>(camera.GetUserHandle("ClusterSSBO"));
+		if (!clusterSSBOHandle)
+		{
+			BufferHandle& lightIndexSSBO = reinterpret_cast<BufferHandle&>(camera.GetUserHandle("LightIndexSSBO"));
+			BufferHandle& lightGridSSBO = reinterpret_cast<BufferHandle&>(camera.GetUserHandle("LightGridSSBO"));
+
+			clusterSSBOHandle = pDevice->CreateBuffer(sizeof(VolumeTileAABB)*NUM_CLUSTERS, BufferType::BT_Storage);
+			lightIndexSSBO = pDevice->CreateBuffer(sizeof(uint32_t)*(NUM_CLUSTERS * MAX_LIGHTS_PER_TILE + 1), BufferType::BT_Storage);
+			lightGridSSBO = pDevice->CreateBuffer(sizeof(LightGrid)*NUM_CLUSTERS, BufferType::BT_Storage);
+
+			//GenerateClusterSSBO(pClusterSSBO, camera);
+		}
 	}
 
 	void NullRendererModule::OnEndCameraRender(CameraRef camera, const FrameData<LightData>& lights)
@@ -343,19 +311,19 @@ namespace Glory
 		//m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS * sizeof(LightData));
 		//m_pLightSpaceTransformsSSBO->Assign(m_FrameData.LightSpaceTransforms.data(), 0, MAX_LIGHTS * sizeof(glm::mat4));
 		//m_pLightDistancesSSBO->Assign(ResetLightDistances);
-		//
-		//if (m_LightCameraDatas->size() < m_FrameData.LightSpaceTransforms.count()) m_LightCameraDatas.resize(m_FrameData.LightSpaceTransforms.count());
-		//for (size_t i = 0; i < m_FrameData.LightSpaceTransforms.count(); ++i)
-		//{
-		//	m_LightCameraDatas.m_Data[i].m_View = glm::identity<glm::mat4>();
-		//	if (m_LightCameraDatas.m_Data[i].m_Projection != m_FrameData.LightSpaceTransforms[i])
-		//	{
-		//		m_LightCameraDatas.m_Data[i].m_Projection = m_FrameData.LightSpaceTransforms[i];
-		//		m_LightCameraDatas.m_Dirty = true;
-		//	}
-		//}
+		
+		/*if (m_LightCameraDatas->size() < m_FrameData.LightSpaceTransforms.count()) m_LightCameraDatas.resize(m_FrameData.LightSpaceTransforms.count());
+		for (size_t i = 0; i < m_FrameData.LightSpaceTransforms.count(); ++i)
+		{
+			m_LightCameraDatas.m_Data[i].m_View = glm::identity<glm::mat4>();
+			if (m_LightCameraDatas.m_Data[i].m_Projection != m_FrameData.LightSpaceTransforms[i])
+			{
+				m_LightCameraDatas.m_Data[i].m_Projection = m_FrameData.LightSpaceTransforms[i];
+				m_LightCameraDatas.m_Dirty = true;
+			}
+		}*/
 		//if (m_LightCameraDatas)
-		//	m_pLightCameraDatasBuffer->Assign(m_LightCameraDatas->data(), m_LightCameraDatas->size() * sizeof(PerCameraData));
+			//m_pLightCameraDatasBuffer->Assign(m_LightCameraDatas->data(), m_LightCameraDatas->size() * sizeof(PerCameraData));
 
 		PrepareBatches(m_DynamicPipelineRenderDatas, m_DynamicBatchData);
 	}
@@ -550,5 +518,34 @@ namespace Glory
 		//pGraphics->EnableDepthWrite(true);
 		RenderBatches(m_DynamicPipelineRenderDatas, m_DynamicBatchData, cameraIndex);
 		//pGraphics->EnableDepthWrite(true);
+	}
+
+	void NullRendererModule::GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera)
+	{
+		//const glm::uvec2 resolution = camera.GetResolution();
+		//const glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
+		//
+		//const float zNear = camera.GetNear();
+		//const float zFar = camera.GetFar();
+		//
+		//const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x / (float)gridSize.x), (uint32_t)std::ceilf(resolution.y / (float)gridSize.y));
+		//ScreenToView screenToView;
+		//screenToView.ProjectionInverse = camera.GetProjectionInverse();
+		//screenToView.ViewInverse = camera.GetViewInverse();
+		//screenToView.ScreenDimensions = resolution;
+		//screenToView.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
+		//screenToView.Scale = (float)gridSize.z / std::log2f(zFar / zNear);
+		//screenToView.Bias = -((float)gridSize.z * std::log2f(zNear) / std::log2f(zFar / zNear));
+		//screenToView.zNear = zNear;
+		//screenToView.zFar = zFar;
+		//
+		//m_pScreenToViewSSBO->Assign((void*)&screenToView);
+		//
+		//m_pClusterShaderMaterial->Use();
+		//pBuffer->BindForDraw();
+		//m_pScreenToViewSSBO->BindForDraw();
+		//m_pEngine->GetMainModule<GraphicsModule>()->DispatchCompute(gridSize.x, gridSize.y, gridSize.z);
+		//pBuffer->Unbind();
+		//m_pScreenToViewSSBO->Unbind();
 	}
 }

@@ -792,6 +792,11 @@ namespace Glory
 		return handle;
 	}
 
+	PipelineHandle OpenGLDevice::CreateComputePipeline(PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts)
+	{
+		return PipelineHandle();
+	}
+
 	DescriptorSetLayoutHandle OpenGLDevice::CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo)
 	{
 		auto iter = m_CachedDescriptorSetLayouts.find(setLayoutInfo);

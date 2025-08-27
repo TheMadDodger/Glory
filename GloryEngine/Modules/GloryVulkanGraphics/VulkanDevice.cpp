@@ -35,12 +35,12 @@ namespace Glory
 		int i = 0;
 		for (const auto& queueFamily : m_AvailableQueueFamilies)
 		{
-			if (m_GraphicsFamily.has_value() && m_PresentFamily.has_value()) break;
+			if (m_GraphicsAndComputeFamily.has_value() && m_PresentFamily.has_value()) break;
 			VkBool32 presentSupport = false;
 			vkGetPhysicalDeviceSurfaceSupportKHR((VkPhysicalDevice)m_VKDevice, i, GraphicsModule()->GetCSurface(), &presentSupport);
-			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-				m_GraphicsFamily = i;
-			if (presentSupport)
+			if (!m_GraphicsAndComputeFamily.has_value() && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT && queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT)
+				m_GraphicsAndComputeFamily = i;
+			if (!m_PresentFamily.has_value() && presentSupport)
 				m_PresentFamily = i;
 			++i;
 		}
@@ -64,7 +64,7 @@ namespace Glory
 
 		m_DidLastSupportCheckPass = false;
 
-		if (!m_GraphicsFamily.has_value() || !m_PresentFamily.has_value()) return;
+		if (!m_GraphicsAndComputeFamily.has_value() || !m_PresentFamily.has_value()) return;
 
 		std::set<std::string> requiredExtensions(m_DeviceExtensions.begin(), m_DeviceExtensions.end());
 
@@ -113,7 +113,7 @@ namespace Glory
 	{
 		// Create logical device
 		std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
-		std::set<uint32_t> uniqueQueueFamilies = { m_GraphicsFamily.value(), m_PresentFamily.value() };
+		std::set<uint32_t> uniqueQueueFamilies = { m_GraphicsAndComputeFamily.value(), m_PresentFamily.value() };
 
 		float queuePriority = 1.0f;
 		for (uint32_t queueFamily : uniqueQueueFamilies)
@@ -156,7 +156,7 @@ namespace Glory
 		}
 
 		// Get the queue families from the device
-		m_GraphicsQueue = m_LogicalDevice.getQueue(m_GraphicsFamily.value(), 0);
+		m_GraphicsAndComputeQueue = m_LogicalDevice.getQueue(m_GraphicsAndComputeFamily.value(), 0);
 		m_PresentQueue = m_LogicalDevice.getQueue(m_PresentFamily.value(), 0);
 
 		CreateGraphicsCommandPool();
@@ -205,7 +205,7 @@ namespace Glory
 	{
 		// Create command pool
 		vk::CommandPoolCreateInfo commandPoolCreateInfo = vk::CommandPoolCreateInfo()
-			.setQueueFamilyIndex(m_GraphicsFamily.value())
+			.setQueueFamilyIndex(m_GraphicsAndComputeFamily.value())
 			.setFlags((vk::CommandPoolCreateFlags)0);
 
 		m_GraphicsCommandPool = m_LogicalDevice.createCommandPool(commandPoolCreateInfo);
@@ -217,7 +217,7 @@ namespace Glory
 	{
 		// Create command pool
 		vk::CommandPoolCreateInfo commandPoolCreateInfo = vk::CommandPoolCreateInfo()
-			.setQueueFamilyIndex(m_GraphicsFamily.value())
+			.setQueueFamilyIndex(m_GraphicsAndComputeFamily.value())
 			.setFlags(flags);
 
 		vk::CommandPool pool = m_LogicalDevice.createCommandPool(commandPoolCreateInfo);
@@ -329,7 +329,7 @@ namespace Glory
 	        .setSignalSemaphoreCount(0)
 	        .setPSignalSemaphores(nullptr);
 
-		if (m_GraphicsQueue.submit(1, &submitInfo, m_Fence) != vk::Result::eSuccess)
+		if (m_GraphicsAndComputeQueue.submit(1, &submitInfo, m_Fence) != vk::Result::eSuccess)
 			throw std::runtime_error("failed to submit draw command buffer!");
 
 		m_LogicalDevice.waitForFences(1, &m_Fence, VK_TRUE, UINT64_MAX);
@@ -1043,8 +1043,8 @@ namespace Glory
 
 		vk::SubpassDescription subPass = vk::SubpassDescription()
 			.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
-			.setColorAttachmentCount(attachmentColorRefs.size())
-			.setPColorAttachments(attachmentColorRefs.data());
+			.setColorAttachmentCount(static_cast<uint32_t>(attachmentColorRefs.size()))
+			.setPColorAttachments(attachmentColorRefs.empty() ? nullptr : attachmentColorRefs.data());
 		if (info.RenderTextureInfo.HasDepth || info.RenderTextureInfo.HasStencil)
 			subPass.setPDepthStencilAttachment(&attachmentDepthStencilRef);
 
@@ -1058,7 +1058,7 @@ namespace Glory
 
 		vk::RenderPassCreateInfo renderPassCreateInfo = vk::RenderPassCreateInfo()
 			.setAttachmentCount(static_cast<uint32_t>(attachments.size()))
-			.setPAttachments(attachments.data())
+			.setPAttachments(attachments.empty() ? nullptr : attachments.data())
 			.setSubpassCount(1)
 			.setPSubpasses(&subPass)
 			.setDependencyCount(1)
@@ -1315,7 +1315,8 @@ namespace Glory
 		pipeline.m_VKLayout = m_LogicalDevice.createPipelineLayout(pipelineLayoutCreateInfo);
 		if (pipeline.m_VKLayout == nullptr)
 		{
-			throw std::runtime_error("failed to create pipeline layout!");
+			Debug().LogError("VulkanDevice::CreatePipeline: Failed to create pipeline layout.");
+			return NULL;
 		}
 
 		// Create the pipeline
@@ -1339,6 +1340,76 @@ namespace Glory
 		if (m_LogicalDevice.createGraphicsPipelines(VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &pipeline.m_VKPipeline) != vk::Result::eSuccess)
 		{
 			Debug().LogError("VulkanDevice::CreatePipeline: Failed to create graphics pipeline.");
+			return NULL;
+		}
+
+		std::stringstream str;
+		str << "VulkanDevice: Pipeline " << handle << " created.";
+		Debug().LogInfo(str.str());
+
+		return handle;
+	}
+
+	PipelineHandle VulkanDevice::CreateComputePipeline(PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts)
+	{
+		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
+		std::vector<vk::PushConstantRange> pushConstants;
+
+		if (pPipeline->ShaderCount() > 1 || pPipeline->ShaderCount() == 0 || pPipeline->GetShaderType(pipelines, 0) != ShaderType::ST_Compute)
+		{
+			Debug().LogError("VulkanDevice::CreateComputePipeline: Pipeline must have only 1 shader and it must be a compute shader.");
+			return NULL;
+		}
+
+		std::vector<vk::DescriptorSetLayout> vkDescriptorSetLayouts(descriptorSetLayouts.size());
+		for (size_t i = 0; i < descriptorSetLayouts.size(); ++i)
+		{
+			VK_DescriptorSetLayout* vkSetLayout = m_DescriptorSetLayouts.Find(descriptorSetLayouts[i]);
+			if (!vkSetLayout)
+			{
+				Debug().LogError("VulkanDevice::CreateComputePipeline: Invalid descriptor set layout handle.");
+				return NULL;
+			}
+			vkDescriptorSetLayouts[i] = vkSetLayout->m_VKLayout;
+
+			if (vkSetLayout->m_PushConstantRange.size)
+				pushConstants.push_back(vkSetLayout->m_PushConstantRange);
+		}
+
+		PipelineHandle handle;
+		VK_Pipeline& pipeline = m_Pipelines.Emplace(handle, VK_Pipeline());
+		pipeline.m_RenderPass = 0;
+
+		pipeline.m_Shaders.resize(1);
+		pipeline.m_Shaders[0] = CreateShader(pPipeline->Shader(pipelines, 0), ShaderType::ST_Compute, "main");
+
+		VK_Shader* shader = m_Shaders.Find(pipeline.m_Shaders[0]);
+		vk::PipelineShaderStageCreateInfo shaderStage = vk::PipelineShaderStageCreateInfo()
+			.setStage(shader->m_VKStage)
+			.setModule(shader->m_VKModule)
+			.setPName(shader->m_Function.data());
+
+		vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
+			.setSetLayoutCount(static_cast<uint32_t>(vkDescriptorSetLayouts.size()))
+			.setPSetLayouts(vkDescriptorSetLayouts.data())
+			.setPushConstantRangeCount(static_cast<uint32_t>(pushConstants.size()))
+			.setPPushConstantRanges(pushConstants.data());
+
+		pipeline.m_VKLayout = m_LogicalDevice.createPipelineLayout(pipelineLayoutCreateInfo);
+		if (pipeline.m_VKLayout == nullptr)
+		{
+			Debug().LogError("VulkanDevice::CreateComputePipeline: Failed to create pipeline layout.");
+			return NULL;
+		}
+
+		// Create the pipeline
+		vk::ComputePipelineCreateInfo pipelineCreateInfo = vk::ComputePipelineCreateInfo()
+			.setStage(shaderStage)
+			.setLayout(pipeline.m_VKLayout);
+
+		if (m_LogicalDevice.createComputePipelines(VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &pipeline.m_VKPipeline) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreateComputePipeline: Failed to create graphics pipeline.");
 			return NULL;
 		}
 
@@ -1613,7 +1684,6 @@ namespace Glory
 			return;
 		}
 
-		m_LogicalDevice.destroyDescriptorSetLayout(pipeline->m_VKDescriptorSetLayouts);
 		m_LogicalDevice.destroyPipeline(pipeline->m_VKPipeline);
 		m_LogicalDevice.destroyPipelineLayout(pipeline->m_VKLayout);
 		m_Pipelines.Erase(handle);

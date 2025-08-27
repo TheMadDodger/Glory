@@ -85,7 +85,6 @@ namespace Glory
 		virtual void Initialize() override;
 		virtual void OnPostInitialize() override;
 		virtual void Update() override;
-		//virtual void Draw() override;
 
 		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) override;
 		virtual void OnDoCompositing(CameraRef camera, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
@@ -103,6 +102,8 @@ namespace Glory
 
 		void DynamicObjectsPass(uint32_t cameraIndex);
 
+		void GenerateClusterSSBO(Buffer* pBuffer, CameraRef camera);
+
 	private:
 		std::vector<PipelineBatchData> m_DynamicBatchData;
 		CPUBuffer<PerCameraData> m_CameraDatas;
@@ -113,5 +114,38 @@ namespace Glory
 
 		DescriptorSetHandle m_GlobalSet;
 		DescriptorSetLayoutHandle m_GlobalSetLayout;
+
+		//BufferHandle m_LightsSSBO = 0;
+		//BufferHandle m_LightCountSSBO = 0;
+		//BufferHandle m_LightSpaceTransformsSSBO = 0;
+		//BufferHandle m_LightDistancesSSBO = 0;
+
+		static const size_t m_GridSizeX = 16;
+		static const size_t m_GridSizeY = 9;
+		static const size_t NUM_DEPTH_SLICES = 24;
+		static const size_t NUM_CLUSTERS = m_GridSizeX * m_GridSizeY * NUM_DEPTH_SLICES;
+		static const size_t MAX_LIGHTS_PER_TILE = 50;
+		static const size_t MAX_KERNEL_SIZE = 1024;
+
+		/* Compute shaders */
+		FileData* m_pClusterShaderData = nullptr;
+		PipelineData* m_pClusterShaderPipelineData = nullptr;
+		DescriptorSetLayoutHandle m_ClusterSetLayout;
+		PipelineHandle m_ClusterPipeline = 0;
+
+		//FileData* m_pMarkActiveClustersShaderData = nullptr;
+		//PipelineData* m_pMarkActiveClustersPipelineData = nullptr;
+		//MaterialData* m_pMarkActiveClustersMaterialData = nullptr;
+		//Material* m_pMarkActiveClustersMaterial = nullptr;
+		//
+		//FileData* m_pCompactClustersShaderData = nullptr;
+		//PipelineData* m_pCompactClustersPipelineData = nullptr;
+		//MaterialData* m_pCompactClustersMaterialData = nullptr;
+		//Material* m_pCompactClustersMaterial = nullptr;
+		//
+		//FileData* m_pClusterCullLightShaderData = nullptr;
+		//PipelineData* m_pClusterCullLightPipelineData = nullptr;
+		//MaterialData* m_pClusterCullLightMaterialData = nullptr;
+		//Material* m_pClusterCullLightMaterial = nullptr;
 	};
 }
