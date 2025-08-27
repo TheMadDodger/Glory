@@ -1,3 +1,4 @@
+#type compute
 #version 430 core
 layout(local_size_x = 16, local_size_y = 9, local_size_z = 4) in;
 
@@ -73,8 +74,6 @@ layout(std430, binding = 7) buffer lightCountSSBO
 //Shared variables 
 shared LightData sharedLights[16 * 9 * 4];
 shared uint sharedLightIndices[16 * 9 * 4];
-
-uniform mat4 viewMatrix;
 
 bool TestSphereAABB(uint light, uint tile);
 bool TestConeAABB(uint light, uint tile);
@@ -155,7 +154,7 @@ void main()
 bool TestSphereAABB(uint light, uint tile)
 {
     float radius = sharedLights[light].Data.y;
-    vec3 center = vec3(viewMatrix * vec4(sharedLights[light].Position.xyz, 1.0));
+    vec3 center = vec3(inverse(ViewInverse) * vec4(sharedLights[light].Position.xyz, 1.0));
     float squaredDistance = SQDistPointAABB(center, tile);
 
     return squaredDistance <= (radius * radius);
@@ -184,10 +183,10 @@ bool TestConeAABB(uint light, uint tile)
     vec3 start = sharedLights[light].Position.xyz;
     vec3 direction = sharedLights[light].Direction.xyz;
     vec4 boundingSphere = ConeBoundingSphere(start, -direction, range, outerAngle*PI/180.0);
-    vec3 center = vec3(viewMatrix * vec4(boundingSphere.xyz, 1.0));
+    vec3 center = vec3(inverse(ViewInverse)*vec4(boundingSphere.xyz, 1.0));
     float endSphereRadius = range*tan(outerAngle*PI/180.0/2.0);
     float squaredDistance = SQDistPointAABB(center, tile);
-    center = vec3(viewMatrix * vec4(start - direction*range, 1.0));
+    center = vec3(inverse(ViewInverse)*vec4(start - direction*range, 1.0));
     float squaredDistance2 = SQDistPointAABB(center, tile);
     float radius = boundingSphere.w;
     return squaredDistance <= (radius*radius) || squaredDistance2 <= (endSphereRadius*endSphereRadius);
