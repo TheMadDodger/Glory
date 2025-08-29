@@ -180,6 +180,10 @@ namespace Glory
 
 	void OpenGLDevice::Dispatch(uint32_t x, uint32_t y, uint32_t z)
 	{
+		glDispatchCompute((GLuint)x, (GLuint)y, (GLuint)z);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
 #pragma endregion
@@ -798,7 +802,52 @@ namespace Glory
 
 	PipelineHandle OpenGLDevice::CreateComputePipeline(PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts)
 	{
-		return PipelineHandle();
+		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
+
+		PipelineHandle handle;
+		GL_Pipeline& pipeline = m_Pipelines.Emplace(handle, GL_Pipeline());
+		pipeline.m_RenderPass = NULL;
+
+		int success;
+		char infoLog[512];
+
+		pipeline.m_GLProgramID = glCreateProgram();
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		for (size_t i = 0; i < pPipeline->ShaderCount(); ++i)
+		{
+			const FileData* pShader = pPipeline->Shader(pipelines, i);
+			const ShaderType type = pPipeline->GetShaderType(pipelines, i);
+			ShaderHandle shaderHandle = CreateShader(pShader, type, "main");
+			if (!shaderHandle)
+			{
+				Debug().LogError("OpenGLDevice::CreatePipeline: Invalid render pass handle.");
+				continue;
+			}
+
+			GL_Shader* shader = m_Shaders.Find(shaderHandle);
+
+			glAttachShader(pipeline.m_GLProgramID, shader->m_GLShaderID);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+
+		glLinkProgram(pipeline.m_GLProgramID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glGetProgramiv(pipeline.m_GLProgramID, GL_LINK_STATUS, &success);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		if (!success)
+		{
+			glGetProgramInfoLog(pipeline.m_GLProgramID, 512, NULL, infoLog);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			Debug().LogError(infoLog);
+		}
+
+		std::stringstream str;
+		str << "OpenGLDevice: Compute pipeline " << handle << " created.";
+		Debug().LogInfo(str.str());
+
+		return handle;
 	}
 
 	DescriptorSetLayoutHandle OpenGLDevice::CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo)
