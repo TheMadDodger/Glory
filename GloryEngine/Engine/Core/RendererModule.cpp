@@ -767,22 +767,19 @@ namespace Glory
 			pass.m_Callback(0, this);
 		}
 
-		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
-		{
-			for (auto& pass : m_RenderPasses[RP_CameraPrepass])
-			{
-				pass.m_Callback(i, this);
-			}
-		}
-
-		pDevice->Begin();
+		m_CommandBuffer = pDevice->Begin();
 
 		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
 		{
 			CameraRef camera = m_FrameData.ActiveCameras[i];
 
 			RenderPassHandle& renderPass = reinterpret_cast<UUID&>(camera.GetUserHandle("RenderPass"));
-			pDevice->BeginRenderPass(renderPass);
+			pDevice->BeginRenderPass(m_CommandBuffer, renderPass);
+
+			for (auto& pass : m_RenderPasses[RP_CameraPrepass])
+			{
+				pass.m_Callback(i, this);
+			}
 
 			//RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
 			//pRenderTexture->BindForDraw();
@@ -818,7 +815,7 @@ namespace Glory
 				pass.m_Callback(i, this);
 			}
 
-			pDevice->EndRenderPass();
+			pDevice->EndRenderPass(m_CommandBuffer);
 		}
 
 		for (auto& pass : m_RenderPasses[RP_PreCompositePass])
@@ -865,7 +862,8 @@ namespace Glory
 			pass.m_Callback(0, this);
 		}
 
-		pDevice->End();
+		pDevice->End(m_CommandBuffer);
+		pDevice->Commit(m_CommandBuffer);
 
 		//m_LastSubmittedObjectCount = m_FrameData.ObjectsToRender.size();
 		//m_LastSubmittedCameraCount = m_FrameData.ActiveCameras.size();

@@ -160,33 +160,30 @@ namespace Glory
 		m_PresentQueue = m_LogicalDevice.getQueue(m_PresentFamily.value(), 0);
 
 		CreateGraphicsCommandPool();
-		CreateCommandBuffer();
-	}
-
-	void VulkanDevice::CreateCommandBuffer()
-	{
-		vk::CommandPool commandPool = GetGraphicsCommandPool(vk::CommandPoolCreateFlagBits::eTransient | vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
-
-		// Create command buffers
-		m_FrameCommandBuffers.resize(1);
-
-		vk::CommandBufferAllocateInfo commandBufferAllocateInfo = vk::CommandBufferAllocateInfo()
-			.setCommandPool(commandPool)
-			.setLevel(vk::CommandBufferLevel::ePrimary)
-			.setCommandBufferCount((uint32_t)m_FrameCommandBuffers.size());
-
-		if (m_LogicalDevice.allocateCommandBuffers(&commandBufferAllocateInfo, m_FrameCommandBuffers.data()) != vk::Result::eSuccess)
-		{
-			Debug().LogError("Vulkan: Failed to allocate command buffer.");
-		}
+		AllocateCommandBuffers(10);
 
 		vk::FenceCreateInfo fenceCreateInfo = vk::FenceCreateInfo()
 			.setFlags((vk::FenceCreateFlagBits)0);
 
 		if (m_LogicalDevice.createFence(&fenceCreateInfo, nullptr, &m_Fence) != vk::Result::eSuccess)
-		{
-			throw std::runtime_error("failed to create sync objects for a frame!");
-		}
+			Debug().LogError("Vulkan: Failed to create sync objects for a frame.");
+	}
+
+	void VulkanDevice::AllocateCommandBuffers(size_t numBuffers)
+	{
+		vk::CommandPool commandPool = GetGraphicsCommandPool(vk::CommandPoolCreateFlagBits::eTransient | vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
+
+		// Create command buffers
+		const size_t firstNewBufferIndex = m_FreeCommandBuffers.size();
+		m_FreeCommandBuffers.resize(m_FreeCommandBuffers.size() + numBuffers);
+
+		vk::CommandBufferAllocateInfo commandBufferAllocateInfo = vk::CommandBufferAllocateInfo()
+			.setCommandPool(commandPool)
+			.setLevel(vk::CommandBufferLevel::ePrimary)
+			.setCommandBufferCount(numBuffers);
+
+		if (m_LogicalDevice.allocateCommandBuffers(&commandBufferAllocateInfo, &m_FreeCommandBuffers[firstNewBufferIndex]) != vk::Result::eSuccess)
+			Debug().LogError("Vulkan: Failed to allocate command buffers.");
 	}
 
 	uint32_t VulkanDevice::GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags)
@@ -241,25 +238,35 @@ namespace Glory
 		return m_GraphicsCommandPools[flags];
 	}
 
-	void VulkanDevice::Begin()
+	CommandBufferHandle VulkanDevice::Begin()
 	{
 		vk::CommandBufferBeginInfo commandBeginInfo = vk::CommandBufferBeginInfo()
 			.setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse)
 			.setPInheritanceInfo(nullptr);
 
-		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
+		CommandBufferHandle handle;
+		vk::CommandBuffer commandBuffer = this->GetNewCommandBuffer(handle);
 		commandBuffer.begin(commandBeginInfo);
+		return handle;
 	}
 
-	void VulkanDevice::BeginRenderPass(RenderPassHandle handle)
+	void VulkanDevice::BeginRenderPass(CommandBufferHandle commandBuffer, RenderPassHandle renderPass)
 	{
-		VK_RenderPass* renderPass = m_RenderPasses.Find(handle);
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		if (iter == m_CommandBuffers.end())
+		{
+			Debug().LogError("VulkanDevice::BeginRenderPass: Invalid command buffer handle.");
+			return;
+		}
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+
+		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(renderPass);
 		if (!renderPass)
 		{
 			Debug().LogError("VulkanDevice::BeginRenderPass: Invalid render pass handle.");
 			return;
 		}
-		VK_RenderTexture* renderTexture = m_RenderTextures.Find(renderPass->m_RenderTexture);
+		VK_RenderTexture* renderTexture = m_RenderTextures.Find(vkRenderPass->m_RenderTexture);
 		if (!renderTexture)
 		{
 			Debug().LogError("VulkanDevice::BeginRenderPass: Render pass has an invalid render texture handle.");
@@ -282,72 +289,75 @@ namespace Glory
         }
 
 		if (renderTexture->m_HasDepthOrStencil)
-		{
 			clearColors.back().setDepthStencil(vk::ClearDepthStencilValue(1.0f, 0));
-		}
 
         vk::RenderPassBeginInfo renderPassBeginInfo = vk::RenderPassBeginInfo()
-            .setRenderPass(renderPass->m_VKRenderPass)
+            .setRenderPass(vkRenderPass->m_VKRenderPass)
             .setFramebuffer(renderTexture->m_VKFramebuffer)
             .setRenderArea(renderArea)
             .setClearValueCount(static_cast<uint32_t>(clearColors.size()))
             .setPClearValues(clearColors.data());
 
-        vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
-        commandBuffer.beginRenderPass(&renderPassBeginInfo, vk::SubpassContents::eInline);
+        vkCommandBuffer.beginRenderPass(&renderPassBeginInfo, vk::SubpassContents::eInline);
 	}
 
-	void VulkanDevice::BeginPipeline(PipelineHandle handle)
+	void VulkanDevice::BeginPipeline(CommandBufferHandle commandBuffer, PipelineHandle pipeline)
 	{
-		VK_Pipeline* pipeline = m_Pipelines.Find(handle);
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		if (iter == m_CommandBuffers.end())
+		{
+			Debug().LogError("VulkanDevice::BeginPipeline: Invalid command buffer handle.");
+			return;
+		}
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+
+		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
 		if (!pipeline)
 		{
 			Debug().LogError("VulkanDevice::BeginPipeline: Invalid pipeline handle.");
 			return;
 		}
-
-		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
-		commandBuffer.bindPipeline(pipeline->m_VKBindPoint, pipeline->m_VKPipeline);
+		vkCommandBuffer.bindPipeline(vkPipeline->m_VKBindPoint, vkPipeline->m_VKPipeline);
 	}
 
-	void VulkanDevice::End()
+	void VulkanDevice::End(CommandBufferHandle commandBuffer)
 	{
-		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
-		commandBuffer.end();
-
-		// Submit command buffer
-	    //vk::Semaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
-	    vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
-
-	    //vk::Semaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
-	    vk::SubmitInfo submitInfo = vk::SubmitInfo()
-	        .setWaitSemaphoreCount(0)
-	        .setPWaitSemaphores(nullptr)
-	        .setPWaitDstStageMask(waitStages)
-	        .setCommandBufferCount(1)
-	        .setPCommandBuffers(&m_FrameCommandBuffers[0])
-	        .setSignalSemaphoreCount(0)
-	        .setPSignalSemaphores(nullptr);
-
-		if (m_GraphicsAndComputeQueue.submit(1, &submitInfo, m_Fence) != vk::Result::eSuccess)
-			throw std::runtime_error("failed to submit draw command buffer!");
-
-		m_LogicalDevice.waitForFences(1, &m_Fence, VK_TRUE, UINT64_MAX);
-		m_LogicalDevice.resetFences(1, &m_Fence);
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		if (iter == m_CommandBuffers.end())
+		{
+			Debug().LogError("VulkanDevice::End: Invalid command buffer handle.");
+			return;
+		}
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+		vkCommandBuffer.end();
 	}
 
-	void VulkanDevice::EndRenderPass()
+	void VulkanDevice::EndRenderPass(CommandBufferHandle commandBuffer)
 	{
-		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
-		commandBuffer.endRenderPass();
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		if (iter == m_CommandBuffers.end())
+		{
+			Debug().LogError("VulkanDevice::EndRenderPass: Invalid command buffer handle.");
+			return;
+		}
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+		vkCommandBuffer.endRenderPass();
 	}
 
-	void VulkanDevice::EndPipeline()
+	void VulkanDevice::EndPipeline(CommandBufferHandle)
 	{
 	}
 
-	void VulkanDevice::BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t firstSet)
+	void VulkanDevice::BindDescriptorSets(CommandBufferHandle commandBuffer, PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t firstSet)
 	{
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		if (iter == m_CommandBuffers.end())
+		{
+			Debug().LogError("VulkanDevice::BindDescriptorSets: Invalid command buffer handle.");
+			return;
+		}
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+
 		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
 		if (!vkPipeline)
 		{
@@ -366,27 +376,39 @@ namespace Glory
 			}
 			setsToBind[i] = vkSet->m_VKDescriptorSet;
 		}
-
-		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
-		commandBuffer.bindDescriptorSets(vkPipeline->m_VKBindPoint, vkPipeline->m_VKLayout,
+		vkCommandBuffer.bindDescriptorSets(vkPipeline->m_VKBindPoint, vkPipeline->m_VKLayout,
 			firstSet, setsToBind.size(), setsToBind.data(), 0, nullptr);
 	}
 
-	void VulkanDevice::PushConstants(PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data)
+	void VulkanDevice::PushConstants(CommandBufferHandle commandBuffer, PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data)
 	{
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		if (iter == m_CommandBuffers.end())
+		{
+			Debug().LogError("VulkanDevice::PushConstants: Invalid command buffer handle.");
+			return;
+		}
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+
 		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
 		if (!vkPipeline)
 		{
 			Debug().LogError("VulkanDevice::PushConstants: Invalid pipeline handle.");
 			return;
 		}
-
-		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
-		commandBuffer.pushConstants(vkPipeline->m_VKLayout, vk::FlagTraits<vk::ShaderStageFlagBits>::allFlags, offset, size, data);
+		vkCommandBuffer.pushConstants(vkPipeline->m_VKLayout, vk::FlagTraits<vk::ShaderStageFlagBits>::allFlags, offset, size, data);
 	}
 
-	void VulkanDevice::DrawMesh(MeshHandle handle)
+	void VulkanDevice::DrawMesh(CommandBufferHandle commandBuffer, MeshHandle handle)
 	{
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		if (iter == m_CommandBuffers.end())
+		{
+			Debug().LogError("VulkanDevice::DrawMesh: Invalid command buffer handle.");
+			return;
+		}
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+
 		VK_Mesh* mesh = m_Meshes.Find(handle);
 		if (!mesh)
 		{
@@ -407,22 +429,60 @@ namespace Glory
 		}
 
 		VK_Buffer* indexBuffer = mesh->m_IndexCount > 0 ? m_Buffers.Find(mesh->m_Buffers.back()) : nullptr;
-
-		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
-		commandBuffer.bindVertexBuffers(0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+		vkCommandBuffer.bindVertexBuffers(0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 		if (indexBuffer)
-			commandBuffer.bindIndexBuffer(indexBuffer->m_VKBuffer, 0, vk::IndexType::eUint32);
+			vkCommandBuffer.bindIndexBuffer(indexBuffer->m_VKBuffer, 0, vk::IndexType::eUint32);
 
 		if (hasIndexBuffer)
-			commandBuffer.drawIndexed(mesh->m_IndexCount, 1, 0, 0, 0);
+			vkCommandBuffer.drawIndexed(mesh->m_IndexCount, 1, 0, 0, 0);
 		else
-			commandBuffer.draw(mesh->m_VertexCount, 1, 0, 0);
+			vkCommandBuffer.draw(mesh->m_VertexCount, 1, 0, 0);
 	}
 
-	void VulkanDevice::Dispatch(uint32_t x, uint32_t y, uint32_t z)
+	void VulkanDevice::Dispatch(CommandBufferHandle commandBuffer, uint32_t x, uint32_t y, uint32_t z)
 	{
-		vk::CommandBuffer commandBuffer = m_FrameCommandBuffers[0];
-		commandBuffer.dispatch(x, y, z);
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		if (iter == m_CommandBuffers.end())
+		{
+			Debug().LogError("VulkanDevice::Dispatch: Invalid command buffer handle.");
+			return;
+		}
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+		vkCommandBuffer.dispatch(x, y, z);
+	}
+
+	void VulkanDevice::Commit(CommandBufferHandle commandBuffer)
+	{
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		if (iter == m_CommandBuffers.end())
+		{
+			Debug().LogError("VulkanDevice::End: Invalid command buffer handle.");
+			return;
+		}
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+
+		/* Submit command buffer */
+		//vk::Semaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
+		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+
+		//vk::Semaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
+		vk::SubmitInfo submitInfo = vk::SubmitInfo()
+			.setWaitSemaphoreCount(0)
+			.setPWaitSemaphores(nullptr)
+			.setPWaitDstStageMask(waitStages)
+			.setCommandBufferCount(1)
+			.setPCommandBuffers(&vkCommandBuffer)
+			.setSignalSemaphoreCount(0)
+			.setPSignalSemaphores(nullptr);
+
+		if (m_GraphicsAndComputeQueue.submit(1, &submitInfo, m_Fence) != vk::Result::eSuccess)
+			throw std::runtime_error("failed to submit draw command buffer!");
+
+		m_LogicalDevice.waitForFences(1, &m_Fence, VK_TRUE, UINT64_MAX);
+		m_LogicalDevice.resetFences(1, &m_Fence);
+
+		m_CommandBuffers.erase(commandBuffer);
+		m_FreeCommandBuffers.push_back(vkCommandBuffer);
 	}
 
 	vk::BufferUsageFlags GetBufferUsageFlags(BufferType bufferType)
@@ -1891,5 +1951,18 @@ namespace Glory
 		commandBuffer.copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal, 1, &copyRegion);
 
 		EndSingleTimeCommands(commandBuffer);
+	}
+
+	vk::CommandBuffer VulkanDevice::GetNewCommandBuffer(CommandBufferHandle commandBufferHandle)
+	{
+		if (m_FreeCommandBuffers.empty())
+		{
+			AllocateCommandBuffers(10);
+		}
+
+		vk::CommandBuffer commandBuffer = m_FreeCommandBuffers.back();
+		m_CommandBuffers.emplace(commandBufferHandle, commandBuffer);
+		m_FreeCommandBuffers.erase(--m_FreeCommandBuffers.end());
+		return commandBuffer;
 	}
 }

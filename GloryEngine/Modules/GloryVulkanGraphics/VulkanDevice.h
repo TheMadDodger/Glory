@@ -101,7 +101,7 @@ namespace Glory
         void CheckSupport(std::vector<const char*> extensions);
         bool SupportCheckPassed() const;
         void CreateLogicalDevice();
-        void CreateCommandBuffer();
+        void AllocateCommandBuffers(size_t numBuffers);
         uint32_t VulkanDevice::GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags);
 
         GLORY_API uint32_t GraphicsFamily() const { return m_GraphicsAndComputeFamily.value(); }
@@ -119,17 +119,18 @@ namespace Glory
         GLORY_API vk::CommandPool GetGraphicsCommandPool(vk::CommandPoolCreateFlags flags);
 
     private: /* Render commands */
-        virtual void Begin() override;
-        virtual void BeginRenderPass(RenderPassHandle handle) override;
-        virtual void BeginPipeline(PipelineHandle handle) override;
-        virtual void End() override;
-        virtual void EndRenderPass() override;
-        virtual void EndPipeline() override;
-        virtual void BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t firstSet=0) override;
-        virtual void PushConstants(PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data) override;
+        virtual CommandBufferHandle Begin() override;
+        virtual void BeginRenderPass(CommandBufferHandle commandBuffer, RenderPassHandle renderPass) override;
+        virtual void BeginPipeline(CommandBufferHandle commandBuffer, PipelineHandle pipeline) override;
+        virtual void End(CommandBufferHandle commandBufferHandle) override;
+        virtual void EndRenderPass(CommandBufferHandle commandBuffer) override;
+        virtual void EndPipeline(CommandBufferHandle) override;
+        virtual void BindDescriptorSets(CommandBufferHandle commandBuffer, PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t firstSet=0) override;
+        virtual void PushConstants(CommandBufferHandle commandBuffer, PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data) override;
 
-        virtual void DrawMesh(MeshHandle handle) override;
-        virtual void Dispatch(uint32_t x, uint32_t y, uint32_t z) override;
+        virtual void DrawMesh(CommandBufferHandle commandBuffer, MeshHandle handle) override;
+        virtual void Dispatch(CommandBufferHandle commandBuffer, uint32_t x, uint32_t y, uint32_t z) override;
+        virtual void Commit(CommandBufferHandle commandBuffer) override;
 
     private: /* Resource management */
         virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;
@@ -171,6 +172,8 @@ namespace Glory
         void CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags,
             int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth);
 
+        vk::CommandBuffer GetNewCommandBuffer(CommandBufferHandle commandBufferHandle);
+
     private:
         vk::PhysicalDevice m_VKDevice;
         vk::PhysicalDeviceMemoryProperties m_MemoryProperties;
@@ -192,7 +195,6 @@ namespace Glory
         std::vector<const char*> m_DeviceExtensions;
         vk::CommandPool m_GraphicsCommandPool;
         std::map<vk::CommandPoolCreateFlags, vk::CommandPool> m_GraphicsCommandPools;
-        std::vector<vk::CommandBuffer> m_FrameCommandBuffers;
 
         vk::PhysicalDeviceFeatures m_Features;
         vk::PhysicalDeviceProperties m_DeviceProperties;
@@ -208,6 +210,9 @@ namespace Glory
         GraphicsResources<VK_Pipeline> m_Pipelines;
         GraphicsResources<VK_DescriptorSetLayout> m_DescriptorSetLayouts;
         GraphicsResources<VK_DescriptorSet> m_DescriptorSets;
+
+        std::unordered_map<CommandBufferHandle, vk::CommandBuffer> m_CommandBuffers;
+        std::vector<vk::CommandBuffer> m_FreeCommandBuffers;
 
         std::unordered_map<SamplerSettings, vk::Sampler> m_CachedSamlers;
         std::unordered_map<DescriptorSetLayoutInfo, DescriptorSetLayoutHandle> m_CachedDescriptorSetLayouts;

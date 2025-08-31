@@ -32,19 +32,20 @@ namespace Glory
 
 #pragma region Commands
 
-	void OpenGLDevice::Begin()
+	CommandBufferHandle OpenGLDevice::Begin()
 	{
+		return CommandBufferHandle();
 	}
 
-	void OpenGLDevice::BeginRenderPass(RenderPassHandle handle)
+	void OpenGLDevice::BeginRenderPass(CommandBufferHandle, RenderPassHandle renderPass)
 	{
-		GL_RenderPass* renderPass = m_RenderPasses.Find(handle);
-		if (!renderPass)
+		GL_RenderPass* glRenderPass = m_RenderPasses.Find(renderPass);
+		if (!glRenderPass)
 		{
 			Debug().LogError("OpenGLDevice::BeginRenderPass: Invalid render pass handle.");
 			return;
 		}
-		GL_RenderTexture* renderTexture = m_RenderTextures.Find(renderPass->m_RenderTexture);
+		GL_RenderTexture* renderTexture = m_RenderTextures.Find(glRenderPass->m_RenderTexture);
 		if (!renderTexture)
 		{
 			Debug().LogError("OpenGLDevice::BeginRenderPass: Render pass has an invalid render texture handle.");
@@ -59,36 +60,36 @@ namespace Glory
 		glViewport(0, 0, renderTexture->m_Width, renderTexture->m_Height);
 	}
 
-	void OpenGLDevice::BeginPipeline(PipelineHandle handle)
+	void OpenGLDevice::BeginPipeline(CommandBufferHandle, PipelineHandle pipeline)
 	{
-		GL_Pipeline* pipeline = m_Pipelines.Find(handle);
-		if (!pipeline)
+		GL_Pipeline* glPipeline = m_Pipelines.Find(pipeline);
+		if (!glPipeline)
 		{
 			Debug().LogError("OpenGLDevice::BeginPipeline: Invalid pipeline handle.");
 			return;
 		}
 
-		glUseProgram(pipeline->m_GLProgramID);
+		glUseProgram(glPipeline->m_GLProgramID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
-	void OpenGLDevice::End()
+	void OpenGLDevice::End(CommandBufferHandle)
 	{
 	}
 
-	void OpenGLDevice::EndRenderPass()
+	void OpenGLDevice::EndRenderPass(CommandBufferHandle)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
-	void OpenGLDevice::EndPipeline()
+	void OpenGLDevice::EndPipeline(CommandBufferHandle)
 	{
 		glUseProgram(NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
-	void OpenGLDevice::BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t)
+	void OpenGLDevice::BindDescriptorSets(CommandBufferHandle, PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t)
 	{
 		GL_Pipeline* glPipeline = m_Pipelines.Find(pipeline);
 		if (!glPipeline)
@@ -154,12 +155,12 @@ namespace Glory
 		}
 	}
 
-	void OpenGLDevice::PushConstants(PipelineHandle, uint32_t, uint32_t, const void*)
+	void OpenGLDevice::PushConstants(CommandBufferHandle, PipelineHandle, uint32_t, uint32_t, const void*)
 	{
 		Debug().LogError("OpenGLDevice::PushConstants: Not supported on OpenGL device.");
 	}
 
-	void OpenGLDevice::DrawMesh(MeshHandle handle)
+	void OpenGLDevice::DrawMesh(CommandBufferHandle, MeshHandle handle)
 	{
 		GL_Mesh* mesh = m_Meshes.Find(handle);
 		if (!mesh)
@@ -178,12 +179,16 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
-	void OpenGLDevice::Dispatch(uint32_t x, uint32_t y, uint32_t z)
+	void OpenGLDevice::Dispatch(CommandBufferHandle, uint32_t x, uint32_t y, uint32_t z)
 	{
 		glDispatchCompute((GLuint)x, (GLuint)y, (GLuint)z);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OpenGLDevice::Commit(CommandBufferHandle)
+	{
 	}
 
 #pragma endregion

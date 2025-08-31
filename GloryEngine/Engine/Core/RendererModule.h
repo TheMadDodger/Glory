@@ -44,6 +44,8 @@ namespace Glory
 		uint32_t m_MaterialIndex;
 	};
 
+	typedef struct UUID CommandBufferHandle;
+
 	template<typename T>
 	struct CPUBuffer
 	{
@@ -228,5 +230,7 @@ namespace Glory
 		std::vector<PipelineBatch> m_StaticPipelineRenderDatas;
 		std::vector<PipelineBatch> m_DynamicPipelineRenderDatas;
 		std::vector<PipelineBatch> m_DynamicLatePipelineRenderDatas;
+
+		CommandBufferHandle m_CommandBuffer;
 	};
 }

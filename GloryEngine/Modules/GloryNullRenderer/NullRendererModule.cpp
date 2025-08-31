@@ -206,8 +206,8 @@ namespace Glory
 
 			PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineRenderData.m_PipelineID);
 			if (!pPipelineData) continue;
-			pDevice->BeginPipeline(batchData.m_Pipeline);
-			pDevice->BindDescriptorSets(batchData.m_Pipeline, { m_GlobalSet, batchData.m_Set });
+			pDevice->BeginPipeline(m_CommandBuffer, batchData.m_Pipeline);
+			pDevice->BindDescriptorSets(m_CommandBuffer, batchData.m_Pipeline, { m_GlobalSet, batchData.m_Set });
 
 			uint32_t objectIndex = 0;
 			for (UUID uniqueMeshID : pipelineRenderData.m_UniqueMeshOrder)
@@ -235,12 +235,12 @@ namespace Glory
 					constants.m_MaterialIndex = meshBatch.m_MaterialIndices[i];
 
 					if (usePushConstants)
-						pDevice->PushConstants(batchData.m_Pipeline, 0, sizeof(RenderConstants), &constants);
+						pDevice->PushConstants(m_CommandBuffer, batchData.m_Pipeline, 0, sizeof(RenderConstants), &constants);
 					else
 						pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(RenderConstants));
 					if (!batchData.m_TextureSets.empty())
-						pDevice->BindDescriptorSets(batchData.m_Pipeline, { batchData.m_TextureSets[constants.m_MaterialIndex] }, 2);
-					pDevice->DrawMesh(mesh);
+						pDevice->BindDescriptorSets(m_CommandBuffer, batchData.m_Pipeline, { batchData.m_TextureSets[constants.m_MaterialIndex] }, 2);
+					pDevice->DrawMesh(m_CommandBuffer, mesh);
 				}
 			}
 
@@ -269,7 +269,7 @@ namespace Glory
 					pipelineRenderData.m_PropertiesBuffer->size());
 			}*/
 
-			pDevice->EndPipeline();
+			pDevice->EndPipeline(m_CommandBuffer);
 		}
 	}
 
@@ -599,20 +599,13 @@ namespace Glory
 
 		pDevice->AssignBuffer(m_ScreenToViewBuffer, (void*)&screenToView, sizeof(ScreenToView));
 
-		pDevice->Begin();
-		pDevice->BeginPipeline(m_ClusterCullLightPipeline);
-		pDevice->BindDescriptorSets(m_ClusterCullLightPipeline, { clusterCullSet });
-		pDevice->Dispatch(1, 1, 6);
-		pDevice->EndPipeline();
-		pDevice->End();
-
-		//pClusterSSBO->BindForDraw();
-		//m_pScreenToViewSSBO->BindForDraw();
-		//m_pLightsSSBO->BindForDraw();
-		//pLightIndexSSBO->BindForDraw();
-		//pLightGridSSBO->BindForDraw();
-		//m_pLightDistancesSSBO->BindForDraw();
-		//m_pLightCountSSBO->BindForDraw();
+		CommandBufferHandle commandBuffer = pDevice->Begin();
+		pDevice->BeginPipeline(commandBuffer, m_ClusterCullLightPipeline);
+		pDevice->BindDescriptorSets(commandBuffer, m_ClusterCullLightPipeline, { clusterCullSet });
+		pDevice->Dispatch(commandBuffer, 1, 1, 6);
+		pDevice->EndPipeline(commandBuffer);
+		pDevice->End(commandBuffer);
+		pDevice->Commit(commandBuffer);
 	}
 
 	void NullRendererModule::DynamicObjectsPass(uint32_t cameraIndex)
@@ -647,11 +640,12 @@ namespace Glory
 		
 		pDevice->AssignBuffer(m_ScreenToViewBuffer, (void*)&screenToView, sizeof(ScreenToView));
 		
-		pDevice->Begin();
-		pDevice->BeginPipeline(m_ClusterPipeline);
-		pDevice->BindDescriptorSets(m_ClusterPipeline, { clusterSet });
-		pDevice->Dispatch(gridSize.x, gridSize.y, gridSize.z);
-		pDevice->EndPipeline();
-		pDevice->End();
+		CommandBufferHandle commandBuffer = pDevice->Begin();
+		pDevice->BeginPipeline(commandBuffer, m_ClusterPipeline);
+		pDevice->BindDescriptorSets(commandBuffer, m_ClusterPipeline, { clusterSet });
+		pDevice->Dispatch(commandBuffer, gridSize.x, gridSize.y, gridSize.z);
+		pDevice->EndPipeline(commandBuffer);
+		pDevice->End(commandBuffer);
+		pDevice->Commit(commandBuffer);
 	}
 }

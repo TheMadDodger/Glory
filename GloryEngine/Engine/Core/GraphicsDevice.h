@@ -100,6 +100,7 @@ namespace Glory
 	typedef struct UUID PipelineHandle;
 	typedef struct UUID DescriptorSetLayoutHandle;
 	typedef struct UUID DescriptorSetHandle;
+	typedef struct UUID CommandBufferHandle;
 
 	template<class T>
 	struct GraphicsResources
@@ -181,17 +182,18 @@ namespace Glory
 		virtual bool IsSupported(const APIFeatures& features) const;
 
 	public: /* Rendering commands */
-		virtual void Begin() = 0;
-		virtual void BeginRenderPass(RenderPassHandle handle) = 0;
-		virtual void BeginPipeline(PipelineHandle handle) = 0;
-		virtual void End() = 0;
-		virtual void EndRenderPass() = 0;
-		virtual void EndPipeline() = 0;
-		virtual void BindDescriptorSets(PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t firstSet=0) = 0;
-		virtual void PushConstants(PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data) = 0;
+		virtual CommandBufferHandle Begin() = 0;
+		virtual void BeginRenderPass(CommandBufferHandle commandBuffer, RenderPassHandle renderPass) = 0;
+		virtual void BeginPipeline(CommandBufferHandle commandBuffer, PipelineHandle pipeline) = 0;
+		virtual void End(CommandBufferHandle commandBuffer) = 0;
+		virtual void EndRenderPass(CommandBufferHandle commandBuffer) = 0;
+		virtual void EndPipeline(CommandBufferHandle commandBuffer) = 0;
+		virtual void BindDescriptorSets(CommandBufferHandle commandBuffer, PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t firstSet=0) = 0;
+		virtual void PushConstants(CommandBufferHandle commandBuffer, PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data) = 0;
 
-		virtual void DrawMesh(MeshHandle handle) = 0;
-		virtual void Dispatch(uint32_t x, uint32_t y, uint32_t z) = 0;
+		virtual void DrawMesh(CommandBufferHandle commandBuffer, MeshHandle handle) = 0;
+		virtual void Dispatch(CommandBufferHandle commandBuffer, uint32_t x, uint32_t y, uint32_t z) = 0;
+		virtual void Commit(CommandBufferHandle commandBuffer) = 0;
 
 	public: /* Resource caching */
 		PipelineHandle AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetHandle>&& descriptorSets,

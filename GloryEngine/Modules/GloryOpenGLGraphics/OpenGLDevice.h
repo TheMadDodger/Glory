@@ -86,17 +86,18 @@ namespace Glory
         OpenGLGraphicsModule* GraphicsModule();
 
     private: /* Render commands */
-        virtual void Begin() override;
-        virtual void BeginRenderPass(RenderPassHandle handle) override;
-        virtual void BeginPipeline(PipelineHandle handle) override;
-        virtual void End() override;
-        virtual void EndRenderPass() override;
-        virtual void EndPipeline() override;
-        virtual void BindDescriptorSets(PipelineHandle, std::vector<DescriptorSetHandle> sets, uint32_t firstSet=0) override;
-        virtual void PushConstants(PipelineHandle, uint32_t, uint32_t, const void*) override;
+        virtual CommandBufferHandle Begin() override;
+        virtual void BeginRenderPass(CommandBufferHandle, RenderPassHandle renderPass) override;
+        virtual void BeginPipeline(CommandBufferHandle, PipelineHandle pipeline) override;
+        virtual void End(CommandBufferHandle) override;
+        virtual void EndRenderPass(CommandBufferHandle) override;
+        virtual void EndPipeline(CommandBufferHandle) override;
+        virtual void BindDescriptorSets(CommandBufferHandle, PipelineHandle, std::vector<DescriptorSetHandle> sets, uint32_t firstSet=0) override;
+        virtual void PushConstants(CommandBufferHandle, PipelineHandle, uint32_t, uint32_t, const void*) override;
 
-        virtual void DrawMesh(MeshHandle handle) override;
-        virtual void Dispatch(uint32_t x, uint32_t y, uint32_t z) override;
+        virtual void DrawMesh(CommandBufferHandle, MeshHandle handle) override;
+        virtual void Dispatch(CommandBufferHandle, uint32_t x, uint32_t y, uint32_t z) override;
+        virtual void Commit(CommandBufferHandle) override;
 
     private: /* Resource management */
         virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;
