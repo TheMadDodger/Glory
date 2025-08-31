@@ -12,6 +12,8 @@
 
 namespace Glory
 {
+	static uint32_t* ResetLightDistances = nullptr;
+
 	GLORY_MODULE_VERSION_CPP(NullRendererModule);
 
 	enum class BindingIndices : uint32_t
@@ -65,6 +67,10 @@ namespace Glory
 			PrepareDataPass();
 		} });
 
+		m_RenderPasses[RP_CameraPrepass].push_back(RenderPass{ "Dynamic Object Pass", [this](uint32_t cameraIndex, RendererModule*) {
+			ClusterPass(cameraIndex);
+		} });
+
 		m_RenderPasses[RP_ObjectPass].push_back(RenderPass{ "Dynamic Object Pass", [this](uint32_t cameraIndex, RendererModule*) {
 			DynamicObjectsPass(cameraIndex);
 		} });
@@ -78,14 +84,6 @@ namespace Glory
 			m_pEngine->GetDebug().LogError("Renderer: No graphics device active");
 			return;
 		}
-
-		FileImportSettings importSettings;
-		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
-		importSettings.AddNullTerminateAtEnd = true;
-
-		//RenderPassInfo clusterGeneratorPassInfo;
-		//RenderPassHandle clusterGeneratorPass = pDevice->CreateRenderPass(clusterGeneratorPassInfo);
-		//pDevice->CreatePipeline(clusterGeneratorPass, );
 
 		const bool usePushConstants = pDevice->IsSupported(APIFeatures::PushConstants);
 		DescriptorSetLayoutInfo setLayoutInfo;
@@ -124,13 +122,27 @@ namespace Glory
 		setLayoutInfo.m_Buffers[1].m_Type = BufferType::BT_Storage;
 		m_ClusterSetLayout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
 
+		setLayoutInfo = DescriptorSetLayoutInfo();
+		setLayoutInfo.m_Buffers.resize(7);
+		for (size_t i = 0; i < setLayoutInfo.m_Buffers.size(); ++i)
+		{
+			setLayoutInfo.m_Buffers[i].m_BindingIndex = i + 1;
+			setLayoutInfo.m_Buffers[i].m_Type = BufferType::BT_Storage;
+		}
+		m_ClusterCullLightSetLayout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
+
 		m_ScreenToViewBuffer = pDevice->CreateBuffer(sizeof(ScreenToView), BufferType::BT_Storage);
 		pDevice->AssignBuffer(m_ScreenToViewBuffer, &ScreenToView(), sizeof(ScreenToView));
 
-		//m_LightsSSBO = pDevice->CreateBuffer(sizeof(LightData)*MAX_LIGHTS, BufferType::BT_Storage);
-		//m_LightCountSSBO = pDevice->CreateBuffer(sizeof(uint32_t), BufferType::BT_Storage);
+		m_LightsSSBO = pDevice->CreateBuffer(sizeof(LightData)*MAX_LIGHTS, BufferType::BT_Storage);
+		m_LightCountSSBO = pDevice->CreateBuffer(sizeof(uint32_t), BufferType::BT_Storage);
 		//m_LightSpaceTransformsSSBO = pDevice->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferType::BT_Storage);
-		//m_LightDistancesSSBO = pDevice->CreateBuffer(sizeof(uint32_t)*MAX_LIGHTS, BufferType::BT_Storage);
+		m_LightDistancesSSBO = pDevice->CreateBuffer(sizeof(uint32_t)*MAX_LIGHTS, BufferType::BT_Storage);
+
+		ResetLightDistances = new uint32_t[MAX_LIGHTS];
+		for (size_t i = 0; i < MAX_LIGHTS; ++i)
+			ResetLightDistances[i] = NUM_DEPTH_SLICES;
+		pDevice->AssignBuffer(m_LightDistancesSSBO, ResetLightDistances);
 	}
 
 	void NullRendererModule::Update()
@@ -273,6 +285,12 @@ namespace Glory
 			m_ClusterPipeline = pDevice->CreateComputePipeline(pClusterPipeline, { m_ClusterSetLayout });
 		}
 
+		if (!m_ClusterCullLightPipeline)
+		{
+			PipelineData* pClusterCullLightPipeline = pipelines.GetPipelineData(45);
+			m_ClusterCullLightPipeline = pDevice->CreateComputePipeline(pClusterCullLightPipeline, { m_ClusterCullLightSetLayout });
+		}
+
 		MaterialManager& materials = m_pEngine->GetMaterialManager();
 
 		/* Prepare cameras */
@@ -295,23 +313,50 @@ namespace Glory
 			if (!clusterSSBOHandle)
 			{
 				DescriptorSetHandle& clusterSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("ClusterSet"));
-				//BufferHandle& lightIndexSSBO = reinterpret_cast<BufferHandle&>(camera.GetUserHandle("LightIndexSSBO"));
-				//BufferHandle& lightGridSSBO = reinterpret_cast<BufferHandle&>(camera.GetUserHandle("LightGridSSBO"));
+				DescriptorSetHandle& clusterCullSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("ClusterCullSet"));
+				BufferHandle& lightIndexSSBO = reinterpret_cast<BufferHandle&>(camera.GetUserHandle("LightIndexSSBO"));
+				BufferHandle& lightGridSSBO = reinterpret_cast<BufferHandle&>(camera.GetUserHandle("LightGridSSBO"));
 
 				clusterSSBOHandle = pDevice->CreateBuffer(sizeof(VolumeTileAABB)*NUM_CLUSTERS, BufferType::BT_Storage);
-				//lightIndexSSBO = pDevice->CreateBuffer(sizeof(uint32_t)*(NUM_CLUSTERS * MAX_LIGHTS_PER_TILE + 1), BufferType::BT_Storage);
-				//lightGridSSBO = pDevice->CreateBuffer(sizeof(LightGrid)*NUM_CLUSTERS, BufferType::BT_Storage);
+				lightIndexSSBO = pDevice->CreateBuffer(sizeof(uint32_t)*(NUM_CLUSTERS*MAX_LIGHTS_PER_TILE + 1), BufferType::BT_Storage);
+				lightGridSSBO = pDevice->CreateBuffer(sizeof(LightGrid)*NUM_CLUSTERS, BufferType::BT_Storage);
 
-				DescriptorSetInfo setInfo;
+				DescriptorSetInfo setInfo = DescriptorSetInfo();
 				setInfo.m_Layout = m_ClusterSetLayout;
 				setInfo.m_Buffers.resize(2);
+				setInfo.m_Buffers[0].m_BufferHandle = clusterSSBOHandle;
+				setInfo.m_Buffers[0].m_Offset = 0;
+				setInfo.m_Buffers[0].m_Size = sizeof(VolumeTileAABB) * NUM_CLUSTERS;
+				setInfo.m_Buffers[1].m_BufferHandle = m_ScreenToViewBuffer;
+				setInfo.m_Buffers[1].m_Offset = 0;
+				setInfo.m_Buffers[1].m_Size = sizeof(ScreenToView);
+				clusterSet = pDevice->CreateDescriptorSet(std::move(setInfo));
+
+				setInfo = DescriptorSetInfo();
+				setInfo.m_Layout = m_ClusterCullLightSetLayout;
+				setInfo.m_Buffers.resize(7);
 				setInfo.m_Buffers[0].m_BufferHandle = clusterSSBOHandle;
 				setInfo.m_Buffers[0].m_Offset = 0;
 				setInfo.m_Buffers[0].m_Size = sizeof(VolumeTileAABB)*NUM_CLUSTERS;
 				setInfo.m_Buffers[1].m_BufferHandle = m_ScreenToViewBuffer;
 				setInfo.m_Buffers[1].m_Offset = 0;
 				setInfo.m_Buffers[1].m_Size = sizeof(ScreenToView);
-				clusterSet = pDevice->CreateDescriptorSet(std::move(setInfo));
+				setInfo.m_Buffers[2].m_BufferHandle = m_LightsSSBO;
+				setInfo.m_Buffers[2].m_Offset = 0;
+				setInfo.m_Buffers[2].m_Size = sizeof(LightData)*MAX_LIGHTS;
+				setInfo.m_Buffers[3].m_BufferHandle = lightIndexSSBO;
+				setInfo.m_Buffers[3].m_Offset = 0;
+				setInfo.m_Buffers[3].m_Size = sizeof(uint32_t)*(NUM_CLUSTERS*MAX_LIGHTS_PER_TILE + 1);
+				setInfo.m_Buffers[4].m_BufferHandle = lightGridSSBO;
+				setInfo.m_Buffers[4].m_Offset = 0;
+				setInfo.m_Buffers[4].m_Size = sizeof(LightGrid)*NUM_CLUSTERS;
+				setInfo.m_Buffers[5].m_BufferHandle = m_LightDistancesSSBO;
+				setInfo.m_Buffers[5].m_Offset = 0;
+				setInfo.m_Buffers[5].m_Size = sizeof(uint32_t)*MAX_LIGHTS;
+				setInfo.m_Buffers[6].m_BufferHandle = m_LightCountSSBO;
+				setInfo.m_Buffers[6].m_Offset = 0;
+				setInfo.m_Buffers[6].m_Size = sizeof(uint32_t);
+				clusterCullSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 
 				GenerateClusterSSBO(pDevice, camera, clusterSet);
 			}
@@ -320,11 +365,11 @@ namespace Glory
 			pDevice->AssignBuffer(m_CameraDatasBuffer, m_CameraDatas->data(), m_CameraDatas->size()*sizeof(PerCameraData));
 
 		/* Update light data */
-		//const uint32_t count = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
-		//m_LightCountSSBO->Assign(&count, 0, sizeof(uint32_t));
-		//m_pLightsSSBO->Assign(m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS * sizeof(LightData));
-		//m_pLightSpaceTransformsSSBO->Assign(m_FrameData.LightSpaceTransforms.data(), 0, MAX_LIGHTS * sizeof(glm::mat4));
-		//m_pLightDistancesSSBO->Assign(ResetLightDistances);
+		const uint32_t count = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
+		pDevice->AssignBuffer(m_LightCountSSBO, &count, sizeof(uint32_t));
+		pDevice->AssignBuffer(m_LightsSSBO, m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS*sizeof(LightData));
+		//pDevice->AssignBuffer(m_LightSpaceTransformsSSBO, m_FrameData.LightSpaceTransforms.data(), 0, MAX_LIGHTS*sizeof(glm::mat4));
+		//pDevice->AssignBuffer(m_LightDistancesSSBO, ResetLightDistances);
 		
 		/*if (m_LightCameraDatas->size() < m_FrameData.LightSpaceTransforms.count()) m_LightCameraDatas.resize(m_FrameData.LightSpaceTransforms.count());
 		for (size_t i = 0; i < m_FrameData.LightSpaceTransforms.count(); ++i)
@@ -521,6 +566,53 @@ namespace Glory
 					std::move(descriptorSetLayouts), pMesh->VertexSize(), pMesh->AttributeTypesVector());
 			}
 		}
+	}
+
+	void NullRendererModule::ClusterPass(uint32_t cameraIndex)
+	{
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+
+		CameraRef camera = m_FrameData.ActiveCameras[cameraIndex];
+		DescriptorSetHandle& clusterCullSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("ClusterCullSet"));
+
+		glm::uvec2 resolution = camera.GetResolution();
+		glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
+
+		BufferHandle clusterSSBO = camera.GetUserHandle("ClusterSSBO");
+		BufferHandle lightIndexSSBO = camera.GetUserHandle("LightIndexSSBO");
+		BufferHandle lightGridSSBO = camera.GetUserHandle("LightGridSSBO");
+		if (!clusterSSBO || !lightIndexSSBO || !lightGridSSBO) return;
+
+		float zNear = camera.GetNear();
+		float zFar = camera.GetFar();
+
+		const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x / (float)gridSize.x), (uint32_t)std::ceilf(resolution.y / (float)gridSize.y));
+		ScreenToView screenToView;
+		screenToView.ProjectionInverse = camera.GetProjectionInverse();
+		screenToView.ViewInverse = camera.GetViewInverse();
+		screenToView.ScreenDimensions = resolution;
+		screenToView.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
+		screenToView.Scale = (float)gridSize.z / std::log2f(zFar / zNear);
+		screenToView.Bias = -((float)gridSize.z * std::log2f(zNear) / std::log2f(zFar / zNear));
+		screenToView.zNear = zNear;
+		screenToView.zFar = zFar;
+
+		pDevice->AssignBuffer(m_ScreenToViewBuffer, (void*)&screenToView, sizeof(ScreenToView));
+
+		pDevice->Begin();
+		pDevice->BeginPipeline(m_ClusterCullLightPipeline);
+		pDevice->BindDescriptorSets(m_ClusterCullLightPipeline, { clusterCullSet });
+		pDevice->Dispatch(1, 1, 6);
+		pDevice->EndPipeline();
+		pDevice->End();
+
+		//pClusterSSBO->BindForDraw();
+		//m_pScreenToViewSSBO->BindForDraw();
+		//m_pLightsSSBO->BindForDraw();
+		//pLightIndexSSBO->BindForDraw();
+		//pLightGridSSBO->BindForDraw();
+		//m_pLightDistancesSSBO->BindForDraw();
+		//m_pLightCountSSBO->BindForDraw();
 	}
 
 	void NullRendererModule::DynamicObjectsPass(uint32_t cameraIndex)

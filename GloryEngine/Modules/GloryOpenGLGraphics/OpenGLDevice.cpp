@@ -194,6 +194,7 @@ namespace Glory
 	{
 		BufferHandle handle;
 		GL_Buffer& buffer = m_Buffers.Emplace(handle, GL_Buffer());
+		buffer.m_Size = bufferSize;
 
 		glGenBuffers(1, &buffer.m_GLBufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());

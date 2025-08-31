@@ -101,6 +101,7 @@ namespace Glory
 		void PrepareDataPass();
 		void PrepareBatches(const std::vector<PipelineBatch>& batches, std::vector<PipelineBatchData>& batchDatas);
 
+		void ClusterPass(uint32_t cameraIndex);
 		void DynamicObjectsPass(uint32_t cameraIndex);
 
 		void GenerateClusterSSBO(GraphicsDevice* pDevice, CameraRef camera, DescriptorSetHandle clusterSet);
@@ -117,10 +118,10 @@ namespace Glory
 		DescriptorSetHandle m_GlobalSet;
 		DescriptorSetLayoutHandle m_GlobalSetLayout;
 
-		//BufferHandle m_LightsSSBO = 0;
-		//BufferHandle m_LightCountSSBO = 0;
+		BufferHandle m_LightsSSBO = 0;
+		BufferHandle m_LightCountSSBO = 0;
 		//BufferHandle m_LightSpaceTransformsSSBO = 0;
-		//BufferHandle m_LightDistancesSSBO = 0;
+		BufferHandle m_LightDistancesSSBO = 0;
 
 		static const size_t m_GridSizeX = 16;
 		static const size_t m_GridSizeY = 9;
@@ -131,6 +132,8 @@ namespace Glory
 
 		/* Compute shaders */
 		DescriptorSetLayoutHandle m_ClusterSetLayout;
+		DescriptorSetLayoutHandle m_ClusterCullLightSetLayout;
 		PipelineHandle m_ClusterPipeline = 0;
+		PipelineHandle m_ClusterCullLightPipeline = 0;
 	};
 }

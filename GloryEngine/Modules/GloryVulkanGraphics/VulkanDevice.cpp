@@ -1417,7 +1417,7 @@ namespace Glory
 
 		if (m_LogicalDevice.createComputePipelines(VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &pipeline.m_VKPipeline) != vk::Result::eSuccess)
 		{
-			Debug().LogError("VulkanDevice::CreateComputePipeline: Failed to create graphics pipeline.");
+			Debug().LogError("VulkanDevice::CreateComputePipeline: Failed to create compute pipeline.");
 			return NULL;
 		}
 

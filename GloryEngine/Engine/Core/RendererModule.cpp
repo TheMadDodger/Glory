@@ -767,6 +767,14 @@ namespace Glory
 			pass.m_Callback(0, this);
 		}
 
+		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
+		{
+			for (auto& pass : m_RenderPasses[RP_CameraPrepass])
+			{
+				pass.m_Callback(i, this);
+			}
+		}
+
 		pDevice->Begin();
 
 		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
@@ -779,11 +787,6 @@ namespace Glory
 			//RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
 			//pRenderTexture->BindForDraw();
 			//pGraphics->Clear(camera.GetClearColor());
-
-			for (auto& pass : m_RenderPasses[RP_CameraPrepass])
-			{
-				pass.m_Callback(i, this);
-			}
 
 			OnStartCameraRender(camera, m_FrameData.ActiveLights);
 

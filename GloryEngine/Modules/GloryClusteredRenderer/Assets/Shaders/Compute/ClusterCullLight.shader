@@ -16,6 +16,14 @@ struct LightData
 	vec4 ShadowCoords;
 };
 
+struct CompactLightData
+{
+	vec3 Position;
+	uint Type;
+	vec4 Direction;
+	vec4 Data;
+};
+
 struct LightGridElement
 {
     uint Offset;
@@ -72,8 +80,8 @@ layout(std430, binding = 7) buffer lightCountSSBO
 };
 
 //Shared variables 
-shared LightData sharedLights[16 * 9 * 4];
-shared uint sharedLightIndices[16 * 9 * 4];
+shared CompactLightData sharedLights[16*9*4];
+shared uint sharedLightIndices[16*9*4];
 
 bool TestSphereAABB(uint light, uint tile);
 bool TestConeAABB(uint light, uint tile);
@@ -105,7 +113,10 @@ void main()
         lightIndex = min(lightIndex, Lights.length());
 
         //Populating shared light array
-        sharedLights[gl_LocalInvocationIndex] = Lights[lightIndex];
+        sharedLights[gl_LocalInvocationIndex].Position = Lights[lightIndex].Position;
+        sharedLights[gl_LocalInvocationIndex].Direction = Lights[lightIndex].Direction;
+        sharedLights[gl_LocalInvocationIndex].Data = Lights[lightIndex].Data;
+        sharedLights[gl_LocalInvocationIndex].Type = Lights[lightIndex].Type;
         sharedLightIndices[gl_LocalInvocationIndex] = lightIndex;
         barrier();
 
