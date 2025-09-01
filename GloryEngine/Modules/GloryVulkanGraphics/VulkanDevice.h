@@ -131,6 +131,8 @@ namespace Glory
         virtual void DrawMesh(CommandBufferHandle commandBuffer, MeshHandle handle) override;
         virtual void Dispatch(CommandBufferHandle commandBuffer, uint32_t x, uint32_t y, uint32_t z) override;
         virtual void Commit(CommandBufferHandle commandBuffer) override;
+        virtual void Wait(CommandBufferHandle commandBuffer) override;
+        virtual void Release(CommandBufferHandle commandBuffer) override;
 
     private: /* Resource management */
         virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;
@@ -199,8 +201,6 @@ namespace Glory
         vk::PhysicalDeviceFeatures m_Features;
         vk::PhysicalDeviceProperties m_DeviceProperties;
 
-        vk::Fence m_Fence;
-
         GraphicsResources<VK_Buffer> m_Buffers;
         GraphicsResources<VK_Mesh> m_Meshes;
         GraphicsResources<VK_Texture> m_Textures;
@@ -212,7 +212,9 @@ namespace Glory
         GraphicsResources<VK_DescriptorSet> m_DescriptorSets;
 
         std::unordered_map<CommandBufferHandle, vk::CommandBuffer> m_CommandBuffers;
+        std::unordered_map<CommandBufferHandle, vk::Fence> m_CommandBufferFences;
         std::vector<vk::CommandBuffer> m_FreeCommandBuffers;
+        std::vector<vk::Fence> m_FreeFences;
 
         std::unordered_map<SamplerSettings, vk::Sampler> m_CachedSamlers;
         std::unordered_map<DescriptorSetLayoutInfo, DescriptorSetLayoutHandle> m_CachedDescriptorSetLayouts;

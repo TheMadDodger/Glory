@@ -606,6 +606,8 @@ namespace Glory
 		pDevice->EndPipeline(commandBuffer);
 		pDevice->End(commandBuffer);
 		pDevice->Commit(commandBuffer);
+		pDevice->Wait(commandBuffer);
+		pDevice->Release(commandBuffer);
 	}
 
 	void NullRendererModule::DynamicObjectsPass(uint32_t cameraIndex)

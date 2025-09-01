@@ -161,12 +161,6 @@ namespace Glory
 
 		CreateGraphicsCommandPool();
 		AllocateCommandBuffers(10);
-
-		vk::FenceCreateInfo fenceCreateInfo = vk::FenceCreateInfo()
-			.setFlags((vk::FenceCreateFlagBits)0);
-
-		if (m_LogicalDevice.createFence(&fenceCreateInfo, nullptr, &m_Fence) != vk::Result::eSuccess)
-			Debug().LogError("Vulkan: Failed to create sync objects for a frame.");
 	}
 
 	void VulkanDevice::AllocateCommandBuffers(size_t numBuffers)
@@ -175,7 +169,9 @@ namespace Glory
 
 		// Create command buffers
 		const size_t firstNewBufferIndex = m_FreeCommandBuffers.size();
+		const size_t firstNewFenceIndex = m_FreeFences.size();
 		m_FreeCommandBuffers.resize(m_FreeCommandBuffers.size() + numBuffers);
+		m_FreeFences.resize(m_FreeFences.size() + numBuffers);
 
 		vk::CommandBufferAllocateInfo commandBufferAllocateInfo = vk::CommandBufferAllocateInfo()
 			.setCommandPool(commandPool)
@@ -184,6 +180,15 @@ namespace Glory
 
 		if (m_LogicalDevice.allocateCommandBuffers(&commandBufferAllocateInfo, &m_FreeCommandBuffers[firstNewBufferIndex]) != vk::Result::eSuccess)
 			Debug().LogError("Vulkan: Failed to allocate command buffers.");
+
+		for (size_t i = firstNewFenceIndex; i < m_FreeFences.size(); ++i)
+		{
+			vk::FenceCreateInfo fenceCreateInfo = vk::FenceCreateInfo()
+				.setFlags((vk::FenceCreateFlagBits)0);
+
+			if (m_LogicalDevice.createFence(&fenceCreateInfo, nullptr, &m_FreeFences[i]) != vk::Result::eSuccess)
+				Debug().LogError("Vulkan: Failed to create sync objects for a frame.");
+		}
 	}
 
 	uint32_t VulkanDevice::GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags)
@@ -454,12 +459,14 @@ namespace Glory
 	void VulkanDevice::Commit(CommandBufferHandle commandBuffer)
 	{
 		auto iter = m_CommandBuffers.find(commandBuffer);
+		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
 			Debug().LogError("VulkanDevice::End: Invalid command buffer handle.");
 			return;
 		}
 		vk::CommandBuffer vkCommandBuffer = iter->second;
+		vk::Fence vkFence = fenceIter->second;
 
 		/* Submit command buffer */
 		//vk::Semaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
@@ -475,14 +482,51 @@ namespace Glory
 			.setSignalSemaphoreCount(0)
 			.setPSignalSemaphores(nullptr);
 
-		if (m_GraphicsAndComputeQueue.submit(1, &submitInfo, m_Fence) != vk::Result::eSuccess)
+		if (m_GraphicsAndComputeQueue.submit(1, &submitInfo, vkFence) != vk::Result::eSuccess)
 			throw std::runtime_error("failed to submit draw command buffer!");
+	}
 
-		m_LogicalDevice.waitForFences(1, &m_Fence, VK_TRUE, UINT64_MAX);
-		m_LogicalDevice.resetFences(1, &m_Fence);
+	void VulkanDevice::Wait(CommandBufferHandle commandBuffer)
+	{
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
+		if (iter == m_CommandBuffers.end() || fenceIter == m_CommandBufferFences.end())
+		{
+			Debug().LogError("VulkanDevice::Wait: Invalid command buffer handle.");
+			return;
+		}
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+		vk::Fence vkFence = fenceIter->second;
 
+		if (m_LogicalDevice.waitForFences(1, &vkFence, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::Wait: Failed to wait for fence.");
+			return;
+		}
+		if (m_LogicalDevice.resetFences(1, &vkFence) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::Wait: Failed to reset fence.");
+			return;
+		}
+	}
+
+	void VulkanDevice::Release(CommandBufferHandle commandBuffer)
+	{
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
+		if (iter == m_CommandBuffers.end() || fenceIter == m_CommandBufferFences.end())
+		{
+			Debug().LogError("VulkanDevice::Wait: Invalid command buffer handle.");
+			return;
+		}
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+		vk::Fence vkFence = fenceIter->second;
+
+		vkCommandBuffer.reset();
 		m_CommandBuffers.erase(commandBuffer);
+		m_CommandBufferFences.erase(commandBuffer);
 		m_FreeCommandBuffers.push_back(vkCommandBuffer);
+		m_FreeFences.push_back(vkFence);
 	}
 
 	vk::BufferUsageFlags GetBufferUsageFlags(BufferType bufferType)
@@ -1955,14 +1999,15 @@ namespace Glory
 
 	vk::CommandBuffer VulkanDevice::GetNewCommandBuffer(CommandBufferHandle commandBufferHandle)
 	{
-		if (m_FreeCommandBuffers.empty())
-		{
+		if (m_FreeCommandBuffers.empty() || m_FreeFences.empty())
 			AllocateCommandBuffers(10);
-		}
 
 		vk::CommandBuffer commandBuffer = m_FreeCommandBuffers.back();
+		vk::Fence fence = m_FreeFences.back();
 		m_CommandBuffers.emplace(commandBufferHandle, commandBuffer);
+		m_CommandBufferFences.emplace(commandBufferHandle, fence);
 		m_FreeCommandBuffers.erase(--m_FreeCommandBuffers.end());
+		m_FreeFences.erase(--m_FreeFences.end());
 		return commandBuffer;
 	}
 }

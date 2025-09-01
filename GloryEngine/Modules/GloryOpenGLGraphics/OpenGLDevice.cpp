@@ -189,6 +189,15 @@ namespace Glory
 
 	void OpenGLDevice::Commit(CommandBufferHandle)
 	{
+		glFlush();
+	}
+
+	void OpenGLDevice::Wait(CommandBufferHandle)
+	{
+	}
+
+	void OpenGLDevice::Release(CommandBufferHandle)
+	{
 	}
 
 #pragma endregion

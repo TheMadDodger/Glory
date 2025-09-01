@@ -864,6 +864,8 @@ namespace Glory
 
 		pDevice->End(m_CommandBuffer);
 		pDevice->Commit(m_CommandBuffer);
+		pDevice->Wait(m_CommandBuffer);
+		pDevice->Release(m_CommandBuffer);
 
 		//m_LastSubmittedObjectCount = m_FrameData.ObjectsToRender.size();
 		//m_LastSubmittedCameraCount = m_FrameData.ActiveCameras.size();

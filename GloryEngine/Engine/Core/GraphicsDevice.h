@@ -194,6 +194,8 @@ namespace Glory
 		virtual void DrawMesh(CommandBufferHandle commandBuffer, MeshHandle handle) = 0;
 		virtual void Dispatch(CommandBufferHandle commandBuffer, uint32_t x, uint32_t y, uint32_t z) = 0;
 		virtual void Commit(CommandBufferHandle commandBuffer) = 0;
+		virtual void Wait(CommandBufferHandle commandBuffer) = 0;
+		virtual void Release(CommandBufferHandle commandBuffer) = 0;
 
 	public: /* Resource caching */
 		PipelineHandle AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetHandle>&& descriptorSets,

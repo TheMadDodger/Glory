@@ -98,6 +98,8 @@ namespace Glory
         virtual void DrawMesh(CommandBufferHandle, MeshHandle handle) override;
         virtual void Dispatch(CommandBufferHandle, uint32_t x, uint32_t y, uint32_t z) override;
         virtual void Commit(CommandBufferHandle) override;
+        virtual void Wait(CommandBufferHandle) override;
+        virtual void Release(CommandBufferHandle) override;
 
     private: /* Resource management */
         virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;
