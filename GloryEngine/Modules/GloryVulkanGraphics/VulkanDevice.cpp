@@ -1288,38 +1288,6 @@ namespace Glory
 				.setPName(shader->m_Function.data());
 		}
 
-		/*const size_t numLayouts = pPipeline->UniformBufferCount() + pPipeline->StorageBufferCount();
-		std::vector<vk::DescriptorSetLayoutBinding> layoutBindings(numLayouts);
-		size_t layoutIndex = 0;
-		for (size_t i = 0; i < pPipeline->UniformBufferCount(); ++i)
-		{
-			const ShaderBufferInfo& bufferInfo = pPipeline->UniformBuffer(i);
-			layoutBindings[layoutIndex].binding = BindingIndex(bufferInfo.Name);
-			layoutBindings[layoutIndex].descriptorType = vk::DescriptorType::eUniformBuffer;
-			layoutBindings[layoutIndex].descriptorCount = 1;
-			layoutBindings[layoutIndex].stageFlags = VKConverter::ToShaderStageFlags(bufferInfo.ShaderFlags);
-			++layoutIndex;
-		}
-
-		for (size_t i = 0; i < pPipeline->StorageBufferCount(); ++i)
-		{
-			const ShaderBufferInfo& bufferInfo = pPipeline->StorageBuffer(i);
-			layoutBindings[layoutIndex].binding = BindingIndex(bufferInfo.Name);
-			layoutBindings[layoutIndex].descriptorType = vk::DescriptorType::eStorageBuffer;
-			layoutBindings[layoutIndex].descriptorCount = 1;
-			layoutBindings[layoutIndex].stageFlags = VKConverter::ToShaderStageFlags(bufferInfo.ShaderFlags);
-			++layoutIndex;
-		}
-
-		vk::DescriptorSetLayoutCreateInfo layoutInfo{};
-		layoutInfo.bindingCount = layoutBindings.size();
-		layoutInfo.pBindings = layoutBindings.data();
-
-		if (m_LogicalDevice.createDescriptorSetLayout(&layoutInfo, nullptr, &pipeline.m_VKDescriptorSetLayouts) != vk::Result::eSuccess)
-			throw std::runtime_error("Failed to create descriptor set layout!");*/
-
-		//m_DescriptorAllocator.Allocate(&pipeline.m_VKBuffersDescriptorSet, pipeline.m_VKDescriptorSetLayouts);
-
 		// Vertex input state
 		vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo()
 			.setVertexBindingDescriptionCount(1)
@@ -1532,6 +1500,28 @@ namespace Glory
 		return handle;
 	}
 
+	constexpr size_t ShaderTypeFlagsCount = 6;
+	constexpr vk::ShaderStageFlagBits ShaderTypeFlags[ShaderTypeFlagsCount] = {
+		vk::ShaderStageFlagBits::eVertex,
+		vk::ShaderStageFlagBits::eFragment,
+		vk::ShaderStageFlagBits::eGeometry,
+		vk::ShaderStageFlagBits::eTessellationControl,
+		vk::ShaderStageFlagBits::eTessellationEvaluation,
+		vk::ShaderStageFlagBits::eCompute,
+
+	};
+
+	vk::ShaderStageFlags GetShaderStageFlags(const ShaderTypeFlag& shaderTypeFlags)
+	{
+		vk::ShaderStageFlags result = vk::ShaderStageFlagBits(0);
+		for (size_t i = 0; i < ShaderTypeFlagsCount; ++i)
+		{
+			if (!(shaderTypeFlags & ShaderTypeFlag(1 << i))) continue;
+			result |= ShaderTypeFlags[i];
+		}
+		return result;
+	}
+
 	DescriptorSetLayoutHandle VulkanDevice::CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo)
 	{
 		auto iter = m_CachedDescriptorSetLayouts.find(setLayoutInfo);
@@ -1549,7 +1539,7 @@ namespace Glory
 				layoutBindings[i].binding = bufferInfo.m_BindingIndex;
 				layoutBindings[i].descriptorCount = 1;
 				/** @todo: Pass for which shaders stages the buffer is meant for */
-				layoutBindings[i].stageFlags = vk::FlagTraits<vk::ShaderStageFlagBits>::allFlags;
+				layoutBindings[i].stageFlags = GetShaderStageFlags(bufferInfo.m_ShaderStages);
 				bindingIndices.emplace_back(bufferInfo.m_BindingIndex);
 				descriptorTypes.emplace_back(layoutBindings[i].descriptorType);
 			}
@@ -1561,7 +1551,7 @@ namespace Glory
 				layoutBindings[index].descriptorCount = 1;
 				layoutBindings[index].descriptorType = vk::DescriptorType::eCombinedImageSampler;
 				layoutBindings[index].pImmutableSamplers = nullptr;
-				layoutBindings[index].stageFlags = vk::ShaderStageFlagBits::eAll;
+				layoutBindings[index].stageFlags = GetShaderStageFlags(setLayoutInfo.m_Samplers[i].m_ShaderStages);
 				bindingIndices.emplace_back(layoutBindings[index].binding);
 				descriptorTypes.emplace_back(layoutBindings[index].descriptorType);
 			}
@@ -1584,7 +1574,7 @@ namespace Glory
 			setLayout.m_VKLayout = layout;
 			setLayout.m_PushConstantRange.offset = setLayoutInfo.m_PushConstantRange.m_Offset;
 			setLayout.m_PushConstantRange.size = setLayoutInfo.m_PushConstantRange.m_Size;
-			setLayout.m_PushConstantRange.stageFlags = vk::FlagTraits<vk::ShaderStageFlagBits>::allFlags;
+			setLayout.m_PushConstantRange.stageFlags = GetShaderStageFlags(setLayoutInfo.m_PushConstantRange.m_ShaderStages);
 			setLayout.m_BindingIndices = std::move(bindingIndices);
 			setLayout.m_DescriptorTypes = std::move(descriptorTypes);
 		}

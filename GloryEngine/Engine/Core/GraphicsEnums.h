@@ -498,6 +498,8 @@ namespace Glory
         STF_TessControl = 1 << 3,
         STF_TessEval = 1 << 4,
         STF_Compute = 1 << 5,
+
+        STF_All = STF_Vertex | STF_Fragment | STF_Geomtery | STF_TessControl | STF_TessEval | STF_Compute,
     };
 
     constexpr size_t ShaderTypeToFlagCount = 7;

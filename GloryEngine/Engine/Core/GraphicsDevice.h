@@ -20,17 +20,20 @@ namespace Glory
 	{
 		uint32_t m_Offset = 0;
 		uint32_t m_Size = 0;
+		ShaderTypeFlag m_ShaderStages = ShaderTypeFlag::STF_All;
 	};
 
 	struct BufferDescriptorLayout
 	{
 		BufferType m_Type;
 		uint32_t m_BindingIndex;
+		ShaderTypeFlag m_ShaderStages = ShaderTypeFlag::STF_All;
 	};
 
 	struct SamplerDescritporLayout
 	{
 		uint32_t m_BindingIndex;
+		ShaderTypeFlag m_ShaderStages = ShaderTypeFlag::STF_All;
 	};
 
 	struct DescriptorSetLayoutInfo

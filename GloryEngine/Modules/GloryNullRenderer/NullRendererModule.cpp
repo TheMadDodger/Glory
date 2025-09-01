@@ -97,16 +97,19 @@ namespace Glory
 			setInfo.m_Buffers[0].m_Size = sizeof(RenderConstants);
 			setLayoutInfo.m_Buffers[0].m_BindingIndex = uint32_t(BindingIndices::RenderConstants);
 			setLayoutInfo.m_Buffers[0].m_Type = BufferType::BT_Uniform;
+			setLayoutInfo.m_Buffers[0].m_ShaderStages = ShaderTypeFlag(STF_Vertex | STF_Fragment);
 		}
 		else
 		{
 			setLayoutInfo.m_PushConstantRange.m_Offset = 0;
 			setLayoutInfo.m_PushConstantRange.m_Size = sizeof(RenderConstants);
+			setLayoutInfo.m_PushConstantRange.m_ShaderStages = ShaderTypeFlag(STF_Vertex | STF_Fragment);
 		}
 		const size_t cameraDatasBufferIndex = usePushConstants ? 0 : 1;
 		m_CameraDatasBuffer = setInfo.m_Buffers[cameraDatasBufferIndex].m_BufferHandle = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_CAMERAS, BufferType::BT_Uniform);
 		setLayoutInfo.m_Buffers[cameraDatasBufferIndex].m_BindingIndex = uint32_t(BindingIndices::CameraDatas);
 		setLayoutInfo.m_Buffers[cameraDatasBufferIndex].m_Type = BufferType::BT_Uniform;
+		setLayoutInfo.m_Buffers[cameraDatasBufferIndex].m_ShaderStages = ShaderTypeFlag(STF_Vertex);
 		setInfo.m_Buffers[cameraDatasBufferIndex].m_Offset = 0;
 		setInfo.m_Buffers[cameraDatasBufferIndex].m_Size = sizeof(PerCameraData)*MAX_CAMERAS;
 		//m_LightCameraDatasBuffer = pDevice->CreateBuffer(CameraDatasBufferName, sizeof(PerCameraData)*MAX_LIGHTS, BufferType::BT_Uniform);
@@ -118,8 +121,10 @@ namespace Glory
 		setLayoutInfo.m_Buffers.resize(2);
 		setLayoutInfo.m_Buffers[0].m_BindingIndex = 1;
 		setLayoutInfo.m_Buffers[0].m_Type = BufferType::BT_Storage;
+		setLayoutInfo.m_Buffers[0].m_ShaderStages = STF_Compute;
 		setLayoutInfo.m_Buffers[1].m_BindingIndex = 2;
 		setLayoutInfo.m_Buffers[1].m_Type = BufferType::BT_Storage;
+		setLayoutInfo.m_Buffers[1].m_ShaderStages = STF_Compute;
 		m_ClusterSetLayout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
 
 		setLayoutInfo = DescriptorSetLayoutInfo();
@@ -128,6 +133,7 @@ namespace Glory
 		{
 			setLayoutInfo.m_Buffers[i].m_BindingIndex = i + 1;
 			setLayoutInfo.m_Buffers[i].m_Type = BufferType::BT_Storage;
+			setLayoutInfo.m_Buffers[i].m_ShaderStages = STF_Compute;
 		}
 		m_ClusterCullLightSetLayout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
 
@@ -449,6 +455,7 @@ namespace Glory
 				{
 					texturesSetLayoutInfo.m_SamplerNames[i] = pPipelineData->ResourcePropertyInfo(i)->ShaderName();
 					texturesSetLayoutInfo.m_Samplers[i].m_BindingIndex = i;
+					texturesSetLayoutInfo.m_Samplers[i].m_ShaderStages = STF_Fragment;
 				}
 				batchData.m_TextureSetLayout = pDevice->CreateDescriptorSetLayout(std::move(texturesSetLayoutInfo));
 				batchData.m_TextureSets.resize(pipelineBatch.m_UniqueMaterials.size(), 0ull);
@@ -528,12 +535,14 @@ namespace Glory
 				setLayoutInfo.m_Buffers.resize(2 + (textureCount > 0 ? 1 : 0));
 				setLayoutInfo.m_Buffers[0].m_BindingIndex = uint32_t(BindingIndices::WorldTransforms);
 				setLayoutInfo.m_Buffers[0].m_Type = BT_Storage;
+				setLayoutInfo.m_Buffers[0].m_ShaderStages = STF_Vertex;
 				setInfo.m_Buffers[0].m_BufferHandle = batchData.m_WorldsBuffer;
 				setInfo.m_Buffers[0].m_Offset = 0;
 				setInfo.m_Buffers[0].m_Size = batchData.m_Worlds->size()*sizeof(glm::mat4);
 
 				setLayoutInfo.m_Buffers[1].m_BindingIndex = uint32_t(BindingIndices::Materials);
 				setLayoutInfo.m_Buffers[1].m_Type = BT_Storage;
+				setLayoutInfo.m_Buffers[1].m_ShaderStages = STF_Fragment;
 				setInfo.m_Buffers[1].m_BufferHandle = batchData.m_MaterialsBuffer;
 				setInfo.m_Buffers[1].m_Offset = 0;
 				setInfo.m_Buffers[1].m_Size = batchData.m_MaterialDatas->size();
@@ -541,6 +550,7 @@ namespace Glory
 				{
 					setLayoutInfo.m_Buffers[2].m_BindingIndex = uint32_t(BindingIndices::HasTexture);
 					setLayoutInfo.m_Buffers[2].m_Type = BT_Storage;
+					setLayoutInfo.m_Buffers[2].m_ShaderStages = STF_Fragment;
 					setInfo.m_Buffers[2].m_BufferHandle = batchData.m_TextureBitsBuffer;
 					setInfo.m_Buffers[2].m_Offset = 0;
 					setInfo.m_Buffers[2].m_Size = batchData.m_TextureBits->size()*sizeof(uint32_t);
