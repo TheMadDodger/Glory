@@ -14,7 +14,7 @@ namespace Glory
 		m_VertexCount(0), m_IndexCount(0), m_Vertices(), m_Indices(),
 		m_Attributes(std::move(attributes)), m_VertexSize(vertexSize), m_IsDirty(true)
 	{
-		m_Vertices.reserve(reservedVertexCount*vertexSize);
+		m_Vertices.reserve(reservedVertexCount*vertexSize/sizeof(float));
 		m_Indices.reserve(reservedVertexCount);
 		APPEND_TYPE(MeshData);
 	}
@@ -27,19 +27,19 @@ namespace Glory
 	}
 
 	MeshData::MeshData(uint32_t vertexCount, uint32_t vertexSize, const float* vertices, uint32_t indexCount, const uint32_t* indices, const std::vector<AttributeType>& attributes) :
-		m_VertexCount(vertexCount), m_IndexCount(indexCount), m_Vertices(std::vector<float>(vertexCount)),
+		m_VertexCount(vertexCount), m_IndexCount(indexCount), m_Vertices(std::vector<float>(vertexCount*vertexSize/sizeof(float))),
 		m_Indices(std::vector<uint32_t>(indexCount)), m_Attributes(attributes), m_VertexSize(vertexSize), m_IsDirty(true)
 	{
-		memcpy(&m_Vertices[0], vertices, sizeof(float) * vertexCount);
-		memcpy(&m_Indices[0], indices, sizeof(uint32_t) * indexCount);
+		memcpy(&m_Vertices[0], vertices, vertexCount*vertexSize);
+		memcpy(&m_Indices[0], indices, sizeof(uint32_t)*indexCount);
 		APPEND_TYPE(MeshData);
 	}
 
 	MeshData::MeshData(uint32_t vertexCount, uint32_t vertexSize, const float* vertices, const std::vector<AttributeType>& attributes) :
-		m_VertexCount(vertexCount), m_IndexCount(0), m_Vertices(std::vector<float>(vertexCount)),
+		m_VertexCount(vertexCount), m_IndexCount(0), m_Vertices(std::vector<float>(vertexCount*vertexSize/sizeof(float))),
 		m_Indices(), m_Attributes(attributes), m_VertexSize(vertexSize), m_IsDirty(true)
 	{
-		memcpy(&m_Vertices[0], vertices, sizeof(float) * vertexCount);
+		memcpy(&m_Vertices[0], vertices, vertexCount*vertexSize);
 		APPEND_TYPE(MeshData);
 	}
 
@@ -93,6 +93,11 @@ namespace Glory
 	const AttributeType* MeshData::AttributeTypes() const
 	{
 		return m_Attributes.data();
+	}
+
+	const std::vector<AttributeType>& MeshData::AttributeTypesVector() const
+	{
+		return m_Attributes;
 	}
 
 	void MeshData::Serialize(BinaryStream& container) const

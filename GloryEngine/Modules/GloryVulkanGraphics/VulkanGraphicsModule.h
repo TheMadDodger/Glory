@@ -31,15 +31,6 @@ namespace Glory
 		alignas(16) glm::mat4 proj;
 	};
 
-	struct SamplerSettingsComparer
-	{
-	public:
-		bool operator()(const SamplerSettings& a, const SamplerSettings& b) const
-		{
-			return std::memcmp(&a, &b, sizeof(SamplerSettings) == 0);
-		}
-	};
-
 	class VulkanGraphicsModule : public GraphicsModule
 	{
 	public:
