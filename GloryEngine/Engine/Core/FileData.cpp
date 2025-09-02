@@ -36,12 +36,12 @@ namespace Glory
 		m_Data.clear();
 	}
 
-	size_t FileData::Size()
+	size_t FileData::Size() const
 	{
 		return m_Data.size();
 	}
 
-	const char* FileData::Data()
+	const char* FileData::Data() const
 	{
 		return m_Data.data();
 	}
