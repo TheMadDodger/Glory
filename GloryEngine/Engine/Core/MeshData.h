@@ -24,6 +24,7 @@ namespace Glory
 		uint32_t* Indices();
 		const uint32_t* Indices() const;
 		const AttributeType* AttributeTypes() const;
+		const std::vector<AttributeType>& AttributeTypesVector() const;
 
 		void Serialize(BinaryStream& container) const override;
 		void Deserialize(BinaryStream& container) override;

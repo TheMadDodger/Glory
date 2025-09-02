@@ -10,20 +10,6 @@ namespace Glory
 	class Buffer;
 	class CubemapData;
 
-	struct TextureCreateInfo
-	{
-		uint32_t m_Width;
-		uint32_t m_Height;
-		PixelFormat m_PixelFormat;
-		PixelFormat m_InternalFormat;
-		ImageType m_ImageType;
-		DataType m_Type;
-		uint32_t m_UsageFlags;
-		uint32_t m_SharingMode;
-		ImageAspect m_ImageAspectFlags;
-		SamplerSettings m_SamplerSettings = SamplerSettings();
-	};
-
 	class Texture : public GPUResource
 	{
 	public:

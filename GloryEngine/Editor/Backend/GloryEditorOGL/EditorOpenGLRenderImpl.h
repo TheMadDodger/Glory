@@ -19,6 +19,7 @@ namespace Glory::Editor
 
     private:
         virtual std::string ShadingLanguage() override;
+        virtual bool PushConstantsSupported() override { return false; }
         virtual void CompileShaderForEditor(const EditorShaderData& editorShader, std::vector<char>& out) override;
 
         virtual void SetContext(ImGuiContext* pImguiConext) override;

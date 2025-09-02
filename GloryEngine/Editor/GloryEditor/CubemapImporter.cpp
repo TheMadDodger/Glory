@@ -54,7 +54,6 @@ namespace Glory::Editor
 		samplerSettings.AddressModeU = sampler["AddressModeU"].AsEnum<SamplerAddressMode>(DefaultSampler.AddressModeU);
 		samplerSettings.AddressModeV = sampler["AddressModeV"].AsEnum<SamplerAddressMode>(DefaultSampler.AddressModeV);
 		samplerSettings.AddressModeW = sampler["AddressModeW"].AsEnum<SamplerAddressMode>(DefaultSampler.AddressModeW);
-		samplerSettings.AnisotropyEnable = sampler["AnisotropyEnable"].As<bool>(DefaultSampler.AnisotropyEnable);
 		samplerSettings.MaxAnisotropy = sampler["MaxAnisotropy"].As<float>(DefaultSampler.MaxAnisotropy);
 		samplerSettings.UnnormalizedCoordinates = sampler["UnnormalizedCoordinates"].As<bool>(DefaultSampler.UnnormalizedCoordinates);
 		samplerSettings.CompareEnable = sampler["CompareEnable"].As<bool>(DefaultSampler.CompareEnable);
@@ -102,7 +101,6 @@ namespace Glory::Editor
 		sampler["AddressModeU"].SetEnum<SamplerAddressMode>(samplerSettings.AddressModeU);
 		sampler["AddressModeV"].SetEnum<SamplerAddressMode>(samplerSettings.AddressModeV);
 		sampler["AddressModeW"].SetEnum<SamplerAddressMode>(samplerSettings.AddressModeW);
-		sampler["AnisotropyEnable"].Set(samplerSettings.AnisotropyEnable);
 		sampler["MaxAnisotropy"].Set(samplerSettings.MaxAnisotropy);
 		sampler["UnnormalizedCoordinates"].Set(samplerSettings.UnnormalizedCoordinates);
 		sampler["CompareEnable"].Set(samplerSettings.CompareEnable);

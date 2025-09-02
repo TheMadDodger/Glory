@@ -64,8 +64,8 @@ namespace Glory
         { { 3840, 1080 }, { 5120, 1440 }, { 7680, 2160 } }
     };
 
-	enum class PixelFormat
-	{
+    enum class PixelFormat
+    {
         PF_Undefined,
 
         // Basic format
@@ -177,7 +177,7 @@ namespace Glory
         PF_R16G16B16Sint,
         PF_R16G16B16Sfloat,
         PF_R16G16B16A16Unorm,
-        PF_R16G16B16A16Snorm ,
+        PF_R16G16B16A16Snorm,
         PF_R16G16B16A16Uscaled,
         PF_R16G16B16A16Sscaled,
         PF_R16G16B16A16Uint,
@@ -367,63 +367,113 @@ namespace Glory
         PF_R12X4G12X4B12X4A12X4Unorm4Pack16KHR,
         PF_R12X4G12X4Unorm2Pack16KHR,
         PF_R12X4UnormPack16KHR,
-	};
+    };
 
-	enum class ImageType
-	{
-		IT_UNDEFINED,
-		IT_1D,
-		IT_2D,
-		IT_3D,
-		IT_Cube,
-		IT_1DArray,
-		IT_2DArray,
-		IT_CubeArray,
+    enum class ImageType
+    {
+        IT_UNDEFINED,
+        IT_1D,
+        IT_2D,
+        IT_3D,
+        IT_Cube,
+        IT_1DArray,
+        IT_2DArray,
+        IT_CubeArray,
         IT_Count
-	};
+    };
 
-	enum ImageAspect : int
-	{
-		IA_Color			= 0x00000001,
-		IA_Depth			= 0x00000002,
-		IA_Stencil			= 0x00000004,
-		IA_Metadata			= 0x00000008,
-		IA_Plane0			= 0x00000010,
-		IA_Plane1			= 0x00000020,
-		IA_Plane2			= 0x00000040,
-		IA_MemoryPlane0EXT	= 0x00000080,
-		IA_MemoryPlane1EXT	= 0x00000100,
-		IA_MemoryPlane2EXT	= 0x00000200,
-		IA_MemoryPlane3EXT	= 0x00000400,
-		IA_Plane0KHR		= 0x00000800,
-		IA_Plane1KHR		= 0x00001000,
-		IA_Plane2KHR		= 0x00002000,
-	};
+    enum ImageAspect : int
+    {
+        IA_Color = 0x00000001,
+        IA_Depth = 0x00000002,
+        IA_Stencil = 0x00000004,
+        IA_Metadata = 0x00000008,
+        IA_Plane0 = 0x00000010,
+        IA_Plane1 = 0x00000020,
+        IA_Plane2 = 0x00000040,
+        IA_MemoryPlane0EXT = 0x00000080,
+        IA_MemoryPlane1EXT = 0x00000100,
+        IA_MemoryPlane2EXT = 0x00000200,
+        IA_MemoryPlane3EXT = 0x00000400,
+        IA_Plane0KHR = 0x00000800,
+        IA_Plane1KHR = 0x00001000,
+        IA_Plane2KHR = 0x00002000,
+    };
 
-	struct SamplerSettings
-	{
+    struct SamplerSettings
+    {
         constexpr SamplerSettings() : MagFilter(Filter::F_Linear), MinFilter(Filter::F_Linear),
             AddressModeU(SamplerAddressMode::SAM_Repeat), AddressModeV(SamplerAddressMode::SAM_Repeat),
-            AddressModeW(SamplerAddressMode::SAM_Repeat), AnisotropyEnable(false), MaxAnisotropy(1.f),
+            AddressModeW(SamplerAddressMode::SAM_Repeat), MaxAnisotropy(16.f),
             UnnormalizedCoordinates(false), CompareEnable(false), CompareOp(CompareOp::OP_Never),
-            MipmapMode(Filter::F_Linear), MipLODBias(0.0f), MinLOD(0.f), MaxLOD(0.f)
+            MipmapMode(Filter::F_Linear), MipLODBias(0.0f), MinLOD(0.f), MaxLOD(1000.0F)
         {};
 
-		Filter MagFilter;
-		Filter MinFilter;
-		SamplerAddressMode AddressModeU;
-		SamplerAddressMode AddressModeV;
-		SamplerAddressMode AddressModeW;
-		bool AnisotropyEnable;
-		float MaxAnisotropy;
-		bool UnnormalizedCoordinates;
-		bool CompareEnable;
-		CompareOp CompareOp;
-		Filter MipmapMode;
-		float MipLODBias;
-		float MinLOD;
-		float MaxLOD;
-	};
+        bool operator==(const SamplerSettings& other) const
+        {
+            return std::memcmp(this, &other, sizeof(SamplerSettings) == 0);
+        }
+
+        Filter MagFilter;
+        Filter MinFilter;
+        SamplerAddressMode AddressModeU;
+        SamplerAddressMode AddressModeV;
+        SamplerAddressMode AddressModeW;
+        float MaxAnisotropy;
+        bool UnnormalizedCoordinates;
+        bool CompareEnable;
+        CompareOp CompareOp;
+        Filter MipmapMode;
+        float MipLODBias;
+        float MinLOD;
+        float MaxLOD;
+    };
+}
+
+namespace std
+{
+    template <class T>
+    inline void CombineHash(size_t& hash, const T& v)
+    {
+        std::hash<T> h;
+        hash ^= h(v) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+    }
+
+    template<>
+    struct hash<Glory::SamplerSettings>
+    {
+    public:
+        size_t operator()(const Glory::SamplerSettings& settings) const noexcept
+        {
+            size_t hash = 0;
+            CombineHash(hash, settings.MagFilter);
+            CombineHash(hash, settings.MinFilter);
+            CombineHash(hash, settings.AddressModeU);
+            CombineHash(hash, settings.AddressModeV);
+            CombineHash(hash, settings.AddressModeW);
+            CombineHash(hash, settings.MaxAnisotropy);
+            CombineHash(hash, settings.UnnormalizedCoordinates);
+            CombineHash(hash, settings.CompareEnable);
+            CombineHash(hash, settings.CompareOp);
+            CombineHash(hash, settings.MipmapMode);
+            CombineHash(hash, settings.MipLODBias);
+            CombineHash(hash, settings.MinLOD);
+            CombineHash(hash, settings.MaxLOD);
+            return hash;
+        }
+    };
+}
+
+namespace Glory
+{
+    struct SamplerSettingsComparer
+    {
+    public:
+        bool operator()(const SamplerSettings& a, const SamplerSettings& b) const
+        {
+            return std::memcmp(&a, &b, sizeof(SamplerSettings) == 0);
+        }
+    };
 
     static constexpr SamplerSettings DefaultSampler = SamplerSettings();
 
@@ -448,6 +498,8 @@ namespace Glory
         STF_TessControl = 1 << 3,
         STF_TessEval = 1 << 4,
         STF_Compute = 1 << 5,
+
+        STF_All = STF_Vertex | STF_Fragment | STF_Geomtery | STF_TessControl | STF_TessEval | STF_Compute,
     };
 
     constexpr size_t ShaderTypeToFlagCount = 7;
@@ -875,6 +927,49 @@ namespace Glory
     {
         uint64_t PipelineID;
         ShaderType Type;
+    };
+
+    struct TextureCreateInfo
+    {
+        uint32_t m_Width;
+        uint32_t m_Height;
+        PixelFormat m_PixelFormat;
+        PixelFormat m_InternalFormat;
+        ImageType m_ImageType;
+        DataType m_Type;
+        uint32_t m_UsageFlags;
+        uint32_t m_SharingMode;
+        ImageAspect m_ImageAspectFlags;
+        SamplerSettings m_SamplerSettings = SamplerSettings();
+    };
+
+    struct Attachment
+    {
+        Attachment(const std::string& name, const PixelFormat& pixelFormat, const PixelFormat& internalFormat,
+            const ImageType& imageType, const ImageAspect& imageAspect, DataType type = DataType::DT_UByte, bool autoBind = true);
+        Attachment(const std::string& name, const TextureCreateInfo& textureInfo, bool autoBind = true);
+
+        //PixelFormat::PF_R8G8B8A8Srgb
+        std::string Name;
+        PixelFormat InternalFormat;
+        PixelFormat Format;
+        ImageType ImageType;
+        ImageAspect ImageAspect;
+        DataType m_Type;
+        bool m_AutoBind;
+    };
+
+    struct RenderTextureCreateInfo
+    {
+    public:
+        RenderTextureCreateInfo();
+        RenderTextureCreateInfo(uint32_t width, uint32_t height, bool hasDepth, bool hasStencil = false);
+
+        uint32_t Width;
+        uint32_t Height;
+        bool HasDepth;
+        bool HasStencil;
+        std::vector<Attachment> Attachments;
     };
 
     struct ShaderBufferInfo
