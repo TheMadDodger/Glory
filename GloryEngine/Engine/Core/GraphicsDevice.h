@@ -2,6 +2,7 @@
 #include "VertexDefinitions.h"
 #include "GraphicsEnums.h"
 #include "GraphicsFeatures.h"
+#include "GraphicsHandles.h"
 #include "UUID.h"
 
 namespace Glory
@@ -61,9 +62,11 @@ namespace Glory
 
 namespace std
 {
+	/** @brief Hash generator for DescriptorSetLayoutInfo */
 	template <>
 	struct hash<Glory::DescriptorSetLayoutInfo>
 	{
+		/** @brief Hash function */
 		size_t operator()(const Glory::DescriptorSetLayoutInfo& info) const noexcept
 		{
 			size_t hash = 0;
@@ -102,17 +105,6 @@ namespace Glory
 	class TextureAtlas;
 	class PipelineData;
 
-	typedef struct UUID BufferHandle;
-	typedef struct UUID MeshHandle;
-	typedef struct UUID TextureHandle;
-	typedef struct UUID RenderTextureHandle;
-	typedef struct UUID RenderPassHandle;
-	typedef struct UUID ShaderHandle;
-	typedef struct UUID PipelineHandle;
-	typedef struct UUID DescriptorSetLayoutHandle;
-	typedef struct UUID DescriptorSetHandle;
-	typedef struct UUID CommandBufferHandle;
-
 	/**
 	 * @brief Container for graphics resources
 	 * @param T Type of the resource
@@ -124,7 +116,6 @@ namespace Glory
 		/** @brief Clear this container */
 		void Clear()
 		{
-			m_IDs.clear();
 			m_Resources.clear();
 		}
 
@@ -135,16 +126,14 @@ namespace Glory
 		 */
 		T& Emplace(UUID id, T&& resource)
 		{
-			m_IDs.emplace_back(id);
-			return m_Resources.emplace_back(std::move(resource));
+			return m_Resources.emplace(id, std::move(resource)).first->second;
 		}
 
 		/** @overload */
 		template <class... _Valty>
 		T& Emplace(UUID id, _Valty&&... _Val)
 		{
-			m_IDs.emplace_back(id);
-			return m_Resources.emplace_back(forward<_Valty>(_Val)...);
+			return m_Resources.emplace(id, forward<_Valty>(_Val)...).first->second;
 		}
 
 		/**
@@ -154,28 +143,22 @@ namespace Glory
 		 */
 		T* Find(UUID id)
 		{
-			auto iter = std::find(m_IDs.begin(), m_IDs.end(), id);
-			if (iter == m_IDs.end()) return nullptr;
-			const size_t index = iter - m_IDs.begin();
-			return &m_Resources[index];
+			auto& iter = m_Resources.find(id);
+			if (iter == m_Resources.end()) return nullptr;
+			return &iter->second;
 		}
 
 		/**
-		 * @brief Remove a resource in this container
+		 * @brief Remove a resource from this container
 		 * @param id ID of the resource to remove
 		 */
 		void Erase(UUID id)
 		{
-			auto iter = std::find(m_IDs.begin(), m_IDs.end(), id);
-			if (iter == m_IDs.end()) return;
-			const size_t index = iter - m_IDs.begin();
-			m_IDs.erase(iter);
-			m_Resources.erase(m_Resources.begin() + index);
+			m_Resources.erase(id);
 		}
 
 	private:
-		std::vector<UUID> m_IDs;
-		std::vector<T> m_Resources;
+		std::unordered_map<UUID, T> m_Resources;
 	};
 
 	/** @brief Render pass info */
@@ -317,8 +300,8 @@ namespace Glory
 		 * @param stride Size of a vertex
 		 * @param attributeTypes Attribute types
 		 */
-		PipelineHandle AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetHandle>&& descriptorSets,
-			size_t stride, const std::vector<AttributeType>& attributeTypes);
+		PipelineHandle AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
+			std::vector<DescriptorSetLayoutHandle>&& descriptorSets, size_t stride, const std::vector<AttributeType>& attributeTypes);
 		/**
 		 * @brief Acquire a cached mesh or create a new one
 		 * @param pMesh The mesh data to create a mesh from
@@ -457,7 +440,7 @@ namespace Glory
 		/** @brief Free a mesh from device memory, this also frees any buffers the mesh owns */
 		virtual void FreeMesh(MeshHandle& handle) = 0;
 		/** @brief Free a texture from device memory */
-		virtual void FreeTexture(MeshHandle& handle) = 0;
+		virtual void FreeTexture(TextureHandle& handle) = 0;
 		/** @brief Free a render texture from device memory */
 		virtual void FreeRenderTexture(RenderTextureHandle& handle) = 0;
 		/** @brief Free a render pass from device memory */

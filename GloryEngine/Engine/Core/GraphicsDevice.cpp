@@ -40,7 +40,7 @@ namespace Glory
 	}
 
 	PipelineHandle GraphicsDevice::AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
-		std::vector<DescriptorSetHandle>&& descriptorSets, size_t stride, const std::vector<AttributeType>& attributeTypes)
+		std::vector<DescriptorSetLayoutHandle>&& descriptorSets, size_t stride, const std::vector<AttributeType>& attributeTypes)
 	{
 		auto iter = m_PipelineHandles.find(pPipeline->GetGPUUUID());
 		if (iter == m_PipelineHandles.end())
