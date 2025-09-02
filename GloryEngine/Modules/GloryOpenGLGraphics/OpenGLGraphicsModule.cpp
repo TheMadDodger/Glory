@@ -21,7 +21,7 @@ namespace Glory
 	Engine* EngineInstance;
 
 	OpenGLGraphicsModule::OpenGLGraphicsModule()
-		: m_ScreenQuadVertexArrayID(0), m_ScreenQuadVertexbufferID(0)
+		: m_ScreenQuadVertexArrayID(0), m_ScreenQuadVertexbufferID(0), m_Device(this)
 	{
 	}
 
@@ -37,6 +37,8 @@ namespace Glory
 	void OpenGLGraphicsModule::OnInitialize()
 	{
 		EngineInstance = m_pEngine;
+
+		m_pEngine->AddGraphicsDevice(&m_Device);
 
 		Window* pMainWindow = GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
 		pMainWindow->SetupForOpenGL();

@@ -13,6 +13,7 @@ namespace Glory
 
 		void SetDirty(bool dirty);
 		bool IsDirty() const;
+		UUID ID() const;
 
 	protected:
 		GPUResourceManager* m_pOwner = nullptr;
