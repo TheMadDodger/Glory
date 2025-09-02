@@ -121,40 +121,40 @@ namespace Glory
 
 		/**
 		 * @brief Add a resource to this container
-		 * @param id ID of the resource
+		 * @param handle Unique resource handle
 		 * @param resource Resource to add
 		 */
-		T& Emplace(UUID id, T&& resource)
+		T& Emplace(GraphicsHandle<T::HandleType> handle, T&& resource)
 		{
-			return m_Resources.emplace(id, std::move(resource)).first->second;
+			return m_Resources.emplace(handle.m_ID, std::move(resource)).first->second;
 		}
 
 		/** @overload */
 		template <class... _Valty>
-		T& Emplace(UUID id, _Valty&&... _Val)
+		T& Emplace(GraphicsHandle<T::HandleType> handle, _Valty&&... _Val)
 		{
-			return m_Resources.emplace(id, forward<_Valty>(_Val)...).first->second;
+			return m_Resources.emplace(handle.m_ID, forward<_Valty>(_Val)...).first->second;
 		}
 
 		/**
 		 * @brief Find a resource in this container
-		 * @param id ID of the resource to find
+		 * @param handle Unique resource handle to find
 		 * @returns A pointer to the resource or nullptr if not found
 		 */
-		T* Find(UUID id)
+		T* Find(GraphicsHandle<T::HandleType> handle)
 		{
-			auto& iter = m_Resources.find(id);
+			auto& iter = m_Resources.find(handle.m_ID);
 			if (iter == m_Resources.end()) return nullptr;
 			return &iter->second;
 		}
 
 		/**
 		 * @brief Remove a resource from this container
-		 * @param id ID of the resource to remove
+		 * @param @param handle Unique resource handle to remove
 		 */
-		void Erase(UUID id)
+		void Erase(GraphicsHandle<T::HandleType> handle)
 		{
-			m_Resources.erase(id);
+			m_Resources.erase(handle.m_ID);
 		}
 
 	private:
@@ -410,8 +410,9 @@ namespace Glory
 		 * @param stride Size of the vertex type used by this pipeline
 		 * @param attributeTypes Attribute types of the vertex type used by this pipeline
 		 */
-		virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts,
-			size_t stride, const std::vector<AttributeType>& attributeTypes) = 0;
+		virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
+			std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride,
+			const std::vector<AttributeType>& attributeTypes) = 0;
 
 		/**
 		 * @brief Create a compute pipeline on this device
@@ -463,7 +464,5 @@ namespace Glory
 		std::map<UUID, PipelineHandle> m_PipelineHandles;
 		std::map<UUID, MeshHandle> m_MeshHandles;
 		std::map<UUID, TextureHandle> m_TextureHandles;
-
-		std::map<std::string, uint32_t> m_BindingIndices;
 	};
 }
