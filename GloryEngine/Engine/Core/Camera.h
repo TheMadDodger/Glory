@@ -49,6 +49,8 @@ namespace Glory
 			return true;
 		}
 
+		uint64_t& GetUserHandle(const std::string& name);
+
 		float GetNear() const;
 		float GetFar() const;
 		UUID GetUUID() const;
@@ -82,6 +84,7 @@ namespace Glory
 		bool m_PerspectiveDirty;
 
 		std::unordered_map<std::string, void*> m_UserDatas;
+		std::unordered_map<std::string, uint64_t> m_UserHandles;
 
 		UUID m_UUID;
 	};
