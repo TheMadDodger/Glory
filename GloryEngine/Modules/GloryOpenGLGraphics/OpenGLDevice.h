@@ -1,5 +1,6 @@
 #pragma once
 #include <GraphicsDevice.h>
+#include <Glory.h>
 
 namespace Glory
 {
@@ -103,6 +104,8 @@ namespace Glory
 
         OpenGLGraphicsModule* GraphicsModule();
 
+        GLORY_API uint32_t GetGLTextureID(TextureHandle texture);
+
     private: /* Render commands */
         virtual CommandBufferHandle Begin() override;
         virtual void BeginRenderPass(CommandBufferHandle, RenderPassHandle renderPass) override;
@@ -133,7 +136,9 @@ namespace Glory
         virtual TextureHandle CreateTexture(TextureData* pTexture) override;
         virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) override;
         virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info) override;
+        virtual TextureHandle GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index) override;
         virtual RenderPassHandle CreateRenderPass(const RenderPassInfo& info) override;
+        virtual RenderTextureHandle GetRenderPassRenderTexture(RenderPassHandle renderPass) override;
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
         virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&&,
             size_t, const std::vector<AttributeType>&) override;

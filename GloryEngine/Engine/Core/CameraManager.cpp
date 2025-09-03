@@ -64,10 +64,6 @@ namespace Glory
 		}
 
 		if (!createIfNotExist) return nullptr;
-
-		uint32_t width = pCamera->m_Resolution.x;
-		uint32_t height = pCamera->m_Resolution.y;
-		pEngine->GetMainModule<RendererModule>()->CreateCameraRenderTextures(width, height, pCamera->m_pRenderTextures);
 		pCamera->m_TextureIsDirty = false;
 		return pCamera->m_pRenderTextures[index];
 	}

@@ -40,7 +40,6 @@ namespace Glory
 		NullRendererModule();
 		virtual ~NullRendererModule();
 
-		virtual void GetCameraRenderTextureInfos(std::vector<RenderTextureCreateInfo>& infos) override;
 		virtual void OnCameraResize(CameraRef camera) override;
 		virtual void OnCameraPerspectiveChanged(CameraRef camera) override;
 		virtual MaterialData* GetInternalMaterial(std::string_view name) const override;
@@ -56,14 +55,11 @@ namespace Glory
 		virtual void Initialize() override;
 		virtual void OnPostInitialize() override;
 		virtual void Update() override;
+		virtual void Draw() override;
 
-		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) override;
-		virtual void OnDoCompositing(CameraRef camera, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) override;
-		virtual void OnDisplayCopy(RenderTexture* pRenderTexture, uint32_t width, uint32_t height) override;
-		virtual void OnRenderSkybox(CameraRef camera, CubemapData* pCubemap) override;
-
-		virtual void OnStartCameraRender(CameraRef camera, const FrameData<LightData>& lights) override;
-		virtual void OnEndCameraRender(CameraRef camera, const FrameData<LightData>& lights) override;
+		virtual size_t CameraAttachmentPreviewCount() const override;
+		virtual std::string_view CameraAttachmentPreviewName(size_t index) const override;
+		virtual TextureHandle CameraAttachmentPreview(CameraRef camera, size_t index) const override;
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
 	};

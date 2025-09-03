@@ -313,7 +313,7 @@ namespace Glory
 		 */
 		TextureHandle AcquireCachedTexture(TextureData* pTexture);
 
-	public: /* Resource mamagement */
+	public: /* Resource management */
 		
 		/* Buffer */
 
@@ -382,6 +382,8 @@ namespace Glory
 		 */
 		virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info) = 0;
 
+		virtual TextureHandle GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index) = 0;
+
 		/* Render pass */
 		
 		/**
@@ -389,6 +391,8 @@ namespace Glory
 		 * @param info Render pass creation info
 		 */
 		virtual RenderPassHandle CreateRenderPass(const RenderPassInfo& info) = 0;
+
+		virtual RenderTextureHandle GetRenderPassRenderTexture(RenderPassHandle renderPass) = 0;
 
 		/* Shader */
 

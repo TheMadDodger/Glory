@@ -37,6 +37,19 @@ namespace Glory::Editor
 		return (void*)iter->second;
 	}
 
+	void* EditorVulkanRenderImpl::GetTextureID(TextureHandle texture)
+	{
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		m_pDevice = static_cast<VulkanDevice*>(pEngine->ActiveGraphicsDevice());
+		auto iter = m_DesciptorSets.find(texture);
+		if (iter == m_DesciptorSets.end())
+		{
+			vk::DescriptorSet ds = ImGui_ImplVulkan_AddTexture(m_pDevice->GetVKSampler(texture), m_pDevice->GetVKImageView(texture), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			iter = m_DesciptorSets.emplace(texture, ds).first;
+		}
+		return (void*)iter->second;
+	}
+
 	std::string EditorVulkanRenderImpl::ShadingLanguage()
 	{
 		return "spv";

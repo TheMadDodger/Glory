@@ -136,6 +136,9 @@ namespace Glory
         GLORY_API vk::CommandPool GetGraphicsCommandPool();
         GLORY_API vk::CommandPool GetGraphicsCommandPool(vk::CommandPoolCreateFlags flags);
 
+        GLORY_API vk::ImageView GetVKImageView(TextureHandle texture);
+        GLORY_API vk::Sampler GetVKSampler(TextureHandle texture);
+
     private: /* Render commands */
         virtual CommandBufferHandle Begin() override;
         virtual void BeginRenderPass(CommandBufferHandle commandBuffer, RenderPassHandle renderPass) override;
@@ -166,7 +169,9 @@ namespace Glory
         virtual TextureHandle CreateTexture(TextureData* pTexture) override;
         virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) override;
         virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info) override;
+        virtual TextureHandle GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index) override;
         virtual RenderPassHandle CreateRenderPass(const RenderPassInfo& info) override;
+        virtual RenderTextureHandle GetRenderPassRenderTexture(RenderPassHandle renderPass) override;
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
         virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
             std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride, const std::vector<AttributeType>& attributeTypes) override;

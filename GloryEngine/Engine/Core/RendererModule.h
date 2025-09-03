@@ -2,12 +2,11 @@
 #include "Module.h"
 #include "RenderFrame.h"
 #include "CameraRef.h"
-#include "LightData.h"
 #include "VertexHelpers.h"
 #include "ShapeProperty.h"
 #include "SceneObjectRef.h"
+#include "GraphicsHandles.h"
 
-#include <functional>
 #include <vector>
 #include <string_view>
 
@@ -122,8 +121,6 @@ namespace Glory
 
 		virtual void OnBeginFrame() override;
 
-		virtual void CreateCameraRenderTextures(uint32_t width, uint32_t height, std::vector<RenderTexture*>& renderTextures);
-		virtual void GetCameraRenderTextureInfos(std::vector<RenderTextureCreateInfo>& infos);
 		virtual void OnCameraResize(CameraRef camera);
 		virtual void OnCameraPerspectiveChanged(CameraRef camera);
 		virtual MaterialData* GetInternalMaterial(std::string_view name) const = 0;
@@ -153,9 +150,6 @@ namespace Glory
 
 		void OnWindowResize(glm::uvec2 size);
 
-		void AddRenderPass(RenderPassType type, RenderPass&& pass);
-		void RemoveRenderPass(RenderPassType type, std::string_view name);
-
 		void RenderOnBackBuffer(RenderTexture* pTexture);
 
 		GPUTextureAtlas* CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, bool depth=false);
@@ -166,6 +160,10 @@ namespace Glory
 
 		CameraRef GetActiveCamera(uint32_t cameraIndex) const;
 
+		virtual size_t CameraAttachmentPreviewCount() const = 0;
+		virtual std::string_view CameraAttachmentPreviewName(size_t index) const = 0;
+		virtual TextureHandle CameraAttachmentPreview(CameraRef camera, size_t index) const = 0;
+
 	protected:
 		virtual void OnSubmitDynamic(const RenderData& renderData) {}
 		virtual void OnSubmit(CameraRef camera) {}
@@ -175,30 +173,14 @@ namespace Glory
 		virtual void Initialize() override;
 		virtual void PostInitialize() override;
 		virtual void Cleanup() = 0;
-		virtual void OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture) = 0;
-		virtual void OnRenderSkybox(CameraRef camera, CubemapData* pCubemap) = 0;
-		virtual void OnDoCompositing(CameraRef camera, uint32_t width, uint32_t height, RenderTexture* pRenderTexture) = 0;
-		virtual void OnDisplayCopy(RenderTexture* pRenderTexture, uint32_t width, uint32_t height) = 0;
 
 		virtual void OnPostInitialize() {};
-
-		virtual void OnStartCameraRender(CameraRef camera, const FrameData<LightData>& lights) = 0;
-		virtual void OnEndCameraRender(CameraRef camera, const FrameData<LightData>& lights) = 0;
-
-		virtual void Draw() override;
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
 
 	protected:
 		static const uint32_t MAX_LIGHTS = 3000;
 		static const uint32_t MAX_CAMERAS = 100;
-
-	private:
-		// Run on Graphics Thread
-		void Render();
-		void DoPicking(const glm::ivec2& pos, CameraRef camera);
-		void CreateLineBuffer();
-		void RenderLines(CameraRef camera);
 
 	protected:
 		RenderFrame m_FrameData;
@@ -220,13 +202,13 @@ namespace Glory
 
 		std::atomic_bool m_DisplaysDirty;
 
-		std::vector<std::vector<RenderPass>> m_RenderPasses;
-
 		std::vector<GPUTextureAtlas> m_GPUTextureAtlases;
 
 		std::vector<RenderData> m_ToProcessStaticRenderData;
 		std::vector<PipelineBatch> m_StaticPipelineRenderDatas;
 		std::vector<PipelineBatch> m_DynamicPipelineRenderDatas;
 		std::vector<PipelineBatch> m_DynamicLatePipelineRenderDatas;
+
+		CommandBufferHandle m_CommandBuffer;
 	};
 }

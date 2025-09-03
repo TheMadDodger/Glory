@@ -356,6 +356,17 @@ namespace Glory
 		return static_cast<OpenGLGraphicsModule*>(m_pModule);
 	}
 
+	uint32_t OpenGLDevice::GetGLTextureID(TextureHandle texture)
+	{
+		GL_Texture* glTexture = m_Textures.Find(texture);
+		if (!glTexture)
+		{
+			Debug().LogError("OpenGLDevice::GetGLTextureID: Invalid texture handle.");
+			return 0;
+		}
+		return glTexture->m_GLTextureID;
+	}
+
 #pragma region Commands
 
 	CommandBufferHandle OpenGLDevice::Begin()
@@ -1023,6 +1034,23 @@ namespace Glory
 		return handle;
 	}
 
+	TextureHandle OpenGLDevice::GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index)
+	{
+		GL_RenderTexture* vkRenderPass = m_RenderTextures.Find(renderTexture);
+		if (!vkRenderPass)
+		{
+			Debug().LogError("VulkanDevice::GetRenderTextureAttatchment: Invalid render texture handle");
+			return NULL;
+		}
+
+		if (index >= vkRenderPass->m_Textures.size())
+		{
+			Debug().LogError("VulkanDevice::GetRenderTextureAttatchment: Invalid attachment index");
+			return NULL;
+		}
+		return vkRenderPass->m_Textures[index];
+	}
+
 	RenderPassHandle OpenGLDevice::CreateRenderPass(const RenderPassInfo& info)
 	{
 		if (info.RenderTextureInfo.Width == 0 || info.RenderTextureInfo.Height == 0)
@@ -1047,6 +1075,17 @@ namespace Glory
 		Debug().LogInfo(str.str());
 
 		return handle;
+	}
+
+	RenderTextureHandle OpenGLDevice::GetRenderPassRenderTexture(RenderPassHandle renderPass)
+	{
+		GL_RenderPass* glRenderPass = m_RenderPasses.Find(renderPass);
+		if (!glRenderPass)
+		{
+			Debug().LogError("OpenGLDevice::GetRenderPassRenderTexture: Invalid render pass handle");
+			return NULL;
+		}
+		return glRenderPass->m_RenderTexture;
 	}
 
 	ShaderHandle OpenGLDevice::CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function)

@@ -23,6 +23,7 @@ namespace Glory::Editor
         virtual ~EditorVulkanRenderImpl();
 
         virtual void* GetTextureID(Texture* pTexture) override;
+        virtual void* GetTextureID(TextureHandle texture) override;
 
     private:
         virtual std::string ShadingLanguage() override;

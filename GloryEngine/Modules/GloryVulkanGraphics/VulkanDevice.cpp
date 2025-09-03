@@ -243,6 +243,28 @@ namespace Glory
 		return m_GraphicsCommandPools[flags];
 	}
 
+	vk::ImageView VulkanDevice::GetVKImageView(TextureHandle texture)
+	{
+		VK_Texture* vkTexture = m_Textures.Find(texture);
+		if (!vkTexture)
+		{
+			Debug().LogError("VulkanDevice::GetVKImageView: Invalid texture handle.");
+			return nullptr;
+		}
+		return vkTexture->m_VKImageView;
+	}
+
+	vk::Sampler VulkanDevice::GetVKSampler(TextureHandle texture)
+	{
+		VK_Texture* vkTexture = m_Textures.Find(texture);
+		if (!vkTexture)
+		{
+			Debug().LogError("VulkanDevice::GetVKSampler: Invalid texture handle.");
+			return nullptr;
+		}
+		return vkTexture->m_VKSampler;
+	}
+
 	CommandBufferHandle VulkanDevice::Begin()
 	{
 		vk::CommandBufferBeginInfo commandBeginInfo = vk::CommandBufferBeginInfo()
@@ -1063,6 +1085,23 @@ namespace Glory
 		return handle;
 	}
 
+	TextureHandle VulkanDevice::GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index)
+	{
+		VK_RenderTexture* vkRenderPass = m_RenderTextures.Find(renderTexture);
+		if (!vkRenderPass)
+		{
+			Debug().LogError("VulkanDevice::GetRenderTextureAttatchment: Invalid render texture handle");
+			return NULL;
+		}
+
+		if (index >= vkRenderPass->m_Textures.size())
+		{
+			Debug().LogError("VulkanDevice::GetRenderTextureAttatchment: Invalid attachment index");
+			return NULL;
+		}
+		return vkRenderPass->m_Textures[index];
+	}
+
 	RenderPassHandle VulkanDevice::CreateRenderPass(const RenderPassInfo& info)
 	{
 		if (info.RenderTextureInfo.Width == 0 || info.RenderTextureInfo.Height == 0)
@@ -1197,6 +1236,17 @@ namespace Glory
 		Debug().LogInfo(str.str());
 
 		return handle;
+	}
+
+	RenderTextureHandle VulkanDevice::GetRenderPassRenderTexture(RenderPassHandle renderPass)
+	{
+		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(renderPass);
+		if (!vkRenderPass)
+		{
+			Debug().LogError("VulkanDevice::GetRenderPassRenderTexture: Invalid render pass handle");
+			return NULL;
+		}
+		return vkRenderPass->m_RenderTexture;
 	}
 
 	ShaderHandle VulkanDevice::CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function)

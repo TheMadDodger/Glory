@@ -46,7 +46,6 @@ namespace Glory::Editor
         SceneViewCamera m_SceneCamera;
         bool m_DrawGrid;
         int m_SelectedRenderTextureIndex;
-        size_t m_SelectedFrameBufferIndex;
         UUID m_ViewEventID;
         UUID m_PreviewPrefabID = 0;
         UUID m_PrefabInstance = 0;

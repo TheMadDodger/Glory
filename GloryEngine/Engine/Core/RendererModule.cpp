@@ -1,28 +1,16 @@
 #include "RendererModule.h"
 #include "Engine.h"
-#include "CameraManager.h"
-#include "DisplayManager.h"
 #include "EngineProfiler.h"
-#include "Buffer.h"
-#include "FileLoaderModule.h"
 #include "WindowModule.h"
-#include "SceneManager.h"
-#include "GraphicsModule.h"
-#include "Engine.h"
-#include "InternalMaterial.h"
-#include "InternalPipeline.h"
-#include "GScene.h"
+#include "MaterialData.h"
+#include "PipelineData.h"
+#include "CameraManager.h"
 #include "AssetManager.h"
-#include "CubemapData.h"
-#include "MaterialManager.h"
 #include "GPUTextureAtlas.h"
-#include "Window.h"
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/ext/scalar_constants.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <algorithm>
 
 namespace Glory
 {
@@ -30,7 +18,7 @@ namespace Glory
 		: m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0), m_LineVertexCount(0),
 		m_pLineBuffer(nullptr), m_pLineMesh(nullptr), m_pLinesMaterialData(nullptr),
 		m_pLineVertex(nullptr), m_pLineVertices(nullptr), m_DisplaysDirty(false),
-		m_RenderPasses(RP_Count), m_FrameData(size_t(MAX_LIGHTS))
+		m_FrameData(size_t(MAX_LIGHTS))
 	{
 	}
 
@@ -226,14 +214,6 @@ namespace Glory
 			return;
 		}
 
-		if (camera.GetDisplayIndex() != -1)
-		{
-			/* Resize camera to display manager */
-			uint32_t width, height;
-			m_pEngine->GetDisplayManager().GetResolution(width, height);
-			camera.SetResolution(width, height);
-		}
-
 		m_FrameData.ActiveCameras.push_back(camera);
 		OnSubmit(camera);
 	}
@@ -261,14 +241,15 @@ namespace Glory
 
 	void RendererModule::OnBeginFrame()
 	{
-		REQUIRE_MODULE(m_pEngine, GraphicsModule, );
-		REQUIRE_MODULE(m_pEngine, RendererModule, );
+		//REQUIRE_MODULE(m_pEngine, GraphicsModule, );
 		REQUIRE_MODULE(m_pEngine, WindowModule, );
 
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::StartFrame" };
 		m_FrameData.Reset();
 		std::for_each(m_DynamicPipelineRenderDatas.begin(), m_DynamicPipelineRenderDatas.end(), [](PipelineBatch& batch) { batch.Reset(); });
 		std::for_each(m_DynamicLatePipelineRenderDatas.begin(), m_DynamicLatePipelineRenderDatas.end(), [](PipelineBatch& batch) { batch.Reset(); });
+
+		m_pLineVertex = m_pLineVertices;
 	}
 
 	size_t RendererModule::LastSubmittedObjectCount()
@@ -424,26 +405,14 @@ namespace Glory
 		m_DisplaysDirty = true;
 	}
 
-	void RendererModule::AddRenderPass(RenderPassType type, RenderPass&& pass)
-	{
-		m_RenderPasses[type].push_back(std::move(pass));
-	}
-
-	void RendererModule::RemoveRenderPass(RenderPassType type, std::string_view name)
-	{
-		auto iter = std::find_if(m_RenderPasses[type].begin(), m_RenderPasses[type].end(), [name](const RenderPass& pass) {return pass.m_Name == name; });
-		if (iter == m_RenderPasses[type].end()) return;
-		m_RenderPasses[type].erase(iter);
-	}
-
 	void RendererModule::RenderOnBackBuffer(RenderTexture* pTexture)
 	{
-		REQUIRE_MODULE_CALL(m_pEngine, GraphicsModule, Blit(pTexture), );
+		//REQUIRE_MODULE_CALL(m_pEngine, GraphicsModule, Blit(pTexture), );
 
-		for (auto& pass : m_RenderPasses[RP_Postblit])
-		{
-			pass.m_Callback(0, this);
-		}
+		//for (auto& pass : m_RenderPasses[RP_Postblit])
+		//{
+		//	pass.m_Callback(0, this);
+		//}
 	}
 
 	GPUTextureAtlas* RendererModule::CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, bool depth)
@@ -468,272 +437,26 @@ namespace Glory
 
 	void RendererModule::Initialize()
 	{
-		REQUIRE_MODULE_MESSAGE(m_pEngine, WindowModule, "A renderer module was loaded but there is no WindowModule present to render to.", Warning, );
-		REQUIRE_MODULE_MESSAGE(m_pEngine, GraphicsModule, "A renderer module was loaded but there is no GraphicsModule present.", Warning, );
+		//REQUIRE_MODULE_MESSAGE(m_pEngine, WindowModule, "A renderer module was loaded but there is no WindowModule present to render to.", Warning, );
+		//REQUIRE_MODULE_MESSAGE(m_pEngine, GraphicsModule, "A renderer module was loaded but there is no GraphicsModule present.", Warning, );
 
 		m_pLineVertices = new LineVertex[MAX_LINE_VERTICES];
 		m_pLineVertex = m_pLineVertices;
-
-		FileImportSettings importSettings;
-		importSettings.Flags = (int)(std::ios::ate | std::ios::binary);
-		importSettings.AddNullTerminateAtEnd = true;
 
 		/* Line rendering */
 		const UUID linesPipeline = Settings().Value<uint64_t>("Lines Pipeline");
 		m_pLinesMaterialData = new MaterialData();
 		m_pLinesMaterialData->SetPipeline(linesPipeline);
-
-		m_RenderPasses[RP_LateobjectPass].push_back(RenderPass{ "Line Pass", [this](uint32_t cameraIndex, RendererModule*) {
-			RenderLines(m_FrameData.ActiveCameras[cameraIndex]);
-		} });
 	}
 
 	void RendererModule::PostInitialize()
 	{
-		m_pEngine->GetDisplayManager().Initialize(m_pEngine);
-		CreateLineBuffer();
 		OnPostInitialize();
-	}
-
-	void RendererModule::Render()
-	{
-		if (m_DisplaysDirty)
-		{
-			int width, height;
-			m_pEngine->GetMainModule<WindowModule>()->GetMainWindow()->GetDrawableSize(&width, &height);
-			m_pEngine->GetDisplayManager().ResizeAllTextures(uint32_t(width), uint32_t(height));
-			m_DisplaysDirty = false;
-		}
-
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-
-		m_PickResults.clear();
-
-		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Render" };
-		m_pEngine->GetDisplayManager().ClearAllDisplays(m_pEngine);
-
-		for (auto& pass : m_RenderPasses[RP_Prepass])
-		{
-			pass.m_Callback(0, this);
-		}
-
-		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
-		{
-			CameraRef camera = m_FrameData.ActiveCameras[i];
-
-			RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
-			pRenderTexture->BindForDraw();
-			pGraphics->Clear(camera.GetClearColor());
-
-			for (auto& pass : m_RenderPasses[RP_CameraPrepass])
-			{
-				pass.m_Callback(i, this);
-			}
-
-			OnStartCameraRender(camera, m_FrameData.ActiveLights);
-
-			for (auto& pass : m_RenderPasses[RP_ObjectPass])
-			{
-				pass.m_Callback(i, this);
-			}
-
-			/* Picking */
-			for (size_t j = 0; j < m_FrameData.Picking.size(); ++j)
-			{
-				const auto& picking = m_FrameData.Picking[j];
-				if (picking.second != camera.GetUUID()) continue;
-				DoPicking(picking.first, camera);
-			}
-			
-			pRenderTexture->BindForDraw();
-			for (auto& pass : m_RenderPasses[RP_LateobjectPass])
-			{
-				pass.m_Callback(i, this);
-			}
-
-			OnEndCameraRender(camera, m_FrameData.ActiveLights);
-			pRenderTexture->UnBindForDraw();
-			OnRenderEffects(camera, pRenderTexture);
-
-			for (auto& pass : m_RenderPasses[RP_CameraPostpass])
-			{
-				pass.m_Callback(i, this);
-			}
-		}
-
-		for (auto& pass : m_RenderPasses[RP_PreCompositePass])
-		{
-			pass.m_Callback(0, this);
-		}
-
-		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
-		{
-			CameraRef camera = m_FrameData.ActiveCameras[i];
-
-			RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine);
-			pRenderTexture->BindForDraw();
-			for (auto& pass : m_RenderPasses[RP_CameraCompositePass])
-			{
-				pass.m_Callback(i, this);
-			}
-			pRenderTexture->UnBindForDraw();
-
-			/* Copy to display */
-			int displayIndex = camera.GetDisplayIndex();
-			if (displayIndex == -1) continue;
-
-			RenderTexture* pOutputTexture = camera.GetOutputTexture();
-			uint32_t width, height;
-			pOutputTexture->GetDimensions(width, height);
-
-			RenderTexture* pDisplayRenderTexture = m_pEngine->GetDisplayManager().GetDisplayRenderTexture(displayIndex);
-			if (pDisplayRenderTexture == nullptr) continue;
-			m_pEngine->Profiler().BeginSample("RendererModule::OnRender > Blit to Display");
-			pDisplayRenderTexture->BindForDraw();
-			OnDisplayCopy(pOutputTexture, width, height);
-			pDisplayRenderTexture->UnBindForDraw();
-			m_pEngine->Profiler().EndSample();
-		}
-
-		for (auto& pass : m_RenderPasses[RP_PostCompositePass])
-		{
-			pass.m_Callback(0, this);
-		}
-
-		for (auto& pass : m_RenderPasses[RP_Postpass])
-		{
-			pass.m_Callback(0, this);
-		}
-
-		//m_LastSubmittedObjectCount = m_FrameData.ObjectsToRender.size();
-		m_LastSubmittedCameraCount = m_FrameData.ActiveCameras.size();
-
-		std::scoped_lock lock(m_PickLock);
-		m_LastFramePickResults.resize(m_PickResults.size());
-		std::memcpy(m_LastFramePickResults.data(), m_PickResults.data(), m_PickResults.size()*sizeof(PickResult));
-	}
-
-	void RendererModule::DoPicking(const glm::ivec2& pos, CameraRef camera)
-	{
-		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::DoPicking" };
-		RenderTexture* pRenderTexture = m_pEngine->GetCameraManager().GetRenderTextureForCamera(camera, m_pEngine, 0, false);
-		if (pRenderTexture == nullptr) return;
-		Texture* pTexture = pRenderTexture->GetTextureAttachment("object");
-		if (pTexture == nullptr) return;
-
-		struct ObjData
-		{
-			uint64_t SceneID;
-			uint64_t ObjectID;
-		};
-
-		ObjData object;
-		glm::vec4 normal;
-		float depth;
-
-		/* Read pixels */
-		pRenderTexture->ReadColorPixel("object", pos, &object, DataType::DT_UInt);
-		pRenderTexture->ReadColorPixel("Normal", pos, &normal, DataType::DT_Float);
-		pRenderTexture->ReadDepthPixel(pos, &depth, DataType::DT_Float);
-
-		/* Calculate position */
-		const float z = depth * 2.0f - 1.0f;
-		uint32_t width, height;
-		pRenderTexture->GetDimensions(width, height);
-		const glm::vec2 coord = glm::vec2{ pos.x / (float)width, pos.y / (float)height };
-
-		const glm::vec4 clipSpacePosition{ coord * 2.0f - 1.0f, z, 1.0f };
-		const glm::mat4 projectionInverse = camera.GetProjectionInverse();
-		const glm::mat4 viewInverse = camera.GetViewInverse();
-		glm::vec4 viewSpacePosition = projectionInverse * clipSpacePosition;
-
-		/* Perspective division */
-		viewSpacePosition /= viewSpacePosition.w;
-		const glm::vec4 worldSpacePosition = viewInverse * viewSpacePosition;
-
-		/* Calculate normal */
-		normal = normal * 2.0f - 1.0f;
-
-		/* Store results */
-		if (m_PickResults.empty())
-		{
-			m_pEngine->GetSceneManager()->SetHoveringObject(object.SceneID, object.ObjectID);
-			m_pEngine->GetSceneManager()->SetHoveringPosition(worldSpacePosition);
-			m_pEngine->GetSceneManager()->SetHoveringNormal(normal);
-		}
-		m_PickResults.push_back({ camera.GetUUID(), SceneObjectRef(object.SceneID, object.ObjectID), worldSpacePosition, normal});
-	}
-
-	void RendererModule::CreateLineBuffer()
-	{
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-		if (!pGraphics) return;
-		m_pLineBuffer = pGraphics->GetResourceManager()->CreateBuffer(sizeof(LineVertex) * MAX_LINE_VERTICES, BufferBindingTarget::B_ARRAY, MemoryUsage::MU_STATIC_DRAW, 0);
-		m_pLineMesh = pGraphics->GetResourceManager()->CreateMesh(MAX_LINE_VERTICES, 0, InputRate::Vertex, 0, sizeof(LineVertex), PrimitiveType::PT_Lines, { AttributeType::Float3, AttributeType::Float4 }, m_pLineBuffer, nullptr);
-	}
-
-	void RendererModule::RenderLines(CameraRef camera)
-	{
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-		if (!pGraphics || !m_LineVertexCount) return;
-
-		m_pLineMesh->BindForDraw();
-		m_pLineBuffer->Assign(m_pLineVertices);
-
-		Material* pMaterial = pGraphics->UseMaterial(m_pLinesMaterialData);
-
-		ObjectData object;
-		object.Model = glm::identity<glm::mat4>();
-		object.View = camera.GetView();
-		object.Projection = camera.GetProjection();
-		object.ObjectID = 0;
-		pGraphics->EnableDepthWrite(false);
-		pGraphics->EnableDepthTest(false);
-		pMaterial->SetProperties(m_pEngine);
-		pMaterial->SetObjectData(object);
-
-		pGraphics->DrawMesh(m_pLineMesh, 0, m_LineVertexCount);
-		pGraphics->UseMaterial(nullptr);
-		pGraphics->EnableDepthWrite(true);
-		pGraphics->EnableDepthTest(true);
-
-		m_LineVertexCount = 0;
-		m_pLineVertex = m_pLineVertices;
-	}
-
-	void RendererModule::CreateCameraRenderTextures(uint32_t width, uint32_t height, std::vector<RenderTexture*>& renderTextures)
-	{
-		GPUResourceManager* pResourceManager = m_pEngine->GetMainModule<GraphicsModule>()->GetResourceManager();
-		std::vector<RenderTextureCreateInfo> renderTextureInfos;
-		GetCameraRenderTextureInfos(renderTextureInfos);
-
-		renderTextures.resize(renderTextureInfos.size());
-
-		for (size_t i = 0; i < renderTextureInfos.size(); ++i)
-		{
-			renderTextureInfos[i].Width = width;
-			renderTextureInfos[i].Height = height;
-			renderTextures[i] = pResourceManager->CreateRenderTexture(renderTextureInfos[i]);
-		}
-	}
-
-	void RendererModule::GetCameraRenderTextureInfos(std::vector<RenderTextureCreateInfo>& infos)
-	{
-		infos.resize(1);
-		infos[0].HasDepth = true;
-		infos[0].Attachments.push_back({Attachment("object", PixelFormat::PF_RGBAI, PixelFormat::PF_R32G32B32A32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UInt, false)});
-		infos[0].Attachments.push_back({ Attachment("color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color) });
 	}
 
 	void RendererModule::OnCameraResize(CameraRef camera) {}
 
 	void RendererModule::OnCameraPerspectiveChanged(CameraRef camera) {}
-
-	void RendererModule::Draw()
-	{
-		m_pEngine->GetDebug().SubmitLines(this, &m_pEngine->Time());
-		Render();
-	}
 
 	void RendererModule::LoadSettings(ModuleSettings& settings)
 	{

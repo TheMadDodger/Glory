@@ -112,12 +112,12 @@ namespace Glory::Editor
 			if (pSDLImage->format->Rmask == 0x000000ff)
 			{
 				pixelFormat = PixelFormat::PF_RGBA;
-				internalFormat = PixelFormat::PF_R8G8B8A8Srgb;
+				internalFormat = PixelFormat::PF_R8G8B8A8Unorm;
 			}
 			else
 			{
 				pixelFormat = PixelFormat::PF_RGBA;
-				internalFormat = PixelFormat::PF_B8G8R8A8Srgb;
+				internalFormat = PixelFormat::PF_B8G8R8A8Unorm;
 			}
 			break;
 		default:

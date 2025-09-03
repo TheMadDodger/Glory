@@ -12,10 +12,6 @@ namespace Glory
 	{
 	}
 
-	void NullRendererModule::GetCameraRenderTextureInfos(std::vector<RenderTextureCreateInfo>& infos)
-	{
-	}
-
 	void NullRendererModule::OnCameraResize(CameraRef camera)
 	{
 	}
@@ -51,31 +47,26 @@ namespace Glory
 	{
 	}
 
+	void NullRendererModule::Draw()
+	{
+	}
+
+	size_t NullRendererModule::CameraAttachmentPreviewCount() const
+	{
+		return 0;
+	}
+
+	std::string_view NullRendererModule::CameraAttachmentPreviewName(size_t index) const
+	{
+		return "";
+	}
+
+	TextureHandle NullRendererModule::CameraAttachmentPreview(CameraRef camera, size_t index) const
+	{
+		return NULL;
+	}
+
 	void NullRendererModule::Cleanup()
-	{
-	}
-
-	void NullRendererModule::OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture)
-	{
-	}
-
-	void NullRendererModule::OnDoCompositing(CameraRef camera, uint32_t width, uint32_t height, RenderTexture* pRenderTexture)
-	{
-	}
-
-	void NullRendererModule::OnDisplayCopy(RenderTexture* pRenderTexture, uint32_t width, uint32_t height)
-	{
-	}
-
-	void NullRendererModule::OnRenderSkybox(CameraRef camera, CubemapData* pCubemap)
-	{
-	}
-
-	void NullRendererModule::OnStartCameraRender(CameraRef camera, const FrameData<LightData>& lights)
-	{
-	}
-
-	void NullRendererModule::OnEndCameraRender(CameraRef camera, const FrameData<LightData>& lights)
 	{
 	}
 
