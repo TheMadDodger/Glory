@@ -3,7 +3,7 @@
 #include <EditorApplication.h>
 #include <EditorShaderData.h>
 
-#include <VulkanTexture.h>
+#include <VulkanDevice.h>
 
 namespace Glory::Editor
 {
@@ -27,7 +27,14 @@ namespace Glory::Editor
 
 	void* EditorVulkanRenderImpl::GetTextureID(Texture* pTexture)
 	{
-		return nullptr;
+		VulkanTexture* pVKTexture = static_cast<VulkanTexture*>(pTexture);
+		auto iter = m_DesciptorSets.find(pTexture->ID());
+		if (iter == m_DesciptorSets.end())
+		{
+			vk::DescriptorSet ds = ImGui_ImplVulkan_AddTexture(pVKTexture->GetTextureSampler(), pVKTexture->GetTextureImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			iter = m_DesciptorSets.emplace(pTexture->ID(), ds).first;
+		}
+		return (void*)iter->second;
 	}
 
 	std::string EditorVulkanRenderImpl::ShadingLanguage()
@@ -48,9 +55,10 @@ namespace Glory::Editor
 
 	void EditorVulkanRenderImpl::Setup()
 	{
-		VulkanGraphicsModule* pGraphicsModule = EditorApplication::GetInstance()->GetEngine()->GetMainModule<VulkanGraphicsModule>();
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		VulkanGraphicsModule* pGraphicsModule = pEngine->GetMainModule<VulkanGraphicsModule>();
 		VkInstance instance = pGraphicsModule->GetCInstance();
-		m_pDevice = pGraphicsModule->GetDeviceManager().GetSelectedDevice();
+		m_pDevice = static_cast<VulkanDevice*>(pEngine->ActiveGraphicsDevice());
 
 		m_MainWindow = ImGui_ImplVulkanH_Window();
 		//m_MainWindow.Swapchain = pGraphicsModule->GetSwapChain().GetSwapChain();
@@ -73,14 +81,11 @@ namespace Glory::Editor
 		ImGui_ImplVulkan_InitInfo vulkanInfo{};
 		vulkanInfo.Instance = pGraphicsModule->GetCInstance();
 
-		Glory::QueueFamilyIndices indices = m_pDevice->GetQueueFamilyIndices();
-		const Glory::LogicalDeviceData& logicalDeviceData = m_pDevice->GetLogicalDeviceData();
-
 		// Device and queues
-		vulkanInfo.PhysicalDevice = (VkPhysicalDevice)m_pDevice->GetPhysicalDevice();
-		vulkanInfo.Device = (VkDevice)logicalDeviceData.LogicalDevice;
-		vulkanInfo.QueueFamily = indices.GraphicsFamily.value();
-		vulkanInfo.Queue = (VkQueue)logicalDeviceData.GraphicsQueue;
+		vulkanInfo.PhysicalDevice = (VkPhysicalDevice)m_pDevice->PhysicalDevice();
+		vulkanInfo.Device = (VkDevice)m_pDevice->LogicalDevice();
+		vulkanInfo.QueueFamily = m_pDevice->GraphicsFamily();
+		vulkanInfo.Queue = m_pDevice->GraphicsQueue();
 
 		// Not used
 		vulkanInfo.PipelineCache = VK_NULL_HANDLE;
@@ -107,7 +112,7 @@ namespace Glory::Editor
 
 	void EditorVulkanRenderImpl::Shutdown()
 	{
-		VkResult err = vkDeviceWaitIdle((VkDevice)m_pDevice->GetLogicalDeviceData().LogicalDevice);
+		VkResult err = vkDeviceWaitIdle((VkDevice)m_pDevice->LogicalDevice());
 		check_vk_result(err);
 		ImGui_ImplVulkan_Shutdown();
 	}
@@ -122,9 +127,9 @@ namespace Glory::Editor
 	{
 		wd->Surface = surface;
 
-		VkPhysicalDevice physicalDevice = (VkPhysicalDevice)m_pDevice->GetPhysicalDevice();
-		VkDevice device = (VkDevice)m_pDevice->GetLogicalDeviceData().LogicalDevice;
-		uint32_t graphicsFamilyIndex = m_pDevice->GetQueueFamilyIndices().GraphicsFamily.value();
+		VkPhysicalDevice physicalDevice = (VkPhysicalDevice)m_pDevice->PhysicalDevice();
+		VkDevice device = (VkDevice)m_pDevice->LogicalDevice();
+		uint32_t graphicsFamilyIndex = m_pDevice->GraphicsFamily();
 
 		// Check for WSI support
 		VkBool32 res;
@@ -185,10 +190,9 @@ namespace Glory::Editor
 
 	void EditorVulkanRenderImpl::UploadFonts(ImGui_ImplVulkanH_Window* wd)
 	{
-		VkPhysicalDevice physicalDevice = (VkPhysicalDevice)m_pDevice->GetPhysicalDevice();
-		const LogicalDeviceData& deviceData = m_pDevice->GetLogicalDeviceData();
-		VkDevice device = (VkDevice)deviceData.LogicalDevice;
-		uint32_t graphicsFamilyIndex = m_pDevice->GetQueueFamilyIndices().GraphicsFamily.value();
+		VkPhysicalDevice physicalDevice = (VkPhysicalDevice)m_pDevice->PhysicalDevice();
+		VkDevice device = (VkDevice)m_pDevice->LogicalDevice();
+		uint32_t graphicsFamilyIndex = m_pDevice->GraphicsFamily();
 
 		VkResult err;
 		// Use any command queue
@@ -211,7 +215,7 @@ namespace Glory::Editor
 		end_info.pCommandBuffers = &command_buffer;
 		err = vkEndCommandBuffer(command_buffer);
 		check_vk_result(err);
-		err = vkQueueSubmit((VkQueue)deviceData.GraphicsQueue, 1, &end_info, VK_NULL_HANDLE);
+		err = vkQueueSubmit(m_pDevice->GraphicsQueue(), 1, &end_info, VK_NULL_HANDLE);
 		check_vk_result(err);
 
 		err = vkDeviceWaitIdle(device);
@@ -221,10 +225,9 @@ namespace Glory::Editor
 
 	void EditorVulkanRenderImpl::FrameRender(ImGui_ImplVulkanH_Window* wd, ImDrawData* draw_data)
 	{
-		VkPhysicalDevice physicalDevice = (VkPhysicalDevice)m_pDevice->GetPhysicalDevice();
-		const LogicalDeviceData& deviceData = m_pDevice->GetLogicalDeviceData();
-		VkDevice device = (VkDevice)deviceData.LogicalDevice;
-		uint32_t graphicsFamilyIndex = m_pDevice->GetQueueFamilyIndices().GraphicsFamily.value();
+		VkPhysicalDevice physicalDevice = (VkPhysicalDevice)m_pDevice->PhysicalDevice();
+		VkDevice device = (VkDevice)m_pDevice->LogicalDevice();
+		uint32_t graphicsFamilyIndex = m_pDevice->GraphicsFamily();
 
 		VkResult err;
 
@@ -286,17 +289,16 @@ namespace Glory::Editor
 
 			err = vkEndCommandBuffer(fd->CommandBuffer);
 			check_vk_result(err);
-			err = vkQueueSubmit((VkQueue)deviceData.GraphicsQueue, 1, &info, fd->Fence);
+			err = vkQueueSubmit(m_pDevice->GraphicsQueue(), 1, &info, fd->Fence);
 			check_vk_result(err);
 		}
 	}
 
 	void EditorVulkanRenderImpl::FramePresent(ImGui_ImplVulkanH_Window* wd)
 	{
-		VkPhysicalDevice physicalDevice = (VkPhysicalDevice)m_pDevice->GetPhysicalDevice();
-		const LogicalDeviceData& deviceData = m_pDevice->GetLogicalDeviceData();
-		VkDevice device = (VkDevice)deviceData.LogicalDevice;
-		uint32_t graphicsFamilyIndex = m_pDevice->GetQueueFamilyIndices().GraphicsFamily.value();
+		VkPhysicalDevice physicalDevice = (VkPhysicalDevice)m_pDevice->PhysicalDevice();
+		VkDevice device = (VkDevice)m_pDevice->LogicalDevice();
+		uint32_t graphicsFamilyIndex = m_pDevice->GraphicsFamily();
 
 		if (m_SwapChainRebuild)
 			return;
@@ -309,7 +311,7 @@ namespace Glory::Editor
 		info.swapchainCount = 1;
 		info.pSwapchains = &wd->Swapchain;
 		info.pImageIndices = &wd->FrameIndex;
-		VkResult err = vkQueuePresentKHR((VkQueue)deviceData.PresentQueue, &info);
+		VkResult err = vkQueuePresentKHR((VkQueue)m_pDevice->PresentQueue(), &info);
 		if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR)
 		{
 			m_SwapChainRebuild = true;
@@ -321,10 +323,9 @@ namespace Glory::Editor
 
 	void EditorVulkanRenderImpl::CleanupVulkanWindow()
 	{
-		VkPhysicalDevice physicalDevice = (VkPhysicalDevice)m_pDevice->GetPhysicalDevice();
-		const LogicalDeviceData& deviceData = m_pDevice->GetLogicalDeviceData();
-		VkDevice device = (VkDevice)deviceData.LogicalDevice;
-		uint32_t graphicsFamilyIndex = m_pDevice->GetQueueFamilyIndices().GraphicsFamily.value();
+		VkPhysicalDevice physicalDevice = (VkPhysicalDevice)m_pDevice->PhysicalDevice();
+		VkDevice device = (VkDevice)m_pDevice->LogicalDevice();
+		uint32_t graphicsFamilyIndex = m_pDevice->GraphicsFamily();
 
 		VulkanGraphicsModule* pGraphicsModule = EditorApplication::GetInstance()->GetEngine()->GetMainModule<VulkanGraphicsModule>();
 
@@ -333,20 +334,17 @@ namespace Glory::Editor
 
 	void EditorVulkanRenderImpl::CleanupVulkan()
 	{
-		VkPhysicalDevice physicalDevice = (VkPhysicalDevice)m_pDevice->GetPhysicalDevice();
-		const LogicalDeviceData& deviceData = m_pDevice->GetLogicalDeviceData();
-		VkDevice device = (VkDevice)deviceData.LogicalDevice;
+		VkPhysicalDevice physicalDevice = (VkPhysicalDevice)m_pDevice->PhysicalDevice();
+		VkDevice device = (VkDevice)m_pDevice->LogicalDevice();
 
 		vkDestroyDescriptorPool(device, m_DescriptorPool, VK_NULL_HANDLE);
 	}
 
 	void EditorVulkanRenderImpl::BeforeRender()
 	{
-		VulkanGraphicsModule* pGraphicsModule = EditorApplication::GetInstance()->GetEngine()->GetMainModule<VulkanGraphicsModule>();
-		VkPhysicalDevice physicalDevice = (VkPhysicalDevice)m_pDevice->GetPhysicalDevice();
-		const LogicalDeviceData& deviceData = m_pDevice->GetLogicalDeviceData();
-		VkDevice device = (VkDevice)deviceData.LogicalDevice;
-		uint32_t graphicsFamilyIndex = m_pDevice->GetQueueFamilyIndices().GraphicsFamily.value();
+		VkPhysicalDevice physicalDevice = (VkPhysicalDevice)m_pDevice->PhysicalDevice();
+		VkDevice device = (VkDevice)m_pDevice->LogicalDevice();
+		uint32_t graphicsFamilyIndex = m_pDevice->GraphicsFamily();
 
 		// Resize swap chain?
 		if (m_SwapChainRebuild)
@@ -356,7 +354,7 @@ namespace Glory::Editor
 			if (width > 0 && height > 0)
 			{
 				ImGui_ImplVulkan_SetMinImageCount(MINIMAGECOUNT);
-				ImGui_ImplVulkanH_CreateOrResizeWindow(pGraphicsModule->GetCInstance(), physicalDevice, device, &m_MainWindow, graphicsFamilyIndex, VK_NULL_HANDLE, width, height, MINIMAGECOUNT);
+				ImGui_ImplVulkanH_CreateOrResizeWindow(m_pDevice->GraphicsModule()->GetCInstance(), physicalDevice, device, &m_MainWindow, graphicsFamilyIndex, VK_NULL_HANDLE, width, height, MINIMAGECOUNT);
 				m_MainWindow.FrameIndex = 0;
 				m_SwapChainRebuild = false;
 			}

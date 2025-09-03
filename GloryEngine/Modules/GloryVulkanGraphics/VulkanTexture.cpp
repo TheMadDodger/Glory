@@ -5,6 +5,8 @@
 #include "VulkanBuffer.h"
 #include "VulkanStructsConverter.h"
 
+#include "VulkanDevice.h"
+
 #include <Engine.h>
 
 namespace Glory
@@ -77,8 +79,7 @@ namespace Glory
         VulkanGraphicsModule* pGraphics = m_pOwner->GetEngine()->GetMainModule<VulkanGraphicsModule>();
         GPUResourceManager* pResources = pGraphics->GetResourceManager();
         VulkanDeviceManager& deviceManager = pGraphics->GetDeviceManager();
-        Device* pDevice = deviceManager.GetSelectedDevice();
-        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
+        VulkanDevice* pDevice = static_cast<VulkanDevice*>(m_pOwner->GetEngine()->ActiveGraphicsDevice());
 
         uint32_t imageSize = pImage->GetByteSize();
 
@@ -86,7 +87,7 @@ namespace Glory
         Buffer* pTextureStagingBuffer = pResources->CreateBuffer(imageSize, BufferBindingTarget::B_COPY_READ, MemoryUsage::MU_DYNAMIC_COPY, 0);//new VulkanBuffer(imageSize, (uint32_t)vk::BufferUsageFlagBits::eTransferSrc, (uint32_t)memoryFlags);
         pTextureStagingBuffer->Assign(pImage->GetPixels());
 
-        vk::Format format = VKConverter::GetVulkanFormat(m_TextureInfo.m_PixelFormat); //vk::Format::eR8G8B8A8Srgb;
+        vk::Format format = VKConverter::GetVulkanFormat(m_TextureInfo.m_InternalFormat);
 
         vk::ImageCreateInfo imageInfo = vk::ImageCreateInfo();
         vk::ImageType imageType = VKConverter::GetVulkanImageType(m_TextureInfo.m_ImageType);
@@ -104,11 +105,11 @@ namespace Glory
         imageInfo.samples = vk::SampleCountFlagBits::e1;
         imageInfo.flags = (vk::ImageCreateFlags)0;
 
-        if (deviceData.LogicalDevice.createImage(&imageInfo, nullptr, &m_TextureImage) != vk::Result::eSuccess)
+        if (pDevice->LogicalDevice().createImage(&imageInfo, nullptr, &m_TextureImage) != vk::Result::eSuccess)
             throw std::runtime_error("Failed to create image!");
 
         vk::MemoryRequirements memRequirements;
-        deviceData.LogicalDevice.getImageMemoryRequirements(m_TextureImage, &memRequirements);
+        pDevice->LogicalDevice().getImageMemoryRequirements(m_TextureImage, &memRequirements);
 
         uint32_t typeFilter = memRequirements.memoryTypeBits;
         vk::MemoryPropertyFlags properties = vk::MemoryPropertyFlagBits::eDeviceLocal;
@@ -118,9 +119,9 @@ namespace Glory
         imageAllocInfo.allocationSize = memRequirements.size;
         imageAllocInfo.memoryTypeIndex = memoryIndex;
 
-        if (deviceData.LogicalDevice.allocateMemory(&imageAllocInfo, nullptr, &m_TextureImageMemory) != vk::Result::eSuccess)
+        if (pDevice->LogicalDevice().allocateMemory(&imageAllocInfo, nullptr, &m_TextureImageMemory) != vk::Result::eSuccess)
             throw std::runtime_error("Failed to allocate image memory!");
-        deviceData.LogicalDevice.bindImageMemory(m_TextureImage, m_TextureImageMemory, 0);
+        pDevice->LogicalDevice().bindImageMemory(m_TextureImage, m_TextureImageMemory, 0);
 
         // Transition image layout
         pGraphics->TransitionImageLayout(m_TextureImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
@@ -144,7 +145,10 @@ namespace Glory
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = 1;
 
-        if (deviceData.LogicalDevice.createImageView(&viewInfo, nullptr, &m_TextureImageView) != vk::Result::eSuccess)
+        if (format == vk::Format::eR8G8B8Unorm)
+            viewInfo.components.a = vk::ComponentSwizzle::eOne;
+
+        if (pDevice->LogicalDevice().createImageView(&viewInfo, nullptr, &m_TextureImageView) != vk::Result::eSuccess)
             throw std::runtime_error("failed to create texture image view!");
     }
 
