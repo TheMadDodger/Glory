@@ -231,6 +231,12 @@ namespace Glory
 		return data;
 	}
 
+	uint64_t& CameraRef::GetUserHandle(const std::string& name)
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		return pCamera->GetUserHandle(name);
+	}
+
 	float CameraRef::GetNear() const
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
