@@ -17,9 +17,7 @@ project "GloryVulkanGraphics"
 
 	vpaths
 	{
-		["CommandHandlers"] = { "PipelineCommandHandlers.*", "RenderPassCommandHandlers.*" },
 		["Device"] = { "Device.*", "QueueFamilyIndices.h", "VulkanDeviceManager.*" },
-		["Graphics"] = { "DepthImage.*", "SwapChain.*", "VulkanGraphicsPipeline.*", "VulkanRenderPass.*" },
 		["Module"] = { "GloryVulkan.*", "VulkanExceptions.h", "VulkanGraphicsModule.*", "VulkanStructsConverter.*" },
 		["Resources"] = { "VulkanBuffer.*", "VulkanMesh.*", "VulkanResourceManager.*", "VulkanShader.*", "VulkanTexture.*" }
 	}

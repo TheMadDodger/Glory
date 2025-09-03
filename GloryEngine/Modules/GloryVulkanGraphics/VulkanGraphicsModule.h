@@ -7,14 +7,10 @@
 #include "VulkanBuffer.h"
 #include "VulkanMesh.h"
 #include "VulkanTexture.h"
-#include "DepthImage.h"
-#include "VulkanRenderPass.h"
-#include "DeferredRenderPassTest.h"
-#include "DeferredPipelineTest.h"
-#include "VulkanCommandBuffers.h"
 
 #include <GraphicsModule.h>
 #include <WindowModule.h>
+#include <GraphicsEnums.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -22,14 +18,7 @@
 
 namespace Glory
 {
-	class SwapChain;
-
-	struct UniformBufferObject
-	{
-		alignas(16) glm::mat4 model;
-		alignas(16) glm::mat4 view;
-		alignas(16) glm::mat4 proj;
-	};
+	class VulkanDevice;
 
 	class VulkanGraphicsModule : public GraphicsModule
 	{
@@ -44,9 +33,6 @@ namespace Glory
 		GLORY_API vk::Instance GetInstance();
 
 		GLORY_API VulkanDeviceManager& GetDeviceManager();
-		GLORY_API SwapChain& GetSwapChain();
-		GLORY_API DepthImage& GetDepthImage();
-		GLORY_API VulkanCommandBuffers& GetVulkanCommandBuffers();
 
 		GLORY_API const std::vector<const char*>& GetExtensions() const;
 		GLORY_API const std::vector<const char*>& GetValidationLayers() const;
@@ -62,11 +48,6 @@ namespace Glory
 		const std::type_info& GetModuleType() override;
 
 		GLORY_API vk::Sampler& GetSampler(const SamplerSettings& settings);
-
-		GLORY_API uint32_t CurrentImageIndex() const;
-		GLORY_API uint32_t ImageCount() const;
-
-		GLORY_API VulkanRenderPass& MainRenderPass() const;
 
 		GLORY_MODULE_VERSION_H(0, 1, 0);
 
@@ -129,37 +110,10 @@ namespace Glory
 		Window* m_pMainWindow;
 
 		VulkanDeviceManager m_DeviceManager;
-		SwapChain m_SwapChain;
-		DepthImage m_DepthImage;
-		VulkanCommandBuffers m_CommandBuffers;
-		std::unique_ptr<VulkanRenderPass> m_MainRenderPass;
 		
 		std::map<SamplerSettings, vk::Sampler, SamplerSettingsComparer> m_Samplers;
-		
-		uint32_t m_CurrentFrame = 0;
-		uint32_t m_CurrentImageIndex = 0;
 
-		std::vector<vk::Semaphore> m_ImageAvailableSemaphores;
-		std::vector<vk::Semaphore> m_RenderFinishedSemaphores;
-		std::vector<vk::Fence> m_InFlightFences;
-		std::vector<vk::Fence> m_ImagesInFlight;
-		
-
-		//VulkanRenderPass* m_pMainRenderPass;
-		//VulkanGraphicsPipeline* m_pGraphicsPipeline;
-
-		//DeferredRenderPassTest* m_pRenderPass;
-		//DeferredPipelineTest* m_pRenderPipeline;
-
-		//vk::DescriptorPool m_DescriptorPool;
-		//std::vector<vk::DescriptorSet> m_DescriptorSets;
-
-		//VulkanBuffer* m_pVertexBuffer;
-		//VulkanBuffer* m_pIndexBuffer;
-		//VulkanMesh* m_pMesh;
-		//VulkanTexture* m_pTexture;
-
-		//std::vector<VulkanBuffer*> m_pUniformBufers;
+		std::vector<VulkanDevice> m_Devices;
 
 #if defined(_DEBUG)
 		vk::DebugUtilsMessengerEXT m_DebugMessenger;
