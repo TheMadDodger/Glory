@@ -12,11 +12,11 @@ namespace Glory
 	{
 	}
 
-	void NullRendererModule::OnCameraResize(CameraRef camera)
+	void NullRendererModule::OnCameraResize(uint32_t)
 	{
 	}
 
-	void NullRendererModule::OnCameraPerspectiveChanged(CameraRef camera)
+	void NullRendererModule::OnCameraPerspectiveChanged(uint32_t)
 	{
 	}
 

@@ -9,6 +9,27 @@
 
 namespace Glory
 {
+	constexpr size_t ShaderTypeFlagsCount = 6;
+	constexpr vk::ShaderStageFlagBits ShaderTypeFlags[ShaderTypeFlagsCount] = {
+		vk::ShaderStageFlagBits::eVertex,
+		vk::ShaderStageFlagBits::eFragment,
+		vk::ShaderStageFlagBits::eGeometry,
+		vk::ShaderStageFlagBits::eTessellationControl,
+		vk::ShaderStageFlagBits::eTessellationEvaluation,
+		vk::ShaderStageFlagBits::eCompute,
+	};
+
+	vk::ShaderStageFlags GetShaderStageFlags(const ShaderTypeFlag& shaderTypeFlags)
+	{
+		vk::ShaderStageFlags result = vk::ShaderStageFlagBits(0);
+		for (size_t i = 0; i < ShaderTypeFlagsCount; ++i)
+		{
+			if (!(shaderTypeFlags & ShaderTypeFlag(1 << i))) continue;
+			result |= ShaderTypeFlags[i];
+		}
+		return result;
+	}
+
 	VulkanDevice::VulkanDevice(VulkanGraphicsModule* pModule, vk::PhysicalDevice physicalDevice):
 		GraphicsDevice(pModule), m_VKDevice(physicalDevice), m_DidLastSupportCheckPass(false), m_DescriptorAllocator(this)
 	{
@@ -407,7 +428,7 @@ namespace Glory
 			firstSet, setsToBind.size(), setsToBind.data(), 0, nullptr);
 	}
 
-	void VulkanDevice::PushConstants(CommandBufferHandle commandBuffer, PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data)
+	void VulkanDevice::PushConstants(CommandBufferHandle commandBuffer, PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data, ShaderTypeFlag shaderStages)
 	{
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
@@ -423,7 +444,8 @@ namespace Glory
 			Debug().LogError("VulkanDevice::PushConstants: Invalid pipeline handle.");
 			return;
 		}
-		vkCommandBuffer.pushConstants(vkPipeline->m_VKLayout, vk::FlagTraits<vk::ShaderStageFlagBits>::allFlags, offset, size, data);
+		const vk::ShaderStageFlags stageFlags = GetShaderStageFlags(shaderStages);
+		vkCommandBuffer.pushConstants(vkPipeline->m_VKLayout, stageFlags, offset, size, data);
 	}
 
 	void VulkanDevice::DrawMesh(CommandBufferHandle commandBuffer, MeshHandle handle)
@@ -1549,28 +1571,6 @@ namespace Glory
 		Debug().LogInfo(str.str());
 
 		return handle;
-	}
-
-	constexpr size_t ShaderTypeFlagsCount = 6;
-	constexpr vk::ShaderStageFlagBits ShaderTypeFlags[ShaderTypeFlagsCount] = {
-		vk::ShaderStageFlagBits::eVertex,
-		vk::ShaderStageFlagBits::eFragment,
-		vk::ShaderStageFlagBits::eGeometry,
-		vk::ShaderStageFlagBits::eTessellationControl,
-		vk::ShaderStageFlagBits::eTessellationEvaluation,
-		vk::ShaderStageFlagBits::eCompute,
-
-	};
-
-	vk::ShaderStageFlags GetShaderStageFlags(const ShaderTypeFlag& shaderTypeFlags)
-	{
-		vk::ShaderStageFlags result = vk::ShaderStageFlagBits(0);
-		for (size_t i = 0; i < ShaderTypeFlagsCount; ++i)
-		{
-			if (!(shaderTypeFlags & ShaderTypeFlag(1 << i))) continue;
-			result |= ShaderTypeFlags[i];
-		}
-		return result;
 	}
 
 	DescriptorSetLayoutHandle VulkanDevice::CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo)

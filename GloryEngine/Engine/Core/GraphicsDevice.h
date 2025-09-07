@@ -259,7 +259,7 @@ namespace Glory
 		 * @param size Size of the constants to push
 		 * @param data The push constants data
 		 */
-		virtual void PushConstants(CommandBufferHandle commandBuffer, PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data) = 0;
+		virtual void PushConstants(CommandBufferHandle commandBuffer, PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data, ShaderTypeFlag shaderStages) = 0;
 
 		/**
 		 * @brief Push a draw mesh onto the command buffer

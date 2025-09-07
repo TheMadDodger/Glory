@@ -15,22 +15,19 @@ namespace Glory
 		glm::vec4 MaxPoint;
 	};
 
-	struct ScreenToView
-	{
-		glm::mat4 ProjectionInverse;
-		glm::mat4 ViewInverse;
-		glm::uvec4 TileSizes;
-		glm::uvec2 ScreenDimensions;
-		float Scale;
-		float Bias;
-		float zNear;
-		float zFar;
-	};
-
 	struct LightGrid
 	{
 		uint32_t Offset;
 		uint32_t Count;
+	};
+
+	struct ClusterConstants
+	{
+		glm::uvec4 TileSizes;
+		uint32_t LightCount;
+		uint32_t CameraIndex;
+		float Scale;
+		float Bias;
 	};
 
 	class GloryRendererModule : public RendererModule
@@ -58,8 +55,8 @@ namespace Glory
 		GloryRendererModule();
 		virtual ~GloryRendererModule();
 
-		virtual void OnCameraResize(CameraRef camera) override;
-		virtual void OnCameraPerspectiveChanged(CameraRef camera) override;
+		virtual void OnCameraResize(uint32_t cameraIndex) override;
+		virtual void OnCameraPerspectiveChanged(uint32_t cameraIndex) override;
 		virtual MaterialData* GetInternalMaterial(std::string_view name) const override;
 
 		virtual void CollectReferences(std::vector<UUID>& references) override;
@@ -86,7 +83,7 @@ namespace Glory
 		void RenderBatches(const std::vector<PipelineBatch>& batches, const std::vector<PipelineBatchData>& batchDatas, size_t cameraIndex);
 		void PrepareDataPass();
 		void PrepareBatches(const std::vector<PipelineBatch>& batches, std::vector<PipelineBatchData>& batchDatas);
-		void GenerateClusterSSBO(GraphicsDevice* pDevice, CameraRef camera, DescriptorSetHandle clusterSet);
+		void GenerateClusterSSBO(uint32_t cameraIndex, GraphicsDevice* pDevice, CameraRef camera, DescriptorSetHandle clusterSet);
 
 		void ClusterPass(uint32_t cameraIndex);
 		void DynamicObjectsPass(uint32_t cameraIndex);
@@ -95,18 +92,25 @@ namespace Glory
 		std::vector<PipelineBatchData> m_DynamicBatchData;
 		CPUBuffer<PerCameraData> m_CameraDatas;
 		CPUBuffer<PerCameraData> m_LightCameraDatas;
+
+		/* Buffers */
 		BufferHandle m_CameraDatasBuffer = 0;
 		//BufferHandle m_LightCameraDatasBuffer = 0;
 		BufferHandle m_RenderConstantsBuffer = 0;
-		BufferHandle m_ScreenToViewBuffer = 0;
-
-		DescriptorSetHandle m_GlobalSet;
-		DescriptorSetLayoutHandle m_GlobalSetLayout;
-
+		BufferHandle m_ClusterConstantsBuffer = 0;
 		BufferHandle m_LightsSSBO = 0;
-		BufferHandle m_LightCountSSBO = 0;
 		//BufferHandle m_LightSpaceTransformsSSBO = 0;
 		BufferHandle m_LightDistancesSSBO = 0;
+
+		/* Descriptors */
+		DescriptorSetLayoutHandle m_GlobalRenderSetLayout;
+		DescriptorSetHandle m_GlobalRenderSet;
+		DescriptorSetLayoutHandle m_GlobalClusterSetLayout;
+		DescriptorSetHandle m_GlobalClusterSet;
+		DescriptorSetLayoutHandle m_GlobalLightSetLayout;
+		DescriptorSetHandle m_GlobalLightSet;
+		DescriptorSetLayoutHandle m_CameraClusterSetLayout;
+		DescriptorSetLayoutHandle m_CameraLightSetLayout;
 
 		static const size_t m_GridSizeX = 16;
 		static const size_t m_GridSizeY = 9;
@@ -115,10 +119,8 @@ namespace Glory
 		static const size_t MAX_LIGHTS_PER_TILE = 50;
 		static const size_t MAX_KERNEL_SIZE = 1024;
 
-		/* Compute shaders */
-		DescriptorSetLayoutHandle m_ClusterSetLayout;
-		DescriptorSetLayoutHandle m_ClusterCullLightSetLayout;
-		PipelineHandle m_ClusterPipeline = 0;
+		/* Compute pipelines */
+		PipelineHandle m_ClusterGeneratorPipeline = 0;
 		PipelineHandle m_ClusterCullLightPipeline = 0;
 	};
 }

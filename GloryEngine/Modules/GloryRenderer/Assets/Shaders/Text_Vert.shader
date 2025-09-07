@@ -3,6 +3,7 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 #include "Internal/RenderConstants.glsl"
+#include "Internal/Camera.glsl"
 #include "Internal/PerObjectData.glsl"
 
 layout(location = 0) in vec2 inPosition;

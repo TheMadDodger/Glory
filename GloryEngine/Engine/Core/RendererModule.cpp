@@ -454,9 +454,9 @@ namespace Glory
 		OnPostInitialize();
 	}
 
-	void RendererModule::OnCameraResize(CameraRef camera) {}
+	void RendererModule::OnCameraResize(uint32_t cameraIndex) {}
 
-	void RendererModule::OnCameraPerspectiveChanged(CameraRef camera) {}
+	void RendererModule::OnCameraPerspectiveChanged(uint32_t cameraIndex) {}
 
 	void RendererModule::LoadSettings(ModuleSettings& settings)
 	{

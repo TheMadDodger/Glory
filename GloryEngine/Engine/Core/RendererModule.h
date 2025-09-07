@@ -32,6 +32,9 @@ namespace Glory
 	{
 		glm::mat4 m_View;
 		glm::mat4 m_Projection;
+		float m_Near;
+		float m_Far;
+		glm::vec2 m_Resolution;
 	};
 
 	struct RenderConstants
@@ -121,8 +124,8 @@ namespace Glory
 
 		virtual void OnBeginFrame() override;
 
-		virtual void OnCameraResize(CameraRef camera);
-		virtual void OnCameraPerspectiveChanged(CameraRef camera);
+		virtual void OnCameraResize(uint32_t cameraIndex);
+		virtual void OnCameraPerspectiveChanged(uint32_t cameraIndex);
 		virtual MaterialData* GetInternalMaterial(std::string_view name) const = 0;
 
 		size_t LastSubmittedObjectCount();

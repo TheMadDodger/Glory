@@ -28,13 +28,19 @@ namespace Glory
 
 	GLORY_MODULE_VERSION_CPP(GloryRendererModule);
 
-	enum class BindingIndices : uint32_t
+	struct BindingIndices
 	{
-		RenderConstants = 1,
-		CameraDatas = 2,
-		WorldTransforms = 3,
-		Materials = 4,
-		HasTexture = 6,
+		static constexpr uint32_t RenderConstants = 0;
+		static constexpr uint32_t CameraDatas = 1;
+		static constexpr uint32_t WorldTransforms = 2;
+		static constexpr uint32_t Materials = 3;
+		static constexpr uint32_t HasTexture = 4;
+
+		static constexpr uint32_t Clusters = 2;
+		static constexpr uint32_t LightDatas = 3;
+		static constexpr uint32_t LightIndices = 4;
+		static constexpr uint32_t LightGrid = 5;
+		static constexpr uint32_t LightDistances = 6;
 	};
 
 	GloryRendererModule::GloryRendererModule()
@@ -45,22 +51,24 @@ namespace Glory
 	{
 	}
 
-	void GloryRendererModule::OnCameraResize(CameraRef camera)
+	void GloryRendererModule::OnCameraResize(uint32_t cameraIndex)
 	{
 		/* When the camera rendertexture resizes we need to generate a new grid of clusters for that camera */
+		CameraRef camera = m_FrameData.ActiveCameras[cameraIndex];
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		DescriptorSetHandle clusterSet = camera.GetUserHandle("ClusterSet");
 		if (!clusterSet) return; // Should not happen but just in case
-		GenerateClusterSSBO(pDevice, camera, clusterSet);
+		GenerateClusterSSBO(cameraIndex, pDevice, camera, clusterSet);
 	}
 
-	void GloryRendererModule::OnCameraPerspectiveChanged(CameraRef camera)
+	void GloryRendererModule::OnCameraPerspectiveChanged(uint32_t cameraIndex)
 	{
 		/* When the camera changed perspective we need to generate a new grid of clusters for that camera */
+		CameraRef camera = m_FrameData.ActiveCameras[cameraIndex];
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		DescriptorSetHandle clusterSet = camera.GetUserHandle("ClusterSet");
 		if (!clusterSet) return; // Should not happen but just in case
-		GenerateClusterSSBO(pDevice, camera, clusterSet);
+		GenerateClusterSSBO(cameraIndex, pDevice, camera, clusterSet);
 	}
 
 	MaterialData* GloryRendererModule::GetInternalMaterial(std::string_view name) const
@@ -113,6 +121,84 @@ namespace Glory
 		RendererModule::Initialize();
 	}
 
+	void CreateBufferDescriptorLayoutAndSet(GraphicsDevice* pDevice, bool usePushConstants, size_t numBuffers,
+		const std::vector<uint32_t>& bindingIndices, const std::vector<BufferType>& bufferTypes,
+		const std::vector<ShaderTypeFlag>& shaderStages, const std::vector<BufferHandle>& bufferHandles,
+		const std::vector<std::pair<uint32_t, uint32_t>>& bufferOffsetsAndSizes, DescriptorSetLayoutHandle& layout,
+		DescriptorSetHandle& set, BufferHandle* pConstantsBuffer=nullptr, ShaderTypeFlag constantsShaderStage=ShaderTypeFlag(0),
+		uint32_t constantsOffset=0, uint32_t constantsSize=0)
+	{
+		DescriptorSetLayoutInfo setLayoutInfo = DescriptorSetLayoutInfo();
+		DescriptorSetInfo setInfo = DescriptorSetInfo();
+		size_t firstBufferindex = 0;
+		if (pConstantsBuffer)
+		{
+			if (!usePushConstants)
+			{
+				firstBufferindex = 1;
+				setLayoutInfo.m_Buffers.resize(numBuffers + 1);
+				setInfo.m_Buffers.resize(numBuffers + 1);
+				if (!(*pConstantsBuffer))
+					*pConstantsBuffer = pDevice->CreateBuffer(constantsSize, BufferType::BT_Uniform);
+				setInfo.m_Buffers[0].m_BufferHandle = *pConstantsBuffer;
+				setInfo.m_Buffers[0].m_Offset = constantsOffset;
+				setInfo.m_Buffers[0].m_Size = constantsSize;
+				setLayoutInfo.m_Buffers[0].m_BindingIndex = BindingIndices::RenderConstants;
+				setLayoutInfo.m_Buffers[0].m_Type = BufferType::BT_Uniform;
+				setLayoutInfo.m_Buffers[0].m_ShaderStages = constantsShaderStage;
+			}
+			else
+			{
+				setLayoutInfo.m_Buffers.resize(numBuffers);
+				setInfo.m_Buffers.resize(numBuffers);
+				setLayoutInfo.m_PushConstantRange.m_Offset = constantsOffset;
+				setLayoutInfo.m_PushConstantRange.m_Size = constantsSize;
+				setLayoutInfo.m_PushConstantRange.m_ShaderStages = constantsShaderStage;
+			}
+		}
+		else
+		{
+			setLayoutInfo.m_Buffers.resize(numBuffers);
+			setInfo.m_Buffers.resize(numBuffers);
+		}
+
+		for (size_t i = 0; i < numBuffers; ++i)
+		{
+			const uint32_t bindingIndex = i >= bindingIndices.size() ? bindingIndices.back() : bindingIndices[i];
+			const BufferType bufferType = i >= bufferTypes.size() ? bufferTypes.back() : bufferTypes[i];
+			const ShaderTypeFlag shaderStage = i >= shaderStages.size() ? shaderStages.back() : shaderStages[i];
+
+			const size_t index = firstBufferindex + i;
+			setLayoutInfo.m_Buffers[index].m_BindingIndex = bindingIndex;
+			setLayoutInfo.m_Buffers[index].m_Type = bufferType;
+			setLayoutInfo.m_Buffers[index].m_ShaderStages = shaderStage;
+			setInfo.m_Buffers[index].m_BufferHandle = bufferHandles[i];
+			setInfo.m_Buffers[index].m_Offset = bufferOffsetsAndSizes[i].first;
+			setInfo.m_Buffers[index].m_Size = bufferOffsetsAndSizes[i].second;
+		}
+		layout = setInfo.m_Layout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
+		set = pDevice->CreateDescriptorSet(std::move(setInfo));
+	}
+
+	DescriptorSetLayoutHandle CreateBufferDescriptorLayout(GraphicsDevice* pDevice, size_t numBuffers,
+		const std::vector<uint32_t>& bindingIndices, const std::vector<BufferType>& bufferTypes,
+		const std::vector<ShaderTypeFlag>& shaderStages)
+	{
+		DescriptorSetLayoutInfo setLayoutInfo = DescriptorSetLayoutInfo();
+		setLayoutInfo.m_Buffers.resize(numBuffers);
+
+		for (size_t i = 0; i < numBuffers; ++i)
+		{
+			const uint32_t bindingIndex = i >= bindingIndices.size() ? bindingIndices.back() : bindingIndices[i];
+			const BufferType bufferType = i >= bufferTypes.size() ? bufferTypes.back() : bufferTypes[i];
+			const ShaderTypeFlag shaderStage = i >= shaderStages.size() ? shaderStages.back() : shaderStages[i];
+			setLayoutInfo.m_Buffers[i].m_BindingIndex = bindingIndex;
+			setLayoutInfo.m_Buffers[i].m_Type = bufferType;
+			setLayoutInfo.m_Buffers[i].m_ShaderStages = shaderStage;
+		}
+		return pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
+	}
+
 	void GloryRendererModule::OnPostInitialize()
 	{
 		const ModuleSettings& settings = Settings();
@@ -135,65 +221,32 @@ namespace Glory
 			return;
 		}
 
-		const bool usePushConstants = pDevice->IsSupported(APIFeatures::PushConstants);
-		DescriptorSetLayoutInfo setLayoutInfo;
-		DescriptorSetInfo setInfo;
-		setLayoutInfo.m_Buffers.resize(usePushConstants ? 1 : 2);
-		setInfo.m_Buffers.resize(usePushConstants ? 1 : 2);
-		if (!usePushConstants)
-		{
-			m_RenderConstantsBuffer = setInfo.m_Buffers[0].m_BufferHandle = pDevice->CreateBuffer(sizeof(RenderConstants), BufferType::BT_Uniform);
-			setInfo.m_Buffers[0].m_Offset = 0;
-			setInfo.m_Buffers[0].m_Size = sizeof(RenderConstants);
-			setLayoutInfo.m_Buffers[0].m_BindingIndex = uint32_t(BindingIndices::RenderConstants);
-			setLayoutInfo.m_Buffers[0].m_Type = BufferType::BT_Uniform;
-			setLayoutInfo.m_Buffers[0].m_ShaderStages = ShaderTypeFlag(STF_Vertex | STF_Fragment);
-		}
-		else
-		{
-			setLayoutInfo.m_PushConstantRange.m_Offset = 0;
-			setLayoutInfo.m_PushConstantRange.m_Size = sizeof(RenderConstants);
-			setLayoutInfo.m_PushConstantRange.m_ShaderStages = ShaderTypeFlag(STF_Vertex | STF_Fragment);
-		}
-		const size_t cameraDatasBufferIndex = usePushConstants ? 0 : 1;
-		m_CameraDatasBuffer = setInfo.m_Buffers[cameraDatasBufferIndex].m_BufferHandle = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_CAMERAS, BufferType::BT_Uniform);
-		setLayoutInfo.m_Buffers[cameraDatasBufferIndex].m_BindingIndex = uint32_t(BindingIndices::CameraDatas);
-		setLayoutInfo.m_Buffers[cameraDatasBufferIndex].m_Type = BufferType::BT_Uniform;
-		setLayoutInfo.m_Buffers[cameraDatasBufferIndex].m_ShaderStages = ShaderTypeFlag(STF_Vertex);
-		setInfo.m_Buffers[cameraDatasBufferIndex].m_Offset = 0;
-		setInfo.m_Buffers[cameraDatasBufferIndex].m_Size = sizeof(PerCameraData)*MAX_CAMERAS;
-		//m_LightCameraDatasBuffer = pDevice->CreateBuffer(CameraDatasBufferName, sizeof(PerCameraData)*MAX_LIGHTS, BufferType::BT_Uniform);
-
-		m_GlobalSetLayout = setInfo.m_Layout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
-		m_GlobalSet = pDevice->CreateDescriptorSet(std::move(setInfo));
-
-		setLayoutInfo = DescriptorSetLayoutInfo();
-		setLayoutInfo.m_Buffers.resize(2);
-		setLayoutInfo.m_Buffers[0].m_BindingIndex = 1;
-		setLayoutInfo.m_Buffers[0].m_Type = BufferType::BT_Storage;
-		setLayoutInfo.m_Buffers[0].m_ShaderStages = STF_Compute;
-		setLayoutInfo.m_Buffers[1].m_BindingIndex = 2;
-		setLayoutInfo.m_Buffers[1].m_Type = BufferType::BT_Storage;
-		setLayoutInfo.m_Buffers[1].m_ShaderStages = STF_Compute;
-		m_ClusterSetLayout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
-
-		setLayoutInfo = DescriptorSetLayoutInfo();
-		setLayoutInfo.m_Buffers.resize(7);
-		for (size_t i = 0; i < setLayoutInfo.m_Buffers.size(); ++i)
-		{
-			setLayoutInfo.m_Buffers[i].m_BindingIndex = static_cast<uint32_t>(i + 1);
-			setLayoutInfo.m_Buffers[i].m_Type = BufferType::BT_Storage;
-			setLayoutInfo.m_Buffers[i].m_ShaderStages = STF_Compute;
-		}
-		m_ClusterCullLightSetLayout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
-
-		m_ScreenToViewBuffer = pDevice->CreateBuffer(sizeof(ScreenToView), BufferType::BT_Storage);
-		pDevice->AssignBuffer(m_ScreenToViewBuffer, &ScreenToView(), sizeof(ScreenToView));
-
+		/* Global data buffers */
+		m_CameraDatasBuffer = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_CAMERAS, BufferType::BT_Uniform);
+		//m_LightCameraDatasBuffer = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_LIGHTS, BufferType::BT_Uniform);
 		m_LightsSSBO = pDevice->CreateBuffer(sizeof(LightData)*MAX_LIGHTS, BufferType::BT_Storage);
-		m_LightCountSSBO = pDevice->CreateBuffer(sizeof(uint32_t), BufferType::BT_Storage);
 		//m_LightSpaceTransformsSSBO = pDevice->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferType::BT_Storage);
 		m_LightDistancesSSBO = pDevice->CreateBuffer(sizeof(uint32_t)*MAX_LIGHTS, BufferType::BT_Storage);
+
+		/* Global set */
+		const bool usePushConstants = pDevice->IsSupported(APIFeatures::PushConstants);
+		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BindingIndices::CameraDatas },
+			{ BufferType::BT_Uniform }, { STF_Vertex }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
+			m_GlobalRenderSetLayout, m_GlobalRenderSet, &m_RenderConstantsBuffer, ShaderTypeFlag(STF_Vertex | STF_Fragment), 0, sizeof(RenderConstants));
+
+		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BindingIndices::CameraDatas },
+			{ BufferType::BT_Uniform }, { STF_Compute }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
+			m_GlobalClusterSetLayout, m_GlobalClusterSet, &m_ClusterConstantsBuffer, STF_Compute, 0, sizeof(ClusterConstants));
+
+		m_CameraClusterSetLayout = CreateBufferDescriptorLayout(pDevice, 1, { BindingIndices::Clusters },
+			{ BufferType::BT_Storage }, { ShaderTypeFlag(STF_Compute | STF_Fragment) });
+
+		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BindingIndices::LightDatas },
+			{ BufferType::BT_Storage }, { STF_Compute }, { m_LightsSSBO }, { { 0, sizeof(LightData)*MAX_LIGHTS } },
+			m_GlobalLightSetLayout, m_GlobalLightSet);
+
+		m_CameraLightSetLayout = CreateBufferDescriptorLayout(pDevice, 3, { BindingIndices::LightIndices, BindingIndices::LightGrid, BindingIndices::LightDistances },
+			{ BufferType::BT_Storage }, { STF_Compute });
 
 		ResetLightDistances = new uint32_t[MAX_LIGHTS];
 		for (size_t i = 0; i < MAX_LIGHTS; ++i)
@@ -223,6 +276,9 @@ namespace Glory
 
 	void GloryRendererModule::Draw()
 	{
+		const ModuleSettings& settings = Settings();
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
+
 		//m_pEngine->GetDebug().SubmitLines(this, &m_pEngine->Time());
 		//Render();
 
@@ -235,18 +291,31 @@ namespace Glory
 			CameraRef camera = m_FrameData.ActiveCameras[i];
 
 			RenderPassHandle& renderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("RenderPass"));
-			if (renderPass) continue;
-			RenderPassInfo renderPassInfo;
-			renderPassInfo.RenderTextureInfo.Width = camera.GetResolution().x;
-			renderPassInfo.RenderTextureInfo.Height = camera.GetResolution().y;
-			renderPassInfo.RenderTextureInfo.HasDepth = true;
-			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("object", PixelFormat::PF_RGBAI, PixelFormat::PF_R32G32B32A32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UInt, false));
-			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Debug", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Normal", PixelFormat::PF_RGBA, PixelFormat::PF_R16G16B16A16Sfloat, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("AOBlurred", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Data", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-			renderPass = pDevice->CreateRenderPass(renderPassInfo);
+			//RenderPassHandle& deferredRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("DeferredRenderPass"));
+			const auto& resolution = camera.GetResolution();
+			if (!renderPass)
+			{
+				RenderPassInfo renderPassInfo;
+				renderPassInfo.RenderTextureInfo.Width = resolution.x;
+				renderPassInfo.RenderTextureInfo.Height = resolution.y;
+				renderPassInfo.RenderTextureInfo.HasDepth = true;
+				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("object", PixelFormat::PF_RGBAI, PixelFormat::PF_R32G32B32A32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UInt, false));
+				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Debug", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Normal", PixelFormat::PF_RGBA, PixelFormat::PF_R16G16B16A16Sfloat, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("AOBlurred", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Data", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+				renderPass = pDevice->CreateRenderPass(renderPassInfo);
+			}
+			/*if (!deferredRenderPass)
+			{
+				RenderPassInfo renderPassInfo;
+				renderPassInfo.RenderTextureInfo.Width = resolution.x;
+				renderPassInfo.RenderTextureInfo.Height = resolution.y;
+				renderPassInfo.RenderTextureInfo.HasDepth = false;
+				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+				deferredRenderPass = pDevice->CreateRenderPass(renderPassInfo);
+			}*/
 		}
 
 		m_PickResults.clear();
@@ -262,19 +331,25 @@ namespace Glory
 			CameraRef camera = m_FrameData.ActiveCameras[i];
 
 			RenderPassHandle& renderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("RenderPass"));
+			RenderPassHandle& deferredRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("DeferredRenderPass"));
+			/* Light cluster culling */
 			ClusterPass(static_cast<uint32_t>(i));
+			
+			/* Draw objects */
 			pDevice->BeginRenderPass(m_CommandBuffer, renderPass);
 			DynamicObjectsPass(static_cast<uint32_t>(i));
 			pDevice->EndRenderPass(m_CommandBuffer);
+
+			/* Deferred composite */
+			//pDevice->BeginRenderPass(m_CommandBuffer, deferredRenderPass);
+
+			//pDevice->EndRenderPass(m_CommandBuffer);
 		}
 
 		pDevice->End(m_CommandBuffer);
 		pDevice->Commit(m_CommandBuffer);
 		pDevice->Wait(m_CommandBuffer);
 		pDevice->Release(m_CommandBuffer);
-
-		//m_LastSubmittedObjectCount = m_FrameData.ObjectsToRender.size();
-		//m_LastSubmittedCameraCount = m_FrameData.ActiveCameras.size();
 
 		//std::scoped_lock lock(m_PickLock);
 		//m_LastFramePickResults.resize(m_PickResults.size());
@@ -355,7 +430,7 @@ namespace Glory
 			PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineRenderData.m_PipelineID);
 			if (!pPipelineData) continue;
 			pDevice->BeginPipeline(m_CommandBuffer, batchData.m_Pipeline);
-			pDevice->BindDescriptorSets(m_CommandBuffer, batchData.m_Pipeline, { m_GlobalSet, batchData.m_Set });
+			pDevice->BindDescriptorSets(m_CommandBuffer, batchData.m_Pipeline, { m_GlobalRenderSet, batchData.m_Set });
 
 			uint32_t objectIndex = 0;
 			for (UUID uniqueMeshID : pipelineRenderData.m_UniqueMeshOrder)
@@ -383,7 +458,7 @@ namespace Glory
 					constants.m_MaterialIndex = meshBatch.m_MaterialIndices[i];
 
 					if (usePushConstants)
-						pDevice->PushConstants(m_CommandBuffer, batchData.m_Pipeline, 0, sizeof(RenderConstants), &constants);
+						pDevice->PushConstants(m_CommandBuffer, batchData.m_Pipeline, 0, sizeof(RenderConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
 					else
 						pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(RenderConstants));
 					if (!batchData.m_TextureSets.empty())
@@ -406,16 +481,16 @@ namespace Glory
 		if (!pDevice) return;
 
 		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
-		if (!m_ClusterPipeline)
+		if (!m_ClusterGeneratorPipeline)
 		{
-			PipelineData* pClusterPipeline = pipelines.GetPipelineData(clusterGeneratorPipeline);
-			m_ClusterPipeline = pDevice->CreateComputePipeline(pClusterPipeline, { m_ClusterSetLayout });
+			PipelineData* pPipeline = pipelines.GetPipelineData(clusterGeneratorPipeline);
+			m_ClusterGeneratorPipeline = pDevice->CreateComputePipeline(pPipeline, { m_GlobalClusterSetLayout, m_CameraClusterSetLayout });
 		}
-
 		if (!m_ClusterCullLightPipeline)
 		{
-			PipelineData* pClusterCullLightPipeline = pipelines.GetPipelineData(clusterCullLightPipeline);
-			m_ClusterCullLightPipeline = pDevice->CreateComputePipeline(pClusterCullLightPipeline, { m_ClusterCullLightSetLayout });
+			PipelineData* pPipeline = pipelines.GetPipelineData(clusterCullLightPipeline);
+			m_ClusterCullLightPipeline = pDevice->CreateComputePipeline(pPipeline,
+				{ m_GlobalClusterSetLayout, m_CameraClusterSetLayout, m_GlobalLightSetLayout, m_CameraLightSetLayout });
 		}
 
 		MaterialManager& materials = m_pEngine->GetMaterialManager();
@@ -427,10 +502,10 @@ namespace Glory
 		{
 			CameraRef camera = m_FrameData.ActiveCameras[i];
 
-			const PerCameraData cameraData{ camera.GetView(), camera.GetProjection() };
+			const PerCameraData cameraData{ camera.GetView(), camera.GetProjection(),
+				camera.GetNear(), camera.GetFar(), { static_cast<glm::vec2>(camera.GetResolution()) }};
 
-			if (m_CameraDatas.m_Data[i].m_Projection != cameraData.m_Projection ||
-				m_CameraDatas.m_Data[i].m_View != cameraData.m_View)
+			if (std::memcmp(&m_CameraDatas.m_Data[i], &cameraData, sizeof(PerCameraData)) != 0)
 			{
 				std::memcpy(&m_CameraDatas.m_Data[i], &cameraData, sizeof(PerCameraData));
 				m_CameraDatas.m_Dirty = true;
@@ -440,52 +515,39 @@ namespace Glory
 			if (!clusterSSBOHandle)
 			{
 				DescriptorSetHandle& clusterSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("ClusterSet"));
-				DescriptorSetHandle& clusterCullSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("ClusterCullSet"));
+				DescriptorSetHandle& lightSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("LightSet"));
 				BufferHandle& lightIndexSSBO = reinterpret_cast<BufferHandle&>(camera.GetUserHandle("LightIndexSSBO"));
 				BufferHandle& lightGridSSBO = reinterpret_cast<BufferHandle&>(camera.GetUserHandle("LightGridSSBO"));
+				BufferHandle& lightDistancesSSBO = reinterpret_cast<BufferHandle&>(camera.GetUserHandle("LightDistancesSSBO"));
 
 				clusterSSBOHandle = pDevice->CreateBuffer(sizeof(VolumeTileAABB)*NUM_CLUSTERS, BufferType::BT_Storage);
 				lightIndexSSBO = pDevice->CreateBuffer(sizeof(uint32_t)*(NUM_CLUSTERS*MAX_LIGHTS_PER_TILE + 1), BufferType::BT_Storage);
 				lightGridSSBO = pDevice->CreateBuffer(sizeof(LightGrid)*NUM_CLUSTERS, BufferType::BT_Storage);
+				lightDistancesSSBO = pDevice->CreateBuffer(sizeof(uint32_t)*MAX_LIGHTS, BufferType::BT_Storage);
 
-				DescriptorSetInfo setInfo = DescriptorSetInfo();
-				setInfo.m_Layout = m_ClusterSetLayout;
-				setInfo.m_Buffers.resize(2);
+				DescriptorSetInfo setInfo;
+				setInfo.m_Layout = m_CameraClusterSetLayout;
+				setInfo.m_Buffers.resize(1);
 				setInfo.m_Buffers[0].m_BufferHandle = clusterSSBOHandle;
 				setInfo.m_Buffers[0].m_Offset = 0;
 				setInfo.m_Buffers[0].m_Size = sizeof(VolumeTileAABB)*NUM_CLUSTERS;
-				setInfo.m_Buffers[1].m_BufferHandle = m_ScreenToViewBuffer;
-				setInfo.m_Buffers[1].m_Offset = 0;
-				setInfo.m_Buffers[1].m_Size = sizeof(ScreenToView);
 				clusterSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 
 				setInfo = DescriptorSetInfo();
-				setInfo.m_Layout = m_ClusterCullLightSetLayout;
-				setInfo.m_Buffers.resize(7);
-				setInfo.m_Buffers[0].m_BufferHandle = clusterSSBOHandle;
+				setInfo.m_Layout = m_CameraLightSetLayout;
+				setInfo.m_Buffers.resize(3);
+				setInfo.m_Buffers[0].m_BufferHandle = lightIndexSSBO;
 				setInfo.m_Buffers[0].m_Offset = 0;
-				setInfo.m_Buffers[0].m_Size = sizeof(VolumeTileAABB)*NUM_CLUSTERS;
-				setInfo.m_Buffers[1].m_BufferHandle = m_ScreenToViewBuffer;
+				setInfo.m_Buffers[0].m_Size = sizeof(uint32_t)*(NUM_CLUSTERS*MAX_LIGHTS_PER_TILE + 1);
+				setInfo.m_Buffers[1].m_BufferHandle = lightGridSSBO;
 				setInfo.m_Buffers[1].m_Offset = 0;
-				setInfo.m_Buffers[1].m_Size = sizeof(ScreenToView);
-				setInfo.m_Buffers[2].m_BufferHandle = m_LightsSSBO;
+				setInfo.m_Buffers[1].m_Size = sizeof(LightGrid)*NUM_CLUSTERS;
+				setInfo.m_Buffers[2].m_BufferHandle = lightDistancesSSBO;
 				setInfo.m_Buffers[2].m_Offset = 0;
-				setInfo.m_Buffers[2].m_Size = sizeof(LightData)*MAX_LIGHTS;
-				setInfo.m_Buffers[3].m_BufferHandle = lightIndexSSBO;
-				setInfo.m_Buffers[3].m_Offset = 0;
-				setInfo.m_Buffers[3].m_Size = sizeof(uint32_t)*(NUM_CLUSTERS*MAX_LIGHTS_PER_TILE + 1);
-				setInfo.m_Buffers[4].m_BufferHandle = lightGridSSBO;
-				setInfo.m_Buffers[4].m_Offset = 0;
-				setInfo.m_Buffers[4].m_Size = sizeof(LightGrid)*NUM_CLUSTERS;
-				setInfo.m_Buffers[5].m_BufferHandle = m_LightDistancesSSBO;
-				setInfo.m_Buffers[5].m_Offset = 0;
-				setInfo.m_Buffers[5].m_Size = sizeof(uint32_t)*MAX_LIGHTS;
-				setInfo.m_Buffers[6].m_BufferHandle = m_LightCountSSBO;
-				setInfo.m_Buffers[6].m_Offset = 0;
-				setInfo.m_Buffers[6].m_Size = sizeof(uint32_t);
-				clusterCullSet = pDevice->CreateDescriptorSet(std::move(setInfo));
+				setInfo.m_Buffers[2].m_Size = sizeof(uint32_t)*MAX_LIGHTS;
+				lightSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 
-				GenerateClusterSSBO(pDevice, camera, clusterSet);
+				GenerateClusterSSBO(i, pDevice, camera, clusterSet);
 			}
 		}
 		if (m_CameraDatas)
@@ -493,11 +555,8 @@ namespace Glory
 				static_cast<uint32_t>(m_CameraDatas->size()*sizeof(PerCameraData)));
 
 		/* Update light data */
-		const uint32_t count = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
-		pDevice->AssignBuffer(m_LightCountSSBO, &count, sizeof(uint32_t));
 		pDevice->AssignBuffer(m_LightsSSBO, m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS*sizeof(LightData));
 		//pDevice->AssignBuffer(m_LightSpaceTransformsSSBO, m_FrameData.LightSpaceTransforms.data(), 0, MAX_LIGHTS*sizeof(glm::mat4));
-		//pDevice->AssignBuffer(m_LightDistancesSSBO, ResetLightDistances);
 
 		/*if (m_LightCameraDatas->size() < m_FrameData.LightSpaceTransforms.count()) m_LightCameraDatas.resize(m_FrameData.LightSpaceTransforms.count());
 		for (size_t i = 0; i < m_FrameData.LightSpaceTransforms.count(); ++i)
@@ -685,7 +744,7 @@ namespace Glory
 			if (!batchData.m_Pipeline)
 			{
 				std::vector<DescriptorSetLayoutHandle> descriptorSetLayouts(textureCount ? 3 : 2);
-				descriptorSetLayouts[0] = m_GlobalSetLayout;
+				descriptorSetLayouts[0] = m_GlobalRenderSetLayout;
 				descriptorSetLayouts[1] = batchData.m_SetLayout;
 				if (textureCount) descriptorSetLayouts[2] = batchData.m_TextureSetLayout;
 
@@ -700,7 +759,7 @@ namespace Glory
 		}
 	}
 
-	void GloryRendererModule::GenerateClusterSSBO(GraphicsDevice* pDevice, CameraRef camera, DescriptorSetHandle clusterSet)
+	void GloryRendererModule::GenerateClusterSSBO(uint32_t cameraIndex, GraphicsDevice* pDevice, CameraRef camera, DescriptorSetHandle clusterSet)
 	{
 		const glm::uvec2 resolution = camera.GetResolution();
 		const glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
@@ -709,21 +768,20 @@ namespace Glory
 		const float zFar = camera.GetFar();
 
 		const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x/(float)gridSize.x), (uint32_t)std::ceilf(resolution.y/(float)gridSize.y));
-		ScreenToView screenToView;
-		screenToView.ProjectionInverse = camera.GetProjectionInverse();
-		screenToView.ViewInverse = camera.GetViewInverse();
-		screenToView.ScreenDimensions = resolution;
-		screenToView.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
-		screenToView.Scale = (float)gridSize.z/std::log2f(zFar/zNear);
-		screenToView.Bias = -((float)gridSize.z*std::log2f(zNear)/std::log2f(zFar/zNear));
-		screenToView.zNear = zNear;
-		screenToView.zFar = zFar;
-
-		pDevice->AssignBuffer(m_ScreenToViewBuffer, (void*)&screenToView, sizeof(ScreenToView));
+		ClusterConstants constants;
+		constants.CameraIndex = cameraIndex;
+		constants.LightCount = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
+		constants.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
+		constants.Scale = (float)gridSize.z/std::log2f(zFar/zNear);
+		constants.Bias = -((float)gridSize.z*std::log2f(zNear)/std::log2f(zFar/zNear));
 
 		CommandBufferHandle commandBuffer = pDevice->Begin();
-		pDevice->BeginPipeline(commandBuffer, m_ClusterPipeline);
-		pDevice->BindDescriptorSets(commandBuffer, m_ClusterPipeline, { clusterSet });
+		pDevice->BeginPipeline(commandBuffer, m_ClusterGeneratorPipeline);
+		pDevice->BindDescriptorSets(commandBuffer, m_ClusterGeneratorPipeline, { m_GlobalClusterSet, clusterSet });
+		if (!m_ClusterConstantsBuffer)
+			pDevice->PushConstants(commandBuffer, m_ClusterGeneratorPipeline, 0, sizeof(ClusterConstants), &constants, STF_Compute);
+		else
+			pDevice->AssignBuffer(m_ClusterConstantsBuffer, &constants, sizeof(ClusterConstants));
 		pDevice->Dispatch(commandBuffer, gridSize.x, gridSize.y, gridSize.z);
 		pDevice->EndPipeline(commandBuffer);
 		pDevice->End(commandBuffer);
@@ -735,35 +793,30 @@ namespace Glory
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 
 		CameraRef camera = m_FrameData.ActiveCameras[cameraIndex];
-		DescriptorSetHandle& clusterCullSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("ClusterCullSet"));
+		const DescriptorSetHandle& clusterSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("ClusterSet"));
+		const DescriptorSetHandle& lightSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("LightSet"));
 
-		glm::uvec2 resolution = camera.GetResolution();
-		glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
-
-		BufferHandle clusterSSBO = camera.GetUserHandle("ClusterSSBO");
-		BufferHandle lightIndexSSBO = camera.GetUserHandle("LightIndexSSBO");
-		BufferHandle lightGridSSBO = camera.GetUserHandle("LightGridSSBO");
-		if (!clusterSSBO || !lightIndexSSBO || !lightGridSSBO) return;
+		const glm::uvec2 resolution = camera.GetResolution();
+		const glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
 
 		float zNear = camera.GetNear();
 		float zFar = camera.GetFar();
 
 		const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x/(float)gridSize.x), (uint32_t)std::ceilf(resolution.y/(float)gridSize.y));
-		ScreenToView screenToView;
-		screenToView.ProjectionInverse = camera.GetProjectionInverse();
-		screenToView.ViewInverse = camera.GetViewInverse();
-		screenToView.ScreenDimensions = resolution;
-		screenToView.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
-		screenToView.Scale = (float)gridSize.z/std::log2f(zFar/zNear);
-		screenToView.Bias = -((float)gridSize.z*std::log2f(zNear)/std::log2f(zFar/zNear));
-		screenToView.zNear = zNear;
-		screenToView.zFar = zFar;
-
-		pDevice->AssignBuffer(m_ScreenToViewBuffer, (void*)&screenToView, sizeof(ScreenToView));
+		ClusterConstants constants;
+		constants.CameraIndex = cameraIndex;
+		constants.LightCount = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
+		constants.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
+		constants.Scale = (float)gridSize.z/std::log2f(zFar/zNear);
+		constants.Bias = -((float)gridSize.z*std::log2f(zNear)/std::log2f(zFar/zNear));
 
 		CommandBufferHandle commandBuffer = pDevice->Begin();
 		pDevice->BeginPipeline(commandBuffer, m_ClusterCullLightPipeline);
-		pDevice->BindDescriptorSets(commandBuffer, m_ClusterCullLightPipeline, { clusterCullSet });
+		pDevice->BindDescriptorSets(commandBuffer, m_ClusterCullLightPipeline, { m_GlobalClusterSet, clusterSet, m_GlobalLightSet, lightSet });
+		if (!m_ClusterConstantsBuffer)
+			pDevice->PushConstants(commandBuffer, m_ClusterCullLightPipeline, 0, sizeof(ClusterConstants), &constants, STF_Compute);
+		else
+			pDevice->AssignBuffer(m_ClusterConstantsBuffer, &constants, sizeof(ClusterConstants));
 		pDevice->Dispatch(commandBuffer, 1, 1, 6);
 		pDevice->EndPipeline(commandBuffer);
 		pDevice->End(commandBuffer);

@@ -147,7 +147,7 @@ namespace Glory
         virtual void EndRenderPass(CommandBufferHandle commandBuffer) override;
         virtual void EndPipeline(CommandBufferHandle) override;
         virtual void BindDescriptorSets(CommandBufferHandle commandBuffer, PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t firstSet=0) override;
-        virtual void PushConstants(CommandBufferHandle commandBuffer, PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data) override;
+        virtual void PushConstants(CommandBufferHandle commandBuffer, PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data, ShaderTypeFlag shaderStages) override;
 
         virtual void DrawMesh(CommandBufferHandle commandBuffer, MeshHandle handle) override;
         virtual void Dispatch(CommandBufferHandle commandBuffer, uint32_t x, uint32_t y, uint32_t z) override;

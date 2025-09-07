@@ -463,12 +463,8 @@ namespace Glory
 
 				glBindBuffer(glBuffer->m_GLTarget, glBuffer->m_GLBufferID);
 				OpenGLGraphicsModule::LogGLError(glGetError());
-
-				if (glSetLayout->m_BindingIndices[index])
-				{
-					glBindBufferBase(glBuffer->m_GLTarget, (GLuint)glSetLayout->m_BindingIndices[index], glBuffer->m_GLBufferID);
-					OpenGLGraphicsModule::LogGLError(glGetError());
-				}
+				glBindBufferBase(glBuffer->m_GLTarget, (GLuint)glSetLayout->m_BindingIndices[index], glBuffer->m_GLBufferID);
+				OpenGLGraphicsModule::LogGLError(glGetError());
 				++index;
 			}
 
@@ -492,7 +488,7 @@ namespace Glory
 		}
 	}
 
-	void OpenGLDevice::PushConstants(CommandBufferHandle, PipelineHandle, uint32_t, uint32_t, const void*)
+	void OpenGLDevice::PushConstants(CommandBufferHandle, PipelineHandle, uint32_t, uint32_t, const void*, ShaderTypeFlag)
 	{
 		Debug().LogError("OpenGLDevice::PushConstants: Not supported on OpenGL device.");
 	}

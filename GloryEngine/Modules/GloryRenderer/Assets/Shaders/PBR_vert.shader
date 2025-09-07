@@ -6,6 +6,7 @@
 #define FEATURE_TEXTURED
 
 #include "Internal/RenderConstants.glsl"
+#include "Internal/Camera.glsl"
 #include "Internal/PerObjectData.glsl"
 
 layout(location = 0) in vec3 inPosition;
