@@ -39,6 +39,11 @@ namespace Glory
 		m_pModule = nullptr;
 	}
 
+	void GraphicsDevice::DrawQuad(CommandBufferHandle commandBuffer)
+	{
+		DrawMesh(commandBuffer, m_ScreenMesh);
+	}
+
 	PipelineHandle GraphicsDevice::AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
 		std::vector<DescriptorSetLayoutHandle>&& descriptorSets, size_t stride, const std::vector<AttributeType>& attributeTypes)
 	{
@@ -107,5 +112,20 @@ namespace Glory
 	bool GraphicsDevice::IsSupported(const APIFeatures& features) const
 	{
 		return m_APIFeatures.HasFlag(features);
+	}
+
+	void GraphicsDevice::Initialize()
+	{
+		static const float vertices[] = {
+			-1.0f, -1.0f, 0.0f,
+			 1.0f, -1.0f, 0.0f,
+			-1.0f,  1.0f, 0.0f,
+			-1.0f,  1.0f, 0.0f,
+			 1.0f, -1.0f, 0.0f,
+			 1.0f,  1.0f, 0.0f,
+		};
+		BufferHandle buffer = CreateBuffer(sizeof(vertices), BufferType::BT_Vertex);
+		AssignBuffer(buffer, vertices, sizeof(vertices));
+		m_ScreenMesh = CreateMesh({ buffer }, 6, 0, sizeof(glm::vec3), PrimitiveType::PT_Triangles, { AttributeType::Float3 });
 	}
 }

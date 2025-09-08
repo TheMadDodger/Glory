@@ -7,15 +7,15 @@
 
 layout(location = 0) in vec2 Coord;
 layout(location = 0) out vec4 out_Color;
-layout (binding = 0) uniform sampler2D Debug;
-layout (binding = 1) uniform sampler2D Color;
-layout (binding = 2) uniform sampler2D Normal;
-layout (binding = 3) uniform sampler2D AO;
-layout (binding = 4) uniform sampler2D Data;
-layout (binding = 5) uniform sampler2D Depth;
+layout (set = 0, binding = 0) uniform sampler2D Debug;
+layout (set = 0, binding = 1) uniform sampler2D Color;
+layout (set = 0, binding = 2) uniform sampler2D Normal;
+layout (set = 0, binding = 3) uniform sampler2D AO;
+layout (set = 0, binding = 4) uniform sampler2D Data;
+layout (set = 0, binding = 5) uniform sampler2D Depth;
 
-layout (binding = 6) uniform samplerCube IrradianceMap;
-layout (binding = 7) uniform sampler2D ShadowAtlas;
+layout (set = 1, binding = 6) uniform samplerCube IrradianceMap;
+layout (set = 1, binding = 7) uniform sampler2D ShadowAtlas;
 
 #include "Internal/DepthHelpers.glsl"
 

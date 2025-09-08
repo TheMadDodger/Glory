@@ -30,6 +30,15 @@ namespace Glory
 		float Bias;
 	};
 
+	struct SSAOConstants
+	{
+		glm::uvec4 TileSizes;
+		uint32_t CameraIndex;
+		int32_t KernelSize;
+		float SampleRadius;
+		float SampleBias;
+	};
+
 	class GloryRendererModule : public RendererModule
 	{
 	private:
@@ -88,6 +97,9 @@ namespace Glory
 		void ClusterPass(uint32_t cameraIndex);
 		void DynamicObjectsPass(uint32_t cameraIndex);
 
+		void GenerateDomeSamplePointsSSBO(GraphicsDevice* pDevice, uint32_t size);
+		void GenerateNoiseTexture(GraphicsDevice* pDevice);
+
 	private:
 		std::vector<PipelineBatchData> m_DynamicBatchData;
 		CPUBuffer<PerCameraData> m_CameraDatas;
@@ -100,17 +112,25 @@ namespace Glory
 		BufferHandle m_ClusterConstantsBuffer = 0;
 		BufferHandle m_LightsSSBO = 0;
 		//BufferHandle m_LightSpaceTransformsSSBO = 0;
-		BufferHandle m_LightDistancesSSBO = 0;
+		BufferHandle m_SSAOConstantsBuffer = 0;
+		BufferHandle m_SamplePointsDomeSSBO = 0;
 
 		/* Descriptors */
 		DescriptorSetLayoutHandle m_GlobalRenderSetLayout;
-		DescriptorSetHandle m_GlobalRenderSet;
 		DescriptorSetLayoutHandle m_GlobalClusterSetLayout;
-		DescriptorSetHandle m_GlobalClusterSet;
 		DescriptorSetLayoutHandle m_GlobalLightSetLayout;
-		DescriptorSetHandle m_GlobalLightSet;
+		DescriptorSetLayoutHandle m_GlobalSampleDomeSetLayout;
 		DescriptorSetLayoutHandle m_CameraClusterSetLayout;
 		DescriptorSetLayoutHandle m_CameraLightSetLayout;
+		DescriptorSetLayoutHandle m_SSAOSamplersSetLayout;
+		DescriptorSetLayoutHandle m_NoiseSamplerSetLayout;
+
+		DescriptorSetHandle m_GlobalRenderSet;
+		DescriptorSetHandle m_GlobalClusterSet;
+		DescriptorSetHandle m_GlobalLightSet;
+		DescriptorSetHandle m_GlobalSampleDomeSet;
+		DescriptorSetHandle m_SSAOCameraSet;
+		DescriptorSetHandle m_NoiseSamplerSet;
 
 		static const size_t m_GridSizeX = 16;
 		static const size_t m_GridSizeY = 9;
@@ -119,8 +139,18 @@ namespace Glory
 		static const size_t MAX_LIGHTS_PER_TILE = 50;
 		static const size_t MAX_KERNEL_SIZE = 1024;
 
+		/* Textures */
+		TextureHandle m_SampleNoiseTexture = 0;
+
 		/* Compute pipelines */
 		PipelineHandle m_ClusterGeneratorPipeline = 0;
 		PipelineHandle m_ClusterCullLightPipeline = 0;
+
+		/* Effects pipelines */
+		PipelineHandle m_SSAOPipeline = 0;
+
+		/* SSAO */
+		SSAOSettings m_GlobalSSAOSetting;
+		uint32_t m_SSAOKernelSize = 0;
 	};
 }

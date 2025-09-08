@@ -210,6 +210,8 @@ namespace Glory
 		 */
 		virtual bool IsSupported(const APIFeatures& features) const;
 
+		void Initialize();
+
 	public: /* Rendering commands */
 		/**
 		 * @brief Begin recording a new command buffer
@@ -290,6 +292,8 @@ namespace Glory
 		 * @param commandBuffer The handle to the command buffer
 		 */
 		virtual void Release(CommandBufferHandle commandBuffer) = 0;
+
+		void DrawQuad(CommandBufferHandle commandBuffer);
 
 	public: /* Resource caching */
 		/**
@@ -462,6 +466,7 @@ namespace Glory
 	protected:
 		Module* m_pModule;
 		APIFeatures m_APIFeatures;
+		MeshHandle m_ScreenMesh;
 
 	private:
 		/* Cached handles */

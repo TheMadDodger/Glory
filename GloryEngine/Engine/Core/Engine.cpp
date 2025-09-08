@@ -37,6 +37,7 @@
 #include "GameTime.h"
 #include "BinaryStream.h"
 #include "RenderData.h"
+#include "GraphicsDevice.h"
 
 #include "IModuleLoopHandler.h"
 #include "ResourceLoaderModule.h"
@@ -584,6 +585,7 @@ namespace Glory
 	void Engine::AddGraphicsDevice(GraphicsDevice* pGraphicsDevice)
 	{
 		m_pGraphicsDevices.push_back(pGraphicsDevice);
+		pGraphicsDevice->Initialize();
 	}
 
 	GraphicsDevice* Engine::ActiveGraphicsDevice()

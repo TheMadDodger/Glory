@@ -1043,6 +1043,8 @@ namespace Glory
 		{
 			Attachment attachment = info.Attachments[i];
 			renderTexture.m_Textures[i] = CreateTexture({ info.Width, info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler });
+			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[i]);
+			TransitionImageLayout(vkTexture->m_VKImage, VKConverter::GetVulkanFormat(attachment.InternalFormat), vk::ImageLayout::eUndefined, vk::ImageLayout::eColorAttachmentOptimal, VKConverter::GetVulkanImageAspectFlags(attachment.ImageAspect), 1);
 			renderTexture.m_AttachmentNames[i] = attachment.Name;
 			++textureCounter;
 		}
@@ -1053,6 +1055,8 @@ namespace Glory
 		{
 			depthStencilIndex = textureCounter;
 			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32SfloatS8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
+			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
+			TransitionImageLayout(vkTexture->m_VKImage, VKConverter::GetVulkanFormat(PixelFormat::PF_D32SfloatS8Uint), vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthStencilAttachmentOptimal, VKConverter::GetVulkanImageAspectFlags(ImageAspect(ImageAspect::IA_Depth | ImageAspect::IA_Stencil)), 1);
 			renderTexture.m_AttachmentNames[depthStencilIndex] = "DepthStencil";
 			++textureCounter;
 		}
@@ -1060,6 +1064,8 @@ namespace Glory
 		{
 			depthStencilIndex = textureCounter;
 			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32Sfloat, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
+			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
+			TransitionImageLayout(vkTexture->m_VKImage, VKConverter::GetVulkanFormat(PixelFormat::PF_D32Sfloat), vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthAttachmentOptimal, VKConverter::GetVulkanImageAspectFlags(ImageAspect::IA_Depth), 1);
 			renderTexture.m_AttachmentNames[depthStencilIndex] = "Depth";
 			++textureCounter;
 		}
@@ -1067,6 +1073,8 @@ namespace Glory
 		{
 			depthStencilIndex = textureCounter;
 			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Stencil, sampler });
+			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
+			TransitionImageLayout(vkTexture->m_VKImage, VKConverter::GetVulkanFormat(PixelFormat::PF_R8Uint), vk::ImageLayout::eUndefined, vk::ImageLayout::eStencilAttachmentOptimal, VKConverter::GetVulkanImageAspectFlags(ImageAspect::IA_Stencil), 1);
 			renderTexture.m_AttachmentNames[depthStencilIndex] = "Stencil";
 			++textureCounter;
 		}
@@ -1170,9 +1178,9 @@ namespace Glory
 				.setFormat(vk::Format::eD32SfloatS8Uint)
 				.setSamples(vk::SampleCountFlagBits::e1)
 				.setLoadOp(vk::AttachmentLoadOp::eClear)
-				.setStoreOp(vk::AttachmentStoreOp::eDontCare)
-				.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-				.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+				.setStoreOp(vk::AttachmentStoreOp::eStore)
+				.setStencilLoadOp(vk::AttachmentLoadOp::eClear)
+				.setStencilStoreOp(vk::AttachmentStoreOp::eStore)
 				.setInitialLayout(vk::ImageLayout::eUndefined)
 				.setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
@@ -1186,9 +1194,9 @@ namespace Glory
 				.setFormat(vk::Format::eD32Sfloat)
 				.setSamples(vk::SampleCountFlagBits::e1)
 				.setLoadOp(vk::AttachmentLoadOp::eClear)
-				.setStoreOp(vk::AttachmentStoreOp::eDontCare)
-				.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-				.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+				.setStoreOp(vk::AttachmentStoreOp::eStore)
+				.setStencilLoadOp(vk::AttachmentLoadOp::eClear)
+				.setStencilStoreOp(vk::AttachmentStoreOp::eStore)
 				.setInitialLayout(vk::ImageLayout::eUndefined)
 				.setFinalLayout(vk::ImageLayout::eDepthAttachmentOptimal);
 
@@ -1202,9 +1210,9 @@ namespace Glory
 				.setFormat(vk::Format::eS8Uint)
 				.setSamples(vk::SampleCountFlagBits::e1)
 				.setLoadOp(vk::AttachmentLoadOp::eClear)
-				.setStoreOp(vk::AttachmentStoreOp::eDontCare)
-				.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-				.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+				.setStoreOp(vk::AttachmentStoreOp::eStore)
+				.setStencilLoadOp(vk::AttachmentLoadOp::eClear)
+				.setStencilStoreOp(vk::AttachmentStoreOp::eStore)
 				.setInitialLayout(vk::ImageLayout::eUndefined)
 				.setFinalLayout(vk::ImageLayout::eStencilAttachmentOptimal);
 
@@ -1926,7 +1934,24 @@ namespace Glory
 			sourceStage = vk::PipelineStageFlagBits::eTransfer;
 			destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
 		}
-		else if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eDepthStencilAttachmentOptimal)
+		else if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
+		{
+			barrier.srcAccessMask = (vk::AccessFlags)0;
+			barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+			sourceStage = vk::PipelineStageFlagBits::eTransfer;
+			destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
+		}
+		else if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eColorAttachmentOptimal)
+		{
+			barrier.srcAccessMask = (vk::AccessFlags)0;
+			barrier.dstAccessMask = vk::AccessFlagBits::eColorAttachmentRead;
+
+			sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+			destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
+		}
+		else if (oldLayout == vk::ImageLayout::eUndefined && (newLayout == vk::ImageLayout::eDepthStencilAttachmentOptimal ||
+			newLayout == vk::ImageLayout::eDepthAttachmentOptimal || newLayout == vk::ImageLayout::eStencilAttachmentOptimal))
 		{
 			barrier.srcAccessMask = (vk::AccessFlags)0;
 			barrier.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;

@@ -1,6 +1,7 @@
 #include "GloryRendererModule.h"
 
 #include <Engine.h>
+#include <Console.h>
 #include <GraphicsDevice.h>
 
 #include <PipelineManager.h>
@@ -11,24 +12,26 @@
 #include <MeshData.h>
 
 #include <EngineProfiler.h>
+#include <random>
 
 namespace Glory
 {
-	static uint32_t* ResetLightDistances;
+	static constexpr std::string_view ScreenSpaceAOCVarName = "r_screenSpaceAO";
 
-	constexpr size_t AttachmentNameCount = 6;
-	constexpr std::string_view AttachmentNames[] = {
+	constexpr size_t AttachmentNameCount = 7;
+	constexpr std::string_view AttachmentNames[AttachmentNameCount] = {
 		"object",
 		"Debug",
 		"Color",
 		"Normal",
 		"AOBlurred",
 		"Data",
+		"AO",
 	};
 
 	GLORY_MODULE_VERSION_CPP(GloryRendererModule);
 
-	struct BindingIndices
+	struct BufferBindingIndices
 	{
 		static constexpr uint32_t RenderConstants = 0;
 		static constexpr uint32_t CameraDatas = 1;
@@ -41,6 +44,7 @@ namespace Glory
 		static constexpr uint32_t LightIndices = 4;
 		static constexpr uint32_t LightGrid = 5;
 		static constexpr uint32_t LightDistances = 6;
+		static constexpr uint32_t SampleDome = 2;
 	};
 
 	GloryRendererModule::GloryRendererModule()
@@ -119,6 +123,14 @@ namespace Glory
 	void GloryRendererModule::Initialize()
 	{
 		RendererModule::Initialize();
+
+		RendererModule::Initialize();
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ ScreenSpaceAOCVarName }, "Enables/disables screen space ambient occlusion.", float(m_GlobalSSAOSetting.m_Enabled), CVar::Flags::Save });
+
+		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ ScreenSpaceAOCVarName }, [this](const CVar* cvar) {
+			m_GlobalSSAOSetting.m_Enabled = cvar->m_Value == 1.0f;
+			m_GlobalSSAOSetting.m_Dirty = true;
+		});
 	}
 
 	void CreateBufferDescriptorLayoutAndSet(GraphicsDevice* pDevice, bool usePushConstants, size_t numBuffers,
@@ -143,7 +155,7 @@ namespace Glory
 				setInfo.m_Buffers[0].m_BufferHandle = *pConstantsBuffer;
 				setInfo.m_Buffers[0].m_Offset = constantsOffset;
 				setInfo.m_Buffers[0].m_Size = constantsSize;
-				setLayoutInfo.m_Buffers[0].m_BindingIndex = BindingIndices::RenderConstants;
+				setLayoutInfo.m_Buffers[0].m_BindingIndex = BufferBindingIndices::RenderConstants;
 				setLayoutInfo.m_Buffers[0].m_Type = BufferType::BT_Uniform;
 				setLayoutInfo.m_Buffers[0].m_ShaderStages = constantsShaderStage;
 			}
@@ -199,6 +211,96 @@ namespace Glory
 		return pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
 	}
 
+	DescriptorSetHandle CreateBufferDescriptorSet(GraphicsDevice* pDevice, bool usePushConstants, size_t numBuffers,
+		const std::vector<BufferHandle>& bufferHandles, const std::vector<std::pair<uint32_t, uint32_t>>& bufferOffsetsAndSizes,
+		DescriptorSetLayoutHandle layout, BufferHandle* pConstantsBuffer=nullptr, uint32_t constantsOffset=0, uint32_t constantsSize=0)
+	{
+		DescriptorSetInfo setInfo = DescriptorSetInfo();
+		size_t firstBufferindex = 0;
+		if (pConstantsBuffer)
+		{
+			if (!usePushConstants)
+			{
+				firstBufferindex = 1;
+				setInfo.m_Buffers.resize(numBuffers + 1);
+				if (!(*pConstantsBuffer))
+					*pConstantsBuffer = pDevice->CreateBuffer(constantsSize, BufferType::BT_Uniform);
+				setInfo.m_Buffers[0].m_BufferHandle = *pConstantsBuffer;
+				setInfo.m_Buffers[0].m_Offset = constantsOffset;
+				setInfo.m_Buffers[0].m_Size = constantsSize;
+			}
+			else
+				setInfo.m_Buffers.resize(numBuffers);
+		}
+		else
+			setInfo.m_Buffers.resize(numBuffers);
+
+		for (size_t i = 0; i < numBuffers; ++i)
+		{
+			const size_t index = firstBufferindex + i;
+			setInfo.m_Buffers[index].m_BufferHandle = bufferHandles[i];
+			setInfo.m_Buffers[index].m_Offset = bufferOffsetsAndSizes[i].first;
+			setInfo.m_Buffers[index].m_Size = bufferOffsetsAndSizes[i].second;
+		}
+		setInfo.m_Layout = layout;
+		return pDevice->CreateDescriptorSet(std::move(setInfo));
+	}
+
+	void CreateSamplerDescriptorLayoutAndSet(GraphicsDevice* pDevice, size_t numSamplers,
+		const std::vector<uint32_t>& bindingIndices, const std::vector<ShaderTypeFlag>& shaderStages,
+		std::vector<std::string>&& samplerNames, const std::vector<TextureHandle>& textureHandles,
+		DescriptorSetLayoutHandle& layout, DescriptorSetHandle& set)
+	{
+		DescriptorSetLayoutInfo setLayoutInfo = DescriptorSetLayoutInfo();
+		DescriptorSetInfo setInfo = DescriptorSetInfo();
+		setLayoutInfo.m_Samplers.resize(numSamplers);
+		setLayoutInfo.m_SamplerNames = std::move(samplerNames);
+		setInfo.m_Samplers.resize(numSamplers);
+
+		for (size_t i = 0; i < numSamplers; ++i)
+		{
+			const uint32_t bindingIndex = i >= bindingIndices.size() ? bindingIndices.back() : bindingIndices[i];
+			const ShaderTypeFlag shaderStage = i >= shaderStages.size() ? shaderStages.back() : shaderStages[i];
+			setLayoutInfo.m_Samplers[i].m_BindingIndex = bindingIndex;
+			setLayoutInfo.m_Samplers[i].m_ShaderStages = shaderStage;
+			setInfo.m_Samplers[i].m_TextureHandle = textureHandles[i];
+		}
+		setInfo.m_Layout = layout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
+		set = pDevice->CreateDescriptorSet(std::move(setInfo));
+	}
+
+	DescriptorSetLayoutHandle CreateSamplerDescriptorLayout(GraphicsDevice* pDevice, size_t numSamplers,
+		const std::vector<uint32_t>& bindingIndices, const std::vector<ShaderTypeFlag>& shaderStages,
+		std::vector<std::string>&& samplerNames)
+	{
+		DescriptorSetLayoutInfo setLayoutInfo = DescriptorSetLayoutInfo();
+		setLayoutInfo.m_Samplers.resize(numSamplers);
+		setLayoutInfo.m_SamplerNames = std::move(samplerNames);
+
+		for (size_t i = 0; i < numSamplers; ++i)
+		{
+			const uint32_t bindingIndex = i >= bindingIndices.size() ? bindingIndices.back() : bindingIndices[i];
+			const ShaderTypeFlag shaderStage = i >= shaderStages.size() ? shaderStages.back() : shaderStages[i];
+			setLayoutInfo.m_Samplers[i].m_BindingIndex = bindingIndex;
+			setLayoutInfo.m_Samplers[i].m_ShaderStages = shaderStage;
+		}
+		return pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
+	}
+
+	DescriptorSetHandle CreateSamplerDescriptorSet(GraphicsDevice* pDevice, size_t numSamplers,
+		const std::vector<TextureHandle>& textureHandles, DescriptorSetLayoutHandle layout)
+	{
+		DescriptorSetInfo setInfo = DescriptorSetInfo();
+		setInfo.m_Samplers.resize(numSamplers);
+
+		for (size_t i = 0; i < numSamplers; ++i)
+		{
+			setInfo.m_Samplers[i].m_TextureHandle = textureHandles[i];
+		}
+		setInfo.m_Layout = layout;
+		return pDevice->CreateDescriptorSet(std::move(setInfo));
+	}
+
 	void GloryRendererModule::OnPostInitialize()
 	{
 		const ModuleSettings& settings = Settings();
@@ -220,38 +322,51 @@ namespace Glory
 			m_pEngine->GetDebug().LogError("Renderer: No graphics device active");
 			return;
 		}
+		const bool usePushConstants = pDevice->IsSupported(APIFeatures::PushConstants);
 
 		/* Global data buffers */
 		m_CameraDatasBuffer = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_CAMERAS, BufferType::BT_Uniform);
 		//m_LightCameraDatasBuffer = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_LIGHTS, BufferType::BT_Uniform);
 		m_LightsSSBO = pDevice->CreateBuffer(sizeof(LightData)*MAX_LIGHTS, BufferType::BT_Storage);
 		//m_LightSpaceTransformsSSBO = pDevice->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferType::BT_Storage);
-		m_LightDistancesSSBO = pDevice->CreateBuffer(sizeof(uint32_t)*MAX_LIGHTS, BufferType::BT_Storage);
+
+		GenerateDomeSamplePointsSSBO(pDevice, 64);
+		GenerateNoiseTexture(pDevice);
 
 		/* Global set */
-		const bool usePushConstants = pDevice->IsSupported(APIFeatures::PushConstants);
-		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BindingIndices::CameraDatas },
+		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::CameraDatas },
 			{ BufferType::BT_Uniform }, { STF_Vertex }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
 			m_GlobalRenderSetLayout, m_GlobalRenderSet, &m_RenderConstantsBuffer, ShaderTypeFlag(STF_Vertex | STF_Fragment), 0, sizeof(RenderConstants));
 
-		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BindingIndices::CameraDatas },
-			{ BufferType::BT_Uniform }, { STF_Compute }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
-			m_GlobalClusterSetLayout, m_GlobalClusterSet, &m_ClusterConstantsBuffer, STF_Compute, 0, sizeof(ClusterConstants));
+		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::CameraDatas },
+			{ BufferType::BT_Uniform }, { ShaderTypeFlag(STF_Compute | STF_Fragment) }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
+			m_GlobalClusterSetLayout, m_GlobalClusterSet, &m_ClusterConstantsBuffer, ShaderTypeFlag(STF_Compute | STF_Fragment), 0, sizeof(ClusterConstants));
 
-		m_CameraClusterSetLayout = CreateBufferDescriptorLayout(pDevice, 1, { BindingIndices::Clusters },
+		m_CameraClusterSetLayout = CreateBufferDescriptorLayout(pDevice, 1, { BufferBindingIndices::Clusters },
 			{ BufferType::BT_Storage }, { ShaderTypeFlag(STF_Compute | STF_Fragment) });
 
-		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BindingIndices::LightDatas },
+		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::LightDatas },
 			{ BufferType::BT_Storage }, { STF_Compute }, { m_LightsSSBO }, { { 0, sizeof(LightData)*MAX_LIGHTS } },
 			m_GlobalLightSetLayout, m_GlobalLightSet);
 
-		m_CameraLightSetLayout = CreateBufferDescriptorLayout(pDevice, 3, { BindingIndices::LightIndices, BindingIndices::LightGrid, BindingIndices::LightDistances },
+		m_CameraLightSetLayout = CreateBufferDescriptorLayout(pDevice, 3, { BufferBindingIndices::LightIndices, BufferBindingIndices::LightGrid, BufferBindingIndices::LightDistances },
 			{ BufferType::BT_Storage }, { STF_Compute });
 
-		ResetLightDistances = new uint32_t[MAX_LIGHTS];
+		m_SSAOCameraSet = CreateBufferDescriptorSet(pDevice, usePushConstants, 1, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
+			m_GlobalClusterSetLayout, &m_SSAOConstantsBuffer, 0, sizeof(SSAOConstants));
+
+		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::SampleDome },
+			{ BufferType::BT_Uniform }, { STF_Fragment }, { m_SamplePointsDomeSSBO },
+			{ {0, sizeof(glm::vec3)*m_SSAOKernelSize} }, m_GlobalSampleDomeSetLayout, m_GlobalSampleDomeSet);
+
+		m_SSAOSamplersSetLayout = CreateSamplerDescriptorLayout(pDevice, 2, { 0, 1 }, { STF_Fragment }, { "Normal", "Depth" });
+		m_NoiseSamplerSetLayout = CreateSamplerDescriptorLayout(pDevice, 1, { 2 }, { STF_Fragment }, { "Noise" });
+		m_NoiseSamplerSet = CreateSamplerDescriptorSet(pDevice, 1, { m_SampleNoiseTexture }, m_NoiseSamplerSetLayout);
+
+		/*ResetLightDistances = new uint32_t[MAX_LIGHTS];
 		for (size_t i = 0; i < MAX_LIGHTS; ++i)
 			ResetLightDistances[i] = NUM_DEPTH_SLICES;
-		pDevice->AssignBuffer(m_LightDistancesSSBO, ResetLightDistances);
+		pDevice->AssignBuffer(m_LightDistancesSSBO, ResetLightDistances);*/
 	}
 
 	void GloryRendererModule::Update()
@@ -291,6 +406,7 @@ namespace Glory
 			CameraRef camera = m_FrameData.ActiveCameras[i];
 
 			RenderPassHandle& renderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("RenderPass"));
+			RenderPassHandle& ssaoRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("SSAORenderPass"));
 			//RenderPassHandle& deferredRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("DeferredRenderPass"));
 			const auto& resolution = camera.GetResolution();
 			if (!renderPass)
@@ -307,6 +423,23 @@ namespace Glory
 				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Data", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
 				renderPass = pDevice->CreateRenderPass(renderPassInfo);
 			}
+			if (!ssaoRenderPass)
+			{
+				RenderPassInfo renderPassInfo;
+				renderPassInfo.RenderTextureInfo.Width = resolution.x;
+				renderPassInfo.RenderTextureInfo.Height = resolution.y;
+				renderPassInfo.RenderTextureInfo.HasDepth = false;
+				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("AO", PixelFormat::PF_R, PixelFormat::PF_R32Sfloat, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+				ssaoRenderPass = pDevice->CreateRenderPass(renderPassInfo);
+			}
+			if (!m_SSAOPipeline)
+			{
+				const UUID ssaoPipeline = settings.Value<uint64_t>("SSAO Prepass Pipeline");
+				PipelineData* pPipeline = pipelines.GetPipelineData(ssaoPipeline);
+				m_SSAOPipeline = pDevice->CreatePipeline(ssaoRenderPass, pPipeline, { m_GlobalClusterSetLayout, m_GlobalSampleDomeSetLayout, m_SSAOSamplersSetLayout, m_NoiseSamplerSetLayout },
+					sizeof(glm::vec3), { AttributeType::Float3 });
+			}
+
 			/*if (!deferredRenderPass)
 			{
 				RenderPassInfo renderPassInfo;
@@ -331,13 +464,32 @@ namespace Glory
 			CameraRef camera = m_FrameData.ActiveCameras[i];
 
 			RenderPassHandle& renderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("RenderPass"));
-			RenderPassHandle& deferredRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("DeferredRenderPass"));
+			RenderPassHandle& ssaoRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("SSAORenderPass"));
+			DescriptorSetHandle& ssaoSamplersSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("SSAOSamplersSet"));
+			//RenderPassHandle& deferredRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("DeferredRenderPass"));
 			/* Light cluster culling */
 			ClusterPass(static_cast<uint32_t>(i));
 			
 			/* Draw objects */
 			pDevice->BeginRenderPass(m_CommandBuffer, renderPass);
 			DynamicObjectsPass(static_cast<uint32_t>(i));
+			pDevice->EndRenderPass(m_CommandBuffer);
+
+			SSAOConstants constants;
+			constants.CameraIndex = i;
+			constants.KernelSize = m_GlobalSSAOSetting.m_KernelSize;
+			constants.SampleRadius = m_GlobalSSAOSetting.m_SampleRadius;
+			constants.SampleBias = m_GlobalSSAOSetting.m_SampleBias;
+
+			pDevice->BeginRenderPass(m_CommandBuffer, ssaoRenderPass);
+			pDevice->BeginPipeline(m_CommandBuffer, m_SSAOPipeline);
+			pDevice->BindDescriptorSets(m_CommandBuffer, m_SSAOPipeline, { m_SSAOCameraSet, m_GlobalSampleDomeSet, ssaoSamplersSet, m_NoiseSamplerSet });
+			if (!m_SSAOConstantsBuffer)
+				pDevice->PushConstants(m_CommandBuffer, m_SSAOPipeline, 0, sizeof(SSAOConstants), &constants, STF_Fragment);
+			else
+				pDevice->AssignBuffer(m_ClusterConstantsBuffer, &constants, sizeof(SSAOConstants));
+			pDevice->DrawQuad(m_CommandBuffer);
+			pDevice->EndPipeline(m_CommandBuffer);
 			pDevice->EndRenderPass(m_CommandBuffer);
 
 			/* Deferred composite */
@@ -390,7 +542,14 @@ namespace Glory
 	{
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		RenderPassHandle renderPass = camera.GetUserHandle("RenderPass");
-		if (!renderPass) return NULL;
+		RenderPassHandle ssaoRenderPass = camera.GetUserHandle("SSAORenderPass");
+		if (!renderPass || !ssaoRenderPass) return NULL;
+		if (index >= 6)
+		{
+			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(ssaoRenderPass);
+			return pDevice->GetRenderTextureAttachment(renderTexture, index-6);
+		}
+
 		RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(renderPass);
 		return pDevice->GetRenderTextureAttachment(renderTexture, index);
 	}
@@ -516,9 +675,14 @@ namespace Glory
 			{
 				DescriptorSetHandle& clusterSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("ClusterSet"));
 				DescriptorSetHandle& lightSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("LightSet"));
+				DescriptorSetHandle& ssaoSamplersSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("SSAOSamplersSet"));
 				BufferHandle& lightIndexSSBO = reinterpret_cast<BufferHandle&>(camera.GetUserHandle("LightIndexSSBO"));
 				BufferHandle& lightGridSSBO = reinterpret_cast<BufferHandle&>(camera.GetUserHandle("LightGridSSBO"));
 				BufferHandle& lightDistancesSSBO = reinterpret_cast<BufferHandle&>(camera.GetUserHandle("LightDistancesSSBO"));
+				RenderPassHandle& renderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("RenderPass"));
+				RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(renderPass);
+				TextureHandle normals = pDevice->GetRenderTextureAttachment(renderTexture, 3);
+				TextureHandle depth = pDevice->GetRenderTextureAttachment(renderTexture, 6);
 
 				clusterSSBOHandle = pDevice->CreateBuffer(sizeof(VolumeTileAABB)*NUM_CLUSTERS, BufferType::BT_Storage);
 				lightIndexSSBO = pDevice->CreateBuffer(sizeof(uint32_t)*(NUM_CLUSTERS*MAX_LIGHTS_PER_TILE + 1), BufferType::BT_Storage);
@@ -546,6 +710,13 @@ namespace Glory
 				setInfo.m_Buffers[2].m_Offset = 0;
 				setInfo.m_Buffers[2].m_Size = sizeof(uint32_t)*MAX_LIGHTS;
 				lightSet = pDevice->CreateDescriptorSet(std::move(setInfo));
+				
+				setInfo = DescriptorSetInfo();
+				setInfo.m_Layout = m_SSAOSamplersSetLayout;
+				setInfo.m_Samplers.resize(2);
+				setInfo.m_Samplers[0].m_TextureHandle = normals;
+				setInfo.m_Samplers[1].m_TextureHandle = depth;
+				ssaoSamplersSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 
 				GenerateClusterSSBO(i, pDevice, camera, clusterSet);
 			}
@@ -714,14 +885,14 @@ namespace Glory
 				DescriptorSetInfo setInfo;
 				setInfo.m_Buffers.resize(2 + (textureCount > 0 ? 1 : 0));
 				setLayoutInfo.m_Buffers.resize(2 + (textureCount > 0 ? 1 : 0));
-				setLayoutInfo.m_Buffers[0].m_BindingIndex = uint32_t(BindingIndices::WorldTransforms);
+				setLayoutInfo.m_Buffers[0].m_BindingIndex = uint32_t(BufferBindingIndices::WorldTransforms);
 				setLayoutInfo.m_Buffers[0].m_Type = BT_Storage;
 				setLayoutInfo.m_Buffers[0].m_ShaderStages = STF_Vertex;
 				setInfo.m_Buffers[0].m_BufferHandle = batchData.m_WorldsBuffer;
 				setInfo.m_Buffers[0].m_Offset = 0;
 				setInfo.m_Buffers[0].m_Size = batchData.m_Worlds->size()*sizeof(glm::mat4);
 
-				setLayoutInfo.m_Buffers[1].m_BindingIndex = uint32_t(BindingIndices::Materials);
+				setLayoutInfo.m_Buffers[1].m_BindingIndex = uint32_t(BufferBindingIndices::Materials);
 				setLayoutInfo.m_Buffers[1].m_Type = BT_Storage;
 				setLayoutInfo.m_Buffers[1].m_ShaderStages = STF_Fragment;
 				setInfo.m_Buffers[1].m_BufferHandle = batchData.m_MaterialsBuffer;
@@ -729,7 +900,7 @@ namespace Glory
 				setInfo.m_Buffers[1].m_Size = batchData.m_MaterialDatas->size();
 				if (batchData.m_TextureBitsBuffer)
 				{
-					setLayoutInfo.m_Buffers[2].m_BindingIndex = uint32_t(BindingIndices::HasTexture);
+					setLayoutInfo.m_Buffers[2].m_BindingIndex = uint32_t(BufferBindingIndices::HasTexture);
 					setLayoutInfo.m_Buffers[2].m_Type = BT_Storage;
 					setLayoutInfo.m_Buffers[2].m_ShaderStages = STF_Fragment;
 					setInfo.m_Buffers[2].m_BufferHandle = batchData.m_TextureBitsBuffer;
@@ -832,5 +1003,60 @@ namespace Glory
 		//pGraphics->EnableDepthWrite(true);
 		RenderBatches(m_DynamicPipelineRenderDatas, m_DynamicBatchData, cameraIndex);
 		//pGraphics->EnableDepthWrite(true);
+	}
+
+	std::uniform_real_distribution<float> RandomFloats(0.0, 1.0); // random floats between [0.0, 1.0]
+	std::default_random_engine NumberGenerator;
+
+	void GloryRendererModule::GenerateDomeSamplePointsSSBO(GraphicsDevice* pDevice, uint32_t size)
+	{
+		if (m_SSAOKernelSize == size) return;
+		m_SSAOKernelSize = size;
+
+		if (!m_SamplePointsDomeSSBO)
+			m_SamplePointsDomeSSBO = pDevice->CreateBuffer(sizeof(glm::vec3)*MAX_KERNEL_SIZE, BufferType::BT_Uniform);
+
+		std::vector<glm::vec3> samplePoints{ m_SSAOKernelSize, glm::vec3{} };
+		for (unsigned int i = 0; i < m_SSAOKernelSize; ++i)
+		{
+			samplePoints[i] = glm::vec3{
+				RandomFloats(NumberGenerator)*2.0 - 1.0,
+				RandomFloats(NumberGenerator)*2.0 - 1.0,
+				RandomFloats(NumberGenerator)
+			};
+			samplePoints[i] = glm::normalize(samplePoints[i]);
+			samplePoints[i] *= RandomFloats(NumberGenerator);
+
+			float scale = float(i)/m_SSAOKernelSize;
+			scale = lerp(0.1f, 1.0f, scale*scale);
+			samplePoints[i] *= scale;
+		}
+
+		pDevice->AssignBuffer(m_SamplePointsDomeSSBO, samplePoints.data(), 0, sizeof(glm::vec3)*m_SSAOKernelSize);
+	}
+
+	void GloryRendererModule::GenerateNoiseTexture(GraphicsDevice* pDevice)
+	{
+		const size_t textureSize = 4;
+		std::vector<glm::vec4> ssaoNoise;
+		for (unsigned int i = 0; i < textureSize*textureSize; ++i)
+		{
+			glm::vec4 noise(
+				RandomFloats(NumberGenerator)*2.0 - 1.0,
+				RandomFloats(NumberGenerator)*2.0 - 1.0,
+				0.0f, 0.0f);
+			ssaoNoise.push_back(noise);
+		}
+
+		TextureCreateInfo textureInfo;
+		textureInfo.m_Width = textureSize;
+		textureInfo.m_Height = textureSize;
+		textureInfo.m_PixelFormat = PixelFormat::PF_RGBA;
+		textureInfo.m_InternalFormat = PixelFormat::PF_R16G16B16A16Sfloat;
+		textureInfo.m_ImageType = ImageType::IT_2D;
+		textureInfo.m_Type = DataType::DT_Float;
+		textureInfo.m_ImageAspectFlags = ImageAspect::IA_Color;
+		textureInfo.m_SamplerSettings.MipmapMode = Filter::F_None;
+		m_SampleNoiseTexture = pDevice->CreateTexture(textureInfo, static_cast<const void*>(ssaoNoise.data()), sizeof(glm::vec4)*ssaoNoise.size());
 	}
 }

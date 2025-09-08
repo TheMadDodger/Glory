@@ -1,33 +1,21 @@
-layout(std430, binding = 2) buffer screenToView
+float LinearDepth(float depthSample, float zNear, float zFar)
 {
-    mat4 ProjectionInverse;
-    mat4 ViewInverse;
-    uvec4 TileSizes;
-    uvec2 ScreenDimensions;
-    float Scale;
-    float Bias;
-	float zNear;
-	float zFar;
-};
-
-float LinearDepth(float depthSample)
-{
-    float depthRange = 2.0 * depthSample - 1.0;
-    float linear = 2.0 * zNear * zFar / (zFar + zNear - depthRange * (zFar - zNear));
+    float depthRange = 2.0*depthSample - 1.0;
+    float linear = 2.0*zNear*zFar/(zFar + zNear - depthRange*(zFar - zNear));
     return linear;
 }
 
-uint GetDepthSlice(float depth)
+uint GetDepthSlice(float depth, float zNear, float zFar, float scale, float bias)
 {
-	return uint(max(log2(LinearDepth(depth)) * Scale + Bias, 0.0));
+	return uint(max(log2(LinearDepth(depth, zNear, zFar))*scale + bias, 0.0));
 }
 
-vec4 ViewPosFromDepth(float depth)
+vec4 ViewPosFromDepth(float depth, mat4 projectionInverse)
 {
-    float z = depth * 2.0 - 1.0;
+    float z = depth*2.0 - 1.0;
 
-    vec4 clipSpacePosition = vec4(Coord * 2.0 - 1.0, z, 1.0);
-    vec4 viewSpacePosition = ProjectionInverse * clipSpacePosition;
+    vec4 clipSpacePosition = vec4(Coord*2.0 - 1.0, z, 1.0);
+    vec4 viewSpacePosition = projectionInverse*clipSpacePosition;
 
     // Perspective division
     viewSpacePosition /= viewSpacePosition.w;
@@ -35,19 +23,18 @@ vec4 ViewPosFromDepth(float depth)
     return viewSpacePosition;
 }
 
-vec3 WorldPosFromDepth(float depth)
+vec3 WorldPosFromDepth(float depth, mat4 viewInverse, mat4 projectionInverse)
 {
-    vec4 worldSpacePosition = ViewInverse * ViewPosFromDepth(depth);
+    vec4 worldSpacePosition = viewInverse*ViewPosFromDepth(depth, projectionInverse);
     return worldSpacePosition.xyz;
 }
 
-uint GetClusterIndex(vec3 pixelCoord)
+uint GetClusterIndex(vec3 pixelCoord, float zNear, float zFar, float scale, float bias, uvec4 tileSizes)
 {
-    uint clusterZVal = GetDepthSlice(pixelCoord.z);
-
-    uvec3 clusters = uvec3(uvec2(pixelCoord.xy / TileSizes.w), clusterZVal);
+    uint clusterZVal = GetDepthSlice(pixelCoord.z, zNear, zFar, scale, bias);
+    uvec3 clusters = uvec3(uvec2(pixelCoord.xy/tileSizes.w), clusterZVal);
     uint clusterIndex = clusters.x +
-        TileSizes.x * clusters.y +
-        (TileSizes.x * TileSizes.y) * clusters.z;
+        tileSizes.x*clusters.y +
+        (tileSizes.x*tileSizes.y)*clusters.z;
     return clusterIndex;
 }
