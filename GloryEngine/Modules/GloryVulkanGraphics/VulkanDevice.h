@@ -36,7 +36,7 @@ namespace Glory
     {
         static constexpr GraphicsHandleType HandleType = H_Texture;
 
-        vk::ImageLayout m_VKLayout;
+        vk::ImageLayout m_VKFinalLayout;
         vk::Image m_VKImage;
         vk::ImageView m_VKImageView;
         vk::DeviceMemory m_VKMemory;

@@ -148,6 +148,7 @@ namespace Glory
 
 		vk::PhysicalDeviceVulkan12Features vk12Features = vk::PhysicalDeviceVulkan12Features();
 		vk::PhysicalDeviceFeatures deviceFeatures = vk::PhysicalDeviceFeatures();
+		vk::PhysicalDeviceRobustness2FeaturesKHR robustnessFeatures = vk::PhysicalDeviceRobustness2FeaturesKHR();
 		vk::DeviceCreateInfo deviceCreateInfo = vk::DeviceCreateInfo()
 			.setPQueueCreateInfos(queueCreateInfos.data())
 			.setQueueCreateInfoCount(static_cast<uint32_t>(queueCreateInfos.size()))
@@ -160,6 +161,8 @@ namespace Glory
 		deviceFeatures.vertexPipelineStoresAndAtomics = VK_TRUE;
 		deviceFeatures.fragmentStoresAndAtomics = VK_TRUE;
 		vk12Features.separateDepthStencilLayouts = VK_TRUE;
+		vk12Features.pNext = &robustnessFeatures;
+		robustnessFeatures.nullDescriptor = VK_TRUE;
 
 #if defined(_DEBUG)
 		const std::vector<const char*>& validationLayers = GraphicsModule()->GetValidationLayers();
@@ -909,10 +912,13 @@ namespace Glory
 		imageInfo.tiling = vk::ImageTiling::eOptimal;
 		imageInfo.initialLayout = vk::ImageLayout::eUndefined;
 		imageInfo.usage = VKConverter::GetVulkanImageUsageFlags(textureInfo.m_ImageAspectFlags);
+		if (textureInfo.m_SamplingEnabled) imageInfo.usage |= vk::ImageUsageFlagBits::eSampled;
+		if (pixels) imageInfo.usage |= vk::ImageUsageFlagBits::eTransferDst;
 		imageInfo.sharingMode = vk::SharingMode::eExclusive;
 		imageInfo.samples = vk::SampleCountFlagBits::e1;
 		imageInfo.flags = (vk::ImageCreateFlags)0;
-		imageInfo.mipLevels = textureInfo.m_SamplerSettings.MipmapMode == Filter::F_None ? 1 : mipLevels;
+		imageInfo.mipLevels = !textureInfo.m_SamplingEnabled ||
+			textureInfo.m_SamplerSettings.MipmapMode == Filter::F_None ? 1 : mipLevels;
 		if (imageInfo.mipLevels > 1)
 			imageInfo.usage |= vk::ImageUsageFlagBits::eTransferSrc;
 
@@ -949,15 +955,15 @@ namespace Glory
 		m_LogicalDevice.bindImageMemory(texture.m_VKImage, texture.m_VKMemory, 0);
 
 		/* Copy buffer to image */
+		/* Transition image layout */
 		if (pixels)
 		{
-			/* Transition image layout */
 			TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, imageAspect, imageInfo.mipLevels);
-
 			const vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
 			BufferHandle stagingBuffer = CreateBuffer(memRequirements.size, BufferType::BT_TransferRead);
 			VK_Buffer* vkStagingBuffer = m_Buffers.Find(stagingBuffer);
 			AssignBuffer(stagingBuffer, pixels, uint32_t(dataSize));
+
 			CopyFromBuffer(vkStagingBuffer->m_VKBuffer, texture.m_VKImage, imageAspect, textureInfo.m_Width, textureInfo.m_Height);
 
 			/* Transtion layout again so it can be sampled */
@@ -965,8 +971,10 @@ namespace Glory
 				GenerateMipMaps(texture.m_VKImage, textureInfo.m_Width, textureInfo.m_Height, imageInfo.mipLevels);
 			else
 				TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, imageAspect, imageInfo.mipLevels);
-			
+
 			FreeBuffer(stagingBuffer);
+
+			texture.m_VKFinalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 		}
 
 		/* Create texture image view */
@@ -985,20 +993,23 @@ namespace Glory
 			return NULL;
 		}
 
-		auto samplerIter = m_CachedSamlers.find(textureInfo.m_SamplerSettings);
-		if (samplerIter == m_CachedSamlers.end())
+		if (textureInfo.m_SamplingEnabled)
 		{
-			auto samplerCreateInfo = VKConverter::GetVulkanSamplerInfo(textureInfo.m_SamplerSettings);
-
-			vk::Sampler newSampler;
-			if (m_LogicalDevice.createSampler(&samplerCreateInfo, nullptr, &newSampler) != vk::Result::eSuccess)
+			auto samplerIter = m_CachedSamlers.find(textureInfo.m_SamplerSettings);
+			if (samplerIter == m_CachedSamlers.end())
 			{
-				Debug().LogError("VulkanDevice::CreateTexture: Could not create image sampler.");
-				return NULL;
+				auto samplerCreateInfo = VKConverter::GetVulkanSamplerInfo(textureInfo.m_SamplerSettings);
+
+				vk::Sampler newSampler;
+				if (m_LogicalDevice.createSampler(&samplerCreateInfo, nullptr, &newSampler) != vk::Result::eSuccess)
+				{
+					Debug().LogError("VulkanDevice::CreateTexture: Could not create image sampler.");
+					return NULL;
+				}
+				samplerIter = m_CachedSamlers.emplace(textureInfo.m_SamplerSettings, newSampler).first;
 			}
-			samplerIter = m_CachedSamlers.emplace(textureInfo.m_SamplerSettings, newSampler).first;
+			texture.m_VKSampler = samplerIter->second;
 		}
-		texture.m_VKSampler = samplerIter->second;
 
 		std::stringstream str;
 		str << "VulkanDevice: Texture " << handle << " created.";
@@ -1035,16 +1046,16 @@ namespace Glory
 
 		SamplerSettings sampler;
 		sampler.MipmapMode = Filter::F_None;
-		sampler.MinFilter = Filter::F_Nearest;
-		sampler.MagFilter = Filter::F_Nearest;
+		sampler.MinFilter = Filter::F_None;
+		sampler.MagFilter = Filter::F_None;
 
 		size_t textureCounter = 0;
 		for (size_t i = 0; i < info.Attachments.size(); ++i)
 		{
 			Attachment attachment = info.Attachments[i];
-			renderTexture.m_Textures[i] = CreateTexture({ info.Width, info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler });
+			renderTexture.m_Textures[i] = CreateTexture({ info.Width, info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler, attachment.m_SamplingEnabled });
 			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[i]);
-			TransitionImageLayout(vkTexture->m_VKImage, VKConverter::GetVulkanFormat(attachment.InternalFormat), vk::ImageLayout::eUndefined, vk::ImageLayout::eColorAttachmentOptimal, VKConverter::GetVulkanImageAspectFlags(attachment.ImageAspect), 1);
+			vkTexture->m_VKFinalLayout = attachment.m_SamplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eColorAttachmentOptimal;
 			renderTexture.m_AttachmentNames[i] = attachment.Name;
 			++textureCounter;
 		}
@@ -1056,7 +1067,7 @@ namespace Glory
 			depthStencilIndex = textureCounter;
 			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32SfloatS8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
 			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
-			TransitionImageLayout(vkTexture->m_VKImage, VKConverter::GetVulkanFormat(PixelFormat::PF_D32SfloatS8Uint), vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthStencilAttachmentOptimal, VKConverter::GetVulkanImageAspectFlags(ImageAspect(ImageAspect::IA_Depth | ImageAspect::IA_Stencil)), 1);
+			vkTexture->m_VKFinalLayout = info.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eStencilAttachmentOptimal;
 			renderTexture.m_AttachmentNames[depthStencilIndex] = "DepthStencil";
 			++textureCounter;
 		}
@@ -1065,7 +1076,7 @@ namespace Glory
 			depthStencilIndex = textureCounter;
 			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32Sfloat, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
 			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
-			TransitionImageLayout(vkTexture->m_VKImage, VKConverter::GetVulkanFormat(PixelFormat::PF_D32Sfloat), vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthAttachmentOptimal, VKConverter::GetVulkanImageAspectFlags(ImageAspect::IA_Depth), 1);
+			vkTexture->m_VKFinalLayout = info.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthAttachmentOptimal;
 			renderTexture.m_AttachmentNames[depthStencilIndex] = "Depth";
 			++textureCounter;
 		}
@@ -1074,7 +1085,7 @@ namespace Glory
 			depthStencilIndex = textureCounter;
 			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Stencil, sampler });
 			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
-			TransitionImageLayout(vkTexture->m_VKImage, VKConverter::GetVulkanFormat(PixelFormat::PF_R8Uint), vk::ImageLayout::eUndefined, vk::ImageLayout::eStencilAttachmentOptimal, VKConverter::GetVulkanImageAspectFlags(ImageAspect::IA_Stencil), 1);
+			vkTexture->m_VKFinalLayout = info.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthStencilAttachmentOptimal;
 			renderTexture.m_AttachmentNames[depthStencilIndex] = "Stencil";
 			++textureCounter;
 		}
@@ -1165,7 +1176,8 @@ namespace Glory
 				.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
 				.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
 				.setInitialLayout(vk::ImageLayout::eUndefined)
-				.setFinalLayout(vk::ImageLayout::eColorAttachmentOptimal);
+				.setFinalLayout(attachment.m_SamplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal :
+					vk::ImageLayout::eColorAttachmentOptimal);
 
 			attachmentColorRefs[i] = vk::AttachmentReference()
 				.setAttachment(i)
@@ -1182,7 +1194,8 @@ namespace Glory
 				.setStencilLoadOp(vk::AttachmentLoadOp::eClear)
 				.setStencilStoreOp(vk::AttachmentStoreOp::eStore)
 				.setInitialLayout(vk::ImageLayout::eUndefined)
-				.setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+				.setFinalLayout(info.RenderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal :
+					vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
 			attachmentDepthStencilRef = vk::AttachmentReference()
 				.setAttachment(attachmentCount)
@@ -1198,7 +1211,8 @@ namespace Glory
 				.setStencilLoadOp(vk::AttachmentLoadOp::eClear)
 				.setStencilStoreOp(vk::AttachmentStoreOp::eStore)
 				.setInitialLayout(vk::ImageLayout::eUndefined)
-				.setFinalLayout(vk::ImageLayout::eDepthAttachmentOptimal);
+				.setFinalLayout(info.RenderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal :
+					vk::ImageLayout::eDepthAttachmentOptimal);
 
 			attachmentDepthStencilRef = vk::AttachmentReference()
 				.setAttachment(attachmentCount)
@@ -1214,7 +1228,8 @@ namespace Glory
 				.setStencilLoadOp(vk::AttachmentLoadOp::eClear)
 				.setStencilStoreOp(vk::AttachmentStoreOp::eStore)
 				.setInitialLayout(vk::ImageLayout::eUndefined)
-				.setFinalLayout(vk::ImageLayout::eStencilAttachmentOptimal);
+				.setFinalLayout(info.RenderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal :
+					vk::ImageLayout::eStencilAttachmentOptimal);
 
 			attachmentDepthStencilRef = vk::AttachmentReference()
 				.setAttachment(attachmentCount)
@@ -1683,7 +1698,7 @@ namespace Glory
 			auto& samplerInfo = setInfo.m_Samplers[i];
 			VK_Texture* vkTexture = m_Textures.Find(setInfo.m_Samplers[i].m_TextureHandle);
 
-			imageInfos[i].imageLayout = vkTexture ? vkTexture->m_VKLayout : vk::ImageLayout::eUndefined;
+			imageInfos[i].imageLayout = vkTexture ? vkTexture->m_VKFinalLayout : vk::ImageLayout::eUndefined;
 			imageInfos[i].imageView = vkTexture ? vkTexture->m_VKImageView : nullptr;
 			imageInfos[i].sampler = vkTexture ? vkTexture->m_VKSampler : nullptr;
 

@@ -253,7 +253,7 @@ namespace Glory
     vk::ImageUsageFlags VKConverter::GetVulkanImageUsageFlags(const ImageAspect& aspectFlags)
     {
         vk::ImageUsageFlags flags = vk::ImageUsageFlags();
-        if ((aspectFlags & ImageAspect::IA_Color) > 0) flags |= vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
+        if ((aspectFlags & ImageAspect::IA_Color) > 0) flags |= vk::ImageUsageFlagBits::eColorAttachment;
         if ((aspectFlags & ImageAspect::IA_Depth) > 0) flags |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
         if ((aspectFlags & ImageAspect::IA_Stencil) > 0) flags |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
         return flags;

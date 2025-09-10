@@ -100,7 +100,7 @@ namespace Glory
         imageInfo.format = format;
         imageInfo.tiling = format == vk::Format::eR8G8B8A8Srgb ? vk::ImageTiling::eOptimal : (vk::ImageTiling)0;
         imageInfo.initialLayout = vk::ImageLayout::eUndefined;
-        imageInfo.usage = VKConverter::GetVulkanImageUsageFlags(m_TextureInfo.m_ImageAspectFlags);
+        imageInfo.usage = VKConverter::GetVulkanImageUsageFlags(m_TextureInfo.m_ImageAspectFlags) | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
         imageInfo.sharingMode = vk::SharingMode::eExclusive;
         imageInfo.samples = vk::SampleCountFlagBits::e1;
         imageInfo.flags = (vk::ImageCreateFlags)0;

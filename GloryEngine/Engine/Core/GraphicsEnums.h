@@ -941,6 +941,7 @@ namespace Glory
         uint32_t m_SharingMode;
         ImageAspect m_ImageAspectFlags;
         SamplerSettings m_SamplerSettings = SamplerSettings();
+        bool m_SamplingEnabled = true;
     };
 
     struct Attachment
@@ -957,6 +958,7 @@ namespace Glory
         ImageAspect ImageAspect;
         DataType m_Type;
         bool m_AutoBind;
+        bool m_SamplingEnabled = true;
     };
 
     struct RenderTextureCreateInfo
@@ -969,6 +971,7 @@ namespace Glory
         uint32_t Height;
         bool HasDepth;
         bool HasStencil;
+        bool EnableDepthStencilSampling = true;
         std::vector<Attachment> Attachments;
     };
 
