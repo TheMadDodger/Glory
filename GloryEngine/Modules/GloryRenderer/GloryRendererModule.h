@@ -111,7 +111,7 @@ namespace Glory
 		BufferHandle m_RenderConstantsBuffer = 0;
 		BufferHandle m_ClusterConstantsBuffer = 0;
 		BufferHandle m_LightsSSBO = 0;
-		//BufferHandle m_LightSpaceTransformsSSBO = 0;
+		BufferHandle m_LightSpaceTransformsSSBO = 0;
 		BufferHandle m_SSAOConstantsBuffer = 0;
 		BufferHandle m_SamplePointsDomeSSBO = 0;
 

@@ -41,9 +41,10 @@ namespace Glory
 
 		static constexpr uint32_t Clusters = 2;
 		static constexpr uint32_t LightDatas = 3;
-		static constexpr uint32_t LightIndices = 4;
-		static constexpr uint32_t LightGrid = 5;
-		static constexpr uint32_t LightDistances = 6;
+		static constexpr uint32_t LightSpaceTransforms = 4;
+		static constexpr uint32_t LightIndices = 5;
+		static constexpr uint32_t LightGrid = 6;
+		static constexpr uint32_t LightDistances = 7;
 		static constexpr uint32_t SampleDome = 2;
 	};
 
@@ -328,7 +329,7 @@ namespace Glory
 		m_CameraDatasBuffer = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_CAMERAS, BufferType::BT_Uniform);
 		//m_LightCameraDatasBuffer = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_LIGHTS, BufferType::BT_Uniform);
 		m_LightsSSBO = pDevice->CreateBuffer(sizeof(LightData)*MAX_LIGHTS, BufferType::BT_Storage);
-		//m_LightSpaceTransformsSSBO = pDevice->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferType::BT_Storage);
+		m_LightSpaceTransformsSSBO = pDevice->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferType::BT_Storage);
 
 		GenerateDomeSamplePointsSSBO(pDevice, 64);
 		GenerateNoiseTexture(pDevice);
@@ -345,12 +346,12 @@ namespace Glory
 		m_CameraClusterSetLayout = CreateBufferDescriptorLayout(pDevice, 1, { BufferBindingIndices::Clusters },
 			{ BufferType::BT_Storage }, { ShaderTypeFlag(STF_Compute | STF_Fragment) });
 
-		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::LightDatas },
-			{ BufferType::BT_Storage }, { STF_Compute }, { m_LightsSSBO }, { { 0, sizeof(LightData)*MAX_LIGHTS } },
+		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 2, { BufferBindingIndices::LightDatas, BufferBindingIndices::LightSpaceTransforms },
+			{ BufferType::BT_Storage }, { ShaderTypeFlag(STF_Compute | STF_Fragment) }, { m_LightsSSBO, m_LightSpaceTransformsSSBO }, { { 0, sizeof(LightData)*MAX_LIGHTS }, { 0, sizeof(glm::mat4)*MAX_LIGHTS } },
 			m_GlobalLightSetLayout, m_GlobalLightSet);
 
 		m_CameraLightSetLayout = CreateBufferDescriptorLayout(pDevice, 3, { BufferBindingIndices::LightIndices, BufferBindingIndices::LightGrid, BufferBindingIndices::LightDistances },
-			{ BufferType::BT_Storage }, { STF_Compute });
+			{ BufferType::BT_Storage }, { ShaderTypeFlag(STF_Compute | STF_Fragment) });
 
 		m_SSAOCameraSet = CreateBufferDescriptorSet(pDevice, usePushConstants, 1, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
 			m_GlobalClusterSetLayout, &m_SSAOConstantsBuffer, 0, sizeof(SSAOConstants));
