@@ -1,5 +1,7 @@
 #pragma once
-#include "Texture.h"
+#include "GraphicsHandles.h"
+
+#include <glm/vec4.hpp>
 
 namespace Glory
 {
@@ -22,7 +24,7 @@ namespace Glory
 		/** @brief Initialize the atlas by creating the nescesary resources */
 		virtual void Initialize() = 0;
 		/** @brief Get the GPU texture resource if available, otherwise nullptr */
-		virtual Texture* GetTexture() = 0;
+		virtual TextureHandle GetTexture() = 0;
 
 		/** @brief Reserver a chunk in the atlas
 		 * @param width Width of the chunk
@@ -63,6 +65,7 @@ namespace Glory
 		 * @param id ID of the chunk
 		 */
 		glm::vec4 GetChunkCoords(UUID id) const;
+		glm::vec4 GetChunkPositionAndSize(UUID id) const;
 
 		/** @brief Release a specific chunk from the atlas so that it can be reserved again
 		 * @param id ID of the chunk to release

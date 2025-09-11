@@ -15,6 +15,7 @@ namespace Glory::Utils
 
 	public:
 		void Set(Element index);
+		void Toggle(Element index);
 		void Set(Element index, bool on);
 		void SetAll();
 		void UnSet(Element index);

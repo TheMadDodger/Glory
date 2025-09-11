@@ -415,9 +415,9 @@ namespace Glory
 		//}
 	}
 
-	GPUTextureAtlas* RendererModule::CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, bool depth)
+	GPUTextureAtlas* RendererModule::CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, TextureHandle texture)
 	{
-		GPUTextureAtlas& newAtlas = m_GPUTextureAtlases.emplace_back(std::move(textureInfo), m_pEngine, depth);
+		GPUTextureAtlas& newAtlas = m_GPUTextureAtlases.emplace_back(std::move(textureInfo), m_pEngine, texture);
 		newAtlas.Initialize();
 		return &newAtlas;
 	}

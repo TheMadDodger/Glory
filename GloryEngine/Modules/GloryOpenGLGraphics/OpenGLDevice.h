@@ -122,6 +122,9 @@ namespace Glory
         virtual void Wait(CommandBufferHandle) override;
         virtual void Release(CommandBufferHandle) override;
 
+        virtual void SetViewport(CommandBufferHandle commandBuffer, float x, float y, float width, float height, float minDepth=0.0f, float maxDepth=1.0f) override;
+        virtual void SetScissor(CommandBufferHandle commandBuffer, int x, int y, uint32_t width, uint32_t height) override;
+
     private: /* Resource management */
         virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;
 

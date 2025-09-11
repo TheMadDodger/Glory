@@ -38,8 +38,6 @@ namespace Glory
 	{
 		EngineInstance = m_pEngine;
 
-		m_pEngine->AddGraphicsDevice(&m_Device);
-
 		Window* pMainWindow = GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
 		pMainWindow->SetupForOpenGL();
 		LogGLError(glGetError());
@@ -200,6 +198,8 @@ namespace Glory
 
 		m_pPassthroughMaterial = new MaterialData();
 		m_pPassthroughMaterial->SetPipeline(802);
+
+		m_pEngine->AddGraphicsDevice(&m_Device);
 	}
 
 	void OpenGLGraphicsModule::OnCleanup()

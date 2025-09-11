@@ -26,12 +26,12 @@ struct LightGridElement
     uint Count;
 };
 
-layout(set = 2, std430, binding = 3) buffer LightSSBO
+layout(set = 2, std430, binding = 3) readonly buffer LightSSBO
 {
     LightData Lights[];
 };
 
-layout(set = 2, std430, binding = 4) buffer LightSpaceTransformsSSBO
+layout(set = 2, std430, binding = 4) readonly buffer LightSpaceTransformsSSBO
 {
     mat4 LightSpaceTransforms[];
 };

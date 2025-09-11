@@ -293,6 +293,9 @@ namespace Glory
 		 */
 		virtual void Release(CommandBufferHandle commandBuffer) = 0;
 
+		virtual void SetViewport(CommandBufferHandle commandBuffer, float x, float y, float width, float height, float minDepth=0.0f, float maxDepth=1.0f) = 0;
+		virtual void SetScissor(CommandBufferHandle commandBuffer, int x, int y, uint32_t width, uint32_t height) = 0;
+
 		void DrawQuad(CommandBufferHandle commandBuffer);
 
 	public: /* Resource caching */

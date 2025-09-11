@@ -135,6 +135,27 @@ namespace Glory
 		return coords;
 	}
 
+	glm::vec4 TextureAtlas::GetChunkPositionAndSize(UUID id) const
+	{
+		auto& iter = std::find_if(m_ReservedChunks.begin(), m_ReservedChunks.end(), [id](const ReservedChunk& chunk) {
+			return chunk.ID == id;
+		});
+
+		if (iter == m_ReservedChunks.end())
+		{
+			m_pEngine->GetDebug().LogError("TextureAtlas::GetChunkPositionAndSize() > Chunk not found!");
+			return {};
+		}
+
+		const ReservedChunk& chunk = *iter;
+		glm::vec4 coords;
+		coords.x = chunk.XOffset;
+		coords.y = chunk.YOffset;
+		coords.z = chunk.Width;
+		coords.w = chunk.Height;
+		return coords;
+	}
+
 	void TextureAtlas::ReleaseChunk(UUID id)
 	{
 		auto iter = std::find_if(m_ReservedChunks.begin(), m_ReservedChunks.end(), [id](const ReservedChunk& chunk) { return chunk.ID == id; });

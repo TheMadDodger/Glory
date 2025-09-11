@@ -576,6 +576,38 @@ namespace Glory
 		m_FreeFences.push_back(vkFence);
 	}
 
+	void VulkanDevice::SetViewport(CommandBufferHandle commandBuffer, float x, float y, float width, float height, float minDepth, float maxDepth)
+	{
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
+		if (iter == m_CommandBuffers.end() || fenceIter == m_CommandBufferFences.end())
+		{
+			Debug().LogError("VulkanDevice::SetViewport: Invalid command buffer handle.");
+			return;
+		}
+		const vk::CommandBuffer vkCommandBuffer = iter->second;
+		const vk::Viewport viewport = vk::Viewport()
+			.setX(x).setY(y).setHeight(height).setWidth(width)
+			.setMinDepth(minDepth).setMaxDepth(maxDepth);
+		vkCommandBuffer.setViewport(0, 1, &viewport);
+	}
+
+	void VulkanDevice::SetScissor(CommandBufferHandle commandBuffer, int x, int y, uint32_t width, uint32_t height)
+	{
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
+		if (iter == m_CommandBuffers.end() || fenceIter == m_CommandBufferFences.end())
+		{
+			Debug().LogError("VulkanDevice::SetViewport: Invalid command buffer handle.");
+			return;
+		}
+		const vk::CommandBuffer vkCommandBuffer = iter->second;
+		const vk::Rect2D scissor = vk::Rect2D()
+			.setOffset({ x,y })
+			.setExtent({ width, height });
+		vkCommandBuffer.setScissor(0, 1, &scissor);
+	}
+
 	vk::BufferUsageFlags GetBufferUsageFlags(BufferType bufferType)
 	{
 		switch (bufferType)
@@ -1472,14 +1504,15 @@ namespace Glory
 		//depthStencil.back = {}; // Optional
 
 		// Dynamic state
-		//vk::DynamicState dynamicStates[] = {
-		//    vk::DynamicState::eViewport,
-		//    vk::DynamicState::eLineWidth
-		//};
-		//
-		//vk::PipelineDynamicStateCreateInfo dynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
-		//    .setDynamicStateCount(2)
-		//    .setPDynamicStates(dynamicStates);
+		vk::DynamicState dynamicStates[] = {
+		    vk::DynamicState::eViewport,
+		    vk::DynamicState::eScissor,
+		    //vk::DynamicState::eLineWidth
+		};
+
+		vk::PipelineDynamicStateCreateInfo dynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
+		    .setDynamicStateCount(2)
+		    .setPDynamicStates(dynamicStates);
 
 		vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
 			.setSetLayoutCount(static_cast<uint32_t>(vkDescriptorSetLayouts.size()))
@@ -1505,7 +1538,7 @@ namespace Glory
 			.setPMultisampleState(&multisampleStateCreateInfo)
 			.setPDepthStencilState(&depthStencil)
 			.setPColorBlendState(&colorBlendStateCreateInfo)
-			.setPDynamicState(nullptr)
+			.setPDynamicState(&dynamicStateCreateInfo)
 			.setLayout(pipeline.m_VKLayout)
 			.setRenderPass(vkRenderPass->m_VKRenderPass)
 			.setSubpass(0)

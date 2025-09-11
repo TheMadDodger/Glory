@@ -155,7 +155,7 @@ namespace Glory
 
 		void RenderOnBackBuffer(RenderTexture* pTexture);
 
-		GPUTextureAtlas* CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, bool depth=false);
+		GPUTextureAtlas* CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, TextureHandle texture=0);
 
 		void Reset();
 
@@ -166,6 +166,10 @@ namespace Glory
 		virtual size_t CameraAttachmentPreviewCount() const = 0;
 		virtual std::string_view CameraAttachmentPreviewName(size_t index) const = 0;
 		virtual TextureHandle CameraAttachmentPreview(CameraRef camera, size_t index) const = 0;
+
+		virtual size_t DebugOverlayCount() const = 0;
+		virtual std::string_view DebugOverlayName(size_t index) const = 0;
+		virtual TextureHandle DebugOverlay(size_t index) const = 0;
 
 	protected:
 		virtual void OnSubmitDynamic(const RenderData& renderData) {}

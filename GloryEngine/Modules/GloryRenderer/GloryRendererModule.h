@@ -8,6 +8,7 @@
 namespace Glory
 {
 	class GraphicsDevice;
+	class GPUTextureAtlas;
 
 	struct VolumeTileAABB
 	{
@@ -86,10 +87,14 @@ namespace Glory
 		virtual std::string_view CameraAttachmentPreviewName(size_t index) const override;
 		virtual TextureHandle CameraAttachmentPreview(CameraRef camera, size_t index) const override;
 
+		virtual size_t DebugOverlayCount() const override;
+		virtual std::string_view DebugOverlayName(size_t index) const override;
+		virtual TextureHandle DebugOverlay(size_t index) const override;
+
 	private:
 		size_t GetGCD(size_t a, size_t b); // TODO: Move this to somewhere it can be used from anywhere and make it take templates
 
-		void RenderBatches(const std::vector<PipelineBatch>& batches, const std::vector<PipelineBatchData>& batchDatas, size_t cameraIndex);
+		void RenderBatches(const std::vector<PipelineBatch>& batches, const std::vector<PipelineBatchData>& batchDatas, size_t cameraIndex, DescriptorSetHandle globalRenderSet, const glm::vec4& viewport);
 		void PrepareDataPass();
 		void PrepareBatches(const std::vector<PipelineBatch>& batches, std::vector<PipelineBatchData>& batchDatas);
 		void GenerateClusterSSBO(uint32_t cameraIndex, GraphicsDevice* pDevice, CameraRef camera, DescriptorSetHandle clusterSet);
@@ -100,6 +105,9 @@ namespace Glory
 		void GenerateDomeSamplePointsSSBO(GraphicsDevice* pDevice, uint32_t size);
 		void GenerateNoiseTexture(GraphicsDevice* pDevice);
 
+		void ShadowMapsPass();
+		void RenderShadows(size_t lightIndex, const glm::vec4& viewport);
+
 	private:
 		std::vector<PipelineBatchData> m_DynamicBatchData;
 		CPUBuffer<PerCameraData> m_CameraDatas;
@@ -107,7 +115,7 @@ namespace Glory
 
 		/* Buffers */
 		BufferHandle m_CameraDatasBuffer = 0;
-		//BufferHandle m_LightCameraDatasBuffer = 0;
+		BufferHandle m_LightCameraDatasBuffer = 0;
 		BufferHandle m_RenderConstantsBuffer = 0;
 		BufferHandle m_ClusterConstantsBuffer = 0;
 		BufferHandle m_LightsSSBO = 0;
@@ -117,6 +125,7 @@ namespace Glory
 
 		/* Descriptors */
 		DescriptorSetLayoutHandle m_GlobalRenderSetLayout;
+		DescriptorSetLayoutHandle m_GlobalShadowRenderSetLayout;
 		DescriptorSetLayoutHandle m_GlobalClusterSetLayout;
 		DescriptorSetLayoutHandle m_GlobalLightSetLayout;
 		DescriptorSetLayoutHandle m_GlobalSampleDomeSetLayout;
@@ -126,6 +135,7 @@ namespace Glory
 		DescriptorSetLayoutHandle m_NoiseSamplerSetLayout;
 
 		DescriptorSetHandle m_GlobalRenderSet;
+		DescriptorSetHandle m_GlobalShadowRenderSet;
 		DescriptorSetHandle m_GlobalClusterSet;
 		DescriptorSetHandle m_GlobalLightSet;
 		DescriptorSetHandle m_GlobalSampleDomeSet;
@@ -152,5 +162,9 @@ namespace Glory
 		/* SSAO */
 		SSAOSettings m_GlobalSSAOSetting;
 		uint32_t m_SSAOKernelSize = 0;
+
+		/* Shadows */
+		RenderPassHandle m_ShadowsPass = 0;
+		GPUTextureAtlas* m_pShadowAtlas = nullptr;
 	};
 }

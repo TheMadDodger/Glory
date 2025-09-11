@@ -42,6 +42,16 @@ namespace Glory::Utils
 		m_pMemory[elementIndex] |= 1 << bitIndex;
 	}
 
+	void BitSet::Toggle(Element index)
+	{
+		if (IsSet(index))
+		{
+			UnSet(index);
+			return;
+		}
+		Set(index);
+	}
+
 	void BitSet::Set(Element index, bool on)
 	{
 		if (on)

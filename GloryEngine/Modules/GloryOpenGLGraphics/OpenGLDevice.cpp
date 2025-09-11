@@ -533,6 +533,16 @@ namespace Glory
 	{
 	}
 
+	void OpenGLDevice::SetViewport(CommandBufferHandle, float x, float y, float width, float height, float minDepth, float maxDepth)
+	{
+		glViewport(int(x), int(y), uint32_t(width), uint32_t(height));
+	}
+
+	void OpenGLDevice::SetScissor(CommandBufferHandle, int x, int y, uint32_t width, uint32_t height)
+	{
+		glScissor(x, y, width, height);
+	}
+
 #pragma endregion
 
 #pragma region Resource Management

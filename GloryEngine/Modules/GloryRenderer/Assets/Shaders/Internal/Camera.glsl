@@ -7,7 +7,7 @@ struct CameraData
 	vec2 Resolution;
 };
 
-layout(set = 0, std140, binding = 1) readonly uniform CameraDatasUBO
+layout(set = 0, std430, binding = 1) readonly buffer CameraDatasUBO
 {
 	CameraData Cameras[100];
 };
