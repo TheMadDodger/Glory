@@ -1,39 +1,40 @@
 #include "EditorAssets.h"
 #include "EditorApplication.h"
 #include "Importer.h"
+#include "TextureData.h"
 #include "EditorTextureData.h"
 
 #include <mutex>
 #include <unordered_map>
 #include <vector>
+
 #include <Engine.h>
+#include <GraphicsDevice.h>
 
 namespace Glory::Editor
 {
 	bool EditorAssets::m_IsInitialized = false;
 	std::unordered_map<std::string, EditorTextureData*> TextureDatas;
-	std::unordered_map<std::string, Texture*> Textures;
+	std::unordered_map<std::string, TextureHandle> Textures;
 	std::mutex QueueLock;
 	std::vector<TextureData*> TextureCreationQueue;
 
 	void EditorAssets::LoadAssets()
 	{
-		GraphicsModule* pGraphics = EditorApplication::GetInstance()->GetEngine()->GetMainModule<GraphicsModule>();
+		GraphicsDevice* pDevice = EditorApplication::GetInstance()->GetEngine()->ActiveGraphicsDevice();
 
 		std::unique_lock<std::mutex> lock(QueueLock);
 		for (size_t i = 0; i < TextureCreationQueue.size(); i++)
-		{
-			pGraphics->GetResourceManager()->CreateTexture(TextureCreationQueue[i]);
-		}
+			pDevice->AcquireCachedTexture(TextureCreationQueue[i]);
 		TextureCreationQueue.clear();
 		lock.unlock();
 
 		if (m_IsInitialized) return;
 
-		LoadImage(pGraphics, "./EditorAssets/Thumb/folder.png", "folder");
-		LoadImage(pGraphics, "./EditorAssets/Thumb/file.png", "file");
-		LoadImage(pGraphics, "./EditorAssets/Thumb/scene.png", "scene");
-		LoadImage(pGraphics, "./EditorAssets/Thumb/audio.png", "audio");
+		LoadImage(pDevice, "./EditorAssets/Thumb/folder.png", "folder");
+		LoadImage(pDevice, "./EditorAssets/Thumb/file.png", "file");
+		LoadImage(pDevice, "./EditorAssets/Thumb/scene.png", "scene");
+		LoadImage(pDevice, "./EditorAssets/Thumb/audio.png", "audio");
 
 		m_IsInitialized = true;
 	}
@@ -56,7 +57,7 @@ namespace Glory::Editor
 		lock.unlock();
 	}
 
-	Texture* EditorAssets::GetTexture(const std::string& key)
+	TextureHandle EditorAssets::GetTexture(const std::string& key)
 	{
 		auto it = Textures.find(key);
 		if (it == Textures.end()) return nullptr;
@@ -70,7 +71,7 @@ namespace Glory::Editor
 		return it->second;
 	}
 
-	void EditorAssets::LoadImage(GraphicsModule* pGraphics, const std::string& path, const std::string& key)
+	void EditorAssets::LoadImage(GraphicsDevice* pDevice, const std::string& path, const std::string& key)
 	{
 		ImportedResource resource = Importer::Import(path, nullptr);
 
@@ -78,8 +79,8 @@ namespace Glory::Editor
 		resource.Cleanup();
 		EditorTextureData* pTextureData = new EditorTextureData(pImageData);
 		TextureDatas.emplace(key, pTextureData);
-		Texture* pTexture = pGraphics->GetResourceManager()->CreateTexture(pTextureData);
-		Textures.emplace(key, pTexture);
+		TextureHandle texture = pDevice->AcquireCachedTexture(pTextureData);
+		Textures.emplace(key, texture);
 	}
 
 	EditorAssets::EditorAssets() {}

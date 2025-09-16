@@ -4,15 +4,9 @@
 #include "Debug.h"
 #include "EngineProfiler.h"
 
-#include "Buffer.h"
-#include "Mesh.h"
-#include "Shader.h"
-#include "Material.h"
-#include "Pipeline.h"
-#include "RenderTexture.h"
-
 #include "MaterialData.h"
 #include "PipelineData.h"
+#include "MeshData.h"
 #include "CubemapData.h"
 
 #define TEMPLATE_GETTER(type) template<> \
@@ -79,18 +73,19 @@ namespace Glory
 
 	TextureHandle GraphicsDevice::AcquireCachedTexture(TextureData* pTexture)
 	{
-		auto iter = m_MeshHandles.find(pTexture->GetGPUUUID());
-		if (iter == m_MeshHandles.end())
+		auto iter = m_TextureHandles.find(pTexture->GetGPUUUID());
+		if (iter == m_TextureHandles.end())
 		{
 			TextureHandle newTexture = CreateTexture(pTexture);
-			iter = m_MeshHandles.emplace(pTexture->GetGPUUUID(), newTexture).first;
+			iter = m_TextureHandles.emplace(pTexture->GetGPUUUID(), newTexture).first;
 		}
+		return iter->second;
+	}
 
-		TextureHandle texture = iter->second;
-
-		/* @todo: Update mesh if needed */
-
-		return texture;
+	bool GraphicsDevice::CachedTextureExists(TextureData* pTexture)
+	{
+		auto iter = m_TextureHandles.find(pTexture->GetGPUUUID());
+		return iter != m_TextureHandles.end();
 	}
 
 	MeshHandle GraphicsDevice::CreateMesh(MeshData* pMeshData)

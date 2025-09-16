@@ -1,8 +1,9 @@
 #include "CameraManager.h"
 #include "Engine.h"
 #include "RendererModule.h"
+#include "WindowModule.h"
+#include "Window.h"
 #include "EngineProfiler.h"
-#include "DisplayManager.h"
 #include "Camera.h"
 
 namespace Glory
@@ -10,21 +11,21 @@ namespace Glory
 	CameraRef CameraManager::GetNewOrUnusedCamera()
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "CameraManager::GetNewOrUnusedCamera" };
-		uint32_t width, height;
-		m_pEngine->GetDisplayManager().GetResolution(width, height);
+		int width, height;
+		m_pEngine->GetMainModule<WindowModule>()->GetMainWindow()->GetDrawableSize(&width, &height);
 
 		if (m_UnusedCameraIndices.size() > 0)
 		{
 			size_t index = m_UnusedCameraIndices[0];
 			m_UnusedCameraIndices.erase(m_UnusedCameraIndices.begin());
 			Camera& pCamera = m_Cameras[index];
-			pCamera.SetResolution(width, height);
+			pCamera.SetResolution(uint32_t(width), uint32_t(height));
 			pCamera.m_IsInUse = true;
 			return CameraRef(this, pCamera.GetUUID());
 		}
 
 		size_t index = m_Cameras.size();
-		m_Cameras.push_back(Camera(width, height));
+		m_Cameras.push_back(Camera(uint32_t(width), uint32_t(height)));
 		UUID id = m_Cameras[index].GetUUID();
 		m_IDToCamera[id] = index;
 		return CameraRef(this, m_Cameras[index].GetUUID());

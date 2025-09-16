@@ -30,7 +30,6 @@
 #include "AssetDatabase.h"
 #include "AssetManager.h"
 #include "Serializers.h"
-#include "DisplayManager.h"
 #include "LayerManager.h"
 #include "ObjectManager.h"
 #include "CameraManager.h"
@@ -210,7 +209,7 @@ namespace Glory
 		m_Reflection(new Reflect), m_CreateInfo(createInfo), m_ResourceTypes(new ResourceTypes),
 		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
 		m_pAssetsManager(createInfo.pAssetManager), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
-		m_Serializers(new Serializers(this)), m_CameraManager(new CameraManager(this)), m_DisplayManager(new DisplayManager),
+		m_Serializers(new Serializers(this)), m_CameraManager(new CameraManager(this)),
 		m_pMaterialManager(createInfo.pMaterialManager), m_AssetDatabase(new AssetDatabase),
 		m_ObjectManager(new ObjectManager), m_RootPath("./")
 	{
@@ -387,11 +386,6 @@ namespace Glory
 	Serializers& Engine::GetSerializers()
 	{
 		return *m_Serializers;
-	}
-
-	DisplayManager& Engine::GetDisplayManager()
-	{
-		return *m_DisplayManager;
 	}
 
 	Console& Engine::GetConsole()

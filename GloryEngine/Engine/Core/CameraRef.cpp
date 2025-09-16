@@ -1,6 +1,5 @@
 #include "CameraRef.h"
 #include "CameraManager.h"
-#include "RenderTexture.h"
 #include "Camera.h"
 
 namespace Glory

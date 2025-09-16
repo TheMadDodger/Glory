@@ -11,6 +11,7 @@
 
 #include <PipelineData.h>
 #include <MeshData.h>
+#include <TextureData.h>
 
 #include <EngineProfiler.h>
 #include <random>

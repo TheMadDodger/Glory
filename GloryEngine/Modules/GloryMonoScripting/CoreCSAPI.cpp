@@ -19,6 +19,7 @@
 
 #include <MaterialData.h>
 #include <PrefabData.h>
+#include <TextureData.h>
 #include <TextFileData.h>
 
 namespace Glory

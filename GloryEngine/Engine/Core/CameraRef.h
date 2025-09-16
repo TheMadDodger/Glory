@@ -1,6 +1,5 @@
 #pragma once
 #include "UUID.h"
-#include "RenderTexture.h"
 #include "LayerMask.h"
 
 #include <glm/glm.hpp>

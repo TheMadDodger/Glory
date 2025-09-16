@@ -2,6 +2,7 @@
 #include "AssetManager.h"
 #include "BinaryStream.h"
 #include "PipelineData.h"
+#include "TextureData.h"
 #include "PipelineManager.h"
 #include "Engine.h"
 

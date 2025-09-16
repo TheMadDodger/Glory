@@ -169,7 +169,7 @@ namespace Glory::Editor
 				ResourceMeta meta;
 				EditorAssetDatabase::GetAssetMetadata(uuid, meta);
 				const ResourceType* pType = resourceTypes.GetResourceType(meta.Hash());
-				Texture* pThumbnail = Tumbnail::GetTumbnail(uuid);
+				TextureHandle thumbnail = Tumbnail::GetTumbnail(uuid);
 				const std::string name = EditorAssetDatabase::GetAssetName(uuid);
 
 				AssetLocation location;
@@ -196,7 +196,7 @@ namespace Glory::Editor
 					}
 
 					DND::DragAndDropSource(pPayloadType->Name(), &payload, sizeof(AssetPayload), [&]() {
-						ImGui::Image(pThumbnail ? pRenderImpl->GetTextureID(pThumbnail) : NULL, { 64.0f, 64.0f });
+						ImGui::Image(thumbnail ? pRenderImpl->GetTextureID(thumbnail) : NULL, { 64.0f, 64.0f });
 						ImGui::SameLine();
 						ImGui::Text(name.data());
 					});
@@ -207,7 +207,7 @@ namespace Glory::Editor
 
 				if (ImGui::TableNextColumn())
 				{
-					ImGui::Image(pThumbnail ? pRenderImpl->GetTextureID(pThumbnail) : NULL, { rowHeight, rowHeight });
+					ImGui::Image(thumbnail ? pRenderImpl->GetTextureID(thumbnail) : NULL, { rowHeight, rowHeight });
 				}
 
 				if (ImGui::TableNextColumn())

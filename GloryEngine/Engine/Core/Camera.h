@@ -3,7 +3,6 @@
 #include <unordered_map>
 
 #include "CameraRef.h"
-#include "RenderTexture.h"
 #include "LayerMask.h"
 
 namespace Glory

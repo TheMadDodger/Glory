@@ -947,8 +947,14 @@ namespace Glory
     struct Attachment
     {
         Attachment(const std::string& name, const PixelFormat& pixelFormat, const PixelFormat& internalFormat,
-            const ImageType& imageType, const ImageAspect& imageAspect, DataType type = DataType::DT_UByte, bool autoBind = true);
-        Attachment(const std::string& name, const TextureCreateInfo& textureInfo, bool autoBind = true);
+            const ImageType& imageType, const ImageAspect& imageAspect, DataType type = DataType::DT_UByte, bool autoBind = true):
+            Name(name), InternalFormat(internalFormat), Format(pixelFormat), ImageType(imageType),
+            ImageAspect(imageAspect), m_Type(type), m_AutoBind(autoBind)
+        {}
+        Attachment(const std::string& name, const TextureCreateInfo& textureInfo, bool autoBind = true):
+            Name(name), InternalFormat(textureInfo.m_InternalFormat), Format(textureInfo.m_PixelFormat), ImageType(textureInfo.m_ImageType),
+            ImageAspect(textureInfo.m_ImageAspectFlags), m_Type(textureInfo.m_Type), m_AutoBind(autoBind)
+        {}
 
         //PixelFormat::PF_R8G8B8A8Srgb
         std::string Name;
@@ -964,8 +970,12 @@ namespace Glory
     struct RenderTextureCreateInfo
     {
     public:
-        RenderTextureCreateInfo();
-        RenderTextureCreateInfo(uint32_t width, uint32_t height, bool hasDepth, bool hasStencil = false);
+        RenderTextureCreateInfo() : Width(1), Height(1),
+            HasDepth(false), HasStencil(false)
+        {}
+        RenderTextureCreateInfo(uint32_t width, uint32_t height, bool hasDepth, bool hasStencil = false):
+            Width(width), Height(height), HasDepth(hasDepth), HasStencil(hasStencil)
+        {}
 
         uint32_t Width;
         uint32_t Height;

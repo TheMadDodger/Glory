@@ -7,6 +7,7 @@
 #include "CameraManager.h"
 #include "AssetManager.h"
 #include "GPUTextureAtlas.h"
+#include "GraphicsEnums.h"
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>

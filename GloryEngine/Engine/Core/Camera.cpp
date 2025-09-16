@@ -20,9 +20,9 @@ namespace Glory
 		m_Resolution = glm::ivec2(width, height);
 
 		if (!m_IsOrtho)
-			SetPerspectiveProjection(width, height, m_HalfFOV, m_Near, m_Far, true);
+			SetPerspectiveProjection(float(width), float(height), m_HalfFOV, m_Near, m_Far, true);
 		else
-			SetOrthographicProjection(width, height, m_Near, m_Far, true);
+			SetOrthographicProjection(float(width), float(height), m_Near, m_Far, true);
 		return true;
 	}
 

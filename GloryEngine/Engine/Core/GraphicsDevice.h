@@ -364,6 +364,7 @@ namespace Glory
 		 * @param pTexture The texture data to create a texture from
 		 */
 		TextureHandle AcquireCachedTexture(TextureData* pTexture);
+		bool CachedTextureExists(TextureData* pTexture);
 
 	public: /* Resource management */
 		

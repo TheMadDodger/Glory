@@ -3,9 +3,10 @@
 #include "EditorPlatform.h"
 #include "imgui_impl_vulkan.h"
 
-#include <Device.h>
 #include <Glory.h>
 #include <EditorCreateInfo.h>
+
+#include <vulkan/vulkan.hpp>
 
 namespace Glory
 {
@@ -22,7 +23,6 @@ namespace Glory::Editor
         EditorVulkanRenderImpl();
         virtual ~EditorVulkanRenderImpl();
 
-        virtual void* GetTextureID(Texture* pTexture) override;
         virtual void* GetTextureID(TextureHandle texture) override;
 
     private:

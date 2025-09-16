@@ -1,6 +1,7 @@
 #include "EditorVulkanRenderImpl.h"
 
 #include <EditorApplication.h>
+#include <VulkanGraphicsModule.h>
 #include <EditorShaderData.h>
 
 #include <VulkanDevice.h>
@@ -24,18 +25,6 @@ namespace Glory::Editor
 	EditorVulkanRenderImpl::EditorVulkanRenderImpl() {}
 
 	EditorVulkanRenderImpl::~EditorVulkanRenderImpl() {}
-
-	void* EditorVulkanRenderImpl::GetTextureID(Texture* pTexture)
-	{
-		VulkanTexture* pVKTexture = static_cast<VulkanTexture*>(pTexture);
-		auto iter = m_DesciptorSets.find(pTexture->ID());
-		if (iter == m_DesciptorSets.end())
-		{
-			vk::DescriptorSet ds = ImGui_ImplVulkan_AddTexture(pVKTexture->GetTextureSampler(), pVKTexture->GetTextureImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-			iter = m_DesciptorSets.emplace(pTexture->ID(), ds).first;
-		}
-		return (void*)iter->second;
-	}
 
 	void* EditorVulkanRenderImpl::GetTextureID(TextureHandle texture)
 	{

@@ -19,6 +19,7 @@ namespace Glory
 	class MaterialData;
 	class GPUTextureAtlas;
 	struct RenderPass;
+	struct TextureCreateInfo;
 
 	struct PickResult
 	{

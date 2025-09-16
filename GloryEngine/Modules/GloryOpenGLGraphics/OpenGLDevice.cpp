@@ -4,7 +4,11 @@
 
 #include <Engine.h>
 #include <Debug.h>
+
 #include <PipelineData.h>
+#include <ImageData.h>
+#include <TextureData.h>
+#include <FileData.h>
 
 namespace Glory
 {

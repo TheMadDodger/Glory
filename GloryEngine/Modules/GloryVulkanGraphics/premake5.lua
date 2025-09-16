@@ -17,9 +17,7 @@ project "GloryVulkanGraphics"
 
 	vpaths
 	{
-		["Device"] = { "Device.*", "QueueFamilyIndices.h", "VulkanDeviceManager.*" },
-		["Module"] = { "GloryVulkan.*", "VulkanExceptions.h", "VulkanGraphicsModule.*", "VulkanStructsConverter.*" },
-		["Resources"] = { "VulkanBuffer.*", "VulkanMesh.*", "VulkanResourceManager.*", "VulkanShader.*", "VulkanTexture.*" }
+		["Module"] = { "GloryVulkan.*", "VulkanExceptions.h", "VulkanGraphicsModule.*", "VulkanStructsConverter.*", "VulkanDevice.*", "DescriptorAllocator.*" },
 	}
 
 	includedirs

@@ -1,6 +1,8 @@
 #pragma once
 #include <EditorWindow.h>
 
+#include <glm/vec3.hpp>
+
 namespace Glory::Editor
 {
 	class FSMEditor;

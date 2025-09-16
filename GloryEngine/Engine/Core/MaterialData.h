@@ -1,9 +1,9 @@
 #pragma once
 #include "Resource.h"
-#include "Texture.h"
 #include "MaterialPropertyInfo.h"
 #include "GraphicsEnums.h"
 #include "AssetReference.h"
+#include "TextureData.h"
 
 #include <vector>
 #include <unordered_map>

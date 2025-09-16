@@ -3,7 +3,6 @@
 #include <Debug.h>
 #include <EditorApplication.h>
 #include <GL/glew.h>
-#include <GLTexture.h>
 
 #include <OpenGLDevice.h>
 #include <EditorShaderData.h>
@@ -89,13 +88,6 @@ namespace Glory::Editor
 	void EditorOpenGLRenderImpl::FramePresent()
 	{
 		m_pEditorPlatform->GetWindowImpl()->GetMainWindow()->GLSwapWindow();
-	}
-
-	void* EditorOpenGLRenderImpl::GetTextureID(Texture* pTexture)
-	{
-		if (pTexture == nullptr) return 0;
-		GLTexture* pGLTexture = (GLTexture*)pTexture;
-		return (void*)pGLTexture->GetID();
 	}
 
 	void* EditorOpenGLRenderImpl::GetTextureID(TextureHandle texture)

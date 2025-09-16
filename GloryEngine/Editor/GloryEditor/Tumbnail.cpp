@@ -1,4 +1,3 @@
-#include <Engine.h>
 #include "EditorAssetDatabase.h"
 #include "EditorAssets.h"
 #include "EditorAssets.h"
@@ -6,21 +5,24 @@
 #include "TumbnailGenerator.h"
 #include "EditorApplication.h"
 
+#include <Engine.h>
+#include <GraphicsDevice.h>
+
 namespace Glory::Editor
 {
 	std::vector<BaseTumbnailGenerator*> Tumbnail::m_pGenerators;
 	std::map<UUID, TextureData*> Tumbnail::m_pTumbnails;
 
-	Texture* Tumbnail::GetTumbnail(UUID uuid)
+	TextureHandle Tumbnail::GetTumbnail(UUID uuid)
 	{
-		GPUResourceManager* pResourceManager = EditorApplication::GetInstance()->GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager();
+		GraphicsDevice* pDevice = EditorApplication::GetInstance()->GetEngine()->ActiveGraphicsDevice();
 
 		auto it = m_pTumbnails.find(uuid);
 		if (it != m_pTumbnails.end())
 		{
 			TextureData* pTextureData = m_pTumbnails.at(uuid);
-			if (pResourceManager->ResourceExists(pTextureData))
-				return pResourceManager->CreateTexture(pTextureData);
+			if (pDevice->CachedTextureExists(pTextureData))
+				return pDevice->AcquireCachedTexture(pTextureData);
 			return EditorAssets::GetTexture("file");
 		}
 

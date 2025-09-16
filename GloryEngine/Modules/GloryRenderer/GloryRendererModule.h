@@ -1,6 +1,5 @@
 #pragma once
 #include <RendererModule.h>
-#include <Material.h>
 #include <MaterialData.h>
 #include <FileData.h>
 #include <glm/glm.hpp>
