@@ -65,8 +65,8 @@ namespace Glory
 		GloryRendererModule();
 		virtual ~GloryRendererModule();
 
-		virtual void OnCameraResize(uint32_t cameraIndex) override;
-		virtual void OnCameraPerspectiveChanged(uint32_t cameraIndex) override;
+		virtual void OnCameraResize(CameraRef camera) override;
+		virtual void OnCameraPerspectiveChanged(CameraRef camera) override;
 		virtual MaterialData* GetInternalMaterial(std::string_view name) const override;
 
 		virtual void CollectReferences(std::vector<UUID>& references) override;

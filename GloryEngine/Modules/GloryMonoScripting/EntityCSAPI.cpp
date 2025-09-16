@@ -538,18 +538,6 @@ namespace Glory
 		cameraComp.m_Far = far;
 	}
 
-	int CameraComponent_GetDisplayIndex(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
-	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
-		return cameraComp.m_DisplayIndex;
-	}
-
-	void CameraComponent_SetDisplayIndex(uint64_t sceneID, uint64_t objectID, uint64_t componentID, int displayIndex)
-	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
-		cameraComp.m_DisplayIndex = displayIndex;
-	}
-
 	int CameraComponent_GetPriority(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
@@ -1057,9 +1045,6 @@ namespace Glory
 
 		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetFar", CameraComponent_GetFar);
 		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_SetFar", CameraComponent_SetFar);
-
-		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetDisplayIndex", CameraComponent_GetDisplayIndex);
-		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_SetDisplayIndex", CameraComponent_SetDisplayIndex);
 
 		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_GetPriority", CameraComponent_GetPriority);
 		BIND("GloryEngine.Entities.CameraComponent::CameraComponent_SetPriority", CameraComponent_SetPriority);

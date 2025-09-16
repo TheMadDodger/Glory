@@ -14,7 +14,7 @@ namespace Glory::Editor
 	size_t SelectedResolution = 3;
 	glm::vec2 CustomResolution{ 1920.0f, 1080.0f };
 
-	GameWindow::GameWindow() : EditorWindowTemplate("Game", 1280.0f, 720.0f), m_DisplayIndex(0)
+	GameWindow::GameWindow() : EditorWindowTemplate("Game", 1280.0f, 720.0f)
 	{
 		m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar;
 	}
@@ -39,21 +39,6 @@ namespace Glory::Editor
 	{
 		if (ImGui::BeginMenuBar())
 		{
-			std::string selectedName = "Display " + std::to_string(m_DisplayIndex);
-			if (ImGui::BeginMenu(selectedName.data()))
-			{
-				for (size_t i = 0; i < DisplayManager::MAX_DISPLAYS; i++)
-				{
-					std::string name = "Display " + std::to_string(i);
-					bool selected = m_DisplayIndex == i;
-					if (ImGui::MenuItem(name.data(), NULL, selected))
-					{
-						m_DisplayIndex = i;
-					}
-				}
-				ImGui::EndMenu();
-			}
-
 			const glm::uvec2& selectedResolution = Resolutions[SelectedAspect][SelectedResolution];
 			std::stringstream str;
 			str << selectedResolution.x << "x" << selectedResolution.y;
@@ -100,11 +85,7 @@ namespace Glory::Editor
 
 	void GameWindow::View()
 	{
-		RenderTexture* pDisplayTexture = EditorApplication::GetInstance()->GetEngine()->GetDisplayManager().GetDisplayRenderTexture(m_DisplayIndex);
-		if (pDisplayTexture == nullptr) return;
-		Texture* pTexture = pDisplayTexture->GetTextureAttachment(0);
-
-		uint32_t width, height;
+		/*uint32_t width, height;
 		pDisplayTexture->GetDimensions(width, height);
 		float textureAspect = (float)width / (float)height;
 
@@ -151,6 +132,6 @@ namespace Glory::Editor
 
 		ImGui::GetWindowDrawList()->AddImage(
 			pRenderImpl->GetTextureID(pTexture), topLeft,
-			bottomRight, ImVec2(0, 1), ImVec2(1, 0));
+			bottomRight, ImVec2(0, 1), ImVec2(1, 0));*/
 	}
 }

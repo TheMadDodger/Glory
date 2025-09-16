@@ -48,12 +48,11 @@ namespace Glory
         static constexpr GraphicsHandleType HandleType = H_RenderTexture;
 
         vk::Framebuffer m_VKFramebuffer;
-        uint32_t m_Width;
-        uint32_t m_Height;
         RenderPassHandle m_RenderPass;
         std::vector<TextureHandle> m_Textures;
         std::vector<std::string> m_AttachmentNames;
         bool m_HasDepthOrStencil;
+        RenderTextureCreateInfo m_Info;
     };
 
     struct VK_RenderPass
@@ -103,6 +102,7 @@ namespace Glory
         DescriptorSetLayoutHandle m_Layout;
         vk::PushConstantRange m_PushConstantRange;
         vk::DescriptorSet m_VKDescriptorSet;
+        vk::DescriptorPool m_VKDescriptorPool;
     };
 
     class VulkanGraphicsModule;
@@ -171,9 +171,10 @@ namespace Glory
 
         virtual TextureHandle CreateTexture(TextureData* pTexture) override;
         virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) override;
-        virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info) override;
+        virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info) override;
         virtual TextureHandle GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index) override;
-        virtual RenderPassHandle CreateRenderPass(const RenderPassInfo& info) override;
+        virtual void ResizeRenderTexture(RenderTextureHandle renderTexture, uint32_t width, uint32_t height) override;
+        virtual RenderPassHandle CreateRenderPass(RenderPassInfo&& info) override;
         virtual RenderTextureHandle GetRenderPassRenderTexture(RenderPassHandle renderPass) override;
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
         virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
@@ -181,6 +182,7 @@ namespace Glory
         virtual PipelineHandle CreateComputePipeline(PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts) override;
         virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo) override;
         virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) override;
+        virtual void UpdateDescriptorSet(DescriptorSetHandle descriptorSet, const DescriptorSetUpdateInfo& setWriteInfo) override;
 
         virtual void FreeBuffer(BufferHandle& handle) override;
         virtual void FreeMesh(MeshHandle& handle) override;
@@ -203,6 +205,9 @@ namespace Glory
             int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth);
 
         vk::CommandBuffer GetNewCommandBuffer(CommandBufferHandle commandBufferHandle);
+
+    private:
+        void CreateRenderTexture(vk::RenderPass vkRenderPass, VK_RenderTexture& renderTexture);
 
     private:
         vk::PhysicalDevice m_VKDevice;

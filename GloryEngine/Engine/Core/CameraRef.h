@@ -21,13 +21,9 @@ namespace Glory
 		void SetPerspectiveProjection(uint32_t width, uint32_t height, float halfFOV, float near, float far);
 		void SetOrthographicProjection(float width, float height, float near, float far);
 		void SetView(const glm::mat4& view);
-		void SetDisplayIndex(int index);
 		void SetPriority(int priority);
 		void SetLayerMask(const LayerMask& layerMask);
 		void SetClearColor(const glm::vec4& clearColor);
-		void SetOutputTexture(RenderTexture* pTexture);
-		void SetSecondaryOutputTexture(RenderTexture* pTexture);
-		void Swap();
 		void SetUserData(const std::string& name, void* data);
 
 		const glm::uvec2& GetResolution() const;
@@ -40,14 +36,9 @@ namespace Glory
 		float* GetViewPointer();
 		float* GetProjectionPointer();
 
-		int GetDisplayIndex() const;
 		int GetPriority() const;
 		const glm::vec4& GetClearColor() const;
 		const LayerMask& GetLayerMask() const;
-		size_t GetRenderTextureCount() const;
-		RenderTexture* GetRenderTexture(size_t index) const;
-		RenderTexture* GetOutputTexture() const;
-		RenderTexture* GetSecondaryOutputTexture() const;
 
 		template<typename T>
 		bool GetUserData(const std::string& name, T*& data)

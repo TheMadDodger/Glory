@@ -17,7 +17,7 @@ namespace Glory
 	RendererModule::RendererModule()
 		: m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0), m_LineVertexCount(0),
 		m_pLineBuffer(nullptr), m_pLineMesh(nullptr), m_pLinesMaterialData(nullptr),
-		m_pLineVertex(nullptr), m_pLineVertices(nullptr), m_DisplaysDirty(false),
+		m_pLineVertex(nullptr), m_pLineVertices(nullptr),
 		m_FrameData(size_t(MAX_LIGHTS))
 	{
 	}
@@ -401,8 +401,6 @@ namespace Glory
 
 	void RendererModule::OnWindowResize(glm::uvec2 size)
 	{
-		m_pEngine->GetCameraManager().ResizeAllCameras(size);
-		m_DisplaysDirty = true;
 	}
 
 	void RendererModule::RenderOnBackBuffer(RenderTexture* pTexture)
@@ -454,9 +452,9 @@ namespace Glory
 		OnPostInitialize();
 	}
 
-	void RendererModule::OnCameraResize(uint32_t cameraIndex) {}
+	void RendererModule::OnCameraResize(CameraRef) {}
 
-	void RendererModule::OnCameraPerspectiveChanged(uint32_t cameraIndex) {}
+	void RendererModule::OnCameraPerspectiveChanged(CameraRef) {}
 
 	void RendererModule::LoadSettings(ModuleSettings& settings)
 	{

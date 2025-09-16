@@ -51,7 +51,6 @@ namespace Glory
 		if (pComponent.m_LastHash == hash) return;
 		pComponent.m_LastHash = hash;
 
-		pComponent.m_Camera.SetDisplayIndex(pComponent.m_DisplayIndex);
 		pComponent.m_Camera.SetPriority(pComponent.m_Priority);
 		pComponent.m_Camera.SetLayerMask(pComponent.m_LayerMask);
 		pComponent.m_Camera.SetClearColor(pComponent.m_ClearColor);
@@ -79,9 +78,9 @@ namespace Glory
 	{
 		float value = (float)pComponent.m_ClearColor.x + (float)pComponent.m_ClearColor.y
 			+ (float)pComponent.m_ClearColor.z + (float)pComponent.m_ClearColor.w
-			+ (float)pComponent.m_DisplayIndex + (float)pComponent.m_Far
-			+ (float)pComponent.m_Near + (float)pComponent.m_HalfFOV
-			+ (float)pComponent.m_Priority + (float)pComponent.m_LayerMask;
+			+ (float)pComponent.m_Far + (float)pComponent.m_Near
+			+ (float)pComponent.m_HalfFOV + (float)pComponent.m_Priority
+			+ (float)pComponent.m_LayerMask;
 
 		return (uint32_t)std::hash<float>()(value);
 	}

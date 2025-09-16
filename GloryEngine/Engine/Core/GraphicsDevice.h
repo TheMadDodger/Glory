@@ -189,6 +189,29 @@ namespace Glory
 		std::vector<SamplerDescriptor> m_Samplers;
 	};
 
+	/** @brief Buffer descriptor update info */
+	struct BufferDescriptorUpdate
+	{
+		BufferHandle m_BufferHandle;
+		uint32_t m_Offset;
+		uint32_t m_Size;
+		uint32_t m_DescriptorIndex;
+	};
+
+	/** @brief Sampler descriptor update info */
+	struct SamplerDescriptorUpdate
+	{
+		TextureHandle m_TextureHandle;
+		uint32_t m_DescriptorIndex;
+	};
+
+	/** @brief Descriptor set update info */
+	struct DescriptorSetUpdateInfo
+	{
+		std::vector<BufferDescriptorUpdate> m_Buffers;
+		std::vector<SamplerDescriptorUpdate> m_Samplers;
+	};
+
 	/** @brief Graphics device abstraction */
 	class GraphicsDevice
 	{
@@ -293,9 +316,31 @@ namespace Glory
 		 */
 		virtual void Release(CommandBufferHandle commandBuffer) = 0;
 
+		/**
+		 * @brief Record a set viewport command
+		 * @param commandBuffer The handle to the command buffer
+		 * @param x Viewport X position
+		 * @param y Viewport Y position
+		 * @param width Viewport width
+		 * @param height Viewport height
+		 * @param minDepth Viewport minimum depth
+		 * @param maxDepth Viewport maximum depth
+		 */
 		virtual void SetViewport(CommandBufferHandle commandBuffer, float x, float y, float width, float height, float minDepth=0.0f, float maxDepth=1.0f) = 0;
+		/**
+		 * @brief Record a set scissor command
+		 * @param commandBuffer The handle to the command buffer
+		 * @param x Scissor X position
+		 * @param y Scissor Y position
+		 * @param width Scissor width
+		 * @param height Scissor height
+		 */
 		virtual void SetScissor(CommandBufferHandle commandBuffer, int x, int y, uint32_t width, uint32_t height) = 0;
 
+		/**
+		 * @brief Record commands to draw a basic quad, this quad consists of 6 vec3's for positions
+		 * @param commandBuffer The handle to the command buffer
+		 */
 		void DrawQuad(CommandBufferHandle commandBuffer);
 
 	public: /* Resource caching */
@@ -387,9 +432,22 @@ namespace Glory
 		 * @param renderPass The render pass it belongs to
 		 * @param info Render texture creation info
 		 */
-		virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info) = 0;
+		virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info) = 0;
 
+		/**
+		 * @brief Get an attachment texture of a render texture
+		 * @param renderTexture Render texture handle to get the attachment from
+		 * @param index Index of the attachment to get
+		 */
 		virtual TextureHandle GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index) = 0;
+
+		/**
+		 * @brief Resize a render texture
+		 * @param renderTexture Render texture handle to resize
+		 * @param width New width of the render texture
+		 * @param height New height of the render texture
+		 */
+		virtual void ResizeRenderTexture(RenderTextureHandle renderTexture, uint32_t width, uint32_t height) = 0;
 
 		/* Render pass */
 		
@@ -397,8 +455,12 @@ namespace Glory
 		 * @brief Create a render pass on this device
 		 * @param info Render pass creation info
 		 */
-		virtual RenderPassHandle CreateRenderPass(const RenderPassInfo& info) = 0;
+		virtual RenderPassHandle CreateRenderPass(RenderPassInfo&& info) = 0;
 
+		/**
+		 * @brief Get the render texture of a render pass
+		 * @param renderPass Render pass to get the render texture from
+		 */
 		virtual RenderTextureHandle GetRenderPassRenderTexture(RenderPassHandle renderPass) = 0;
 
 		/* Shader */
@@ -444,6 +506,12 @@ namespace Glory
 		 * @param setInfo Descriptor set info
 		 */
 		virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) = 0;
+		/**
+		 * @brief Update a descriptor set
+		 * @param descriptorSet Descriptor set to update
+		 * @param setWriteInfo @ref DescriptorSetUpdateInfo struct with info on which descriptors in the set to update
+		 */
+		virtual void UpdateDescriptorSet(DescriptorSetHandle descriptorSet, const DescriptorSetUpdateInfo& setWriteInfo) = 0;
 
 		/* Free memory */
 

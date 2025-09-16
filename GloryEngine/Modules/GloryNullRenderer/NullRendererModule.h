@@ -10,45 +10,21 @@ namespace Glory
 	class PipelineData;
 	class TextureAtlas;
 
-	struct VolumeTileAABB
-	{
-		glm::vec4 MinPoint;
-		glm::vec4 MaxPoint;
-	};
-
-	struct ScreenToView
-	{
-		glm::mat4 ProjectionInverse;
-		glm::mat4 ViewInverse;
-		glm::uvec4 TileSizes;
-		glm::uvec2 ScreenDimensions;
-		float Scale;
-		float Bias;
-		float zNear;
-		float zFar;
-	};
-
-	struct LightGrid
-	{
-		uint32_t Offset;
-		uint32_t Count;
-	};
-
 	class NullRendererModule : public RendererModule
 	{
 	public:
 		NullRendererModule();
 		virtual ~NullRendererModule();
 
-		virtual void OnCameraResize(uint32_t cameraIndex) override;
-		virtual void OnCameraPerspectiveChanged(uint32_t cameraIndex) override;
-		virtual MaterialData* GetInternalMaterial(std::string_view name) const override;
+		virtual void OnCameraResize(CameraRef) override;
+		virtual void OnCameraPerspectiveChanged(CameraRef) override;
+		virtual MaterialData* GetInternalMaterial(std::string_view) const override;
 
-		virtual void CollectReferences(std::vector<UUID>& references) override;
+		virtual void CollectReferences(std::vector<UUID>&) override;
 
 		virtual UUID TextPipelineID() const override;
 
-		GLORY_MODULE_VERSION_H(0, 1, 0);
+		GLORY_MODULE_VERSION_H(1, 0, 0);
 
 	private:
 		virtual void Cleanup() override;
@@ -58,8 +34,12 @@ namespace Glory
 		virtual void Draw() override;
 
 		virtual size_t CameraAttachmentPreviewCount() const override;
-		virtual std::string_view CameraAttachmentPreviewName(size_t index) const override;
-		virtual TextureHandle CameraAttachmentPreview(CameraRef camera, size_t index) const override;
+		virtual std::string_view CameraAttachmentPreviewName(size_t) const override;
+		virtual TextureHandle CameraAttachmentPreview(CameraRef, size_t) const override;
+
+		virtual size_t DebugOverlayCount() const override;
+		virtual std::string_view DebugOverlayName(size_t) const override;
+		virtual TextureHandle DebugOverlay(size_t) const override;
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
 	};

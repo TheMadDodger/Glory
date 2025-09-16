@@ -327,14 +327,14 @@ namespace Glory
 		// Start a render pass
         vk::Rect2D renderArea = vk::Rect2D()
             .setOffset(vk::Offset2D(0, 0))
-            .setExtent(vk::Extent2D(renderTexture->m_Width, renderTexture->m_Height));
+            .setExtent(vk::Extent2D(renderTexture->m_Info.Width, renderTexture->m_Info.Height));
 
         std::vector<vk::ClearValue> clearColors = std::vector<vk::ClearValue>(renderTexture->m_Textures.size());
         for (size_t i = 0; i < clearColors.size(); ++i)
         {
 			glm::vec4 value{0.0f, 0.0f, 0.0f, 1.0f};
             vk::ClearColorValue clearColor;
-            memcpy(&clearColor, (const void*)&value, sizeof(float) * 4);
+            memcpy(&clearColor, (const void*)&value, sizeof(float)*4);
             clearColors[i].setColor(clearColor);
 			//clearColors[i].setDepthStencil(vk::ClearDepthStencilValue(0.0f, 0));
         }
@@ -1050,7 +1050,7 @@ namespace Glory
 		return handle;
 	}
 
-	RenderTextureHandle VulkanDevice::CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info)
+	RenderTextureHandle VulkanDevice::CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info)
 	{
 		if (info.Width == 0 || info.Height == 0)
 		{
@@ -1068,114 +1068,59 @@ namespace Glory
 		RenderTextureHandle handle;
 		VK_RenderTexture& renderTexture = m_RenderTextures.Emplace(handle, VK_RenderTexture());
 		renderTexture.m_RenderPass = renderPass;
-		renderTexture.m_Width = info.Width;
-		renderTexture.m_Height = info.Height;
 		renderTexture.m_HasDepthOrStencil = info.HasDepth || info.HasStencil;
-
-		const size_t numAttachments = info.Attachments.size() + (renderTexture.m_HasDepthOrStencil ? 1 : 0);
-		renderTexture.m_AttachmentNames.resize(numAttachments);
-		renderTexture.m_Textures.resize(numAttachments);
-
-		SamplerSettings sampler;
-		sampler.MipmapMode = Filter::F_None;
-		sampler.MinFilter = Filter::F_None;
-		sampler.MagFilter = Filter::F_None;
-
-		size_t textureCounter = 0;
-		for (size_t i = 0; i < info.Attachments.size(); ++i)
-		{
-			Attachment attachment = info.Attachments[i];
-			renderTexture.m_Textures[i] = CreateTexture({ info.Width, info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler, attachment.m_SamplingEnabled });
-			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[i]);
-			vkTexture->m_VKFinalLayout = attachment.m_SamplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eColorAttachmentOptimal;
-			renderTexture.m_AttachmentNames[i] = attachment.Name;
-			++textureCounter;
-		}
-
-		size_t depthStencilIndex = 0;
-
-		if (info.HasDepth && info.HasStencil)
-		{
-			depthStencilIndex = textureCounter;
-			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32SfloatS8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
-			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
-			vkTexture->m_VKFinalLayout = info.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eStencilAttachmentOptimal;
-			renderTexture.m_AttachmentNames[depthStencilIndex] = "DepthStencil";
-			++textureCounter;
-		}
-		else if (info.HasDepth)
-		{
-			depthStencilIndex = textureCounter;
-			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32Sfloat, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
-			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
-			vkTexture->m_VKFinalLayout = info.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthAttachmentOptimal;
-			renderTexture.m_AttachmentNames[depthStencilIndex] = "Depth";
-			++textureCounter;
-		}
-		else if (info.HasStencil)
-		{
-			depthStencilIndex = textureCounter;
-			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Stencil, sampler });
-			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
-			vkTexture->m_VKFinalLayout = info.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthStencilAttachmentOptimal;
-			renderTexture.m_AttachmentNames[depthStencilIndex] = "Stencil";
-			++textureCounter;
-		}
-
-		std::vector<vk::ImageView> attachments(renderTexture.m_Textures.size());
-		for (size_t i = 0; i < renderTexture.m_Textures.size(); ++i)
-		{
-			TextureHandle textureHandle = renderTexture.m_Textures[i];
-			VK_Texture* texture = m_Textures.Find(textureHandle);
-			attachments[i] = texture->m_VKImageView;
-		}
-
-		if (info.HasDepth || info.HasStencil)
-		{
-			VK_Texture* texture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
-			attachments[depthStencilIndex] = texture->m_VKImageView;
-		}
-
-		vk::FramebufferCreateInfo frameBufferCreateInfo = vk::FramebufferCreateInfo()
-			.setRenderPass(vkRenderPass->m_VKRenderPass)
-			.setAttachmentCount(attachments.size())
-			.setPAttachments(attachments.data())
-			.setWidth(info.Width)
-			.setHeight(info.Height)
-			.setLayers(1);
-
-		renderTexture.m_VKFramebuffer = m_LogicalDevice.createFramebuffer(frameBufferCreateInfo);
-		if (renderTexture.m_VKFramebuffer == nullptr)
-		{
-			Debug().LogError("VulkanDevice::CreateRenderTexture: There was an error when trying to create a frame buffer.");
-			return NULL;
-		}
-
-		std::stringstream str;
-		str << "VulkanDevice: RenderTexture " << handle << " created with " << renderTexture.m_Textures.size() << " attachments.";
-		Debug().LogInfo(str.str());
-
+		renderTexture.m_Info = std::move(info);
+		CreateRenderTexture(vkRenderPass->m_VKRenderPass, renderTexture);
 		return handle;
 	}
 
 	TextureHandle VulkanDevice::GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index)
 	{
-		VK_RenderTexture* vkRenderPass = m_RenderTextures.Find(renderTexture);
-		if (!vkRenderPass)
+		VK_RenderTexture* vkRenderTexture = m_RenderTextures.Find(renderTexture);
+		if (!vkRenderTexture)
 		{
 			Debug().LogError("VulkanDevice::GetRenderTextureAttatchment: Invalid render texture handle");
 			return NULL;
 		}
 
-		if (index >= vkRenderPass->m_Textures.size())
+		if (index >= vkRenderTexture->m_Textures.size())
 		{
 			Debug().LogError("VulkanDevice::GetRenderTextureAttatchment: Invalid attachment index");
 			return NULL;
 		}
-		return vkRenderPass->m_Textures[index];
+		return vkRenderTexture->m_Textures[index];
 	}
 
-	RenderPassHandle VulkanDevice::CreateRenderPass(const RenderPassInfo& info)
+	void VulkanDevice::ResizeRenderTexture(RenderTextureHandle renderTexture, uint32_t width, uint32_t height)
+	{
+		VK_RenderTexture* vkRenderTexture = m_RenderTextures.Find(renderTexture);
+		if (!vkRenderTexture)
+		{
+			Debug().LogError("VulkanDevice::ResizeRenderTexture: Invalid render texture handle");
+			return;
+		}
+
+		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(vkRenderTexture->m_RenderPass);
+		if (!vkRenderPass)
+		{
+			Debug().LogError("VulkanDevice::ResizeRenderTexture: Invalid render pass handle");
+			return;
+		}
+
+		vkRenderTexture->m_Info.Width = width;
+		vkRenderTexture->m_Info.Height = height;
+
+		for (size_t i = 0; i < vkRenderTexture->m_Textures.size(); ++i)
+		{
+			FreeTexture(vkRenderTexture->m_Textures[i]);
+		}
+		vkRenderTexture->m_Textures.clear();
+		vkRenderTexture->m_AttachmentNames.clear();
+		m_LogicalDevice.destroyFramebuffer(vkRenderTexture->m_VKFramebuffer);
+		CreateRenderTexture(vkRenderPass->m_VKRenderPass, *vkRenderTexture);
+	}
+
+	RenderPassHandle VulkanDevice::CreateRenderPass(RenderPassInfo&& info)
 	{
 		if (info.RenderTextureInfo.Width == 0 || info.RenderTextureInfo.Height == 0)
 		{
@@ -1299,7 +1244,7 @@ namespace Glory
 			return NULL;
 		}
 
-		renderPass.m_RenderTexture = CreateRenderTexture(handle, info.RenderTextureInfo);
+		renderPass.m_RenderTexture = CreateRenderTexture(handle, std::move(info.RenderTextureInfo));
 
 		if (!renderPass.m_RenderTexture)
 		{
@@ -1432,14 +1377,14 @@ namespace Glory
 		vk::Viewport viewport = vk::Viewport()
 			.setX(0.0f)
 			.setY(0.0f)
-			.setWidth((float)vkRenderTexture->m_Width)
-			.setHeight((float)vkRenderTexture->m_Height)
+			.setWidth((float)vkRenderTexture->m_Info.Width)
+			.setHeight((float)vkRenderTexture->m_Info.Height)
 			.setMinDepth(0.0f)
 			.setMaxDepth(1.0f);
 
 		vk::Rect2D scissor = vk::Rect2D()
 			.setOffset({ 0,0 })
-			.setExtent({ vkRenderTexture->m_Width, vkRenderTexture->m_Height });
+			.setExtent({ vkRenderTexture->m_Info.Width, vkRenderTexture->m_Info.Height });
 
 		vk::PipelineViewportStateCreateInfo viewportStateCreateInfo = vk::PipelineViewportStateCreateInfo()
 			.setViewportCount(1)
@@ -1747,12 +1692,76 @@ namespace Glory
 		VK_DescriptorSet& set = m_DescriptorSets.Emplace(handle, VK_DescriptorSet());
 		set.m_Layout = setInfo.m_Layout;
 
-		m_DescriptorAllocator.Allocate(&set.m_VKDescriptorSet, vkDescriptorSetLayout->m_VKLayout);
+		m_DescriptorAllocator.Allocate(&set.m_VKDescriptorSet, &set.m_VKDescriptorPool, vkDescriptorSetLayout->m_VKLayout);
 		for (size_t i = 0; i < descriptorWrites.size(); ++i)
 			descriptorWrites[i].dstSet = set.m_VKDescriptorSet;
 		m_LogicalDevice.updateDescriptorSets(descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
 
 		return handle;
+	}
+
+	void VulkanDevice::UpdateDescriptorSet(DescriptorSetHandle descriptorSet, const DescriptorSetUpdateInfo& setWriteInfo)
+	{
+		VK_DescriptorSet* vkDescriptorSet = m_DescriptorSets.Find(descriptorSet);
+		if (!vkDescriptorSet)
+		{
+			Debug().LogError("VulkanDevice::UpdateDescriptorSet: Invalid descriptor set handle.");
+			return;
+		}
+
+		VK_DescriptorSetLayout* vkDescriptorSetLayout = m_DescriptorSetLayouts.Find(vkDescriptorSet->m_Layout);
+		if (!vkDescriptorSetLayout)
+		{
+			Debug().LogError("VulkanDevice::UpdateDescriptorSet: Invalid descriptor set layout handle.");
+			return;
+		}
+
+		std::vector<vk::WriteDescriptorSet> descriptorWrites(setWriteInfo.m_Buffers.size() + setWriteInfo.m_Samplers.size());
+		std::vector<vk::DescriptorBufferInfo> bufferInfos(setWriteInfo.m_Buffers.size());
+		std::vector<vk::DescriptorImageInfo> imageInfos(setWriteInfo.m_Samplers.size());
+		for (size_t i = 0; i < setWriteInfo.m_Buffers.size(); ++i)
+		{
+			auto& bufferInfo = setWriteInfo.m_Buffers[i];
+			VK_Buffer* vkBuffer = m_Buffers.Find(setWriteInfo.m_Buffers[i].m_BufferHandle);
+			if (!vkBuffer)
+			{
+				Debug().LogError("VulkanDevice::UpdateDescriptorSet: Invalid buffer handle.");
+				return;
+			}
+
+			bufferInfos[i].buffer = vkBuffer->m_VKBuffer;
+			bufferInfos[i].offset = bufferInfo.m_Offset;
+			bufferInfos[i].range = bufferInfo.m_Size;
+
+			descriptorWrites[i].dstBinding = vkDescriptorSetLayout->m_BindingIndices[bufferInfo.m_DescriptorIndex];
+			descriptorWrites[i].dstArrayElement = 0;
+			descriptorWrites[i].descriptorType = vkDescriptorSetLayout->m_DescriptorTypes[bufferInfo.m_DescriptorIndex];
+			descriptorWrites[i].descriptorCount = 1;
+			descriptorWrites[i].pBufferInfo = &bufferInfos[i];
+			descriptorWrites[i].pImageInfo = nullptr;
+			descriptorWrites[i].pTexelBufferView = nullptr;
+		}
+
+		for (size_t i = 0; i < setWriteInfo.m_Samplers.size(); ++i)
+		{
+			const size_t index = setWriteInfo.m_Buffers.size() + i;
+			auto& samplerInfo = setWriteInfo.m_Samplers[i];
+			VK_Texture* vkTexture = m_Textures.Find(setWriteInfo.m_Samplers[i].m_TextureHandle);
+
+			imageInfos[i].imageLayout = vkTexture ? vkTexture->m_VKFinalLayout : vk::ImageLayout::eUndefined;
+			imageInfos[i].imageView = vkTexture ? vkTexture->m_VKImageView : nullptr;
+			imageInfos[i].sampler = vkTexture ? vkTexture->m_VKSampler : nullptr;
+
+			descriptorWrites[index].dstBinding = vkDescriptorSetLayout->m_BindingIndices[samplerInfo.m_DescriptorIndex];
+			descriptorWrites[index].dstArrayElement = 0;
+			descriptorWrites[index].descriptorType = vkDescriptorSetLayout->m_DescriptorTypes[samplerInfo.m_DescriptorIndex];
+			descriptorWrites[index].descriptorCount = 1;
+			descriptorWrites[index].pImageInfo = &imageInfos[i];
+		}
+
+		for (size_t i = 0; i < descriptorWrites.size(); ++i)
+			descriptorWrites[i].dstSet = vkDescriptorSet->m_VKDescriptorSet;
+		m_LogicalDevice.updateDescriptorSets(descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
 	}
 
 	void VulkanDevice::FreeBuffer(BufferHandle& handle)
@@ -1906,10 +1915,38 @@ namespace Glory
 
 	void VulkanDevice::FreeDescriptorSetLayout(DescriptorSetLayoutHandle& handle)
 	{
+		VK_DescriptorSetLayout* vkSetLayout = m_DescriptorSetLayouts.Find(handle);
+		if (!vkSetLayout)
+		{
+			Debug().LogError("VulkanDevice::FreeDescriptorSetLayout: Invalid descriptor set layout handle.");
+			return;
+		}
+
+		m_LogicalDevice.destroyDescriptorSetLayout(vkSetLayout->m_VKLayout);
+		m_DescriptorSetLayouts.Erase(handle);
+		handle = 0;
+
+		std::stringstream str;
+		str << "VulkanDevice: Descriptor set layout " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
 	}
 
 	void VulkanDevice::FreeDescriptorSet(DescriptorSetHandle& handle)
 	{
+		VK_DescriptorSet* vkSet = m_DescriptorSets.Find(handle);
+		if (!vkSet)
+		{
+			Debug().LogError("VulkanDevice::FreeDescriptorSetLayout: Invalid descriptor set handle.");
+			return;
+		}
+		
+		m_LogicalDevice.freeDescriptorSets(vkSet->m_VKDescriptorPool, 1, &vkSet->m_VKDescriptorSet);
+		m_DescriptorSets.Erase(handle);
+		handle = 0;
+
+		std::stringstream str;
+		str << "VulkanDevice: Descriptor set " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
 	}
 
 	vk::CommandBuffer VulkanDevice::BeginSingleTimeCommands()
@@ -2131,5 +2168,84 @@ namespace Glory
 		m_FreeCommandBuffers.erase(--m_FreeCommandBuffers.end());
 		m_FreeFences.erase(--m_FreeFences.end());
 		return commandBuffer;
+	}
+
+	void VulkanDevice::CreateRenderTexture(vk::RenderPass vkRenderPass, VK_RenderTexture& renderTexture)
+	{
+		const size_t numAttachments = renderTexture.m_Info.Attachments.size() + (renderTexture.m_HasDepthOrStencil ? 1 : 0);
+		renderTexture.m_AttachmentNames.resize(numAttachments);
+		renderTexture.m_Textures.resize(numAttachments);
+
+		SamplerSettings sampler;
+		sampler.MipmapMode = Filter::F_None;
+		sampler.MinFilter = Filter::F_None;
+		sampler.MagFilter = Filter::F_None;
+
+		size_t textureCounter = 0;
+		for (size_t i = 0; i < renderTexture.m_Info.Attachments.size(); ++i)
+		{
+			Attachment attachment = renderTexture.m_Info.Attachments[i];
+			renderTexture.m_Textures[i] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler, attachment.m_SamplingEnabled });
+			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[i]);
+			vkTexture->m_VKFinalLayout = attachment.m_SamplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eColorAttachmentOptimal;
+			renderTexture.m_AttachmentNames[i] = attachment.Name;
+			++textureCounter;
+		}
+
+		size_t depthStencilIndex = 0;
+
+		if (renderTexture.m_Info.HasDepth && renderTexture.m_Info.HasStencil)
+		{
+			depthStencilIndex = textureCounter;
+			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32SfloatS8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
+			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
+			vkTexture->m_VKFinalLayout = renderTexture.m_Info.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eStencilAttachmentOptimal;
+			renderTexture.m_AttachmentNames[depthStencilIndex] = "DepthStencil";
+			++textureCounter;
+		}
+		else if (renderTexture.m_Info.HasDepth)
+		{
+			depthStencilIndex = textureCounter;
+			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32Sfloat, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
+			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
+			vkTexture->m_VKFinalLayout = renderTexture.m_Info.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthAttachmentOptimal;
+			renderTexture.m_AttachmentNames[depthStencilIndex] = "Depth";
+			++textureCounter;
+		}
+		else if (renderTexture.m_Info.HasStencil)
+		{
+			depthStencilIndex = textureCounter;
+			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Stencil, sampler });
+			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
+			vkTexture->m_VKFinalLayout = renderTexture.m_Info.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthStencilAttachmentOptimal;
+			renderTexture.m_AttachmentNames[depthStencilIndex] = "Stencil";
+			++textureCounter;
+		}
+
+		std::vector<vk::ImageView> attachments(renderTexture.m_Textures.size());
+		for (size_t i = 0; i < renderTexture.m_Textures.size(); ++i)
+		{
+			TextureHandle textureHandle = renderTexture.m_Textures[i];
+			VK_Texture* texture = m_Textures.Find(textureHandle);
+			attachments[i] = texture->m_VKImageView;
+		}
+
+		if (renderTexture.m_Info.HasDepth || renderTexture.m_Info.HasStencil)
+		{
+			VK_Texture* texture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
+			attachments[depthStencilIndex] = texture->m_VKImageView;
+		}
+
+		vk::FramebufferCreateInfo frameBufferCreateInfo = vk::FramebufferCreateInfo()
+			.setRenderPass(vkRenderPass)
+			.setAttachmentCount(attachments.size())
+			.setPAttachments(attachments.data())
+			.setWidth(renderTexture.m_Info.Width)
+			.setHeight(renderTexture.m_Info.Height)
+			.setLayers(1);
+
+		renderTexture.m_VKFramebuffer = m_LogicalDevice.createFramebuffer(frameBufferCreateInfo);
+		if (renderTexture.m_VKFramebuffer == nullptr)
+			Debug().LogError("VulkanDevice::CreateRenderTexture: There was an error when trying to create a frame buffer.");
 	}
 }

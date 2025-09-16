@@ -394,7 +394,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glViewport(0, 0, renderTexture->m_Width, renderTexture->m_Height);
+		glViewport(0, 0, renderTexture->m_Info.Width, renderTexture->m_Info.Height);
 	}
 
 	void OpenGLDevice::BeginPipeline(CommandBufferHandle, PipelineHandle pipeline)
@@ -929,7 +929,7 @@ namespace Glory
 		return handle;
 	}
 
-	RenderTextureHandle OpenGLDevice::CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info)
+	RenderTextureHandle OpenGLDevice::CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info)
 	{
 		if (info.Width == 0 || info.Height == 0)
 		{
@@ -947,91 +947,8 @@ namespace Glory
 		RenderTextureHandle handle;
 		GL_RenderTexture& renderTexture = m_RenderTextures.Emplace(handle, GL_RenderTexture());
 		renderTexture.m_RenderPass = renderPass;
-		renderTexture.m_Width = info.Width;
-		renderTexture.m_Height = info.Height;
-
-		/* Create framebuffer */
-		glGenFramebuffers(1, &renderTexture.m_GLFramebufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindFramebuffer(GL_FRAMEBUFFER, renderTexture.m_GLFramebufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		const size_t numAttachments = info.Attachments.size() + (info.HasDepth ? 1 : 0) + (info.HasStencil ? 1 : 0);
-		renderTexture.m_AttachmentNames.resize(numAttachments);
-		renderTexture.m_Textures.resize(numAttachments);
-
-		SamplerSettings sampler;
-		sampler.MipmapMode = Filter::F_None;
-		sampler.MinFilter = Filter::F_Nearest;
-		sampler.MagFilter = Filter::F_Nearest;
-
-		size_t textureCounter = 0;
-		for (size_t i = 0; i < info.Attachments.size(); ++i)
-		{
-			Attachment attachment = info.Attachments[i];
-			renderTexture.m_Textures[i] = CreateTexture({info.Width, info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler});
-			renderTexture.m_AttachmentNames[i] = attachment.Name;
-			++textureCounter;
-		}
-
-		size_t depthIndex = 0, stencilIndex = 0;
-		if (info.HasDepth)
-		{
-			depthIndex = textureCounter;
-			renderTexture.m_Textures[depthIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Depth, PixelFormat::PF_Depth32, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
-			renderTexture.m_AttachmentNames[depthIndex] = "Depth";
-			++textureCounter;
-		}
-
-		if (info.HasStencil)
-		{
-			stencilIndex = textureCounter;
-			renderTexture.m_Textures[stencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Stencil, sampler });
-			renderTexture.m_AttachmentNames[stencilIndex] = "Stencil";
-			++textureCounter;
-		}
-
-		// Initialize the framebuffer
-		const size_t attachmentCount = info.Attachments.size();
-		std::vector<GLenum> drawBuffers = std::vector<GLenum>(attachmentCount);
-		for (uint32_t i = 0; i < attachmentCount; i++)
-		{
-			drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
-			GL_Texture* glTexture = m_Textures.Find(renderTexture.m_Textures[i]);
-			glFramebufferTexture(GL_FRAMEBUFFER, drawBuffers[i], glTexture->m_GLTextureID, 0);
-			OpenGLGraphicsModule::LogGLError(glGetError());
-		}
-
-		if (info.HasDepth)
-		{
-			GL_Texture* glTexture = m_Textures.Find(renderTexture.m_Textures[depthIndex]);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, glTexture->m_GLTextureID, 0);
-			OpenGLGraphicsModule::LogGLError(glGetError());
-		}
-		if (info.HasStencil)
-		{
-			GL_Texture* glTexture = m_Textures.Find(renderTexture.m_Textures[stencilIndex]);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, glTexture->m_GLTextureID, 0);
-			OpenGLGraphicsModule::LogGLError(glGetError());
-		}
-
-		if (attachmentCount > 0)
-		{
-			glDrawBuffers(attachmentCount, &drawBuffers[0]);
-			OpenGLGraphicsModule::LogGLError(glGetError());
-		}
-
-		// Check if something went wrong
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		{
-			Debug().LogError("OpenGLDevice::CreateRenderTexture: There was an error when trying to create a frame buffer.");
-			return NULL;
-		}
-
-		glBindTexture(GL_TEXTURE_2D, NULL);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindFramebuffer(GL_FRAMEBUFFER, NULL);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		renderTexture.m_Info = std::move(info);
+		CreateRenderTexture(renderTexture);
 
 		std::stringstream str;
 		str << "OpenGLDevice: RenderTexture " << handle << " created with " << renderTexture.m_Textures.size() << " attachments.";
@@ -1042,22 +959,44 @@ namespace Glory
 
 	TextureHandle OpenGLDevice::GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index)
 	{
-		GL_RenderTexture* vkRenderPass = m_RenderTextures.Find(renderTexture);
-		if (!vkRenderPass)
+		GL_RenderTexture* glRenderTexture = m_RenderTextures.Find(renderTexture);
+		if (!glRenderTexture)
 		{
 			Debug().LogError("VulkanDevice::GetRenderTextureAttatchment: Invalid render texture handle");
 			return NULL;
 		}
 
-		if (index >= vkRenderPass->m_Textures.size())
+		if (index >= glRenderTexture->m_Textures.size())
 		{
 			Debug().LogError("VulkanDevice::GetRenderTextureAttatchment: Invalid attachment index");
 			return NULL;
 		}
-		return vkRenderPass->m_Textures[index];
+		return glRenderTexture->m_Textures[index];
 	}
 
-	RenderPassHandle OpenGLDevice::CreateRenderPass(const RenderPassInfo& info)
+	void OpenGLDevice::ResizeRenderTexture(RenderTextureHandle renderTexture, uint32_t width, uint32_t height)
+	{
+		GL_RenderTexture* glRenderTexture = m_RenderTextures.Find(renderTexture);
+		if (!glRenderTexture)
+		{
+			Debug().LogError("VulkanDevice::ResizeRenderTexture: Invalid render texture handle");
+			return;
+		}
+
+		for (size_t i = 0; i < glRenderTexture->m_Textures.size(); ++i)
+		{
+			FreeTexture(glRenderTexture->m_Textures[i]);
+		}
+		glRenderTexture->m_Textures.clear();
+		glRenderTexture->m_AttachmentNames.clear();
+		glRenderTexture->m_Info.Width = width;
+		glRenderTexture->m_Info.Height = height;
+		glDeleteFramebuffers(1, &glRenderTexture->m_GLFramebufferID);
+		glRenderTexture->m_GLFramebufferID = 0;
+		CreateRenderTexture(*glRenderTexture);
+	}
+
+	RenderPassHandle OpenGLDevice::CreateRenderPass(RenderPassInfo&& info)
 	{
 		if (info.RenderTextureInfo.Width == 0 || info.RenderTextureInfo.Height == 0)
 		{
@@ -1067,7 +1006,7 @@ namespace Glory
 
 		RenderPassHandle handle;
 		GL_RenderPass& renderPass = m_RenderPasses.Emplace(handle, GL_RenderPass());
-		renderPass.m_RenderTexture = CreateRenderTexture(handle, info.RenderTextureInfo);
+		renderPass.m_RenderTexture = CreateRenderTexture(handle, std::move(info.RenderTextureInfo));
 
 		if (!renderPass.m_RenderTexture)
 		{
@@ -1295,6 +1234,35 @@ namespace Glory
 		return handle;
 	}
 
+	void OpenGLDevice::UpdateDescriptorSet(DescriptorSetHandle descriptorSet, const DescriptorSetUpdateInfo& setWriteInfo)
+	{
+		GL_DescriptorSet* glSet = m_Sets.Find(descriptorSet);
+		if (!glSet)
+		{
+			Debug().LogError("OpenGLDevice::UpdateDescriptorSet: Invalid set handle.");
+			return;
+		}
+
+		GL_DescriptorSetLayout* glSetLayout = m_SetLayouts.Find(glSet->m_Layout);
+		if (!glSetLayout)
+		{
+			Debug().LogError("OpenGLDevice::UpdateDescriptorSet: Invalid set layout handle.");
+			return;
+		}
+
+		for (size_t i = 0; i < setWriteInfo.m_Buffers.size(); ++i)
+		{
+			auto& bufferInfo = setWriteInfo.m_Buffers[i];
+			glSet->m_Buffers[bufferInfo.m_DescriptorIndex] = bufferInfo.m_BufferHandle;
+		}
+
+		for (size_t i = 0; i < setWriteInfo.m_Samplers.size(); ++i)
+		{
+			auto& samplerInfo = setWriteInfo.m_Samplers[i];
+			glSet->m_Textures[samplerInfo.m_DescriptorIndex - setWriteInfo.m_Buffers.size()] = samplerInfo.m_TextureHandle;
+		}
+	}
+
 	void OpenGLDevice::FreeBuffer(BufferHandle& handle)
 	{
 		GL_Buffer* buffer = m_Buffers.Find(handle);
@@ -1453,10 +1421,122 @@ namespace Glory
 
 	void OpenGLDevice::FreeDescriptorSetLayout(DescriptorSetLayoutHandle& handle)
 	{
+		GL_DescriptorSetLayout* glSetLayout = m_SetLayouts.Find(handle);
+		if (!glSetLayout)
+		{
+			Debug().LogError("OpenGLDevice::FreeDescriptorSetLayout: Invalid set layout handle.");
+			return;
+		}
+
+		m_SetLayouts.Erase(handle);
+		handle = 0;
+
+		std::stringstream str;
+		str << "OpenGLDevice: Set layout " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
 	}
 
 	void OpenGLDevice::FreeDescriptorSet(DescriptorSetHandle& handle)
 	{
+		GL_DescriptorSet* glSet = m_Sets.Find(handle);
+		if (!glSet)
+		{
+			Debug().LogError("OpenGLDevice::FreeDescriptorSet: Invalid set handle.");
+			return;
+		}
+
+		m_Sets.Erase(handle);
+		handle = 0;
+
+		std::stringstream str;
+		str << "OpenGLDevice: Set " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+	}
+
+	void OpenGLDevice::CreateRenderTexture(GL_RenderTexture& renderTexture)
+	{
+		/* Create framebuffer */
+		glGenFramebuffers(1, &renderTexture.m_GLFramebufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindFramebuffer(GL_FRAMEBUFFER, renderTexture.m_GLFramebufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		const size_t numAttachments = renderTexture.m_Info.Attachments.size() + (renderTexture.m_Info.HasDepth ? 1 : 0) + (renderTexture.m_Info.HasStencil ? 1 : 0);
+		renderTexture.m_AttachmentNames.resize(numAttachments);
+		renderTexture.m_Textures.resize(numAttachments);
+
+		SamplerSettings sampler;
+		sampler.MipmapMode = Filter::F_None;
+		sampler.MinFilter = Filter::F_Nearest;
+		sampler.MagFilter = Filter::F_Nearest;
+
+		size_t textureCounter = 0;
+		for (size_t i = 0; i < renderTexture.m_Info.Attachments.size(); ++i)
+		{
+			Attachment attachment = renderTexture.m_Info.Attachments[i];
+			renderTexture.m_Textures[i] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler });
+			renderTexture.m_AttachmentNames[i] = attachment.Name;
+			++textureCounter;
+		}
+
+		size_t depthIndex = 0, stencilIndex = 0;
+		if (renderTexture.m_Info.HasDepth)
+		{
+			depthIndex = textureCounter;
+			renderTexture.m_Textures[depthIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Depth, PixelFormat::PF_Depth32, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
+			renderTexture.m_AttachmentNames[depthIndex] = "Depth";
+			++textureCounter;
+		}
+
+		if (renderTexture.m_Info.HasStencil)
+		{
+			stencilIndex = textureCounter;
+			renderTexture.m_Textures[stencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Stencil, sampler });
+			renderTexture.m_AttachmentNames[stencilIndex] = "Stencil";
+			++textureCounter;
+		}
+
+		// Initialize the framebuffer
+		const size_t attachmentCount = renderTexture.m_Info.Attachments.size();
+		std::vector<GLenum> drawBuffers = std::vector<GLenum>(attachmentCount);
+		for (uint32_t i = 0; i < attachmentCount; i++)
+		{
+			drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+			GL_Texture* glTexture = m_Textures.Find(renderTexture.m_Textures[i]);
+			glFramebufferTexture(GL_FRAMEBUFFER, drawBuffers[i], glTexture->m_GLTextureID, 0);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+
+		if (renderTexture.m_Info.HasDepth)
+		{
+			GL_Texture* glTexture = m_Textures.Find(renderTexture.m_Textures[depthIndex]);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, glTexture->m_GLTextureID, 0);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+		if (renderTexture.m_Info.HasStencil)
+		{
+			GL_Texture* glTexture = m_Textures.Find(renderTexture.m_Textures[stencilIndex]);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, glTexture->m_GLTextureID, 0);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+
+		if (attachmentCount > 0)
+		{
+			glDrawBuffers(attachmentCount, &drawBuffers[0]);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+
+		// Check if something went wrong
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		{
+			Debug().LogError("OpenGLDevice::CreateRenderTexture: There was an error when trying to create a frame buffer.");
+			return;
+		}
+
+		glBindTexture(GL_TEXTURE_2D, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindFramebuffer(GL_FRAMEBUFFER, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
 #pragma endregion

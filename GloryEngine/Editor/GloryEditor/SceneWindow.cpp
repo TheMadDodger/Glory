@@ -80,9 +80,6 @@ namespace Glory::Editor
 
 	void SceneWindow::OnGUI()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		RenderTexture* pRenderTexture = pEngine->GetCameraManager().GetRenderTextureForCamera(m_SceneCamera.m_Camera, pEngine, 0, false);
-
 		MenuBar();
 		CameraUpdate();
 		DrawScene();

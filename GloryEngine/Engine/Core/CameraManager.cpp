@@ -37,44 +37,6 @@ namespace Glory
 		pCamera->m_IsInUse = false;
 	}
 
-	RenderTexture* CameraManager::GetRenderTextureForCamera(CameraRef camera, Engine* pEngine, size_t index, bool createIfNotExist)
-	{
-		ProfileSample s{ &m_pEngine->Profiler(), "CameraManager::GetNewOrUnusedCamera" };
-		Camera* pCamera = GetCamera(camera.m_CameraID);
-		if (pCamera == nullptr) return nullptr;
-		if (pCamera->m_pRenderTextures.size() > index)
-		{
-			if (createIfNotExist && pCamera->m_TextureIsDirty)
-			{
-				for (size_t i = 0; i < pCamera->m_pRenderTextures.size(); ++i)
-				{
-					pCamera->m_pRenderTextures[i]->Resize(pCamera->m_Resolution.x, pCamera->m_Resolution.y);
-				}
-
-				pCamera->m_TextureIsDirty = false;
-				pCamera->m_PerspectiveDirty = false;
-				pEngine->GetMainModule<RendererModule>()->OnCameraResize(camera);
-			}
-			else if (createIfNotExist && pCamera->m_PerspectiveDirty)
-			{
-				pCamera->m_PerspectiveDirty = false;
-				pEngine->GetMainModule<RendererModule>()->OnCameraPerspectiveChanged(camera);
-			}
-			return pCamera->m_pRenderTextures[index];
-		}
-
-		if (!createIfNotExist) return nullptr;
-		pCamera->m_TextureIsDirty = false;
-		return pCamera->m_pRenderTextures[index];
-	}
-
-	size_t CameraManager::CameraRenderTextureCount(CameraRef camera, Engine* pEngine)
-	{
-		Camera* pCamera = GetCamera(camera.m_CameraID);
-		if (!pCamera) return 0;
-		return pCamera->m_pRenderTextures.size();
-	}
-
 	Camera* CameraManager::GetCamera(UUID uuid)
 	{
 		if (m_IDToCamera.find(uuid) == m_IDToCamera.end()) return nullptr;
@@ -82,12 +44,10 @@ namespace Glory
 		return &m_Cameras[index];
 	}
 
-	void CameraManager::ResizeAllCameras(glm::uvec2 resolution)
+	void CameraManager::OnCameraResized(CameraRef camera)
 	{
-		for (Camera& camera : m_Cameras)
-		{
-			camera.SetResolution(resolution.x, resolution.y);
-		}
+		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
+		pRenderer->OnCameraResize(camera);
 	}
 
 	void CameraManager::Cleanup()

@@ -21,7 +21,8 @@ namespace Glory
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
 		if (pCamera == nullptr) return;
-		pCamera->SetResolution(width, height);
+		if (!pCamera->SetResolution(width, height)) return;
+		m_pManager->OnCameraResized(*this);
 	}
 
 	void CameraRef::SetPerspectiveProjection(uint32_t width, uint32_t height, float halfFOV, float near, float far)
@@ -45,13 +46,6 @@ namespace Glory
 		pCamera->SetView(view);
 	}
 
-	void CameraRef::SetDisplayIndex(int index)
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return;
-		pCamera->SetDisplayIndex(index);
-	}
-
 	void CameraRef::SetPriority(int priority)
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
@@ -71,27 +65,6 @@ namespace Glory
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
 		if (pCamera == nullptr) return;
 		pCamera->SetClearColor(clearColor);
-	}
-
-	void CameraRef::SetOutputTexture(RenderTexture* pTexture)
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return;
-		pCamera->SetOutputTexture(pTexture);
-	}
-
-	void CameraRef::SetSecondaryOutputTexture(RenderTexture* pTexture)
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return;
-		pCamera->SetSecondaryOutputTexture(pTexture);
-	}
-
-	void CameraRef::Swap()
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return;
-		pCamera->Swap();
 	}
 
 	void CameraRef::SetUserData(const std::string& name, void* data)
@@ -157,13 +130,6 @@ namespace Glory
 		return pCamera->GetProjectionPointer();
 	}
 
-	int CameraRef::GetDisplayIndex() const
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return -1;
-		return pCamera->GetDisplayIndex();
-	}
-
 	int CameraRef::GetPriority() const
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
@@ -185,34 +151,6 @@ namespace Glory
 		if (pCamera == nullptr)
 			throw std::exception();
 		return pCamera->GetLayerMask();
-	}
-
-	size_t CameraRef::GetRenderTextureCount() const
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return 0;
-		return pCamera->RenderTextureCount();
-	}
-
-	RenderTexture* CameraRef::GetRenderTexture(size_t index) const
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return nullptr;
-		return pCamera->GetRenderTexture(index);
-	}
-
-	RenderTexture* CameraRef::GetOutputTexture() const
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return nullptr;
-		return pCamera->GetOutputTexture();
-	}
-
-	RenderTexture* CameraRef::GetSecondaryOutputTexture() const
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return nullptr;
-		return pCamera->GetSecondaryOutputTexture();
 	}
 
 	void CameraRef::Free()

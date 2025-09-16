@@ -124,8 +124,8 @@ namespace Glory
 
 		virtual void OnBeginFrame() override;
 
-		virtual void OnCameraResize(uint32_t cameraIndex);
-		virtual void OnCameraPerspectiveChanged(uint32_t cameraIndex);
+		virtual void OnCameraResize(CameraRef camera);
+		virtual void OnCameraPerspectiveChanged(CameraRef camera);
 		virtual MaterialData* GetInternalMaterial(std::string_view name) const = 0;
 
 		size_t LastSubmittedObjectCount();
@@ -206,8 +206,6 @@ namespace Glory
 		std::mutex m_PickLock;
 		std::vector<PickResult> m_LastFramePickResults;
 		std::vector<PickResult> m_PickResults;
-
-		std::atomic_bool m_DisplaysDirty;
 
 		std::vector<GPUTextureAtlas> m_GPUTextureAtlases;
 

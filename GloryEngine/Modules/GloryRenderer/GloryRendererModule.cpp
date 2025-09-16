@@ -65,20 +65,40 @@ namespace Glory
 	{
 	}
 
-	void GloryRendererModule::OnCameraResize(uint32_t cameraIndex)
+	void GloryRendererModule::OnCameraResize(CameraRef camera)
 	{
-		/* When the camera rendertexture resizes we need to generate a new grid of clusters for that camera */
-		CameraRef camera = m_FrameData.ActiveCameras[cameraIndex];
+		RenderPassHandle& renderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("RenderPass"));
+		RenderPassHandle& ssaoRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("SSAORenderPass"));
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
-		DescriptorSetHandle clusterSet = camera.GetUserHandle("ClusterSet");
-		if (!clusterSet) return; // Should not happen but just in case
-		GenerateClusterSSBO(cameraIndex, pDevice, camera, clusterSet);
+		if (!renderPass || !pDevice) return;
+		RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(renderPass);
+		RenderTextureHandle ssaoRenderTexture = pDevice->GetRenderPassRenderTexture(ssaoRenderPass);
+		const glm::uvec2 resolution = camera.GetResolution();
+		pDevice->ResizeRenderTexture(renderTexture, resolution.x, resolution.y);
+		pDevice->ResizeRenderTexture(ssaoRenderTexture, resolution.x, resolution.y);
+
+		/* Update descriptor sets */
+		DescriptorSetHandle& ssaoSamplersSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("SSAOSamplersSet"));
+		TextureHandle normals = pDevice->GetRenderTextureAttachment(renderTexture, 3);
+		TextureHandle depth = pDevice->GetRenderTextureAttachment(renderTexture, 6);
+		DescriptorSetUpdateInfo updateInfo;
+		updateInfo.m_Samplers.resize(2);
+		updateInfo.m_Samplers[0].m_TextureHandle = normals;
+		updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
+		updateInfo.m_Samplers[1].m_TextureHandle = depth;
+		updateInfo.m_Samplers[1].m_DescriptorIndex = 1;
+		pDevice->UpdateDescriptorSet(ssaoSamplersSet, updateInfo);
+		/* When the camera rendertexture resizes we need to generate a new grid of clusters for that camera */
+		OnCameraPerspectiveChanged(camera);
 	}
 
-	void GloryRendererModule::OnCameraPerspectiveChanged(uint32_t cameraIndex)
+	void GloryRendererModule::OnCameraPerspectiveChanged(CameraRef camera)
 	{
 		/* When the camera changed perspective we need to generate a new grid of clusters for that camera */
-		CameraRef camera = m_FrameData.ActiveCameras[cameraIndex];
+		auto iter = std::find_if(m_FrameData.ActiveCameras.begin(), m_FrameData.ActiveCameras.end(),
+			[camera](const CameraRef& other) { return other.GetUUID() == camera.GetUUID(); });
+		if (iter == m_FrameData.ActiveCameras.end()) return;
+		const size_t cameraIndex = iter - m_FrameData.ActiveCameras.begin();
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		DescriptorSetHandle clusterSet = camera.GetUserHandle("ClusterSet");
 		if (!clusterSet) return; // Should not happen but just in case
@@ -132,8 +152,6 @@ namespace Glory
 
 	void GloryRendererModule::Initialize()
 	{
-		RendererModule::Initialize();
-
 		RendererModule::Initialize();
 		m_pEngine->GetConsole().RegisterCVar({ std::string{ ScreenSpaceAOCVarName }, "Enables/disables screen space ambient occlusion.", float(m_GlobalSSAOSetting.m_Enabled), CVar::Flags::Save });
 
@@ -390,7 +408,7 @@ namespace Glory
 		shadowsPassInfo.RenderTextureInfo.HasStencil = false;
 		shadowsPassInfo.RenderTextureInfo.Width = 4096;
 		shadowsPassInfo.RenderTextureInfo.Height = 4096;
-		m_ShadowsPass = pDevice->CreateRenderPass(shadowsPassInfo);
+		m_ShadowsPass = pDevice->CreateRenderPass(std::move(shadowsPassInfo));
 		RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_ShadowsPass);
 		TextureHandle texture = pDevice->GetRenderTextureAttachment(renderTexture, 0);
 
@@ -452,7 +470,7 @@ namespace Glory
 				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Normal", PixelFormat::PF_RGBA, PixelFormat::PF_R16G16B16A16Sfloat, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
 				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("AOBlurred", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
 				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Data", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-				renderPass = pDevice->CreateRenderPass(renderPassInfo);
+				renderPass = pDevice->CreateRenderPass(std::move(renderPassInfo));
 			}
 			if (!ssaoRenderPass)
 			{
@@ -461,7 +479,7 @@ namespace Glory
 				renderPassInfo.RenderTextureInfo.Height = resolution.y;
 				renderPassInfo.RenderTextureInfo.HasDepth = false;
 				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("AO", PixelFormat::PF_R, PixelFormat::PF_R32Sfloat, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-				ssaoRenderPass = pDevice->CreateRenderPass(renderPassInfo);
+				ssaoRenderPass = pDevice->CreateRenderPass(std::move(renderPassInfo));
 			}
 			if (!m_SSAOPipeline)
 			{

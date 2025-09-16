@@ -12,20 +12,20 @@ namespace Glory
 	{
 	}
 
-	void NullRendererModule::OnCameraResize(uint32_t)
+	void NullRendererModule::OnCameraResize(CameraRef)
 	{
 	}
 
-	void NullRendererModule::OnCameraPerspectiveChanged(uint32_t)
+	void NullRendererModule::OnCameraPerspectiveChanged(CameraRef)
 	{
 	}
 
-	MaterialData* NullRendererModule::GetInternalMaterial(std::string_view name) const
+	MaterialData* NullRendererModule::GetInternalMaterial(std::string_view) const
 	{
 		return nullptr;
 	}
 
-	void NullRendererModule::CollectReferences(std::vector<UUID>& references)
+	void NullRendererModule::CollectReferences(std::vector<UUID>&)
 	{
 	}
 
@@ -56,12 +56,27 @@ namespace Glory
 		return 0;
 	}
 
-	std::string_view NullRendererModule::CameraAttachmentPreviewName(size_t index) const
+	std::string_view NullRendererModule::CameraAttachmentPreviewName(size_t) const
 	{
 		return "";
 	}
 
-	TextureHandle NullRendererModule::CameraAttachmentPreview(CameraRef camera, size_t index) const
+	TextureHandle NullRendererModule::CameraAttachmentPreview(CameraRef, size_t) const
+	{
+		return NULL;
+	}
+
+	size_t NullRendererModule::DebugOverlayCount() const
+	{
+		return 0;
+	}
+
+	std::string_view NullRendererModule::DebugOverlayName(size_t) const
+	{
+		return "";
+	}
+
+	TextureHandle NullRendererModule::DebugOverlay(size_t) const
 	{
 		return NULL;
 	}

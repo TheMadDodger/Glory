@@ -47,11 +47,10 @@ namespace Glory
         static constexpr GraphicsHandleType HandleType = H_RenderTexture;
 
         uint32_t m_GLFramebufferID;
-        uint32_t m_Width;
-        uint32_t m_Height;
         RenderPassHandle m_RenderPass;
         std::vector<TextureHandle> m_Textures;
         std::vector<std::string> m_AttachmentNames;
+        RenderTextureCreateInfo m_Info;
     };
 
     struct GL_RenderPass
@@ -138,9 +137,10 @@ namespace Glory
 
         virtual TextureHandle CreateTexture(TextureData* pTexture) override;
         virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) override;
-        virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info) override;
+        virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info) override;
         virtual TextureHandle GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index) override;
-        virtual RenderPassHandle CreateRenderPass(const RenderPassInfo& info) override;
+        virtual void ResizeRenderTexture(RenderTextureHandle renderTexture, uint32_t width, uint32_t height) override;
+        virtual RenderPassHandle CreateRenderPass(RenderPassInfo&& info) override;
         virtual RenderTextureHandle GetRenderPassRenderTexture(RenderPassHandle renderPass) override;
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
         virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&&,
@@ -148,6 +148,7 @@ namespace Glory
         virtual PipelineHandle CreateComputePipeline(PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts) override;
         virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo) override;
         virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) override;
+        virtual void UpdateDescriptorSet(DescriptorSetHandle descriptorSet, const DescriptorSetUpdateInfo& setWriteInfo) override;
 
         virtual void FreeBuffer(BufferHandle& handle) override;
         virtual void FreeMesh(MeshHandle& handle) override;
@@ -158,6 +159,9 @@ namespace Glory
         virtual void FreePipeline(PipelineHandle& handle) override;
         virtual void FreeDescriptorSetLayout(DescriptorSetLayoutHandle& handle) override;
         virtual void FreeDescriptorSet(DescriptorSetHandle& handle) override;
+
+    private:
+        void CreateRenderTexture(GL_RenderTexture& renderTexture);
 
     private:
         GraphicsResources<GL_Buffer> m_Buffers;

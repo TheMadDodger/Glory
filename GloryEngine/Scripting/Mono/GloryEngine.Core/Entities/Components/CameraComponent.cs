@@ -1,5 +1,4 @@
-﻿using GloryEngine.SceneManagement;
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 
 namespace GloryEngine.Entities
@@ -42,10 +41,11 @@ namespace GloryEngine.Entities
 		/// The index of the display this camera should render to
 		/// This is an internal display
 		/// </summary>
+		[System.Obsolete("0.6.0 > Cameras no longer have a display index")]
 		public int DisplayIndex
 		{
-			get => CameraComponent_GetDisplayIndex(Object.Scene.ID, Object.ID, _objectID);
-			set => CameraComponent_SetDisplayIndex(Object.Scene.ID, Object.ID, _objectID, value);
+			get => -1;
+			set { }
 		}
 
 		/// <summary>
@@ -130,10 +130,6 @@ namespace GloryEngine.Entities
 		private extern static float CameraComponent_GetFar(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern static void CameraComponent_SetFar(UInt64 sceneID, UInt64 objectID, UInt64 componentID, float far);
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern static int CameraComponent_GetDisplayIndex(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern static void CameraComponent_SetDisplayIndex(UInt64 sceneID, UInt64 objectID, UInt64 componentID, int displayIndex);
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern static int CameraComponent_GetPriority(UInt64 sceneID, UInt64 objectID, UInt64 componentID);
 		[MethodImpl(MethodImplOptions.InternalCall)]
