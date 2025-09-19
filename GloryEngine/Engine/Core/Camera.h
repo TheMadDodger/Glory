@@ -10,14 +10,22 @@ namespace Glory
 	class Camera
 	{
 	public:
-		bool SetResolution(uint32_t width, uint32_t height);
-		void SetPerspectiveProjection(uint32_t width, uint32_t height, float halfFOV, float near, float far, bool force=false);
-		void SetOrthographicProjection(float width, float height, float near, float far, bool force=false);
+		bool SetBaseResolution(uint32_t width, uint32_t height);
+		const glm::uvec2& GetBaseResolution() const;
+		bool SetResolutionScale(float width, float height);
+		void SetPerspectiveProjection(float halfFOV, float near, float far, bool force=false);
+		void SetOutput(bool output, int x, int y);
+		bool IsOutput() const;
+		void SetOrthographicProjection(float near, float far, bool force=false);
 		void SetView(const glm::mat4& view);
 		void SetPriority(int priority);
 		void SetLayerMask(const LayerMask& layerMask);
 		void SetClearColor(const glm::vec4& clearColor);
 		void SetUserData(const std::string& name, void* data);
+		bool IsResolutionDirty();
+		bool IsPerspectiveDirty();
+		void SetResolutionDirty(bool dirty=true);
+		void SetPerspectiveDirty(bool dirty = true);
 
 		const glm::uvec2& GetResolution() const;
 		const glm::mat4& GetView() const;
@@ -31,13 +39,6 @@ namespace Glory
 		int GetPriority() const;
 		const glm::vec4& GetClearColor() const;
 		const LayerMask& GetLayerMask() const;
-		template<typename T>
-		bool GetUserData(const std::string& name, T*& data)
-		{
-			if (m_UserDatas.find(name) == m_UserDatas.end()) return false;
-			data = (T*)m_UserDatas[name];
-			return true;
-		}
 
 		uint64_t& GetUserHandle(const std::string& name);
 
@@ -52,6 +53,9 @@ namespace Glory
 		friend class CameraManager;
 		bool m_IsInUse;
 		bool m_IsOrtho;
+		bool m_Output;
+		bool m_ResolutionDirty;
+		bool m_PerspectiveDirty;
 		int m_Priority;
 		float m_Near;
 		float m_Far;
@@ -61,7 +65,10 @@ namespace Glory
 		glm::mat4 m_View;
 		glm::mat4 m_ViewOffset;
 		glm::mat4 m_Projection;
+		glm::uvec2 m_BaseResolution;
+		glm::vec2 m_ResolutionScale;
 		glm::uvec2 m_Resolution;
+		glm::ivec2 m_OutputOffset;
 
 		glm::vec4 m_ClearColor;
 

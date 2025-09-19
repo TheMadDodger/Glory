@@ -510,8 +510,13 @@ namespace Glory
 
 	void CameraComponent_SetHalfFOV(uint64_t sceneID, uint64_t objectID, uint64_t componentID, float halfFov)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		CameraComponent& cameraComp = registry.GetComponent<CameraComponent>(entity.GetEntityID());
 		cameraComp.m_HalfFOV = halfFov;
+		registry.GetTypeView<CameraComponent>()->Invoke(Utils::ECS::InvocationType::OnValidate, &registry, entity.GetEntityID(), &cameraComp);
 	}
 
 	float CameraComponent_GetNear(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -522,8 +527,13 @@ namespace Glory
 
 	void CameraComponent_SetNear(uint64_t sceneID, uint64_t objectID, uint64_t componentID, float near)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		CameraComponent& cameraComp = registry.GetComponent<CameraComponent>(entity.GetEntityID());
 		cameraComp.m_Near = near;
+		registry.GetTypeView<CameraComponent>()->Invoke(Utils::ECS::InvocationType::OnValidate, &registry, entity.GetEntityID(), &cameraComp);
 	}
 
 	float CameraComponent_GetFar(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -534,8 +544,13 @@ namespace Glory
 
 	void CameraComponent_SetFar(uint64_t sceneID, uint64_t objectID, uint64_t componentID, float far)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		CameraComponent& cameraComp = registry.GetComponent<CameraComponent>(entity.GetEntityID());
 		cameraComp.m_Far = far;
+		registry.GetTypeView<CameraComponent>()->Invoke(Utils::ECS::InvocationType::OnValidate, &registry, entity.GetEntityID(), &cameraComp);
 	}
 
 	int CameraComponent_GetPriority(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -546,8 +561,13 @@ namespace Glory
 
 	void CameraComponent_SetPriority(uint64_t sceneID, uint64_t objectID, uint64_t componentID, int priority)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		CameraComponent& cameraComp = registry.GetComponent<CameraComponent>(entity.GetEntityID());
 		cameraComp.m_Priority = priority;
+		registry.GetTypeView<CameraComponent>()->Invoke(Utils::ECS::InvocationType::OnValidate, &registry, entity.GetEntityID(), &cameraComp);
 	}
 
 	LayerMask CameraComponent_GetLayerMask(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -558,8 +578,13 @@ namespace Glory
 
 	void CameraComponent_SetLayerMask(uint64_t sceneID, uint64_t objectID, uint64_t componentID, LayerMask* pLayerMask)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		CameraComponent& cameraComp = registry.GetComponent<CameraComponent>(entity.GetEntityID());
 		cameraComp.m_LayerMask.m_Mask = pLayerMask->m_Mask;
+		registry.GetTypeView<CameraComponent>()->Invoke(Utils::ECS::InvocationType::OnValidate, &registry, entity.GetEntityID(), &cameraComp);
 	}
 
 	glm::vec4 CameraComponent_GetClearColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
@@ -570,8 +595,13 @@ namespace Glory
 
 	void CameraComponent_SetClearColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID, glm::vec4* clearCol)
 	{
-		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
+		GScene* pScene = GetEntityScene(sceneID);
+		Entity entity = pScene->GetEntityByUUID(objectID);
+		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
+		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
+		CameraComponent& cameraComp = registry.GetComponent<CameraComponent>(entity.GetEntityID());
 		cameraComp.m_ClearColor = *clearCol;
+		registry.GetTypeView<CameraComponent>()->Invoke(Utils::ECS::InvocationType::OnValidate, &registry, entity.GetEntityID(), &cameraComp);
 	}
 
 	uint64_t CameraComponent_GetCameraID(uint64_t sceneID, uint64_t objectID, uint64_t componentID)

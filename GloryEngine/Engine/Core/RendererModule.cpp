@@ -1,5 +1,6 @@
 #include "RendererModule.h"
 #include "Engine.h"
+#include "Console.h"
 #include "EngineProfiler.h"
 #include "WindowModule.h"
 #include "MaterialData.h"
@@ -200,23 +201,84 @@ namespace Glory
 		OnSubmitDynamic(renderData);
 	}
 
-	void RendererModule::Submit(CameraRef camera)
+	void RendererModule::SubmitCamera(CameraRef camera)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(camera)" };
-		auto it = std::find_if(m_FrameData.ActiveCameras.begin(), m_FrameData.ActiveCameras.end(), [camera, this](const CameraRef& other)
+		auto it = std::find_if(m_ActiveCameras.begin(), m_ActiveCameras.end(), [camera, this](const CameraRef& other)
 		{
 			return camera.GetPriority() < other.GetPriority();
 		});
 
-		if (it != m_FrameData.ActiveCameras.end())
+		if (it != m_ActiveCameras.end())
+			m_ActiveCameras.insert(it, camera);
+		else
+			m_ActiveCameras.push_back(camera);
+
+		if (camera.IsOutput())
 		{
-			m_FrameData.ActiveCameras.insert(it, camera);
-			OnSubmit(camera);
-			return;
+			auto it = std::find_if(m_OutputCameras.begin(), m_OutputCameras.end(), [camera, this](const CameraRef& other)
+			{
+				return camera.GetPriority() < other.GetPriority();
+			});
+
+			if (it != m_OutputCameras.end())
+				m_OutputCameras.insert(it, camera);
+			else
+				m_OutputCameras.push_back(camera);
+		}
+		OnSubmitCamera(camera);
+	}
+
+	void RendererModule::UnsubmitCamera(CameraRef camera)
+	{
+		auto iter = std::find(m_ActiveCameras.begin(), m_ActiveCameras.end(), camera);
+		if (iter == m_ActiveCameras.end()) return;
+		m_ActiveCameras.erase(iter);
+
+		if (camera.IsOutput())
+		{
+			auto outputIter = std::find(m_OutputCameras.begin(), m_OutputCameras.end(), camera);
+			if (outputIter != m_OutputCameras.end()) return;
+			m_OutputCameras.erase(outputIter);
 		}
 
-		m_FrameData.ActiveCameras.push_back(camera);
-		OnSubmit(camera);
+		OnUnsubmitCamera(camera);
+	}
+
+	void RendererModule::UpdateCamera(CameraRef camera)
+	{
+		auto iter = std::find(m_ActiveCameras.begin(), m_ActiveCameras.end(), camera);
+		auto outputIter = std::find(m_OutputCameras.begin(), m_OutputCameras.end(), camera);
+		if (iter == m_ActiveCameras.end()) return;
+
+		static auto comparer = [](const CameraRef& a, const CameraRef& b) {
+			return a.GetPriority() < b.GetPriority();
+		};
+
+		std::sort(m_ActiveCameras.begin(), m_ActiveCameras.end(), comparer);
+		std::sort(m_OutputCameras.begin(), m_OutputCameras.end(), comparer);
+
+		if (camera.IsOutput() && outputIter == m_OutputCameras.end())
+		{
+			auto it = std::find_if(m_OutputCameras.begin(), m_OutputCameras.end(), [camera, this](const CameraRef& other)
+			{
+				return camera.GetPriority() < other.GetPriority();
+			});
+
+			if (it != m_OutputCameras.end())
+				m_OutputCameras.insert(it, camera);
+			else
+				m_OutputCameras.push_back(camera);
+		}
+		else if (!camera.IsOutput() && outputIter != m_OutputCameras.end())
+			m_OutputCameras.erase(outputIter);
+
+		if (camera.IsResolutionDirty())
+			OnCameraResize(camera);
+		if (camera.IsPerspectiveDirty())
+			OnCameraPerspectiveChanged(camera);
+
+		OnCameraUpdated(camera);
 	}
 
 	size_t RendererModule::Submit(const glm::ivec2& pickPos, UUID cameraID)
@@ -224,10 +286,6 @@ namespace Glory
 		const size_t index = m_FrameData.Picking.size();
 		m_FrameData.Picking.push_back({ pickPos, cameraID });
 		return index;
-	}
-
-	void RendererModule::Submit(CameraRef camera, RenderTexture* pTexture)
-	{
 	}
 
 	void RendererModule::Submit(LightData&& light, glm::mat4&& lightSpace, UUID id)
@@ -251,6 +309,11 @@ namespace Glory
 		std::for_each(m_DynamicLatePipelineRenderDatas.begin(), m_DynamicLatePipelineRenderDatas.end(), [](PipelineBatch& batch) { batch.Reset(); });
 
 		m_pLineVertex = m_pLineVertices;
+	}
+
+	void RendererModule::OnEndFrame()
+	{
+		m_LastResolution = m_Resolution;
 	}
 
 	size_t RendererModule::LastSubmittedObjectCount()
@@ -402,6 +465,7 @@ namespace Glory
 
 	void RendererModule::OnWindowResize(glm::uvec2 size)
 	{
+		m_Resolution = size;
 	}
 
 	void RendererModule::RenderOnBackBuffer(RenderTexture* pTexture)
@@ -431,14 +495,21 @@ namespace Glory
 
 	CameraRef RendererModule::GetActiveCamera(uint32_t cameraIndex) const
 	{
-		return m_FrameData.ActiveCameras[cameraIndex];
+		return m_ActiveCameras[cameraIndex];
+	}
+
+	CameraRef RendererModule::GetOutputCamera(uint32_t cameraIndex) const
+	{
+		return m_OutputCameras[cameraIndex];
+	}
+
+	size_t RendererModule::GetOutputCameraCount() const
+	{
+		return m_OutputCameras.size();
 	}
 
 	void RendererModule::Initialize()
 	{
-		//REQUIRE_MODULE_MESSAGE(m_pEngine, WindowModule, "A renderer module was loaded but there is no WindowModule present to render to.", Warning, );
-		//REQUIRE_MODULE_MESSAGE(m_pEngine, GraphicsModule, "A renderer module was loaded but there is no GraphicsModule present.", Warning, );
-
 		m_pLineVertices = new LineVertex[MAX_LINE_VERTICES];
 		m_pLineVertex = m_pLineVertices;
 
@@ -453,9 +524,15 @@ namespace Glory
 		OnPostInitialize();
 	}
 
-	void RendererModule::OnCameraResize(CameraRef) {}
+	void RendererModule::OnCameraResize(CameraRef camera)
+	{
+		camera.SetResolutionDirty(false);
+	}
 
-	void RendererModule::OnCameraPerspectiveChanged(CameraRef) {}
+	void RendererModule::OnCameraPerspectiveChanged(CameraRef camera)
+	{
+		camera.SetPerspectiveDirty(false);
+	}
 
 	void RendererModule::LoadSettings(ModuleSettings& settings)
 	{
@@ -477,5 +554,15 @@ namespace Glory
 		m_UniqueMeshOrder.clear();
 		m_UniqueMaterials.clear();
 		m_Dirty = true;
+	}
+
+	bool RendererModule::ResolutionChanged() const
+	{
+		return m_LastResolution != m_Resolution;
+	}
+
+	const glm::uvec2& RendererModule::Resolution() const
+	{
+		return m_Resolution;
 	}
 }

@@ -16,7 +16,6 @@ namespace Glory
 		CameraRef GetNewOrUnusedCamera();
 		void SetUnused(Camera* pCamera);
 		Camera* GetCamera(UUID uuid);
-		void OnCameraResized(CameraRef camera);
 
 	private:
 		friend class Engine;

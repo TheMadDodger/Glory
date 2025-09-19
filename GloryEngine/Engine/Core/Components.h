@@ -26,6 +26,7 @@
 
 REFLECTABLE_ENUM_NS(Glory, CameraPerspective, Orthographic, Perspective)
 REFLECTABLE_ENUM_NS(Glory, PhysicsShapeType, Sphere, Box)
+REFLECTABLE_ENUM_NS(Glory, CameraOutputMode, None, ScaledResolution, FixedResolution)
 
 #define PROPERTY_BUFFER_SIZE 2048;
 
@@ -96,9 +97,12 @@ namespace Glory
 
 	struct CameraComponent
 	{
-		GLORY_API CameraComponent() : m_HalfFOV(45.0f), m_Near(0.1f), m_Far(3000.0f), m_Priority(0), m_ClearColor(glm::vec4(0.0f)), m_LayerMask(0), m_LastHash(0) {}
+		GLORY_API CameraComponent() : m_HalfFOV(45.0f), m_Near(0.1f), m_Far(3000.0f), m_Priority(0),
+			m_ClearColor(glm::vec4(0.0f)), m_Offset(0.0f, 0.0f), m_Resolution(1.0f, 1.0f),
+			m_OutputMode(CameraOutputMode::ScaledResolution), m_LayerMask(0) {}
 		GLORY_API CameraComponent(float halfFOV, float near, float far, int priority = 0, const glm::vec4& clearColor = glm::vec4(0.0f))
-			: m_HalfFOV(halfFOV), m_Near(near), m_Far(far), m_Priority(priority), m_ClearColor(clearColor), m_LayerMask(0), m_LastHash(0) {}
+			: m_HalfFOV(halfFOV), m_Near(near), m_Far(far), m_Priority(priority), m_ClearColor(clearColor), m_Offset(0.0f, 0.0f),
+			m_Resolution(1.0f, 1.0f), m_OutputMode(CameraOutputMode::ScaledResolution), m_LayerMask(0) {}
 
 		REFLECTABLE(CameraComponent,
 			(float)	(m_HalfFOV),
@@ -106,10 +110,12 @@ namespace Glory
 			(float)	(m_Far),
 			(int)	(m_Priority),
 			(LayerMask)	(m_LayerMask),
-			(glm::vec4)	(m_ClearColor)
+			(glm::vec4)	(m_ClearColor),
+			(glm::vec2) (m_Offset),
+			(glm::vec2) (m_Resolution),
+			(CameraOutputMode) (m_OutputMode)
 		)
 
-		uint32_t m_LastHash;
 		CameraRef m_Camera;
 	};
 

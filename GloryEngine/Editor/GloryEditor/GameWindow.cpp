@@ -3,9 +3,9 @@
 #include "ImGuiHelpers.h"
 #include "EditorUI.h"
 
-#include <DisplayManager.h>
 #include <imgui.h>
 #include <InputModule.h>
+#include <RendererModule.h>
 
 namespace Glory::Editor
 {
@@ -14,7 +14,8 @@ namespace Glory::Editor
 	size_t SelectedResolution = 3;
 	glm::vec2 CustomResolution{ 1920.0f, 1080.0f };
 
-	GameWindow::GameWindow() : EditorWindowTemplate("Game", 1280.0f, 720.0f)
+	GameWindow::GameWindow(): EditorWindowTemplate("Game", 1280.0f, 720.0f),
+		m_CurrentOutputCameraIndex(0), m_SelectedRenderTextureIndex(-1)
 	{
 		m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar;
 	}
@@ -32,18 +33,22 @@ namespace Glory::Editor
 	void GameWindow::OnOpen()
 	{
 		const glm::uvec2& resolution = Resolutions[SelectedAspect][SelectedResolution];
-		EditorApplication::GetInstance()->GetEngine()->GetDisplayManager().SetResolution(resolution.x, resolution.y);
+		RendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>();
+		pRenderer->OnWindowResize(resolution);
 	}
 
 	void GameWindow::MenuBar()
 	{
+		RendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>();
+
+		if (m_SelectedRenderTextureIndex == -1)
+			m_SelectedRenderTextureIndex = pRenderer->DefaultAttachmenmtIndex();
+
 		if (ImGui::BeginMenuBar())
 		{
 			const glm::uvec2& selectedResolution = Resolutions[SelectedAspect][SelectedResolution];
 			std::stringstream str;
 			str << selectedResolution.x << "x" << selectedResolution.y;
-
-			DisplayManager& displays = EditorApplication::GetInstance()->GetEngine()->GetDisplayManager();
 
 			if (ImGui::BeginMenu(str.str().data()))
 			{
@@ -61,7 +66,7 @@ namespace Glory::Editor
 								SelectedAspect = i;
 								SelectedResolution = j;
 								CustomResolution = resolution;
-								displays.SetResolution(resolution.x, resolution.y);
+								pRenderer->OnWindowResize(resolution);
 							}
 						}
 						ImGui::EndMenu();
@@ -73,9 +78,39 @@ namespace Glory::Editor
 					const bool change = EditorUI::InputFloat2("Resolution", &CustomResolution, 1, FLT_MAX, 1);
 					EditorUI::PopFlag();
 					if (change)
-						displays.SetResolution(CustomResolution.x, CustomResolution.y);
+						pRenderer->OnWindowResize(glm::uvec2(CustomResolution));
 					ImGui::EndMenu();
 				}
+				ImGui::EndMenu();
+			}
+
+			const size_t outputCameraCount = pRenderer->GetOutputCameraCount();
+			if (m_CurrentOutputCameraIndex > outputCameraCount)
+				m_CurrentOutputCameraIndex = 0;
+
+			if (ImGui::BeginMenu(outputCameraCount == 0 ? "No output cameras in scene" : std::string("Camera " + std::to_string(m_CurrentOutputCameraIndex)).data()))
+			{
+				for (size_t i = 0; i < outputCameraCount; ++i)
+				{
+					if (ImGui::MenuItem(std::string("Camera " + std::to_string(i)).data(), NULL, m_CurrentOutputCameraIndex == i))
+					{
+						m_CurrentOutputCameraIndex = i;
+					}
+				}
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu(pRenderer->CameraAttachmentPreviewName(m_SelectedRenderTextureIndex).data()))
+			{
+				for (size_t i = 0; i < pRenderer->CameraAttachmentPreviewCount(); ++i)
+				{
+					if (ImGui::MenuItem(pRenderer->CameraAttachmentPreviewName(i).data(), NULL, m_SelectedRenderTextureIndex == i))
+					{
+						m_SelectedRenderTextureIndex = i;
+					}
+				}
+
 				ImGui::EndMenu();
 			}
 
@@ -85,32 +120,46 @@ namespace Glory::Editor
 
 	void GameWindow::View()
 	{
-		/*uint32_t width, height;
-		pDisplayTexture->GetDimensions(width, height);
-		float textureAspect = (float)width / (float)height;
+		RendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>();
 
-		ImVec2 pos = ImGui::GetWindowPos();
-		ImVec2 vMin = ImGui::GetWindowContentRegionMin();
-		pos = pos + vMin;
+		const size_t outputCameraCount = pRenderer->GetOutputCameraCount();
+		if (outputCameraCount == 0)
+		{
+			ImGui::TextUnformatted("No output cameras in scene");
+			return;
+		}
+
+		if (m_CurrentOutputCameraIndex > outputCameraCount)
+			m_CurrentOutputCameraIndex = 0;
+
+		CameraRef camera = pRenderer->GetOutputCamera(m_CurrentOutputCameraIndex);
+		TextureHandle texture = pRenderer->CameraAttachmentPreview(camera, size_t(m_SelectedRenderTextureIndex));
+		const glm::uvec2& resolution = camera.GetResolution();
+
+		const float textureAspect = (float)resolution.x/(float)resolution.y;
+
+		const ImVec2 vMin = ImGui::GetWindowContentRegionMin();
 		ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+		ImVec2 pos = ImGui::GetWindowPos();
+		pos = pos + vMin;
 		vMax = vMax - vMin;
 		float maxWidth = vMax.x;
-		float maxHeight = vMax.y;
+		const float maxHeight = vMax.y;
 
-		float actualHeight = maxWidth / textureAspect;
+		float actualHeight = maxWidth/textureAspect;
 
 		if (actualHeight > maxHeight)
 		{
 			float diff = actualHeight - maxHeight;
-			float widthOffset = diff * textureAspect;
+			float widthOffset = diff*textureAspect;
 			maxWidth -= widthOffset;
-			actualHeight = maxWidth / textureAspect;
+			actualHeight = maxWidth/textureAspect;
 		}
 
-		const ImVec2 halfMax = vMax / 2.0f;
+		const ImVec2 halfMax = vMax/2.0f;
 		const ImVec2 center = pos + halfMax;
 
-		const ImVec2 halfOffsets = ImVec2(maxWidth / 2.0f, actualHeight / 2.0f);
+		const ImVec2 halfOffsets = ImVec2(maxWidth/2.0f, actualHeight/2.0f);
 
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 
@@ -125,13 +174,13 @@ namespace Glory::Editor
 			const glm::vec2 size{ bottomRight.x - topLeft.x, bottomRight.y - topLeft.y };
 			if (size.x && size.y)
 			{
-				const glm::vec2 screenScale = size / glm::vec2(float(width), float(height));
+				const glm::vec2 screenScale = size/glm::vec2(float(resolution.x), float(resolution.y));
 				pInput->SetScreenScale(screenScale);
 			}
 		}
 
 		ImGui::GetWindowDrawList()->AddImage(
-			pRenderImpl->GetTextureID(pTexture), topLeft,
-			bottomRight, ImVec2(0, 1), ImVec2(1, 0));*/
+			pRenderImpl->GetTextureID(texture), topLeft,
+			bottomRight, ImVec2(0, 1), ImVec2(1, 0));
 	}
 }

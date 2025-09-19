@@ -31,6 +31,7 @@ namespace Glory
 		virtual void Update() override;
 		virtual void Draw() override;
 
+		virtual size_t DefaultAttachmenmtIndex() const override;
 		virtual size_t CameraAttachmentPreviewCount() const override;
 		virtual std::string_view CameraAttachmentPreviewName(size_t) const override;
 		virtual TextureHandle CameraAttachmentPreview(CameraRef, size_t) const override;

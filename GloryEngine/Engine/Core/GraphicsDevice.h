@@ -5,6 +5,8 @@
 #include "GraphicsHandles.h"
 #include "UUID.h"
 
+#include <glm/vec4.hpp>
+
 namespace Glory
 {
 	/** @brief Buffer type */
@@ -165,6 +167,9 @@ namespace Glory
 	struct RenderPassInfo
 	{
 		RenderTextureCreateInfo RenderTextureInfo;
+		glm::vec4 m_ClearColor{ 0.0f, 0.0f, 0.0f, 0.0f };
+		float m_DepthClear{ 1.0f };
+		uint8_t m_StencilClear{ 0 };
 	};
 
 	/** @brief Buffer descriptor info */
@@ -463,6 +468,15 @@ namespace Glory
 		 * @param renderPass Render pass to get the render texture from
 		 */
 		virtual RenderTextureHandle GetRenderPassRenderTexture(RenderPassHandle renderPass) = 0;
+
+		/**
+		 * @brief Set the clear color depth and stencil value for a render pass
+		 * @param renderPass Render pass to update
+		 * @param color Clear color
+		 * @param depth Depth value
+		 * @param stencil Stencil value
+		 */
+		virtual void SetRenderPassClear(RenderPassHandle renderPass, const glm::vec4& color, float depth=1.0f, uint8_t stencil=0) = 0;
 
 		/* Shader */
 

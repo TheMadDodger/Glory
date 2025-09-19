@@ -15,5 +15,9 @@ namespace Glory::Editor
     private:
         void MenuBar();
         void View();
+
+    private:
+        size_t m_CurrentOutputCameraIndex;
+        int m_SelectedRenderTextureIndex;
     };
 }

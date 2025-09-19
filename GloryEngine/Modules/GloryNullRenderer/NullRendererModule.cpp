@@ -51,6 +51,11 @@ namespace Glory
 	{
 	}
 
+	size_t NullRendererModule::DefaultAttachmenmtIndex() const
+	{
+		return 0;
+	}
+
 	size_t NullRendererModule::CameraAttachmentPreviewCount() const
 	{
 		return 0;

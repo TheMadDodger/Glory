@@ -2,6 +2,7 @@
 #include <RendererModule.h>
 #include <MaterialData.h>
 #include <FileData.h>
+
 #include <glm/glm.hpp>
 
 namespace Glory
@@ -82,6 +83,7 @@ namespace Glory
 		virtual void Draw() override;
 		virtual void LoadSettings(ModuleSettings& settings) override;
 
+		virtual size_t DefaultAttachmenmtIndex() const override;
 		virtual size_t CameraAttachmentPreviewCount() const override;
 		virtual std::string_view CameraAttachmentPreviewName(size_t index) const override;
 		virtual TextureHandle CameraAttachmentPreview(CameraRef camera, size_t index) const override;
@@ -106,6 +108,10 @@ namespace Glory
 
 		void ShadowMapsPass();
 		void RenderShadows(size_t lightIndex, const glm::vec4& viewport);
+
+		virtual void OnSubmitCamera(CameraRef camera) override;
+		virtual void OnUnsubmitCamera(CameraRef camera) override;
+		virtual void OnCameraUpdated(CameraRef camera) override;
 
 	private:
 		std::vector<PipelineBatchData> m_DynamicBatchData;
@@ -165,5 +171,7 @@ namespace Glory
 		/* Shadows */
 		RenderPassHandle m_ShadowsPass = 0;
 		GPUTextureAtlas* m_pShadowAtlas = nullptr;
+
+		std::vector<CameraRef> m_DirtyCameraPerspectives;
 	};
 }

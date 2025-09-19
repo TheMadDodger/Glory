@@ -118,12 +118,14 @@ namespace Glory
 		void UnsubmitStatic(UUID pipelineID, UUID meshID, UUID objectID);
 		void SubmitDynamic(RenderData&& renderData);
 		void SubmitLate(RenderData&& renderData);
-		void Submit(CameraRef camera);
+		void SubmitCamera(CameraRef camera);
+		void UnsubmitCamera(CameraRef camera);
+		void UpdateCamera(CameraRef camera);
 		size_t Submit(const glm::ivec2& pickPos, UUID cameraID);
-		void Submit(CameraRef camera, RenderTexture* pTexture);
 		void Submit(LightData&& light, glm::mat4&& lightSpace, UUID id);
 
 		virtual void OnBeginFrame() override;
+		virtual void OnEndFrame() override;
 
 		virtual void OnCameraResize(CameraRef camera);
 		virtual void OnCameraPerspectiveChanged(CameraRef camera);
@@ -163,7 +165,10 @@ namespace Glory
 		virtual UUID TextPipelineID() const = 0;
 
 		CameraRef GetActiveCamera(uint32_t cameraIndex) const;
+		CameraRef GetOutputCamera(uint32_t cameraIndex) const;
+		size_t GetOutputCameraCount() const;
 
+		virtual size_t DefaultAttachmenmtIndex() const = 0;
 		virtual size_t CameraAttachmentPreviewCount() const = 0;
 		virtual std::string_view CameraAttachmentPreviewName(size_t index) const = 0;
 		virtual TextureHandle CameraAttachmentPreview(CameraRef camera, size_t index) const = 0;
@@ -172,9 +177,14 @@ namespace Glory
 		virtual std::string_view DebugOverlayName(size_t index) const = 0;
 		virtual TextureHandle DebugOverlay(size_t index) const = 0;
 
+		bool ResolutionChanged() const;
+		const glm::uvec2& Resolution() const;
+
 	protected:
 		virtual void OnSubmitDynamic(const RenderData& renderData) {}
-		virtual void OnSubmit(CameraRef camera) {}
+		virtual void OnSubmitCamera(CameraRef camera) {}
+		virtual void OnUnsubmitCamera(CameraRef camera) {}
+		virtual void OnCameraUpdated(CameraRef camera) {}
 		virtual void OnSubmit(const LightData& light) {}
 
 	protected:
@@ -210,11 +220,16 @@ namespace Glory
 
 		std::vector<GPUTextureAtlas> m_GPUTextureAtlases;
 
+		std::vector<CameraRef> m_ActiveCameras;
+		std::vector<CameraRef> m_OutputCameras;
 		std::vector<RenderData> m_ToProcessStaticRenderData;
 		std::vector<PipelineBatch> m_StaticPipelineRenderDatas;
 		std::vector<PipelineBatch> m_DynamicPipelineRenderDatas;
 		std::vector<PipelineBatch> m_DynamicLatePipelineRenderDatas;
 
 		CommandBufferHandle m_CommandBuffer;
+
+		glm::uvec2 m_Resolution{ 1920, 1080 };
+		glm::uvec2 m_LastResolution{ 1920, 1080 };
 	};
 }

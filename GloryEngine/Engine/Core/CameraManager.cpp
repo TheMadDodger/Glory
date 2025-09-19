@@ -19,7 +19,7 @@ namespace Glory
 			size_t index = m_UnusedCameraIndices[0];
 			m_UnusedCameraIndices.erase(m_UnusedCameraIndices.begin());
 			Camera& pCamera = m_Cameras[index];
-			pCamera.SetResolution(uint32_t(width), uint32_t(height));
+			pCamera.SetBaseResolution(float(width), float(height));
 			pCamera.m_IsInUse = true;
 			return CameraRef(this, pCamera.GetUUID());
 		}
@@ -43,12 +43,6 @@ namespace Glory
 		if (m_IDToCamera.find(uuid) == m_IDToCamera.end()) return nullptr;
 		size_t index = m_IDToCamera[uuid];
 		return &m_Cameras[index];
-	}
-
-	void CameraManager::OnCameraResized(CameraRef camera)
-	{
-		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
-		pRenderer->OnCameraResize(camera);
 	}
 
 	void CameraManager::Cleanup()

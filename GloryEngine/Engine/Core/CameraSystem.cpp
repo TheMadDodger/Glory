@@ -20,23 +20,52 @@ namespace Glory
 	{
 	}
 
+	void CameraSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
+	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		if (!pRenderer) return;
+
+		const glm::uvec2& resolution = pRenderer->Resolution();
+
+		switch (pComponent.m_OutputMode)
+		{
+		case CameraOutputMode::None:
+		case CameraOutputMode::FixedResolution:
+			pComponent.m_Camera.SetBaseResolution(uint32_t(pComponent.m_Resolution.x), uint32_t(pComponent.m_Resolution.y));
+			pComponent.m_Camera.SetResolutionScale(1.0f, 1.0f);
+			break;
+		case CameraOutputMode::ScaledResolution:
+			pComponent.m_Camera.SetBaseResolution(resolution.x, resolution.y);
+			pComponent.m_Camera.SetResolutionScale(pComponent.m_Resolution.x, pComponent.m_Resolution.y);
+			break;
+		default:
+			break;
+		}
+
+		pComponent.m_Camera.SetOutput(pComponent.m_OutputMode != CameraOutputMode::None, int(pComponent.m_Offset.x), int(pComponent.m_Offset.y));
+		pComponent.m_Camera.SetPerspectiveProjection(pComponent.m_HalfFOV, pComponent.m_Near, pComponent.m_Far);
+		pComponent.m_Camera.SetClearColor(pComponent.m_ClearColor);
+		pComponent.m_Camera.SetPriority(pComponent.m_Priority);
+		pComponent.m_Camera.SetLayerMask(pComponent.m_LayerMask);
+
+		pEngine->GetMainModule<RendererModule>()->UpdateCamera(pComponent.m_Camera);
+	}
+
 	void CameraSystem::OnComponentAdded(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
 		Window* pWindow = pEngine->GetMainModule<WindowModule>()->GetMainWindow();
-
-		int width, height;
-		pWindow->GetDrawableSize(&width, &height);
-
 		pComponent.m_Camera = pEngine->GetCameraManager().GetNewOrUnusedCamera();
-		pComponent.m_Camera.SetPerspectiveProjection(width, height, pComponent.m_HalfFOV, pComponent.m_Near, pComponent.m_Far);
-		pComponent.m_LastHash = CalcHash(pComponent);
+		OnValidate(pRegistry, entity, pComponent);
 	}
 
 	void CameraSystem::OnComponentRemoved(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
 	{
 		pComponent.m_Camera.Free();
+		pComponent.m_Camera = NULL;
 	}
 
 	void CameraSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
@@ -47,41 +76,27 @@ namespace Glory
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		pComponent.m_Camera.SetView(glm::inverse(transform.MatTransform));
 
-		uint32_t hash = CalcHash(pComponent);
-		if (pComponent.m_LastHash == hash) return;
-		pComponent.m_LastHash = hash;
-
-		pComponent.m_Camera.SetPriority(pComponent.m_Priority);
-		pComponent.m_Camera.SetLayerMask(pComponent.m_LayerMask);
-		pComponent.m_Camera.SetClearColor(pComponent.m_ClearColor);
-
-		Window* pWindow = pEngine->GetMainModule<WindowModule>()->GetMainWindow();
-
-		int width, height;
-		pWindow->GetDrawableSize(&width, &height);
-		pComponent.m_Camera.SetPerspectiveProjection(width, height, pComponent.m_HalfFOV, pComponent.m_Near, pComponent.m_Far);
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		if (!pRenderer || !pRenderer->ResolutionChanged()) return;
+		OnValidate(pRegistry, entity, pComponent);
 	}
 
-	void CameraSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
+	void CameraSystem::OnEnableDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		pEngine->GetMainModule<RendererModule>()->Submit(pComponent.m_Camera);
+		pEngine->GetMainModule<RendererModule>()->SubmitCamera(pComponent.m_Camera);
+	}
+
+	void CameraSystem::OnDisableDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
+	{
+		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Engine* pEngine = pScene->Manager()->GetEngine();
+		pEngine->GetMainModule<RendererModule>()->UnsubmitCamera(pComponent.m_Camera);
 	}
 
 	std::string CameraSystem::Name()
 	{
 		return "Camera";
-	}
-
-	uint32_t CameraSystem::CalcHash(CameraComponent& pComponent)
-	{
-		float value = (float)pComponent.m_ClearColor.x + (float)pComponent.m_ClearColor.y
-			+ (float)pComponent.m_ClearColor.z + (float)pComponent.m_ClearColor.w
-			+ (float)pComponent.m_Far + (float)pComponent.m_Near
-			+ (float)pComponent.m_HalfFOV + (float)pComponent.m_Priority
-			+ (float)pComponent.m_LayerMask;
-
-		return (uint32_t)std::hash<float>()(value);
 	}
 }

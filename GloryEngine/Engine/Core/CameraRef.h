@@ -15,15 +15,25 @@ namespace Glory
 		CameraRef();
 		CameraRef(std::nullptr_t);
 
+		bool operator==(const CameraRef& other) const;
+
 	public:
-		void SetResolution(uint32_t width, uint32_t height);
-		void SetPerspectiveProjection(uint32_t width, uint32_t height, float halfFOV, float near, float far);
-		void SetOrthographicProjection(float width, float height, float near, float far);
+		void SetBaseResolution(uint32_t width, uint32_t height);
+		const glm::uvec2& GetBaseResolution() const;
+		void SetResolutionScale(float width, float height);
+		void SetPerspectiveProjection(float halfFOV, float near, float far);
+		void SetOutput(bool output, int x, int y);
+		bool IsOutput() const;
+		void SetOrthographicProjection(float near, float far);
 		void SetView(const glm::mat4& view);
 		void SetPriority(int priority);
 		void SetLayerMask(const LayerMask& layerMask);
 		void SetClearColor(const glm::vec4& clearColor);
 		void SetUserData(const std::string& name, void* data);
+		bool IsResolutionDirty();
+		bool IsPerspectiveDirty();
+		void SetResolutionDirty(bool dirty=true);
+		void SetPerspectiveDirty(bool dirty=true);
 
 		const glm::uvec2& GetResolution() const;
 		const glm::mat4& GetView() const;
@@ -39,16 +49,6 @@ namespace Glory
 		const glm::vec4& GetClearColor() const;
 		const LayerMask& GetLayerMask() const;
 
-		template<typename T>
-		bool GetUserData(const std::string& name, T*& data)
-		{
-			T* userData = (T*)GetUserDataVoid(name);
-			if (!userData) return false;
-			data = userData;
-			return true;
-		}
-
-		void* GetUserDataVoid(const std::string& name);
 		uint64_t& GetUserHandle(const std::string& name);
 
 		float GetNear() const;

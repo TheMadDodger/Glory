@@ -2,17 +2,13 @@
 
 namespace Glory
 {
-    RenderFrame::RenderFrame(size_t maxLigts) : //ObjectsToRender(std::vector<RenderData>()),
+    RenderFrame::RenderFrame(size_t maxLigts):
         ActiveLights(maxLigts), LightSpaceTransforms(maxLigts)
     {
     }
 
     RenderFrame::~RenderFrame()
     {
-        //ObjectsToRender.clear();
-        ActiveCameras.clear();
-        //TextsToRender.clear();
-        //ObjectsToRenderLate.clear();
         Picking.clear();
         ActiveLights.reset();
         LightSpaceTransforms.reset();
@@ -20,10 +16,6 @@ namespace Glory
 
     void RenderFrame::Reset()
     {
-        //ObjectsToRender.clear();
-        ActiveCameras.clear();
-        //TextsToRender.clear();
-        //ObjectsToRenderLate.clear();
         Picking.clear();
         ActiveLights.reset();
         LightSpaceTransforms.reset();

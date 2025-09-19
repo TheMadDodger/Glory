@@ -386,19 +386,40 @@ namespace Glory
 			Debug().LogError("OpenGLDevice::BeginRenderPass: Invalid render pass handle.");
 			return;
 		}
-		GL_RenderTexture* renderTexture = m_RenderTextures.Find(glRenderPass->m_RenderTexture);
-		if (!renderTexture)
+		GL_RenderTexture* glRenderTexture = m_RenderTextures.Find(glRenderPass->m_RenderTexture);
+		if (!glRenderTexture)
 		{
 			Debug().LogError("OpenGLDevice::BeginRenderPass: Render pass has an invalid render texture handle.");
 			return;
 		}
-		glBindFramebuffer(GL_FRAMEBUFFER, renderTexture->m_GLFramebufferID);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, glRenderTexture->m_GLFramebufferID);
+		
+		const bool hasDepth = glRenderTexture->m_Info.HasDepth;
+		const bool hasStencil = glRenderTexture->m_Info.HasStencil;
+		const bool hasStencilOrDepth = hasDepth || hasStencil;
+		const bool hasColor = glRenderTexture->m_Textures.size() > hasStencilOrDepth ? 1 : 0;
+
+		if (hasColor)
+			glClearColor(glRenderPass->m_ClearColor.x, glRenderPass->m_ClearColor.y, glRenderPass->m_ClearColor.z, glRenderPass->m_ClearColor.w);
+		if (hasDepth)
+			glClearDepth(glRenderPass->m_DepthClear);
+		if (hasStencil)
+			glClearStencil(glRenderPass->m_StencilClear);
+
+		GLbitfield clearFlags;
+		if (hasColor)
+			clearFlags |= GL_COLOR_BUFFER_BIT;
+		if (hasDepth)
+			clearFlags |= GL_DEPTH_BUFFER_BIT;
+		if (hasStencil)
+			clearFlags |= GL_STENCIL_BUFFER_BIT;
+
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClear(clearFlags);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glViewport(0, 0, glRenderTexture->m_Info.Width, glRenderTexture->m_Info.Height);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glViewport(0, 0, renderTexture->m_Info.Width, renderTexture->m_Info.Height);
 	}
 
 	void OpenGLDevice::BeginPipeline(CommandBufferHandle, PipelineHandle pipeline)
@@ -1011,6 +1032,9 @@ namespace Glory
 		RenderPassHandle handle;
 		GL_RenderPass& renderPass = m_RenderPasses.Emplace(handle, GL_RenderPass());
 		renderPass.m_RenderTexture = CreateRenderTexture(handle, std::move(info.RenderTextureInfo));
+		renderPass.m_ClearColor = std::move(info.m_ClearColor);
+		renderPass.m_DepthClear = info.m_DepthClear;
+		renderPass.m_StencilClear = info.m_StencilClear;
 
 		if (!renderPass.m_RenderTexture)
 		{
@@ -1035,6 +1059,19 @@ namespace Glory
 			return NULL;
 		}
 		return glRenderPass->m_RenderTexture;
+	}
+
+	void OpenGLDevice::SetRenderPassClear(RenderPassHandle renderPass, const glm::vec4& color, float depth, uint8_t stencil)
+	{
+		GL_RenderPass* glRenderPass = m_RenderPasses.Find(renderPass);
+		if (!glRenderPass)
+		{
+			Debug().LogError("OpenGLDevice::SetRenderPassClear: Invalid render pass handle");
+			return;
+		}
+		glRenderPass->m_ClearColor = color;
+		glRenderPass->m_DepthClear = depth;
+		glRenderPass->m_StencilClear = stencil;
 	}
 
 	ShaderHandle OpenGLDevice::CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function)

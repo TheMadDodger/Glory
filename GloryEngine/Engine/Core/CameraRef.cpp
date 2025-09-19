@@ -12,30 +12,62 @@ namespace Glory
 	{
 	}
 
+	bool CameraRef::operator==(const CameraRef& other) const
+	{
+		return m_CameraID == other.m_CameraID;
+	}
+
 	CameraRef::CameraRef(CameraManager* pManager, UUID uuid) : m_pManager(pManager), m_CameraID(uuid)
 	{
 	}
 
-	void CameraRef::SetResolution(uint32_t width, uint32_t height)
+	void CameraRef::SetBaseResolution(uint32_t width, uint32_t height)
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
 		if (pCamera == nullptr) return;
-		if (!pCamera->SetResolution(width, height)) return;
-		m_pManager->OnCameraResized(*this);
+		pCamera->SetBaseResolution(width, height);
 	}
 
-	void CameraRef::SetPerspectiveProjection(uint32_t width, uint32_t height, float halfFOV, float near, float far)
+	const glm::uvec2& CameraRef::GetBaseResolution() const
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return;
-		pCamera->SetPerspectiveProjection(width, height, halfFOV, near, far);
+		if (pCamera == nullptr) return {};
+		return pCamera->GetBaseResolution();
 	}
 
-	void CameraRef::SetOrthographicProjection(float width, float height, float near, float far)
+	void CameraRef::SetResolutionScale(float width, float height)
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
 		if (pCamera == nullptr) return;
-		pCamera->SetOrthographicProjection(width, height, near, far);
+		pCamera->SetResolutionScale(width, height);
+	}
+
+	void CameraRef::SetPerspectiveProjection(float halfFOV, float near, float far)
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		pCamera->SetPerspectiveProjection(halfFOV, near, far);
+	}
+
+	void CameraRef::SetOutput(bool output, int x, int y)
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		pCamera->SetOutput(output, x, y);
+	}
+
+	bool CameraRef::IsOutput() const
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return false;
+		return pCamera->IsOutput();
+	}
+
+	void CameraRef::SetOrthographicProjection(float near, float far)
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		pCamera->SetOrthographicProjection(near, far);
 	}
 
 	void CameraRef::SetView(const glm::mat4& view)
@@ -71,6 +103,34 @@ namespace Glory
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
 		if (pCamera == nullptr) return;
 		pCamera->SetUserData(name, data);
+	}
+
+	bool CameraRef::IsResolutionDirty()
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return false;
+		return pCamera->IsResolutionDirty();
+	}
+
+	bool CameraRef::IsPerspectiveDirty()
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return false;
+		return pCamera->IsPerspectiveDirty();
+	}
+
+	void CameraRef::SetResolutionDirty(bool dirty)
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		return pCamera->SetResolutionDirty(dirty);
+	}
+
+	void CameraRef::SetPerspectiveDirty(bool dirty)
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		return pCamera->SetPerspectiveDirty(dirty);
 	}
 
 	const glm::uvec2& CameraRef::GetResolution() const
@@ -157,15 +217,6 @@ namespace Glory
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
 		if (pCamera == nullptr) return;
 		m_pManager->SetUnused(pCamera);
-	}
-
-	void* CameraRef::GetUserDataVoid(const std::string& name)
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return false;
-		void* data = nullptr;
-		if (!pCamera->GetUserData(name, data)) return nullptr;
-		return data;
 	}
 
 	uint64_t& CameraRef::GetUserHandle(const std::string& name)

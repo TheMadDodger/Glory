@@ -192,6 +192,7 @@ namespace Glory
 
 		/* Register component types */
 		Reflect::RegisterEnum<CameraPerspective>();
+		Reflect::RegisterEnum<CameraOutputMode>();
 		Reflect::RegisterType<MeshMaterial>();
 		Reflect::RegisterType<ShadowSettings>();
 
@@ -225,10 +226,12 @@ namespace Glory
 		m_pComponentTypesInstance->RegisterInvokaction<Transform>(Glory::Utils::ECS::InvocationType::Update, TransformSystem::OnUpdate);
 
 		// Camera
+		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::OnValidate, CameraSystem::OnValidate);
 		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::OnAdd, CameraSystem::OnComponentAdded);
 		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::OnRemove, CameraSystem::OnComponentRemoved);
 		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::Update, CameraSystem::OnUpdate);
-		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::Draw, CameraSystem::OnDraw);
+		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::OnEnableDraw, CameraSystem::OnEnableDraw);
+		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::OnDisableDraw, CameraSystem::OnDisableDraw);
 
 		// Light
 		m_pComponentTypesInstance->RegisterInvokaction<LightComponent>(Glory::Utils::ECS::InvocationType::Draw, LightSystem::OnDraw);

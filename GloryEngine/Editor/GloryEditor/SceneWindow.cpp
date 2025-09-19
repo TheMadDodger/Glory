@@ -59,10 +59,14 @@ namespace Glory::Editor
 
 		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
 		pScenes->AddExternalScene(m_pPreviewScene);
+
+		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->SubmitCamera(m_SceneCamera.m_Camera);
 	}
 
 	void SceneWindow::OnClose()
 	{
+		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->UnsubmitCamera(m_SceneCamera.m_Camera);
+
 		Gizmos::Clear();
 		m_SceneCamera.Cleanup();
 
@@ -87,7 +91,6 @@ namespace Glory::Editor
 
 	void SceneWindow::Draw()
 	{
-		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->Submit(m_SceneCamera.m_Camera);
 		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->Submit(m_PickPos, m_SceneCamera.m_Camera.GetUUID());
 	}
 
@@ -95,15 +98,15 @@ namespace Glory::Editor
 	{
 		RendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>();
 
+		if (m_SelectedRenderTextureIndex == -1)
+			m_SelectedRenderTextureIndex = pRenderer->DefaultAttachmenmtIndex();
+
 		if (ImGui::BeginMenuBar())
 		{
 			if (ImGui::MenuItem("Grid", NULL, m_DrawGrid))
 			{
 				m_DrawGrid = !m_DrawGrid;
 			}
-
-			if (m_SelectedRenderTextureIndex == -1)
-				m_SelectedRenderTextureIndex = 0;
 
 			if (ImGui::BeginMenu(pRenderer->CameraAttachmentPreviewName(m_SelectedRenderTextureIndex).data()))
 			{
@@ -165,10 +168,9 @@ namespace Glory::Editor
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max)) m_SceneCamera.Update();
-		m_SceneCamera.m_Width = (uint32_t)m_WindowDimensions.x;
-		m_SceneCamera.m_Height = (uint32_t)m_WindowDimensions.x;
 		if (!m_SceneCamera.SetResolution((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y)) return;
 		m_SceneCamera.UpdateCamera();
+		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->UpdateCamera(m_SceneCamera.m_Camera);
 	}
 
 	void SceneWindow::DrawScene()

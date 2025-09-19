@@ -321,34 +321,28 @@ namespace Glory
 			Debug().LogError("VulkanDevice::BeginRenderPass: Invalid render pass handle.");
 			return;
 		}
-		VK_RenderTexture* renderTexture = m_RenderTextures.Find(vkRenderPass->m_RenderTexture);
-		if (!renderTexture)
+		VK_RenderTexture* vkRenderTexture = m_RenderTextures.Find(vkRenderPass->m_RenderTexture);
+		if (!vkRenderTexture)
 		{
 			Debug().LogError("VulkanDevice::BeginRenderPass: Render pass has an invalid render texture handle.");
 			return;
 		}
 
 		// Start a render pass
-        vk::Rect2D renderArea = vk::Rect2D()
+        const vk::Rect2D renderArea = vk::Rect2D()
             .setOffset(vk::Offset2D(0, 0))
-            .setExtent(vk::Extent2D(renderTexture->m_Info.Width, renderTexture->m_Info.Height));
+            .setExtent(vk::Extent2D(vkRenderTexture->m_Info.Width, vkRenderTexture->m_Info.Height));
 
-        std::vector<vk::ClearValue> clearColors = std::vector<vk::ClearValue>(renderTexture->m_Textures.size());
+        std::vector<vk::ClearValue> clearColors = std::vector<vk::ClearValue>(vkRenderTexture->m_Textures.size());
         for (size_t i = 0; i < clearColors.size(); ++i)
-        {
-			glm::vec4 value{0.0f, 0.0f, 0.0f, 1.0f};
-            vk::ClearColorValue clearColor;
-            memcpy(&clearColor, (const void*)&value, sizeof(float)*4);
-            clearColors[i].setColor(clearColor);
-			//clearColors[i].setDepthStencil(vk::ClearDepthStencilValue(0.0f, 0));
-        }
+            clearColors[i].setColor(vkRenderPass->m_ClearColor);
 
-		if (renderTexture->m_HasDepthOrStencil)
-			clearColors.back().setDepthStencil(vk::ClearDepthStencilValue(1.0f, 0));
+		if (vkRenderTexture->m_HasDepthOrStencil)
+			clearColors.back().setDepthStencil(vkRenderPass->m_DepthStencilClear);
 
-        vk::RenderPassBeginInfo renderPassBeginInfo = vk::RenderPassBeginInfo()
+        const vk::RenderPassBeginInfo renderPassBeginInfo = vk::RenderPassBeginInfo()
             .setRenderPass(vkRenderPass->m_VKRenderPass)
-            .setFramebuffer(renderTexture->m_VKFramebuffer)
+            .setFramebuffer(vkRenderTexture->m_VKFramebuffer)
             .setRenderArea(renderArea)
             .setClearValueCount(static_cast<uint32_t>(clearColors.size()))
             .setPClearValues(clearColors.data());
@@ -1134,6 +1128,8 @@ namespace Glory
 
 		RenderPassHandle handle;
 		VK_RenderPass& renderPass = m_RenderPasses.Emplace(handle, VK_RenderPass());
+		memcpy(&renderPass.m_ClearColor, (const void*)&info.m_ClearColor, sizeof(float)*4);
+		renderPass.m_DepthStencilClear = vk::ClearDepthStencilValue(info.m_DepthClear, info.m_StencilClear);
 
 		std::vector<vk::AttachmentDescription> attachments;
 		std::vector<vk::AttachmentReference> attachmentColorRefs;
@@ -1273,6 +1269,18 @@ namespace Glory
 			return NULL;
 		}
 		return vkRenderPass->m_RenderTexture;
+	}
+
+	void VulkanDevice::SetRenderPassClear(RenderPassHandle renderPass, const glm::vec4& color, float depth, uint8_t stencil)
+	{
+		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(renderPass);
+		if (!vkRenderPass)
+		{
+			Debug().LogError("VulkanDevice::SetRenderPassClear: Invalid render pass handle");
+			return;
+		}
+		memcpy(&vkRenderPass->m_ClearColor, (const void*)&color, sizeof(float)*4);
+		vkRenderPass->m_DepthStencilClear = vk::ClearDepthStencilValue(depth, stencil);
 	}
 
 	ShaderHandle VulkanDevice::CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function)

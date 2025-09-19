@@ -61,6 +61,8 @@ namespace Glory
 
         vk::RenderPass m_VKRenderPass;
         RenderTextureHandle m_RenderTexture;
+        vk::ClearColorValue m_ClearColor;
+        vk::ClearDepthStencilValue m_DepthStencilClear;
     };
 
     struct VK_Shader
@@ -176,6 +178,7 @@ namespace Glory
         virtual void ResizeRenderTexture(RenderTextureHandle renderTexture, uint32_t width, uint32_t height) override;
         virtual RenderPassHandle CreateRenderPass(RenderPassInfo&& info) override;
         virtual RenderTextureHandle GetRenderPassRenderTexture(RenderPassHandle renderPass) override;
+        virtual void SetRenderPassClear(RenderPassHandle renderPass, const glm::vec4& color, float depth=1.0f, uint8_t stencil=0) override;
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
         virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
             std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride, const std::vector<AttributeType>& attributeTypes) override;

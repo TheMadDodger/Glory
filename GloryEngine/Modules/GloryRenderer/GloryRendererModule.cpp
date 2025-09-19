@@ -91,19 +91,21 @@ namespace Glory
 		pDevice->UpdateDescriptorSet(ssaoSamplersSet, updateInfo);
 		/* When the camera rendertexture resizes we need to generate a new grid of clusters for that camera */
 		OnCameraPerspectiveChanged(camera);
+		camera.SetResolutionDirty(false);
 	}
 
 	void GloryRendererModule::OnCameraPerspectiveChanged(CameraRef camera)
 	{
 		/* When the camera changed perspective we need to generate a new grid of clusters for that camera */
-		auto iter = std::find_if(m_FrameData.ActiveCameras.begin(), m_FrameData.ActiveCameras.end(),
+		auto iter = std::find_if(m_ActiveCameras.begin(), m_ActiveCameras.end(),
 			[camera](const CameraRef& other) { return other.GetUUID() == camera.GetUUID(); });
-		if (iter == m_FrameData.ActiveCameras.end()) return;
-		const size_t cameraIndex = iter - m_FrameData.ActiveCameras.begin();
+		if (iter == m_ActiveCameras.end()) return;
+		const size_t cameraIndex = iter - m_ActiveCameras.begin();
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		DescriptorSetHandle clusterSet = camera.GetUserHandle("ClusterSet");
 		if (!clusterSet) return; // Should not happen but just in case
 		GenerateClusterSSBO(cameraIndex, pDevice, camera, clusterSet);
+		m_DirtyCameraPerspectives.push_back(camera);
 	}
 
 	MaterialData* GloryRendererModule::GetInternalMaterial(std::string_view name) const
@@ -451,9 +453,9 @@ namespace Glory
 		if (!pDevice) return;
 
 		/* Make sure every camera has a render pass */
-		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
+		for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
 		{
-			CameraRef camera = m_FrameData.ActiveCameras[i];
+			CameraRef camera = m_ActiveCameras[i];
 
 			RenderPassHandle& renderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("RenderPass"));
 			RenderPassHandle& ssaoRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("SSAORenderPass"));
@@ -512,9 +514,9 @@ namespace Glory
 		/* Shadows */
 		ShadowMapsPass();
 
-		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
+		for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
 		{
-			CameraRef camera = m_FrameData.ActiveCameras[i];
+			CameraRef camera = m_ActiveCameras[i];
 
 			RenderPassHandle& renderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("RenderPass"));
 			RenderPassHandle& ssaoRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("SSAORenderPass"));
@@ -524,6 +526,7 @@ namespace Glory
 			ClusterPass(static_cast<uint32_t>(i));
 			
 			/* Draw objects */
+			pDevice->SetRenderPassClear(renderPass, camera.GetClearColor());
 			pDevice->BeginRenderPass(m_CommandBuffer, renderPass);
 			DynamicObjectsPass(static_cast<uint32_t>(i));
 			pDevice->EndRenderPass(m_CommandBuffer);
@@ -583,6 +586,11 @@ namespace Glory
 		settings.RegisterAssetReference<PipelineData>("Shadows Transparent Textured Pipeline", 39);
 		settings.RegisterAssetReference<PipelineData>("Cluster Generator", 44);
 		settings.RegisterAssetReference<PipelineData>("Cluster Cull Light", 45);
+	}
+
+	size_t GloryRendererModule::DefaultAttachmenmtIndex() const
+	{
+		return 2;
 	}
 
 	size_t GloryRendererModule::CameraAttachmentPreviewCount() const
@@ -738,11 +746,11 @@ namespace Glory
 		MaterialManager& materials = m_pEngine->GetMaterialManager();
 
 		/* Prepare cameras */
-		if (m_CameraDatas->size() < m_FrameData.ActiveCameras.size())
-			m_CameraDatas.resize(m_FrameData.ActiveCameras.size());
-		for (size_t i = 0; i < m_FrameData.ActiveCameras.size(); ++i)
+		if (m_CameraDatas->size() < m_ActiveCameras.size())
+			m_CameraDatas.resize(m_ActiveCameras.size());
+		for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
 		{
-			CameraRef camera = m_FrameData.ActiveCameras[i];
+			CameraRef camera = m_ActiveCameras[i];
 
 			const PerCameraData cameraData{ camera.GetView(), camera.GetProjection(),
 				camera.GetNear(), camera.GetFar(), { static_cast<glm::vec2>(camera.GetResolution()) }};
@@ -802,11 +810,24 @@ namespace Glory
 				ssaoSamplersSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 
 				GenerateClusterSSBO(i, pDevice, camera, clusterSet);
+
+				auto iter = std::find(m_DirtyCameraPerspectives.begin(), m_DirtyCameraPerspectives.end(), camera);
+				if (iter != m_DirtyCameraPerspectives.end())
+					m_DirtyCameraPerspectives.erase(iter);
 			}
 		}
 		if (m_CameraDatas)
 			pDevice->AssignBuffer(m_CameraDatasBuffer, m_CameraDatas->data(),
 				static_cast<uint32_t>(m_CameraDatas->size()*sizeof(PerCameraData)));
+
+		for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
+		{
+			CameraRef camera = m_ActiveCameras[i];
+			DescriptorSetHandle& clusterSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("ClusterSet"));
+			if (std::find(m_DirtyCameraPerspectives.begin(), m_DirtyCameraPerspectives.end(), camera) != m_DirtyCameraPerspectives.end())
+				GenerateClusterSSBO(i, pDevice, camera, clusterSet);
+		}
+		m_DirtyCameraPerspectives.clear();
 
 		/* Update light data */
 		pDevice->AssignBuffer(m_LightsSSBO, m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS*sizeof(LightData));
@@ -830,8 +851,8 @@ namespace Glory
 
 	void GloryRendererModule::PrepareBatches(const std::vector<PipelineBatch>& batches, std::vector<PipelineBatchData>& batchDatas)
 	{
-		if (m_FrameData.ActiveCameras.empty()) return;
-		CameraRef defaultCamera = m_FrameData.ActiveCameras[0];
+		if (m_ActiveCameras.empty()) return;
+		CameraRef defaultCamera = m_ActiveCameras[0];
 		RenderPassHandle& defaultRenderPass = reinterpret_cast<RenderPassHandle&>(defaultCamera.GetUserHandle("RenderPass"));
 		if (!defaultRenderPass) return;
 
@@ -1048,7 +1069,7 @@ namespace Glory
 	{
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 
-		CameraRef camera = m_FrameData.ActiveCameras[cameraIndex];
+		CameraRef camera = m_ActiveCameras[cameraIndex];
 		const DescriptorSetHandle& clusterSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("ClusterSet"));
 		const DescriptorSetHandle& lightSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("LightSet"));
 
@@ -1086,7 +1107,7 @@ namespace Glory
 	void GloryRendererModule::DynamicObjectsPass(uint32_t cameraIndex)
 	{
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
-		CameraRef camera = m_FrameData.ActiveCameras[cameraIndex];
+		CameraRef camera = m_ActiveCameras[cameraIndex];
 		//pGraphics->EnableDepthWrite(true);
 		RenderBatches(m_DynamicPipelineRenderDatas, m_DynamicBatchData, cameraIndex, m_GlobalRenderSet, { 0.0f, 0.0f, camera.GetResolution() });
 		//pGraphics->EnableDepthWrite(true);
@@ -1210,5 +1231,18 @@ namespace Glory
 		//RenderBatches(m_StaticPipelineRenderDatas, m_StaticBatchData, lightIndex);
 		RenderBatches(m_DynamicPipelineRenderDatas, m_DynamicBatchData, lightIndex, m_GlobalShadowRenderSet, viewport);
 		//RenderBatches(m_DynamicLatePipelineRenderDatas, m_DynamicLateBatchData, lightIndex);
+	}
+
+	void GloryRendererModule::OnSubmitCamera(CameraRef camera)
+	{
+
+	}
+
+	void GloryRendererModule::OnUnsubmitCamera(CameraRef camera)
+	{
+	}
+
+	void GloryRendererModule::OnCameraUpdated(CameraRef camera)
+	{
 	}
 }

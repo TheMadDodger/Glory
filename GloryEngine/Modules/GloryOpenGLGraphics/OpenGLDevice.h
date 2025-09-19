@@ -58,6 +58,9 @@ namespace Glory
         static constexpr GraphicsHandleType HandleType = H_RenderPass;
 
         RenderTextureHandle m_RenderTexture;
+        glm::vec4 m_ClearColor;
+        float m_DepthClear;
+        uint8_t m_StencilClear;
     };
 
     struct GL_Shader
@@ -142,6 +145,7 @@ namespace Glory
         virtual void ResizeRenderTexture(RenderTextureHandle renderTexture, uint32_t width, uint32_t height) override;
         virtual RenderPassHandle CreateRenderPass(RenderPassInfo&& info) override;
         virtual RenderTextureHandle GetRenderPassRenderTexture(RenderPassHandle renderPass) override;
+        virtual void SetRenderPassClear(RenderPassHandle renderPass, const glm::vec4& color, float depth=1.0f, uint8_t stencil=0) override;
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
         virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&&,
             size_t, const std::vector<AttributeType>&) override;

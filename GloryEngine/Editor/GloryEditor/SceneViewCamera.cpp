@@ -19,6 +19,9 @@ namespace Glory::Editor
         m_Camera = EditorApplication::GetInstance()->GetEngine()->GetCameraManager().GetNewOrUnusedCamera();
 		m_Camera.SetPriority(-69420);
 		m_Camera.SetClearColor(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+		m_Camera.SetOutput(false, 0, 0);
+		m_Camera.SetBaseResolution(m_Width, m_Height);
+		m_Camera.SetResolutionScale(1.0f, 1.0f);
     }
 
 	void SceneViewCamera::Cleanup()
@@ -124,7 +127,8 @@ namespace Glory::Editor
 		const bool diff = width != m_Width || height != m_Height;
 		m_Width = width;
 		m_Height = height;
-		m_Camera.SetResolution(m_Width, m_Height);
+		m_Camera.SetBaseResolution(m_Width, m_Height);
+		m_Camera.SetResolutionScale(1.0f, 1.0f);
 		return diff;
 	}
 
@@ -140,7 +144,7 @@ namespace Glory::Editor
 		m_Far = far;
 
 		m_IsOrthographic = false;
-		m_Camera.SetPerspectiveProjection(m_Width, m_Height, m_HalfFOV, m_Near, m_Far);
+		m_Camera.SetPerspectiveProjection(m_HalfFOV, m_Near, m_Far);
 	}
 	void SceneViewCamera::SetOrthographic(uint32_t width, uint32_t height, float near, float far)
 	{
@@ -153,14 +157,14 @@ namespace Glory::Editor
 		m_Far = far;
 
 		m_IsOrthographic = true;
-		m_Camera.SetOrthographicProjection(m_Width * m_OrthoZoom, m_Height * m_OrthoZoom, m_Near, m_Far);
+		m_Camera.SetOrthographicProjection(m_Near, m_Far);
 	}
 
 	void SceneViewCamera::UpdateCamera()
 	{
 		if (m_IsOrthographic)
-			m_Camera.SetOrthographicProjection(m_Width * m_OrthoZoom, m_Height * m_OrthoZoom, m_Near, m_Far);
+			m_Camera.SetOrthographicProjection(m_Near, m_Far);
 		else
-			m_Camera.SetPerspectiveProjection(m_Width, m_Height, m_HalfFOV, m_Near, m_Far);
+			m_Camera.SetPerspectiveProjection(m_HalfFOV, m_Near, m_Far);
 	}
 }
