@@ -33,7 +33,6 @@ namespace Glory
 
 	struct SSAOConstants
 	{
-		glm::uvec4 TileSizes;
 		uint32_t CameraIndex;
 		int32_t KernelSize;
 		float SampleRadius;

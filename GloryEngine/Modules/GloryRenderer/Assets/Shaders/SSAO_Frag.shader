@@ -14,7 +14,6 @@ layout(push_constant) uniform RenderConstantsUBO
 layout(set = 0, std140, binding = 0) readonly uniform RenderConstantsUBO
 #endif
 {
-    uvec4 TileSizes;
 	uint CameraIndex;
     int KernelSize;
     float SampleRadius;
