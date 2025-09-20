@@ -64,6 +64,7 @@ namespace Glory
 		}
 
 		meshIter->second.m_Worlds.emplace_back(renderData.m_World);
+		meshIter->second.m_LayerMasks.emplace_back(renderData.m_LayerMask);
 		meshIter->second.m_ObjectIDs.emplace_back(renderData.m_SceneID, renderData.m_ObjectID);
 
 		uint32_t materialIndex = 0;
@@ -143,6 +144,7 @@ namespace Glory
 		}
 
 		meshIter->second.m_Worlds.emplace_back(renderData.m_World);
+		meshIter->second.m_LayerMasks.emplace_back(renderData.m_LayerMask);
 		meshIter->second.m_ObjectIDs.emplace_back(renderData.m_SceneID, renderData.m_ObjectID);
 
 		uint32_t materialIndex = 0;
@@ -185,6 +187,7 @@ namespace Glory
 		}
 
 		meshIter->second.m_Worlds.emplace_back(renderData.m_World);
+		meshIter->second.m_LayerMasks.emplace_back(renderData.m_LayerMask);
 		meshIter->second.m_ObjectIDs.emplace_back(renderData.m_SceneID, renderData.m_ObjectID);
 
 		uint32_t materialIndex = 0;

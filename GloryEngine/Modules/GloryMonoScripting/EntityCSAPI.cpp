@@ -80,9 +80,11 @@ namespace Glory
 		pTypeView->Invoke(Utils::ECS::InvocationType::OnValidate, &registry, entity.GetEntityID(), pNewComponent);
 		pTypeView->Invoke(Utils::ECS::InvocationType::Start, &registry, entity.GetEntityID(), pNewComponent);
 		/* We can assume the component is active, but is the entity active? */
-		if (entity.IsActive())
+		if (entity.IsActive() && !pScene->IsStarting())
+		{
 			pTypeView->Invoke(Utils::ECS::InvocationType::OnEnable, &registry, entity.GetEntityID(), pNewComponent);
-
+			pTypeView->Invoke(Utils::ECS::InvocationType::OnEnableDraw, &registry, entity.GetEntityID(), pNewComponent);
+		}
 		return uuid;
 	}
 	
@@ -108,7 +110,10 @@ namespace Glory
 		/* If the scene is starting the enable callback will be called for us */
 		/* We can assume the component is active, but is the entity active? */
 		if (entity.IsActive() && !pScene->IsStarting())
+		{
 			pTypeView->Invoke(Utils::ECS::InvocationType::OnEnable, &registry, entity.GetEntityID(), &comp);
+			pTypeView->Invoke(Utils::ECS::InvocationType::OnEnableDraw, &registry, entity.GetEntityID(), &comp);
+		}
 		return uuid;
 	}
 

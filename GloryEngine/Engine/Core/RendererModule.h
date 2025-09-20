@@ -87,6 +87,7 @@ namespace Glory
 
 		UUID m_Mesh;
 		std::vector<glm::mat4> m_Worlds;
+		std::vector<LayerMask> m_LayerMasks;
 		std::vector<std::pair<UUID, UUID>> m_ObjectIDs;
 		std::vector<uint32_t> m_MaterialIndices;
 	};

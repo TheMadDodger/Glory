@@ -662,6 +662,8 @@ namespace Glory
 
 		RenderConstants constants;
 		constants.m_CameraIndex = static_cast<uint32_t>(cameraIndex);
+		CameraRef camera = m_ActiveCameras[cameraIndex];
+		const LayerMask& cameraMask = camera.GetLayerMask();
 		if (!usePushConstants) pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(RenderConstants));
 
 		size_t batchIndex = 0;
@@ -696,6 +698,9 @@ namespace Glory
 				{
 					const uint32_t currentObject = objectIndex;
 					++objectIndex;
+
+					if (cameraMask != 0 && meshBatch.m_LayerMasks[i] != 0 &&
+						(cameraMask & meshBatch.m_LayerMasks[i]) == 0) continue;
 
 					const UUID materialID = pipelineRenderData.m_UniqueMaterials[meshBatch.m_MaterialIndices[i]];
 					MaterialData* pMaterialData = materialManager.GetMaterial(materialID);
