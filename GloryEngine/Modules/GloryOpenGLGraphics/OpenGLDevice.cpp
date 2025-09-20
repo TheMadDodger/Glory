@@ -407,7 +407,7 @@ namespace Glory
 		if (hasStencil)
 			glClearStencil(glRenderPass->m_StencilClear);
 
-		GLbitfield clearFlags;
+		GLbitfield clearFlags = 0;
 		if (hasColor)
 			clearFlags |= GL_COLOR_BUFFER_BIT;
 		if (hasDepth)
@@ -433,6 +433,7 @@ namespace Glory
 
 		glUseProgram(glPipeline->m_GLProgramID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+		glPipeline->m_TextureCounter = 0;
 	}
 
 	void OpenGLDevice::End(CommandBufferHandle)
@@ -499,16 +500,17 @@ namespace Glory
 
 				GLuint texLocation = glGetUniformLocation(glPipeline->m_GLProgramID, glSetLayout->m_SamplerNames[i].c_str());
 				OpenGLGraphicsModule::LogGLError(glGetError());
-				glUniform1i(texLocation, i);
+				glUniform1i(texLocation, glPipeline->m_TextureCounter);
 				OpenGLGraphicsModule::LogGLError(glGetError());
 
-				glActiveTexture(GL_TEXTURE0 + i);
+				glActiveTexture(GL_TEXTURE0 + glPipeline->m_TextureCounter);
 				OpenGLGraphicsModule::LogGLError(glGetError());
 				glBindTexture(GL_TEXTURE_2D, glTexture ? glTexture->m_GLTextureID : 0);
 				OpenGLGraphicsModule::LogGLError(glGetError());
 
 				glActiveTexture(GL_TEXTURE0);
 				OpenGLGraphicsModule::LogGLError(glGetError());
+				++glPipeline->m_TextureCounter;
 			}
 		}
 	}
@@ -1124,6 +1126,7 @@ namespace Glory
 		PipelineHandle handle;
 		GL_Pipeline& pipeline = m_Pipelines.Emplace(handle, GL_Pipeline());
 		pipeline.m_RenderPass = renderPass;
+		pipeline.m_TextureCounter = 0;
 
 		int success;
 		char infoLog[512];

@@ -547,7 +547,7 @@ namespace Glory
 			if (!m_SSAOConstantsBuffer)
 				pDevice->PushConstants(m_CommandBuffer, m_SSAOPipeline, 0, sizeof(SSAOConstants), &constants, STF_Fragment);
 			else
-				pDevice->AssignBuffer(m_ClusterConstantsBuffer, &constants, sizeof(SSAOConstants));
+				pDevice->AssignBuffer(m_SSAOConstantsBuffer, &constants, sizeof(SSAOConstants));
 			pDevice->DrawQuad(m_CommandBuffer);
 			pDevice->EndPipeline(m_CommandBuffer);
 			pDevice->EndRenderPass(m_CommandBuffer);
