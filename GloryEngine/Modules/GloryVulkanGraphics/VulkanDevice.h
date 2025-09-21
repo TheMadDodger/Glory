@@ -160,6 +160,9 @@ namespace Glory
         virtual void SetViewport(CommandBufferHandle commandBuffer, float x, float y, float width, float height, float minDepth=0.0f, float maxDepth=1.0f) override;
         virtual void SetScissor(CommandBufferHandle commandBuffer, int x, int y, uint32_t width, uint32_t height) override;
 
+        virtual void PipelineBarrier(CommandBufferHandle commandBuffer, std::vector<BufferHandle> buffers,
+            std::vector<TextureHandle> textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage) override;
+
     private: /* Resource management */
         virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;
 

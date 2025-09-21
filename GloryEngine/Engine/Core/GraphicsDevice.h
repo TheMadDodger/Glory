@@ -348,6 +348,17 @@ namespace Glory
 		 */
 		void DrawQuad(CommandBufferHandle commandBuffer);
 
+		/**
+		 * @brief Push a pipeline barrier onto a command buffer
+		 * @param commandBuffer The handle to the command buffer
+		 * @param buffers Buffers for buffer memory barriers
+		 * @param textures Textures for image memory barriers
+		 * @param srcStage Source stage
+		 * @param dstStage Destination stage
+		 */
+		virtual void PipelineBarrier(CommandBufferHandle commandBuffer, std::vector<BufferHandle> buffers,
+			std::vector<TextureHandle> textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage) = 0;
+
 	public: /* Resource caching */
 		/**
 		 * @brief Acquire a cached pipeline or create a new one

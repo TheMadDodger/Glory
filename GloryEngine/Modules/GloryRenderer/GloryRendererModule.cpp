@@ -1077,6 +1077,9 @@ namespace Glory
 		CameraRef camera = m_ActiveCameras[cameraIndex];
 		const DescriptorSetHandle& clusterSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("ClusterSet"));
 		const DescriptorSetHandle& lightSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("LightSet"));
+		const BufferHandle& lightIndexSSBO = reinterpret_cast<BufferHandle&>(camera.GetUserHandle("LightIndexSSBO"));
+		const BufferHandle& lightGridSSBO = reinterpret_cast<BufferHandle&>(camera.GetUserHandle("LightGridSSBO"));
+		const BufferHandle& lightDistancesSSBO = reinterpret_cast<BufferHandle&>(camera.GetUserHandle("LightDistancesSSBO"));
 
 		const glm::uvec2 resolution = camera.GetResolution();
 		const glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
@@ -1092,21 +1095,18 @@ namespace Glory
 		constants.Scale = (float)gridSize.z/std::log2f(zFar/zNear);
 		constants.Bias = -((float)gridSize.z*std::log2f(zNear)/std::log2f(zFar/zNear));
 
-		CommandBufferHandle commandBuffer = pDevice->Begin();
-		pDevice->BeginPipeline(commandBuffer, m_ClusterCullLightPipeline);
-		pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));
-		pDevice->SetScissor(commandBuffer, 0, 0, resolution.x, resolution.y);
-		pDevice->BindDescriptorSets(commandBuffer, m_ClusterCullLightPipeline, { m_GlobalClusterSet, clusterSet, m_GlobalLightSet, lightSet });
+		pDevice->BeginPipeline(m_CommandBuffer, m_ClusterCullLightPipeline);
+		pDevice->SetViewport(m_CommandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));
+		pDevice->SetScissor(m_CommandBuffer, 0, 0, resolution.x, resolution.y);
+		pDevice->BindDescriptorSets(m_CommandBuffer, m_ClusterCullLightPipeline, { m_GlobalClusterSet, clusterSet, m_GlobalLightSet, lightSet });
 		if (!m_ClusterConstantsBuffer)
-			pDevice->PushConstants(commandBuffer, m_ClusterCullLightPipeline, 0, sizeof(ClusterConstants), &constants, STF_Compute);
+			pDevice->PushConstants(m_CommandBuffer, m_ClusterCullLightPipeline, 0, sizeof(ClusterConstants), &constants, STF_Compute);
 		else
 			pDevice->AssignBuffer(m_ClusterConstantsBuffer, &constants, sizeof(ClusterConstants));
-		pDevice->Dispatch(commandBuffer, 1, 1, 6);
-		pDevice->EndPipeline(commandBuffer);
-		pDevice->End(commandBuffer);
-		pDevice->Commit(commandBuffer);
-		pDevice->Wait(commandBuffer);
-		pDevice->Release(commandBuffer);
+		pDevice->Dispatch(m_CommandBuffer, 1, 1, 6);
+		pDevice->EndPipeline(m_CommandBuffer);
+		pDevice->PipelineBarrier(m_CommandBuffer, { lightIndexSSBO, lightGridSSBO, lightDistancesSSBO }, {},
+			PipelineStageFlagBits::PST_ComputeShader, PipelineStageFlagBits::PST_FragmentShader);
 	}
 
 	void GloryRendererModule::DynamicObjectsPass(uint32_t cameraIndex)

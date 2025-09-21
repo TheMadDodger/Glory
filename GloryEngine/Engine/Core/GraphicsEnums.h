@@ -513,6 +513,28 @@ namespace Glory
         ShaderTypeFlag::STF_Compute,
     };
 
+    enum PipelineStageFlagBits
+    {
+        PST_None = 0,
+        PST_TopOfPipe = 1 << 0,
+        PST_DrawIndirect = 1 << 1,
+        PST_VertexInput = 1 << 2,
+        PST_VertexShader = 1 << 3,
+        PST_TessellationControlShader = 1 << 4,
+        PST_TessellationEvaluationShader = 1 << 5,
+        PST_GeometryShader = 1 << 6,
+        PST_FragmentShader = 1 << 7,
+        PST_EarlyFragmentTests = 1 << 8,
+        PST_LateFragmentTests = 1 << 9,
+        PST_ColorAttachmentOutput = 1 << 10,
+        PST_ComputeShader = 1 << 11,
+        PST_Transfer = 1 << 12,
+        PST_BottomOfPipe = 1 << 13,
+        PST_Host = 1 << 14,
+        PST_AllGraphics = 1 << 15,
+        PST_AllCommands = 1 << 16,
+    };
+
     static_assert(ShaderTypeToFlagCount == (size_t)ShaderType::ST_Count);
 
     enum class BufferBindingTarget

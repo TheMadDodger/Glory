@@ -521,7 +521,7 @@ namespace Glory
 		vk::SubmitInfo submitInfo = vk::SubmitInfo()
 			.setWaitSemaphoreCount(0)
 			.setPWaitSemaphores(nullptr)
-			.setPWaitDstStageMask(waitStages)
+			.setPWaitDstStageMask(nullptr)
 			.setCommandBufferCount(1)
 			.setPCommandBuffers(&vkCommandBuffer)
 			.setSignalSemaphoreCount(0)
@@ -604,6 +604,52 @@ namespace Glory
 			.setOffset({ x,y })
 			.setExtent({ width, height });
 		vkCommandBuffer.setScissor(0, 1, &scissor);
+	}
+
+	void VulkanDevice::PipelineBarrier(CommandBufferHandle commandBuffer, std::vector<BufferHandle> buffers,
+		std::vector<TextureHandle> textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage)
+	{
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
+		if (iter == m_CommandBuffers.end() || fenceIter == m_CommandBufferFences.end())
+		{
+			Debug().LogError("VulkanDevice::SetViewport: Invalid command buffer handle.");
+			return;
+		}
+
+		std::vector<vk::BufferMemoryBarrier> bufferBarriers(buffers.size());
+		std::vector<vk::ImageMemoryBarrier> imageBarriers(textures.size());
+		for (size_t i = 0; i < buffers.size(); ++i)
+		{
+			VK_Buffer* vkBuffer = m_Buffers.Find(buffers[i]);
+			bufferBarriers[i] = vk::BufferMemoryBarrier();
+			bufferBarriers[i].buffer = vkBuffer->m_VKBuffer;
+			bufferBarriers[i].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			bufferBarriers[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			bufferBarriers[i].offset = 0;
+			bufferBarriers[i].size = vkBuffer->m_Size;
+			//bufferBarriers[i].srcAccessMask
+			//bufferBarriers[i].dstAccessMask
+		}
+
+		for (size_t i = 0; i < textures.size(); ++i)
+		{
+			VK_Texture* vkTexture = m_Textures.Find(textures[i]);
+			imageBarriers[i] = vk::ImageMemoryBarrier();
+			imageBarriers[i].image = vkTexture->m_VKImage;
+			imageBarriers[i].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			imageBarriers[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			imageBarriers[i].oldLayout = vk::ImageLayout::eUndefined;
+			imageBarriers[i].newLayout = vk::ImageLayout::eUndefined;
+			//imageBarriers[i].srcAccessMask
+			//imageBarriers[i].dstAccessMask
+		}
+
+		const vk::CommandBuffer vkCommandBuffer = iter->second;
+		vkCommandBuffer.pipelineBarrier(vk::PipelineStageFlagBits(srcStage), vk::PipelineStageFlagBits(dstStage),
+			(vk::DependencyFlags)0, 0, nullptr, static_cast<uint32_t>(bufferBarriers.size()), bufferBarriers.data(),
+			static_cast<uint32_t>(imageBarriers.size()), imageBarriers.data()
+		);
 	}
 
 	vk::BufferUsageFlags GetBufferUsageFlags(BufferType bufferType)

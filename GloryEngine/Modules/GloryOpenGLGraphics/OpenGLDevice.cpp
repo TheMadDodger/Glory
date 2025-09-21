@@ -543,8 +543,6 @@ namespace Glory
 	{
 		glDispatchCompute((GLuint)x, (GLuint)y, (GLuint)z);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
 	void OpenGLDevice::Commit(CommandBufferHandle)
@@ -568,6 +566,13 @@ namespace Glory
 	void OpenGLDevice::SetScissor(CommandBufferHandle, int x, int y, uint32_t width, uint32_t height)
 	{
 		glScissor(x, y, width, height);
+	}
+
+	void OpenGLDevice::PipelineBarrier(CommandBufferHandle commandBuffer, std::vector<BufferHandle>,
+		std::vector<TextureHandle>, PipelineStageFlagBits, PipelineStageFlagBits)
+	{
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
 #pragma endregion
