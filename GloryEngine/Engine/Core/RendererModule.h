@@ -181,6 +181,10 @@ namespace Glory
 		bool ResolutionChanged() const;
 		const glm::uvec2& Resolution() const;
 
+		virtual void PresentFrame() = 0;
+
+		void SetSwapchain(SwapChainHandle swapchain);
+
 	protected:
 		virtual void OnSubmitDynamic(const RenderData& renderData) {}
 		virtual void OnSubmitCamera(CameraRef camera) {}
@@ -232,5 +236,7 @@ namespace Glory
 
 		glm::uvec2 m_Resolution{ 1920, 1080 };
 		glm::uvec2 m_LastResolution{ 1920, 1080 };
+
+		SwapChainHandle m_Swapchain = 0;
 	};
 }

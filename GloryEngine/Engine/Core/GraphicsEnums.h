@@ -1,4 +1,6 @@
 #pragma once
+#include "GraphicsHandles.h"
+
 #include <Reflection.h>
 #include <glm/ext/vector_uint2.hpp>
 
@@ -987,6 +989,7 @@ namespace Glory
         DataType m_Type;
         bool m_AutoBind;
         bool m_SamplingEnabled = true;
+        TextureHandle Texture = 0;
     };
 
     struct RenderTextureCreateInfo

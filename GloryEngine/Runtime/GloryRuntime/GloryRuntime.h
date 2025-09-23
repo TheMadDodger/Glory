@@ -1,6 +1,8 @@
 #pragma once
 #include "Visibility.h"
 
+#include <GraphicsHandles.h>
+
 #include <UUID.h>
 #include <memory>
 #include <vector>
@@ -61,7 +63,6 @@ namespace Glory
 	private:
 		Engine* m_pEngine;
 		RendererModule* m_pRenderer;
-		GraphicsModule* m_pGraphics;
 		WindowModule* m_pWindows;
 		std::unique_ptr<RuntimeAssetManager> m_AssetManager;
 		std::unique_ptr<RuntimeSceneManager> m_SceneManager;
@@ -69,6 +70,8 @@ namespace Glory
 		std::unique_ptr<RuntimeMaterialManager> m_MaterialManager;
 		std::vector<std::filesystem::path> m_AppendedAssetDatabases;
 		std::string m_DataPath;
+
+		SwapChainHandle m_SwapChain = 0;
 
 		std::chrono::time_point<std::chrono::system_clock> m_LastRenderedFrame;
 		float m_MaxFramerate = 300.0f;

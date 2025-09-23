@@ -568,4 +568,9 @@ namespace Glory
 	{
 		return m_Resolution;
 	}
+
+	void RendererModule::SetSwapchain(SwapChainHandle swapchain)
+	{
+		m_Swapchain = swapchain;
+	}
 }

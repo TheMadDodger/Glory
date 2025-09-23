@@ -36,11 +36,13 @@ namespace Glory
     {
         static constexpr GraphicsHandleType HandleType = H_Texture;
 
+        vk::ImageLayout m_VKInitialLayout = vk::ImageLayout::eUndefined;
         vk::ImageLayout m_VKFinalLayout;
         vk::Image m_VKImage;
         vk::ImageView m_VKImageView;
         vk::DeviceMemory m_VKMemory;
         vk::Sampler m_VKSampler;
+        vk::Format m_VKFormat = vk::Format::eUndefined;
     };
 
     struct VK_RenderTexture
@@ -107,6 +109,25 @@ namespace Glory
         vk::DescriptorPool m_VKDescriptorPool;
     };
 
+    struct VK_Swapchain
+    {
+        static constexpr GraphicsHandleType HandleType = H_SwapChain;
+
+        vk::SwapchainKHR m_VKSwapchain;
+        std::vector<TextureHandle> m_Textures;
+
+        vk::SurfaceFormatKHR m_Format;
+        vk::PresentModeKHR m_PresentMode;
+        vk::Extent2D m_Extent;
+    };
+
+    struct VK_Semaphore
+    {
+        static constexpr GraphicsHandleType HandleType = H_Semaphore;
+
+        vk::Semaphore m_VKSemaphore;
+    };
+
     class VulkanGraphicsModule;
 
     class VulkanDevice : public GraphicsDevice
@@ -142,26 +163,33 @@ namespace Glory
         GLORY_API vk::Sampler GetVKSampler(TextureHandle texture);
 
     private: /* Render commands */
-        virtual CommandBufferHandle Begin() override;
+        virtual CommandBufferHandle CreateCommandBuffer() override;
+        virtual void Begin(CommandBufferHandle commandBuffer) override;
         virtual void BeginRenderPass(CommandBufferHandle commandBuffer, RenderPassHandle renderPass) override;
         virtual void BeginPipeline(CommandBufferHandle commandBuffer, PipelineHandle pipeline) override;
         virtual void End(CommandBufferHandle commandBufferHandle) override;
         virtual void EndRenderPass(CommandBufferHandle commandBuffer) override;
         virtual void EndPipeline(CommandBufferHandle) override;
-        virtual void BindDescriptorSets(CommandBufferHandle commandBuffer, PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t firstSet=0) override;
+        virtual void BindDescriptorSets(CommandBufferHandle commandBuffer, PipelineHandle pipeline, const std::vector<DescriptorSetHandle>& sets, uint32_t firstSet=0) override;
         virtual void PushConstants(CommandBufferHandle commandBuffer, PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data, ShaderTypeFlag shaderStages) override;
 
         virtual void DrawMesh(CommandBufferHandle commandBuffer, MeshHandle handle) override;
         virtual void Dispatch(CommandBufferHandle commandBuffer, uint32_t x, uint32_t y, uint32_t z) override;
-        virtual void Commit(CommandBufferHandle commandBuffer) override;
+        virtual void Commit(CommandBufferHandle commandBuffer, const std::vector<SemaphoreHandle>& signalSemaphore={},
+			const std::vector<SemaphoreHandle>& waitSemaphores={}) override;
         virtual void Wait(CommandBufferHandle commandBuffer) override;
         virtual void Release(CommandBufferHandle commandBuffer) override;
+        virtual void Reset(CommandBufferHandle commandBuffer) override;
 
         virtual void SetViewport(CommandBufferHandle commandBuffer, float x, float y, float width, float height, float minDepth=0.0f, float maxDepth=1.0f) override;
         virtual void SetScissor(CommandBufferHandle commandBuffer, int x, int y, uint32_t width, uint32_t height) override;
 
-        virtual void PipelineBarrier(CommandBufferHandle commandBuffer, std::vector<BufferHandle> buffers,
-            std::vector<TextureHandle> textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage) override;
+        virtual void PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>& buffers,
+            const std::vector<TextureHandle>& textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage) override;
+
+        virtual void AqcuireNextSwapchainImage(SwapChainHandle swapchain, uint32_t* imageIndex,
+            SemaphoreHandle signalSemaphore=NULL) override;
+        virtual void Present(SwapChainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>& waitSemaphores={}) override;
 
     private: /* Resource management */
         virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;
@@ -189,6 +217,10 @@ namespace Glory
         virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo) override;
         virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) override;
         virtual void UpdateDescriptorSet(DescriptorSetHandle descriptorSet, const DescriptorSetUpdateInfo& setWriteInfo) override;
+        virtual SwapChainHandle CreateSwapChain(Window* pWindow, bool vsync=false, uint32_t minImageCount=0) override;
+        virtual uint32_t GetSwapchainImageCount(SwapChainHandle swapChain) override;
+        virtual TextureHandle GetSwapchainImage(SwapChainHandle swapChain, uint32_t imageIndex) override;
+        virtual SemaphoreHandle CreateSemaphore() override;
 
         virtual void FreeBuffer(BufferHandle& handle) override;
         virtual void FreeMesh(MeshHandle& handle) override;
@@ -199,6 +231,8 @@ namespace Glory
         virtual void FreePipeline(PipelineHandle& handle) override;
         virtual void FreeDescriptorSetLayout(DescriptorSetLayoutHandle& handle) override;
         virtual void FreeDescriptorSet(DescriptorSetHandle& handle) override;
+        virtual void FreeSwapChain(SwapChainHandle& handle) override;
+        virtual void FreeSemaphore(SemaphoreHandle& handle) override;
 
     private:/* Internal */
         vk::CommandBuffer BeginSingleTimeCommands();
@@ -212,6 +246,9 @@ namespace Glory
 
         vk::CommandBuffer GetNewCommandBuffer(CommandBufferHandle commandBufferHandle);
 
+        vk::PresentModeKHR SelectPresentMode(const std::vector<vk::PresentModeKHR>& presentModes, vk::SurfaceKHR surface);
+        vk::SurfaceFormatKHR SelectSurfaceFormat(vk::SurfaceKHR surface, const std::vector<vk::Format> requestFormats, vk::ColorSpaceKHR requestColorSpace);
+
     private:
         void CreateRenderTexture(vk::RenderPass vkRenderPass, VK_RenderTexture& renderTexture);
 
@@ -224,10 +261,6 @@ namespace Glory
 
         std::optional<uint32_t> m_GraphicsAndComputeFamily;
         std::optional<uint32_t> m_PresentFamily;
-
-        vk::SurfaceCapabilitiesKHR m_SwapChainCapabilities;
-        std::vector<vk::SurfaceFormatKHR> m_SwapChainFormats;
-        std::vector<vk::PresentModeKHR> m_SwapChainPresentModes;
 
         vk::Device m_LogicalDevice;
         vk::Queue m_GraphicsAndComputeQueue;
@@ -249,6 +282,8 @@ namespace Glory
         GraphicsResources<VK_Pipeline> m_Pipelines;
         GraphicsResources<VK_DescriptorSetLayout> m_DescriptorSetLayouts;
         GraphicsResources<VK_DescriptorSet> m_DescriptorSets;
+        GraphicsResources<VK_Swapchain> m_Swapchains;
+        GraphicsResources<VK_Semaphore> m_Semaphores;
 
         std::unordered_map<UUID, vk::CommandBuffer> m_CommandBuffers;
         std::unordered_map<UUID, vk::Fence> m_CommandBufferFences;

@@ -28,6 +28,12 @@ namespace Glory
 		H_DescriptorSet,
 		/** @brief CommandBuffer */
 		H_CommandBuffer,
+		/** @brief SwapChain */
+		H_SwapChain,
+		/** @brief Semaphore */
+		H_Semaphore,
+		/** @brief Fence */
+		H_Fence,
 	};
 
 	/** @brief Base struct for graphics resource handles */
@@ -88,6 +94,12 @@ namespace Glory
 	typedef GraphicsHandle<H_DescriptorSet> DescriptorSetHandle;
 	/** @brief CommandBuffer handle */
 	typedef GraphicsHandle<H_CommandBuffer> CommandBufferHandle;
+	/** @brief SwapChain handle */
+	typedef GraphicsHandle<H_SwapChain> SwapChainHandle;
+	/** @brief Semaphore handle */
+	typedef GraphicsHandle<H_Semaphore> SemaphoreHandle;
+	/** @brief Fence handle */
+	typedef GraphicsHandle<H_Fence> FenceHandle;
 }
 
 namespace std

@@ -71,6 +71,7 @@ namespace Glory
 		virtual void CollectReferences(std::vector<UUID>& references) override;
 
 		virtual UUID TextPipelineID() const override;
+		virtual void PresentFrame() override;
 
 		GLORY_MODULE_VERSION_H(0, 1, 0);
 
@@ -172,5 +173,14 @@ namespace Glory
 		GPUTextureAtlas* m_pShadowAtlas = nullptr;
 
 		std::vector<CameraRef> m_DirtyCameraPerspectives;
+
+		std::vector<RenderPassHandle> m_SwapchainPasses;
+		std::vector<CommandBufferHandle> m_SwapchainCommands;
+		std::vector<bool> m_CommandsNew;
+		std::vector<SemaphoreHandle> m_ImageAvailableSemaphores;
+		std::vector<SemaphoreHandle> m_RenderingFinishedSemaphores;
+		uint32_t m_CurrentImageIndex = 0;
+		uint32_t m_CurrentFrameIndex = 0;
+		uint32_t m_MaxFramesInFlight = 4;
 	};
 }

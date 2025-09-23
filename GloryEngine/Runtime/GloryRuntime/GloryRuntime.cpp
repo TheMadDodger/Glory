@@ -6,9 +6,8 @@
 
 #include <Engine.h>
 #include <Window.h>
-#include <DisplayManager.h>
 #include <RendererModule.h>
-#include <GraphicsModule.h>
+#include <GraphicsDevice.h>
 #include <WindowModule.h>
 
 #include <Debug.h>
@@ -29,7 +28,7 @@ namespace Glory
 		m_SceneManager(new RuntimeSceneManager(this)),
 		m_PipelineManager(new RuntimePipelineManager(pEngine)),
 		m_MaterialManager(new RuntimeMaterialManager(pEngine)),
-		m_pRenderer(nullptr), m_pGraphics(nullptr), m_pWindows(nullptr),
+		m_pRenderer(nullptr), m_pWindows(nullptr),
 		m_LastRenderedFrame(std::chrono::system_clock::now())
 	{
 	}
@@ -84,8 +83,14 @@ namespace Glory
 		m_pEngine->Initialize();
 
 		m_pRenderer = m_pEngine->GetMainModule<RendererModule>();
-		m_pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		m_pWindows = m_pEngine->GetMainModule<WindowModule>();
+
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+		if (pDevice)
+		{
+			m_SwapChain = pDevice->CreateSwapChain(m_pWindows->GetMainWindow());
+			m_pRenderer->SetSwapchain(m_SwapChain);
+		}
 
 		/* Load splash screen */
 		std::filesystem::path splashPath = m_DataPath;
@@ -149,6 +154,9 @@ namespace Glory
 			m_pEngine->Update();
 			EndFrame();
 		}
+
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+		if (m_SwapChain) pDevice->FreeSwapChain(m_SwapChain);
 
 		m_IsRunning = false;
 		m_pEngine->GetSceneManager()->Stop();
@@ -252,9 +260,11 @@ namespace Glory
 
 	void GloryRuntime::EndFrame()
 	{
-		RenderTexture* pTexture = m_pEngine->GetDisplayManager().GetDisplayRenderTexture(0);
-		m_pRenderer->RenderOnBackBuffer(pTexture);
-		m_pGraphics->Swap();
+		//RenderTexture* pTexture = m_pEngine->GetDisplayManager().GetDisplayRenderTexture(0);
+		//m_pRenderer->RenderOnBackBuffer(pTexture);
+		//m_pGraphics->Swap();
+
+		m_pRenderer->PresentFrame();
 
 		if (m_MaxFramerate == 0.0f)
 		{

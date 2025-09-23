@@ -153,6 +153,14 @@ namespace Glory
 		return settings.Value<uint64_t>("Text Pipeline");
 	}
 
+	void GloryRendererModule::PresentFrame()
+	{
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+		if (!pDevice || !m_Swapchain) return;
+		pDevice->Present(m_Swapchain, m_CurrentImageIndex, { m_RenderingFinishedSemaphores[m_CurrentFrameIndex] });
+		m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % m_MaxFramesInFlight;
+	}
+
 	void GloryRendererModule::Initialize()
 	{
 		RendererModule::Initialize();
@@ -452,120 +460,168 @@ namespace Glory
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice) return;
 
+		if (m_Swapchain && m_SwapchainPasses.empty() || m_Swapchain && m_SwapchainPasses.size() < pDevice->GetSwapchainImageCount(m_Swapchain))
+		{
+			const uint32_t imageCount = pDevice->GetSwapchainImageCount(m_Swapchain);
+			m_SwapchainPasses.resize(imageCount);
+			for (size_t i = 0; i < imageCount; ++i)
+			{
+				TextureHandle image = pDevice->GetSwapchainImage(m_Swapchain, i);
+
+				RenderPassInfo renderPassInfo;
+				renderPassInfo.RenderTextureInfo.HasDepth = false;
+				renderPassInfo.RenderTextureInfo.HasStencil = false;
+				renderPassInfo.RenderTextureInfo.EnableDepthStencilSampling = false;
+				renderPassInfo.RenderTextureInfo.Width = m_Resolution.x;
+				renderPassInfo.RenderTextureInfo.Height = m_Resolution.y;
+				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("color", PixelFormat::PF_BGRA, PixelFormat::PF_B8G8R8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float, false));
+				renderPassInfo.RenderTextureInfo.Attachments[0].Texture = image;
+				m_SwapchainPasses[i] = pDevice->CreateRenderPass(std::move(renderPassInfo));
+			}
+		}
+
+		if (m_SwapchainCommands.size() < m_MaxFramesInFlight)
+		{
+			m_SwapchainCommands.resize(m_MaxFramesInFlight);
+			m_CommandsNew.resize(m_MaxFramesInFlight, true);
+			m_RenderingFinishedSemaphores.resize(m_MaxFramesInFlight);
+			m_ImageAvailableSemaphores.resize(m_MaxFramesInFlight);
+
+			for (size_t i = 0; i < m_MaxFramesInFlight; ++i)
+			{
+				m_SwapchainCommands[i] = pDevice->CreateCommandBuffer();
+				m_RenderingFinishedSemaphores[i] = pDevice->CreateSemaphore();
+				m_ImageAvailableSemaphores[i] = pDevice->CreateSemaphore();
+			}
+		}
+
 		/* Make sure every camera has a render pass */
-		for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
-		{
-			CameraRef camera = m_ActiveCameras[i];
+		//for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
+		//{
+		//	CameraRef camera = m_ActiveCameras[i];
 
-			RenderPassHandle& renderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("RenderPass"));
-			RenderPassHandle& ssaoRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("SSAORenderPass"));
-			//RenderPassHandle& deferredRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("DeferredRenderPass"));
-			const auto& resolution = camera.GetResolution();
-			if (!renderPass)
-			{
-				RenderPassInfo renderPassInfo;
-				renderPassInfo.RenderTextureInfo.Width = resolution.x;
-				renderPassInfo.RenderTextureInfo.Height = resolution.y;
-				renderPassInfo.RenderTextureInfo.HasDepth = true;
-				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("object", PixelFormat::PF_RGBAI, PixelFormat::PF_R32G32B32A32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UInt, false));
-				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Debug", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Normal", PixelFormat::PF_RGBA, PixelFormat::PF_R16G16B16A16Sfloat, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("AOBlurred", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Data", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-				renderPass = pDevice->CreateRenderPass(std::move(renderPassInfo));
-			}
-			if (!ssaoRenderPass)
-			{
-				RenderPassInfo renderPassInfo;
-				renderPassInfo.RenderTextureInfo.Width = resolution.x;
-				renderPassInfo.RenderTextureInfo.Height = resolution.y;
-				renderPassInfo.RenderTextureInfo.HasDepth = false;
-				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("AO", PixelFormat::PF_R, PixelFormat::PF_R32Sfloat, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-				ssaoRenderPass = pDevice->CreateRenderPass(std::move(renderPassInfo));
-			}
-			if (!m_SSAOPipeline)
-			{
-				const UUID ssaoPipeline = settings.Value<uint64_t>("SSAO Prepass Pipeline");
-				PipelineData* pPipeline = pipelines.GetPipelineData(ssaoPipeline);
-				m_SSAOPipeline = pDevice->CreatePipeline(ssaoRenderPass, pPipeline, { m_GlobalClusterSetLayout, m_GlobalSampleDomeSetLayout, m_SSAOSamplersSetLayout, m_NoiseSamplerSetLayout },
-					sizeof(glm::vec3), { AttributeType::Float3 });
-			}
+		//	RenderPassHandle& renderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("RenderPass"));
+		//	RenderPassHandle& ssaoRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("SSAORenderPass"));
+		//	//RenderPassHandle& deferredRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("DeferredRenderPass"));
+		//	const auto& resolution = camera.GetResolution();
+		//	if (!renderPass)
+		//	{
+		//		RenderPassInfo renderPassInfo;
+		//		renderPassInfo.RenderTextureInfo.Width = resolution.x;
+		//		renderPassInfo.RenderTextureInfo.Height = resolution.y;
+		//		renderPassInfo.RenderTextureInfo.HasDepth = true;
+		//		renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("object", PixelFormat::PF_RGBAI, PixelFormat::PF_R32G32B32A32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UInt, false));
+		//		renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Debug", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+		//		renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+		//		renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Normal", PixelFormat::PF_RGBA, PixelFormat::PF_R16G16B16A16Sfloat, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+		//		renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("AOBlurred", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+		//		renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Data", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+		//		renderPass = pDevice->CreateRenderPass(std::move(renderPassInfo));
+		//	}
+		//	if (!ssaoRenderPass)
+		//	{
+		//		RenderPassInfo renderPassInfo;
+		//		renderPassInfo.RenderTextureInfo.Width = resolution.x;
+		//		renderPassInfo.RenderTextureInfo.Height = resolution.y;
+		//		renderPassInfo.RenderTextureInfo.HasDepth = false;
+		//		renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("AO", PixelFormat::PF_R, PixelFormat::PF_R32Sfloat, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+		//		ssaoRenderPass = pDevice->CreateRenderPass(std::move(renderPassInfo));
+		//	}
+		//	if (!m_SSAOPipeline)
+		//	{
+		//		const UUID ssaoPipeline = settings.Value<uint64_t>("SSAO Prepass Pipeline");
+		//		PipelineData* pPipeline = pipelines.GetPipelineData(ssaoPipeline);
+		//		m_SSAOPipeline = pDevice->CreatePipeline(ssaoRenderPass, pPipeline, { m_GlobalClusterSetLayout, m_GlobalSampleDomeSetLayout, m_SSAOSamplersSetLayout, m_NoiseSamplerSetLayout },
+		//			sizeof(glm::vec3), { AttributeType::Float3 });
+		//	}
 
-			/*if (!deferredRenderPass)
-			{
-				RenderPassInfo renderPassInfo;
-				renderPassInfo.RenderTextureInfo.Width = resolution.x;
-				renderPassInfo.RenderTextureInfo.Height = resolution.y;
-				renderPassInfo.RenderTextureInfo.HasDepth = false;
-				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-				deferredRenderPass = pDevice->CreateRenderPass(renderPassInfo);
-			}*/
-		}
+		//	/*if (!deferredRenderPass)
+		//	{
+		//		RenderPassInfo renderPassInfo;
+		//		renderPassInfo.RenderTextureInfo.Width = resolution.x;
+		//		renderPassInfo.RenderTextureInfo.Height = resolution.y;
+		//		renderPassInfo.RenderTextureInfo.HasDepth = false;
+		//		renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+		//		deferredRenderPass = pDevice->CreateRenderPass(renderPassInfo);
+		//	}*/
+		//}
 
-		m_PickResults.clear();
+		//m_PickResults.clear();
 
-		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Render" };
+		//ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Render" };
 
-		PrepareDataPass();
+		//PrepareDataPass();
 
-		m_CommandBuffer = pDevice->Begin();
+		//m_CommandBuffer = pDevice->Begin();
 
-		/* Shadows */
-		ShadowMapsPass();
+		///* Shadows */
+		//ShadowMapsPass();
 
-		for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
-		{
-			CameraRef camera = m_ActiveCameras[i];
+		//for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
+		//{
+		//	CameraRef camera = m_ActiveCameras[i];
 
-			RenderPassHandle& renderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("RenderPass"));
-			RenderPassHandle& ssaoRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("SSAORenderPass"));
-			DescriptorSetHandle& ssaoSamplersSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("SSAOSamplersSet"));
-			//RenderPassHandle& deferredRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("DeferredRenderPass"));
-			/* Light cluster culling */
-			ClusterPass(static_cast<uint32_t>(i));
-			
-			/* Draw objects */
-			pDevice->SetRenderPassClear(renderPass, camera.GetClearColor());
-			pDevice->BeginRenderPass(m_CommandBuffer, renderPass);
-			DynamicObjectsPass(static_cast<uint32_t>(i));
-			pDevice->EndRenderPass(m_CommandBuffer);
+		//	RenderPassHandle& renderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("RenderPass"));
+		//	RenderPassHandle& ssaoRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("SSAORenderPass"));
+		//	DescriptorSetHandle& ssaoSamplersSet = reinterpret_cast<DescriptorSetHandle&>(camera.GetUserHandle("SSAOSamplersSet"));
+		//	//RenderPassHandle& deferredRenderPass = reinterpret_cast<RenderPassHandle&>(camera.GetUserHandle("DeferredRenderPass"));
+		//	/* Light cluster culling */
+		//	ClusterPass(static_cast<uint32_t>(i));
+		//	
+		//	/* Draw objects */
+		//	pDevice->SetRenderPassClear(renderPass, camera.GetClearColor());
+		//	pDevice->BeginRenderPass(m_CommandBuffer, renderPass);
+		//	DynamicObjectsPass(static_cast<uint32_t>(i));
+		//	pDevice->EndRenderPass(m_CommandBuffer);
 
-			SSAOConstants constants;
-			constants.CameraIndex = i;
-			constants.KernelSize = m_GlobalSSAOSetting.m_KernelSize;
-			constants.SampleRadius = m_GlobalSSAOSetting.m_SampleRadius;
-			constants.SampleBias = m_GlobalSSAOSetting.m_SampleBias;
+		//	SSAOConstants constants;
+		//	constants.CameraIndex = i;
+		//	constants.KernelSize = m_GlobalSSAOSetting.m_KernelSize;
+		//	constants.SampleRadius = m_GlobalSSAOSetting.m_SampleRadius;
+		//	constants.SampleBias = m_GlobalSSAOSetting.m_SampleBias;
 
-			const glm::uvec2& resolution = camera.GetResolution();
+		//	const glm::uvec2& resolution = camera.GetResolution();
 
-			pDevice->BeginRenderPass(m_CommandBuffer, ssaoRenderPass);
-			pDevice->BeginPipeline(m_CommandBuffer, m_SSAOPipeline);
-			pDevice->SetViewport(m_CommandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));
-			pDevice->SetScissor(m_CommandBuffer, 0, 0, resolution.x, resolution.y);
-			pDevice->BindDescriptorSets(m_CommandBuffer, m_SSAOPipeline, { m_SSAOCameraSet, m_GlobalSampleDomeSet, ssaoSamplersSet, m_NoiseSamplerSet });
-			if (!m_SSAOConstantsBuffer)
-				pDevice->PushConstants(m_CommandBuffer, m_SSAOPipeline, 0, sizeof(SSAOConstants), &constants, STF_Fragment);
-			else
-				pDevice->AssignBuffer(m_SSAOConstantsBuffer, &constants, sizeof(SSAOConstants));
-			pDevice->DrawQuad(m_CommandBuffer);
-			pDevice->EndPipeline(m_CommandBuffer);
-			pDevice->EndRenderPass(m_CommandBuffer);
+		//	pDevice->BeginRenderPass(m_CommandBuffer, ssaoRenderPass);
+		//	pDevice->BeginPipeline(m_CommandBuffer, m_SSAOPipeline);
+		//	pDevice->SetViewport(m_CommandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));
+		//	pDevice->SetScissor(m_CommandBuffer, 0, 0, resolution.x, resolution.y);
+		//	pDevice->BindDescriptorSets(m_CommandBuffer, m_SSAOPipeline, { m_SSAOCameraSet, m_GlobalSampleDomeSet, ssaoSamplersSet, m_NoiseSamplerSet });
+		//	if (!m_SSAOConstantsBuffer)
+		//		pDevice->PushConstants(m_CommandBuffer, m_SSAOPipeline, 0, sizeof(SSAOConstants), &constants, STF_Fragment);
+		//	else
+		//		pDevice->AssignBuffer(m_SSAOConstantsBuffer, &constants, sizeof(SSAOConstants));
+		//	pDevice->DrawQuad(m_CommandBuffer);
+		//	pDevice->EndPipeline(m_CommandBuffer);
+		//	pDevice->EndRenderPass(m_CommandBuffer);
 
-			/* Deferred composite */
-			//pDevice->BeginRenderPass(m_CommandBuffer, deferredRenderPass);
+		//	/* Deferred composite */
+		//	//pDevice->BeginRenderPass(m_CommandBuffer, deferredRenderPass);
 
-			//pDevice->EndRenderPass(m_CommandBuffer);
-		}
+		//	//pDevice->EndRenderPass(m_CommandBuffer);
+		//}
 
-		pDevice->End(m_CommandBuffer);
-		pDevice->Commit(m_CommandBuffer);
-		pDevice->Wait(m_CommandBuffer);
-		pDevice->Release(m_CommandBuffer);
+		//pDevice->End(m_CommandBuffer);
+		//pDevice->Commit(m_CommandBuffer);
+		//pDevice->Wait(m_CommandBuffer);
+		//pDevice->Release(m_CommandBuffer);
 
 		//std::scoped_lock lock(m_PickLock);
 		//m_LastFramePickResults.resize(m_PickResults.size());
 		//std::memcpy(m_LastFramePickResults.data(), m_PickResults.data(), m_PickResults.size()*sizeof(PickResult));
+
+		if (!m_Swapchain) return;
+		CommandBufferHandle swapchainCommands = m_SwapchainCommands[m_CurrentFrameIndex];
+		if (!m_CommandsNew[m_CurrentFrameIndex])
+			pDevice->Wait(swapchainCommands);
+		pDevice->AqcuireNextSwapchainImage(m_Swapchain, &m_CurrentImageIndex, m_ImageAvailableSemaphores[m_CurrentFrameIndex]);
+		m_CommandsNew[m_CurrentFrameIndex] = false;
+		pDevice->Reset(swapchainCommands);
+		pDevice->Begin(swapchainCommands);
+		pDevice->BeginRenderPass(swapchainCommands, m_SwapchainPasses[m_CurrentImageIndex]);
+		pDevice->EndRenderPass(swapchainCommands);
+		pDevice->End(swapchainCommands);
+		pDevice->Commit(swapchainCommands, { m_ImageAvailableSemaphores[m_CurrentFrameIndex] }, { m_RenderingFinishedSemaphores[m_CurrentFrameIndex] });
 	}
 
 	void GloryRendererModule::Cleanup()

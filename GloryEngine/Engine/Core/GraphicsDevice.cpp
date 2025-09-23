@@ -123,4 +123,11 @@ namespace Glory
 		AssignBuffer(buffer, vertices, sizeof(vertices));
 		m_ScreenMesh = CreateMesh({ buffer }, 6, 0, sizeof(glm::vec3), PrimitiveType::PT_Triangles, { AttributeType::Float3 });
 	}
+
+	CommandBufferHandle GraphicsDevice::Begin()
+	{
+		CommandBufferHandle commandBuffer = CreateCommandBuffer();
+		Begin(commandBuffer);
+		return commandBuffer;
+	}
 }

@@ -5,6 +5,7 @@
 
 #include <Debug.h>
 #include <Engine.h>
+#include <Window.h>
 
 #include <PipelineData.h>
 #include <ImageData.h>
@@ -42,6 +43,7 @@ namespace Glory
 
 	VulkanDevice::~VulkanDevice()
 	{
+		m_LogicalDevice.waitIdle();
 	}
 
 	VulkanGraphicsModule* VulkanDevice::GraphicsModule()
@@ -103,21 +105,6 @@ namespace Glory
 			Debug().LogError("Missing required device extensions!");
 			return;
 		}
-
-		// Check swapchain support
-		vk::SurfaceKHR surface = GraphicsModule()->GetSurface();
-		vk::Result result = m_VKDevice.getSurfaceCapabilitiesKHR(surface, &m_SwapChainCapabilities);
-		if (result != vk::Result::eSuccess)
-		{
-			Debug().LogFatalError("Vulkan: Failed to get surface capabilities: Vulkan Error Code: " + std::to_string((uint32_t)result));
-			return;
-		}
-		uint32_t formatCount = 0;
-		m_SwapChainFormats = m_VKDevice.getSurfaceFormatsKHR(surface);
-		m_SwapChainPresentModes = m_VKDevice.getSurfacePresentModesKHR(surface);
-
-		bool swapChainAdequite = !m_SwapChainFormats.empty() && !m_SwapChainPresentModes.empty();
-		if (!swapChainAdequite) return;
 
 		// Check feature support
 		m_VKDevice.getFeatures(&m_Features);
@@ -293,16 +280,27 @@ namespace Glory
 		return vkTexture->m_VKSampler;
 	}
 
-	CommandBufferHandle VulkanDevice::Begin()
+	CommandBufferHandle VulkanDevice::CreateCommandBuffer()
 	{
+		CommandBufferHandle handle;
+		this->GetNewCommandBuffer(handle);
+		return handle;
+	}
+
+	void VulkanDevice::Begin(CommandBufferHandle commandBuffer)
+	{
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		if (iter == m_CommandBuffers.end())
+		{
+			Debug().LogError("VulkanDevice::BeginRenderPass: Invalid command buffer handle.");
+			return;
+		}
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+
 		vk::CommandBufferBeginInfo commandBeginInfo = vk::CommandBufferBeginInfo()
 			.setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse)
 			.setPInheritanceInfo(nullptr);
-
-		CommandBufferHandle handle;
-		vk::CommandBuffer commandBuffer = this->GetNewCommandBuffer(handle);
-		commandBuffer.begin(commandBeginInfo);
-		return handle;
+		vkCommandBuffer.begin(commandBeginInfo);
 	}
 
 	void VulkanDevice::BeginRenderPass(CommandBufferHandle commandBuffer, RenderPassHandle renderPass)
@@ -397,7 +395,8 @@ namespace Glory
 	{
 	}
 
-	void VulkanDevice::BindDescriptorSets(CommandBufferHandle commandBuffer, PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t firstSet)
+	void VulkanDevice::BindDescriptorSets(CommandBufferHandle commandBuffer, PipelineHandle pipeline,
+		const std::vector<DescriptorSetHandle>& sets, uint32_t firstSet)
 	{
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
@@ -501,31 +500,59 @@ namespace Glory
 		vkCommandBuffer.dispatch(x, y, z);
 	}
 
-	void VulkanDevice::Commit(CommandBufferHandle commandBuffer)
+	void VulkanDevice::Commit(CommandBufferHandle commandBuffer, const std::vector<SemaphoreHandle>& waitSemaphores,
+		const std::vector<SemaphoreHandle>& signalSemaphores)
 	{
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
-			Debug().LogError("VulkanDevice::End: Invalid command buffer handle.");
+			Debug().LogError("VulkanDevice::Commit: Invalid command buffer handle.");
 			return;
 		}
 		vk::CommandBuffer vkCommandBuffer = iter->second;
 		vk::Fence vkFence = fenceIter->second;
 
+		if (m_LogicalDevice.resetFences(1, &vkFence) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::Wait: Failed to reset fence.");
+			return;
+		}
+
 		/* Submit command buffer */
-		//vk::Semaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 
-		//vk::Semaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
+		std::vector<vk::Semaphore> vkWaitSemaphores(waitSemaphores.size());
+		std::vector<vk::Semaphore> vkSignalSemaphores(signalSemaphores.size());
+		for (size_t i = 0; i < waitSemaphores.size(); ++i)
+		{
+			VK_Semaphore* vkSemaphore = m_Semaphores.Find(waitSemaphores[i]);
+			if (!vkSemaphore)
+			{
+				Debug().LogError("VulkanDevice::Commit: Invalid semaphore handle for waiting.");
+				return;
+			}
+			vkWaitSemaphores[i] = vkSemaphore->m_VKSemaphore;
+		}
+		for (size_t i = 0; i < signalSemaphores.size(); ++i)
+		{
+			VK_Semaphore* vkSemaphore = m_Semaphores.Find(signalSemaphores[i]);
+			if (!vkSemaphore)
+			{
+				Debug().LogError("VulkanDevice::Commit: Invalid semaphore handle for signaling.");
+				return;
+			}
+			vkSignalSemaphores[i] = vkSemaphore->m_VKSemaphore;
+		}
+
 		vk::SubmitInfo submitInfo = vk::SubmitInfo()
-			.setWaitSemaphoreCount(0)
-			.setPWaitSemaphores(nullptr)
-			.setPWaitDstStageMask(nullptr)
+			.setWaitSemaphoreCount(static_cast<uint32_t>(vkWaitSemaphores.size()))
+			.setPWaitSemaphores(vkWaitSemaphores.data())
+			.setPWaitDstStageMask(waitStages)
 			.setCommandBufferCount(1)
 			.setPCommandBuffers(&vkCommandBuffer)
-			.setSignalSemaphoreCount(0)
-			.setPSignalSemaphores(nullptr);
+			.setSignalSemaphoreCount(static_cast<uint32_t>(vkSignalSemaphores.size()))
+			.setPSignalSemaphores(vkSignalSemaphores.data());
 
 		if (m_GraphicsAndComputeQueue.submit(1, &submitInfo, vkFence) != vk::Result::eSuccess)
 			throw std::runtime_error("failed to submit draw command buffer!");
@@ -543,14 +570,10 @@ namespace Glory
 		vk::CommandBuffer vkCommandBuffer = iter->second;
 		vk::Fence vkFence = fenceIter->second;
 
-		if (m_LogicalDevice.waitForFences(1, &vkFence, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess)
+		const vk::Result waitState = m_LogicalDevice.waitForFences(1, &vkFence, VK_TRUE, UINT64_MAX);
+		if (int32_t(waitState) < 0)
 		{
 			Debug().LogError("VulkanDevice::Wait: Failed to wait for fence.");
-			return;
-		}
-		if (m_LogicalDevice.resetFences(1, &vkFence) != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::Wait: Failed to reset fence.");
 			return;
 		}
 	}
@@ -572,6 +595,26 @@ namespace Glory
 		m_CommandBufferFences.erase(commandBuffer);
 		m_FreeCommandBuffers.push_back(vkCommandBuffer);
 		m_FreeFences.push_back(vkFence);
+	}
+
+	void VulkanDevice::Reset(CommandBufferHandle commandBuffer)
+	{
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
+		if (iter == m_CommandBuffers.end() || fenceIter == m_CommandBufferFences.end())
+		{
+			Debug().LogError("VulkanDevice::Reset: Invalid command buffer handle.");
+			return;
+		}
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+		vk::Fence vkFence = fenceIter->second;
+
+		vkCommandBuffer.reset();
+		if (m_LogicalDevice.resetFences(1, &vkFence) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::Reset: Failed to reset fence.");
+			return;
+		}
 	}
 
 	void VulkanDevice::SetViewport(CommandBufferHandle commandBuffer, float x, float y, float width, float height, float minDepth, float maxDepth)
@@ -606,8 +649,8 @@ namespace Glory
 		vkCommandBuffer.setScissor(0, 1, &scissor);
 	}
 
-	void VulkanDevice::PipelineBarrier(CommandBufferHandle commandBuffer, std::vector<BufferHandle> buffers,
-		std::vector<TextureHandle> textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage)
+	void VulkanDevice::PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>& buffers,
+		const std::vector<TextureHandle>& textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage)
 	{
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
@@ -650,6 +693,64 @@ namespace Glory
 			(vk::DependencyFlags)0, 0, nullptr, static_cast<uint32_t>(bufferBarriers.size()), bufferBarriers.data(),
 			static_cast<uint32_t>(imageBarriers.size()), imageBarriers.data()
 		);
+	}
+
+	void VulkanDevice::AqcuireNextSwapchainImage(SwapChainHandle swapchain, uint32_t* imageIndex,
+		SemaphoreHandle signalSemaphore)
+	{
+		VK_Swapchain* vkSwapchain = m_Swapchains.Find(swapchain);
+		if (!vkSwapchain)
+		{
+			Debug().LogError("VulkanDevice::AqcuireNextSwapchainImage: Invalid swap chain handle.");
+			return;
+		}
+
+		VK_Semaphore* vkSemaphore = m_Semaphores.Find(signalSemaphore);
+		vk::Semaphore semaphore = vkSemaphore ? vkSemaphore->m_VKSemaphore : nullptr;
+
+		if (m_LogicalDevice.acquireNextImageKHR(vkSwapchain->m_VKSwapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, imageIndex) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::AqcuireNextSwapchainImage: Failed to acquire image.");
+			return;
+		}
+	}
+
+	void VulkanDevice::Present(SwapChainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>& waitSemaphores)
+	{
+		VK_Swapchain* vkSwapchain = m_Swapchains.Find(swapchain);
+		if (!vkSwapchain)
+		{
+			Debug().LogError("VulkanDevice::AqcuireNextSwapchainImage: Invalid swap chain handle.");
+			return;
+		}
+
+		std::vector<vk::Semaphore> vkWaitSemaphores(waitSemaphores.size());
+		for (size_t i = 0; i < waitSemaphores.size(); ++i)
+		{
+			VK_Semaphore* vkSemaphore = m_Semaphores.Find(waitSemaphores[i]);
+			if (!vkSemaphore)
+			{
+				Debug().LogError("VulkanDevice::Commit: Invalid semaphore handle for waiting.");
+				return;
+			}
+			vkWaitSemaphores[i] = vkSemaphore->m_VKSemaphore;
+		}
+
+		vk::PresentInfoKHR presentInfo{};
+		presentInfo.waitSemaphoreCount = static_cast<uint32_t>(vkWaitSemaphores.size());
+		presentInfo.pWaitSemaphores = vkWaitSemaphores.data();
+
+		vk::SwapchainKHR swapChains[] = { vkSwapchain->m_VKSwapchain };
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = swapChains;
+		presentInfo.pImageIndices = &imageIndex;
+		presentInfo.pResults = nullptr;
+
+		if (m_PresentQueue.presentKHR(presentInfo) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::AqcuireNextSwapchainImage: Failed to present.");
+			return;
+		}
 	}
 
 	vk::BufferUsageFlags GetBufferUsageFlags(BufferType bufferType)
@@ -1188,7 +1289,12 @@ namespace Glory
 		{
 			const Attachment& attachment = info.RenderTextureInfo.Attachments[i];
 
-			const vk::Format format = VKConverter::GetVulkanFormat(attachment.InternalFormat);
+			VK_Texture* texture = m_Textures.Find(attachment.Texture);
+			const vk::Format format = texture && texture->m_VKFormat != vk::Format::eUndefined ? texture->m_VKFormat :
+				VKConverter::GetVulkanFormat(attachment.InternalFormat);
+			const vk::ImageLayout initialLayout = texture ? texture->m_VKInitialLayout : vk::ImageLayout::eUndefined;
+			const vk::ImageLayout finalLayout = texture ? texture->m_VKFinalLayout :
+				(attachment.m_SamplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eColorAttachmentOptimal);
 
 			// Create render pass
 			attachments[i] = vk::AttachmentDescription()
@@ -1198,9 +1304,8 @@ namespace Glory
 				.setStoreOp(vk::AttachmentStoreOp::eStore)
 				.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
 				.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-				.setInitialLayout(vk::ImageLayout::eUndefined)
-				.setFinalLayout(attachment.m_SamplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal :
-					vk::ImageLayout::eColorAttachmentOptimal);
+				.setInitialLayout(initialLayout)
+				.setFinalLayout(finalLayout);
 
 			attachmentColorRefs[i] = vk::AttachmentReference()
 				.setAttachment(i)
@@ -1822,6 +1927,210 @@ namespace Glory
 		m_LogicalDevice.updateDescriptorSets(descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
 	}
 
+	std::vector<vk::PresentModeKHR> VSyncPresentModes = { vk::PresentModeKHR::eFifo };
+	std::vector<vk::PresentModeKHR> InfiniteFPSPresentModes = { vk::PresentModeKHR::eMailbox, vk::PresentModeKHR::eImmediate, vk::PresentModeKHR::eFifo };
+
+	uint32_t GetMinImageCountFromPresentMode(vk::PresentModeKHR presentMode)
+	{
+		if (presentMode == vk::PresentModeKHR::eMailbox)
+			return 3u;
+		if (presentMode == vk::PresentModeKHR::eFifo || presentMode == vk::PresentModeKHR::eFifoRelaxed)
+			return 2u;
+		if (presentMode == vk::PresentModeKHR::eImmediate)
+			return 1u;
+		return 1u;
+	}
+
+	SwapChainHandle VulkanDevice::CreateSwapChain(Window* pWindow, bool vsync, uint32_t minImageCount)
+	{
+		// Check swapchain support
+		vk::SurfaceCapabilitiesKHR swapChainCapabilities;
+		vk::SurfaceKHR surface = GraphicsModule()->GetSurface();
+		vk::Result vkError = m_VKDevice.getSurfaceCapabilitiesKHR(surface, &swapChainCapabilities);
+		if (vkError != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreateSwapChain: Failed to get surface capabilities: Vulkan Error Code: " + std::to_string((uint32_t)vkError));
+			return NULL;
+		}
+
+		std::vector<vk::SurfaceFormatKHR> swapChainFormats = m_VKDevice.getSurfaceFormatsKHR(surface);
+
+		if (swapChainFormats.empty())
+		{
+			Debug().LogError("VulkanDevice::CreateSwapChain: Surface does not support any formats");
+			return NULL;
+		}
+
+		const vk::Format requestSurfaceImageFormat[] = { vk::Format::eB8G8R8A8Unorm, vk::Format::eR8G8B8A8Unorm, vk::Format::eB8G8R8Unorm, vk::Format::eR8G8B8Unorm };
+		/* Get shaw chain format */
+		const vk::SurfaceFormatKHR swapChainFormat = SelectSurfaceFormat(surface,
+			{ vk::Format::eB8G8R8A8Unorm, vk::Format::eR8G8B8A8Unorm, vk::Format::eB8G8R8Unorm, vk::Format::eR8G8B8Unorm },
+			vk::ColorSpaceKHR::eSrgbNonlinear);
+
+		/* Get shaw chain present mode */
+		const vk::PresentModeKHR swapChainPresentMode = SelectPresentMode(vsync ? VSyncPresentModes : InfiniteFPSPresentModes, surface);
+		if (minImageCount == 0)
+			minImageCount = GetMinImageCountFromPresentMode(swapChainPresentMode);
+
+		/* Get swap chain extend */
+		vk::Extent2D swapChainExtent = swapChainCapabilities.currentExtent;
+		if (swapChainCapabilities.currentExtent.width == std::numeric_limits<uint32_t>::max())
+		{
+			int width, height;
+			pWindow->GetDrawableSize(&width, &height);
+
+			VkExtent2D actualExtent = {
+				static_cast<uint32_t>(width),
+				static_cast<uint32_t>(height)
+			};
+
+			actualExtent.width = std::clamp(actualExtent.width, swapChainCapabilities.minImageExtent.width, swapChainCapabilities.maxImageExtent.width);
+			actualExtent.height = std::clamp(actualExtent.height, swapChainCapabilities.minImageExtent.height, swapChainCapabilities.maxImageExtent.height);
+
+			swapChainExtent = actualExtent;
+		}
+
+		if (minImageCount < swapChainCapabilities.minImageCount) {
+			minImageCount = swapChainCapabilities.minImageCount;
+		}
+		if (swapChainCapabilities.maxImageCount > 0 && minImageCount > swapChainCapabilities.maxImageCount) {
+			minImageCount = swapChainCapabilities.maxImageCount;
+		}
+
+		vk::SwapchainCreateInfoKHR createInfo{};
+		createInfo.surface = surface;
+		createInfo.minImageCount = minImageCount;
+		createInfo.imageFormat = swapChainFormat.format;
+		createInfo.imageColorSpace = swapChainFormat.colorSpace;
+		createInfo.imageExtent = swapChainExtent;
+		createInfo.imageArrayLayers = 1;
+		createInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
+
+		uint32_t queueFamilyIndices[] = { m_GraphicsAndComputeFamily.value(), m_PresentFamily.value() };
+
+		if (m_GraphicsAndComputeFamily.value() != m_PresentFamily.value())
+		{
+			createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
+			createInfo.queueFamilyIndexCount = 2;
+			createInfo.pQueueFamilyIndices = queueFamilyIndices;
+		}
+		else
+		{
+			createInfo.imageSharingMode = vk::SharingMode::eExclusive;
+			createInfo.queueFamilyIndexCount = 0; // Optional
+			createInfo.pQueueFamilyIndices = nullptr; // Optional
+		}
+
+		createInfo.preTransform = swapChainCapabilities.currentTransform;
+		createInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
+		createInfo.presentMode = swapChainPresentMode;
+		createInfo.clipped = VK_TRUE;
+		createInfo.oldSwapchain = VK_NULL_HANDLE;
+
+		SwapChainHandle handle;
+		VK_Swapchain& swapchain = m_Swapchains.Emplace(handle, VK_Swapchain());
+		if (m_LogicalDevice.createSwapchainKHR(&createInfo, nullptr, &swapchain.m_VKSwapchain) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreateSwapChain: Failed to create swapchain");
+			return NULL;
+		}
+
+		uint32_t imageCount;
+		if (m_LogicalDevice.getSwapchainImagesKHR(swapchain.m_VKSwapchain, &imageCount, nullptr) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreateSwapChain: Failed to get swap chain images");
+			return NULL;
+		}
+		std::vector<vk::Image> swapChainImages(imageCount);
+		std::vector<vk::ImageView> swapChainImageViews(imageCount);
+		if (m_LogicalDevice.getSwapchainImagesKHR(swapchain.m_VKSwapchain, &imageCount, swapChainImages.data()) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreateSwapChain: Failed to get swap chain images");
+			return NULL;
+		}
+
+		swapchain.m_Format = swapChainFormat;
+		swapchain.m_PresentMode = swapChainPresentMode;
+		swapchain.m_Extent = swapChainExtent;
+
+		for (size_t i = 0; i < imageCount; ++i)
+		{
+			vk::ImageViewCreateInfo imageViewInfo;
+			imageViewInfo.image = swapChainImages[i];
+			imageViewInfo.viewType = vk::ImageViewType::e2D;
+			imageViewInfo.format = swapChainFormat.format;
+			imageViewInfo.components.r = vk::ComponentSwizzle::eIdentity;
+			imageViewInfo.components.g = vk::ComponentSwizzle::eIdentity;
+			imageViewInfo.components.b = vk::ComponentSwizzle::eIdentity;
+			imageViewInfo.components.a = vk::ComponentSwizzle::eIdentity;
+			imageViewInfo.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+			imageViewInfo.subresourceRange.baseMipLevel = 0;
+			imageViewInfo.subresourceRange.levelCount = 1;
+			imageViewInfo.subresourceRange.baseArrayLayer = 0;
+			imageViewInfo.subresourceRange.layerCount = 1;
+			if (m_LogicalDevice.createImageView(&imageViewInfo, nullptr, &swapChainImageViews[i]) != vk::Result::eSuccess)
+			{
+				Debug().LogError("VulkanDevice::CreateSwapChain: Failed to create image view");
+				return NULL;
+			}
+		}
+
+		swapchain.m_Textures.resize(imageCount);
+		for (size_t i = 0; i < imageCount; ++i)
+		{
+			swapchain.m_Textures[i] = TextureHandle();
+			VK_Texture& texture = m_Textures.Emplace(swapchain.m_Textures[i], VK_Texture());
+			texture.m_VKInitialLayout = vk::ImageLayout::eUndefined;
+			texture.m_VKFinalLayout = vk::ImageLayout::ePresentSrcKHR;
+			texture.m_VKImage = swapChainImages[i];
+			texture.m_VKImageView = swapChainImageViews[i];
+			texture.m_VKMemory = nullptr;
+			texture.m_VKSampler = nullptr;
+			texture.m_VKFormat = swapChainFormat.format;
+		}
+
+		std::stringstream str;
+		str << "VulkanDevice: Swap chain " << handle << " created.";
+		Debug().LogInfo(str.str());
+
+		return handle;
+	}
+
+	uint32_t VulkanDevice::GetSwapchainImageCount(SwapChainHandle swapChain)
+	{
+		VK_Swapchain* vkSwapchain = m_Swapchains.Find(swapChain);
+		if (!vkSwapchain)
+		{
+			Debug().LogError("VulkanDevice::GetSwapchainImageCount: Invalid swap chain handle.");
+			return 0;
+		}
+		return vkSwapchain->m_Textures.size();
+	}
+
+	TextureHandle VulkanDevice::GetSwapchainImage(SwapChainHandle swapChain, uint32_t imageIndex)
+	{
+		VK_Swapchain* vkSwapchain = m_Swapchains.Find(swapChain);
+		if (!vkSwapchain)
+		{
+			Debug().LogError("VulkanDevice::GetSwapchainImageCount: Invalid swap chain handle.");
+			return 0;
+		}
+		return vkSwapchain->m_Textures[imageIndex];
+	}
+
+	SemaphoreHandle VulkanDevice::CreateSemaphore()
+	{
+		SemaphoreHandle handle;
+		VK_Semaphore& semaphore = m_Semaphores.Emplace(handle, VK_Semaphore());
+		vk::SemaphoreCreateInfo createInfo;
+		if (m_LogicalDevice.createSemaphore(&createInfo, nullptr, &semaphore.m_VKSemaphore) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreateSemaphore: Failed to create semaphore");
+			return NULL;
+		}
+		return handle;
+	}
+
 	void VulkanDevice::FreeBuffer(BufferHandle& handle)
 	{
 		VK_Buffer* buffer = m_Buffers.Find(handle);
@@ -2004,6 +2313,52 @@ namespace Glory
 
 		std::stringstream str;
 		str << "VulkanDevice: Descriptor set " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+	}
+
+	void VulkanDevice::FreeSwapChain(SwapChainHandle& handle)
+	{
+		VK_Swapchain* vkSwapchain = m_Swapchains.Find(handle);
+		if (!vkSwapchain)
+		{
+			Debug().LogError("VulkanDevice::FreeSwapChain: Invalid swap chain handle.");
+			return;
+		}
+
+		m_LogicalDevice.destroySwapchainKHR(vkSwapchain->m_VKSwapchain);
+
+		for (TextureHandle texture : vkSwapchain->m_Textures)
+		{
+			VK_Texture* vkTexture = m_Textures.Find(texture);
+			if (!vkTexture) continue;
+			m_LogicalDevice.destroyImageView(vkTexture->m_VKImageView);
+		}
+		vkSwapchain->m_Textures.clear();
+
+		m_Swapchains.Erase(handle);
+		handle = 0;
+
+		std::stringstream str;
+		str << "VulkanDevice: Swap chain " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+	}
+
+	void VulkanDevice::FreeSemaphore(SemaphoreHandle& handle)
+	{
+		VK_Semaphore* vkSemaphore = m_Semaphores.Find(handle);
+		if (!vkSemaphore)
+		{
+			Debug().LogError("VulkanDevice::FreeSemaphore: Invalid semaphore handle.");
+			return;
+		}
+
+		m_LogicalDevice.destroySemaphore(vkSemaphore->m_VKSemaphore);
+
+		m_Semaphores.Erase(handle);
+		handle = 0;
+
+		std::stringstream str;
+		str << "VulkanDevice: Semaphore " << handle << " was freed from device memory.";
 		Debug().LogInfo(str.str());
 	}
 
@@ -2228,6 +2583,62 @@ namespace Glory
 		return commandBuffer;
 	}
 
+	vk::PresentModeKHR VulkanDevice::SelectPresentMode(const std::vector<vk::PresentModeKHR>& presentModes, vk::SurfaceKHR surface)
+	{
+		std::vector<vk::PresentModeKHR> availablePresentModes;
+		uint32_t presentModesCount = 0;
+		m_VKDevice.getSurfacePresentModesKHR(surface, &presentModesCount, nullptr);
+		availablePresentModes.resize(presentModesCount);
+		m_VKDevice.getSurfacePresentModesKHR(surface, &presentModesCount, availablePresentModes.data());
+
+		for (vk::PresentModeKHR chosenPresentMode : presentModes)
+		{
+			if (std::find(availablePresentModes.begin(), availablePresentModes.end(), chosenPresentMode) == availablePresentModes.end())
+				continue;
+			return chosenPresentMode;
+		}
+		return vk::PresentModeKHR::eFifo;
+	}
+
+	vk::SurfaceFormatKHR VulkanDevice::SelectSurfaceFormat(vk::SurfaceKHR surface, const std::vector<vk::Format> requestFormats, vk::ColorSpaceKHR requestColorSpace)
+	{
+		uint32_t availableFormatCount;
+		std::vector<vk::SurfaceFormatKHR> availableFormats;
+		m_VKDevice.getSurfaceFormatsKHR(surface, &availableFormatCount, nullptr);
+		availableFormats.resize(availableFormatCount);
+		m_VKDevice.getSurfaceFormatsKHR(surface, &availableFormatCount, availableFormats.data());
+
+		// If only vk::Format::eUndefined is available then every format is allowed
+		if (availableFormatCount == 1)
+		{
+			if (availableFormats[0].format == vk::Format::eUndefined)
+			{
+				vk::SurfaceFormatKHR ret;
+				ret.format = requestFormats[0];
+				ret.colorSpace = requestColorSpace;
+				return ret;
+			}
+
+			// No point in searching another format
+			return availableFormats[0];
+		}
+
+		// Request several formats, the first found will be used
+		for (vk::Format chosenFormat : requestFormats)
+		{
+			auto iter = std::find_if(availableFormats.begin(), availableFormats.end(), [requestColorSpace, chosenFormat](vk::SurfaceFormatKHR& format) {
+				return format.colorSpace == requestColorSpace && format.format == chosenFormat;
+			});
+
+			if (iter == availableFormats.end())
+				continue;
+			return *iter;
+		}
+
+		// If none of the requested image formats could be found, use the first available
+		return availableFormats[0];
+	}
+
 	void VulkanDevice::CreateRenderTexture(vk::RenderPass vkRenderPass, VK_RenderTexture& renderTexture)
 	{
 		const size_t numAttachments = renderTexture.m_Info.Attachments.size() + (renderTexture.m_HasDepthOrStencil ? 1 : 0);
@@ -2242,8 +2653,9 @@ namespace Glory
 		size_t textureCounter = 0;
 		for (size_t i = 0; i < renderTexture.m_Info.Attachments.size(); ++i)
 		{
-			Attachment attachment = renderTexture.m_Info.Attachments[i];
-			renderTexture.m_Textures[i] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler, attachment.m_SamplingEnabled });
+			const Attachment& attachment = renderTexture.m_Info.Attachments[i];
+			renderTexture.m_Textures[i] = attachment.Texture ? attachment.Texture :
+				CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler, attachment.m_SamplingEnabled });
 			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[i]);
 			vkTexture->m_VKFinalLayout = attachment.m_SamplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eColorAttachmentOptimal;
 			renderTexture.m_AttachmentNames[i] = attachment.Name;

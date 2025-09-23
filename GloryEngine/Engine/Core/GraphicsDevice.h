@@ -97,6 +97,7 @@ namespace Glory
 {
 	class Module;
 	class Debug;
+	class Window;
 
 	class Resource;
 	class MeshData;
@@ -241,11 +242,18 @@ namespace Glory
 		void Initialize();
 
 	public: /* Rendering commands */
+		/** @brief Create a new command buffer */
+		virtual CommandBufferHandle CreateCommandBuffer() = 0;
 		/**
-		 * @brief Begin recording a new command buffer
+		 * @brief Create a new command buffer and call Begin() on it
 		 * @returns The handle to the command buffer
 		 */
-		virtual CommandBufferHandle Begin() = 0;
+		virtual CommandBufferHandle Begin();
+		/**
+		 * @brief Begin recording on a command buffer
+		 * @param commandBuffer The handle to the command buffer
+		 */
+		virtual void Begin(CommandBufferHandle commandBuffer) = 0;
 		/**
 		 * @brief Push a begin render pass onto a command buffer
 		 * @param commandBuffer The handle to the command buffer
@@ -280,7 +288,7 @@ namespace Glory
 		 * @param sets Handles of descriptor sets to bind
 		 * @param firstSet The index to the first set to bind to
 		 */
-		virtual void BindDescriptorSets(CommandBufferHandle commandBuffer, PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t firstSet=0) = 0;
+		virtual void BindDescriptorSets(CommandBufferHandle commandBuffer, PipelineHandle pipeline, const std::vector<DescriptorSetHandle>& sets, uint32_t firstSet=0) = 0;
 		/**
 		 * @brief Push push constants onto a command buffer
 		 * @param commandBuffer The handle to the command buffer
@@ -309,7 +317,8 @@ namespace Glory
 		 * @brief Commit a command buffer to the GPU
 		 * @param commandBuffer The handle to the command buffer
 		 */
-		virtual void Commit(CommandBufferHandle commandBuffer) = 0;
+		virtual void Commit(CommandBufferHandle commandBuffer, const std::vector<SemaphoreHandle>& waitSemaphores={},
+			const std::vector<SemaphoreHandle>& signalSemaphore={}) = 0;
 		/**
 		 * @brief Wait for a command buffer to finish on the GPU
 		 * @param commandBuffer The handle to the command buffer
@@ -320,6 +329,11 @@ namespace Glory
 		 * @param commandBuffer The handle to the command buffer
 		 */
 		virtual void Release(CommandBufferHandle commandBuffer) = 0;
+		/**
+		 * @brief Reset a command buffer
+		 * @param commandBuffer The handle to the command buffer
+		 */
+		virtual void Reset(CommandBufferHandle commandBuffer) = 0;
 
 		/**
 		 * @brief Record a set viewport command
@@ -356,8 +370,12 @@ namespace Glory
 		 * @param srcStage Source stage
 		 * @param dstStage Destination stage
 		 */
-		virtual void PipelineBarrier(CommandBufferHandle commandBuffer, std::vector<BufferHandle> buffers,
-			std::vector<TextureHandle> textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage) = 0;
+		virtual void PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>& buffers,
+			const std::vector<TextureHandle>& textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage) = 0;
+
+		virtual void AqcuireNextSwapchainImage(SwapChainHandle swapchain, uint32_t* imageIndex,
+			SemaphoreHandle signalSemaphore=NULL) = 0;
+		virtual void Present(SwapChainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>& waitSemaphores={}) = 0;
 
 	public: /* Resource caching */
 		/**
@@ -539,6 +557,14 @@ namespace Glory
 		 */
 		virtual void UpdateDescriptorSet(DescriptorSetHandle descriptorSet, const DescriptorSetUpdateInfo& setWriteInfo) = 0;
 
+		/* Swap chain */
+		virtual SwapChainHandle CreateSwapChain(Window* pWindow, bool vsync=false, uint32_t minImageCount=0) = 0;
+		virtual uint32_t GetSwapchainImageCount(SwapChainHandle swapChain) = 0;
+		virtual TextureHandle GetSwapchainImage(SwapChainHandle swapChain, uint32_t imageIndex) = 0;
+
+		/* Synchronization */
+		virtual SemaphoreHandle CreateSemaphore() = 0;
+
 		/* Free memory */
 
 		/** @brief Free a buffer from device memory */
@@ -559,6 +585,10 @@ namespace Glory
 		virtual void FreeDescriptorSetLayout(DescriptorSetLayoutHandle& handle) = 0;
 		/** @brief Free a descriptor set from device memory */
 		virtual void FreeDescriptorSet(DescriptorSetHandle& handle) = 0;
+		/** @brief Free a swap chain from device memory */
+		virtual void FreeSwapChain(SwapChainHandle& handle) = 0;
+		/** @brief Free a semaphore from device memory */
+		virtual void FreeSemaphore(SemaphoreHandle& handle) = 0;
 
 	protected:
 		Module* m_pModule;

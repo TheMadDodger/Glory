@@ -34,6 +34,10 @@ namespace Glory
 		return 0;
 	}
 
+	void NullRendererModule::PresentFrame()
+	{
+	}
+
 	void NullRendererModule::Initialize()
 	{
 		RendererModule::Initialize();

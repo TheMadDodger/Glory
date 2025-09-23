@@ -21,6 +21,7 @@ namespace Glory
 		virtual void CollectReferences(std::vector<UUID>&) override;
 
 		virtual UUID TextPipelineID() const override;
+		virtual void PresentFrame() override;
 
 		GLORY_MODULE_VERSION_H(1, 0, 0);
 
