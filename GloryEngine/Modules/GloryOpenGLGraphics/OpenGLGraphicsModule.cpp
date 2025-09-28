@@ -54,16 +54,6 @@ namespace Glory
 		fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 		LogGLError(glGetError());
 
-		// Should be done in the window itself, probably api independant
-		//if (SDL_GL_SetSwapInterval(1) < 0)
-		//{
-		//	std::cerr << "Could not set SDL GL Swap interval: " << SDL_GetError() << std::endl;
-		//	return;
-		//}
-		//SDL_GL_SetSwapInterval(0);
-
-		LogGLError(glGetError());
-
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		LogGLError(glGetError());
 

@@ -4,6 +4,7 @@
 
 #include <Engine.h>
 #include <Debug.h>
+#include <Window.h>
 
 #include <PipelineData.h>
 #include <ImageData.h>
@@ -373,9 +374,13 @@ namespace Glory
 
 #pragma region Commands
 
-	CommandBufferHandle OpenGLDevice::Begin()
+	CommandBufferHandle OpenGLDevice::CreateCommandBuffer()
 	{
 		return CommandBufferHandle();
+	}
+
+	void OpenGLDevice::Begin(CommandBufferHandle)
+	{
 	}
 
 	void OpenGLDevice::BeginRenderPass(CommandBufferHandle, RenderPassHandle renderPass)
@@ -452,7 +457,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
-	void OpenGLDevice::BindDescriptorSets(CommandBufferHandle, PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t)
+	void OpenGLDevice::BindDescriptorSets(CommandBufferHandle, PipelineHandle pipeline, const std::vector<DescriptorSetHandle>& sets, uint32_t)
 	{
 		GL_Pipeline* glPipeline = m_Pipelines.Find(pipeline);
 		if (!glPipeline)
@@ -545,16 +550,21 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
-	void OpenGLDevice::Commit(CommandBufferHandle)
+	void OpenGLDevice::Commit(CommandBufferHandle, const std::vector<SemaphoreHandle>&, const std::vector<SemaphoreHandle>&)
 	{
-		glFlush();
+		//glFlush();
 	}
 
-	void OpenGLDevice::Wait(CommandBufferHandle)
+	GraphicsDevice::WaitResult OpenGLDevice::Wait(CommandBufferHandle, uint64_t)
 	{
+		return WaitResult::WR_Success;
 	}
 
 	void OpenGLDevice::Release(CommandBufferHandle)
+	{
+	}
+
+	void OpenGLDevice::Reset(CommandBufferHandle)
 	{
 	}
 
@@ -568,11 +578,40 @@ namespace Glory
 		glScissor(x, y, width, height);
 	}
 
-	void OpenGLDevice::PipelineBarrier(CommandBufferHandle commandBuffer, std::vector<BufferHandle>,
-		std::vector<TextureHandle>, PipelineStageFlagBits, PipelineStageFlagBits)
+	void OpenGLDevice::PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>&,
+		const std::vector<TextureHandle>&, PipelineStageFlagBits, PipelineStageFlagBits)
 	{
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OpenGLDevice::AqcuireNextSwapchainImage(SwapChainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle)
+	{
+		GL_Swapchain* glSwapchain = m_Swapchains.Find(swapchain);
+		if (!glSwapchain)
+		{
+			Debug().LogError("OpenGLDevice::AqcuireNextSwapchainImage: Invalid swap chain handle.");
+			return;
+		}
+
+		/* Get next available image */
+	}
+
+	void OpenGLDevice::Present(SwapChainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>&)
+	{
+		GL_Swapchain* glSwapchain = m_Swapchains.Find(swapchain);
+		if (!glSwapchain)
+		{
+			Debug().LogError("OpenGLDevice::Present: Invalid swap chain handle.");
+			return;
+		}
+
+		/* Blit current image to window back buffer */
+		glSwapchain->m_pWindow->MakeGLContextCurrent();
+		//glBlitFramebuffer();
+
+		/* Swap window */
+		glSwapchain->m_pWindow->GLSwapWindow();
 	}
 
 #pragma endregion
@@ -1312,6 +1351,38 @@ namespace Glory
 		}
 	}
 
+	SwapChainHandle OpenGLDevice::CreateSwapChain(Window* pWindow, bool vsync, uint32_t minImageCount)
+	{
+		SwapChainHandle handle;
+		GL_Swapchain& swapchain = m_Swapchains.Emplace(handle, GL_Swapchain());
+		swapchain.m_pWindow = pWindow;
+		pWindow->SetGLSwapInterval(vsync ? 1 : 0);
+
+		/* Swap chain emulation */
+
+
+		std::stringstream str;
+		str << "OpenGLDevice: Swap chain " << handle << " created.";
+		Debug().LogInfo(str.str());
+
+		return handle;
+	}
+
+	uint32_t OpenGLDevice::GetSwapchainImageCount(SwapChainHandle swapChain)
+	{
+		return 0;
+	}
+
+	TextureHandle OpenGLDevice::GetSwapchainImage(SwapChainHandle swapChain, uint32_t imageIndex)
+	{
+		return TextureHandle();
+	}
+
+	SemaphoreHandle OpenGLDevice::CreateSemaphore()
+	{
+		return SemaphoreHandle();
+	}
+
 	void OpenGLDevice::FreeBuffer(BufferHandle& handle)
 	{
 		GL_Buffer* buffer = m_Buffers.Find(handle);
@@ -1502,6 +1573,27 @@ namespace Glory
 		Debug().LogInfo(str.str());
 	}
 
+	void OpenGLDevice::FreeSwapChain(SwapChainHandle& handle)
+	{
+		GL_Swapchain* glSwapchain = m_Swapchains.Find(handle);
+		if (!glSwapchain)
+		{
+			Debug().LogError("OpenGLDevice::FreeSwapChain: Invalid swap chain handle.");
+			return;
+		}
+
+		m_Swapchains.Erase(handle);
+		handle = 0;
+
+		std::stringstream str;
+		str << "OpenGLDevice: Swap chain " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+	}
+
+	void OpenGLDevice::FreeSemaphore(SemaphoreHandle& handle)
+	{
+	}
+
 	void OpenGLDevice::CreateRenderTexture(GL_RenderTexture& renderTexture)
 	{
 		/* Create framebuffer */
@@ -1522,8 +1614,9 @@ namespace Glory
 		size_t textureCounter = 0;
 		for (size_t i = 0; i < renderTexture.m_Info.Attachments.size(); ++i)
 		{
-			Attachment attachment = renderTexture.m_Info.Attachments[i];
-			renderTexture.m_Textures[i] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler });
+			const Attachment& attachment = renderTexture.m_Info.Attachments[i];
+			renderTexture.m_Textures[i] = attachment.Texture ? attachment.Texture :
+				CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler });
 			renderTexture.m_AttachmentNames[i] = attachment.Name;
 			++textureCounter;
 		}

@@ -636,6 +636,15 @@ namespace Glory
 		SDL_MaximizeWindow(m_pWindow);
 	}
 
+	void SDLWindow::SetGLSwapInterval(int interval)
+	{
+		if (SDL_GL_SetSwapInterval(interval) < 0)
+		{
+			std::cerr << "Could not set SDL GL Swap interval: " << SDL_GetError() << std::endl;
+			return;
+		}
+	}
+
 	void SDLWindow::UpdateCursorShow()
 	{
 		const bool show = m_ForceShowCursor || m_ShowCursor;

@@ -97,6 +97,13 @@ namespace Glory
         std::vector<TextureHandle> m_Textures;
     };
 
+    struct GL_Swapchain
+    {
+        static constexpr GraphicsHandleType HandleType = H_SwapChain;
+
+        Window* m_pWindow;
+    };
+
     class OpenGLGraphicsModule;
 
     class OpenGLDevice : public GraphicsDevice
@@ -110,26 +117,32 @@ namespace Glory
         GLORY_API uint32_t GetGLTextureID(TextureHandle texture);
 
     private: /* Render commands */
-        virtual CommandBufferHandle Begin() override;
+        virtual CommandBufferHandle CreateCommandBuffer() override;
+        virtual void Begin(CommandBufferHandle) override;
         virtual void BeginRenderPass(CommandBufferHandle, RenderPassHandle renderPass) override;
         virtual void BeginPipeline(CommandBufferHandle, PipelineHandle pipeline) override;
         virtual void End(CommandBufferHandle) override;
         virtual void EndRenderPass(CommandBufferHandle) override;
         virtual void EndPipeline(CommandBufferHandle) override;
-        virtual void BindDescriptorSets(CommandBufferHandle, PipelineHandle, std::vector<DescriptorSetHandle> sets, uint32_t firstSet=0) override;
+        virtual void BindDescriptorSets(CommandBufferHandle, PipelineHandle, const std::vector<DescriptorSetHandle>& sets, uint32_t firstSet=0) override;
         virtual void PushConstants(CommandBufferHandle, PipelineHandle, uint32_t, uint32_t, const void*, ShaderTypeFlag) override;
 
         virtual void DrawMesh(CommandBufferHandle, MeshHandle handle) override;
         virtual void Dispatch(CommandBufferHandle, uint32_t x, uint32_t y, uint32_t z) override;
-        virtual void Commit(CommandBufferHandle) override;
-        virtual void Wait(CommandBufferHandle) override;
+        virtual void Commit(CommandBufferHandle, const std::vector<SemaphoreHandle>&,
+            const std::vector<SemaphoreHandle>&) override;
+        virtual WaitResult Wait(CommandBufferHandle, uint64_t) override;
         virtual void Release(CommandBufferHandle) override;
+        virtual void Reset(CommandBufferHandle) override;
 
         virtual void SetViewport(CommandBufferHandle commandBuffer, float x, float y, float width, float height, float minDepth=0.0f, float maxDepth=1.0f) override;
         virtual void SetScissor(CommandBufferHandle commandBuffer, int x, int y, uint32_t width, uint32_t height) override;
 
-        virtual void PipelineBarrier(CommandBufferHandle commandBuffer, std::vector<BufferHandle>,
-            std::vector<TextureHandle>, PipelineStageFlagBits, PipelineStageFlagBits) override;
+        virtual void PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>&,
+            const std::vector<TextureHandle>&, PipelineStageFlagBits, PipelineStageFlagBits) override;
+
+        virtual void AqcuireNextSwapchainImage(SwapChainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle) override;
+        virtual void Present(SwapChainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>& waitSemaphores={}) override;
 
     private: /* Resource management */
         virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;
@@ -157,6 +170,10 @@ namespace Glory
         virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo) override;
         virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) override;
         virtual void UpdateDescriptorSet(DescriptorSetHandle descriptorSet, const DescriptorSetUpdateInfo& setWriteInfo) override;
+        virtual SwapChainHandle CreateSwapChain(Window* pWindow, bool vsync=false, uint32_t minImageCount=0) override;
+        virtual uint32_t GetSwapchainImageCount(SwapChainHandle swapChain) override;
+        virtual TextureHandle GetSwapchainImage(SwapChainHandle swapChain, uint32_t imageIndex) override;
+        virtual SemaphoreHandle CreateSemaphore() override;
 
         virtual void FreeBuffer(BufferHandle& handle) override;
         virtual void FreeMesh(MeshHandle& handle) override;
@@ -167,6 +184,8 @@ namespace Glory
         virtual void FreePipeline(PipelineHandle& handle) override;
         virtual void FreeDescriptorSetLayout(DescriptorSetLayoutHandle& handle) override;
         virtual void FreeDescriptorSet(DescriptorSetHandle& handle) override;
+        virtual void FreeSwapChain(SwapChainHandle& handle) override;
+        virtual void FreeSemaphore(SemaphoreHandle& handle) override;
 
     private:
         void CreateRenderTexture(GL_RenderTexture& renderTexture);
@@ -181,6 +200,7 @@ namespace Glory
         GraphicsResources<GL_Pipeline> m_Pipelines;
         GraphicsResources<GL_DescriptorSetLayout> m_SetLayouts;
         GraphicsResources<GL_DescriptorSet> m_Sets;
+        GraphicsResources<GL_Swapchain> m_Swapchains;
         std::unordered_map<DescriptorSetLayoutInfo, DescriptorSetLayoutHandle> m_CachedDescriptorSetLayouts;
     };
 }

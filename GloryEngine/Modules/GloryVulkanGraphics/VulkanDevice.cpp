@@ -558,14 +558,14 @@ namespace Glory
 			throw std::runtime_error("failed to submit draw command buffer!");
 	}
 
-	void VulkanDevice::Wait(CommandBufferHandle commandBuffer)
+	GraphicsDevice::WaitResult VulkanDevice::Wait(CommandBufferHandle commandBuffer, uint64_t timeout)
 	{
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
 		if (iter == m_CommandBuffers.end() || fenceIter == m_CommandBufferFences.end())
 		{
 			Debug().LogError("VulkanDevice::Wait: Invalid command buffer handle.");
-			return;
+			return WR_Fail;
 		}
 		vk::CommandBuffer vkCommandBuffer = iter->second;
 		vk::Fence vkFence = fenceIter->second;
@@ -574,8 +574,18 @@ namespace Glory
 		if (int32_t(waitState) < 0)
 		{
 			Debug().LogError("VulkanDevice::Wait: Failed to wait for fence.");
-			return;
+			return WR_Fail;
 		}
+
+		switch (waitState)
+		{
+		case vk::Result::eSuccess:
+			return WR_Success;
+		case vk::Result::eTimeout:
+			return WR_Timeout;
+		}
+
+		return WR_Fail;
 	}
 
 	void VulkanDevice::Release(CommandBufferHandle commandBuffer)

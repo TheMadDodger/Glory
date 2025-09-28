@@ -177,7 +177,7 @@ namespace Glory
         virtual void Dispatch(CommandBufferHandle commandBuffer, uint32_t x, uint32_t y, uint32_t z) override;
         virtual void Commit(CommandBufferHandle commandBuffer, const std::vector<SemaphoreHandle>& signalSemaphore={},
 			const std::vector<SemaphoreHandle>& waitSemaphores={}) override;
-        virtual void Wait(CommandBufferHandle commandBuffer) override;
+        virtual WaitResult Wait(CommandBufferHandle commandBuffer, uint64_t timeout=UINT64_MAX) override;
         virtual void Release(CommandBufferHandle commandBuffer) override;
         virtual void Reset(CommandBufferHandle commandBuffer) override;
 

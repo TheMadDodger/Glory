@@ -274,7 +274,7 @@ namespace Glory
 
 		/* Limit framerate */
 		std::chrono::time_point<std::chrono::system_clock> currentTime = std::chrono::system_clock::now();
-		const double frameIntervals = 1.0f / m_MaxFramerate;
+		const double frameIntervals = 1.0f/m_MaxFramerate;
 		double timeSinceRefresh = 0.0f;
 
 		while (timeSinceRefresh < frameIntervals)

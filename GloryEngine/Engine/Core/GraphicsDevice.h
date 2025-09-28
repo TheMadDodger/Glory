@@ -319,11 +319,19 @@ namespace Glory
 		 */
 		virtual void Commit(CommandBufferHandle commandBuffer, const std::vector<SemaphoreHandle>& waitSemaphores={},
 			const std::vector<SemaphoreHandle>& signalSemaphore={}) = 0;
+
+		enum WaitResult
+		{
+			WR_Success,
+			WR_Timeout,
+			WR_Fail
+		};
+
 		/**
 		 * @brief Wait for a command buffer to finish on the GPU
 		 * @param commandBuffer The handle to the command buffer
 		 */
-		virtual void Wait(CommandBufferHandle commandBuffer) = 0;
+		virtual WaitResult Wait(CommandBufferHandle commandBuffer, uint64_t timeout=UINT64_MAX) = 0;
 		/**
 		 * @brief Reset and release a command buffer
 		 * @param commandBuffer The handle to the command buffer

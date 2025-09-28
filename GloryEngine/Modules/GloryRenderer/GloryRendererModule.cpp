@@ -157,8 +157,9 @@ namespace Glory
 	{
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice || !m_Swapchain) return;
-		pDevice->Present(m_Swapchain, m_CurrentImageIndex, { m_RenderingFinishedSemaphores[m_CurrentFrameIndex] });
-		m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % m_MaxFramesInFlight;
+		pDevice->Present(m_Swapchain, m_CurrentFrameIndex, { m_RenderingFinishedSemaphores[m_CurrentSemaphoreIndex] });
+		m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % m_ImageCount;
+		m_CurrentSemaphoreIndex = (m_CurrentSemaphoreIndex + 1) % m_ImageCount;
 	}
 
 	void GloryRendererModule::Initialize()
@@ -462,9 +463,13 @@ namespace Glory
 
 		if (m_Swapchain && m_SwapchainPasses.empty() || m_Swapchain && m_SwapchainPasses.size() < pDevice->GetSwapchainImageCount(m_Swapchain))
 		{
-			const uint32_t imageCount = pDevice->GetSwapchainImageCount(m_Swapchain);
-			m_SwapchainPasses.resize(imageCount);
-			for (size_t i = 0; i < imageCount; ++i)
+			m_ImageCount = pDevice->GetSwapchainImageCount(m_Swapchain);
+			m_SwapchainPasses.resize(m_ImageCount);
+			m_SwapchainCommands.resize(m_ImageCount);
+			m_CommandsNew.resize(m_ImageCount, true);
+			m_RenderingFinishedSemaphores.resize(m_ImageCount);
+			m_ImageAvailableSemaphores.resize(m_ImageCount);
+			for (size_t i = 0; i < m_ImageCount; ++i)
 			{
 				TextureHandle image = pDevice->GetSwapchainImage(m_Swapchain, i);
 
@@ -477,18 +482,6 @@ namespace Glory
 				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("color", PixelFormat::PF_BGRA, PixelFormat::PF_B8G8R8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float, false));
 				renderPassInfo.RenderTextureInfo.Attachments[0].Texture = image;
 				m_SwapchainPasses[i] = pDevice->CreateRenderPass(std::move(renderPassInfo));
-			}
-		}
-
-		if (m_SwapchainCommands.size() < m_MaxFramesInFlight)
-		{
-			m_SwapchainCommands.resize(m_MaxFramesInFlight);
-			m_CommandsNew.resize(m_MaxFramesInFlight, true);
-			m_RenderingFinishedSemaphores.resize(m_MaxFramesInFlight);
-			m_ImageAvailableSemaphores.resize(m_MaxFramesInFlight);
-
-			for (size_t i = 0; i < m_MaxFramesInFlight; ++i)
-			{
 				m_SwapchainCommands[i] = pDevice->CreateCommandBuffer();
 				m_RenderingFinishedSemaphores[i] = pDevice->CreateSemaphore();
 				m_ImageAvailableSemaphores[i] = pDevice->CreateSemaphore();
@@ -612,16 +605,24 @@ namespace Glory
 
 		if (!m_Swapchain) return;
 		CommandBufferHandle swapchainCommands = m_SwapchainCommands[m_CurrentFrameIndex];
-		if (!m_CommandsNew[m_CurrentFrameIndex])
-			pDevice->Wait(swapchainCommands);
-		pDevice->AqcuireNextSwapchainImage(m_Swapchain, &m_CurrentImageIndex, m_ImageAvailableSemaphores[m_CurrentFrameIndex]);
+		for (;;)
+		{
+			if (m_CommandsNew[m_CurrentFrameIndex]) break;
+			const GraphicsDevice::WaitResult result = pDevice->Wait(swapchainCommands);
+			if (result == GraphicsDevice::WR_Success) break;
+			if (result == GraphicsDevice::WR_Timeout) continue;
+			m_pEngine->GetDebug().LogError("Failed to wait for render finished!");
+		}
+
+		pDevice->AqcuireNextSwapchainImage(m_Swapchain, &m_CurrentFrameIndex, m_ImageAvailableSemaphores[m_CurrentSemaphoreIndex]);
 		m_CommandsNew[m_CurrentFrameIndex] = false;
 		pDevice->Reset(swapchainCommands);
 		pDevice->Begin(swapchainCommands);
-		pDevice->BeginRenderPass(swapchainCommands, m_SwapchainPasses[m_CurrentImageIndex]);
+		pDevice->BeginRenderPass(swapchainCommands, m_SwapchainPasses[m_CurrentSemaphoreIndex]);
 		pDevice->EndRenderPass(swapchainCommands);
 		pDevice->End(swapchainCommands);
-		pDevice->Commit(swapchainCommands, { m_ImageAvailableSemaphores[m_CurrentFrameIndex] }, { m_RenderingFinishedSemaphores[m_CurrentFrameIndex] });
+		pDevice->Commit(swapchainCommands, { m_ImageAvailableSemaphores[m_CurrentSemaphoreIndex] },
+			{ m_RenderingFinishedSemaphores[m_CurrentSemaphoreIndex] });
 	}
 
 	void GloryRendererModule::Cleanup()

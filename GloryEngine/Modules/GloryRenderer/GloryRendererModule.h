@@ -179,8 +179,8 @@ namespace Glory
 		std::vector<bool> m_CommandsNew;
 		std::vector<SemaphoreHandle> m_ImageAvailableSemaphores;
 		std::vector<SemaphoreHandle> m_RenderingFinishedSemaphores;
-		uint32_t m_CurrentImageIndex = 0;
+		uint32_t m_CurrentSemaphoreIndex = 0;
 		uint32_t m_CurrentFrameIndex = 0;
-		uint32_t m_MaxFramesInFlight = 4;
+		uint32_t m_ImageCount = 0;
 	};
 }
