@@ -92,6 +92,9 @@ namespace Glory
 		virtual std::string_view DebugOverlayName(size_t index) const override;
 		virtual TextureHandle DebugOverlay(size_t index) const override;
 
+		virtual void OnWindowResized() override;
+		virtual void OnSwapchainChanged() override;
+
 	private:
 		size_t GetGCD(size_t a, size_t b); // TODO: Move this to somewhere it can be used from anywhere and make it take templates
 

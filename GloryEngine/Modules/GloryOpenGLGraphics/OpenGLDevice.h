@@ -99,7 +99,7 @@ namespace Glory
 
     struct GL_Swapchain
     {
-        static constexpr GraphicsHandleType HandleType = H_SwapChain;
+        static constexpr GraphicsHandleType HandleType = H_Swapchain;
 
         Window* m_pWindow;
     };
@@ -140,9 +140,10 @@ namespace Glory
 
         virtual void PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>&,
             const std::vector<TextureHandle>&, PipelineStageFlagBits, PipelineStageFlagBits) override;
+        virtual SwapchainResult AqcuireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle) override;
+        virtual SwapchainResult Present(SwapchainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>& waitSemaphores={}) override;
 
-        virtual void AqcuireNextSwapchainImage(SwapChainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle) override;
-        virtual void Present(SwapChainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>& waitSemaphores={}) override;
+        virtual void WaitIdle() override;
 
     private: /* Resource management */
         virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;
@@ -170,9 +171,10 @@ namespace Glory
         virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo) override;
         virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) override;
         virtual void UpdateDescriptorSet(DescriptorSetHandle descriptorSet, const DescriptorSetUpdateInfo& setWriteInfo) override;
-        virtual SwapChainHandle CreateSwapChain(Window* pWindow, bool vsync=false, uint32_t minImageCount=0) override;
-        virtual uint32_t GetSwapchainImageCount(SwapChainHandle swapChain) override;
-        virtual TextureHandle GetSwapchainImage(SwapChainHandle swapChain, uint32_t imageIndex) override;
+        virtual SwapchainHandle CreateSwapchain(Window* pWindow, bool vsync=false, uint32_t minImageCount=0) override;
+        virtual uint32_t GetSwapchainImageCount(SwapchainHandle swapchain) override;
+        virtual TextureHandle GetSwapchainImage(SwapchainHandle swapchain, uint32_t imageIndex) override;
+        virtual void RecreateSwapchain(SwapchainHandle swapchain) override;
         virtual SemaphoreHandle CreateSemaphore() override;
 
         virtual void FreeBuffer(BufferHandle& handle) override;
@@ -184,7 +186,7 @@ namespace Glory
         virtual void FreePipeline(PipelineHandle& handle) override;
         virtual void FreeDescriptorSetLayout(DescriptorSetLayoutHandle& handle) override;
         virtual void FreeDescriptorSet(DescriptorSetHandle& handle) override;
-        virtual void FreeSwapChain(SwapChainHandle& handle) override;
+        virtual void FreeSwapchain(SwapchainHandle& handle) override;
         virtual void FreeSemaphore(SemaphoreHandle& handle) override;
 
     private:

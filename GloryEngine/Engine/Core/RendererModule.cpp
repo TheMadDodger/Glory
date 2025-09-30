@@ -468,7 +468,9 @@ namespace Glory
 
 	void RendererModule::OnWindowResize(glm::uvec2 size)
 	{
+		if (size == m_Resolution || size.x == 0 || size.y == 0) return;
 		m_Resolution = size;
+		OnWindowResized();
 	}
 
 	void RendererModule::RenderOnBackBuffer(RenderTexture* pTexture)
@@ -569,8 +571,14 @@ namespace Glory
 		return m_Resolution;
 	}
 
-	void RendererModule::SetSwapchain(SwapChainHandle swapchain)
+	void RendererModule::SetSwapchain(SwapchainHandle swapchain)
 	{
 		m_Swapchain = swapchain;
+		OnSwapchainChanged();
+	}
+
+	void RendererModule::SetEnabled(bool enabled)
+	{
+		m_Enabled = enabled;
 	}
 }

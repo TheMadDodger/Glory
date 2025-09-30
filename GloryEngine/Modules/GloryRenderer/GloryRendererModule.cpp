@@ -155,9 +155,17 @@ namespace Glory
 
 	void GloryRendererModule::PresentFrame()
 	{
+		if (!m_Enabled) return;
+
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice || !m_Swapchain) return;
-		pDevice->Present(m_Swapchain, m_CurrentFrameIndex, { m_RenderingFinishedSemaphores[m_CurrentSemaphoreIndex] });
+		const GraphicsDevice::SwapchainResult result = pDevice->Present(m_Swapchain, m_CurrentFrameIndex, { m_RenderingFinishedSemaphores[m_CurrentSemaphoreIndex] });
+		if (result == GraphicsDevice::SwapchainResult::S_OutOfDate)
+		{
+			OnWindowResized();
+			return;
+		}
+
 		m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % m_ImageCount;
 		m_CurrentSemaphoreIndex = (m_CurrentSemaphoreIndex + 1) % m_ImageCount;
 	}
@@ -452,6 +460,8 @@ namespace Glory
 
 	void GloryRendererModule::Draw()
 	{
+		if (!m_Enabled) return;
+
 		const ModuleSettings& settings = Settings();
 		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
 
@@ -460,33 +470,6 @@ namespace Glory
 
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice) return;
-
-		if (m_Swapchain && m_SwapchainPasses.empty() || m_Swapchain && m_SwapchainPasses.size() < pDevice->GetSwapchainImageCount(m_Swapchain))
-		{
-			m_ImageCount = pDevice->GetSwapchainImageCount(m_Swapchain);
-			m_SwapchainPasses.resize(m_ImageCount);
-			m_SwapchainCommands.resize(m_ImageCount);
-			m_CommandsNew.resize(m_ImageCount, true);
-			m_RenderingFinishedSemaphores.resize(m_ImageCount);
-			m_ImageAvailableSemaphores.resize(m_ImageCount);
-			for (size_t i = 0; i < m_ImageCount; ++i)
-			{
-				TextureHandle image = pDevice->GetSwapchainImage(m_Swapchain, i);
-
-				RenderPassInfo renderPassInfo;
-				renderPassInfo.RenderTextureInfo.HasDepth = false;
-				renderPassInfo.RenderTextureInfo.HasStencil = false;
-				renderPassInfo.RenderTextureInfo.EnableDepthStencilSampling = false;
-				renderPassInfo.RenderTextureInfo.Width = m_Resolution.x;
-				renderPassInfo.RenderTextureInfo.Height = m_Resolution.y;
-				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("color", PixelFormat::PF_BGRA, PixelFormat::PF_B8G8R8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float, false));
-				renderPassInfo.RenderTextureInfo.Attachments[0].Texture = image;
-				m_SwapchainPasses[i] = pDevice->CreateRenderPass(std::move(renderPassInfo));
-				m_SwapchainCommands[i] = pDevice->CreateCommandBuffer();
-				m_RenderingFinishedSemaphores[i] = pDevice->CreateSemaphore();
-				m_ImageAvailableSemaphores[i] = pDevice->CreateSemaphore();
-			}
-		}
 
 		/* Make sure every camera has a render pass */
 		//for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
@@ -615,6 +598,7 @@ namespace Glory
 		}
 
 		pDevice->AqcuireNextSwapchainImage(m_Swapchain, &m_CurrentFrameIndex, m_ImageAvailableSemaphores[m_CurrentSemaphoreIndex]);
+
 		m_CommandsNew[m_CurrentFrameIndex] = false;
 		pDevice->Reset(swapchainCommands);
 		pDevice->Begin(swapchainCommands);
@@ -694,6 +678,58 @@ namespace Glory
 			return m_pShadowAtlas->GetTexture();
 		}
 		return NULL;
+	}
+
+	void GloryRendererModule::OnWindowResized()
+	{
+		if (!m_Swapchain) return;
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+		if (!pDevice) return;
+		pDevice->WaitIdle();
+
+		for (size_t i = 0; i < m_SwapchainPasses.size(); ++i)
+			pDevice->FreeRenderPass(m_SwapchainPasses[i]);
+
+		pDevice->RecreateSwapchain(m_Swapchain);
+		OnSwapchainChanged();
+	}
+
+	void GloryRendererModule::OnSwapchainChanged()
+	{
+		if (!m_Swapchain) return;
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+		if (!pDevice) return;
+		m_ImageCount = pDevice->GetSwapchainImageCount(m_Swapchain);
+		m_SwapchainPasses.resize(m_ImageCount, 0ull);
+		m_SwapchainCommands.resize(m_ImageCount, 0ull);
+		m_CommandsNew.resize(m_ImageCount, true);
+		m_RenderingFinishedSemaphores.resize(m_ImageCount, 0ull);
+		m_ImageAvailableSemaphores.resize(m_ImageCount, 0ull);
+		for (size_t i = 0; i < m_ImageCount; ++i)
+		{
+			m_CommandsNew[i] = true;
+
+			TextureHandle image = pDevice->GetSwapchainImage(m_Swapchain, i);
+			RenderPassInfo renderPassInfo;
+			renderPassInfo.RenderTextureInfo.HasDepth = false;
+			renderPassInfo.RenderTextureInfo.HasStencil = false;
+			renderPassInfo.RenderTextureInfo.EnableDepthStencilSampling = false;
+			renderPassInfo.RenderTextureInfo.Width = m_Resolution.x;
+			renderPassInfo.RenderTextureInfo.Height = m_Resolution.y;
+			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("color", PixelFormat::PF_BGRA, PixelFormat::PF_B8G8R8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float, false));
+			renderPassInfo.RenderTextureInfo.Attachments[0].Texture = image;
+			if (!m_SwapchainPasses[i])
+				m_SwapchainPasses[i] = pDevice->CreateRenderPass(std::move(renderPassInfo));
+			if (!m_SwapchainCommands[i])
+				m_SwapchainCommands[i] = pDevice->CreateCommandBuffer();
+			if (!m_RenderingFinishedSemaphores[i])
+				m_RenderingFinishedSemaphores[i] = pDevice->CreateSemaphore();
+			if (!m_ImageAvailableSemaphores[i])
+				m_ImageAvailableSemaphores[i] = pDevice->CreateSemaphore();
+		}
+
+		m_CurrentSemaphoreIndex = 0;
+		m_CurrentFrameIndex = 0;
 	}
 
 	size_t GloryRendererModule::GetGCD(size_t a, size_t b)

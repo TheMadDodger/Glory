@@ -183,7 +183,9 @@ namespace Glory
 
 		virtual void PresentFrame() = 0;
 
-		void SetSwapchain(SwapChainHandle swapchain);
+		void SetSwapchain(SwapchainHandle swapchain);
+
+		void SetEnabled(bool enabled=true);
 
 	protected:
 		virtual void OnSubmitDynamic(const RenderData& renderData) {}
@@ -191,6 +193,8 @@ namespace Glory
 		virtual void OnUnsubmitCamera(CameraRef camera) {}
 		virtual void OnCameraUpdated(CameraRef camera) {}
 		virtual void OnSubmit(const LightData& light) {}
+		virtual void OnWindowResized() {}
+		virtual void OnSwapchainChanged() {}
 
 	protected:
 		virtual void Initialize() override;
@@ -237,6 +241,7 @@ namespace Glory
 		glm::uvec2 m_Resolution{ 1920, 1080 };
 		glm::uvec2 m_LastResolution{ 1920, 1080 };
 
-		SwapChainHandle m_Swapchain = 0;
+		SwapchainHandle m_Swapchain = 0;
+		bool m_Enabled = true;
 	};
 }

@@ -88,8 +88,8 @@ namespace Glory
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (pDevice)
 		{
-			m_SwapChain = pDevice->CreateSwapChain(m_pWindows->GetMainWindow());
-			m_pRenderer->SetSwapchain(m_SwapChain);
+			m_Swapchain = pDevice->CreateSwapchain(m_pWindows->GetMainWindow());
+			m_pRenderer->SetSwapchain(m_Swapchain);
 		}
 
 		/* Load splash screen */
@@ -156,7 +156,7 @@ namespace Glory
 		}
 
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
-		if (m_SwapChain) pDevice->FreeSwapChain(m_SwapChain);
+		if (m_Swapchain) pDevice->FreeSwapchain(m_Swapchain);
 
 		m_IsRunning = false;
 		m_pEngine->GetSceneManager()->Stop();

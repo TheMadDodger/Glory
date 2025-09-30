@@ -71,7 +71,7 @@ namespace Glory
 		std::vector<std::filesystem::path> m_AppendedAssetDatabases;
 		std::string m_DataPath;
 
-		SwapChainHandle m_SwapChain = 0;
+		SwapchainHandle m_Swapchain = 0;
 
 		std::chrono::time_point<std::chrono::system_clock> m_LastRenderedFrame;
 		float m_MaxFramerate = 300.0f;

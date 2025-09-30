@@ -585,25 +585,26 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
-	void OpenGLDevice::AqcuireNextSwapchainImage(SwapChainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle)
+	GraphicsDevice::SwapchainResult OpenGLDevice::AqcuireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle)
 	{
 		GL_Swapchain* glSwapchain = m_Swapchains.Find(swapchain);
 		if (!glSwapchain)
 		{
 			Debug().LogError("OpenGLDevice::AqcuireNextSwapchainImage: Invalid swap chain handle.");
-			return;
+			return GraphicsDevice::SwapchainResult::S_Error;
 		}
 
 		/* Get next available image */
+		return GraphicsDevice::SwapchainResult::S_Success;
 	}
 
-	void OpenGLDevice::Present(SwapChainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>&)
+	GraphicsDevice::SwapchainResult OpenGLDevice::Present(SwapchainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>&)
 	{
 		GL_Swapchain* glSwapchain = m_Swapchains.Find(swapchain);
 		if (!glSwapchain)
 		{
 			Debug().LogError("OpenGLDevice::Present: Invalid swap chain handle.");
-			return;
+			return GraphicsDevice::SwapchainResult::S_Error;
 		}
 
 		/* Blit current image to window back buffer */
@@ -612,6 +613,12 @@ namespace Glory
 
 		/* Swap window */
 		glSwapchain->m_pWindow->GLSwapWindow();
+		return GraphicsDevice::SwapchainResult::S_Success;
+	}
+
+	void OpenGLDevice::WaitIdle()
+	{
+		glFlush();
 	}
 
 #pragma endregion
@@ -1351,9 +1358,9 @@ namespace Glory
 		}
 	}
 
-	SwapChainHandle OpenGLDevice::CreateSwapChain(Window* pWindow, bool vsync, uint32_t minImageCount)
+	SwapchainHandle OpenGLDevice::CreateSwapchain(Window* pWindow, bool vsync, uint32_t minImageCount)
 	{
-		SwapChainHandle handle;
+		SwapchainHandle handle;
 		GL_Swapchain& swapchain = m_Swapchains.Emplace(handle, GL_Swapchain());
 		swapchain.m_pWindow = pWindow;
 		pWindow->SetGLSwapInterval(vsync ? 1 : 0);
@@ -1368,14 +1375,18 @@ namespace Glory
 		return handle;
 	}
 
-	uint32_t OpenGLDevice::GetSwapchainImageCount(SwapChainHandle swapChain)
+	uint32_t OpenGLDevice::GetSwapchainImageCount(SwapchainHandle swapchain)
 	{
 		return 0;
 	}
 
-	TextureHandle OpenGLDevice::GetSwapchainImage(SwapChainHandle swapChain, uint32_t imageIndex)
+	TextureHandle OpenGLDevice::GetSwapchainImage(SwapchainHandle swapchain, uint32_t imageIndex)
 	{
 		return TextureHandle();
+	}
+
+	void OpenGLDevice::RecreateSwapchain(SwapchainHandle swapchain)
+	{
 	}
 
 	SemaphoreHandle OpenGLDevice::CreateSemaphore()
@@ -1573,12 +1584,12 @@ namespace Glory
 		Debug().LogInfo(str.str());
 	}
 
-	void OpenGLDevice::FreeSwapChain(SwapChainHandle& handle)
+	void OpenGLDevice::FreeSwapchain(SwapchainHandle& handle)
 	{
 		GL_Swapchain* glSwapchain = m_Swapchains.Find(handle);
 		if (!glSwapchain)
 		{
-			Debug().LogError("OpenGLDevice::FreeSwapChain: Invalid swap chain handle.");
+			Debug().LogError("OpenGLDevice::FreeSwapchain: Invalid swap chain handle.");
 			return;
 		}
 

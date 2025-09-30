@@ -28,8 +28,8 @@ namespace Glory
 		H_DescriptorSet,
 		/** @brief CommandBuffer */
 		H_CommandBuffer,
-		/** @brief SwapChain */
-		H_SwapChain,
+		/** @brief Swapchain */
+		H_Swapchain,
 		/** @brief Semaphore */
 		H_Semaphore,
 		/** @brief Fence */
@@ -94,8 +94,8 @@ namespace Glory
 	typedef GraphicsHandle<H_DescriptorSet> DescriptorSetHandle;
 	/** @brief CommandBuffer handle */
 	typedef GraphicsHandle<H_CommandBuffer> CommandBufferHandle;
-	/** @brief SwapChain handle */
-	typedef GraphicsHandle<H_SwapChain> SwapChainHandle;
+	/** @brief Swapchain handle */
+	typedef GraphicsHandle<H_Swapchain> SwapchainHandle;
 	/** @brief Semaphore handle */
 	typedef GraphicsHandle<H_Semaphore> SemaphoreHandle;
 	/** @brief Fence handle */

@@ -381,9 +381,34 @@ namespace Glory
 		virtual void PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>& buffers,
 			const std::vector<TextureHandle>& textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage) = 0;
 
-		virtual void AqcuireNextSwapchainImage(SwapChainHandle swapchain, uint32_t* imageIndex,
+		enum SwapchainResult
+		{
+			S_Error = -1,
+			S_Success,
+			S_OutOfDate,
+		};
+
+		/**
+		 * @brief Aqcuire the next swapchain image for rendering
+		 * @param swapchain The swapchain to get the image from
+		 * @param imageIndex The swapchain image index
+		 * @param signalSemaphore Semaphore to signal when the image is ready
+		 * @returns Result of aqcuiring the image, @ref SwapchainResult::S_Success on success,
+		 *			@ref SwapchainResult::S_OutOfDate if the swapchain needs to be recreated.
+		 */
+		virtual SwapchainResult AqcuireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex,
 			SemaphoreHandle signalSemaphore=NULL) = 0;
-		virtual void Present(SwapChainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>& waitSemaphores={}) = 0;
+		/**
+		 * @brief Swap the backbuffer
+		 * @param swapchain The swapchain to present from
+		 * @param imageIndex The swapchain image index to present
+		 * @param waitSemaphores Semaphores to wait on
+		 * @returns Result of presenting the image, @ref SwapchainResult::S_Success on success,
+		 *			@ref SwapchainResult::S_OutOfDate if the swapchain needs to be recreated.
+		 */
+		virtual SwapchainResult Present(SwapchainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>& waitSemaphores={}) = 0;
+
+		virtual void WaitIdle() = 0;
 
 	public: /* Resource caching */
 		/**
@@ -566,9 +591,11 @@ namespace Glory
 		virtual void UpdateDescriptorSet(DescriptorSetHandle descriptorSet, const DescriptorSetUpdateInfo& setWriteInfo) = 0;
 
 		/* Swap chain */
-		virtual SwapChainHandle CreateSwapChain(Window* pWindow, bool vsync=false, uint32_t minImageCount=0) = 0;
-		virtual uint32_t GetSwapchainImageCount(SwapChainHandle swapChain) = 0;
-		virtual TextureHandle GetSwapchainImage(SwapChainHandle swapChain, uint32_t imageIndex) = 0;
+		virtual SwapchainHandle CreateSwapchain(Window* pWindow, bool vsync=false, uint32_t minImageCount=0) = 0;
+		virtual uint32_t GetSwapchainImageCount(SwapchainHandle swapchain) = 0;
+		virtual TextureHandle GetSwapchainImage(SwapchainHandle swapchain, uint32_t imageIndex) = 0;
+		//virtual void ChangeSwapchainImagecount(SwapchainHandle swapchain, bool vsync=false, uint32_t minImageCount=0) = 0;
+		virtual void RecreateSwapchain(SwapchainHandle swapchain) = 0;
 
 		/* Synchronization */
 		virtual SemaphoreHandle CreateSemaphore() = 0;
@@ -594,7 +621,7 @@ namespace Glory
 		/** @brief Free a descriptor set from device memory */
 		virtual void FreeDescriptorSet(DescriptorSetHandle& handle) = 0;
 		/** @brief Free a swap chain from device memory */
-		virtual void FreeSwapChain(SwapChainHandle& handle) = 0;
+		virtual void FreeSwapchain(SwapchainHandle& handle) = 0;
 		/** @brief Free a semaphore from device memory */
 		virtual void FreeSemaphore(SemaphoreHandle& handle) = 0;
 

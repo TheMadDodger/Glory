@@ -580,14 +580,17 @@ namespace Glory
 		case SDL_WINDOWEVENT_MINIMIZED:
 			/* Window has been minimized */
 			m_Maximized = false;
+			pRenderer->SetEnabled(false);
 			break;
 		case SDL_WINDOWEVENT_MAXIMIZED:
 			/* Window has been maximized */
 			m_Maximized = true;
+			pRenderer->SetEnabled(true);
 			break;
 		case SDL_WINDOWEVENT_RESTORED:
 			/* Window has been restored to normal size and position */
 			m_Maximized = false;
+			pRenderer->SetEnabled(true);
 			break;
 		case SDL_WINDOWEVENT_ICCPROF_CHANGED:
 			/* The ICC profile of the window's display has changed. */
