@@ -236,8 +236,6 @@ namespace Glory
 		std::vector<PipelineBatch> m_DynamicPipelineRenderDatas;
 		std::vector<PipelineBatch> m_DynamicLatePipelineRenderDatas;
 
-		CommandBufferHandle m_CommandBuffer;
-
 		glm::uvec2 m_Resolution{ 1920, 1080 };
 		glm::uvec2 m_LastResolution{ 1920, 1080 };
 

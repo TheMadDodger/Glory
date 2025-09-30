@@ -98,19 +98,20 @@ namespace Glory
 	private:
 		size_t GetGCD(size_t a, size_t b); // TODO: Move this to somewhere it can be used from anywhere and make it take templates
 
-		void RenderBatches(const std::vector<PipelineBatch>& batches, const std::vector<PipelineBatchData>& batchDatas, size_t cameraIndex, DescriptorSetHandle globalRenderSet, const glm::vec4& viewport);
+		void RenderBatches(CommandBufferHandle commandBuffer, const std::vector<PipelineBatch>& batches,
+			const std::vector<PipelineBatchData>& batchDatas, size_t cameraIndex, DescriptorSetHandle globalRenderSet, const glm::vec4& viewport);
 		void PrepareDataPass();
 		void PrepareBatches(const std::vector<PipelineBatch>& batches, std::vector<PipelineBatchData>& batchDatas);
 		void GenerateClusterSSBO(uint32_t cameraIndex, GraphicsDevice* pDevice, CameraRef camera, DescriptorSetHandle clusterSet);
 
-		void ClusterPass(uint32_t cameraIndex);
-		void DynamicObjectsPass(uint32_t cameraIndex);
+		void ClusterPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex);
+		void DynamicObjectsPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex);
 
 		void GenerateDomeSamplePointsSSBO(GraphicsDevice* pDevice, uint32_t size);
 		void GenerateNoiseTexture(GraphicsDevice* pDevice);
 
-		void ShadowMapsPass();
-		void RenderShadows(size_t lightIndex, const glm::vec4& viewport);
+		void ShadowMapsPass(CommandBufferHandle commandBuffer);
+		void RenderShadows(CommandBufferHandle commandBuffer, size_t lightIndex, const glm::vec4& viewport);
 
 		virtual void OnSubmitCamera(CameraRef camera) override;
 		virtual void OnUnsubmitCamera(CameraRef camera) override;
@@ -131,7 +132,7 @@ namespace Glory
 		BufferHandle m_SSAOConstantsBuffer = 0;
 		BufferHandle m_SamplePointsDomeSSBO = 0;
 
-		/* Descriptors */
+		/* Descriptor set layouts */
 		DescriptorSetLayoutHandle m_GlobalRenderSetLayout;
 		DescriptorSetLayoutHandle m_GlobalShadowRenderSetLayout;
 		DescriptorSetLayoutHandle m_GlobalClusterSetLayout;
@@ -142,6 +143,7 @@ namespace Glory
 		DescriptorSetLayoutHandle m_SSAOSamplersSetLayout;
 		DescriptorSetLayoutHandle m_NoiseSamplerSetLayout;
 
+		/* Descriptor sets */
 		DescriptorSetHandle m_GlobalRenderSet;
 		DescriptorSetHandle m_GlobalShadowRenderSet;
 		DescriptorSetHandle m_GlobalClusterSet;
@@ -178,12 +180,30 @@ namespace Glory
 		std::vector<CameraRef> m_DirtyCameraPerspectives;
 
 		std::vector<RenderPassHandle> m_SwapchainPasses;
-		std::vector<CommandBufferHandle> m_SwapchainCommands;
-		std::vector<bool> m_CommandsNew;
+		Utils::BitSet m_CommandsNew;
 		std::vector<SemaphoreHandle> m_ImageAvailableSemaphores;
 		std::vector<SemaphoreHandle> m_RenderingFinishedSemaphores;
 		uint32_t m_CurrentSemaphoreIndex = 0;
 		uint32_t m_CurrentFrameIndex = 0;
-		uint32_t m_ImageCount = 0;
+		uint32_t m_ImageCount = 1;
+
+		struct UniqueCameraData
+		{
+			BufferHandle m_ClusterSSBO = 0;
+			DescriptorSetHandle m_ClusterSet = 0;
+
+			std::vector<RenderPassHandle> m_RenderPasses;
+			std::vector<RenderPassHandle> m_SSAORenderPasses;
+			std::vector<RenderPassHandle> m_DeferredRenderPasses;
+			std::vector<BufferHandle> m_LightIndexSSBOs;
+			std::vector<BufferHandle> m_LightGridSSBOs;
+			std::vector<BufferHandle> m_LightDistancesSSBOs;
+
+			std::vector<DescriptorSetHandle> m_LightSets;
+			std::vector<DescriptorSetHandle> m_SSAOSamplersSets;
+		};
+
+		std::map<UUID, UniqueCameraData> m_UniqueCameraDatas;
+		std::vector<CommandBufferHandle> m_FrameCommandBuffers;
 	};
 }
