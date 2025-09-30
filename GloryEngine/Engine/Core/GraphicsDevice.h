@@ -120,6 +120,7 @@ namespace Glory
 		void Clear()
 		{
 			m_Resources.clear();
+			m_IDs.clear();
 		}
 
 		/**
@@ -129,6 +130,7 @@ namespace Glory
 		 */
 		T& Emplace(GraphicsHandle<T::HandleType> handle, T&& resource)
 		{
+			m_IDs.push_back(handle.m_ID);
 			return m_Resources.emplace(handle.m_ID, std::move(resource)).first->second;
 		}
 
@@ -136,6 +138,7 @@ namespace Glory
 		template <class... _Valty>
 		T& Emplace(GraphicsHandle<T::HandleType> handle, _Valty&&... _Val)
 		{
+			m_IDs.push_back(handle.m_ID);
 			return m_Resources.emplace(handle.m_ID, forward<_Valty>(_Val)...).first->second;
 		}
 
@@ -158,10 +161,24 @@ namespace Glory
 		void Erase(GraphicsHandle<T::HandleType> handle)
 		{
 			m_Resources.erase(handle.m_ID);
+			auto itor = std::find(m_IDs.begin(), m_IDs.end(), handle.m_ID);
+			m_IDs.erase(itor);
+		}
+
+		/**
+		 * @brief Free all resources from this container and clear it
+		 * @param @param handler Callback to the free implementation
+		 */
+		void FreeAll(std::function<void(GraphicsHandle<T::HandleType>)> handler)
+		{
+			for (auto id : m_IDs)
+				handler(GraphicsHandle<T::HandleType>(id));
+			Clear();
 		}
 
 	private:
 		std::unordered_map<UUID, T> m_Resources;
+		std::vector<UUID> m_IDs;
 	};
 
 	/** @brief Render pass info */

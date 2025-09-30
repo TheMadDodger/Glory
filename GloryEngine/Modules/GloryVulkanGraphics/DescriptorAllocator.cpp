@@ -22,20 +22,19 @@ namespace Glory
 
 	DescriptorAllocator::DescriptorAllocator(VulkanDevice* pDevice): m_pDevice(pDevice), m_ActivePoolIndex(0)
 	{
-		for (auto pool : m_DescriptorPools)
-			m_pDevice->LogicalDevice().destroyDescriptorPool(pool, nullptr);
-		m_DescriptorPools.clear();
 	}
 
 	DescriptorAllocator::~DescriptorAllocator()
 	{
+		for (auto pool : m_DescriptorPools)
+			m_pDevice->LogicalDevice().destroyDescriptorPool(pool);
+		m_DescriptorPools.clear();
 	}
 
 	void DescriptorAllocator::ResetPools()
 	{
-		for (auto pool : m_DescriptorPools) {
+		for (auto pool : m_DescriptorPools)
 			m_pDevice->LogicalDevice().resetDescriptorPool(pool);
-		}
 		m_ActivePoolIndex = 0;
 	}
 

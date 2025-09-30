@@ -44,6 +44,38 @@ namespace Glory
 	VulkanDevice::~VulkanDevice()
 	{
 		m_LogicalDevice.waitIdle();
+		m_Semaphores.FreeAll(std::bind(&VulkanDevice::FreeSemaphore, this, std::placeholders::_1));
+		m_Swapchains.FreeAll(std::bind(&VulkanDevice::FreeSwapchain, this, std::placeholders::_1));
+		m_Pipelines.FreeAll(std::bind(&VulkanDevice::FreePipeline, this, std::placeholders::_1));
+		m_Shaders.FreeAll(std::bind(&VulkanDevice::FreeShader, this, std::placeholders::_1));
+		m_RenderPasses.FreeAll(std::bind(&VulkanDevice::FreeRenderPass, this, std::placeholders::_1));
+		m_RenderTextures.FreeAll(std::bind(&VulkanDevice::FreeRenderTexture, this, std::placeholders::_1));
+		m_Textures.FreeAll(std::bind(&VulkanDevice::FreeTexture, this, std::placeholders::_1));
+		m_Meshes.FreeAll(std::bind(&VulkanDevice::FreeMesh, this, std::placeholders::_1));
+		m_Buffers.FreeAll(std::bind(&VulkanDevice::FreeBuffer, this, std::placeholders::_1));
+		m_DescriptorSets.Clear();
+		m_DescriptorAllocator.ResetPools();
+		m_DescriptorSetLayouts.FreeAll(std::bind(&VulkanDevice::FreeDescriptorSetLayout, this, std::placeholders::_1));
+
+		m_LogicalDevice.destroyCommandPool(m_GraphicsCommandPool);
+		for (auto iter : m_GraphicsCommandPools)
+			m_LogicalDevice.destroyCommandPool(iter.second);
+		m_GraphicsCommandPools.clear();
+		m_CommandBuffers.clear();
+		m_FreeCommandBuffers.clear();
+
+		for (auto& iter : m_CommandBufferFences)
+			m_LogicalDevice.destroyFence(iter.second);
+		m_CommandBufferFences.clear();
+		for (auto fence: m_FreeFences)
+			m_LogicalDevice.destroyFence(fence);
+		m_FreeFences.clear();
+		for (auto& iter : m_CachedSamlers)
+			m_LogicalDevice.destroySampler(iter.second);
+		m_CachedSamlers.clear();
+		m_CachedDescriptorSetLayouts.clear();
+
+		m_LogicalDevice.destroy();
 	}
 
 	VulkanGraphicsModule* VulkanDevice::GraphicsModule()
@@ -2117,6 +2149,9 @@ namespace Glory
 
 		m_LogicalDevice.destroyBuffer(buffer->m_VKBuffer);
 		m_LogicalDevice.freeMemory(buffer->m_VKMemory);
+
+		m_Buffers.Erase(handle);
+		handle = 0;
 
 		std::stringstream str;
 		str << "VulkanDevice: Buffer " << handle << " was freed from device memory.";

@@ -352,8 +352,16 @@ namespace Glory
 
 	OpenGLDevice::~OpenGLDevice()
 	{
-		m_Buffers.Clear();
-		m_Meshes.Clear();
+		m_Swapchains.FreeAll(std::bind(&OpenGLDevice::FreeSwapchain, this, std::placeholders::_1));
+		m_Pipelines.FreeAll(std::bind(&OpenGLDevice::FreePipeline, this, std::placeholders::_1));
+		m_Shaders.FreeAll(std::bind(&OpenGLDevice::FreeShader, this, std::placeholders::_1));
+		m_RenderPasses.FreeAll(std::bind(&OpenGLDevice::FreeRenderPass, this, std::placeholders::_1));
+		m_RenderTextures.FreeAll(std::bind(&OpenGLDevice::FreeRenderTexture, this, std::placeholders::_1));
+		m_Textures.FreeAll(std::bind(&OpenGLDevice::FreeTexture, this, std::placeholders::_1));
+		m_Meshes.FreeAll(std::bind(&OpenGLDevice::FreeMesh, this, std::placeholders::_1));
+		m_Buffers.FreeAll(std::bind(&OpenGLDevice::FreeBuffer, this, std::placeholders::_1));
+		m_Sets.FreeAll(std::bind(&OpenGLDevice::FreeDescriptorSet, this, std::placeholders::_1));
+		m_SetLayouts.FreeAll(std::bind(&OpenGLDevice::FreeDescriptorSetLayout, this, std::placeholders::_1));
 	}
 
 	OpenGLGraphicsModule* OpenGLDevice::GraphicsModule()
