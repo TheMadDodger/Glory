@@ -2149,13 +2149,13 @@ namespace Glory
 
 		m_LogicalDevice.destroyBuffer(buffer->m_VKBuffer);
 		m_LogicalDevice.freeMemory(buffer->m_VKMemory);
-
 		m_Buffers.Erase(handle);
-		handle = 0;
 
 		std::stringstream str;
 		str << "VulkanDevice: Buffer " << handle << " was freed from device memory.";
 		Debug().LogInfo(str.str());
+
+		handle = 0;
 	}
 
 	void VulkanDevice::FreeMesh(MeshHandle& handle)
@@ -2302,11 +2302,12 @@ namespace Glory
 
 		m_LogicalDevice.destroyDescriptorSetLayout(vkSetLayout->m_VKLayout);
 		m_DescriptorSetLayouts.Erase(handle);
-		handle = 0;
 
 		std::stringstream str;
 		str << "VulkanDevice: Descriptor set layout " << handle << " was freed from device memory.";
 		Debug().LogInfo(str.str());
+
+		handle = 0;
 	}
 
 	void VulkanDevice::FreeDescriptorSet(DescriptorSetHandle& handle)
@@ -2320,11 +2321,12 @@ namespace Glory
 		
 		m_LogicalDevice.freeDescriptorSets(vkSet->m_VKDescriptorPool, 1, &vkSet->m_VKDescriptorSet);
 		m_DescriptorSets.Erase(handle);
-		handle = 0;
 
 		std::stringstream str;
 		str << "VulkanDevice: Descriptor set " << handle << " was freed from device memory.";
 		Debug().LogInfo(str.str());
+
+		handle = 0;
 	}
 
 	void VulkanDevice::FreeSwapchain(SwapchainHandle& handle)
@@ -2347,11 +2349,12 @@ namespace Glory
 		vkSwapchain->m_Textures.clear();
 
 		m_Swapchains.Erase(handle);
-		handle = 0;
 
 		std::stringstream str;
 		str << "VulkanDevice: Swap chain " << handle << " was freed from device memory.";
 		Debug().LogInfo(str.str());
+
+		handle = 0;
 	}
 
 	void VulkanDevice::FreeSemaphore(SemaphoreHandle& handle)
@@ -2366,11 +2369,12 @@ namespace Glory
 		m_LogicalDevice.destroySemaphore(vkSemaphore->m_VKSemaphore);
 
 		m_Semaphores.Erase(handle);
-		handle = 0;
 
 		std::stringstream str;
 		str << "VulkanDevice: Semaphore " << handle << " was freed from device memory.";
 		Debug().LogInfo(str.str());
+
+		handle = 0;
 	}
 
 	vk::CommandBuffer VulkanDevice::BeginSingleTimeCommands()

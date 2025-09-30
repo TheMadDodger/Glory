@@ -1568,11 +1568,12 @@ namespace Glory
 		}
 
 		m_SetLayouts.Erase(handle);
-		handle = 0;
 
 		std::stringstream str;
 		str << "OpenGLDevice: Set layout " << handle << " was freed from device memory.";
 		Debug().LogInfo(str.str());
+
+		handle = 0;
 	}
 
 	void OpenGLDevice::FreeDescriptorSet(DescriptorSetHandle& handle)
@@ -1585,11 +1586,12 @@ namespace Glory
 		}
 
 		m_Sets.Erase(handle);
-		handle = 0;
 
 		std::stringstream str;
 		str << "OpenGLDevice: Set " << handle << " was freed from device memory.";
 		Debug().LogInfo(str.str());
+
+		handle = 0;
 	}
 
 	void OpenGLDevice::FreeSwapchain(SwapchainHandle& handle)
@@ -1602,11 +1604,12 @@ namespace Glory
 		}
 
 		m_Swapchains.Erase(handle);
-		handle = 0;
 
 		std::stringstream str;
 		str << "OpenGLDevice: Swap chain " << handle << " was freed from device memory.";
 		Debug().LogInfo(str.str());
+
+		handle = 0;
 	}
 
 	void OpenGLDevice::FreeSemaphore(SemaphoreHandle& handle)
