@@ -87,6 +87,7 @@ namespace Glory
 		virtual size_t CameraAttachmentPreviewCount() const override;
 		virtual std::string_view CameraAttachmentPreviewName(size_t index) const override;
 		virtual TextureHandle CameraAttachmentPreview(CameraRef camera, size_t index) const override;
+		virtual TextureHandle FinalColor() const override;
 
 		virtual size_t DebugOverlayCount() const override;
 		virtual std::string_view DebugOverlayName(size_t index) const override;
@@ -142,6 +143,8 @@ namespace Glory
 		DescriptorSetLayoutHandle m_CameraLightSetLayout;
 		DescriptorSetLayoutHandle m_SSAOSamplersSetLayout;
 		DescriptorSetLayoutHandle m_NoiseSamplerSetLayout;
+
+		DescriptorSetLayoutHandle m_DisplayCopySamplerSetLayout;
 
 		/* Descriptor sets */
 		DescriptorSetHandle m_GlobalRenderSet;
@@ -201,9 +204,13 @@ namespace Glory
 
 			std::vector<DescriptorSetHandle> m_LightSets;
 			std::vector<DescriptorSetHandle> m_SSAOSamplersSets;
+			std::vector<DescriptorSetHandle> m_ColorSamplerSets;
 		};
 
 		std::map<UUID, UniqueCameraData> m_UniqueCameraDatas;
 		std::vector<CommandBufferHandle> m_FrameCommandBuffers;
+
+		std::vector<RenderPassHandle> m_FinalFrameColorPasses;
+		PipelineHandle m_DisplayCopyPipeline = 0;
 	};
 }

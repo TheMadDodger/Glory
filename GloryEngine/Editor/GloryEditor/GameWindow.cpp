@@ -15,7 +15,7 @@ namespace Glory::Editor
 	glm::vec2 CustomResolution{ 1920.0f, 1080.0f };
 
 	GameWindow::GameWindow(): EditorWindowTemplate("Game", 1280.0f, 720.0f),
-		m_CurrentOutputCameraIndex(0), m_SelectedRenderTextureIndex(-1)
+		m_CurrentOutputCameraIndex(-1), m_SelectedRenderTextureIndex(-1)
 	{
 		m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar;
 	}
@@ -85,11 +85,14 @@ namespace Glory::Editor
 			}
 
 			const size_t outputCameraCount = pRenderer->GetOutputCameraCount();
-			if (m_CurrentOutputCameraIndex > outputCameraCount)
+			if (m_CurrentOutputCameraIndex != -1 && m_CurrentOutputCameraIndex > outputCameraCount)
 				m_CurrentOutputCameraIndex = 0;
 
-			if (ImGui::BeginMenu(outputCameraCount == 0 ? "No output cameras in scene" : std::string("Camera " + std::to_string(m_CurrentOutputCameraIndex)).data()))
+			if (ImGui::BeginMenu(m_CurrentOutputCameraIndex == -1 ? "Final output color" : std::string("Camera " + std::to_string(m_CurrentOutputCameraIndex)).data()))
 			{
+				if (ImGui::MenuItem("Final output", NULL, m_CurrentOutputCameraIndex == -1))
+					m_CurrentOutputCameraIndex = -1;
+
 				for (size_t i = 0; i < outputCameraCount; ++i)
 				{
 					if (ImGui::MenuItem(std::string("Camera " + std::to_string(i)).data(), NULL, m_CurrentOutputCameraIndex == i))
@@ -101,6 +104,7 @@ namespace Glory::Editor
 				ImGui::EndMenu();
 			}
 
+			ImGui::BeginDisabled(m_CurrentOutputCameraIndex == -1);
 			if (ImGui::BeginMenu(pRenderer->CameraAttachmentPreviewName(m_SelectedRenderTextureIndex).data()))
 			{
 				for (size_t i = 0; i < pRenderer->CameraAttachmentPreviewCount(); ++i)
@@ -113,7 +117,7 @@ namespace Glory::Editor
 
 				ImGui::EndMenu();
 			}
-
+			ImGui::EndDisabled();
 			ImGui::EndMenuBar();
 		}
 	}
@@ -123,18 +127,25 @@ namespace Glory::Editor
 		RendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>();
 
 		const size_t outputCameraCount = pRenderer->GetOutputCameraCount();
-		if (outputCameraCount == 0)
-		{
-			ImGui::TextUnformatted("No output cameras in scene");
-			return;
-		}
-
-		if (m_CurrentOutputCameraIndex > outputCameraCount)
+		if (m_CurrentOutputCameraIndex != -1 && m_CurrentOutputCameraIndex > outputCameraCount)
 			m_CurrentOutputCameraIndex = 0;
+		if (outputCameraCount == 0)
+			m_CurrentOutputCameraIndex = -1;
 
-		CameraRef camera = pRenderer->GetOutputCamera(m_CurrentOutputCameraIndex);
-		TextureHandle texture = pRenderer->CameraAttachmentPreview(camera, size_t(m_SelectedRenderTextureIndex));
-		const glm::uvec2& resolution = camera.GetResolution();
+		TextureHandle texture = NULL;
+		glm::uvec2 resolution{};
+
+		if (m_CurrentOutputCameraIndex == -1)
+		{
+			texture = pRenderer->FinalColor();
+			resolution = pRenderer->Resolution();
+		}
+		else
+		{
+			CameraRef camera = pRenderer->GetOutputCamera(m_CurrentOutputCameraIndex);
+			texture = pRenderer->CameraAttachmentPreview(camera, size_t(m_SelectedRenderTextureIndex));
+			resolution = camera.GetResolution();
+		}
 
 		const float textureAspect = (float)resolution.x/(float)resolution.y;
 

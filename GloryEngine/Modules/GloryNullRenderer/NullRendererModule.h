@@ -36,6 +36,7 @@ namespace Glory
 		virtual size_t CameraAttachmentPreviewCount() const override;
 		virtual std::string_view CameraAttachmentPreviewName(size_t) const override;
 		virtual TextureHandle CameraAttachmentPreview(CameraRef, size_t) const override;
+		virtual TextureHandle FinalColor() const override;
 
 		virtual size_t DebugOverlayCount() const override;
 		virtual std::string_view DebugOverlayName(size_t) const override;

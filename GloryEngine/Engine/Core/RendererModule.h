@@ -157,8 +157,6 @@ namespace Glory
 
 		void OnWindowResize(glm::uvec2 size);
 
-		void RenderOnBackBuffer(RenderTexture* pTexture);
-
 		size_t CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, TextureHandle texture=0);
 		GPUTextureAtlas& GetGPUTextureAtlas(size_t index);
 		const GPUTextureAtlas& GetGPUTextureAtlas(size_t index) const;
@@ -175,6 +173,7 @@ namespace Glory
 		virtual size_t CameraAttachmentPreviewCount() const = 0;
 		virtual std::string_view CameraAttachmentPreviewName(size_t index) const = 0;
 		virtual TextureHandle CameraAttachmentPreview(CameraRef camera, size_t index) const = 0;
+		virtual TextureHandle FinalColor() const = 0;
 
 		virtual size_t DebugOverlayCount() const = 0;
 		virtual std::string_view DebugOverlayName(size_t index) const = 0;

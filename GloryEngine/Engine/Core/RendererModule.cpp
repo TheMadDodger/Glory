@@ -473,16 +473,6 @@ namespace Glory
 		OnWindowResized();
 	}
 
-	void RendererModule::RenderOnBackBuffer(RenderTexture* pTexture)
-	{
-		//REQUIRE_MODULE_CALL(m_pEngine, GraphicsModule, Blit(pTexture), );
-
-		//for (auto& pass : m_RenderPasses[RP_Postblit])
-		//{
-		//	pass.m_Callback(0, this);
-		//}
-	}
-
 	size_t RendererModule::CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, TextureHandle texture)
 	{
 		const size_t index = m_GPUTextureAtlases.size();

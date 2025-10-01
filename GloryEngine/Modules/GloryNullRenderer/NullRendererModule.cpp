@@ -75,6 +75,11 @@ namespace Glory
 		return NULL;
 	}
 
+	TextureHandle NullRendererModule::FinalColor() const
+	{
+		return NULL;
+	}
+
 	size_t NullRendererModule::DebugOverlayCount() const
 	{
 		return 0;

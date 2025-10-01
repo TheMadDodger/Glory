@@ -724,8 +724,13 @@ namespace Glory
 			imageBarriers[i].image = vkTexture->m_VKImage;
 			imageBarriers[i].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 			imageBarriers[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			imageBarriers[i].oldLayout = vk::ImageLayout::eUndefined;
-			imageBarriers[i].newLayout = vk::ImageLayout::eUndefined;
+			imageBarriers[i].oldLayout = vkTexture->m_VKFinalLayout;
+			imageBarriers[i].newLayout = vkTexture->m_VKFinalLayout;
+			imageBarriers[i].subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+			imageBarriers[i].subresourceRange.levelCount = 1;
+			imageBarriers[i].subresourceRange.layerCount = 1;
+			imageBarriers[i].subresourceRange.baseArrayLayer = 0;
+			imageBarriers[i].subresourceRange.baseMipLevel = 0;
 			//imageBarriers[i].srcAccessMask
 			//imageBarriers[i].dstAccessMask
 		}
