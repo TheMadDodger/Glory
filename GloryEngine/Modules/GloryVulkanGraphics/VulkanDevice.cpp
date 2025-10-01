@@ -2742,10 +2742,9 @@ namespace Glory
 	bool VulkanDevice::CreateSwapchain(VK_Swapchain& swapchain, const vk::SurfaceCapabilitiesKHR& capabilities,
 		vk::SurfaceKHR surface, const glm::uvec2& resolution, bool vsync, uint32_t minImageCount)
 	{
-		const vk::Format requestSurfaceImageFormat[] = { vk::Format::eB8G8R8A8Unorm, vk::Format::eR8G8B8A8Unorm, vk::Format::eB8G8R8Unorm, vk::Format::eR8G8B8Unorm };
 		/* Get shaw chain format */
 		const vk::SurfaceFormatKHR swapchainFormat = SelectSurfaceFormat(surface,
-			{ vk::Format::eB8G8R8A8Unorm, vk::Format::eR8G8B8A8Unorm, vk::Format::eB8G8R8Unorm, vk::Format::eR8G8B8Unorm },
+			{ vk::Format::eR8G8B8A8Unorm, vk::Format::eB8G8R8A8Unorm, vk::Format::eR8G8B8Unorm, vk::Format::eB8G8R8Unorm },
 			vk::ColorSpaceKHR::eSrgbNonlinear);
 
 		/* Get shaw chain present mode */

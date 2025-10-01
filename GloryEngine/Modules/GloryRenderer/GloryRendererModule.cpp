@@ -469,6 +469,7 @@ namespace Glory
 		m_CommandsNew.SetAll();
 
 		m_FinalFrameColorPasses.resize(m_ImageCount);
+		m_FinalFrameColorSets.resize(m_ImageCount);
 		for (size_t i = 0; i < m_FinalFrameColorPasses.size(); ++i)
 		{
 			RenderPassInfo info;
@@ -478,10 +479,18 @@ namespace Glory
 			info.RenderTextureInfo.Width = m_Resolution.x;
 			info.RenderTextureInfo.Height = m_Resolution.y;
 			info.RenderTextureInfo.Attachments.push_back(
-				Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb,
+				Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Unorm,
 					Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float)
 			);
 			m_FinalFrameColorPasses[i] = pDevice->CreateRenderPass(std::move(info));
+
+			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_FinalFrameColorPasses[i]);
+			TextureHandle color = pDevice->GetRenderTextureAttachment(renderTexture, 0);
+			DescriptorSetInfo dsInfo;
+			dsInfo.m_Layout = m_DisplayCopySamplerSetLayout;
+			dsInfo.m_Samplers.resize(1);
+			dsInfo.m_Samplers[0].m_TextureHandle = color;
+			m_FinalFrameColorSets[i] = pDevice->CreateDescriptorSet(std::move(dsInfo));
 		}
 	}
 
@@ -674,7 +683,16 @@ namespace Glory
 
 		if (m_Swapchain)
 		{
+			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_FinalFrameColorPasses[m_CurrentFrameIndex]);
+			TextureHandle color = pDevice->GetRenderTextureAttachment(renderTexture, 0);
+
+			pDevice->PipelineBarrier(commandBuffer, {}, { color },
+				PipelineStageFlagBits::PST_ColorAttachmentOutput, PipelineStageFlagBits::PST_FragmentShader);
+
 			pDevice->BeginRenderPass(commandBuffer, m_SwapchainPasses[m_CurrentSemaphoreIndex]);
+			pDevice->BeginPipeline(commandBuffer, m_DisplayCopyPipeline);
+			pDevice->BindDescriptorSets(commandBuffer, m_DisplayCopyPipeline, { m_FinalFrameColorSets[m_CurrentFrameIndex] });
+			pDevice->DrawQuad(commandBuffer);
 			pDevice->EndRenderPass(commandBuffer);
 		}
 		pDevice->End(commandBuffer);
@@ -770,6 +788,13 @@ namespace Glory
 		{
 			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_FinalFrameColorPasses[i]);
 			pDevice->ResizeRenderTexture(renderTexture, m_Resolution.x, m_Resolution.y);
+			TextureHandle color = pDevice->GetRenderTextureAttachment(renderTexture, 0);
+
+			DescriptorSetUpdateInfo updateInfo;
+			updateInfo.m_Samplers.resize(1);
+			updateInfo.m_Samplers[0].m_TextureHandle = color;
+			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
+			pDevice->UpdateDescriptorSet(m_FinalFrameColorSets[i], updateInfo);
 		}
 
 		if (!m_Swapchain) return;
@@ -797,6 +822,7 @@ namespace Glory
 		m_ShadowsPasses.resize(m_ImageCount, 0ull);
 		m_ShadowAtlasses.resize(m_ImageCount, 0ull);
 		m_FinalFrameColorPasses.resize(m_ImageCount, 0ull);
+		m_FinalFrameColorSets.resize(m_ImageCount, 0ull);
 
 		for (size_t i = 0; i < m_ImageCount; ++i)
 		{
@@ -837,12 +863,26 @@ namespace Glory
 			RenderPassInfo finalColorPassInfo;
 			finalColorPassInfo.RenderTextureInfo.HasDepth = false;
 			finalColorPassInfo.RenderTextureInfo.HasStencil = false;
+			finalColorPassInfo.RenderTextureInfo.EnableDepthStencilSampling = false;
+			finalColorPassInfo.RenderTextureInfo.Width = m_Resolution.x;
+			finalColorPassInfo.RenderTextureInfo.Height = m_Resolution.y;
 			finalColorPassInfo.RenderTextureInfo.Attachments.push_back(
-				Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb,
+				Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Unorm,
 					Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float)
 			);
 			if (!m_FinalFrameColorPasses[i])
 				m_FinalFrameColorPasses[i] = pDevice->CreateRenderPass(std::move(finalColorPassInfo));
+
+			if (!m_FinalFrameColorSets[i])
+			{
+				RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_FinalFrameColorPasses[i]);
+				TextureHandle color = pDevice->GetRenderTextureAttachment(renderTexture, 0);
+				DescriptorSetInfo dsInfo;
+				dsInfo.m_Layout = m_DisplayCopySamplerSetLayout;
+				dsInfo.m_Samplers.resize(1);
+				dsInfo.m_Samplers[0].m_TextureHandle = color;
+				m_FinalFrameColorSets[i] = pDevice->CreateDescriptorSet(std::move(dsInfo));
+			}
 		}
 
 		m_CurrentSemaphoreIndex = 0;

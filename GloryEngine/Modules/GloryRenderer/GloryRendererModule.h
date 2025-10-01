@@ -211,6 +211,7 @@ namespace Glory
 		std::vector<CommandBufferHandle> m_FrameCommandBuffers;
 
 		std::vector<RenderPassHandle> m_FinalFrameColorPasses;
+		std::vector<DescriptorSetHandle> m_FinalFrameColorSets;
 		PipelineHandle m_DisplayCopyPipeline = 0;
 	};
 }
