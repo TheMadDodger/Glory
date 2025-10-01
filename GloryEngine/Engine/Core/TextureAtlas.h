@@ -23,7 +23,7 @@ namespace Glory
 		/** @brief Initialize the atlas by creating the nescesary resources */
 		virtual void Initialize() = 0;
 		/** @brief Get the GPU texture resource if available, otherwise nullptr */
-		virtual TextureHandle GetTexture() = 0;
+		virtual TextureHandle GetTexture() const = 0;
 
 		/** @brief Reserver a chunk in the atlas
 		 * @param width Width of the chunk

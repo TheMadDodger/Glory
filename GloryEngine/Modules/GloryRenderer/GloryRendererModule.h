@@ -174,8 +174,8 @@ namespace Glory
 		uint32_t m_SSAOKernelSize = 0;
 
 		/* Shadows */
-		RenderPassHandle m_ShadowsPass = 0;
-		GPUTextureAtlas* m_pShadowAtlas = nullptr;
+		std::vector<RenderPassHandle> m_ShadowsPasses;
+		std::vector<size_t> m_ShadowAtlasses;
 
 		std::vector<CameraRef> m_DirtyCameraPerspectives;
 

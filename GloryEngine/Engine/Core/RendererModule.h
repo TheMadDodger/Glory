@@ -159,7 +159,9 @@ namespace Glory
 
 		void RenderOnBackBuffer(RenderTexture* pTexture);
 
-		GPUTextureAtlas* CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, TextureHandle texture=0);
+		size_t CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, TextureHandle texture=0);
+		GPUTextureAtlas& GetGPUTextureAtlas(size_t index);
+		const GPUTextureAtlas& GetGPUTextureAtlas(size_t index) const;
 
 		void Reset();
 

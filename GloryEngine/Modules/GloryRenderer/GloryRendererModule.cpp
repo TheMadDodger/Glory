@@ -428,20 +428,25 @@ namespace Glory
 			ResetLightDistances[i] = NUM_DEPTH_SLICES;
 		pDevice->AssignBuffer(m_LightDistancesSSBO, ResetLightDistances);*/
 
-		RenderPassInfo shadowsPassInfo;
-		shadowsPassInfo.RenderTextureInfo.EnableDepthStencilSampling = true;
-		shadowsPassInfo.RenderTextureInfo.HasDepth = true;
-		shadowsPassInfo.RenderTextureInfo.HasStencil = false;
-		shadowsPassInfo.RenderTextureInfo.Width = 4096;
-		shadowsPassInfo.RenderTextureInfo.Height = 4096;
-		m_ShadowsPass = pDevice->CreateRenderPass(std::move(shadowsPassInfo));
-		RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_ShadowsPass);
-		TextureHandle texture = pDevice->GetRenderTextureAttachment(renderTexture, 0);
+		m_ShadowsPasses.resize(m_ImageCount);
+		m_ShadowAtlasses.resize(m_ImageCount);
+		for (size_t i = 0; i < m_ShadowsPasses.size(); ++i)
+		{
+			RenderPassInfo shadowsPassInfo;
+			shadowsPassInfo.RenderTextureInfo.EnableDepthStencilSampling = true;
+			shadowsPassInfo.RenderTextureInfo.HasDepth = true;
+			shadowsPassInfo.RenderTextureInfo.HasStencil = false;
+			shadowsPassInfo.RenderTextureInfo.Width = 4096;
+			shadowsPassInfo.RenderTextureInfo.Height = 4096;
 
-		TextureCreateInfo info;
-		info.m_Width = 4096;
-		info.m_Height = 4096;
-		m_pShadowAtlas = CreateGPUTextureAtlas(std::move(info), texture);
+			m_ShadowsPasses[i] = pDevice->CreateRenderPass(std::move(shadowsPassInfo));
+			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_ShadowsPasses[i]);
+			TextureHandle texture = pDevice->GetRenderTextureAttachment(renderTexture, 0);
+			TextureCreateInfo info;
+			info.m_Width = 4096;
+			info.m_Height = 4096;
+			m_ShadowAtlasses[i] = CreateGPUTextureAtlas(std::move(info), texture);
+		}
 
 		m_FrameCommandBuffers.resize(m_ImageCount);
 		for (size_t i = 0; i < m_FrameCommandBuffers.size(); ++i)
@@ -687,7 +692,7 @@ namespace Glory
 		switch (index == 0)
 		{
 		default:
-			return m_pShadowAtlas->GetTexture();
+			return GetGPUTextureAtlas(m_ShadowAtlasses[m_CurrentFrameIndex]).GetTexture();
 		}
 		return NULL;
 	}
@@ -718,6 +723,8 @@ namespace Glory
 		m_RenderingFinishedSemaphores.resize(m_ImageCount, 0ull);
 		m_ImageAvailableSemaphores.resize(m_ImageCount, 0ull);
 		m_FrameCommandBuffers.resize(m_ImageCount, 0ull);
+		m_ShadowsPasses.resize(m_ImageCount, 0ull);
+		m_ShadowAtlasses.resize(m_ImageCount, 0ull);
 
 		for (size_t i = 0; i < m_ImageCount; ++i)
 		{
@@ -738,6 +745,22 @@ namespace Glory
 				m_RenderingFinishedSemaphores[i] = pDevice->CreateSemaphore();
 			if (!m_ImageAvailableSemaphores[i])
 				m_ImageAvailableSemaphores[i] = pDevice->CreateSemaphore();
+
+			RenderPassInfo shadowsPassInfo;
+			shadowsPassInfo.RenderTextureInfo.EnableDepthStencilSampling = true;
+			shadowsPassInfo.RenderTextureInfo.HasDepth = true;
+			shadowsPassInfo.RenderTextureInfo.HasStencil = false;
+			shadowsPassInfo.RenderTextureInfo.Width = 4096;
+			shadowsPassInfo.RenderTextureInfo.Height = 4096;
+			if (!m_ShadowsPasses[i])
+				m_ShadowsPasses[i] = pDevice->CreateRenderPass(std::move(shadowsPassInfo));
+			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_ShadowsPasses[i]);
+			TextureHandle texture = pDevice->GetRenderTextureAttachment(renderTexture, 0);
+			TextureCreateInfo info;
+			info.m_Width = 4096;
+			info.m_Height = 4096;
+			if (!m_ShadowAtlasses[i])
+				m_ShadowAtlasses[i] = CreateGPUTextureAtlas(std::move(info), texture);
 		}
 
 		m_CurrentSemaphoreIndex = 0;
@@ -1238,9 +1261,10 @@ namespace Glory
 		//const uint32_t sliceSteps = NUM_DEPTH_SLICES / m_MaxShadowLODs;
 
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
-		/* @todo: Need 1 shadow atlas per swapchain image! */
-		m_pShadowAtlas->ReleaseAllChunks();
-		pDevice->BeginRenderPass(commandBuffer, m_ShadowsPass);
+
+		GPUTextureAtlas& shadowAtlas = GetGPUTextureAtlas(m_ShadowAtlasses[m_CurrentFrameIndex]);
+		shadowAtlas.ReleaseAllChunks();
+		pDevice->BeginRenderPass(commandBuffer, m_ShadowsPasses[m_CurrentFrameIndex]);
 
 		//pGraphics->SetCullFace(CullFace::Front);
 		//pGraphics->SetColorMask(false, false, false, false);
@@ -1267,7 +1291,7 @@ namespace Glory
 			//const glm::uvec2 shadowMapResolution = m_ShadowMapResolutions[shadowLOD];
 			const glm::uvec2 shadowMapResolution = glm::uvec2(512, 512);
 
-			const UUID chunkID = m_pShadowAtlas->ReserveChunk(shadowMapResolution.x, shadowMapResolution.y, lightID);
+			const UUID chunkID = shadowAtlas.ReserveChunk(shadowMapResolution.x, shadowMapResolution.y, lightID);
 			if (!chunkID)
 			{
 				lightData.shadowsEnabled = 0;
@@ -1275,9 +1299,9 @@ namespace Glory
 				continue;
 			}
 
-			const glm::vec4 chunkRect = m_pShadowAtlas->GetChunkPositionAndSize(chunkID);
+			const glm::vec4 chunkRect = shadowAtlas.GetChunkPositionAndSize(chunkID);
 			RenderShadows(commandBuffer, i, chunkRect);
-			lightData.shadowCoords = m_pShadowAtlas->GetChunkCoords(lightID);
+			lightData.shadowCoords = shadowAtlas.GetChunkCoords(lightID);
 		}
 
 		//pGraphics->SetColorMask(true, true, true, true);

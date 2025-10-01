@@ -23,7 +23,7 @@ namespace Glory
 		virtual ~GPUTextureAtlas();
 
 		/** @brief Get the attached texture */
-		virtual TextureHandle GetTexture() override;
+		virtual TextureHandle GetTexture() const override;
 		/** @brief Initialize the atlas by creating the render texture */
 		virtual void Initialize() override;
 

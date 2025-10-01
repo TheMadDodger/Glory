@@ -483,11 +483,22 @@ namespace Glory
 		//}
 	}
 
-	GPUTextureAtlas* RendererModule::CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, TextureHandle texture)
+	size_t RendererModule::CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, TextureHandle texture)
 	{
+		const size_t index = m_GPUTextureAtlases.size();
 		GPUTextureAtlas& newAtlas = m_GPUTextureAtlases.emplace_back(std::move(textureInfo), m_pEngine, texture);
 		newAtlas.Initialize();
-		return &newAtlas;
+		return index;
+	}
+
+	GPUTextureAtlas& RendererModule::GetGPUTextureAtlas(size_t index)
+	{
+		return m_GPUTextureAtlases[index];
+	}
+
+	const GPUTextureAtlas& RendererModule::GetGPUTextureAtlas(size_t index) const
+	{
+		return m_GPUTextureAtlases[index];
 	}
 
 	void RendererModule::Reset()

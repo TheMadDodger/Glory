@@ -24,7 +24,7 @@ namespace Glory
 		m_Texture = pDevice->CreateTexture(m_TextureInfo);
 	}
 
-	TextureHandle GPUTextureAtlas::GetTexture()
+	TextureHandle GPUTextureAtlas::GetTexture() const
 	{
 		return m_Texture;
 	}
