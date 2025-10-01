@@ -6,6 +6,8 @@
 
 #include <VulkanDevice.h>
 
+#define IMGUI_UNLIMITED_FRAME_RATE
+
 namespace Glory::Editor
 {
 	void LoadBackend(EditorCreateInfo& editorCreateInfo)
@@ -61,11 +63,9 @@ namespace Glory::Editor
 		VulkanGraphicsModule* pGraphicsModule = pEngine->GetMainModule<VulkanGraphicsModule>();
 		VkInstance instance = pGraphicsModule->GetCInstance();
 		m_pDevice = static_cast<VulkanDevice*>(pEngine->ActiveGraphicsDevice());
+		m_pDevice->DisableViewportInversion();
 
 		m_MainWindow = ImGui_ImplVulkanH_Window();
-		//m_MainWindow.Swapchain = pGraphicsModule->GetSwapChain().GetSwapChain();
-		//m_MainWindow.RenderPass = pGraphicsModule->MainRenderPass().GetRenderPass();
-		//m_MainWindow.ImageCount = pGraphicsModule->ImageCount();
 		VkSurfaceKHR surface = pGraphicsModule->GetCSurface();
 		int width, height;
 
@@ -156,7 +156,7 @@ namespace Glory::Editor
 		wd->PresentMode = ImGui_ImplVulkanH_SelectPresentMode(physicalDevice, wd->Surface, &present_modes[0], IM_ARRAYSIZE(present_modes));
 		//printf("[vulkan] Selected PresentMode = %d\n", wd->PresentMode);
 
-		// Create SwapChain, RenderPass, Framebuffer, etc.
+		// Create Swapchain, RenderPass, Framebuffer, etc.
 		IM_ASSERT(MINIMAGECOUNT >= 2);
 		ImGui_ImplVulkanH_CreateOrResizeWindow(instance, physicalDevice, device, wd, graphicsFamilyIndex, VK_NULL_HANDLE, width, height, MINIMAGECOUNT);
 	}
@@ -238,7 +238,7 @@ namespace Glory::Editor
 		err = vkAcquireNextImageKHR(device, wd->Swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE, &wd->FrameIndex);
 		if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR)
 		{
-			m_SwapChainRebuild = true;
+			m_SwapchainRebuild = true;
 			return;
 		}
 		check_vk_result(err);
@@ -302,7 +302,7 @@ namespace Glory::Editor
 		VkDevice device = (VkDevice)m_pDevice->LogicalDevice();
 		uint32_t graphicsFamilyIndex = m_pDevice->GraphicsFamily();
 
-		if (m_SwapChainRebuild)
+		if (m_SwapchainRebuild)
 			return;
 
 		VkSemaphore render_complete_semaphore = wd->FrameSemaphores[wd->SemaphoreIndex].RenderCompleteSemaphore;
@@ -316,7 +316,7 @@ namespace Glory::Editor
 		VkResult err = vkQueuePresentKHR((VkQueue)m_pDevice->PresentQueue(), &info);
 		if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR)
 		{
-			m_SwapChainRebuild = true;
+			m_SwapchainRebuild = true;
 			return;
 		}
 		check_vk_result(err);
@@ -349,7 +349,7 @@ namespace Glory::Editor
 		uint32_t graphicsFamilyIndex = m_pDevice->GraphicsFamily();
 
 		// Resize swap chain?
-		if (m_SwapChainRebuild)
+		if (m_SwapchainRebuild)
 		{
 			int width, height;
 			m_pEditorPlatform->GetWindowImpl()->GetMainWindow()->GetWindowSize(&width, &height);
@@ -358,7 +358,7 @@ namespace Glory::Editor
 				ImGui_ImplVulkan_SetMinImageCount(MINIMAGECOUNT);
 				ImGui_ImplVulkanH_CreateOrResizeWindow(m_pDevice->GraphicsModule()->GetCInstance(), physicalDevice, device, &m_MainWindow, graphicsFamilyIndex, VK_NULL_HANDLE, width, height, MINIMAGECOUNT);
 				m_MainWindow.FrameIndex = 0;
-				m_SwapChainRebuild = false;
+				m_SwapchainRebuild = false;
 			}
 		}
 	}

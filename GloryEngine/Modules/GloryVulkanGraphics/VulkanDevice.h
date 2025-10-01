@@ -167,6 +167,8 @@ namespace Glory
         GLORY_API vk::ImageView GetVKImageView(TextureHandle texture);
         GLORY_API vk::Sampler GetVKSampler(TextureHandle texture);
 
+        GLORY_API void DisableViewportInversion();
+
     private: /* Render commands */
         virtual CommandBufferHandle CreateCommandBuffer() override;
         virtual void Begin(CommandBufferHandle commandBuffer) override;
@@ -304,5 +306,7 @@ namespace Glory
         std::unordered_map<DescriptorSetLayoutInfo, DescriptorSetLayoutHandle> m_CachedDescriptorSetLayouts;
 
         DescriptorAllocator m_DescriptorAllocator;
+
+        bool m_InvertViewport = true;
     };
 }

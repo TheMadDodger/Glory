@@ -312,6 +312,11 @@ namespace Glory
 		return vkTexture->m_VKSampler;
 	}
 
+	void VulkanDevice::DisableViewportInversion()
+	{
+		m_InvertViewport = false;
+	}
+
 	CommandBufferHandle VulkanDevice::CreateCommandBuffer()
 	{
 		CommandBufferHandle handle;
@@ -670,7 +675,7 @@ namespace Glory
 		}
 		const vk::CommandBuffer vkCommandBuffer = iter->second;
 		const vk::Viewport viewport = vk::Viewport()
-			.setX(x).setY(y).setHeight(height).setWidth(width)
+			.setX(x).setY(m_InvertViewport ? height - y : y).setHeight(m_InvertViewport ? -height : height).setWidth(width)
 			.setMinDepth(minDepth).setMaxDepth(maxDepth);
 		vkCommandBuffer.setViewport(0, 1, &viewport);
 	}
@@ -681,7 +686,7 @@ namespace Glory
 		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
 		if (iter == m_CommandBuffers.end() || fenceIter == m_CommandBufferFences.end())
 		{
-			Debug().LogError("VulkanDevice::SetViewport: Invalid command buffer handle.");
+			Debug().LogError("VulkanDevice::SetScissor: Invalid command buffer handle.");
 			return;
 		}
 		const vk::CommandBuffer vkCommandBuffer = iter->second;
@@ -1605,9 +1610,9 @@ namespace Glory
 		// Viewport and scissor
 		vk::Viewport viewport = vk::Viewport()
 			.setX(0.0f)
-			.setY(0.0f)
+			.setY(m_InvertViewport ? (float)vkRenderTexture->m_Info.Height : 0.0f)
 			.setWidth((float)vkRenderTexture->m_Info.Width)
-			.setHeight((float)vkRenderTexture->m_Info.Height)
+			.setHeight((float)vkRenderTexture->m_Info.Height*(m_InvertViewport ? -1.0f : 1.0f))
 			.setMinDepth(0.0f)
 			.setMaxDepth(1.0f);
 
@@ -1627,7 +1632,7 @@ namespace Glory
 			.setRasterizerDiscardEnable(VK_FALSE)
 			.setPolygonMode(vk::PolygonMode::eFill)
 			.setLineWidth(1.0f)
-			.setCullMode(vk::CullModeFlagBits::eBack)
+			.setCullMode(m_InvertViewport ? vk::CullModeFlagBits::eFront : vk::CullModeFlagBits::eBack)
 			.setFrontFace(vk::FrontFace::eClockwise)
 			.setDepthBiasEnable(VK_FALSE)
 			.setDepthBiasConstantFactor(0.0f)

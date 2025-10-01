@@ -53,7 +53,7 @@ namespace Glory::Editor
         VulkanDevice* m_pDevice;
         ImGui_ImplVulkanH_Window m_MainWindow;
         VkDescriptorPool m_DescriptorPool;
-        bool m_SwapChainRebuild;
+        bool m_SwapchainRebuild;
         std::map<UUID, vk::DescriptorSet> m_DesciptorSets;
 
         const int MINIMAGECOUNT = 2;
