@@ -866,11 +866,31 @@ namespace Glory
 		}
 	}
 
-	BufferHandle VulkanDevice::CreateBuffer(size_t bufferSize, BufferType type)
+	vk::MemoryPropertyFlags GetBufferMemoryPropertyFlags(BufferFlags flags)
+	{
+		if (flags == BF_None)
+			return vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+		vk::MemoryPropertyFlags result;
+		if (flags & BF_Write)
+		{
+			result |= vk::MemoryPropertyFlagBits::eHostVisible;
+			result |= vk::MemoryPropertyFlagBits::eHostCoherent;
+		}
+		if (flags & BF_Read)
+		{
+			result |= vk::MemoryPropertyFlagBits::eHostVisible;
+			result |= vk::MemoryPropertyFlagBits::eHostCoherent;
+			result |= vk::MemoryPropertyFlagBits::eHostCached;
+		}
+		return result;
+	}
+
+	BufferHandle VulkanDevice::CreateBuffer(size_t bufferSize, BufferType type, BufferFlags flags)
 	{
 		BufferHandle handle;
 		VK_Buffer& buffer = m_Buffers.Emplace(handle, VK_Buffer());
 		buffer.m_Size = bufferSize;
+		buffer.m_KeepMemoryMapped = (flags & BF_Write) != 0;
 
 		vk::BufferCreateInfo bufferInfo = vk::BufferCreateInfo();
 		bufferInfo.size = (vk::DeviceSize)buffer.m_Size;
@@ -888,9 +908,9 @@ namespace Glory
 		vk::MemoryRequirements memRequirements;
 		m_LogicalDevice.getBufferMemoryRequirements(buffer.m_VKBuffer, &memRequirements);
 
-		uint32_t typeFilter = memRequirements.memoryTypeBits;
-		vk::MemoryPropertyFlags properties = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;//(vk::MemoryPropertyFlagBits)m_MemoryFlags;
-		uint32_t memoryIndex = GetSupportedMemoryIndex(typeFilter, properties);
+		const uint32_t typeFilter = memRequirements.memoryTypeBits;
+		const vk::MemoryPropertyFlags properties = GetBufferMemoryPropertyFlags(flags);
+		const uint32_t memoryIndex = GetSupportedMemoryIndex(typeFilter, properties);
 
 		// Allocate device memory
 		vk::MemoryAllocateInfo allocateInfo = vk::MemoryAllocateInfo();
@@ -921,41 +941,16 @@ namespace Glory
 		VK_Buffer* buffer = m_Buffers.Find(handle);
 		if (!buffer)
 		{
-			Debug().LogError("VulkanDevice::FreeBuffer: Invalid buffer handle.");
+			Debug().LogError("VulkanDevice::AssignBuffer: Invalid buffer handle.");
 			return;
 		}
-
-		void* dstData;
-		vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)0, (vk::DeviceSize)buffer->m_Size, (vk::MemoryMapFlags)0, &dstData);
-		if (result != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
-			return;
-		}
-		memcpy(dstData, data, buffer->m_Size);
-		m_LogicalDevice.unmapMemory(buffer->m_VKMemory);
+		AssignBuffer(handle, data, 0, buffer->m_Size);
 	}
 
 	void VulkanDevice::AssignBuffer(BufferHandle handle, const void* data, uint32_t size)
 	{
 		if (!data) return;
-
-		VK_Buffer* buffer = m_Buffers.Find(handle);
-		if (!buffer)
-		{
-			Debug().LogError("VulkanDevice::FreeBuffer: Invalid buffer handle.");
-			return;
-		}
-
-		void* dstData;
-		vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)0, (vk::DeviceSize)size, (vk::MemoryMapFlags)0, &dstData);
-		if (result != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
-			return;
-		}
-		memcpy(dstData, data, size);
-		m_LogicalDevice.unmapMemory(buffer->m_VKMemory);
+		AssignBuffer(handle, data, 0, size);
 	}
 
 	void VulkanDevice::AssignBuffer(BufferHandle handle, const void* data, uint32_t offset, uint32_t size)
@@ -969,15 +964,35 @@ namespace Glory
 			return;
 		}
 
-		void* dstData;
-		vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)offset, (vk::DeviceSize)size, (vk::MemoryMapFlags)0, &dstData);
-		if (result != vk::Result::eSuccess)
+		void* mappedData = buffer->m_pMappedMemory;
+		if (buffer->m_KeepMemoryMapped && !buffer->m_pMappedMemory)
 		{
-			Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
-			return;
+			const vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)0, (vk::DeviceSize)buffer->m_Size, (vk::MemoryMapFlags)0, &buffer->m_pMappedMemory);
+			if (result != vk::Result::eSuccess)
+			{
+				Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
+				return;
+			}
+			mappedData = buffer->m_pMappedMemory;
 		}
-		memcpy(dstData, data, size);
+		else if(!buffer->m_KeepMemoryMapped)
+		{
+			const vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)offset, (vk::DeviceSize)size, (vk::MemoryMapFlags)0, &mappedData);
+			if (result != vk::Result::eSuccess)
+			{
+				Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
+				return;
+			}
+			offset = 0;
+		}
+
+		char* p = (char*)mappedData;
+		void* offsettedData = p + offset;
+		memcpy(offsettedData, data, size);
+
+		if (buffer->m_KeepMemoryMapped) return;
 		m_LogicalDevice.unmapMemory(buffer->m_VKMemory);
+		buffer->m_pMappedMemory = nullptr;
 	}
 
 	vk::Format GetFormat(const AttributeType& atributeType)
@@ -2155,6 +2170,12 @@ namespace Glory
 		{
 			Debug().LogError("VulkanDevice::FreeBuffer: Invalid buffer handle.");
 			return;
+		}
+
+		if (buffer->m_pMappedMemory)
+		{
+			m_LogicalDevice.unmapMemory(buffer->m_VKMemory);
+			buffer->m_pMappedMemory = nullptr;
 		}
 
 		m_LogicalDevice.destroyBuffer(buffer->m_VKBuffer);

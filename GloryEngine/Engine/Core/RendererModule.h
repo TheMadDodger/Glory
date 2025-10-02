@@ -62,12 +62,16 @@ namespace Glory
 		{
 			m_Data.clear();
 			m_Dirty = true;
+			m_DirtyRange.first = 0;
+			m_DirtyRange.second = 1;
 		}
 
 		void resize(size_t newSize)
 		{
 			m_Data.resize(newSize);
 			m_Dirty = true;
+			m_DirtyRange.first = 0;
+			m_DirtyRange.second = newSize;
 		}
 
 		operator bool()
@@ -76,9 +80,48 @@ namespace Glory
 			m_Dirty = false;
 			return value;
 		}
+
 		std::vector<T>* operator->() { return &m_Data; }
+
+		void SetDirty(size_t index)
+		{
+			if (index >= m_Data.size()) return;
+
+			const bool wasDirty = m_Dirty;
+			m_Dirty = true;
+			if (!wasDirty)
+			{
+				m_DirtyRange.first = index;
+				m_DirtyRange.second = index + 1;
+				return;
+			}
+			if (index < m_DirtyRange.first)
+				m_DirtyRange.first = index;
+			if (index + 1 > m_DirtyRange.second)
+				m_DirtyRange.second = index + 1;
+		}
+
+		void SetDirty()
+		{
+			m_Dirty = true;
+			m_DirtyRange.first = 0;
+			m_DirtyRange.second = m_Data.size();
+		}
+
+		size_t DirtySize()
+		{
+			return m_DirtyRange.second - m_DirtyRange.first;
+		}
+
+		void* DirtyStart()
+		{
+			char* start = (char*)m_Data.data();
+			return start + m_DirtyRange.first;
+		}
+
 		std::vector<T> m_Data;
 		bool m_Dirty{ false };
+		std::pair<size_t, size_t> m_DirtyRange{ 0, 0 };
 	};
 
 	struct PipelineMeshBatch

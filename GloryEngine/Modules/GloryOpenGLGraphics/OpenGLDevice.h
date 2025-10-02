@@ -148,7 +148,7 @@ namespace Glory
         virtual void WaitIdle() override;
 
     private: /* Resource management */
-        virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;
+        virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type, BufferFlags flags=BF_None) override;
 
         virtual void AssignBuffer(BufferHandle handle, const void* data) override;
         virtual void AssignBuffer(BufferHandle handle, const void* data, uint32_t size) override;

@@ -642,7 +642,19 @@ namespace Glory
 
 #pragma region Resource Management
 
-	BufferHandle OpenGLDevice::CreateBuffer(size_t bufferSize, BufferType type)
+	uint32_t GetBufferUsage(BufferFlags flags)
+	{
+		if (flags == BF_None)
+			return GL_STATIC_DRAW;
+		if (flags == BF_Write)
+			return GL_DYNAMIC_DRAW;
+		if (flags == BF_Read)
+			return GL_STATIC_READ;
+		if (flags == BF_ReadAndWrite)
+			return GL_DYNAMIC_READ;
+	}
+
+	BufferHandle OpenGLDevice::CreateBuffer(size_t bufferSize, BufferType type, BufferFlags flags)
 	{
 		BufferHandle handle;
 		GL_Buffer& buffer = m_Buffers.Emplace(handle, GL_Buffer());
@@ -680,6 +692,9 @@ namespace Glory
 		default:
 			break;
 		}
+
+		if (flags != BF_None)
+			buffer.m_GLUsage = GetBufferUsage(flags);
 
 		glBindBuffer(buffer.m_GLTarget, buffer.m_GLBufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());

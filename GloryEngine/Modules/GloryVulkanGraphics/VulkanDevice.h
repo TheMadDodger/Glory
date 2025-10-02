@@ -19,6 +19,9 @@ namespace Glory
         vk::Buffer m_VKBuffer;
         vk::DeviceMemory m_VKMemory;
         vk::BufferUsageFlags m_VKUsage;
+
+        bool m_KeepMemoryMapped = false;
+        void* m_pMappedMemory = nullptr;
     };
 
     struct VK_Mesh
@@ -201,7 +204,7 @@ namespace Glory
         virtual void WaitIdle() override;
 
     private: /* Resource management */
-        virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;
+        virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type, BufferFlags flags=BF_None) override;
 
         virtual void AssignBuffer(BufferHandle handle, const void* data) override;
         virtual void AssignBuffer(BufferHandle handle, const void* data, uint32_t size) override;

@@ -20,6 +20,19 @@ namespace Glory
 		BT_Uniform,
 	};
 
+	/** @brief Buffer flags */
+	enum BufferFlags
+	{
+		/** @brief None */
+		BF_None = 0,
+		/** @brief The buffer will be used for reading to the CPU many times */
+		BF_Read = 1 << 0,
+		/** @brief The buffer will be written to from the CPU many times */
+		BF_Write = 1 << 1,
+		/** @brief The buffer will both be read and written to from the CPU many times */
+		BF_ReadAndWrite = BF_Read | BF_Write,
+	};
+
 	/** @brief Push constants range */
 	struct PushConstantsRange
 	{
@@ -460,7 +473,7 @@ namespace Glory
 		 * @param bufferSize Size of the buffer in bytes
 		 * @param type Type of the buffer
 		 */
-		virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) = 0;
+		virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type, BufferFlags flags) = 0;
 
 		/** @overload */
 		virtual void AssignBuffer(BufferHandle handle, const void* data) = 0;
