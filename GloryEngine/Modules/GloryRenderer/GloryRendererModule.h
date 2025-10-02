@@ -183,7 +183,6 @@ namespace Glory
 		std::vector<CameraRef> m_DirtyCameraPerspectives;
 
 		std::vector<RenderPassHandle> m_SwapchainPasses;
-		Utils::BitSet m_CommandsNew;
 		std::vector<SemaphoreHandle> m_ImageAvailableSemaphores;
 		std::vector<SemaphoreHandle> m_RenderingFinishedSemaphores;
 		uint32_t m_CurrentSemaphoreIndex = 0;

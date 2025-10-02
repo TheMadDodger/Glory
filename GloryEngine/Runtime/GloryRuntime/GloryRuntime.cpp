@@ -88,7 +88,7 @@ namespace Glory
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (pDevice)
 		{
-			m_Swapchain = pDevice->CreateSwapchain(m_pWindows->GetMainWindow());
+			m_Swapchain = pDevice->CreateSwapchain(m_pWindows->GetMainWindow(), false, 3);
 			m_pRenderer->SetSwapchain(m_Swapchain);
 		}
 

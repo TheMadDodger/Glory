@@ -17,7 +17,7 @@ project "GloryVulkanGraphics"
 
 	vpaths
 	{
-		["Module"] = { "GloryVulkan.*", "VulkanExceptions.h", "VulkanGraphicsModule.*", "VulkanStructsConverter.*", "VulkanDevice.*", "DescriptorAllocator.*" },
+		["Module"] = { "GloryVulkan.*", "VulkanExceptions.h", "VulkanGraphicsModule.*", "VulkanStructsConverter.*", "VulkanDevice.*", "DescriptorAllocator.*", "CommandBufferAllocator.*" },
 	}
 
 	includedirs

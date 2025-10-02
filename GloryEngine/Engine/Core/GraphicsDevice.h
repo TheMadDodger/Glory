@@ -659,6 +659,7 @@ namespace Glory
 		Module* m_pModule;
 		APIFeatures m_APIFeatures;
 		MeshHandle m_ScreenMesh;
+		TextureHandle m_DefaultTexture;
 
 	private:
 		/* Cached handles */

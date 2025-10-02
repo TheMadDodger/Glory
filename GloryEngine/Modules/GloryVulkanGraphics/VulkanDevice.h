@@ -1,11 +1,10 @@
 #pragma once
 #include "DescriptorAllocator.h"
+#include "CommandBufferAllocator.h"
 
 #include <Glory.h>
 #include <GraphicsDevice.h>
 #include <GraphicsEnums.h>
-
-#include <vulkan/vulkan.hpp>
 
 #include <optional>
 
@@ -136,6 +135,18 @@ namespace Glory
         vk::Semaphore m_VKSemaphore;
     };
 
+    struct VK_CommandBuffer
+    {
+        static constexpr GraphicsHandleType HandleType = H_CommandBuffer;
+
+        vk::CommandBuffer m_VKCommandBuffer;
+        vk::Fence m_VKFence;
+        bool m_Resetable;
+
+        vk::CommandBuffer* operator->() { return &m_VKCommandBuffer; }
+        const vk::CommandBuffer* operator->() const { return &m_VKCommandBuffer; }
+    };
+
     class VulkanGraphicsModule;
 
     class VulkanDevice : public GraphicsDevice
@@ -150,7 +161,8 @@ namespace Glory
         void CheckSupport(std::vector<const char*> extensions);
         bool SupportCheckPassed() const;
         void CreateLogicalDevice();
-        void AllocateCommandBuffers(size_t numBuffers);
+        void AllocateFreeFences(size_t numFences);
+        void AllocateFreeCommandBuffers(size_t numBuffers);
         uint32_t VulkanDevice::GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags);
 
         GLORY_API uint32_t GraphicsFamily() const { return m_GraphicsAndComputeFamily.value(); }
@@ -162,10 +174,7 @@ namespace Glory
         GLORY_API vk::Queue PresentQueue() { return m_PresentQueue; }
 
         GLORY_API void CreateGraphicsCommandPool();
-        GLORY_API vk::CommandPool CreateGraphicsCommandPool(vk::CommandPoolCreateFlags flags);
-
         GLORY_API vk::CommandPool GetGraphicsCommandPool();
-        GLORY_API vk::CommandPool GetGraphicsCommandPool(vk::CommandPoolCreateFlags flags);
 
         GLORY_API vk::ImageView GetVKImageView(TextureHandle texture);
         GLORY_API vk::Sampler GetVKSampler(TextureHandle texture);
@@ -174,6 +183,7 @@ namespace Glory
 
     private: /* Render commands */
         virtual CommandBufferHandle CreateCommandBuffer() override;
+        virtual CommandBufferHandle Begin() override;
         virtual void Begin(CommandBufferHandle commandBuffer) override;
         virtual void BeginRenderPass(CommandBufferHandle commandBuffer, RenderPassHandle renderPass) override;
         virtual void BeginPipeline(CommandBufferHandle commandBuffer, PipelineHandle pipeline) override;
@@ -257,7 +267,7 @@ namespace Glory
         void CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags,
             int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth);
 
-        vk::CommandBuffer GetNewCommandBuffer(CommandBufferHandle commandBufferHandle);
+        vk::CommandBuffer GetNewResetableCommandBuffer(CommandBufferHandle commandBufferHandle);
 
         vk::PresentModeKHR SelectPresentMode(const std::vector<vk::PresentModeKHR>& presentModes, vk::SurfaceKHR surface);
         vk::SurfaceFormatKHR SelectSurfaceFormat(vk::SurfaceKHR surface, const std::vector<vk::Format> requestFormats, vk::ColorSpaceKHR requestColorSpace);
@@ -283,7 +293,6 @@ namespace Glory
 
         std::vector<const char*> m_DeviceExtensions;
         vk::CommandPool m_GraphicsCommandPool;
-        std::map<vk::CommandPoolCreateFlags, vk::CommandPool> m_GraphicsCommandPools;
 
         vk::PhysicalDeviceFeatures m_Features;
         vk::PhysicalDeviceProperties m_DeviceProperties;
@@ -300,15 +309,15 @@ namespace Glory
         GraphicsResources<VK_Swapchain> m_Swapchains;
         GraphicsResources<VK_Semaphore> m_Semaphores;
 
-        std::unordered_map<UUID, vk::CommandBuffer> m_CommandBuffers;
-        std::unordered_map<UUID, vk::Fence> m_CommandBufferFences;
+        std::unordered_map<UUID, VK_CommandBuffer> m_CommandBuffers;
         std::vector<vk::CommandBuffer> m_FreeCommandBuffers;
         std::vector<vk::Fence> m_FreeFences;
 
-        std::unordered_map<SamplerSettings, vk::Sampler> m_CachedSamlers;
+        std::unordered_map<SamplerSettings, vk::Sampler> m_CachedSamplers;
         std::unordered_map<DescriptorSetLayoutInfo, DescriptorSetLayoutHandle> m_CachedDescriptorSetLayouts;
 
         DescriptorAllocator m_DescriptorAllocator;
+        CommandBufferAllocator m_CommandBufferAllocator;
 
         bool m_InvertViewport = true;
     };

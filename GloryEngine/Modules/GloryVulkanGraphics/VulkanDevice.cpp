@@ -36,7 +36,8 @@ namespace Glory
 	}
 
 	VulkanDevice::VulkanDevice(VulkanGraphicsModule* pModule, vk::PhysicalDevice physicalDevice):
-		GraphicsDevice(pModule), m_VKDevice(physicalDevice), m_DidLastSupportCheckPass(false), m_DescriptorAllocator(this)
+		GraphicsDevice(pModule), m_VKDevice(physicalDevice), m_DidLastSupportCheckPass(false),
+		m_DescriptorAllocator(this), m_CommandBufferAllocator(this)
 	{
 		m_APIFeatures = APIFeatures::All;
 	}
@@ -58,21 +59,17 @@ namespace Glory
 		m_DescriptorSetLayouts.FreeAll(std::bind(&VulkanDevice::FreeDescriptorSetLayout, this, std::placeholders::_1));
 
 		m_LogicalDevice.destroyCommandPool(m_GraphicsCommandPool);
-		for (auto iter : m_GraphicsCommandPools)
-			m_LogicalDevice.destroyCommandPool(iter.second);
-		m_GraphicsCommandPools.clear();
 		m_CommandBuffers.clear();
 		m_FreeCommandBuffers.clear();
 
-		for (auto& iter : m_CommandBufferFences)
-			m_LogicalDevice.destroyFence(iter.second);
-		m_CommandBufferFences.clear();
-		for (auto fence: m_FreeFences)
+		m_CommandBufferAllocator.Cleanup();
+
+		for (auto fence : m_FreeFences)
 			m_LogicalDevice.destroyFence(fence);
 		m_FreeFences.clear();
-		for (auto& iter : m_CachedSamlers)
+		for (auto& iter : m_CachedSamplers)
 			m_LogicalDevice.destroySampler(iter.second);
-		m_CachedSamlers.clear();
+		m_CachedSamplers.clear();
 		m_CachedDescriptorSetLayouts.clear();
 
 		m_LogicalDevice.destroy();
@@ -185,7 +182,7 @@ namespace Glory
 		deviceFeatures.fragmentStoresAndAtomics = VK_TRUE;
 		vk12Features.separateDepthStencilLayouts = VK_TRUE;
 		vk12Features.pNext = &robustnessFeatures;
-		robustnessFeatures.nullDescriptor = VK_TRUE;
+		robustnessFeatures.nullDescriptor = VK_FALSE;
 
 #if defined(_DEBUG)
 		const std::vector<const char*>& validationLayers = GraphicsModule()->GetValidationLayers();
@@ -207,35 +204,31 @@ namespace Glory
 		m_PresentQueue = m_LogicalDevice.getQueue(m_PresentFamily.value(), 0);
 
 		CreateGraphicsCommandPool();
-		AllocateCommandBuffers(10);
+		AllocateFreeFences(10);
+
+		//m_CommandBufferAllocator
 	}
 
-	void VulkanDevice::AllocateCommandBuffers(size_t numBuffers)
+	void VulkanDevice::AllocateFreeFences(size_t numFences)
 	{
-		vk::CommandPool commandPool = GetGraphicsCommandPool(vk::CommandPoolCreateFlagBits::eTransient | vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
-
-		// Create command buffers
-		const size_t firstNewBufferIndex = m_FreeCommandBuffers.size();
 		const size_t firstNewFenceIndex = m_FreeFences.size();
-		m_FreeCommandBuffers.resize(m_FreeCommandBuffers.size() + numBuffers);
-		m_FreeFences.resize(m_FreeFences.size() + numBuffers);
-
-		vk::CommandBufferAllocateInfo commandBufferAllocateInfo = vk::CommandBufferAllocateInfo()
-			.setCommandPool(commandPool)
-			.setLevel(vk::CommandBufferLevel::ePrimary)
-			.setCommandBufferCount(numBuffers);
-
-		if (m_LogicalDevice.allocateCommandBuffers(&commandBufferAllocateInfo, &m_FreeCommandBuffers[firstNewBufferIndex]) != vk::Result::eSuccess)
-			Debug().LogError("Vulkan: Failed to allocate command buffers.");
-
+		m_FreeFences.resize(m_FreeFences.size() + numFences);
 		for (size_t i = firstNewFenceIndex; i < m_FreeFences.size(); ++i)
 		{
 			vk::FenceCreateInfo fenceCreateInfo = vk::FenceCreateInfo()
 				.setFlags((vk::FenceCreateFlagBits)0);
 
 			if (m_LogicalDevice.createFence(&fenceCreateInfo, nullptr, &m_FreeFences[i]) != vk::Result::eSuccess)
-				Debug().LogError("Vulkan: Failed to create sync objects for a frame.");
+				Debug().LogError("VulkanDevice::AllocateFreeFences: Failed to create fence.");
 		}
+	}
+
+	void VulkanDevice::AllocateFreeCommandBuffers(size_t numBuffers)
+	{
+		const size_t firstNewCommandBufferIndex = m_FreeCommandBuffers.size();
+		m_FreeCommandBuffers.resize(m_FreeCommandBuffers.size() + numBuffers);
+		m_CommandBufferAllocator.Allocate(vk::CommandPoolCreateFlagBits::eTransient | vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+			numBuffers, &m_FreeCommandBuffers[firstNewCommandBufferIndex]);
 	}
 
 	uint32_t VulkanDevice::GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags)
@@ -262,32 +255,9 @@ namespace Glory
 			throw std::runtime_error("failed to create command pool!");
 	}
 
-	vk::CommandPool VulkanDevice::CreateGraphicsCommandPool(vk::CommandPoolCreateFlags flags)
-	{
-		// Create command pool
-		vk::CommandPoolCreateInfo commandPoolCreateInfo = vk::CommandPoolCreateInfo()
-			.setQueueFamilyIndex(m_GraphicsAndComputeFamily.value())
-			.setFlags(flags);
-
-		vk::CommandPool pool = m_LogicalDevice.createCommandPool(commandPoolCreateInfo);
-		if (pool == nullptr)
-			throw std::runtime_error("failed to create command pool!");
-
-		m_GraphicsCommandPools.emplace(flags, pool);
-		return pool;
-	}
-
 	vk::CommandPool VulkanDevice::GetGraphicsCommandPool()
 	{
 		return m_GraphicsCommandPool;
-	}
-
-	vk::CommandPool VulkanDevice::GetGraphicsCommandPool(vk::CommandPoolCreateFlags flags)
-	{
-		if (flags == (vk::CommandPoolCreateFlags)0) return GetGraphicsCommandPool();
-		auto it = m_GraphicsCommandPools.find(flags);
-		if (it == m_GraphicsCommandPools.end()) return CreateGraphicsCommandPool(flags);
-		return m_GraphicsCommandPools[flags];
 	}
 
 	vk::ImageView VulkanDevice::GetVKImageView(TextureHandle texture)
@@ -320,7 +290,33 @@ namespace Glory
 	CommandBufferHandle VulkanDevice::CreateCommandBuffer()
 	{
 		CommandBufferHandle handle;
-		this->GetNewCommandBuffer(handle);
+		this->GetNewResetableCommandBuffer(handle);
+		return handle;
+	}
+
+	CommandBufferHandle VulkanDevice::Begin()
+	{
+		CommandBufferHandle handle;
+		VK_CommandBuffer& commandBuffer = m_CommandBuffers.emplace(handle, VK_CommandBuffer()).first->second;
+		m_CommandBufferAllocator.Allocate(vk::CommandPoolCreateFlagBits::eTransient, 1, &commandBuffer.m_VKCommandBuffer);
+		commandBuffer.m_Resetable = false;
+
+		if (m_FreeFences.empty())
+			AllocateFreeFences(10);
+
+		commandBuffer.m_VKFence = m_FreeFences.back();
+		m_FreeFences.erase(--m_FreeFences.end());
+		if (m_LogicalDevice.resetFences(1, &commandBuffer.m_VKFence) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::Begin: Failed to reset fence.");
+			return NULL;
+		}
+
+		const vk::CommandBufferBeginInfo commandBeginInfo = vk::CommandBufferBeginInfo()
+			.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit)
+			.setPInheritanceInfo(nullptr);
+		commandBuffer->begin(commandBeginInfo);
+
 		return handle;
 	}
 
@@ -332,12 +328,12 @@ namespace Glory
 			Debug().LogError("VulkanDevice::BeginRenderPass: Invalid command buffer handle.");
 			return;
 		}
-		vk::CommandBuffer vkCommandBuffer = iter->second;
+		VK_CommandBuffer& vkCommandBuffer = iter->second;
 
 		vk::CommandBufferBeginInfo commandBeginInfo = vk::CommandBufferBeginInfo()
 			.setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse)
 			.setPInheritanceInfo(nullptr);
-		vkCommandBuffer.begin(commandBeginInfo);
+		vkCommandBuffer->begin(commandBeginInfo);
 	}
 
 	void VulkanDevice::BeginRenderPass(CommandBufferHandle commandBuffer, RenderPassHandle renderPass)
@@ -348,7 +344,7 @@ namespace Glory
 			Debug().LogError("VulkanDevice::BeginRenderPass: Invalid command buffer handle.");
 			return;
 		}
-		vk::CommandBuffer vkCommandBuffer = iter->second;
+		VK_CommandBuffer& vkCommandBuffer = iter->second;
 
 		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(renderPass);
 		if (!renderPass)
@@ -382,7 +378,7 @@ namespace Glory
             .setClearValueCount(static_cast<uint32_t>(clearColors.size()))
             .setPClearValues(clearColors.data());
 
-        vkCommandBuffer.beginRenderPass(&renderPassBeginInfo, vk::SubpassContents::eInline);
+        vkCommandBuffer->beginRenderPass(&renderPassBeginInfo, vk::SubpassContents::eInline);
 	}
 
 	void VulkanDevice::BeginPipeline(CommandBufferHandle commandBuffer, PipelineHandle pipeline)
@@ -393,7 +389,7 @@ namespace Glory
 			Debug().LogError("VulkanDevice::BeginPipeline: Invalid command buffer handle.");
 			return;
 		}
-		vk::CommandBuffer vkCommandBuffer = iter->second;
+		VK_CommandBuffer& vkCommandBuffer = iter->second;
 
 		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
 		if (!pipeline)
@@ -401,7 +397,7 @@ namespace Glory
 			Debug().LogError("VulkanDevice::BeginPipeline: Invalid pipeline handle.");
 			return;
 		}
-		vkCommandBuffer.bindPipeline(vkPipeline->m_VKBindPoint, vkPipeline->m_VKPipeline);
+		vkCommandBuffer->bindPipeline(vkPipeline->m_VKBindPoint, vkPipeline->m_VKPipeline);
 	}
 
 	void VulkanDevice::End(CommandBufferHandle commandBuffer)
@@ -412,8 +408,8 @@ namespace Glory
 			Debug().LogError("VulkanDevice::End: Invalid command buffer handle.");
 			return;
 		}
-		vk::CommandBuffer vkCommandBuffer = iter->second;
-		vkCommandBuffer.end();
+		VK_CommandBuffer& vkCommandBuffer = iter->second;
+		vkCommandBuffer->end();
 	}
 
 	void VulkanDevice::EndRenderPass(CommandBufferHandle commandBuffer)
@@ -424,8 +420,8 @@ namespace Glory
 			Debug().LogError("VulkanDevice::EndRenderPass: Invalid command buffer handle.");
 			return;
 		}
-		vk::CommandBuffer vkCommandBuffer = iter->second;
-		vkCommandBuffer.endRenderPass();
+		VK_CommandBuffer& vkCommandBuffer = iter->second;
+		vkCommandBuffer->endRenderPass();
 	}
 
 	void VulkanDevice::EndPipeline(CommandBufferHandle)
@@ -441,7 +437,7 @@ namespace Glory
 			Debug().LogError("VulkanDevice::BindDescriptorSets: Invalid command buffer handle.");
 			return;
 		}
-		vk::CommandBuffer vkCommandBuffer = iter->second;
+		VK_CommandBuffer& vkCommandBuffer = iter->second;
 
 		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
 		if (!vkPipeline)
@@ -461,7 +457,7 @@ namespace Glory
 			}
 			setsToBind[i] = vkSet->m_VKDescriptorSet;
 		}
-		vkCommandBuffer.bindDescriptorSets(vkPipeline->m_VKBindPoint, vkPipeline->m_VKLayout,
+		vkCommandBuffer->bindDescriptorSets(vkPipeline->m_VKBindPoint, vkPipeline->m_VKLayout,
 			firstSet, setsToBind.size(), setsToBind.data(), 0, nullptr);
 	}
 
@@ -473,7 +469,7 @@ namespace Glory
 			Debug().LogError("VulkanDevice::PushConstants: Invalid command buffer handle.");
 			return;
 		}
-		vk::CommandBuffer vkCommandBuffer = iter->second;
+		VK_CommandBuffer& vkCommandBuffer = iter->second;
 
 		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
 		if (!vkPipeline)
@@ -482,7 +478,7 @@ namespace Glory
 			return;
 		}
 		const vk::ShaderStageFlags stageFlags = GetShaderStageFlags(shaderStages);
-		vkCommandBuffer.pushConstants(vkPipeline->m_VKLayout, stageFlags, offset, size, data);
+		vkCommandBuffer->pushConstants(vkPipeline->m_VKLayout, stageFlags, offset, size, data);
 	}
 
 	void VulkanDevice::DrawMesh(CommandBufferHandle commandBuffer, MeshHandle handle)
@@ -493,7 +489,7 @@ namespace Glory
 			Debug().LogError("VulkanDevice::DrawMesh: Invalid command buffer handle.");
 			return;
 		}
-		vk::CommandBuffer vkCommandBuffer = iter->second;
+		VK_CommandBuffer& vkCommandBuffer = iter->second;
 
 		VK_Mesh* mesh = m_Meshes.Find(handle);
 		if (!mesh)
@@ -515,14 +511,14 @@ namespace Glory
 		}
 
 		VK_Buffer* indexBuffer = mesh->m_IndexCount > 0 ? m_Buffers.Find(mesh->m_Buffers.back()) : nullptr;
-		vkCommandBuffer.bindVertexBuffers(0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+		vkCommandBuffer->bindVertexBuffers(0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 		if (indexBuffer)
-			vkCommandBuffer.bindIndexBuffer(indexBuffer->m_VKBuffer, 0, vk::IndexType::eUint32);
+			vkCommandBuffer->bindIndexBuffer(indexBuffer->m_VKBuffer, 0, vk::IndexType::eUint32);
 
 		if (hasIndexBuffer)
-			vkCommandBuffer.drawIndexed(mesh->m_IndexCount, 1, 0, 0, 0);
+			vkCommandBuffer->drawIndexed(mesh->m_IndexCount, 1, 0, 0, 0);
 		else
-			vkCommandBuffer.draw(mesh->m_VertexCount, 1, 0, 0);
+			vkCommandBuffer->draw(mesh->m_VertexCount, 1, 0, 0);
 	}
 
 	void VulkanDevice::Dispatch(CommandBufferHandle commandBuffer, uint32_t x, uint32_t y, uint32_t z)
@@ -533,22 +529,21 @@ namespace Glory
 			Debug().LogError("VulkanDevice::Dispatch: Invalid command buffer handle.");
 			return;
 		}
-		vk::CommandBuffer vkCommandBuffer = iter->second;
-		vkCommandBuffer.dispatch(x, y, z);
+		VK_CommandBuffer& vkCommandBuffer = iter->second;
+		vkCommandBuffer->dispatch(x, y, z);
 	}
 
 	void VulkanDevice::Commit(CommandBufferHandle commandBuffer, const std::vector<SemaphoreHandle>& waitSemaphores,
 		const std::vector<SemaphoreHandle>& signalSemaphores)
 	{
 		auto iter = m_CommandBuffers.find(commandBuffer);
-		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
 			Debug().LogError("VulkanDevice::Commit: Invalid command buffer handle.");
 			return;
 		}
-		vk::CommandBuffer vkCommandBuffer = iter->second;
-		vk::Fence vkFence = fenceIter->second;
+		VK_CommandBuffer& vkCommandBuffer = iter->second;
+		vk::Fence vkFence = vkCommandBuffer.m_VKFence;
 
 		if (m_LogicalDevice.resetFences(1, &vkFence) != vk::Result::eSuccess)
 		{
@@ -587,7 +582,7 @@ namespace Glory
 			.setPWaitSemaphores(vkWaitSemaphores.data())
 			.setPWaitDstStageMask(waitStages)
 			.setCommandBufferCount(1)
-			.setPCommandBuffers(&vkCommandBuffer)
+			.setPCommandBuffers(&vkCommandBuffer.m_VKCommandBuffer)
 			.setSignalSemaphoreCount(static_cast<uint32_t>(vkSignalSemaphores.size()))
 			.setPSignalSemaphores(vkSignalSemaphores.data());
 
@@ -598,14 +593,13 @@ namespace Glory
 	GraphicsDevice::WaitResult VulkanDevice::Wait(CommandBufferHandle commandBuffer, uint64_t timeout)
 	{
 		auto iter = m_CommandBuffers.find(commandBuffer);
-		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
-		if (iter == m_CommandBuffers.end() || fenceIter == m_CommandBufferFences.end())
+		if (iter == m_CommandBuffers.end())
 		{
 			Debug().LogError("VulkanDevice::Wait: Invalid command buffer handle.");
 			return WR_Fail;
 		}
-		vk::CommandBuffer vkCommandBuffer = iter->second;
-		vk::Fence vkFence = fenceIter->second;
+		VK_CommandBuffer& vkCommandBuffer = iter->second;
+		vk::Fence vkFence = vkCommandBuffer.m_VKFence;
 
 		const vk::Result waitState = m_LogicalDevice.waitForFences(1, &vkFence, VK_TRUE, UINT64_MAX);
 		if (int32_t(waitState) < 0)
@@ -628,35 +622,46 @@ namespace Glory
 	void VulkanDevice::Release(CommandBufferHandle commandBuffer)
 	{
 		auto iter = m_CommandBuffers.find(commandBuffer);
-		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
-		if (iter == m_CommandBuffers.end() || fenceIter == m_CommandBufferFences.end())
+		if (iter == m_CommandBuffers.end())
 		{
 			Debug().LogError("VulkanDevice::Wait: Invalid command buffer handle.");
 			return;
 		}
-		vk::CommandBuffer vkCommandBuffer = iter->second;
-		vk::Fence vkFence = fenceIter->second;
+		VK_CommandBuffer& vkCommandBuffer = iter->second;
+		vk::Fence vkFence = vkCommandBuffer.m_VKFence;
 
-		vkCommandBuffer.reset();
-		m_CommandBuffers.erase(commandBuffer);
-		m_CommandBufferFences.erase(commandBuffer);
-		m_FreeCommandBuffers.push_back(vkCommandBuffer);
 		m_FreeFences.push_back(vkFence);
+		vkCommandBuffer.m_VKFence = nullptr;
+
+		if (!vkCommandBuffer.m_Resetable)
+		{
+			m_CommandBuffers.erase(commandBuffer);
+			return;
+		}
+
+		vkCommandBuffer->reset();
+		m_FreeCommandBuffers.push_back(vkCommandBuffer.m_VKCommandBuffer);
+		m_CommandBuffers.erase(commandBuffer);
 	}
 
 	void VulkanDevice::Reset(CommandBufferHandle commandBuffer)
 	{
 		auto iter = m_CommandBuffers.find(commandBuffer);
-		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
-		if (iter == m_CommandBuffers.end() || fenceIter == m_CommandBufferFences.end())
+		if (iter == m_CommandBuffers.end())
 		{
 			Debug().LogError("VulkanDevice::Reset: Invalid command buffer handle.");
 			return;
 		}
-		vk::CommandBuffer vkCommandBuffer = iter->second;
-		vk::Fence vkFence = fenceIter->second;
+		VK_CommandBuffer& vkCommandBuffer = iter->second;
+		vk::Fence vkFence = vkCommandBuffer.m_VKFence;
 
-		vkCommandBuffer.reset();
+		if (!vkCommandBuffer.m_Resetable)
+		{
+			Debug().LogError("VulkanDevice::Reset: Trying to reset a non-resetable command buffer.");
+			return;
+		}
+
+		vkCommandBuffer->reset();
 		if (m_LogicalDevice.resetFences(1, &vkFence) != vk::Result::eSuccess)
 		{
 			Debug().LogError("VulkanDevice::Reset: Failed to reset fence.");
@@ -667,41 +672,38 @@ namespace Glory
 	void VulkanDevice::SetViewport(CommandBufferHandle commandBuffer, float x, float y, float width, float height, float minDepth, float maxDepth)
 	{
 		auto iter = m_CommandBuffers.find(commandBuffer);
-		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
-		if (iter == m_CommandBuffers.end() || fenceIter == m_CommandBufferFences.end())
+		if (iter == m_CommandBuffers.end())
 		{
 			Debug().LogError("VulkanDevice::SetViewport: Invalid command buffer handle.");
 			return;
 		}
-		const vk::CommandBuffer vkCommandBuffer = iter->second;
+		const VK_CommandBuffer& vkCommandBuffer = iter->second;
 		const vk::Viewport viewport = vk::Viewport()
 			.setX(x).setY(m_InvertViewport ? height - y : y).setHeight(m_InvertViewport ? -height : height).setWidth(width)
 			.setMinDepth(minDepth).setMaxDepth(maxDepth);
-		vkCommandBuffer.setViewport(0, 1, &viewport);
+		vkCommandBuffer->setViewport(0, 1, &viewport);
 	}
 
 	void VulkanDevice::SetScissor(CommandBufferHandle commandBuffer, int x, int y, uint32_t width, uint32_t height)
 	{
 		auto iter = m_CommandBuffers.find(commandBuffer);
-		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
-		if (iter == m_CommandBuffers.end() || fenceIter == m_CommandBufferFences.end())
+		if (iter == m_CommandBuffers.end())
 		{
 			Debug().LogError("VulkanDevice::SetScissor: Invalid command buffer handle.");
 			return;
 		}
-		const vk::CommandBuffer vkCommandBuffer = iter->second;
+		const VK_CommandBuffer& vkCommandBuffer = iter->second;
 		const vk::Rect2D scissor = vk::Rect2D()
 			.setOffset({ x,y })
 			.setExtent({ width, height });
-		vkCommandBuffer.setScissor(0, 1, &scissor);
+		vkCommandBuffer->setScissor(0, 1, &scissor);
 	}
 
 	void VulkanDevice::PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>& buffers,
 		const std::vector<TextureHandle>& textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage)
 	{
 		auto iter = m_CommandBuffers.find(commandBuffer);
-		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
-		if (iter == m_CommandBuffers.end() || fenceIter == m_CommandBufferFences.end())
+		if (iter == m_CommandBuffers.end())
 		{
 			Debug().LogError("VulkanDevice::SetViewport: Invalid command buffer handle.");
 			return;
@@ -740,8 +742,8 @@ namespace Glory
 			//imageBarriers[i].dstAccessMask
 		}
 
-		const vk::CommandBuffer vkCommandBuffer = iter->second;
-		vkCommandBuffer.pipelineBarrier(vk::PipelineStageFlagBits(srcStage), vk::PipelineStageFlagBits(dstStage),
+		const VK_CommandBuffer& vkCommandBuffer = iter->second;
+		vkCommandBuffer->pipelineBarrier(vk::PipelineStageFlagBits(srcStage), vk::PipelineStageFlagBits(dstStage),
 			(vk::DependencyFlags)0, 0, nullptr, static_cast<uint32_t>(bufferBarriers.size()), bufferBarriers.data(),
 			static_cast<uint32_t>(imageBarriers.size()), imageBarriers.data()
 		);
@@ -1258,8 +1260,8 @@ namespace Glory
 
 		if (textureInfo.m_SamplingEnabled)
 		{
-			auto samplerIter = m_CachedSamlers.find(textureInfo.m_SamplerSettings);
-			if (samplerIter == m_CachedSamlers.end())
+			auto samplerIter = m_CachedSamplers.find(textureInfo.m_SamplerSettings);
+			if (samplerIter == m_CachedSamplers.end())
 			{
 				auto samplerCreateInfo = VKConverter::GetVulkanSamplerInfo(textureInfo.m_SamplerSettings);
 
@@ -1269,7 +1271,7 @@ namespace Glory
 					Debug().LogError("VulkanDevice::CreateTexture: Could not create image sampler.");
 					return NULL;
 				}
-				samplerIter = m_CachedSamlers.emplace(textureInfo.m_SamplerSettings, newSampler).first;
+				samplerIter = m_CachedSamplers.emplace(textureInfo.m_SamplerSettings, newSampler).first;
 			}
 			texture.m_VKSampler = samplerIter->second;
 		}
@@ -1924,6 +1926,7 @@ namespace Glory
 			const size_t index = setInfo.m_Buffers.size() + i;
 			auto& samplerInfo = setInfo.m_Samplers[i];
 			VK_Texture* vkTexture = m_Textures.Find(setInfo.m_Samplers[i].m_TextureHandle);
+			if (!vkTexture) vkTexture = m_Textures.Find(m_DefaultTexture);
 
 			imageInfos[i].imageLayout = vkTexture ? vkTexture->m_VKFinalLayout : vk::ImageLayout::eUndefined;
 			imageInfos[i].imageView = vkTexture ? vkTexture->m_VKImageView : nullptr;
@@ -1996,6 +1999,7 @@ namespace Glory
 			const size_t index = setWriteInfo.m_Buffers.size() + i;
 			auto& samplerInfo = setWriteInfo.m_Samplers[i];
 			VK_Texture* vkTexture = m_Textures.Find(setWriteInfo.m_Samplers[i].m_TextureHandle);
+			if (!vkTexture) vkTexture = m_Textures.Find(m_DefaultTexture);
 
 			imageInfos[i].imageLayout = vkTexture ? vkTexture->m_VKFinalLayout : vk::ImageLayout::eUndefined;
 			imageInfos[i].imageView = vkTexture ? vkTexture->m_VKImageView : nullptr;
@@ -2059,7 +2063,6 @@ namespace Glory
 		VK_Swapchain& swapchain = m_Swapchains.Emplace(handle, VK_Swapchain());
 		swapchain.m_pWindow = pWindow;
 		swapchain.m_Vsync = vsync;
-		swapchain.m_MinImageCount = minImageCount;
 		if (!CreateSwapchain(swapchain, swapchainCapabilities, surface, resolution, vsync, minImageCount))
 		{
 			m_Swapchains.Erase(handle);
@@ -2615,15 +2618,18 @@ namespace Glory
 		EndSingleTimeCommands(commandBuffer);
 	}
 
-	vk::CommandBuffer VulkanDevice::GetNewCommandBuffer(CommandBufferHandle commandBufferHandle)
+	vk::CommandBuffer VulkanDevice::GetNewResetableCommandBuffer(CommandBufferHandle commandBufferHandle)
 	{
-		if (m_FreeCommandBuffers.empty() || m_FreeFences.empty())
-			AllocateCommandBuffers(10);
+		if (m_FreeCommandBuffers.empty())
+			AllocateFreeCommandBuffers(10);
+		if (m_FreeFences.empty())
+			AllocateFreeFences(10);
 
 		vk::CommandBuffer commandBuffer = m_FreeCommandBuffers.back();
-		vk::Fence fence = m_FreeFences.back();
-		m_CommandBuffers.emplace(commandBufferHandle, commandBuffer);
-		m_CommandBufferFences.emplace(commandBufferHandle, fence);
+		VK_CommandBuffer& vkCommandBuffer = m_CommandBuffers.emplace(commandBufferHandle, VK_CommandBuffer()).first->second;
+		vkCommandBuffer.m_VKCommandBuffer = m_FreeCommandBuffers.back();
+		vkCommandBuffer.m_VKFence = m_FreeFences.back();
+		vkCommandBuffer.m_Resetable = true;
 		m_FreeCommandBuffers.erase(--m_FreeCommandBuffers.end());
 		m_FreeFences.erase(--m_FreeFences.end());
 		return commandBuffer;
@@ -2853,6 +2859,7 @@ namespace Glory
 		swapchain.m_Format = swapchainFormat;
 		swapchain.m_PresentMode = swapchainPresentMode;
 		swapchain.m_Extent = swapchainExtent;
+		swapchain.m_MinImageCount = imageCount;
 
 		for (size_t i = 0; i < imageCount; ++i)
 		{

@@ -122,6 +122,24 @@ namespace Glory
 		BufferHandle buffer = CreateBuffer(sizeof(vertices), BufferType::BT_Vertex, BF_None);
 		AssignBuffer(buffer, vertices, sizeof(vertices));
 		m_ScreenMesh = CreateMesh({ buffer }, 6, 0, sizeof(glm::vec3), PrimitiveType::PT_Triangles, { AttributeType::Float3 });
+
+		TextureCreateInfo defaultTextureInfo;
+		defaultTextureInfo.m_Width = 1;
+		defaultTextureInfo.m_Height = 1;
+		defaultTextureInfo.m_ImageAspectFlags = IA_Color;
+		defaultTextureInfo.m_ImageType = ImageType::IT_2D;
+		defaultTextureInfo.m_InternalFormat = PixelFormat::PF_R8G8B8A8Srgb;
+		defaultTextureInfo.m_PixelFormat = PixelFormat::PF_RGBA;
+		defaultTextureInfo.m_Type = DataType::DT_Float;
+		defaultTextureInfo.m_SamplerSettings.MipmapMode = Filter::F_None;
+		defaultTextureInfo.m_SamplerSettings.MaxAnisotropy = 1.0f;
+		defaultTextureInfo.m_SamplerSettings.MinFilter = Filter::F_Nearest;
+		defaultTextureInfo.m_SamplerSettings.MagFilter = Filter::F_Nearest;
+
+		static constexpr uint8_t defaultTexturePixels[] = {
+			255, 0, 255, 255
+		};
+		m_DefaultTexture = CreateTexture(defaultTextureInfo, defaultTexturePixels, sizeof(defaultTexturePixels));
 	}
 
 	CommandBufferHandle GraphicsDevice::Begin()
