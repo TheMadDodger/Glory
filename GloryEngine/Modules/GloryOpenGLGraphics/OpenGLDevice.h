@@ -102,6 +102,8 @@ namespace Glory
         static constexpr GraphicsHandleType HandleType = H_Swapchain;
 
         Window* m_pWindow;
+        std::vector<RenderTextureHandle> m_SwapchainImages;
+        uint32_t m_CurrentImageIndex = 0;
     };
 
     class OpenGLGraphicsModule;

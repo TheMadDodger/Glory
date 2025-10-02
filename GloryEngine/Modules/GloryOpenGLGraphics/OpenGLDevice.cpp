@@ -603,6 +603,8 @@ namespace Glory
 		}
 
 		/* Get next available image */
+		*imageIndex = glSwapchain->m_CurrentImageIndex;
+		glSwapchain->m_CurrentImageIndex = (glSwapchain->m_CurrentImageIndex + 1) % glSwapchain->m_SwapchainImages.size();
 		return GraphicsDevice::SwapchainResult::S_Success;
 	}
 
@@ -617,7 +619,14 @@ namespace Glory
 
 		/* Blit current image to window back buffer */
 		glSwapchain->m_pWindow->MakeGLContextCurrent();
-		//glBlitFramebuffer();
+		int width, height;
+		glSwapchain->m_pWindow->GetDrawableSize(&width, &height);
+		GL_RenderTexture* glRenderTexture = m_RenderTextures.Find(glSwapchain->m_SwapchainImages[imageIndex]);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, glRenderTexture->m_GLFramebufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBlitFramebuffer(0, 0, glRenderTexture->m_Info.Width, glRenderTexture->m_Info.Height,
+			0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		/* Swap window */
 		glSwapchain->m_pWindow->GLSwapWindow();
@@ -1023,13 +1032,6 @@ namespace Glory
 			return NULL;
 		}
 
-		GL_RenderPass* glRenderPass = m_RenderPasses.Find(renderPass);
-		if (!glRenderPass)
-		{
-			Debug().LogError("OpenGLDevice::CreateRenderTexture: Invalid render pass handle");
-			return NULL;
-		}
-
 		RenderTextureHandle handle;
 		GL_RenderTexture& renderTexture = m_RenderTextures.Emplace(handle, GL_RenderTexture());
 		renderTexture.m_RenderPass = renderPass;
@@ -1373,8 +1375,25 @@ namespace Glory
 		swapchain.m_pWindow = pWindow;
 		pWindow->SetGLSwapInterval(vsync ? 1 : 0);
 
-		/* Swap chain emulation */
+		int width, height;
+		pWindow->GetDrawableSize(&width, &height);
 
+		/* Swap chain emulation */
+		minImageCount = 1;
+		swapchain.m_SwapchainImages.resize(minImageCount);
+
+		for (size_t i = 0; i < minImageCount; ++i)
+		{
+			RenderTextureCreateInfo info;
+			info.HasDepth = false;
+			info.HasStencil = false;
+			info.EnableDepthStencilSampling = false;
+			info.Width = uint32_t(width);
+			info.Height = uint32_t(height);
+			info.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA,
+				PixelFormat::PF_R8G8B8A8Srgb, ImageType::IT_2D, ImageAspect::IA_Color, DataType::DT_Float));
+			swapchain.m_SwapchainImages[i] = CreateRenderTexture(NULL, std::move(info));
+		}
 
 		std::stringstream str;
 		str << "OpenGLDevice: Swap chain " << handle << " created.";
@@ -1385,12 +1404,24 @@ namespace Glory
 
 	uint32_t OpenGLDevice::GetSwapchainImageCount(SwapchainHandle swapchain)
 	{
-		return 0;
+		GL_Swapchain* glSwapchain = m_Swapchains.Find(swapchain);
+		if (!glSwapchain)
+		{
+			Debug().LogError("OpenGLDevice::GetSwapchainImageCount: Invalid swapchain handle.");
+			return 0;
+		}
+		return static_cast<uint32_t>(glSwapchain->m_SwapchainImages.size());
 	}
 
 	TextureHandle OpenGLDevice::GetSwapchainImage(SwapchainHandle swapchain, uint32_t imageIndex)
 	{
-		return TextureHandle();
+		GL_Swapchain* glSwapchain = m_Swapchains.Find(swapchain);
+		if (!glSwapchain)
+		{
+			Debug().LogError("OpenGLDevice::GetSwapchainImageCount: Invalid swapchain handle.");
+			return NULL;
+		}
+		return GetRenderTextureAttachment(glSwapchain->m_SwapchainImages[imageIndex], 0);
 	}
 
 	void OpenGLDevice::RecreateSwapchain(SwapchainHandle swapchain)
@@ -1399,7 +1430,7 @@ namespace Glory
 
 	SemaphoreHandle OpenGLDevice::CreateSemaphore()
 	{
-		return SemaphoreHandle();
+		return NULL;
 	}
 
 	void OpenGLDevice::FreeBuffer(BufferHandle& handle)
