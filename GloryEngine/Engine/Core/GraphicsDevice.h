@@ -111,6 +111,7 @@ namespace Glory
 	class Module;
 	class Debug;
 	class Window;
+	class EngineProfiler;
 
 	class Resource;
 	class MeshData;
@@ -262,6 +263,7 @@ namespace Glory
 
 		/** @brief Helper for getting the debug logger */
 		Debug& Debug();
+		EngineProfiler& Profiler();
 
 		/**
 		 * @brief Check whether certain API features are supported

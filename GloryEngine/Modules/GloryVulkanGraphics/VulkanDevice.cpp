@@ -11,6 +11,7 @@
 #include <ImageData.h>
 #include <TextureData.h>
 #include <FileData.h>
+#include <EngineProfiler.h>
 
 namespace Glory
 {
@@ -211,6 +212,7 @@ namespace Glory
 
 	void VulkanDevice::AllocateFreeFences(size_t numFences)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::AllocateFreeFences" };
 		const size_t firstNewFenceIndex = m_FreeFences.size();
 		m_FreeFences.resize(m_FreeFences.size() + numFences);
 		for (size_t i = firstNewFenceIndex; i < m_FreeFences.size(); ++i)
@@ -225,6 +227,7 @@ namespace Glory
 
 	void VulkanDevice::AllocateFreeCommandBuffers(size_t numBuffers)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::AllocateFreeCommandBuffers" };
 		const size_t firstNewCommandBufferIndex = m_FreeCommandBuffers.size();
 		m_FreeCommandBuffers.resize(m_FreeCommandBuffers.size() + numBuffers);
 		m_CommandBufferAllocator.Allocate(vk::CommandPoolCreateFlagBits::eTransient | vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
@@ -262,6 +265,7 @@ namespace Glory
 
 	vk::ImageView VulkanDevice::GetVKImageView(TextureHandle texture)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::GetVKImageView" };
 		VK_Texture* vkTexture = m_Textures.Find(texture);
 		if (!vkTexture)
 		{
@@ -273,6 +277,7 @@ namespace Glory
 
 	vk::Sampler VulkanDevice::GetVKSampler(TextureHandle texture)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::GetVKSampler" };
 		VK_Texture* vkTexture = m_Textures.Find(texture);
 		if (!vkTexture)
 		{
@@ -289,6 +294,7 @@ namespace Glory
 
 	CommandBufferHandle VulkanDevice::CreateCommandBuffer()
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateCommandBuffer" };
 		CommandBufferHandle handle;
 		this->GetNewResetableCommandBuffer(handle);
 		return handle;
@@ -296,9 +302,10 @@ namespace Glory
 
 	CommandBufferHandle VulkanDevice::Begin()
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::Begin" };
 		CommandBufferHandle handle;
 		VK_CommandBuffer& commandBuffer = m_CommandBuffers.emplace(handle, VK_CommandBuffer()).first->second;
-		m_CommandBufferAllocator.Allocate(vk::CommandPoolCreateFlagBits::eTransient, 1, &commandBuffer.m_VKCommandBuffer);
+		m_CommandBufferAllocator.Allocate(vk::CommandPoolCreateFlags(0), 1, &commandBuffer.m_VKCommandBuffer);
 		commandBuffer.m_Resetable = false;
 
 		if (m_FreeFences.empty())
@@ -322,6 +329,7 @@ namespace Glory
 
 	void VulkanDevice::Begin(CommandBufferHandle commandBuffer)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::Begin(commandBuffer)" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
@@ -338,6 +346,7 @@ namespace Glory
 
 	void VulkanDevice::BeginRenderPass(CommandBufferHandle commandBuffer, RenderPassHandle renderPass)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::BeginRenderPass" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
@@ -383,6 +392,7 @@ namespace Glory
 
 	void VulkanDevice::BeginPipeline(CommandBufferHandle commandBuffer, PipelineHandle pipeline)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::BeginPipeline" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
@@ -402,6 +412,7 @@ namespace Glory
 
 	void VulkanDevice::End(CommandBufferHandle commandBuffer)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::End" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
@@ -414,6 +425,7 @@ namespace Glory
 
 	void VulkanDevice::EndRenderPass(CommandBufferHandle commandBuffer)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::EndRenderPass" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
@@ -426,11 +438,13 @@ namespace Glory
 
 	void VulkanDevice::EndPipeline(CommandBufferHandle)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::EndPipeline" };
 	}
 
 	void VulkanDevice::BindDescriptorSets(CommandBufferHandle commandBuffer, PipelineHandle pipeline,
 		const std::vector<DescriptorSetHandle>& sets, uint32_t firstSet)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::BindDescriptorSets" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
@@ -463,6 +477,7 @@ namespace Glory
 
 	void VulkanDevice::PushConstants(CommandBufferHandle commandBuffer, PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data, ShaderTypeFlag shaderStages)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::PushConstants" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
@@ -483,6 +498,7 @@ namespace Glory
 
 	void VulkanDevice::DrawMesh(CommandBufferHandle commandBuffer, MeshHandle handle)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::DrawMesh" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
@@ -523,6 +539,7 @@ namespace Glory
 
 	void VulkanDevice::Dispatch(CommandBufferHandle commandBuffer, uint32_t x, uint32_t y, uint32_t z)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::Dispatch" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
@@ -536,6 +553,7 @@ namespace Glory
 	void VulkanDevice::Commit(CommandBufferHandle commandBuffer, const std::vector<SemaphoreHandle>& waitSemaphores,
 		const std::vector<SemaphoreHandle>& signalSemaphores)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::Commit" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
@@ -592,6 +610,7 @@ namespace Glory
 
 	GraphicsDevice::WaitResult VulkanDevice::Wait(CommandBufferHandle commandBuffer, uint64_t timeout)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::Wait" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
@@ -621,6 +640,7 @@ namespace Glory
 
 	void VulkanDevice::Release(CommandBufferHandle commandBuffer)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::Release" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
@@ -646,6 +666,7 @@ namespace Glory
 
 	void VulkanDevice::Reset(CommandBufferHandle commandBuffer)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::Reset" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
@@ -671,6 +692,7 @@ namespace Glory
 
 	void VulkanDevice::SetViewport(CommandBufferHandle commandBuffer, float x, float y, float width, float height, float minDepth, float maxDepth)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::SetViewport" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
@@ -686,6 +708,7 @@ namespace Glory
 
 	void VulkanDevice::SetScissor(CommandBufferHandle commandBuffer, int x, int y, uint32_t width, uint32_t height)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::SetScissor" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
@@ -702,6 +725,7 @@ namespace Glory
 	void VulkanDevice::PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>& buffers,
 		const std::vector<TextureHandle>& textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::PipelineBarrier" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
@@ -752,6 +776,7 @@ namespace Glory
 	GraphicsDevice::SwapchainResult VulkanDevice::AqcuireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex,
 		SemaphoreHandle signalSemaphore)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::AqcuireNextSwapchainImage" };
 		VK_Swapchain* vkSwapchain = m_Swapchains.Find(swapchain);
 		if (!vkSwapchain)
 		{
@@ -778,6 +803,7 @@ namespace Glory
 
 	GraphicsDevice::SwapchainResult VulkanDevice::Present(SwapchainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>& waitSemaphores)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::Present" };
 		VK_Swapchain* vkSwapchain = m_Swapchains.Find(swapchain);
 		if (!vkSwapchain)
 		{
@@ -823,6 +849,7 @@ namespace Glory
 
 	void VulkanDevice::WaitIdle()
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::WaitIdle" };
 		m_LogicalDevice.waitIdle();
 	}
 
@@ -889,6 +916,7 @@ namespace Glory
 
 	BufferHandle VulkanDevice::CreateBuffer(size_t bufferSize, BufferType type, BufferFlags flags)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateBuffer" };
 		BufferHandle handle;
 		VK_Buffer& buffer = m_Buffers.Emplace(handle, VK_Buffer());
 		buffer.m_Size = bufferSize;
@@ -938,6 +966,7 @@ namespace Glory
 
 	void VulkanDevice::AssignBuffer(BufferHandle handle, const void* data)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::AssignBuffer" };
 		if (!data) return;
 
 		VK_Buffer* buffer = m_Buffers.Find(handle);
@@ -951,12 +980,14 @@ namespace Glory
 
 	void VulkanDevice::AssignBuffer(BufferHandle handle, const void* data, uint32_t size)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::AssignBuffer(size)" };
 		if (!data) return;
 		AssignBuffer(handle, data, 0, size);
 	}
 
 	void VulkanDevice::AssignBuffer(BufferHandle handle, const void* data, uint32_t offset, uint32_t size)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::AssignBuffer(offset, size)" };
 		if (!data) return;
 
 		VK_Buffer* buffer = m_Buffers.Find(handle);
@@ -1090,6 +1121,7 @@ namespace Glory
 	MeshHandle VulkanDevice::CreateMesh(std::vector<BufferHandle>&& buffers, uint32_t vertexCount, uint32_t indexCount,
 		uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateMesh" };
 		MeshHandle handle;
 		VK_Mesh& mesh = m_Meshes.Emplace(handle, VK_Mesh());
 		mesh.m_Buffers = std::move(buffers);
@@ -1122,6 +1154,7 @@ namespace Glory
 
 	TextureHandle VulkanDevice::CreateTexture(TextureData* pTexture)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateTexture" };
 		ImageData* pImage = pTexture->GetImageData(&m_pModule->GetEngine()->GetAssetManager());
 		if (!pImage)
 		{
@@ -1161,6 +1194,7 @@ namespace Glory
 
 	TextureHandle VulkanDevice::CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels, size_t dataSize)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateTexture(textureInfo)" };
 		TextureHandle handle;
 		VK_Texture& texture = m_Textures.Emplace(handle, VK_Texture());
 
@@ -1285,6 +1319,7 @@ namespace Glory
 
 	RenderTextureHandle VulkanDevice::CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateRenderTexture" };
 		if (info.Width == 0 || info.Height == 0)
 		{
 			Debug().LogError("VulkanDevice::CreateRenderTexture: Invalid RenderTexture size.");
@@ -1309,6 +1344,7 @@ namespace Glory
 
 	TextureHandle VulkanDevice::GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::GetRenderTextureAttachment" };
 		VK_RenderTexture* vkRenderTexture = m_RenderTextures.Find(renderTexture);
 		if (!vkRenderTexture)
 		{
@@ -1326,6 +1362,7 @@ namespace Glory
 
 	void VulkanDevice::ResizeRenderTexture(RenderTextureHandle renderTexture, uint32_t width, uint32_t height)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::ResizeRenderTexture" };
 		VK_RenderTexture* vkRenderTexture = m_RenderTextures.Find(renderTexture);
 		if (!vkRenderTexture)
 		{
@@ -1355,6 +1392,7 @@ namespace Glory
 
 	RenderPassHandle VulkanDevice::CreateRenderPass(RenderPassInfo&& info)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateRenderPass" };
 		if (info.RenderTextureInfo.Width == 0 || info.RenderTextureInfo.Height == 0)
 		{
 			Debug().LogError("VulkanDevice::CreateRenderPass: Invalid RenderTexture size.");
@@ -1501,6 +1539,7 @@ namespace Glory
 
 	RenderTextureHandle VulkanDevice::GetRenderPassRenderTexture(RenderPassHandle renderPass)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::GetRenderPassRenderTexture" };
 		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(renderPass);
 		if (!vkRenderPass)
 		{
@@ -1512,6 +1551,7 @@ namespace Glory
 
 	void VulkanDevice::SetRenderPassClear(RenderPassHandle renderPass, const glm::vec4& color, float depth, uint8_t stencil)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::SetRenderPassClear" };
 		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(renderPass);
 		if (!vkRenderPass)
 		{
@@ -1524,6 +1564,7 @@ namespace Glory
 
 	ShaderHandle VulkanDevice::CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateShader" };
 		ShaderHandle handle;
 		VK_Shader& shader = m_Shaders.Emplace(handle, VK_Shader());
 
@@ -1544,6 +1585,7 @@ namespace Glory
 	PipelineHandle VulkanDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
 		std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride, const std::vector<AttributeType>& attributeTypes)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreatePipeline" };
 		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
 		std::vector<vk::PushConstantRange> pushConstants;
 
@@ -1756,6 +1798,7 @@ namespace Glory
 
 	PipelineHandle VulkanDevice::CreateComputePipeline(PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateComputePipeline" };
 		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
 		std::vector<vk::PushConstantRange> pushConstants;
 
@@ -1827,6 +1870,7 @@ namespace Glory
 
 	DescriptorSetLayoutHandle VulkanDevice::CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateDescriptorSetLayout" };
 		auto iter = m_CachedDescriptorSetLayouts.find(setLayoutInfo);
 		if (iter == m_CachedDescriptorSetLayouts.end())
 		{
@@ -1886,6 +1930,7 @@ namespace Glory
 
 	DescriptorSetHandle VulkanDevice::CreateDescriptorSet(DescriptorSetInfo&& setInfo)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateDescriptorSet" };
 		VK_DescriptorSetLayout* vkDescriptorSetLayout = m_DescriptorSetLayouts.Find(setInfo.m_Layout);
 		if (!vkDescriptorSetLayout)
 		{
@@ -1954,6 +1999,7 @@ namespace Glory
 
 	void VulkanDevice::UpdateDescriptorSet(DescriptorSetHandle descriptorSet, const DescriptorSetUpdateInfo& setWriteInfo)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::UpdateDescriptorSet" };
 		VK_DescriptorSet* vkDescriptorSet = m_DescriptorSets.Find(descriptorSet);
 		if (!vkDescriptorSet)
 		{
@@ -2033,6 +2079,7 @@ namespace Glory
 
 	SwapchainHandle VulkanDevice::CreateSwapchain(Window* pWindow, bool vsync, uint32_t minImageCount)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateSwapchain" };
 		// Check swapchain support
 		vk::SurfaceCapabilitiesKHR swapchainCapabilities;
 		vk::SurfaceKHR surface;
@@ -2078,6 +2125,7 @@ namespace Glory
 
 	uint32_t VulkanDevice::GetSwapchainImageCount(SwapchainHandle swapchain)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::GetSwapchainImageCount" };
 		VK_Swapchain* vkSwapchain = m_Swapchains.Find(swapchain);
 		if (!vkSwapchain)
 		{
@@ -2089,6 +2137,7 @@ namespace Glory
 
 	TextureHandle VulkanDevice::GetSwapchainImage(SwapchainHandle swapchain, uint32_t imageIndex)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::GetSwapchainImage" };
 		VK_Swapchain* vkSwapchain = m_Swapchains.Find(swapchain);
 		if (!vkSwapchain)
 		{
@@ -2100,6 +2149,7 @@ namespace Glory
 
 	void VulkanDevice::RecreateSwapchain(SwapchainHandle swapchain)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::RecreateSwapchain" };
 		VK_Swapchain* vkSwapchain = m_Swapchains.Find(swapchain);
 		if (!vkSwapchain)
 		{
@@ -2155,6 +2205,7 @@ namespace Glory
 
 	SemaphoreHandle VulkanDevice::CreateSemaphore()
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateSemaphore" };
 		SemaphoreHandle handle;
 		VK_Semaphore& semaphore = m_Semaphores.Emplace(handle, VK_Semaphore());
 		vk::SemaphoreCreateInfo createInfo;
@@ -2168,6 +2219,7 @@ namespace Glory
 
 	void VulkanDevice::FreeBuffer(BufferHandle& handle)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::FreeBuffer" };
 		VK_Buffer* buffer = m_Buffers.Find(handle);
 		if (!buffer)
 		{
@@ -2194,6 +2246,7 @@ namespace Glory
 
 	void VulkanDevice::FreeMesh(MeshHandle& handle)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::FreeMesh" };
 		VK_Mesh* mesh = m_Meshes.Find(handle);
 		if (!mesh)
 		{
@@ -2215,6 +2268,7 @@ namespace Glory
 
 	void VulkanDevice::FreeTexture(TextureHandle& handle)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::FreeTexture" };
 		VK_Texture* texture = m_Textures.Find(handle);
 		if (!texture)
 		{
@@ -2238,6 +2292,7 @@ namespace Glory
 
 	void VulkanDevice::FreeRenderTexture(RenderTextureHandle& handle)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::FreeRenderTexture" };
 		VK_RenderTexture* renderTexture = m_RenderTextures.Find(handle);
 		if (!renderTexture)
 		{
@@ -2266,6 +2321,7 @@ namespace Glory
 
 	void VulkanDevice::FreeRenderPass(RenderPassHandle& handle)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::FreeRenderPass" };
 		VK_RenderPass* renderPass = m_RenderPasses.Find(handle);
 		if (!renderPass)
 		{
@@ -2287,6 +2343,7 @@ namespace Glory
 
 	void VulkanDevice::FreeShader(ShaderHandle& handle)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::FreeShader" };
 		VK_Shader* shader = m_Shaders.Find(handle);
 		if (!shader)
 		{
@@ -2307,6 +2364,7 @@ namespace Glory
 
 	void VulkanDevice::FreePipeline(PipelineHandle& handle)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::FreePipeline" };
 		VK_Pipeline* pipeline = m_Pipelines.Find(handle);
 		if (!pipeline)
 		{
@@ -2327,6 +2385,7 @@ namespace Glory
 
 	void VulkanDevice::FreeDescriptorSetLayout(DescriptorSetLayoutHandle& handle)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::FreeDescriptorSetLayout" };
 		VK_DescriptorSetLayout* vkSetLayout = m_DescriptorSetLayouts.Find(handle);
 		if (!vkSetLayout)
 		{
@@ -2346,6 +2405,7 @@ namespace Glory
 
 	void VulkanDevice::FreeDescriptorSet(DescriptorSetHandle& handle)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::FreeDescriptorSet" };
 		VK_DescriptorSet* vkSet = m_DescriptorSets.Find(handle);
 		if (!vkSet)
 		{
@@ -2365,6 +2425,7 @@ namespace Glory
 
 	void VulkanDevice::FreeSwapchain(SwapchainHandle& handle)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::FreeSwapchain" };
 		VK_Swapchain* vkSwapchain = m_Swapchains.Find(handle);
 		if (!vkSwapchain)
 		{
@@ -2393,6 +2454,7 @@ namespace Glory
 
 	void VulkanDevice::FreeSemaphore(SemaphoreHandle& handle)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::FreeSemaphore" };
 		VK_Semaphore* vkSemaphore = m_Semaphores.Find(handle);
 		if (!vkSemaphore)
 		{
@@ -2413,6 +2475,7 @@ namespace Glory
 
 	vk::CommandBuffer VulkanDevice::BeginSingleTimeCommands()
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::BeginSingleTimeCommands" };
 		vk::CommandPool commandPool = GetGraphicsCommandPool();
 
 		vk::CommandBufferAllocateInfo allocInfo = vk::CommandBufferAllocateInfo();
@@ -2433,6 +2496,7 @@ namespace Glory
 
 	void VulkanDevice::EndSingleTimeCommands(vk::CommandBuffer commandBuffer)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::EndSingleTimeCommands" };
 		vk::CommandPool commandPool = GetGraphicsCommandPool();
 
 		commandBuffer.end();
@@ -2448,6 +2512,7 @@ namespace Glory
 
 	void VulkanDevice::TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags, uint32_t mipLevels)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::TransitionImageLayout" };
 		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
 
 		vk::ImageMemoryBarrier barrier = vk::ImageMemoryBarrier();
@@ -2524,6 +2589,7 @@ namespace Glory
 
 	void VulkanDevice::GenerateMipMaps(vk::Image image, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::GenerateMipMaps" };
 		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
 
 		vk::ImageMemoryBarrier barrier{};
@@ -2593,11 +2659,13 @@ namespace Glory
 
 	void VulkanDevice::CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags, uint32_t width, uint32_t height)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CopyFromBuffer" };
 		CopyFromBuffer(buffer, image, aspectFlags, 0, 0, 0, width, height, 1);
 	}
 
 	void VulkanDevice::CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags, int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CopyFromBuffer(offset)" };
 		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
 
 		vk::BufferImageCopy copyRegion = vk::BufferImageCopy();
@@ -2620,6 +2688,7 @@ namespace Glory
 
 	vk::CommandBuffer VulkanDevice::GetNewResetableCommandBuffer(CommandBufferHandle commandBufferHandle)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::GetNewResetableCommandBuffer" };
 		if (m_FreeCommandBuffers.empty())
 			AllocateFreeCommandBuffers(10);
 		if (m_FreeFences.empty())
@@ -2693,6 +2762,7 @@ namespace Glory
 
 	void VulkanDevice::CreateRenderTexture(vk::RenderPass vkRenderPass, VK_RenderTexture& renderTexture)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateRenderTexture" };
 		const size_t numAttachments = renderTexture.m_Info.Attachments.size() + (renderTexture.m_HasDepthOrStencil ? 1 : 0);
 		renderTexture.m_AttachmentNames.resize(numAttachments);
 		renderTexture.m_Textures.resize(numAttachments);
@@ -2774,6 +2844,7 @@ namespace Glory
 	bool VulkanDevice::CreateSwapchain(VK_Swapchain& swapchain, const vk::SurfaceCapabilitiesKHR& capabilities,
 		vk::SurfaceKHR surface, const glm::uvec2& resolution, bool vsync, uint32_t minImageCount)
 	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateSwapchain" };
 		/* Get shaw chain format */
 		const vk::SurfaceFormatKHR swapchainFormat = SelectSurfaceFormat(surface,
 			{ vk::Format::eR8G8B8A8Unorm, vk::Format::eB8G8R8A8Unorm, vk::Format::eR8G8B8Unorm, vk::Format::eB8G8R8Unorm },

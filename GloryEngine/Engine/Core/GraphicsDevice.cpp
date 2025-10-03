@@ -104,6 +104,11 @@ namespace Glory
 		return m_pModule->GetEngine()->GetDebug();
 	}
 
+	EngineProfiler& GraphicsDevice::Profiler()
+	{
+		return m_pModule->GetEngine()->Profiler();
+	}
+
 	bool GraphicsDevice::IsSupported(const APIFeatures& features) const
 	{
 		return m_APIFeatures.HasFlag(features);

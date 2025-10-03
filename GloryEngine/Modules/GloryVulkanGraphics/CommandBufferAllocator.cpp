@@ -86,7 +86,7 @@ namespace Glory
 			if (flags & vk::CommandPoolCreateFlagBits::eResetCommandBuffer)
 				continue;
 
-			const size_t numBuffers = 1000;
+			const size_t numBuffers = 20;
 			pools.m_Pools[i].m_CommandBuffers.resize(numBuffers);
 			pools.m_Pools[i].m_NextCommandBufferIndex = 0;
 			vk::CommandBufferAllocateInfo allocateInfo;

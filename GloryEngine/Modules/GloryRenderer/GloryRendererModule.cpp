@@ -512,6 +512,7 @@ namespace Glory
 
 	void GloryRendererModule::Draw()
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::Draw" };
 		if (!m_Enabled) return;
 
 		const ModuleSettings& settings = Settings();
@@ -522,12 +523,10 @@ namespace Glory
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice) return;
 
-		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Render" };
-
 		for (;;)
 		{
 			if (!m_FrameCommandBuffers[m_CurrentFrameIndex]) break;
-			const GraphicsDevice::WaitResult result = pDevice->Wait(m_FrameCommandBuffers[m_CurrentFrameIndex]);
+			const GraphicsDevice::WaitResult result = pDevice->Wait(m_FrameCommandBuffers[m_CurrentFrameIndex], 1);
 			if (result == GraphicsDevice::WR_Success)
 			{
 				pDevice->Release(m_FrameCommandBuffers[m_CurrentFrameIndex]);
@@ -599,10 +598,11 @@ namespace Glory
 		m_FrameCommandBuffers[m_CurrentFrameIndex] = pDevice->Begin();
 
 		/* Shadows */
-		ShadowMapsPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
+		//ShadowMapsPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 
 		for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
 		{
+			ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::Draw: Camera " + std::to_string(i) };
 			CameraRef camera = m_ActiveCameras[i];
 
 			const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
@@ -664,6 +664,7 @@ namespace Glory
 		pDevice->BeginPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DisplayCopyPipeline);
 		for (size_t i = 0; i < m_OutputCameras.size(); ++i)
 		{
+			ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::Draw: Render output from camera " + std::to_string(i) };
 			CameraRef camera = m_OutputCameras[i];
 			const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
 			pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DisplayCopyPipeline, { uniqueCameraData.m_ColorSamplerSets[m_CurrentFrameIndex] });
@@ -678,6 +679,7 @@ namespace Glory
 
 		if (m_Swapchain)
 		{
+			ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::Draw: Render to swap chain image" };
 			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_FinalFrameColorPasses[m_CurrentFrameIndex]);
 			TextureHandle color = pDevice->GetRenderTextureAttachment(renderTexture, 0);
 
@@ -775,6 +777,7 @@ namespace Glory
 
 	void GloryRendererModule::OnWindowResized()
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::OnWindowResized" };
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice) return;
 		pDevice->WaitIdle();
@@ -803,6 +806,7 @@ namespace Glory
 
 	void GloryRendererModule::OnSwapchainChanged()
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::OnSwapchainChanged" };
 		if (!m_Swapchain) return;
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice) return;
@@ -895,6 +899,7 @@ namespace Glory
 	void GloryRendererModule::RenderBatches(CommandBufferHandle commandBuffer, const std::vector<PipelineBatch>& batches,
 		const std::vector<PipelineBatchData>& batchDatas, size_t cameraIndex, DescriptorSetHandle globalRenderSet, const glm::vec4& viewport)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::RenderBatches" };
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		MaterialManager& materialManager = m_pEngine->GetMaterialManager();
 		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
@@ -970,6 +975,7 @@ namespace Glory
 
 	void GloryRendererModule::PrepareDataPass()
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::PrepareDataPass" };
 		const ModuleSettings& settings = Settings();
 		const UUID clusterGeneratorPipeline = settings.Value<uint64_t>("Cluster Generator");
 		const UUID clusterCullLightPipeline = settings.Value<uint64_t>("Cluster Cull Light");
@@ -1057,6 +1063,7 @@ namespace Glory
 
 	void GloryRendererModule::PrepareBatches(const std::vector<PipelineBatch>& batches, std::vector<PipelineBatchData>& batchDatas)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::PrepareBatches" };
 		if (m_ActiveCameras.empty()) return;
 		CameraRef defaultCamera = m_ActiveCameras[0];
 		const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(defaultCamera.GetUUID());
@@ -1247,6 +1254,7 @@ namespace Glory
 
 	void GloryRendererModule::GenerateClusterSSBO(uint32_t cameraIndex, GraphicsDevice* pDevice, CameraRef camera, DescriptorSetHandle clusterSet)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::GenerateClusterSSBO" };
 		const glm::uvec2 resolution = camera.GetResolution();
 		const glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
 
@@ -1279,6 +1287,7 @@ namespace Glory
 
 	void GloryRendererModule::ClusterPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::ClusterPass" };
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 
 		CameraRef camera = m_ActiveCameras[cameraIndex];
@@ -1319,6 +1328,7 @@ namespace Glory
 
 	void GloryRendererModule::DynamicObjectsPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::DynamicObjectsPass" };
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		CameraRef camera = m_ActiveCameras[cameraIndex];
 		//pGraphics->EnableDepthWrite(true);
@@ -1331,6 +1341,7 @@ namespace Glory
 
 	void GloryRendererModule::GenerateDomeSamplePointsSSBO(GraphicsDevice* pDevice, uint32_t size)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::GenerateDomeSamplePointsSSBO" };
 		if (m_SSAOKernelSize == size) return;
 		m_SSAOKernelSize = size;
 
@@ -1358,6 +1369,7 @@ namespace Glory
 
 	void GloryRendererModule::GenerateNoiseTexture(GraphicsDevice* pDevice)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::GenerateNoiseTexture" };
 		const size_t textureSize = 4;
 		std::vector<glm::vec4> ssaoNoise;
 		for (unsigned int i = 0; i < textureSize*textureSize; ++i)
@@ -1383,6 +1395,7 @@ namespace Glory
 
 	void GloryRendererModule::ShadowMapsPass(CommandBufferHandle commandBuffer)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::ShadowMapsPass" };
 		if (m_FrameData.ActiveLights.count() == 0) return;
 
 		//uint32_t lightDepthSlices[MAX_LIGHTS];
@@ -1443,6 +1456,7 @@ namespace Glory
 
 	void GloryRendererModule::RenderShadows(CommandBufferHandle commandBuffer, size_t lightIndex, const glm::vec4& viewport)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::RenderShadows" };
 		//RenderBatches(m_StaticPipelineRenderDatas, m_StaticBatchData, lightIndex);
 		RenderBatches(commandBuffer, m_DynamicPipelineRenderDatas, m_DynamicBatchData, lightIndex, m_GlobalShadowRenderSet, viewport);
 		//RenderBatches(m_DynamicLatePipelineRenderDatas, m_DynamicLateBatchData, lightIndex);
@@ -1450,6 +1464,7 @@ namespace Glory
 
 	void GloryRendererModule::OnSubmitCamera(CameraRef camera)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::OnSubmitCamera" };
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice) return;
 
@@ -1567,9 +1582,11 @@ namespace Glory
 
 	void GloryRendererModule::OnUnsubmitCamera(CameraRef camera)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::OnUnsubmitCamera" };
 	}
 
 	void GloryRendererModule::OnCameraUpdated(CameraRef camera)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::OnCameraUpdated" };
 	}
 }

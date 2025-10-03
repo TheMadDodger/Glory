@@ -37,6 +37,8 @@ namespace Glory
 
 	void RendererModule::SubmitStatic(RenderData&& renderData)
 	{
+		ProfileSample sample{ &m_pEngine->Profiler(), "RendererModule::SubmitStatic" };
+
 		Resource* pMaterialResource = m_pEngine->GetAssetManager().FindResource(renderData.m_MaterialID);
 		if (!pMaterialResource)
 		{
@@ -81,6 +83,8 @@ namespace Glory
 
 	void RendererModule::UpdateStatic(UUID pipelineID, UUID meshID, UUID objectID, glm::mat4 world)
 	{
+		ProfileSample sample{ &m_pEngine->Profiler(), "RendererModule::UpdateStatic" };
+
 		auto& pipelineIter = std::find_if(m_StaticPipelineRenderDatas.begin(), m_StaticPipelineRenderDatas.end(),
 			[pipelineID](const PipelineBatch& otherPipeline) { return otherPipeline.m_PipelineID == pipelineID; });
 		if (pipelineIter == m_StaticPipelineRenderDatas.end()) return;
@@ -99,6 +103,8 @@ namespace Glory
 
 	void RendererModule::UnsubmitStatic(UUID pipelineID, UUID meshID, UUID objectID)
 	{
+		ProfileSample sample{ &m_pEngine->Profiler(), "RendererModule::UnsubmitStatic" };
+
 		auto pipelineIter = std::find_if(m_StaticPipelineRenderDatas.begin(), m_StaticPipelineRenderDatas.end(),
 			[pipelineID](const PipelineBatch& otherPipeline) { return otherPipeline.m_PipelineID == pipelineID; });
 		if (pipelineIter == m_StaticPipelineRenderDatas.end()) return;
@@ -120,7 +126,7 @@ namespace Glory
 
 	void RendererModule::SubmitDynamic(RenderData&& renderData)
 	{
-		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(RenderData)" };
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::SubmitDynamic" };
 
 		Resource* pMaterialResource = m_pEngine->GetAssetManager().FindResource(renderData.m_MaterialID);
 		if (!pMaterialResource) return;
@@ -163,7 +169,7 @@ namespace Glory
 
 	void RendererModule::SubmitLate(RenderData&& renderData)
 	{
-		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::SubmitLate(RenderData)" };
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::SubmitLate" };
 
 		Resource* pMaterialResource = m_pEngine->GetAssetManager().FindResource(renderData.m_MaterialID);
 		if (!pMaterialResource) return;
@@ -206,7 +212,7 @@ namespace Glory
 
 	void RendererModule::SubmitCamera(CameraRef camera)
 	{
-		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(camera)" };
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::SubmitCamera" };
 		auto it = std::find_if(m_ActiveCameras.begin(), m_ActiveCameras.end(), [camera, this](const CameraRef& other)
 		{
 			return camera.GetPriority() < other.GetPriority();
@@ -234,6 +240,8 @@ namespace Glory
 
 	void RendererModule::UnsubmitCamera(CameraRef camera)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::UnsubmitCamera" };
+
 		auto iter = std::find(m_ActiveCameras.begin(), m_ActiveCameras.end(), camera);
 		if (iter == m_ActiveCameras.end()) return;
 		m_ActiveCameras.erase(iter);
@@ -250,6 +258,7 @@ namespace Glory
 
 	void RendererModule::UpdateCamera(CameraRef camera)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::UpdateCamera" };
 		auto iter = std::find(m_ActiveCameras.begin(), m_ActiveCameras.end(), camera);
 		auto outputIter = std::find(m_OutputCameras.begin(), m_OutputCameras.end(), camera);
 		if (iter == m_ActiveCameras.end()) return;
@@ -286,6 +295,7 @@ namespace Glory
 
 	size_t RendererModule::Submit(const glm::ivec2& pickPos, UUID cameraID)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(pickPos, cameraID)" };
 		const size_t index = m_FrameData.Picking.size();
 		m_FrameData.Picking.push_back({ pickPos, cameraID });
 		return index;
@@ -303,10 +313,10 @@ namespace Glory
 
 	void RendererModule::OnBeginFrame()
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::OnBeginFrame" };
 		//REQUIRE_MODULE(m_pEngine, GraphicsModule, );
 		REQUIRE_MODULE(m_pEngine, WindowModule, );
 
-		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::StartFrame" };
 		m_FrameData.Reset();
 		std::for_each(m_DynamicPipelineRenderDatas.begin(), m_DynamicPipelineRenderDatas.end(), [](PipelineBatch& batch) { batch.Reset(); });
 		std::for_each(m_DynamicLatePipelineRenderDatas.begin(), m_DynamicLatePipelineRenderDatas.end(), [](PipelineBatch& batch) { batch.Reset(); });
@@ -316,6 +326,7 @@ namespace Glory
 
 	void RendererModule::OnEndFrame()
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::OnEndFrame" };
 		m_LastResolution = m_Resolution;
 	}
 
@@ -331,6 +342,7 @@ namespace Glory
 
 	void RendererModule::DrawLine(const glm::mat4& transform, const glm::vec3& p1, const glm::vec3& p2, const glm::vec4& color)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::DrawLine" };
 		const glm::vec4 transfromedP1 = transform * glm::vec4(p1, 1.0f);
 		const glm::vec4 transfromedP2 = transform * glm::vec4(p2, 1.0f);
 		m_pLineVertex->Pos = { transfromedP1.x, transfromedP1.y, transfromedP1.z };
@@ -344,6 +356,7 @@ namespace Glory
 
 	void RendererModule::DrawLineQuad(const glm::mat4& transform, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& p4, const glm::vec4& color)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::DrawLineQuad" };
 		DrawLine(transform, p1, p2, color);
 		DrawLine(transform, p2, p3, color);
 		DrawLine(transform, p3, p4, color);
@@ -352,6 +365,7 @@ namespace Glory
 
 	void RendererModule::DrawLineCircle(const glm::mat4& transform, const glm::vec3& position, float radius, CircleUp up, const glm::vec4& color)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::DrawLineCircle" };
 		static constexpr float pi = glm::pi<float>();
 		static const float res = 100;
 		static const float fullRadius = 360;
@@ -386,6 +400,7 @@ namespace Glory
 
 	void RendererModule::DrawLineBox(const glm::mat4& transform, const glm::vec3& position, const glm::vec3& extends, const glm::vec4& color)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::DrawLineBox" };
 		const glm::vec3 topTopLeft = position + glm::vec3(-extends.x, extends.y, -extends.z);
 		const glm::vec3 topTopRight = position + glm::vec3(extends.x, extends.y, -extends.z);
 		const glm::vec3 topBottomRight = position + glm::vec3(extends.x, extends.y, extends.z);
@@ -405,6 +420,7 @@ namespace Glory
 
 	void RendererModule::DrawLineSphere(const glm::mat4& transform, const glm::vec3& position, float radius, const glm::vec4& color)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::DrawLineSphere" };
 		DrawLineCircle(transform, position, radius, CircleUp::x, color);
 		DrawLineCircle(transform, position, radius, CircleUp::y, color);
 		DrawLineCircle(transform, position, radius, CircleUp::z, color);
@@ -412,6 +428,7 @@ namespace Glory
 
 	void RendererModule::DrawLineShape(const glm::mat4& transform, const glm::vec3& position, const ShapeProperty& shape, const glm::vec4& color)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::DrawLineShape" };
 		switch (shape.m_ShapeType)
 		{
 		case ShapeType::Sphere: {
@@ -468,6 +485,7 @@ namespace Glory
 
 	void RendererModule::OnWindowResize(glm::uvec2 size)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::OnWindowResize" };
 		if (size == m_Resolution || size.x == 0 || size.y == 0) return;
 		m_Resolution = size;
 		OnWindowResized();
@@ -475,6 +493,7 @@ namespace Glory
 
 	size_t RendererModule::CreateGPUTextureAtlas(TextureCreateInfo&& textureInfo, TextureHandle texture)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::CreateGPUTextureAtlas" };
 		const size_t index = m_GPUTextureAtlases.size();
 		GPUTextureAtlas& newAtlas = m_GPUTextureAtlases.emplace_back(std::move(textureInfo), m_pEngine, texture);
 		newAtlas.Initialize();
@@ -493,6 +512,7 @@ namespace Glory
 
 	void RendererModule::Reset()
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Reset" };
 		m_StaticPipelineRenderDatas.clear();
 		m_DynamicPipelineRenderDatas.clear();
 		m_DynamicLatePipelineRenderDatas.clear();
@@ -574,6 +594,7 @@ namespace Glory
 
 	void RendererModule::SetSwapchain(SwapchainHandle swapchain)
 	{
+		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::SetSwapchain" };
 		m_Swapchain = swapchain;
 		OnSwapchainChanged();
 	}
