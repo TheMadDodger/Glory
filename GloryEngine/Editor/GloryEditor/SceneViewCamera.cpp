@@ -39,7 +39,7 @@ namespace Glory::Editor
         const ImGuiIO& io = ImGui::GetIO();
 
 		const bool fastMode = io.KeyShift;
-		const float movementSpeed = fastMode ? m_MovementSpeed * 5.0f : m_MovementSpeed;
+		const float movementSpeed = fastMode ? m_MovementSpeed*5.0f : m_MovementSpeed;
 
 		const float deltaTime = io.DeltaTime;
 
@@ -57,24 +57,24 @@ namespace Glory::Editor
 		const glm::vec3 referenceUp = glm::vec3(0.0f, 1.0f, 0.0f);
 		const glm::vec3 referenceDown = glm::vec3(0.0f, -1.0f, 0.0f);
 
-		if (leftKey) position += left * movementSpeed * deltaTime;
-		if (rightKey) position += right * movementSpeed * deltaTime;
-		if (forwardKey) position -= forward * movementSpeed * deltaTime;
-		if (backwardKey) position -= backward * movementSpeed * deltaTime;
-		if (upKey) position += referenceDown * movementSpeed * deltaTime;
-		if (downKey) position += referenceUp * movementSpeed * deltaTime;
+		if (leftKey) position += left*movementSpeed*deltaTime;
+		if (rightKey) position += right*movementSpeed*deltaTime;
+		if (forwardKey) position -= forward*movementSpeed*deltaTime;
+		if (backwardKey) position -= backward*movementSpeed*deltaTime;
+		if (upKey) position += referenceDown*movementSpeed*deltaTime;
+		if (downKey) position += referenceUp*movementSpeed*deltaTime;
 
 		const float axis = io.MouseWheel;
 		const auto zoomSensitivity = fastMode ? m_FastZoomSensitivity : m_ZoomSensitivity;
 		if (axis > 0)
 		{
-			if (!m_IsOrthographic) position += forward * movementSpeed * deltaTime;
-			else m_OrthoZoom -= movementSpeed * deltaTime;
+			if (!m_IsOrthographic) position += forward*movementSpeed*deltaTime;
+			else m_OrthoZoom -= movementSpeed*deltaTime;
 		}
 		else if (axis < 0)
 		{
-			if (!m_IsOrthographic) position += backward * movementSpeed * deltaTime;
-			else m_OrthoZoom += movementSpeed * deltaTime;
+			if (!m_IsOrthographic) position += backward*movementSpeed*deltaTime;
+			else m_OrthoZoom += movementSpeed*deltaTime;
 		}
 
 		const ImVec2 mouseDelta = io.MouseDelta;
@@ -95,13 +95,13 @@ namespace Glory::Editor
 
 			glm::mat4 rx, ry, roll;
 
-			rx = glm::rotate(glm::identity<glm::mat4>(), -mouseDelta.x * m_FreeLookSensitivity * deltaTime, referenceUp);
-			ry = glm::rotate(glm::identity<glm::mat4>(), -mouseDelta.y * m_FreeLookSensitivity * deltaTime, right);
+			rx = glm::rotate(glm::identity<glm::mat4>(), -mouseDelta.x*m_FreeLookSensitivity*0.005f, referenceUp);
+			ry = glm::rotate(glm::identity<glm::mat4>(), -mouseDelta.y*m_FreeLookSensitivity*0.005f, right);
 
-			roll = rx * ry;
+			roll = rx*ry;
 
 			glm::vec4 newDirV4 = glm::vec4(forward, 1.0f);
-			newDirV4 = roll * newDirV4;
+			newDirV4 = roll*newDirV4;
 			glm::vec3 newDir = glm::vec3(newDirV4);
 			newDir = glm::normalize(newDir);
 
