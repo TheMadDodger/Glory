@@ -595,6 +595,7 @@ namespace Glory
 	void RendererModule::SetSwapchain(SwapchainHandle swapchain)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::SetSwapchain" };
+		assert(m_Swapchain == NULL);
 		m_Swapchain = swapchain;
 		OnSwapchainChanged();
 	}

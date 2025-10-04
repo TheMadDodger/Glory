@@ -758,7 +758,7 @@ namespace Glory
 			imageBarriers[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 			imageBarriers[i].oldLayout = vkTexture->m_VKFinalLayout;
 			imageBarriers[i].newLayout = vkTexture->m_VKFinalLayout;
-			imageBarriers[i].subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+			imageBarriers[i].subresourceRange.aspectMask = vkTexture->m_VKAspect;
 			imageBarriers[i].subresourceRange.levelCount = 1;
 			imageBarriers[i].subresourceRange.layerCount = 1;
 			imageBarriers[i].subresourceRange.baseArrayLayer = 0;
@@ -1246,7 +1246,7 @@ namespace Glory
 		vk::ImageViewCreateInfo viewInfo = vk::ImageViewCreateInfo();
 		EnsureSupportedFormat(imageInfo.format, viewInfo);
 
-		const vk::ImageAspectFlags imageAspect = VKConverter::GetVulkanImageAspectFlags(textureInfo.m_ImageAspectFlags);
+		texture.m_VKAspect = VKConverter::GetVulkanImageAspectFlags(textureInfo.m_ImageAspectFlags);
 
 		if (m_LogicalDevice.createImage(&imageInfo, nullptr, &texture.m_VKImage) != vk::Result::eSuccess)
 		{
@@ -1279,19 +1279,19 @@ namespace Glory
 		/* Transition image layout */
 		if (pixels)
 		{
-			TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, imageAspect, imageInfo.mipLevels);
+			TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, texture.m_VKAspect, imageInfo.mipLevels);
 			const vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
 			BufferHandle stagingBuffer = CreateBuffer(memRequirements.size, BufferType::BT_TransferRead, BufferFlags::BF_Write);
 			VK_Buffer* vkStagingBuffer = m_Buffers.Find(stagingBuffer);
 			AssignBuffer(stagingBuffer, pixels, uint32_t(dataSize));
 
-			CopyFromBuffer(vkStagingBuffer->m_VKBuffer, texture.m_VKImage, imageAspect, textureInfo.m_Width, textureInfo.m_Height);
+			CopyFromBuffer(vkStagingBuffer->m_VKBuffer, texture.m_VKImage, texture.m_VKAspect, textureInfo.m_Width, textureInfo.m_Height);
 
 			/* Transtion layout again so it can be sampled */
 			if (imageInfo.mipLevels > 1)
 				GenerateMipMaps(texture.m_VKImage, textureInfo.m_Width, textureInfo.m_Height, imageInfo.mipLevels);
 			else
-				TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, imageAspect, imageInfo.mipLevels);
+				TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, texture.m_VKAspect, imageInfo.mipLevels);
 
 			FreeBuffer(stagingBuffer);
 
@@ -1302,7 +1302,7 @@ namespace Glory
 		viewInfo.image = texture.m_VKImage;
 		viewInfo.viewType = VKConverter::GetVulkanImageViewType(textureInfo.m_ImageType);
 		viewInfo.format = format;
-		viewInfo.subresourceRange.aspectMask = imageAspect;
+		viewInfo.subresourceRange.aspectMask = texture.m_VKAspect;
 		viewInfo.subresourceRange.baseMipLevel = 0;
 		viewInfo.subresourceRange.levelCount = imageInfo.mipLevels;
 		viewInfo.subresourceRange.baseArrayLayer = 0;

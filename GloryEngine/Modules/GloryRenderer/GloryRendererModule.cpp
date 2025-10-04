@@ -23,7 +23,7 @@ namespace Glory
 {
 	static constexpr std::string_view ScreenSpaceAOCVarName = "r_screenSpaceAO";
 
-	constexpr size_t AttachmentNameCount = 7;
+	constexpr size_t AttachmentNameCount = 8;
 	constexpr std::string_view AttachmentNames[AttachmentNameCount] = {
 		"ObjectID",
 		"Debug",
@@ -32,6 +32,7 @@ namespace Glory
 		"AOBlurred",
 		"Data",
 		"AO",
+		"Final",
 	};
 
 	constexpr size_t DebugOverlayNameCount = 1;
@@ -76,19 +77,27 @@ namespace Glory
 		for (size_t i = 0; i < m_ImageCount; ++i)
 		{
 			const RenderPassHandle& renderPass = uniqueCameraData.m_RenderPasses[i];
+			const RenderPassHandle& deferredRenderPass = uniqueCameraData.m_DeferredRenderPasses[i];
 			const RenderPassHandle& ssaoRenderPass = uniqueCameraData.m_SSAORenderPasses[i];
 			if (!renderPass) continue;
 			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(renderPass);
+			RenderTextureHandle deferredRenderTexture = pDevice->GetRenderPassRenderTexture(deferredRenderPass);
 			RenderTextureHandle ssaoRenderTexture = pDevice->GetRenderPassRenderTexture(ssaoRenderPass);
 			const glm::uvec2 resolution = camera.GetResolution();
 			pDevice->ResizeRenderTexture(renderTexture, resolution.x, resolution.y);
+			pDevice->ResizeRenderTexture(deferredRenderTexture, resolution.x, resolution.y);
 			pDevice->ResizeRenderTexture(ssaoRenderTexture, resolution.x, resolution.y);
 
 			/* Update descriptor sets */
 			const DescriptorSetHandle& ssaoSamplersSet = uniqueCameraData.m_SSAOSamplersSets[i];
-			const DescriptorSetHandle& colorSamplerSet = uniqueCameraData.m_ColorSamplerSets[i];
+			const DescriptorSetHandle& deferredSamplersSet = uniqueCameraData.m_DeferredSamplersSets[i];
+			const DescriptorSetHandle& colorSamplerSet = uniqueCameraData.m_FinalColorSamplerSets[i];
+			TextureHandle finalColor = pDevice->GetRenderTextureAttachment(deferredRenderTexture, 0);
+			TextureHandle debug = pDevice->GetRenderTextureAttachment(renderTexture, 1);
 			TextureHandle color = pDevice->GetRenderTextureAttachment(renderTexture, 2);
 			TextureHandle normals = pDevice->GetRenderTextureAttachment(renderTexture, 3);
+			TextureHandle ao = pDevice->GetRenderTextureAttachment(renderTexture, 4);
+			TextureHandle data = pDevice->GetRenderTextureAttachment(renderTexture, 5);
 			TextureHandle depth = pDevice->GetRenderTextureAttachment(renderTexture, 6);
 			DescriptorSetUpdateInfo updateInfo;
 			updateInfo.m_Samplers.resize(2);
@@ -98,8 +107,23 @@ namespace Glory
 			updateInfo.m_Samplers[1].m_DescriptorIndex = 1;
 			pDevice->UpdateDescriptorSet(ssaoSamplersSet, updateInfo);
 			updateInfo = DescriptorSetUpdateInfo();
+			updateInfo.m_Samplers.resize(6);
+			updateInfo.m_Samplers[0].m_TextureHandle = debug;
+			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
+			updateInfo.m_Samplers[1].m_TextureHandle = color;
+			updateInfo.m_Samplers[1].m_DescriptorIndex = 1;
+			updateInfo.m_Samplers[2].m_TextureHandle = normals;
+			updateInfo.m_Samplers[2].m_DescriptorIndex = 2;
+			updateInfo.m_Samplers[3].m_TextureHandle = ao;
+			updateInfo.m_Samplers[3].m_DescriptorIndex = 3;
+			updateInfo.m_Samplers[4].m_TextureHandle = data;
+			updateInfo.m_Samplers[4].m_DescriptorIndex = 4;
+			updateInfo.m_Samplers[5].m_TextureHandle = depth;
+			updateInfo.m_Samplers[5].m_DescriptorIndex = 5;
+			pDevice->UpdateDescriptorSet(deferredSamplersSet, updateInfo);
+			updateInfo = DescriptorSetUpdateInfo();
 			updateInfo.m_Samplers.resize(1);
-			updateInfo.m_Samplers[0].m_TextureHandle = color;
+			updateInfo.m_Samplers[0].m_TextureHandle = finalColor;
 			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
 			pDevice->UpdateDescriptorSet(colorSamplerSet, updateInfo);
 		}
@@ -417,6 +441,10 @@ namespace Glory
 		m_CameraClusterSetLayout = CreateBufferDescriptorLayout(pDevice, 1, { BufferBindingIndices::Clusters },
 			{ BufferType::BT_Storage }, { ShaderTypeFlag(STF_Compute | STF_Fragment) });
 
+		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::CameraDatas },
+			{ BufferType::BT_Storage }, { STF_Fragment }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
+			m_GlobalDeferredSetLayout, m_GlobalDeferredSet, &m_DeferredConstantsBuffer, ShaderTypeFlag(STF_Fragment), 0, sizeof(DeferredConstants));
+
 		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 2, { BufferBindingIndices::LightDatas, BufferBindingIndices::LightSpaceTransforms },
 			{ BufferType::BT_Storage }, { ShaderTypeFlag(STF_Compute | STF_Fragment) }, { m_LightsSSBO, m_LightSpaceTransformsSSBO }, { { 0, sizeof(LightData)*MAX_LIGHTS }, { 0, sizeof(glm::mat4)*MAX_LIGHTS } },
 			m_GlobalLightSetLayout, m_GlobalLightSet);
@@ -433,6 +461,8 @@ namespace Glory
 
 		m_SSAOSamplersSetLayout = CreateSamplerDescriptorLayout(pDevice, 2, { 0, 1 }, { STF_Fragment }, { "Normal", "Depth" });
 		m_NoiseSamplerSetLayout = CreateSamplerDescriptorLayout(pDevice, 1, { 2 }, { STF_Fragment }, { "Noise" });
+		m_CameraDeferredSamplerSetLayout = CreateSamplerDescriptorLayout(pDevice, 6, { 0, 1, 2, 3, 4, 5 }, { STF_Fragment }, { "Debug", "Color", "Normal", "AO", "Data", "Depth" });
+		m_GlobalDeferredSamplerSetLayout = CreateSamplerDescriptorLayout(pDevice, 2, { 6, 7 }, { STF_Fragment }, { "IrradianceMap", "ShadowAtlas" });
 		m_NoiseSamplerSet = CreateSamplerDescriptorSet(pDevice, 1, { m_SampleNoiseTexture }, m_NoiseSamplerSetLayout);
 		m_DisplayCopySamplerSetLayout = CreateSamplerDescriptorLayout(pDevice, 1, { 0 }, { STF_Fragment }, { "Color" });
 
@@ -444,6 +474,7 @@ namespace Glory
 		assert(m_ImageCount > 0);
 		m_ShadowsPasses.resize(m_ImageCount);
 		m_ShadowAtlasses.resize(m_ImageCount);
+		m_GlobalDeferredSamplerSets.resize(m_ImageCount);
 		for (size_t i = 0; i < m_ShadowsPasses.size(); ++i)
 		{
 			RenderPassInfo shadowsPassInfo;
@@ -460,6 +491,7 @@ namespace Glory
 			info.m_Width = 4096;
 			info.m_Height = 4096;
 			m_ShadowAtlasses[i] = CreateGPUTextureAtlas(std::move(info), texture);
+			m_GlobalDeferredSamplerSets[i] = CreateSamplerDescriptorSet(pDevice, 2, { NULL, texture }, m_GlobalDeferredSamplerSetLayout);
 		}
 
 		m_FrameCommandBuffers.resize(m_ImageCount, 0ull);
@@ -565,6 +597,15 @@ namespace Glory
 					sizeof(glm::vec3), { AttributeType::Float3 });
 			}
 
+			if (!m_DeferredPipeline)
+			{
+				const UUID deferredPipeline = settings.Value<uint64_t>("Screen Pipeline");
+				PipelineData* pPipeline = pipelines.GetPipelineData(deferredPipeline);
+				m_DeferredPipeline = pDevice->CreatePipeline(uniqueCameraData.m_DeferredRenderPasses[0], pPipeline,
+					{ m_GlobalDeferredSetLayout, m_CameraDeferredSamplerSetLayout, m_GlobalLightSetLayout, m_CameraLightSetLayout, m_GlobalDeferredSamplerSetLayout },
+					sizeof(glm::vec3), { AttributeType::Float3 });
+			}
+
 			BufferHandle& clusterSSBOHandle = uniqueCameraData.m_ClusterSSBO;
 			if (!uniqueCameraData.m_ClusterSSBO)
 			{
@@ -583,16 +624,6 @@ namespace Glory
 				if (iter != m_DirtyCameraPerspectives.end())
 					m_DirtyCameraPerspectives.erase(iter);
 			}
-
-			/*if (!deferredRenderPass)
-			{
-				RenderPassInfo renderPassInfo;
-				renderPassInfo.RenderTextureInfo.Width = resolution.x;
-				renderPassInfo.RenderTextureInfo.Height = resolution.y;
-				renderPassInfo.RenderTextureInfo.HasDepth = false;
-				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-				deferredRenderPass = pDevice->CreateRenderPass(renderPassInfo);
-			}*/
 		}
 
 		m_FrameCommandBuffers[m_CurrentFrameIndex] = pDevice->Begin();
@@ -610,8 +641,18 @@ namespace Glory
 			const RenderPassHandle& renderPass = uniqueCameraData.m_RenderPasses[m_CurrentFrameIndex];
 			const RenderPassHandle& ssaoRenderPass = uniqueCameraData.m_SSAORenderPasses[m_CurrentFrameIndex];
 			const DescriptorSetHandle& ssaoSamplersSet = uniqueCameraData.m_SSAOSamplersSets[m_CurrentFrameIndex];
-			const DescriptorSetHandle& colorSamplerSet = uniqueCameraData.m_ColorSamplerSets[m_CurrentFrameIndex];
-			//const RenderPassHandle& deferredRenderPass = uniqueCameraData.m_DeferredRenderPasses[m_CurrentFrameIndex];
+			const DescriptorSetHandle& deferredSamplerSet = uniqueCameraData.m_DeferredSamplersSets[m_CurrentFrameIndex];
+			const DescriptorSetHandle& colorSamplerSet = uniqueCameraData.m_FinalColorSamplerSets[m_CurrentFrameIndex];
+			const DescriptorSetHandle& lightSet = uniqueCameraData.m_LightSets[m_CurrentFrameIndex];
+			const RenderPassHandle& deferredRenderPass = uniqueCameraData.m_DeferredRenderPasses[m_CurrentFrameIndex];
+			const RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(renderPass);
+			const TextureHandle debug = pDevice->GetRenderTextureAttachment(renderTexture, 1);
+			const TextureHandle color = pDevice->GetRenderTextureAttachment(renderTexture, 2);
+			const TextureHandle normals = pDevice->GetRenderTextureAttachment(renderTexture, 3);
+			const TextureHandle ao = pDevice->GetRenderTextureAttachment(renderTexture, 4);
+			const TextureHandle data = pDevice->GetRenderTextureAttachment(renderTexture, 5);
+			const TextureHandle depth = pDevice->GetRenderTextureAttachment(renderTexture, 6);
+
 			/* Light cluster culling */
 			ClusterPass(m_FrameCommandBuffers[m_CurrentFrameIndex], static_cast<uint32_t>(i));
 
@@ -629,6 +670,9 @@ namespace Glory
 
 			const glm::uvec2& resolution = camera.GetResolution();
 
+			pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, { normals, depth },
+				PipelineStageFlagBits::PST_ColorAttachmentOutput, PipelineStageFlagBits::PST_FragmentShader);
+
 			pDevice->BeginRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex], ssaoRenderPass);
 			pDevice->BeginPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex], m_SSAOPipeline);
 			pDevice->SetViewport(m_FrameCommandBuffers[m_CurrentFrameIndex], 0.0f, 0.0f, float(resolution.x), float(resolution.y));
@@ -642,9 +686,45 @@ namespace Glory
 			pDevice->EndPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 			pDevice->EndRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 
+			/* Barriers */
+			pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, { debug, color, normals, ao, data, depth },
+				PipelineStageFlagBits::PST_ColorAttachmentOutput, PipelineStageFlagBits::PST_FragmentShader);
+
 			/* Deferred composite */
-			//pDevice->BeginRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex], deferredRenderPass);
-			//pDevice->EndRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
+			const glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
+			const float zNear = camera.GetNear();
+			const float zFar = camera.GetFar();
+			const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x / (float)gridSize.x), (uint32_t)std::ceilf(resolution.y / (float)gridSize.y));
+
+			DeferredConstants deferredConstants;
+			deferredConstants.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
+			deferredConstants.HasTexture = 0;
+			deferredConstants.CameraIndex = i;
+			deferredConstants.Scale = (float)gridSize.z/std::log2f(zFar / zNear);
+			deferredConstants.Bias = -((float)gridSize.z*std::log2f(zNear) / std::log2f(zFar / zNear));
+			deferredConstants.AOEnabled = false;
+			deferredConstants.AOMagnitude = m_GlobalSSAOSetting.m_Magnitude;
+			deferredConstants.AOContrast = m_GlobalSSAOSetting.m_Contrast;
+
+			//m_GlobalDeferredSetLayout, m_CameraDeferredSamplerSetLayout, m_GlobalLightSetLayout, m_CameraLightSetLayout, m_GlobalDeferredSamplerSetLayout
+
+			const BufferHandle& lightIndexSSBO = uniqueCameraData.m_LightIndexSSBOs[m_CurrentFrameIndex];
+			const BufferHandle& lightGridSSBO = uniqueCameraData.m_LightGridSSBOs[m_CurrentFrameIndex];
+			const BufferHandle& lightDistancesSSBO = uniqueCameraData.m_LightDistancesSSBOs[m_CurrentFrameIndex];
+			pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], { lightIndexSSBO, lightGridSSBO, lightDistancesSSBO }, {},
+				PipelineStageFlagBits::PST_ComputeShader, PipelineStageFlagBits::PST_FragmentShader);
+
+			pDevice->BeginRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex], deferredRenderPass);
+			pDevice->BeginPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DeferredPipeline);
+			pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DeferredPipeline,
+				{ m_GlobalDeferredSet, deferredSamplerSet, m_GlobalLightSet, lightSet, m_GlobalDeferredSamplerSets[m_CurrentFrameIndex] });
+			if (!m_DeferredConstantsBuffer)
+				pDevice->PushConstants(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DeferredPipeline, 0, sizeof(DeferredConstants), &deferredConstants, ShaderTypeFlag(STF_Fragment));
+			else
+				pDevice->AssignBuffer(m_SSAOConstantsBuffer, &deferredConstants, sizeof(DeferredConstants));
+			pDevice->DrawQuad(m_FrameCommandBuffers[m_CurrentFrameIndex]);
+			pDevice->EndPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex]);
+			pDevice->EndRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 		}
 
 		std::vector<TextureHandle> colorTextures(m_OutputCameras.size());
@@ -652,8 +732,8 @@ namespace Glory
 		{
 			CameraRef camera = m_OutputCameras[i];
 			const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
-			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(uniqueCameraData.m_RenderPasses[m_CurrentFrameIndex]);
-			colorTextures[i] = pDevice->GetRenderTextureAttachment(renderTexture, 2);
+			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(uniqueCameraData.m_DeferredRenderPasses[m_CurrentFrameIndex]);
+			colorTextures[i] = pDevice->GetRenderTextureAttachment(renderTexture, 0);
 		}
 
 		if (!colorTextures.empty())
@@ -667,7 +747,7 @@ namespace Glory
 			ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::Draw: Render output from camera " + std::to_string(i) };
 			CameraRef camera = m_OutputCameras[i];
 			const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
-			pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DisplayCopyPipeline, { uniqueCameraData.m_ColorSamplerSets[m_CurrentFrameIndex] });
+			pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DisplayCopyPipeline, { uniqueCameraData.m_FinalColorSamplerSets[m_CurrentFrameIndex] });
 			pDevice->DrawQuad(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 		}
 		pDevice->EndPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex]);
@@ -690,6 +770,7 @@ namespace Glory
 			pDevice->BeginPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DisplayCopyPipeline);
 			pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DisplayCopyPipeline, { m_FinalFrameColorSets[m_CurrentFrameIndex] });
 			pDevice->DrawQuad(m_FrameCommandBuffers[m_CurrentFrameIndex]);
+			pDevice->EndPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 			pDevice->EndRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 		}
 		pDevice->End(m_FrameCommandBuffers[m_CurrentFrameIndex]);
@@ -718,7 +799,7 @@ namespace Glory
 
 	size_t GloryRendererModule::DefaultAttachmenmtIndex() const
 	{
-		return 2;
+		return 7;
 	}
 
 	size_t GloryRendererModule::CameraAttachmentPreviewCount() const
@@ -736,8 +817,14 @@ namespace Glory
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
 		RenderPassHandle renderPass = uniqueCameraData.m_RenderPasses[m_CurrentFrameIndex];
+		RenderPassHandle deferredRenderPass = uniqueCameraData.m_DeferredRenderPasses[m_CurrentFrameIndex];
 		RenderPassHandle ssaoRenderPass = uniqueCameraData.m_SSAORenderPasses[m_CurrentFrameIndex];
-		if (!renderPass || !ssaoRenderPass) return NULL;
+		if (!renderPass || !ssaoRenderPass || !deferredRenderPass) return NULL;
+		if (index == 7)
+		{
+			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(deferredRenderPass);
+			return pDevice->GetRenderTextureAttachment(renderTexture, 0);
+		}
 		if (index >= 6)
 		{
 			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(ssaoRenderPass);
@@ -853,7 +940,10 @@ namespace Glory
 			info.m_Width = 4096;
 			info.m_Height = 4096;
 			if (!m_ShadowAtlasses[i])
+			{
 				m_ShadowAtlasses[i] = CreateGPUTextureAtlas(std::move(info), texture);
+				m_GlobalDeferredSamplerSets[i] = CreateSamplerDescriptorSet(pDevice, 2, { NULL, texture }, m_GlobalDeferredSamplerSetLayout);
+			}
 
 			RenderPassInfo finalColorPassInfo;
 			finalColorPassInfo.RenderTextureInfo.HasDepth = false;
@@ -1322,8 +1412,6 @@ namespace Glory
 			pDevice->AssignBuffer(m_ClusterConstantsBuffer, &constants, sizeof(ClusterConstants));
 		pDevice->Dispatch(commandBuffer, 1, 1, 6);
 		pDevice->EndPipeline(commandBuffer);
-		pDevice->PipelineBarrier(commandBuffer, { lightIndexSSBO, lightGridSSBO, lightDistancesSSBO }, {},
-			PipelineStageFlagBits::PST_ComputeShader, PipelineStageFlagBits::PST_FragmentShader);
 	}
 
 	void GloryRendererModule::DynamicObjectsPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex)
@@ -1482,13 +1570,14 @@ namespace Glory
 		cameraData.m_LightDistancesSSBOs.resize(m_ImageCount, 0ull);
 		cameraData.m_LightSets.resize(m_ImageCount, 0ull);
 		cameraData.m_SSAOSamplersSets.resize(m_ImageCount, 0ull);
-		cameraData.m_ColorSamplerSets.resize(m_ImageCount, 0ull);
+		cameraData.m_DeferredSamplersSets.resize(m_ImageCount, 0ull);
+		cameraData.m_FinalColorSamplerSets.resize(m_ImageCount, 0ull);
 
 		for (size_t i = 0; i < m_ImageCount; ++i)
 		{
 			RenderPassHandle& renderPass = cameraData.m_RenderPasses[i];
 			RenderPassHandle& ssaoRenderPass = cameraData.m_SSAORenderPasses[i];
-			//RenderPassHandle& deferredRenderPass = cameraData.m_DeferredRenderPasses[i];
+			RenderPassHandle& deferredRenderPass = cameraData.m_DeferredRenderPasses[i];
 			const auto& resolution = camera.GetResolution();
 			if (!renderPass)
 			{
@@ -1514,15 +1603,31 @@ namespace Glory
 				ssaoRenderPass = pDevice->CreateRenderPass(std::move(renderPassInfo));
 			}
 
+			if (!deferredRenderPass)
+			{
+				RenderPassInfo renderPassInfo;
+				renderPassInfo.RenderTextureInfo.Width = resolution.x;
+				renderPassInfo.RenderTextureInfo.Height = resolution.y;
+				renderPassInfo.RenderTextureInfo.HasDepth = false;
+				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+				deferredRenderPass = pDevice->CreateRenderPass(std::move(renderPassInfo));
+			}
+
 			DescriptorSetHandle& lightSet = cameraData.m_LightSets[i];
 			DescriptorSetHandle& ssaoSamplersSet = cameraData.m_SSAOSamplersSets[i];
-			DescriptorSetHandle& colorSamplerSet = cameraData.m_ColorSamplerSets[i];
+			DescriptorSetHandle& deferredSamplersSet = cameraData.m_DeferredSamplersSets[i];
+			DescriptorSetHandle& colorSamplerSet = cameraData.m_FinalColorSamplerSets[i];
 			BufferHandle& lightIndexSSBO = cameraData.m_LightIndexSSBOs[i];
 			BufferHandle& lightGridSSBO = cameraData.m_LightGridSSBOs[i];
 			BufferHandle& lightDistancesSSBO = cameraData.m_LightDistancesSSBOs[i];
 			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(renderPass);
+			RenderTextureHandle deferredRenderTexture = pDevice->GetRenderPassRenderTexture(deferredRenderPass);
+			TextureHandle finalColor = pDevice->GetRenderTextureAttachment(deferredRenderTexture, 0);
+			TextureHandle debug = pDevice->GetRenderTextureAttachment(renderTexture, 1);
 			TextureHandle color = pDevice->GetRenderTextureAttachment(renderTexture, 2);
 			TextureHandle normals = pDevice->GetRenderTextureAttachment(renderTexture, 3);
+			TextureHandle ao = pDevice->GetRenderTextureAttachment(renderTexture, 4);
+			TextureHandle data = pDevice->GetRenderTextureAttachment(renderTexture, 5);
 			TextureHandle depth = pDevice->GetRenderTextureAttachment(renderTexture, 6);
 
 			if (!lightIndexSSBO)
@@ -1558,25 +1663,29 @@ namespace Glory
 				setInfo.m_Samplers[1].m_TextureHandle = depth;
 				ssaoSamplersSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 			}
+			
+			if (!deferredSamplersSet)
+			{
+				DescriptorSetInfo setInfo = DescriptorSetInfo();
+				setInfo.m_Layout = m_CameraDeferredSamplerSetLayout;
+				setInfo.m_Samplers.resize(6);
+				setInfo.m_Samplers[0].m_TextureHandle = debug;
+				setInfo.m_Samplers[1].m_TextureHandle = color;
+				setInfo.m_Samplers[2].m_TextureHandle = normals;
+				setInfo.m_Samplers[3].m_TextureHandle = ao;
+				setInfo.m_Samplers[4].m_TextureHandle = data;
+				setInfo.m_Samplers[5].m_TextureHandle = depth;
+				deferredSamplersSet = pDevice->CreateDescriptorSet(std::move(setInfo));
+			}
 
 			if (!colorSamplerSet)
 			{
 				DescriptorSetInfo setInfo = DescriptorSetInfo();
 				setInfo.m_Layout = m_DisplayCopySamplerSetLayout;
 				setInfo.m_Samplers.resize(1);
-				setInfo.m_Samplers[0].m_TextureHandle = color;
+				setInfo.m_Samplers[0].m_TextureHandle = finalColor;
 				colorSamplerSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 			}
-
-			/*if (!deferredRenderPass)
-			{
-				RenderPassInfo renderPassInfo;
-				renderPassInfo.RenderTextureInfo.Width = resolution.x;
-				renderPassInfo.RenderTextureInfo.Height = resolution.y;
-				renderPassInfo.RenderTextureInfo.HasDepth = false;
-				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-				deferredRenderPass = pDevice->CreateRenderPass(renderPassInfo);
-			}*/
 		}
 	}
 

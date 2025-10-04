@@ -41,6 +41,7 @@ namespace Glory
 
         vk::ImageLayout m_VKInitialLayout = vk::ImageLayout::eUndefined;
         vk::ImageLayout m_VKFinalLayout;
+        vk::ImageAspectFlags m_VKAspect;
         vk::Image m_VKImage;
         vk::ImageView m_VKImageView;
         vk::DeviceMemory m_VKMemory;

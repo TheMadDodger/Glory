@@ -39,6 +39,18 @@ namespace Glory
 		float SampleBias;
 	};
 
+	struct DeferredConstants
+	{
+		glm::uvec4 TileSizes;
+		uint64_t HasTexture;
+		uint32_t CameraIndex;
+		float Scale;
+		float Bias;
+		int32_t AOEnabled;
+		float AOMagnitude;
+		float AOContrast;
+	};
+
 	class GloryRendererModule : public RendererModule
 	{
 	private:
@@ -128,6 +140,7 @@ namespace Glory
 		BufferHandle m_LightCameraDatasBuffer = 0;
 		BufferHandle m_RenderConstantsBuffer = 0;
 		BufferHandle m_ClusterConstantsBuffer = 0;
+		BufferHandle m_DeferredConstantsBuffer = 0;
 		BufferHandle m_LightsSSBO = 0;
 		BufferHandle m_LightSpaceTransformsSSBO = 0;
 		BufferHandle m_SSAOConstantsBuffer = 0;
@@ -137,12 +150,15 @@ namespace Glory
 		DescriptorSetLayoutHandle m_GlobalRenderSetLayout;
 		DescriptorSetLayoutHandle m_GlobalShadowRenderSetLayout;
 		DescriptorSetLayoutHandle m_GlobalClusterSetLayout;
+		DescriptorSetLayoutHandle m_GlobalDeferredSetLayout;
 		DescriptorSetLayoutHandle m_GlobalLightSetLayout;
 		DescriptorSetLayoutHandle m_GlobalSampleDomeSetLayout;
 		DescriptorSetLayoutHandle m_CameraClusterSetLayout;
 		DescriptorSetLayoutHandle m_CameraLightSetLayout;
 		DescriptorSetLayoutHandle m_SSAOSamplersSetLayout;
 		DescriptorSetLayoutHandle m_NoiseSamplerSetLayout;
+		DescriptorSetLayoutHandle m_GlobalDeferredSamplerSetLayout;
+		DescriptorSetLayoutHandle m_CameraDeferredSamplerSetLayout;
 
 		DescriptorSetLayoutHandle m_DisplayCopySamplerSetLayout;
 
@@ -150,6 +166,7 @@ namespace Glory
 		DescriptorSetHandle m_GlobalRenderSet;
 		DescriptorSetHandle m_GlobalShadowRenderSet;
 		DescriptorSetHandle m_GlobalClusterSet;
+		DescriptorSetHandle m_GlobalDeferredSet;
 		DescriptorSetHandle m_GlobalLightSet;
 		DescriptorSetHandle m_GlobalSampleDomeSet;
 		DescriptorSetHandle m_SSAOCameraSet;
@@ -171,6 +188,7 @@ namespace Glory
 
 		/* Effects pipelines */
 		PipelineHandle m_SSAOPipeline = 0;
+		PipelineHandle m_DeferredPipeline = 0;
 
 		/* SSAO */
 		SSAOSettings m_GlobalSSAOSetting;
@@ -203,8 +221,10 @@ namespace Glory
 
 			std::vector<DescriptorSetHandle> m_LightSets;
 			std::vector<DescriptorSetHandle> m_SSAOSamplersSets;
-			std::vector<DescriptorSetHandle> m_ColorSamplerSets;
+			std::vector<DescriptorSetHandle> m_DeferredSamplersSets;
+			std::vector<DescriptorSetHandle> m_FinalColorSamplerSets;
 		};
+		std::vector<DescriptorSetHandle> m_GlobalDeferredSamplerSets;
 
 		std::map<UUID, UniqueCameraData> m_UniqueCameraDatas;
 		std::vector<CommandBufferHandle> m_FrameCommandBuffers;
