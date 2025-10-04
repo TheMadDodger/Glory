@@ -21,6 +21,7 @@ namespace Glory
 
         bool m_KeepMemoryMapped = false;
         void* m_pMappedMemory = nullptr;
+        bool m_CPUVisible = false;
     };
 
     struct VK_Mesh
@@ -266,6 +267,8 @@ namespace Glory
             uint32_t width, uint32_t height);
         void CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags,
             int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth);
+
+        void CopyFromBuffer(vk::Buffer dst, vk::Buffer src, int32_t dstOffset, int32_t srcOffset, uint32_t size);
 
         vk::CommandBuffer GetNewResetableCommandBuffer(CommandBufferHandle commandBufferHandle);
 

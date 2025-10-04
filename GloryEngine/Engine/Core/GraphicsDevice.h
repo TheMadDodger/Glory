@@ -31,6 +31,8 @@ namespace Glory
 		BF_Write = 1 << 1,
 		/** @brief The buffer will both be read and written to from the CPU many times */
 		BF_ReadAndWrite = BF_Read | BF_Write,
+		/** @brief Force copying to be enabled on this buffer */
+		BF_CopyDst = 1 << 2,
 	};
 
 	/** @brief Push constants range */

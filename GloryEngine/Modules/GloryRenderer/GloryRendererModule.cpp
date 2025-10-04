@@ -568,7 +568,7 @@ namespace Glory
 			BufferHandle& clusterSSBOHandle = uniqueCameraData.m_ClusterSSBO;
 			if (!uniqueCameraData.m_ClusterSSBO)
 			{
-				uniqueCameraData.m_ClusterSSBO = pDevice->CreateBuffer(sizeof(VolumeTileAABB)*NUM_CLUSTERS, BufferType::BT_Storage, BF_None);
+				uniqueCameraData.m_ClusterSSBO = pDevice->CreateBuffer(sizeof(VolumeTileAABB)*NUM_CLUSTERS, BufferType::BT_Storage, BF_CopyDst);
 				DescriptorSetInfo setInfo;
 				setInfo.m_Layout = m_CameraClusterSetLayout;
 				setInfo.m_Buffers.resize(1);
@@ -1346,7 +1346,7 @@ namespace Glory
 		m_SSAOKernelSize = size;
 
 		if (!m_SamplePointsDomeSSBO)
-			m_SamplePointsDomeSSBO = pDevice->CreateBuffer(sizeof(glm::vec3)*MAX_KERNEL_SIZE, BufferType::BT_Uniform, BF_None);
+			m_SamplePointsDomeSSBO = pDevice->CreateBuffer(sizeof(glm::vec3)*MAX_KERNEL_SIZE, BufferType::BT_Uniform, BF_CopyDst);
 
 		std::vector<glm::vec3> samplePoints{ m_SSAOKernelSize, glm::vec3{} };
 		for (unsigned int i = 0; i < m_SSAOKernelSize; ++i)
@@ -1530,7 +1530,7 @@ namespace Glory
 			if (!lightGridSSBO)
 				lightGridSSBO = pDevice->CreateBuffer(sizeof(LightGrid)*NUM_CLUSTERS, BufferType::BT_Storage, BF_None);
 			if (!lightDistancesSSBO)
-				lightDistancesSSBO = pDevice->CreateBuffer(sizeof(uint32_t)*MAX_LIGHTS, BufferType::BT_Storage, BF_Read);
+				lightDistancesSSBO = pDevice->CreateBuffer(sizeof(uint32_t)*MAX_LIGHTS, BufferType::BT_Storage, BF_None);
 
 			if (!lightSet)
 			{

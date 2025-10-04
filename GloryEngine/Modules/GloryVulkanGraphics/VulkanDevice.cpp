@@ -9,6 +9,7 @@
 
 #include <PipelineData.h>
 #include <ImageData.h>
+#include <MeshData.h>
 #include <TextureData.h>
 #include <FileData.h>
 #include <EngineProfiler.h>
@@ -853,25 +854,34 @@ namespace Glory
 		m_LogicalDevice.waitIdle();
 	}
 
-	vk::BufferUsageFlags GetBufferUsageFlags(BufferType bufferType)
+	vk::BufferUsageFlags GetBufferUsageFlags(BufferType bufferType, BufferFlags flags)
 	{
+		vk::BufferUsageFlags usageFlags;
+
 		switch (bufferType)
 		{
 		case Glory::BT_TransferRead:
-			return vk::BufferUsageFlagBits::eTransferSrc;
+			usageFlags |= vk::BufferUsageFlagBits::eTransferSrc;
+			break;
 		case Glory::BT_TransferWrite:
-			return vk::BufferUsageFlagBits::eTransferDst;
+			usageFlags |= vk::BufferUsageFlagBits::eTransferDst;
+			break;
 		case Glory::BT_Vertex:
-			return vk::BufferUsageFlagBits::eVertexBuffer;
+			usageFlags |= vk::BufferUsageFlagBits::eVertexBuffer;
+			break;
 		case Glory::BT_Index:
-			return vk::BufferUsageFlagBits::eIndexBuffer;
+			usageFlags |= vk::BufferUsageFlagBits::eIndexBuffer;
+			break;
 		case Glory::BT_Storage:
-			return vk::BufferUsageFlagBits::eStorageBuffer;
+			usageFlags |= vk::BufferUsageFlagBits::eStorageBuffer;
+			break;
 		case Glory::BT_Uniform:
-			return vk::BufferUsageFlagBits::eUniformBuffer;
-		default:
-			return vk::BufferUsageFlagBits(0);
+			usageFlags |= vk::BufferUsageFlagBits::eUniformBuffer;
+			break;
 		}
+		if (flags & BF_CopyDst)
+			usageFlags |= vk::BufferUsageFlagBits::eTransferDst;
+		return usageFlags;
 	}
 
 	vk::DescriptorType GetDescriptorType(BufferType bufferType)
@@ -898,7 +908,7 @@ namespace Glory
 	vk::MemoryPropertyFlags GetBufferMemoryPropertyFlags(BufferFlags flags)
 	{
 		if (flags == BF_None)
-			return vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+			return vk::MemoryPropertyFlagBits::eDeviceLocal;
 		vk::MemoryPropertyFlags result;
 		if (flags & BF_Write)
 		{
@@ -921,11 +931,12 @@ namespace Glory
 		VK_Buffer& buffer = m_Buffers.Emplace(handle, VK_Buffer());
 		buffer.m_Size = bufferSize;
 		buffer.m_KeepMemoryMapped = (flags & BF_Write) != 0;
+		buffer.m_CPUVisible = (flags & BF_ReadAndWrite) != 0;
 
 		vk::BufferCreateInfo bufferInfo = vk::BufferCreateInfo();
 		bufferInfo.size = (vk::DeviceSize)buffer.m_Size;
 		bufferInfo.sharingMode = vk::SharingMode::eExclusive;
-		bufferInfo.usage = buffer.m_VKUsage = GetBufferUsageFlags(type);
+		bufferInfo.usage = buffer.m_VKUsage = GetBufferUsageFlags(type, flags);
 
 		vk::Result result = m_LogicalDevice.createBuffer(&bufferInfo, nullptr, &buffer.m_VKBuffer);
 		if (result != vk::Result::eSuccess)
@@ -994,6 +1005,17 @@ namespace Glory
 		if (!buffer)
 		{
 			Debug().LogError("VulkanDevice::FreeBuffer: Invalid buffer handle.");
+			return;
+		}
+
+		if (!buffer->m_CPUVisible)
+		{
+			/* We have to assign it using a buffer copy */
+			BufferHandle staging = CreateBuffer(size, BufferType::BT_TransferRead, BufferFlags::BF_Write);
+			AssignBuffer(staging, data, offset, size);
+			VK_Buffer* vkStaging = m_Buffers.Find(staging);
+			CopyFromBuffer(buffer->m_VKBuffer, vkStaging->m_VKBuffer, offset, 0, size);
+			FreeBuffer(staging);
 			return;
 		}
 
@@ -1259,7 +1281,7 @@ namespace Glory
 		{
 			TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, imageAspect, imageInfo.mipLevels);
 			const vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
-			BufferHandle stagingBuffer = CreateBuffer(memRequirements.size, BufferType::BT_TransferRead);
+			BufferHandle stagingBuffer = CreateBuffer(memRequirements.size, BufferType::BT_TransferRead, BufferFlags::BF_Write);
 			VK_Buffer* vkStagingBuffer = m_Buffers.Find(stagingBuffer);
 			AssignBuffer(stagingBuffer, pixels, uint32_t(dataSize));
 
@@ -2683,6 +2705,17 @@ namespace Glory
 
 		commandBuffer.copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal, 1, &copyRegion);
 
+		EndSingleTimeCommands(commandBuffer);
+	}
+
+	void VulkanDevice::CopyFromBuffer(vk::Buffer dst, vk::Buffer src, int32_t dstOffset, int32_t srcOffset, uint32_t size)
+	{
+		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
+		vk::BufferCopy copyRegion = vk::BufferCopy();
+		copyRegion.dstOffset = dstOffset;
+		copyRegion.srcOffset = srcOffset;
+		copyRegion.size = size;
+		commandBuffer.copyBuffer(src, dst, 1, &copyRegion);
 		EndSingleTimeCommands(commandBuffer);
 	}
 

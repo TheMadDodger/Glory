@@ -91,8 +91,8 @@ namespace Glory
 	MeshHandle GraphicsDevice::CreateMesh(MeshData* pMeshData)
 	{
 		std::vector<BufferHandle> buffers(2);
-		buffers[0] = CreateBuffer(pMeshData->VertexCount()*pMeshData->VertexSize(), BufferType::BT_Vertex, BF_None);
-		buffers[1] = CreateBuffer(pMeshData->IndexCount()*sizeof(uint32_t), BufferType::BT_Index, BF_None);
+		buffers[0] = CreateBuffer(pMeshData->VertexCount()*pMeshData->VertexSize(), BufferType::BT_Vertex, BF_CopyDst);
+		buffers[1] = CreateBuffer(pMeshData->IndexCount()*sizeof(uint32_t), BufferType::BT_Index, BF_CopyDst);
 		AssignBuffer(buffers[0], pMeshData->Vertices(), pMeshData->VertexCount()*pMeshData->VertexSize());
 		AssignBuffer(buffers[1], pMeshData->Indices(), pMeshData->IndexCount()*sizeof(uint32_t));
 		return CreateMesh(std::move(buffers), pMeshData->VertexCount(), pMeshData->IndexCount(),
@@ -124,7 +124,7 @@ namespace Glory
 			 1.0f, -1.0f, 0.0f,
 			 1.0f,  1.0f, 0.0f,
 		};
-		BufferHandle buffer = CreateBuffer(sizeof(vertices), BufferType::BT_Vertex, BF_None);
+		BufferHandle buffer = CreateBuffer(sizeof(vertices), BufferType::BT_Vertex, BF_CopyDst);
 		AssignBuffer(buffer, vertices, sizeof(vertices));
 		m_ScreenMesh = CreateMesh({ buffer }, 6, 0, sizeof(glm::vec3), PrimitiveType::PT_Triangles, { AttributeType::Float3 });
 

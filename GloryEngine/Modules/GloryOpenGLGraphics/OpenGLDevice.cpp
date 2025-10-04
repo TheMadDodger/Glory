@@ -693,7 +693,7 @@ namespace Glory
 			break;
 		}
 
-		if (flags != BF_None)
+		if (flags != BF_None && flags != BF_CopyDst)
 			buffer.m_GLUsage = GetBufferUsage(flags);
 
 		glBindBuffer(buffer.m_GLTarget, buffer.m_GLBufferID);
