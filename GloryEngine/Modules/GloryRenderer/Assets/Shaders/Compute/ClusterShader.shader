@@ -13,7 +13,6 @@ vec3 LineIntersectionToZPlane(vec3 A, vec3 B, float zDistance);
 void main()
 {
     CameraData camera = CurrentCamera();
-    mat4 projectionInverse = inverse(camera.Projection);
 
     //Eye position is zero in view space
     const vec3 eyePos = vec3(0.0);
@@ -29,8 +28,8 @@ void main()
     vec4 minPoint_sS = vec4(gl_WorkGroupID.xy*tileSizePx, -1.0, 1.0); // Bottom left
 
     //Pass min and max to view space
-    vec3 maxPoint_vS = Screen2View(maxPoint_sS, camera.Resolution, projectionInverse).xyz;
-    vec3 minPoint_vS = Screen2View(minPoint_sS, camera.Resolution, projectionInverse).xyz;
+    vec3 maxPoint_vS = Screen2View(maxPoint_sS, camera.Resolution, camera.ProjectionInverse).xyz;
+    vec3 minPoint_vS = Screen2View(minPoint_sS, camera.Resolution, camera.ProjectionInverse).xyz;
 
     //Near and far values of the cluster in view space
     float tileNear = -camera.zNear*pow(camera.zFar/camera.zNear, gl_WorkGroupID.z/float(gl_NumWorkGroups.z));

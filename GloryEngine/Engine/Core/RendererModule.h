@@ -33,6 +33,8 @@ namespace Glory
 	{
 		glm::mat4 m_View;
 		glm::mat4 m_Projection;
+		glm::mat4 m_ViewInverse;
+		glm::mat4 m_ProjectionInverse;
 		float m_Near;
 		float m_Far;
 		glm::vec2 m_Resolution;

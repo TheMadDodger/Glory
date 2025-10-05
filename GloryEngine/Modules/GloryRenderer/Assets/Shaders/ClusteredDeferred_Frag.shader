@@ -224,9 +224,7 @@ void main()
 	}
 
 	CameraData camera = CurrentCamera();
-	mat4 viewInverse = inverse(camera.View);
-	mat4 projectionInverse = inverse(camera.Projection);
-	vec3 CameraPos = viewInverse[3].xyz;
+	vec3 CameraPos = camera.ViewInverse[3].xyz;
 
 	vec3 color = texture(Color, Coord).xyz;
 	vec4 metallicRoughnessAO = texture(Data, Coord);
@@ -244,7 +242,7 @@ void main()
 
 	vec3 normal = normalize(texture(Normal, Coord).xyz*2.0 - 1.0);
 	float depth = texture(Depth, Coord).r;
-	vec3 worldPosition = WorldPosFromDepth(depth, viewInverse, projectionInverse);
+	vec3 worldPosition = WorldPosFromDepth(depth, camera.ViewInverse, camera.ProjectionInverse);
 
 	vec2 pixelID = Coord*camera.Resolution;
 	uint clusterID = GetClusterIndex(vec3(pixelID.xy, depth), camera.zNear, camera.zFar, Constants.Scale, Constants.Bias, Constants.TileSizes);
@@ -352,9 +350,7 @@ vec3 CalculateLighting(LightData light, vec3 normal, vec3 color, vec3 worldPosit
 void main()
 {
 	CameraData camera = CurrentCamera();
-	mat4 viewInverse = inverse(camera.View);
-	mat4 projectionInverse = inverse(camera.Projection);
-    vec3 CameraPos = viewInverse[3].xyz;
+    vec3 CameraPos = camera.ViewInverse[3].xyz;
 
 	vec3 debug = texture(Debug, Coord).xyz;
 	if (debug.r > 0.0 || debug.g > 0.0 || debug.b > 0.0)
@@ -376,7 +372,7 @@ void main()
 	float ssao = Constants.AOEnabled == 1 ? Constants.AOMagnitude*pow(texture(AO, Coord).x, Constants.AOContrast) : 1.0;
 	ssao = min(ssao, 1.0);
 	float depth = texture(Depth, Coord).r;
-	vec3 worldPosition = WorldPosFromDepth(depth, viewInverse, projectionInverse);
+	vec3 worldPosition = WorldPosFromDepth(depth, camera.ViewInverse, camera.ProjectionInverse);
 	vec3 ambient = TextureEnabled(6) ? texture(IrradianceMap, normal).rgb : vec3(1.0);
 
 	vec2 pixelID = Coord*camera.Resolution;

@@ -1095,28 +1095,7 @@ namespace Glory
 
 		MaterialManager& materials = m_pEngine->GetMaterialManager();
 
-		/* Prepare cameras */
-		if (m_CameraDatas->size() < m_ActiveCameras.size())
-			m_CameraDatas.resize(m_ActiveCameras.size());
-		for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
-		{
-			CameraRef camera = m_ActiveCameras[i];
-
-			const PerCameraData cameraData{ camera.GetView(), camera.GetProjection(),
-				camera.GetNear(), camera.GetFar(), { static_cast<glm::vec2>(camera.GetResolution()) }};
-
-			if (std::memcmp(&m_CameraDatas.m_Data[i], &cameraData, sizeof(PerCameraData)) != 0)
-			{
-				std::memcpy(&m_CameraDatas.m_Data[i], &cameraData, sizeof(PerCameraData));
-				m_CameraDatas.SetDirty(i);
-			}
-		}
-		if (m_CameraDatas)
-		{
-			const size_t dirtySize = m_CameraDatas.DirtySize();
-			pDevice->AssignBuffer(m_CameraDatasBuffer, m_CameraDatas.DirtyStart(),
-				m_CameraDatas.m_DirtyRange.first*sizeof(PerCameraData), static_cast<uint32_t>(dirtySize*sizeof(PerCameraData)));
-		}
+		PrepareCameras();
 
 		for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
 		{
@@ -1344,6 +1323,8 @@ namespace Glory
 
 	void GloryRendererModule::GenerateClusterSSBO(uint32_t cameraIndex, GraphicsDevice* pDevice, CameraRef camera, DescriptorSetHandle clusterSet)
 	{
+		PrepareCameras();
+
 		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::GenerateClusterSSBO" };
 		const glm::uvec2 resolution = camera.GetResolution();
 		const glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
@@ -1373,6 +1354,7 @@ namespace Glory
 		pDevice->End(commandBuffer);
 		pDevice->Commit(commandBuffer);
 		pDevice->Wait(commandBuffer);
+		pDevice->Release(commandBuffer);
 	}
 
 	void GloryRendererModule::ClusterPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex)
@@ -1697,5 +1679,34 @@ namespace Glory
 	void GloryRendererModule::OnCameraUpdated(CameraRef camera)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::OnCameraUpdated" };
+	}
+
+	void GloryRendererModule::PrepareCameras()
+	{
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+		if (!pDevice) return;
+
+		/* Prepare cameras */
+		if (m_CameraDatas->size() < m_ActiveCameras.size())
+			m_CameraDatas.resize(m_ActiveCameras.size());
+		for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
+		{
+			CameraRef camera = m_ActiveCameras[i];
+
+			const PerCameraData cameraData{ camera.GetView(), camera.GetProjection(), camera.GetViewInverse(), camera.GetProjectionInverse(),
+				camera.GetNear(), camera.GetFar(), { static_cast<glm::vec2>(camera.GetResolution()) }};
+
+			if (std::memcmp(&m_CameraDatas.m_Data[i], &cameraData, sizeof(PerCameraData)) != 0)
+			{
+				std::memcpy(&m_CameraDatas.m_Data[i], &cameraData, sizeof(PerCameraData));
+				m_CameraDatas.SetDirty(i);
+			}
+		}
+		if (m_CameraDatas)
+		{
+			const size_t dirtySize = m_CameraDatas.DirtySize();
+			pDevice->AssignBuffer(m_CameraDatasBuffer, m_CameraDatas.DirtyStart(),
+				m_CameraDatas.m_DirtyRange.first*sizeof(PerCameraData), static_cast<uint32_t>(dirtySize*sizeof(PerCameraData)));
+		}
 	}
 }

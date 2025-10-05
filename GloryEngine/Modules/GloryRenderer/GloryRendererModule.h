@@ -130,6 +130,8 @@ namespace Glory
 		virtual void OnUnsubmitCamera(CameraRef camera) override;
 		virtual void OnCameraUpdated(CameraRef camera) override;
 
+		void PrepareCameras();
+
 	private:
 		std::vector<PipelineBatchData> m_DynamicBatchData;
 		CPUBuffer<PerCameraData> m_CameraDatas;

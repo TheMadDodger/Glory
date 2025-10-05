@@ -2,6 +2,8 @@ struct CameraData
 {
 	mat4 View;
 	mat4 Projection;
+	mat4 ViewInverse;
+	mat4 ProjectionInverse;
 	float zNear;
 	float zFar;
 	vec2 Resolution;

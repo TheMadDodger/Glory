@@ -31,8 +31,6 @@ layout(set = 1, std140, binding = 2) readonly uniform SampleDomeUBO
 void main()
 {
     CameraData camera = CurrentCamera();
-    mat4 viewInverse = inverse(camera.View);
-    mat4 projectionInverse = inverse(camera.Projection);
 
     vec2 noiseScale = vec2(camera.Resolution.x/4.0, camera.Resolution.y/4.0);
 
@@ -40,7 +38,7 @@ void main()
     normal = mat3(camera.View)*normalize(normal);
 	vec3 randomVec = texture(Noise, Coord*noiseScale).xyz;
 	float depth = texture(Depth, Coord).r;
-	vec4 fragPosition = ViewPosFromDepth(depth, projectionInverse);
+	vec4 fragPosition = ViewPosFromDepth(depth, camera.ProjectionInverse);
 
     vec3 tangent   = normalize(randomVec - normal*dot(randomVec, normal));
     vec3 bitangent = cross(normal, tangent);
@@ -59,7 +57,7 @@ void main()
         offset.xyz  = offset.xyz * 0.5 + 0.5; // transform to range 0.0 - 1.0
 
         float sampleDepth = texture(Depth, offset.xy).r;
-        vec3 offsetPosition = ViewPosFromDepth(sampleDepth, projectionInverse).xyz;
+        vec3 offsetPosition = ViewPosFromDepth(sampleDepth, camera.ProjectionInverse).xyz;
         float intensity = smoothstep(0.0, 1.0, Constants.SampleRadius/abs(fragPosition.z - offsetPosition.z));
         float occluded = samplePos.z + Constants.SampleBias <= offsetPosition.z ? 1.0 : 0.0;
         occluded *= intensity;
