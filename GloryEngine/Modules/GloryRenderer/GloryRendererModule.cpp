@@ -721,7 +721,7 @@ namespace Glory
 			if (!m_DeferredConstantsBuffer)
 				pDevice->PushConstants(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DeferredPipeline, 0, sizeof(DeferredConstants), &deferredConstants, ShaderTypeFlag(STF_Fragment));
 			else
-				pDevice->AssignBuffer(m_SSAOConstantsBuffer, &deferredConstants, sizeof(DeferredConstants));
+				pDevice->AssignBuffer(m_DeferredConstantsBuffer, &deferredConstants, sizeof(DeferredConstants));
 			pDevice->DrawQuad(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 			pDevice->EndPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 			pDevice->EndRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
@@ -1128,8 +1128,8 @@ namespace Glory
 		m_DirtyCameraPerspectives.clear();
 
 		/* Update light data */
-		//pDevice->AssignBuffer(m_LightsSSBO, m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS*sizeof(LightData));
-		//pDevice->AssignBuffer(m_LightSpaceTransformsSSBO, m_FrameData.LightSpaceTransforms.data(), 0, MAX_LIGHTS*sizeof(glm::mat4));
+		pDevice->AssignBuffer(m_LightsSSBO, m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS*sizeof(LightData));
+		pDevice->AssignBuffer(m_LightSpaceTransformsSSBO, m_FrameData.LightSpaceTransforms.data(), 0, MAX_LIGHTS*sizeof(glm::mat4));
 
 		if (m_LightCameraDatas->size() < m_FrameData.LightSpaceTransforms.count()) m_LightCameraDatas.resize(m_FrameData.LightSpaceTransforms.count());
 		for (size_t i = 0; i < m_FrameData.LightSpaceTransforms.count(); ++i)
