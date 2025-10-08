@@ -47,6 +47,7 @@ namespace Glory
 		uint32_t m_ObjectDataIndex;
 		uint32_t m_CameraIndex;
 		uint32_t m_MaterialIndex;
+		uint32_t m_LightCount;
 	};
 
 	template<typename T>

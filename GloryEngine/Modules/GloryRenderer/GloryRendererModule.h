@@ -39,7 +39,7 @@ namespace Glory
 		float SampleBias;
 	};
 
-	struct DeferredConstants
+	/*struct DeferredConstants
 	{
 		glm::uvec4 TileSizes;
 		uint64_t HasTexture;
@@ -49,7 +49,7 @@ namespace Glory
 		int32_t AOEnabled;
 		float AOMagnitude;
 		float AOContrast;
-	};
+	};*/
 
 	class GloryRendererModule : public RendererModule
 	{
@@ -66,9 +66,11 @@ namespace Glory
 			BufferHandle m_TextureBitsBuffer = 0;
 
 			PipelineHandle m_Pipeline = 0;
-			DescriptorSetLayoutHandle m_SetLayout = 0;
+			DescriptorSetLayoutHandle m_ObjectDataSetLayout = 0;
 			DescriptorSetLayoutHandle m_TextureSetLayout = 0;
-			DescriptorSetHandle m_Set = 0;
+			DescriptorSetLayoutHandle m_MaterialSetLayout = 0;
+			DescriptorSetHandle m_ObjectDataSet = 0;
+			DescriptorSetHandle m_MaterialSet = 0;
 			std::vector<DescriptorSetHandle> m_TextureSets;
 		};
 
@@ -152,15 +154,14 @@ namespace Glory
 		DescriptorSetLayoutHandle m_GlobalRenderSetLayout;
 		DescriptorSetLayoutHandle m_GlobalShadowRenderSetLayout;
 		DescriptorSetLayoutHandle m_GlobalClusterSetLayout;
-		DescriptorSetLayoutHandle m_GlobalDeferredSetLayout;
 		DescriptorSetLayoutHandle m_GlobalLightSetLayout;
 		DescriptorSetLayoutHandle m_GlobalSampleDomeSetLayout;
 		DescriptorSetLayoutHandle m_CameraClusterSetLayout;
 		DescriptorSetLayoutHandle m_CameraLightSetLayout;
 		DescriptorSetLayoutHandle m_SSAOSamplersSetLayout;
 		DescriptorSetLayoutHandle m_NoiseSamplerSetLayout;
-		DescriptorSetLayoutHandle m_GlobalDeferredSamplerSetLayout;
-		DescriptorSetLayoutHandle m_CameraDeferredSamplerSetLayout;
+		DescriptorSetLayoutHandle m_GlobalSamplerSetLayout;
+		DescriptorSetLayoutHandle m_CameraSamplerSetLayout;
 
 		DescriptorSetLayoutHandle m_DisplayCopySamplerSetLayout;
 
@@ -190,7 +191,6 @@ namespace Glory
 
 		/* Effects pipelines */
 		PipelineHandle m_SSAOPipeline = 0;
-		PipelineHandle m_DeferredPipeline = 0;
 
 		/* SSAO */
 		SSAOSettings m_GlobalSSAOSetting;
@@ -216,17 +216,15 @@ namespace Glory
 
 			std::vector<RenderPassHandle> m_RenderPasses;
 			std::vector<RenderPassHandle> m_SSAORenderPasses;
-			std::vector<RenderPassHandle> m_DeferredRenderPasses;
 			std::vector<BufferHandle> m_LightIndexSSBOs;
 			std::vector<BufferHandle> m_LightGridSSBOs;
 			std::vector<BufferHandle> m_LightDistancesSSBOs;
 
 			std::vector<DescriptorSetHandle> m_LightSets;
 			std::vector<DescriptorSetHandle> m_SSAOSamplersSets;
-			std::vector<DescriptorSetHandle> m_DeferredSamplersSets;
 			std::vector<DescriptorSetHandle> m_FinalColorSamplerSets;
 		};
-		std::vector<DescriptorSetHandle> m_GlobalDeferredSamplerSets;
+		std::vector<DescriptorSetHandle> m_GlobalSamplerSets;
 
 		std::map<UUID, UniqueCameraData> m_UniqueCameraDatas;
 		std::vector<CommandBufferHandle> m_FrameCommandBuffers;
