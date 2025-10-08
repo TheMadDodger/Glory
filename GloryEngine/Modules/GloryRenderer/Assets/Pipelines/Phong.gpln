@@ -1,2 +1,4 @@
 Type: "Phong"
 Shaders: [1, 2]
+Features:
+  FEATURE_TEXTURED: false

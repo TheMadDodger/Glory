@@ -1022,7 +1022,7 @@ namespace Glory
 					else
 						pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(RenderConstants));
 					if (!batchData.m_TextureSets.empty())
-						pDevice->BindDescriptorSets(commandBuffer, batchData.m_Pipeline, { batchData.m_TextureSets[constants.m_MaterialIndex] }, 2);
+						pDevice->BindDescriptorSets(commandBuffer, batchData.m_Pipeline, { batchData.m_TextureSets[constants.m_MaterialIndex] }, 6);
 					pDevice->DrawMesh(commandBuffer, mesh);
 				}
 			}
