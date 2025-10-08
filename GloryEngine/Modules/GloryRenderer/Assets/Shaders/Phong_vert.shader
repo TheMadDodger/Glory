@@ -15,13 +15,15 @@ layout(location = 4) in vec2 inTexCoord;
 layout(location = 5) in vec4 inColor;
 
 layout(location = 0) out vec3 normal;
-layout(location = 1) out vec4 outColor;
+layout(location = 1) out vec3 worldPosition;
+layout(location = 2) out vec4 outColor;
 
 void main()
 {
 	CameraData camera = CurrentCamera();
 	mat4 world = WorldTransform();
 	gl_Position = camera.Projection*camera.View*world*vec4(inPosition, 1.0);
+	worldPosition = (world*vec4(inPosition, 1.0)).xyz;
 	normal = vec3(world*vec4(inNormal, 0.0));
 	outColor = inColor;
 }

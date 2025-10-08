@@ -14,10 +14,6 @@ bool TestSphereAABB(uint light, uint tile, mat4 view);
 bool TestConeAABB(uint light, uint tile, mat4 view);
 float SQDistPointAABB(vec3 point, uint tile);
 
-const uint Sun = 1;
-const uint Point = 2;
-const uint Spot = 3;
-
 const float PI = 3.14159265359;
 
 void main()

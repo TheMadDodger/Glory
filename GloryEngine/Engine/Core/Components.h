@@ -165,19 +165,20 @@ namespace Glory
 	struct LightComponent
 	{
 		LightComponent() :
-			m_Type(LightType::Point), m_Color(1.0f), m_Inner(45.0f),
-			m_Outer(60.0f), m_Range(100.0f), m_Intensity(1.0f) {}
-		LightComponent(const glm::vec4& color, float intensity, float range) :
-			m_Type(LightType::Point), m_Color(color), m_Inner(45.0f),
-			m_Outer(60.0f), m_Range(range), m_Intensity(intensity) {}
+			m_Type(LightType::Point), m_Color(1.0f), m_Intensity(1.0f), m_Inner(45.0f),
+			m_Outer(60.0f), m_Range(100.0f), m_FalloffExponent(1.0f) {}
+		LightComponent(const glm::vec4& color, float intensity, float exponent, float range) :
+			m_Type(LightType::Point), m_Color(color), m_Intensity(intensity), m_Inner(45.0f),
+			m_Outer(60.0f), m_Range(range), m_FalloffExponent(exponent) {}
 
 		REFLECTABLE(LightComponent,
 			(LightType)	(m_Type),
-			(glm::vec4)	(m_Color),
+			(glm::vec3)	(m_Color),
+			(float)	(m_Intensity),
 			(float)	(m_Inner),
 			(float)	(m_Outer),
 			(float)	(m_Range),
-			(float)	(m_Intensity),
+			(float)	(m_FalloffExponent),
 			(ShadowSettings)(m_Shadows)
 		)
 	};

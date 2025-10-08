@@ -1,4 +1,4 @@
-layout(set = 1, binding = 3, std430) readonly buffer MaterialSSBO
+layout(set = 4, binding = 8, std430) readonly buffer MaterialSSBO
 {
 	Material Materials[];
 };

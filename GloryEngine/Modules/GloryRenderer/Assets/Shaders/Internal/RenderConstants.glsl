@@ -8,4 +8,5 @@ layout(set = 0, std140, binding = 0) readonly uniform RenderConstantsUBO
 	uint ObjectDataIndex;
 	uint CameraIndex;
 	uint MaterialIndex;
+	uint LightCount;
 } Constants;

@@ -681,7 +681,7 @@ namespace Glory
 	glm::vec4 LightComponent_GetColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
 		LightComponent& lightComp = GetComponent<LightComponent>(sceneID, objectID, componentID);
-		return lightComp.m_Color;
+		return glm::vec4(lightComp.m_Color, lightComp.m_Intensity);
 	}
 
 	void LightComponent_SetColor(uint64_t sceneID, uint64_t objectID, uint64_t componentID, glm::vec4* color)

@@ -60,10 +60,6 @@ bool TextureEnabled(int index)
 const vec3 GoodColor = vec3(0.0, 1.0, 0.0);
 const vec3 BadColor = vec3(1.0, 0.0, 0.0);
 
-const uint Sun = 1;
-const uint Point = 2;
-const uint Spot = 3;
-
 float ShadowCalculation(vec4 fragPosLightSpace, LightData lightData, vec3 normal, vec3 lightDir)
 {
     // perform perspective divide
