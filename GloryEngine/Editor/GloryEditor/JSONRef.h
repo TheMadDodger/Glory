@@ -72,6 +72,7 @@ namespace Glory
 		void PushBackValue(rapidjson::Value& value);
 		bool Remove(size_t index);
 		bool Remove(const std::string& key);
+		bool Remove(const std::string_view key);
 		size_t Size();
 
 		template<typename T>
