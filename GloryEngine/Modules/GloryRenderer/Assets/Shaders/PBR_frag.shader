@@ -22,11 +22,11 @@ struct Material
 
 #ifdef WITH_TEXTURED
 #include "internal/Textured.glsl"
-layout(set = 6, binding = 0) uniform sampler2D texSampler;
-layout(set = 6, binding = 1) uniform sampler2D normalSampler;
-layout(set = 6, binding = 2) uniform sampler2D ambientSampler;
-layout(set = 6, binding = 3) uniform sampler2D roughnessSampler;
-layout(set = 6, binding = 4) uniform sampler2D metalnessSampler;
+layout(set = 5, binding = 0) uniform sampler2D texSampler;
+layout(set = 5, binding = 1) uniform sampler2D normalSampler;
+layout(set = 5, binding = 2) uniform sampler2D ambientSampler;
+layout(set = 5, binding = 3) uniform sampler2D roughnessSampler;
+layout(set = 5, binding = 4) uniform sampler2D metalnessSampler;
 #endif
 
 layout(location = 0) in vec2 fragTexCoord;

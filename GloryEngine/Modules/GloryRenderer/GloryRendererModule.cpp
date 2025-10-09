@@ -403,7 +403,7 @@ namespace Glory
 
 		/* Global set */
 		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::CameraDatas },
-			{ BufferType::BT_Storage }, { STF_Vertex }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
+			{ BufferType::BT_Storage }, { ShaderTypeFlag(STF_Vertex | STF_Fragment) }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
 			m_GlobalRenderSetLayout, m_GlobalRenderSet, &m_RenderConstantsBuffer, ShaderTypeFlag(STF_Vertex | STF_Fragment), 0, sizeof(RenderConstants));
 
 		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::CameraDatas },
@@ -987,7 +987,7 @@ namespace Glory
 			}
 
 			pDevice->BindDescriptorSets(commandBuffer, batchData.m_Pipeline,
-				{ globalRenderSet, batchData.m_ObjectDataSet, lightSet, m_GlobalLightSet, batchData.m_MaterialSet });
+				{ globalRenderSet, batchData.m_ObjectDataSet, m_GlobalLightSet, lightSet, batchData.m_MaterialSet });
 
 			uint32_t objectIndex = 0;
 			for (UUID uniqueMeshID : pipelineRenderData.m_UniqueMeshOrder)
@@ -1022,7 +1022,7 @@ namespace Glory
 					else
 						pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(RenderConstants));
 					if (!batchData.m_TextureSets.empty())
-						pDevice->BindDescriptorSets(commandBuffer, batchData.m_Pipeline, { batchData.m_TextureSets[constants.m_MaterialIndex] }, 6);
+						pDevice->BindDescriptorSets(commandBuffer, batchData.m_Pipeline, { batchData.m_TextureSets[constants.m_MaterialIndex] }, 5);
 					pDevice->DrawMesh(commandBuffer, mesh);
 				}
 			}
@@ -1280,11 +1280,13 @@ namespace Glory
 
 			if (!batchData.m_Pipeline)
 			{
-				std::vector<DescriptorSetLayoutHandle> descriptorSetLayouts(textureCount ? 4 : 3);
+				std::vector<DescriptorSetLayoutHandle> descriptorSetLayouts(textureCount ? 6 : 5);
 				descriptorSetLayouts[0] = m_GlobalRenderSetLayout;
 				descriptorSetLayouts[1] = batchData.m_ObjectDataSetLayout;
-				descriptorSetLayouts[2] = batchData.m_MaterialSetLayout;
-				if (textureCount) descriptorSetLayouts[3] = batchData.m_TextureSetLayout;
+				descriptorSetLayouts[2] = m_GlobalLightSetLayout;
+				descriptorSetLayouts[3] = m_CameraLightSetLayout;
+				descriptorSetLayouts[4] = batchData.m_MaterialSetLayout;
+				if (textureCount) descriptorSetLayouts[5] = batchData.m_TextureSetLayout;
 
 				PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineBatch.m_PipelineID);
 				if (!pPipelineData) continue;
