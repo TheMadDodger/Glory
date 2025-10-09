@@ -1,11 +1,7 @@
 - Path: "Shaders\\Phong_frag.shader"
   ID: 1
-- Path: "Shaders\\Phong_vert.shader"
+- Path: "Shaders\\Default_vert.shader"
   ID: 2
-- Path: "Shaders\\PhongTextured_frag.shader"
-  ID: 3
-- Path: "Shaders\\PhongTextured_vert.shader"
-  ID: 4
 - Path: "Shaders\\Lines_Vert.shader"
   ID: 11
 - Path: "Shaders\\Lines_Frag.shader"
@@ -14,8 +10,6 @@
   ID: 13
 - Path: "Shaders\\Screen_Frag.shader"
   ID: 29
-- Path: "Shaders\\ClusteredDeferred_Frag.shader"
-  ID: 14
 - Path: "Shaders\\SSAO_Frag.shader"
   ID: 15
 - Path: "Shaders\\SSAOBlur_Frag.shader"
@@ -26,18 +20,12 @@
   ID: 18
 - Path: "Shaders\\PBR_frag.shader"
   ID: 24
-- Path: "Shaders\\PBR_vert.shader"
-  ID: 25
 - Path: "Pipelines\\Phong.gpln"
   ID: 9
 - Path: "Pipelines\\PhongTextured.gpln"
   ID: 10
 - Path: "Pipelines\\Lines.gpln"
   ID: 19
-- Path: "Pipelines\\ClusteredDeferred.gpln"
-  ID: 20
-- Path: "Pipelines\\ClusteredDeferred_PBR.gpln"
-  ID: 27
 - Path: "Pipelines\\SSAO_Prepass.gpln"
   ID: 21
 - Path: "Pipelines\\SSAO_Blur.gpln"
