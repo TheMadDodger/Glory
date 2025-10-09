@@ -3,8 +3,9 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
+#define FEATURE_TEXTURED
+
 #include "Internal/RenderConstants.glsl"
-#include "internal/Textured.glsl"
 
 struct Material
 {
@@ -14,61 +15,90 @@ struct Material
 	float MetallicFactor;
 };
 
+#include "Internal/Camera.glsl"
+#include "Internal/Light.glsl"
 #include "Internal/Material.glsl"
-
-#define FEATURE_TEXTURED
-#define FEATURE_TRANSPARENT
+#include "Internal/PBR.glsl"
 
 #ifdef WITH_TEXTURED
-layout(binding = 0) uniform sampler2D texSampler;
-layout(binding = 1) uniform sampler2D normalSampler;
-layout(binding = 2) uniform sampler2D ambientSampler;
-layout(binding = 3) uniform sampler2D roughnessSampler;
-layout(binding = 4) uniform sampler2D metalnessSampler;
+#include "internal/Textured.glsl"
+layout(set = 6, binding = 0) uniform sampler2D texSampler;
+layout(set = 6, binding = 1) uniform sampler2D normalSampler;
+layout(set = 6, binding = 2) uniform sampler2D ambientSampler;
+layout(set = 6, binding = 3) uniform sampler2D roughnessSampler;
+layout(set = 6, binding = 4) uniform sampler2D metalnessSampler;
 #endif
 
 layout(location = 0) in vec2 fragTexCoord;
-layout(location = 1) in vec4 inColor;
+layout(location = 1) in vec3 inWorldPosition;
+layout(location = 2) in vec4 inColor;
 #ifdef WITH_TEXTURED
-layout(location = 2) in mat3 TBN;
+layout(location = 3) in mat3 TBN;
 #else
-layout(location = 2) in vec3 inNormal;
+layout(location = 3) in vec3 inNormal;
 #endif
 
 layout(location = 0) out uvec4 outID;
-layout(location = 2) out vec4 outColor;
-layout(location = 3) out vec4 outNormal;
-layout(location = 5) out vec4 outData;
+layout(location = 1) out vec4 outColor;
+layout(location = 2) out vec4 outNormal;
 
 void main()
 {
 	Material mat = GetMaterial();
 
 #ifdef WITH_TEXTURED
+	vec4 baseColor = TextureEnabled(0) ? texture(texSampler, fragTexCoord) : vec4(1.0);
+	if (baseColor.a < 1.0) discard;
 
-	vec4 texColor = texture(texSampler, fragTexCoord);
-#ifdef WITH_TRANSPARENT
-	if (texColor.a < 1.0) discard;
-#endif
-	outColor = (TextureEnabled(0) ? vec4(pow(texColor.rgb, vec3(2.2)), texColor.a) : mat.Color) * inColor;
+	baseColor = (TextureEnabled(0) ? vec4(pow(baseColor.rgb, vec3(2.2)), baseColor.a) : mat.Color)*inColor;
 	vec3 normal = TextureEnabled(1) ? normalize(TBN*(texture(normalSampler, fragTexCoord).xyz * 2.0 - 1.0)) : TBN[2];
-	float ambient = TextureEnabled(2) ? texture(ambientSampler, fragTexCoord).r : mat.AmbientOcclusion;
+	float ao = TextureEnabled(2) ? texture(ambientSampler, fragTexCoord).r : mat.AmbientOcclusion;
 	float roughness = TextureEnabled(3) ? texture(roughnessSampler, fragTexCoord).g : mat.RoughnessFactor;
-	float metalic = TextureEnabled(4) ? texture(metalnessSampler, fragTexCoord).b : mat.MetallicFactor;
+	float metallic = TextureEnabled(4) ? texture(metalnessSampler, fragTexCoord).b : mat.MetallicFactor;
 #else
-	outColor = inColor*mat.Color;
+	vec4 baseColor = inColor*mat.Color;
 	vec3 normal = inNormal;
-	float ambient = mat.AmbientOcclusion;
+	float ao = mat.AmbientOcclusion;
 	float roughness = mat.RoughnessFactor;
-	float metalic = mat.MetallicFactor;
+	float metallic = mat.MetallicFactor;
 #endif
-	outNormal = vec4((normalize(normal) + 1.0)*0.5, 1.0);
 	outID = Constants.ObjectID;
+	outNormal = vec4((normalize(normal) + 1.0)*0.5, 1.0);
 
-	vec4 data;
-	data.r = ambient;
-	data.g = roughness;
-	data.b = metalic;
-	data.a = 1.0;
-	outData = data;
+	CameraData camera = CurrentCamera();
+    vec3 cameraPos = camera.ViewInverse[3].xyz;
+	vec3 color = baseColor.xyz;
+    vec3 viewDir = normalize(cameraPos - inWorldPosition);
+
+	vec3 Lo = vec3(0.0);
+
+	vec3 shadedColor = 0.05*color;
+	for (uint i = 0; i < Constants.LightCount; ++i)
+	{
+		LightData light = Lights[i];
+		if (light.Type == Sun)
+			Lo += CalculateSunLight(light, normal, color, viewDir, roughness, metallic);
+		else if (light.Type == Point)
+			Lo += CalcPointLight(light, normal, inWorldPosition, color, viewDir, roughness, metallic);
+		else if (light.Type == Spot)
+			Lo += CalcSpotLight(light, normal, inWorldPosition, color, viewDir, roughness, metallic);
+	}
+
+	/* Ambient lighting */
+	vec3 F0 = vec3(0.04);
+	F0 = mix(F0, color, metallic);
+    vec3 kS = FresnelSchlick(max(dot(normal, viewDir), 0.0), F0, roughness);
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;
+    //vec3 irradiance = TextureEnabled(6) ? texture(IrradianceMap, normal).rgb : vec3(0.03);
+    vec3 irradiance = vec3(0.03);
+    vec3 diffuse = irradiance*color;
+    vec3 ambient = (kD*diffuse)*ao;
+	vec3 fragColor = ambient + Lo;
+
+	/* Gamma correction */
+	fragColor = fragColor/(fragColor + vec3(1.0));
+	fragColor = pow(fragColor, vec3(1.0/2.2));
+
+	outColor = vec4(fragColor, baseColor.a);
 }
