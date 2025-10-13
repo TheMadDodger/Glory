@@ -192,6 +192,10 @@ namespace Glory
 		/* Effects pipelines */
 		PipelineHandle m_SSAOPipeline = 0;
 
+		/* Shadow rendering */
+		PipelineHandle m_ShadowRenderPipeline = 0;
+		PipelineHandle m_TransparentShadowRenderPipeline = 0;
+
 		/* SSAO */
 		SSAOSettings m_GlobalSSAOSetting;
 		uint32_t m_SSAOKernelSize = 0;

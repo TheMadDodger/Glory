@@ -3,7 +3,9 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-#include "internal/ObjectData.glsl"
+#include "internal/RenderConstants.glsl"
+#include "internal/Camera.glsl"
+#include "internal/PerObjectData.glsl"
 
 #define FEATURE_TRANSPARENT_TEXTURED
 
@@ -16,7 +18,10 @@ layout(location = 0) out vec2 fragTexCoord;
 
 void main()
 {
-	gl_Position = Object.view * Object.model * vec4(inPosition, 1.0);
+	CameraData camera = CurrentCamera();
+
+	mat4 world = WorldTransform();
+	gl_Position = camera.View*world*vec4(inPosition, 1.0);
 #ifdef WITH_TRANSPARENT_TEXTURED
 	fragTexCoord = inTexCoord;
 #endif

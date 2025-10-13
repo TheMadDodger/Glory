@@ -594,7 +594,7 @@ namespace Glory
 		m_FrameCommandBuffers[m_CurrentFrameIndex] = pDevice->Begin();
 
 		/* Shadows */
-		//ShadowMapsPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
+		ShadowMapsPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 
 		for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
 		{
@@ -872,6 +872,8 @@ namespace Glory
 		m_FinalFrameColorPasses.resize(m_ImageCount, 0ull);
 		m_FinalFrameColorSets.resize(m_ImageCount, 0ull);
 
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
+		const ModuleSettings& settings = Settings();
 		for (size_t i = 0; i < m_ImageCount; ++i)
 		{
 			TextureHandle image = pDevice->GetSwapchainImage(m_Swapchain, i);
@@ -898,6 +900,26 @@ namespace Glory
 			shadowsPassInfo.RenderTextureInfo.Height = 4096;
 			if (!m_ShadowsPasses[i])
 				m_ShadowsPasses[i] = pDevice->CreateRenderPass(std::move(shadowsPassInfo));
+
+			if (!m_ShadowRenderPipeline)
+			{
+				const UUID shadowsPipeline = settings.Value<uint64_t>("Shadows Pipeline");
+				PipelineData* pPipeline = pipelines.GetPipelineData(shadowsPipeline);
+				pPipeline->GetCullFace() = CullFace::Front;
+				m_ShadowRenderPipeline = pDevice->CreatePipeline(m_ShadowsPasses[i], pPipeline, {}, sizeof(DefaultVertex3D),
+					{ AttributeType::Float3, AttributeType::Float3, AttributeType::Float3,
+					AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 });
+			}
+			if (!m_TransparentShadowRenderPipeline)
+			{
+				const UUID shadowsTransparentPipeline = settings.Value<uint64_t>("Shadows Transparent Textured Pipeline");
+				PipelineData* pPipeline = pipelines.GetPipelineData(shadowsTransparentPipeline);
+				pPipeline->GetCullFace() = CullFace::Front;
+				m_TransparentShadowRenderPipeline = pDevice->CreatePipeline(m_ShadowsPasses[i], pPipeline, {}, sizeof(DefaultVertex3D),
+					{ AttributeType::Float3, AttributeType::Float3, AttributeType::Float3,
+					AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 });
+			}
+
 			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_ShadowsPasses[i]);
 			TextureHandle texture = pDevice->GetRenderTextureAttachment(renderTexture, 0);
 			TextureCreateInfo info;
@@ -1079,11 +1101,11 @@ namespace Glory
 		if (m_LightCameraDatas->size() < m_FrameData.LightSpaceTransforms.count()) m_LightCameraDatas.resize(m_FrameData.LightSpaceTransforms.count());
 		for (size_t i = 0; i < m_FrameData.LightSpaceTransforms.count(); ++i)
 		{
-			m_LightCameraDatas.m_Data[i].m_View = glm::identity<glm::mat4>();
-			if (m_LightCameraDatas.m_Data[i].m_Projection != m_FrameData.LightSpaceTransforms[i])
+			m_LightCameraDatas.m_Data[i].m_Projection = glm::identity<glm::mat4>();
+			if (m_LightCameraDatas.m_Data[i].m_View != m_FrameData.LightSpaceTransforms[i])
 			{
-				m_LightCameraDatas.m_Data[i].m_Projection = m_FrameData.LightSpaceTransforms[i];
-				m_LightCameraDatas.m_Dirty = true;
+				m_LightCameraDatas.m_Data[i].m_View = m_FrameData.LightSpaceTransforms[i];
+				m_CameraDatas.SetDirty(i);
 			}
 		}
 		if (m_LightCameraDatas)
@@ -1458,10 +1480,7 @@ namespace Glory
 		shadowAtlas.ReleaseAllChunks();
 		pDevice->BeginRenderPass(commandBuffer, m_ShadowsPasses[m_CurrentFrameIndex]);
 
-		//pGraphics->SetCullFace(CullFace::Front);
 		//pGraphics->SetColorMask(false, false, false, false);
-		//pGraphics->EnableDepthWrite(true);
-		//pGraphics->EnableDepthTest(true);
 
 		for (size_t i = 0; i < m_FrameData.ActiveLights.count(); ++i)
 		{
@@ -1497,7 +1516,6 @@ namespace Glory
 		}
 
 		//pGraphics->SetColorMask(true, true, true, true);
-		//pGraphics->SetCullFace(CullFace::None);
 
 		pDevice->EndRenderPass(commandBuffer);
 	}

@@ -1604,6 +1604,23 @@ namespace Glory
 		return handle;
 	}
 
+	vk::CullModeFlagBits GetVKCullMode(CullFace cullFace)
+	{
+		switch (cullFace)
+		{
+		case Glory::CullFace::None:
+			return vk::CullModeFlagBits::eNone;
+		case Glory::CullFace::Front:
+			return vk::CullModeFlagBits::eFront;
+		case Glory::CullFace::Back:
+			return vk::CullModeFlagBits::eBack;
+		case Glory::CullFace::FrontAndBack:
+			return vk::CullModeFlagBits::eFrontAndBack;
+		default:
+			return vk::CullModeFlagBits::eNone;
+		}
+	}
+
 	PipelineHandle VulkanDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
 		std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride, const std::vector<AttributeType>& attributeTypes)
 	{
@@ -1713,8 +1730,8 @@ namespace Glory
 			.setRasterizerDiscardEnable(VK_FALSE)
 			.setPolygonMode(vk::PolygonMode::eFill)
 			.setLineWidth(1.0f)
-			.setCullMode(m_InvertViewport ? vk::CullModeFlagBits::eFront : vk::CullModeFlagBits::eBack)
-			.setFrontFace(vk::FrontFace::eClockwise)
+			.setCullMode(GetVKCullMode(pPipeline->GetCullFace()))
+			.setFrontFace(m_InvertViewport ? vk::FrontFace::eCounterClockwise : vk::FrontFace::eClockwise)
 			.setDepthBiasEnable(VK_FALSE)
 			.setDepthBiasConstantFactor(0.0f)
 			.setDepthBiasClamp(0.0f)

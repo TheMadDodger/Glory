@@ -447,6 +447,13 @@ namespace Glory
 		glUseProgram(glPipeline->m_GLProgramID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glPipeline->m_TextureCounter = 0;
+
+		if (glPipeline->m_CullFace != 0)
+		{
+			glEnable(GL_CULL_FACE);
+			glCullFace(glPipeline->m_CullFace);
+		}
+		else glDisable(GL_CULL_FACE);
 	}
 
 	void OpenGLDevice::End(CommandBufferHandle)
@@ -1187,6 +1194,23 @@ namespace Glory
 		return handle;
 	}
 
+	uint32_t GetGLCullFace(CullFace cullFace)
+	{
+		switch (cullFace)
+		{
+		case Glory::CullFace::None:
+			return GL_NONE;
+		case Glory::CullFace::Front:
+			return GL_FRONT;
+		case Glory::CullFace::Back:
+			return GL_BACK;
+		case Glory::CullFace::FrontAndBack:
+			return GL_FRONT_AND_BACK;
+		default:
+			return GL_NONE;
+		}
+	}
+
 	PipelineHandle OpenGLDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
 		std::vector<DescriptorSetLayoutHandle>&&, size_t, const std::vector<AttributeType>&)
 	{
@@ -1203,6 +1227,7 @@ namespace Glory
 		GL_Pipeline& pipeline = m_Pipelines.Emplace(handle, GL_Pipeline());
 		pipeline.m_RenderPass = renderPass;
 		pipeline.m_TextureCounter = 0;
+		pipeline.m_CullFace = GetGLCullFace(pPipeline->GetCullFace());
 
 		int success;
 		char infoLog[512];

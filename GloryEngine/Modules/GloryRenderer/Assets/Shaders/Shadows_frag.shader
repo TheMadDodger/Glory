@@ -5,7 +5,7 @@
 
 #define FEATURE_TRANSPARENT_TEXTURED
 
-#include "internal/ObjectData.glsl"
+#include "internal/RenderConstants.glsl"
 
 #ifdef WITH_TRANSPARENT_TEXTURED
 #include "internal/Textured.glsl"
