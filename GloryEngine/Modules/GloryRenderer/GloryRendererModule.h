@@ -66,7 +66,6 @@ namespace Glory
 			BufferHandle m_TextureBitsBuffer = 0;
 
 			PipelineHandle m_Pipeline = 0;
-			DescriptorSetLayoutHandle m_ObjectDataSetLayout = 0;
 			DescriptorSetLayoutHandle m_TextureSetLayout = 0;
 			DescriptorSetLayoutHandle m_MaterialSetLayout = 0;
 			DescriptorSetHandle m_ObjectDataSet = 0;
@@ -114,7 +113,8 @@ namespace Glory
 		size_t GetGCD(size_t a, size_t b); // TODO: Move this to somewhere it can be used from anywhere and make it take templates
 
 		void RenderBatches(CommandBufferHandle commandBuffer, const std::vector<PipelineBatch>& batches,
-			const std::vector<PipelineBatchData>& batchDatas, size_t cameraIndex, DescriptorSetHandle globalRenderSet, const glm::vec4& viewport);
+			const std::vector<PipelineBatchData>& batchDatas, size_t cameraIndex, DescriptorSetHandle globalRenderSet, const glm::vec4& viewport,
+			DescriptorSetHandle shadowsSet);
 		void PrepareDataPass();
 		void PrepareBatches(const std::vector<PipelineBatch>& batches, std::vector<PipelineBatchData>& batchDatas);
 		void GenerateClusterSSBO(uint32_t cameraIndex, GraphicsDevice* pDevice, CameraRef camera, DescriptorSetHandle clusterSet);
@@ -160,8 +160,9 @@ namespace Glory
 		DescriptorSetLayoutHandle m_CameraLightSetLayout;
 		DescriptorSetLayoutHandle m_SSAOSamplersSetLayout;
 		DescriptorSetLayoutHandle m_NoiseSamplerSetLayout;
-		DescriptorSetLayoutHandle m_GlobalSamplerSetLayout;
 		DescriptorSetLayoutHandle m_CameraSamplerSetLayout;
+		DescriptorSetLayoutHandle m_ShadowAtlasSamplerSetLayout;
+		DescriptorSetLayoutHandle m_ObjectDataSetLayout = 0;
 
 		DescriptorSetLayoutHandle m_DisplayCopySamplerSetLayout;
 
@@ -228,7 +229,7 @@ namespace Glory
 			std::vector<DescriptorSetHandle> m_SSAOSamplersSets;
 			std::vector<DescriptorSetHandle> m_FinalColorSamplerSets;
 		};
-		std::vector<DescriptorSetHandle> m_GlobalSamplerSets;
+		std::vector<DescriptorSetHandle> m_ShadowAtlasSamplerSets;
 
 		std::map<UUID, UniqueCameraData> m_UniqueCameraDatas;
 		std::vector<CommandBufferHandle> m_FrameCommandBuffers;

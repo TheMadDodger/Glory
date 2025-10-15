@@ -588,6 +588,8 @@ namespace Glory::Editor
 		for (size_t i = 0; i < resources.sampled_images.size(); ++i)
 		{
 			spirv_cross::Resource sampler = resources.sampled_images[i];
+			if (sampler.name == "ShadowAtlas") continue;
+
 			const spirv_cross::SPIRType& type = compiler.get_type(sampler.type_id);
 			ImageType imageType = ImageType::IT_UNDEFINED;
 			const bool isArray = type.image.arrayed;
