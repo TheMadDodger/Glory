@@ -77,8 +77,6 @@ namespace Glory
 
         RenderPassHandle m_RenderPass;
         uint32_t m_GLProgramID;
-        uint32_t m_TextureCounter;
-
         uint32_t m_CullFace;
     };
 

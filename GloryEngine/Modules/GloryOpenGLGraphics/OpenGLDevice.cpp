@@ -446,7 +446,6 @@ namespace Glory
 
 		glUseProgram(glPipeline->m_GLProgramID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glPipeline->m_TextureCounter = 0;
 
 		if (glPipeline->m_CullFace != 0)
 		{
@@ -520,17 +519,17 @@ namespace Glory
 
 				GLuint texLocation = glGetUniformLocation(glPipeline->m_GLProgramID, glSetLayout->m_SamplerNames[i].c_str());
 				OpenGLGraphicsModule::LogGLError(glGetError());
-				glUniform1i(texLocation, glPipeline->m_TextureCounter);
+				glUniform1i(texLocation, glSetLayout->m_BindingIndices[index]);
 				OpenGLGraphicsModule::LogGLError(glGetError());
 
-				glActiveTexture(GL_TEXTURE0 + glPipeline->m_TextureCounter);
+				glActiveTexture(GL_TEXTURE0 + glSetLayout->m_BindingIndices[index]);
 				OpenGLGraphicsModule::LogGLError(glGetError());
 				glBindTexture(GL_TEXTURE_2D, glTexture ? glTexture->m_GLTextureID : 0);
 				OpenGLGraphicsModule::LogGLError(glGetError());
 
 				glActiveTexture(GL_TEXTURE0);
 				OpenGLGraphicsModule::LogGLError(glGetError());
-				++glPipeline->m_TextureCounter;
+				++index;
 			}
 		}
 	}
@@ -1226,7 +1225,6 @@ namespace Glory
 		PipelineHandle handle;
 		GL_Pipeline& pipeline = m_Pipelines.Emplace(handle, GL_Pipeline());
 		pipeline.m_RenderPass = renderPass;
-		pipeline.m_TextureCounter = 0;
 		pipeline.m_CullFace = GetGLCullFace(pPipeline->GetCullFace());
 
 		int success;
@@ -1330,6 +1328,8 @@ namespace Glory
 			GL_DescriptorSetLayout& setLayout = m_SetLayouts.Emplace(iter->second, GL_DescriptorSetLayout());
 			for (size_t i = 0; i < setLayoutInfo.m_Buffers.size(); ++i)
 				setLayout.m_BindingIndices.emplace_back(setLayoutInfo.m_Buffers[i].m_BindingIndex);
+			for (size_t i = 0; i < setLayoutInfo.m_Samplers.size(); ++i)
+				setLayout.m_BindingIndices.emplace_back(setLayoutInfo.m_Samplers[i].m_BindingIndex);
 			setLayout.m_SamplerNames = std::move(setLayoutInfo.m_SamplerNames);
 		}
 		return iter->second;
