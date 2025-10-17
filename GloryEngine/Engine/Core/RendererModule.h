@@ -40,16 +40,6 @@ namespace Glory
 		glm::vec2 m_Resolution;
 	};
 
-	struct RenderConstants
-	{
-		UUID m_SceneID;
-		UUID m_ObjectID;
-		uint32_t m_ObjectDataIndex;
-		uint32_t m_CameraIndex;
-		uint32_t m_MaterialIndex;
-		uint32_t m_LightCount;
-	};
-
 	template<typename T>
 	struct CPUBuffer
 	{

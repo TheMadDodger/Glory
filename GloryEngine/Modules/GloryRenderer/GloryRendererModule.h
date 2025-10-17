@@ -39,6 +39,19 @@ namespace Glory
 		float SampleBias;
 	};
 
+	struct RenderConstants
+	{
+		glm::uvec4 m_TileSizes;
+		UUID m_SceneID;
+		UUID m_ObjectID;
+		uint32_t m_ObjectDataIndex;
+		uint32_t m_CameraIndex;
+		uint32_t m_MaterialIndex;
+		uint32_t m_LightCount;
+		float m_Scale;
+		float m_Bias;
+	};
+
 	/*struct DeferredConstants
 	{
 		glm::uvec4 TileSizes;

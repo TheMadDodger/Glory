@@ -238,7 +238,7 @@ void main()
 
 	vec3 normal = normalize(texture(Normal, Coord).xyz*2.0 - 1.0);
 	float depth = texture(Depth, Coord).r;
-	vec3 worldPosition = WorldPosFromDepth(depth, camera.ViewInverse, camera.ProjectionInverse);
+	vec3 worldPosition = WorldPosFromDepth(depth, camera.ViewInverse, camera.ProjectionInverse, Coord);
 
 	vec2 pixelID = Coord*camera.Resolution;
 	uint clusterID = GetClusterIndex(vec3(pixelID.xy, depth), camera.zNear, camera.zFar, Constants.Scale, Constants.Bias, Constants.TileSizes);
@@ -368,7 +368,7 @@ void main()
 	float ssao = Constants.AOEnabled == 1 ? Constants.AOMagnitude*pow(texture(AO, Coord).x, Constants.AOContrast) : 1.0;
 	ssao = min(ssao, 1.0);
 	float depth = texture(Depth, Coord).r;
-	vec3 worldPosition = WorldPosFromDepth(depth, camera.ViewInverse, camera.ProjectionInverse);
+	vec3 worldPosition = WorldPosFromDepth(depth, camera.ViewInverse, camera.ProjectionInverse, Coord);
 	vec3 ambient = TextureEnabled(6) ? texture(IrradianceMap, normal).rgb : vec3(1.0);
 
 	vec2 pixelID = Coord*camera.Resolution;

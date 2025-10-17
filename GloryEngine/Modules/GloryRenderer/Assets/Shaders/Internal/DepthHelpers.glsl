@@ -10,11 +10,11 @@ uint GetDepthSlice(float depth, float zNear, float zFar, float scale, float bias
 	return uint(max(log2(LinearDepth(depth, zNear, zFar))*scale + bias, 0.0));
 }
 
-vec4 ViewPosFromDepth(float depth, mat4 projectionInverse)
+vec4 ViewPosFromDepth(float depth, mat4 projectionInverse, vec2 coord)
 {
     float z = depth*2.0 - 1.0;
 
-    vec4 clipSpacePosition = vec4(Coord*2.0 - 1.0, z, 1.0);
+    vec4 clipSpacePosition = vec4(coord*2.0 - 1.0, z, 1.0);
     vec4 viewSpacePosition = projectionInverse*clipSpacePosition;
 
     // Perspective division
@@ -23,9 +23,9 @@ vec4 ViewPosFromDepth(float depth, mat4 projectionInverse)
     return viewSpacePosition;
 }
 
-vec3 WorldPosFromDepth(float depth, mat4 viewInverse, mat4 projectionInverse)
+vec3 WorldPosFromDepth(float depth, mat4 viewInverse, mat4 projectionInverse, vec2 coord)
 {
-    vec4 worldSpacePosition = viewInverse*ViewPosFromDepth(depth, projectionInverse);
+    vec4 worldSpacePosition = viewInverse*ViewPosFromDepth(depth, projectionInverse, coord);
     return worldSpacePosition.xyz;
 }
 

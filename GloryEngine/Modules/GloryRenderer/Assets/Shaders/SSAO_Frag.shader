@@ -38,7 +38,7 @@ void main()
     normal = mat3(camera.View)*normalize(normal);
 	vec3 randomVec = texture(Noise, Coord*noiseScale).xyz;
 	float depth = texture(Depth, Coord).r;
-	vec4 fragPosition = ViewPosFromDepth(depth, camera.ProjectionInverse);
+	vec4 fragPosition = ViewPosFromDepth(depth, camera.ProjectionInverse, Coord);
 
     vec3 tangent   = normalize(randomVec - normal*dot(randomVec, normal));
     vec3 bitangent = cross(normal, tangent);
@@ -57,7 +57,7 @@ void main()
         offset.xyz  = offset.xyz * 0.5 + 0.5; // transform to range 0.0 - 1.0
 
         float sampleDepth = texture(Depth, offset.xy).r;
-        vec3 offsetPosition = ViewPosFromDepth(sampleDepth, camera.ProjectionInverse).xyz;
+        vec3 offsetPosition = ViewPosFromDepth(sampleDepth, camera.ProjectionInverse, Coord).xyz;
         float intensity = smoothstep(0.0, 1.0, Constants.SampleRadius/abs(fragPosition.z - offsetPosition.z));
         float occluded = samplePos.z + Constants.SampleBias <= offsetPosition.z ? 1.0 : 0.0;
         occluded *= intensity;

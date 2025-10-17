@@ -968,9 +968,18 @@ namespace Glory
 
 		const bool usePushConstants = pDevice->IsSupported(APIFeatures::PushConstants);
 
+		const glm::uvec2& resolution = m_ActiveCameras[cameraIndex].GetResolution();
+		const glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
+		const float zNear = m_ActiveCameras[cameraIndex].GetNear();
+		const float zFar = m_ActiveCameras[cameraIndex].GetFar();
+		const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x / (float)gridSize.x), (uint32_t)std::ceilf(resolution.y / (float)gridSize.y));
+
 		RenderConstants constants;
 		constants.m_CameraIndex = static_cast<uint32_t>(cameraIndex);
 		constants.m_LightCount = m_FrameData.ActiveLights.count();
+		constants.m_TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
+		constants.m_Scale = (float)gridSize.z / std::log2f(zFar / zNear);
+		constants.m_Bias = -((float)gridSize.z * std::log2f(zNear) / std::log2f(zFar / zNear));
 		CameraRef camera = m_ActiveCameras[cameraIndex];
 		const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
 		const DescriptorSetHandle lightSet = uniqueCameraData.m_LightSets[m_CurrentFrameIndex];

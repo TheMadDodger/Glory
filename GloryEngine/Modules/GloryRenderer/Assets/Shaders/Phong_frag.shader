@@ -18,7 +18,7 @@ struct Material
 #include "Internal/Light.glsl"
 #include "Internal/Material.glsl"
 #include "Internal/Phong.glsl"
-//#include "Internal/DepthHelpers.glsl"
+#include "Internal/DepthHelpers.glsl"
 
 #ifdef WITH_RECEIVE_SHADOWS
 layout (set = 5, binding = 0) uniform sampler2D ShadowAtlas;
@@ -107,10 +107,20 @@ void main()
 	vec3 color = baseColor.xyz;
     vec3 viewDir = normalize(cameraPos - inWorldPosition);
 
+	vec2 pixelID = coord*camera.Resolution;
+	float depth = gl_FragCoord.z;
+	uint clusterID = GetClusterIndex(vec3(pixelID.xy, depth), camera.zNear, camera.zFar, Constants.Scale, Constants.Bias, Constants.TileSizes);
+
+	uint offset = LightGrid[clusterID].Offset;
+	uint count = LightGrid[clusterID].Count;
+
 	vec3 shadedColor = 0.05*color;
-	for (uint i = 0; i < Constants.LightCount; ++i)
+	for (uint i = 0; i < count; ++i)
 	{
-		LightData light = Lights[i];
+		uint indexListIndex = offset + i;
+		uint lightIndex = GlobalLightIndexList[indexListIndex];
+		LightData light = Lights[lightIndex];
+
 #ifdef WITH_RECEIVE_SHADOWS
 		vec4 fragPosLightSpace = LightSpaceTransforms[i]*vec4(inWorldPosition, 1.0);
 		vec3 lightDir = normalize(inWorldPosition - inWorldPosition);
