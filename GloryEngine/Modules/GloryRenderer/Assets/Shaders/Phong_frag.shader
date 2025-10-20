@@ -35,11 +35,12 @@ layout(set = 6, binding = 3) uniform sampler2D shininessSampler;
 
 layout(location = 0) in vec2 fragTexCoord;
 layout(location = 1) in vec3 inWorldPosition;
-layout(location = 2) in vec4 inColor;
+layout(location = 2) in vec3 inViewPosition;
+layout(location = 3) in vec4 inColor;
 #ifdef WITH_TEXTURED
-layout(location = 3) in mat3 TBN;
+layout(location = 4) in mat3 TBN;
 #else
-layout(location = 3) in vec3 inNormal;
+layout(location = 4) in vec3 inNormal;
 #endif
 
 layout(location = 0) out uvec4 outID;
@@ -107,9 +108,10 @@ void main()
 	vec3 color = baseColor.xyz;
     vec3 viewDir = normalize(cameraPos - inWorldPosition);
 
-	vec2 pixelID = coord*camera.Resolution;
-	float depth = gl_FragCoord.z;
-	uint clusterID = GetClusterIndex(vec3(pixelID.xy, depth), camera.zNear, camera.zFar, Constants.Scale, Constants.Bias, Constants.TileSizes);
+	uint zTile = uint((log(abs(inViewPosition.z) / camera.zNear) * Constants.GridSize.z) / log(camera.zFar / camera.zNear));
+    vec2 tileSize = camera.Resolution / Constants.GridSize.xy;
+    uvec3 tile = uvec3(gl_FragCoord.xy / tileSize, zTile);
+    uint clusterID = tile.x + (tile.y * Constants.GridSize.x) + (tile.z * Constants.GridSize.x * Constants.GridSize.y);
 
 	uint offset = LightGrid[clusterID].Offset;
 	uint count = LightGrid[clusterID].Count;
@@ -122,7 +124,7 @@ void main()
 		LightData light = Lights[lightIndex];
 
 #ifdef WITH_RECEIVE_SHADOWS
-		vec4 fragPosLightSpace = LightSpaceTransforms[i]*vec4(inWorldPosition, 1.0);
+		vec4 fragPosLightSpace = LightSpaceTransforms[lightIndex]*vec4(inWorldPosition, 1.0);
 		vec3 lightDir = normalize(inWorldPosition - inWorldPosition);
 		float shadow = light.ShadowsEnabled == 1 ? 1.0 - ShadowCalculation(fragPosLightSpace, light, normal, lightDir) : 1.0;
 		if (shadow == 0.0)

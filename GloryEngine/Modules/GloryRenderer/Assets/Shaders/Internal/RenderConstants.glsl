@@ -4,12 +4,10 @@ layout(push_constant) uniform RenderConstantsUBO
 layout(set = 0, std140, binding = 0) readonly uniform RenderConstantsUBO
 #endif
 {
-	uvec4 TileSizes;
+	uvec4 GridSize;
 	uvec4 ObjectID;
 	uint ObjectDataIndex;
 	uint CameraIndex;
 	uint MaterialIndex;
 	uint LightCount;
-	float Scale;
-	float Bias;
 } Constants;

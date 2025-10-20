@@ -6,7 +6,7 @@ layout(local_size_x = 16, local_size_y = 9, local_size_z = 4) in;
 #include "../Internal/Camera.glsl"
 #include "../Internal/Light.glsl"
 
-//Shared variables 
+/* Shared variables */
 shared CompactLightData sharedLights[16*9*4];
 shared uint sharedLightIndices[16*9*4];
 
@@ -35,10 +35,10 @@ void main()
     {
         uint lightIndex = batch*threadCount + gl_LocalInvocationIndex;
 
-        //Prevent overflow by clamping to last light which is always null
+        /* Prevent overflow by clamping to last light which is always null */
         lightIndex = min(lightIndex, Lights.length());
 
-        //Populating shared light array
+        /* Populating shared light array */
         sharedLights[gl_LocalInvocationIndex].Position = Lights[lightIndex].Position;
         sharedLights[gl_LocalInvocationIndex].Direction = Lights[lightIndex].Direction;
         sharedLights[gl_LocalInvocationIndex].Data = Lights[lightIndex].Data;
@@ -46,7 +46,7 @@ void main()
         sharedLightIndices[gl_LocalInvocationIndex] = lightIndex;
         barrier();
 
-        //Iterating within the current batch of lights
+        /* Iterating within the current batch of lights */
         for (uint light = 0; light < threadCount; ++light)
         {
             if(sharedLightIndices[light] < Constants.LightCount)
@@ -70,19 +70,19 @@ void main()
         }
     }
 
-    //We want all thread groups to have completed the light tests before continuing
+    /* We want all thread groups to have completed the light tests before continuing */
     barrier();
 
     uint offset = atomicAdd(GlobalIndexCount, visibleLightCount);
 
-    uint depthSlice = tileIndex/(Constants.TileSizes.x*Constants.TileSizes.y);
-
-    for (uint i = 0; i < visibleLightCount; ++i)
-    {
-        uint lightIndex = visibleLightIndices[i];
-        GlobalLightIndexList[offset + i] = lightIndex;
-        atomicMin(LightDepthSlices[lightIndex], depthSlice);
-    }
+    //uint depthSlice = tileIndex/(Constants.TileSizes.x*Constants.TileSizes.y);
+    //
+    //for (uint i = 0; i < visibleLightCount; ++i)
+    //{
+    //    uint lightIndex = visibleLightIndices[i];
+    //    GlobalLightIndexList[offset + i] = lightIndex;
+    //    atomicMin(LightDepthSlices[lightIndex], depthSlice);
+    //}
 
     LightGrid[tileIndex].Offset = offset;
     LightGrid[tileIndex].Count = visibleLightCount;

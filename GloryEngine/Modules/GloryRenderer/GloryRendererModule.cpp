@@ -968,18 +968,10 @@ namespace Glory
 
 		const bool usePushConstants = pDevice->IsSupported(APIFeatures::PushConstants);
 
-		const glm::uvec2& resolution = m_ActiveCameras[cameraIndex].GetResolution();
-		const glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
-		const float zNear = m_ActiveCameras[cameraIndex].GetNear();
-		const float zFar = m_ActiveCameras[cameraIndex].GetFar();
-		const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x / (float)gridSize.x), (uint32_t)std::ceilf(resolution.y / (float)gridSize.y));
-
 		RenderConstants constants;
 		constants.m_CameraIndex = static_cast<uint32_t>(cameraIndex);
 		constants.m_LightCount = m_FrameData.ActiveLights.count();
-		constants.m_TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
-		constants.m_Scale = (float)gridSize.z / std::log2f(zFar / zNear);
-		constants.m_Bias = -((float)gridSize.z * std::log2f(zNear) / std::log2f(zFar / zNear));
+		constants.m_GridSize = glm::uvec4(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES, 0.0f);
 		CameraRef camera = m_ActiveCameras[cameraIndex];
 		const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
 		const DescriptorSetHandle lightSet = uniqueCameraData.m_LightSets[m_CurrentFrameIndex];
@@ -1375,18 +1367,11 @@ namespace Glory
 
 		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::GenerateClusterSSBO" };
 		const glm::uvec2 resolution = camera.GetResolution();
-		const glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
 
-		const float zNear = camera.GetNear();
-		const float zFar = camera.GetFar();
-
-		const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x/(float)gridSize.x), (uint32_t)std::ceilf(resolution.y/(float)gridSize.y));
 		ClusterConstants constants;
 		constants.CameraIndex = cameraIndex;
 		constants.LightCount = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
-		constants.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
-		constants.Scale = (float)gridSize.z/std::log2f(zFar/zNear);
-		constants.Bias = -((float)gridSize.z*std::log2f(zNear)/std::log2f(zFar/zNear));
+		constants.GridSize = glm::vec4(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES, 0.0f);
 
 		CommandBufferHandle commandBuffer = pDevice->Begin();
 		pDevice->BeginPipeline(commandBuffer, m_ClusterGeneratorPipeline);
@@ -1397,7 +1382,7 @@ namespace Glory
 			pDevice->PushConstants(commandBuffer, m_ClusterGeneratorPipeline, 0, sizeof(ClusterConstants), &constants, ShaderTypeFlag(STF_Fragment | STF_Compute));
 		else
 			pDevice->AssignBuffer(m_ClusterConstantsBuffer, &constants, sizeof(ClusterConstants));
-		pDevice->Dispatch(commandBuffer, gridSize.x, gridSize.y, gridSize.z);
+		pDevice->Dispatch(commandBuffer, constants.GridSize.x, constants.GridSize.y, constants.GridSize.z);
 		pDevice->EndPipeline(commandBuffer);
 		pDevice->End(commandBuffer);
 		pDevice->Commit(commandBuffer);
@@ -1419,18 +1404,11 @@ namespace Glory
 		const BufferHandle& lightDistancesSSBO = uniqueCameraData.m_LightDistancesSSBOs[m_CurrentFrameIndex];
 
 		const glm::uvec2 resolution = camera.GetResolution();
-		const glm::uvec3 gridSize = glm::vec3(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES);
 
-		float zNear = camera.GetNear();
-		float zFar = camera.GetFar();
-
-		const uint32_t sizeX = std::max((uint32_t)std::ceilf(resolution.x/(float)gridSize.x), (uint32_t)std::ceilf(resolution.y/(float)gridSize.y));
 		ClusterConstants constants;
 		constants.CameraIndex = cameraIndex;
 		constants.LightCount = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
-		constants.TileSizes = glm::uvec4(gridSize.x, gridSize.y, gridSize.z, sizeX);
-		constants.Scale = (float)gridSize.z/std::log2f(zFar/zNear);
-		constants.Bias = -((float)gridSize.z*std::log2f(zNear)/std::log2f(zFar/zNear));
+		constants.GridSize = glm::vec4(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES, 0.0f);
 
 		pDevice->BeginPipeline(commandBuffer, m_ClusterCullLightPipeline);
 		pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));

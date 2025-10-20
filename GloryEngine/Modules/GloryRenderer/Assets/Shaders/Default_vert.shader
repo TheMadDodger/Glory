@@ -18,19 +18,21 @@ layout(location = 5) in vec4 inColor;
 
 layout(location = 0) out vec2 fragTexCoord;
 layout(location = 1) out vec3 worldPosition;
-layout(location = 2) out vec4 outColor;
+layout(location = 2) out vec3 viewPosition;
+layout(location = 3) out vec4 outColor;
 #ifdef WITH_TEXTURED
-layout(location = 3) out mat3 TBN;
+layout(location = 4) out mat3 TBN;
 #else
-layout(location = 3) out vec3 outNormal;
+layout(location = 4) out vec3 outNormal;
 #endif
 
 void main()
 {
 	CameraData camera = CurrentCamera();
 	mat4 world = WorldTransform();
-	gl_Position = camera.Projection*camera.View*world*vec4(inPosition, 1.0);
 	worldPosition = (world*vec4(inPosition, 1.0)).xyz;
+	viewPosition = (camera.View*vec4(worldPosition, 1.0)).xyz;
+	gl_Position = camera.Projection*vec4(viewPosition, 1.0);
 #ifdef WITH_TEXTURED
 	vec3 T = normalize(vec3(world*vec4(inTangent, 0.0)));
 	vec3 B = normalize(vec3(world*vec4(inBitangent, 0.0)));

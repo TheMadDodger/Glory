@@ -1,90 +1,78 @@
 #type compute
 #version 430 core
-layout(local_size_x = 1, local_size_y = 1) in;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 #include "../Internal/Clusters.glsl"
 #include "../Internal/Camera.glsl"
 
-//Function prototypes
-vec4 ClipToView(vec4 clip, mat4 projectionInverse);
-vec4 Screen2View(vec4 screen, vec2 screenResolution, mat4 projectionInverse);
-vec3 LineIntersectionToZPlane(vec3 A, vec3 B, float zDistance);
+/* Function prototypes */
+vec3 LineIntersectionWithZPlane(vec3 startPoint, vec3 endPoint, float zDistance);
+vec3 ScreenToView(vec2 screenCoord, mat4 inverseProjection, vec2 screenDimensions);
 
+/*
+ * Source: https://github.com/DaveH355/clustered-shading
+ * context: glViewport is referred to as the "screen"
+ * clusters are built based on a 2d screen-space grid and depth slices.
+ * Later when shading, it is easy to figure what cluster a fragment is in based on
+ * gl_FragCoord.xy and the fragment's z depth from camera
+ */
 void main()
 {
     CameraData camera = CurrentCamera();
 
-    //Eye position is zero in view space
-    const vec3 eyePos = vec3(0.0);
+    uint tileIndex = gl_WorkGroupID.x + (gl_WorkGroupID.y*Constants.GridSize.x) +
+        (gl_WorkGroupID.z*Constants.GridSize.x*Constants.GridSize.y);
+    vec2 tileSize = camera.Resolution/Constants.GridSize.xy;
 
-    //Per Tile variables
-    uint tileSizePx = Constants.TileSizes.w;
-    uint tileIndex = gl_WorkGroupID.x +
-        gl_WorkGroupID.y * gl_NumWorkGroups.x +
-        gl_WorkGroupID.z * (gl_NumWorkGroups.x * gl_NumWorkGroups.y);
+    /* Tile in screen-space */
+    vec2 minTile_screenspace = gl_WorkGroupID.xy*tileSize;
+    vec2 maxTile_screenspace = (gl_WorkGroupID.xy + 1)*tileSize;
 
-    //Calculating the min and max point in screen space
-    vec4 maxPoint_sS = vec4(vec2(gl_WorkGroupID.x + 1, gl_WorkGroupID.y + 1)*tileSizePx, -1.0, 1.0); // Top Right
-    vec4 minPoint_sS = vec4(gl_WorkGroupID.xy*tileSizePx, -1.0, 1.0); // Bottom left
+    /* Convert tile to view space sitting on the near plane */
+    vec3 minTile = ScreenToView(minTile_screenspace, camera.ProjectionInverse, camera.Resolution);
+    vec3 maxTile = ScreenToView(maxTile_screenspace, camera.ProjectionInverse, camera.Resolution);
 
-    //Pass min and max to view space
-    vec3 maxPoint_vS = Screen2View(maxPoint_sS, camera.Resolution, camera.ProjectionInverse).xyz;
-    vec3 minPoint_vS = Screen2View(minPoint_sS, camera.Resolution, camera.ProjectionInverse).xyz;
+    float planeNear = camera.zNear*pow(camera.zFar/camera.zNear, gl_WorkGroupID.z/float(Constants.GridSize.z));
+    float planeFar = camera.zNear*pow(camera.zFar/camera.zNear, (gl_WorkGroupID.z + 1)/float(Constants.GridSize.z));
 
-    //Near and far values of the cluster in view space
-    float tileNear = -camera.zNear*pow(camera.zFar/camera.zNear, gl_WorkGroupID.z/float(gl_NumWorkGroups.z));
-    float tileFar = -camera.zNear*pow(camera.zFar/camera.zNear, (gl_WorkGroupID.z + 1)/float(gl_NumWorkGroups.z));
+    /*
+     * The line goes from the eye position in view space (0, 0, 0)
+     * through the min/max points of a tile to intersect with a given cluster's near-far planes
+     */
+    vec3 minPointNear = LineIntersectionWithZPlane(vec3(0, 0, 0), minTile, planeNear);
+    vec3 minPointFar = LineIntersectionWithZPlane(vec3(0, 0, 0), minTile, planeFar);
+    vec3 maxPointNear = LineIntersectionWithZPlane(vec3(0, 0, 0), maxTile, planeNear);
+    vec3 maxPointFar = LineIntersectionWithZPlane(vec3(0, 0, 0), maxTile, planeFar);
 
-    //Finding the 4 intersection points made from the maxPoint to the cluster near/far plane
-    vec3 minPointNear = LineIntersectionToZPlane(eyePos, minPoint_vS, tileNear);
-    vec3 minPointFar = LineIntersectionToZPlane(eyePos, minPoint_vS, tileFar);
-    vec3 maxPointNear = LineIntersectionToZPlane(eyePos, maxPoint_vS, tileNear);
-    vec3 maxPointFar = LineIntersectionToZPlane(eyePos, maxPoint_vS, tileFar);
-
-    vec3 minPointAABB = min(min(minPointNear, minPointFar), min(maxPointNear, maxPointFar));
-    vec3 maxPointAABB = max(max(minPointNear, minPointFar), max(maxPointNear, maxPointFar));
-
-    //Getting the 
-    Cluster[tileIndex].MinPoint = vec4(minPointAABB, 0.0);
-    Cluster[tileIndex].MaxPoint = vec4(maxPointAABB, 0.0);
+    Cluster[tileIndex].MinPoint = vec4(min(minPointNear, minPointFar), 0.0);
+    Cluster[tileIndex].MaxPoint = vec4(max(maxPointNear, maxPointFar), 0.0);
 }
 
-//Creates a line from the eye to the screenpoint, then finds its intersection
-//With a z oriented plane located at the given distance to the origin
-vec3 LineIntersectionToZPlane(vec3 A, vec3 B, float zDistance)
+/*
+ * Returns the intersection point of an infinite line and a
+ * plane perpendicular to the Z-axis
+ */
+vec3 LineIntersectionWithZPlane(vec3 startPoint, vec3 endPoint, float zDistance)
 {
-    //Because this is a Z based normal this is fixed
-    vec3 normal = vec3(0.0, 0.0, 1.0);
+    vec3 direction = endPoint - startPoint;
+    vec3 normal = vec3(0.0, 0.0, -1.0); /* Plane normal */
 
-    vec3 ab = B - A;
+    /* Skip check if the line is parallel to the plane. */
 
-    //Computing the intersection length for the line and the plane
-    float t = (zDistance - dot(normal, A))/dot(normal, ab);
-
-    //Computing the actual xyz position of the point along the line
-    vec3 result = A + t*ab;
-
-    return result;
+    float t = (zDistance - dot(normal, startPoint))/dot(normal, direction);
+    return startPoint + t*direction; /* The parametric form of the line equation */
 }
 
-vec4 ClipToView(vec4 clip, mat4 projectionInverse)
+vec3 ScreenToView(vec2 screenCoord, mat4 inverseProjection, vec2 screenDimensions)
 {
-    //View space transform
-    vec4 view = projectionInverse*clip;
-    //Perspective projection
-    view = view/view.w;
-    return view;
-}
+    /*
+     * Normalize screenCoord to [-1, 1] and
+     * set the NDC depth of the coordinate to be on the near plane. This is -1 by
+     * default in OpenGL
+     */
+    vec4 ndc = vec4(screenCoord/screenDimensions*2.0 - 1.0, -1.0, 1.0);
 
-vec4 Screen2View(vec4 screen, vec2 screenResolution, mat4 projectionInverse)
-{
-    //Convert to NDC
-    vec2 texCoord = screen.xy/screenResolution;
-
-    //Convert to clipSpace
-    // vec4 clip = vec4(vec2(texCoord.x, 1.0 - texCoord.y)* 2.0 - 1.0, screen.z, screen.w);
-    vec4 clip = vec4(vec2(texCoord.x, texCoord.y)*2.0 - 1.0, screen.z, screen.w);
-    //Not sure which of the two it is just yet
-
-    return ClipToView(clip, projectionInverse);
+    vec4 viewCoord = inverseProjection*ndc;
+    viewCoord /= viewCoord.w;
+    return viewCoord.xyz;
 }

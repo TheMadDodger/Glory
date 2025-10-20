@@ -24,11 +24,9 @@ namespace Glory
 
 	struct ClusterConstants
 	{
-		glm::uvec4 TileSizes;
+		glm::uvec4 GridSize;
 		uint32_t LightCount;
 		uint32_t CameraIndex;
-		float Scale;
-		float Bias;
 	};
 
 	struct SSAOConstants
@@ -41,15 +39,13 @@ namespace Glory
 
 	struct RenderConstants
 	{
-		glm::uvec4 m_TileSizes;
+		glm::uvec4 m_GridSize;
 		UUID m_SceneID;
 		UUID m_ObjectID;
 		uint32_t m_ObjectDataIndex;
 		uint32_t m_CameraIndex;
 		uint32_t m_MaterialIndex;
 		uint32_t m_LightCount;
-		float m_Scale;
-		float m_Bias;
 	};
 
 	/*struct DeferredConstants
