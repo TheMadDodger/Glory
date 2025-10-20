@@ -76,13 +76,13 @@ void main()
     uint offset = atomicAdd(GlobalIndexCount, visibleLightCount);
 
     //uint depthSlice = tileIndex/(Constants.TileSizes.x*Constants.TileSizes.y);
-    //
-    //for (uint i = 0; i < visibleLightCount; ++i)
-    //{
-    //    uint lightIndex = visibleLightIndices[i];
-    //    GlobalLightIndexList[offset + i] = lightIndex;
-    //    atomicMin(LightDepthSlices[lightIndex], depthSlice);
-    //}
+
+    for (uint i = 0; i < visibleLightCount; ++i)
+    {
+        uint lightIndex = visibleLightIndices[i];
+        GlobalLightIndexList[offset + i] = lightIndex;
+        //atomicMin(LightDepthSlices[lightIndex], depthSlice);
+    }
 
     LightGrid[tileIndex].Offset = offset;
     LightGrid[tileIndex].Count = visibleLightCount;
