@@ -1242,13 +1242,13 @@ namespace Glory
 				if (std::memcmp(&batchData.m_MaterialDatas.m_Data[i*finalPropertyDataSize], buffer.data(), buffer.size()) != 0)
 				{
 					std::memcpy(&batchData.m_MaterialDatas.m_Data[i*finalPropertyDataSize], buffer.data(), buffer.size());
-					batchData.m_MaterialDatas.m_Dirty = true;
+					batchData.m_MaterialDatas.SetDirty(i);
 				}
 				const uint32_t textureBits = pMaterialData->TextureSetBits();
 				if (textureCount && batchData.m_TextureBits.m_Data[i] != textureBits)
 				{
 					batchData.m_TextureBits.m_Data[i] = textureBits;
-					batchData.m_TextureBits.m_Dirty = true;
+					batchData.m_TextureBits.SetDirty(i);
 				}
 
 				if (textureCount == 0) continue;
@@ -1293,7 +1293,11 @@ namespace Glory
 				batchData.m_MaterialDatas.SetDirty();
 			}
 			if (batchData.m_MaterialDatas)
-				pDevice->AssignBuffer(batchData.m_MaterialsBuffer, batchData.m_MaterialDatas->data(), batchData.m_MaterialDatas->size());
+			{
+				const size_t dirtySize = batchData.m_MaterialDatas.DirtySize();
+				pDevice->AssignBuffer(batchData.m_MaterialsBuffer, batchData.m_MaterialDatas.DirtyStart(),
+					batchData.m_MaterialDatas.m_DirtyRange.first, dirtySize);
+			}
 
 			if (textureCount && !batchData.m_TextureBitsBuffer)
 			{
@@ -1301,7 +1305,11 @@ namespace Glory
 				batchData.m_TextureBits.SetDirty();
 			}
 			if (textureCount && batchData.m_TextureBits)
-				pDevice->AssignBuffer(batchData.m_TextureBitsBuffer, batchData.m_TextureBits->data(), batchData.m_TextureBits->size()*sizeof(uint32_t));
+			{
+				const size_t dirtySize = batchData.m_TextureBits.DirtySize();
+				pDevice->AssignBuffer(batchData.m_TextureBitsBuffer, batchData.m_TextureBits.DirtyStart(),
+					batchData.m_TextureBits.m_DirtyRange.first*sizeof(uint32_t), dirtySize*sizeof(uint32_t));
+			}
 
 			if (!batchData.m_ObjectDataSet)
 			{

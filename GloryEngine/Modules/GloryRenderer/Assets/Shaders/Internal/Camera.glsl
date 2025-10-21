@@ -11,7 +11,7 @@ struct CameraData
 
 layout(set = 0, std430, binding = 1) readonly buffer CameraDatasSSBO
 {
-	CameraData Cameras[100];
+	CameraData Cameras[];
 };
 
 CameraData CurrentCamera()

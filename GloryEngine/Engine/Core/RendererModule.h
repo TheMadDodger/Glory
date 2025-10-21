@@ -109,7 +109,7 @@ namespace Glory
 		void* DirtyStart()
 		{
 			char* start = (char*)m_Data.data();
-			return start + m_DirtyRange.first;
+			return start + m_DirtyRange.first*sizeof(T);
 		}
 
 		std::vector<T> m_Data;
