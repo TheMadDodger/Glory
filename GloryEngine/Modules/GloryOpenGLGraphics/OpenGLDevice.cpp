@@ -453,6 +453,7 @@ namespace Glory
 			glCullFace(glPipeline->m_CullFace);
 		}
 		else glDisable(GL_CULL_FACE);
+		glDisable(GL_SCISSOR_TEST);
 	}
 
 	void OpenGLDevice::End(CommandBufferHandle)
@@ -589,6 +590,7 @@ namespace Glory
 
 	void OpenGLDevice::SetScissor(CommandBufferHandle, int x, int y, uint32_t width, uint32_t height)
 	{
+		glEnable(GL_SCISSOR_TEST);
 		glScissor(x, y, width, height);
 	}
 
