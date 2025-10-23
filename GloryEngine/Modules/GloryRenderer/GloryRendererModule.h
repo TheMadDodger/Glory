@@ -143,6 +143,10 @@ namespace Glory
 
 		void PrepareCameras();
 
+		void GenerateShadowMapLODResolutions();
+		void ResizeShadowMapLODResolutions(uint32_t minSize, uint32_t maxSize);
+		void GenerateShadowLODDivisions(uint32_t maxLODs);
+
 	private:
 		std::vector<PipelineBatchData> m_DynamicBatchData;
 		CPUBuffer<PerCameraData> m_CameraDatas;
@@ -172,6 +176,7 @@ namespace Glory
 		DescriptorSetLayoutHandle m_CameraSamplerSetLayout;
 		DescriptorSetLayoutHandle m_ShadowAtlasSamplerSetLayout;
 		DescriptorSetLayoutHandle m_ObjectDataSetLayout = 0;
+		DescriptorSetLayoutHandle m_LightDistancesSetLayout = 0;
 
 		DescriptorSetLayoutHandle m_DisplayCopySamplerSetLayout;
 
@@ -232,12 +237,15 @@ namespace Glory
 			std::vector<RenderPassHandle> m_SSAORenderPasses;
 			std::vector<BufferHandle> m_LightIndexSSBOs;
 			std::vector<BufferHandle> m_LightGridSSBOs;
-			std::vector<BufferHandle> m_LightDistancesSSBOs;
 
 			std::vector<DescriptorSetHandle> m_LightSets;
 			std::vector<DescriptorSetHandle> m_SSAOSamplersSets;
 			std::vector<DescriptorSetHandle> m_FinalColorSamplerSets;
 		};
+		std::vector<BufferHandle> m_LightDistancesSSBOs;
+		std::vector<uint32_t> m_ClosestLightDepthSlices;
+		std::vector<DescriptorSetHandle> m_LightDistancesSets;
+
 		std::vector<DescriptorSetHandle> m_ShadowAtlasSamplerSets;
 
 		std::map<UUID, UniqueCameraData> m_UniqueCameraDatas;
@@ -246,5 +254,13 @@ namespace Glory
 		std::vector<RenderPassHandle> m_FinalFrameColorPasses;
 		std::vector<DescriptorSetHandle> m_FinalFrameColorSets;
 		PipelineHandle m_DisplayCopyPipeline = 0;
+
+		uint32_t m_MinShadowResolution;
+		uint32_t m_MaxShadowResolution;
+		uint32_t m_ShadowAtlasResolution;
+		uint32_t m_MaxShadowLODs;
+		static const uint32_t MAX_SHADOW_LODS = 24;
+		std::vector<uint32_t> m_ShadowLODDivisions;
+		std::vector<glm::uvec2> m_ShadowMapResolutions;
 	};
 }

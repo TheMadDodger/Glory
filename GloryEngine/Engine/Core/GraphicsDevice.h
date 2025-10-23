@@ -265,6 +265,7 @@ namespace Glory
 
 		/** @brief Helper for getting the debug logger */
 		Debug& Debug();
+		/** @brief Helper for getting the profiler */
 		EngineProfiler& Profiler();
 
 		/**
@@ -491,6 +492,14 @@ namespace Glory
 		 * @param size Size of the data to assign
 		 */
 		virtual void AssignBuffer(BufferHandle handle, const void* data, uint32_t offset, uint32_t size) = 0;
+		/**
+		 * @brief Copy data from a buffer to memory
+		 * @param handle The handle to the buffer
+		 * @param outData Memory to copy to
+		 * @param offset Offset into the source buffer
+		 * @param size Size of the data to copy
+		 */
+		virtual void ReadBuffer(BufferHandle handle, void* outData, uint32_t offset, uint32_t size) = 0;
 
 		/* Mesh */
 

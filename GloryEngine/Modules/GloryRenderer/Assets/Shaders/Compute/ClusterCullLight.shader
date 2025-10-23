@@ -6,6 +6,11 @@ layout(local_size_x = 16, local_size_y = 9, local_size_z = 4) in;
 #include "../Internal/Camera.glsl"
 #include "../Internal/Light.glsl"
 
+layout(set = 4, std430, binding = 7) buffer LightDistanceSSBO
+{
+    uint LightDepthSlices[];
+};
+
 /* Shared variables */
 shared CompactLightData sharedLights[16*9*4];
 shared uint sharedLightIndices[16*9*4];
@@ -75,13 +80,12 @@ void main()
 
     uint offset = atomicAdd(GlobalIndexCount, visibleLightCount);
 
-    //uint depthSlice = tileIndex/(Constants.TileSizes.x*Constants.TileSizes.y);
-
+    uint depthSlice = tileIndex/(Constants.GridSize.x*Constants.GridSize.y);
     for (uint i = 0; i < visibleLightCount; ++i)
     {
         uint lightIndex = visibleLightIndices[i];
         GlobalLightIndexList[offset + i] = lightIndex;
-        //atomicMin(LightDepthSlices[lightIndex], depthSlice);
+        atomicMin(LightDepthSlices[lightIndex], depthSlice);
     }
 
     LightGrid[tileIndex].Offset = offset;

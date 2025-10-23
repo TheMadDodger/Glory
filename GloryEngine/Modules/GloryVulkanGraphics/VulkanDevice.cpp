@@ -930,7 +930,6 @@ namespace Glory
 		BufferHandle handle;
 		VK_Buffer& buffer = m_Buffers.Emplace(handle, VK_Buffer());
 		buffer.m_Size = bufferSize;
-		buffer.m_KeepMemoryMapped = (flags & BF_Write) != 0;
 		buffer.m_CPUVisible = (flags & BF_ReadAndWrite) != 0;
 
 		vk::BufferCreateInfo bufferInfo = vk::BufferCreateInfo();
@@ -1019,8 +1018,7 @@ namespace Glory
 			return;
 		}
 
-		void* mappedData = buffer->m_pMappedMemory;
-		if (buffer->m_KeepMemoryMapped && !buffer->m_pMappedMemory)
+		if (!buffer->m_pMappedMemory)
 		{
 			const vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)0, (vk::DeviceSize)buffer->m_Size, (vk::MemoryMapFlags)0, &buffer->m_pMappedMemory);
 			if (result != vk::Result::eSuccess)
@@ -1028,26 +1026,44 @@ namespace Glory
 				Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
 				return;
 			}
-			mappedData = buffer->m_pMappedMemory;
 		}
-		else if(!buffer->m_KeepMemoryMapped)
+
+		char* p = (char*)buffer->m_pMappedMemory;
+		void* offsettedData = p + offset;
+		memcpy(offsettedData, data, size);
+	}
+
+	void VulkanDevice::ReadBuffer(BufferHandle handle, void* outData, uint32_t offset, uint32_t size)
+	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::ReadBuffer(offset, size)" };
+		if (!outData) return;
+
+		VK_Buffer* buffer = m_Buffers.Find(handle);
+		if (!buffer)
 		{
-			const vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)offset, (vk::DeviceSize)size, (vk::MemoryMapFlags)0, &mappedData);
+			Debug().LogError("VulkanDevice::ReadBuffer: Invalid buffer handle.");
+			return;
+		}
+
+		if (!buffer->m_CPUVisible)
+		{
+			Debug().LogError("VulkanDevice::ReadBuffer: Can't read a buffer that is not visible to the CPU.");
+			return;
+		}
+
+		if (!buffer->m_pMappedMemory)
+		{
+			const vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)0, (vk::DeviceSize)buffer->m_Size, (vk::MemoryMapFlags)0, &buffer->m_pMappedMemory);
 			if (result != vk::Result::eSuccess)
 			{
 				Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
 				return;
 			}
-			offset = 0;
 		}
 
-		char* p = (char*)mappedData;
+		char* p = (char*)buffer->m_pMappedMemory;
 		void* offsettedData = p + offset;
-		memcpy(offsettedData, data, size);
-
-		if (buffer->m_KeepMemoryMapped) return;
-		m_LogicalDevice.unmapMemory(buffer->m_VKMemory);
-		buffer->m_pMappedMemory = nullptr;
+		std::memcpy(outData, offsettedData, size);
 	}
 
 	vk::Format GetFormat(const AttributeType& atributeType)

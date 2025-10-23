@@ -769,7 +769,7 @@ namespace Glory
 
 		if (offset + size > buffer->m_Size)
 		{
-			Debug().LogError("OpenGLDevice::AssignBuffer: Attempting to write beyong buffer size");
+			Debug().LogError("OpenGLDevice::AssignBuffer: Attempting to write beyond buffer size");
 			return;
 		}
 
@@ -779,6 +779,28 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindBuffer(buffer->m_GLTarget, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OpenGLDevice::ReadBuffer(BufferHandle handle, void* outData, uint32_t offset, uint32_t size)
+	{
+		GL_Buffer* buffer = m_Buffers.Find(handle);
+		if (!buffer)
+		{
+			Debug().LogError("OpenGLDevice::ReadBuffer: Invalid buffer handle");
+			return;
+		}
+
+		if (offset + size > buffer->m_Size)
+		{
+			Debug().LogError("OpenGLDevice::ReadBuffer: Attempting to read beyond buffer size");
+			return;
+		}
+
+		glBindBuffer(buffer->m_GLTarget, buffer->m_GLBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glGetBufferSubData(buffer->m_GLTarget, offset, size, outData);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindBuffer(buffer->m_GLTarget, NULL);
 	}
 
 	MeshHandle OpenGLDevice::CreateMesh(std::vector<BufferHandle>&& buffers, uint32_t vertexCount,

@@ -153,6 +153,7 @@ namespace Glory
         virtual void AssignBuffer(BufferHandle handle, const void* data) override;
         virtual void AssignBuffer(BufferHandle handle, const void* data, uint32_t size) override;
         virtual void AssignBuffer(BufferHandle handle, const void* data, uint32_t offset, uint32_t size) override;
+        virtual void ReadBuffer(BufferHandle handle, void* outData, uint32_t offset, uint32_t size) override;
 
         virtual MeshHandle CreateMesh(std::vector<BufferHandle>&& buffers, uint32_t vertexCount,
             uint32_t indexCount, uint32_t stride, PrimitiveType primitiveType,

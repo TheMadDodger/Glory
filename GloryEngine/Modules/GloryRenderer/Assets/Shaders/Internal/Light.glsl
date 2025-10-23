@@ -47,11 +47,6 @@ layout(set = 3, std430, binding = 6) buffer LightGridSSBO
     LightGridElement LightGrid[];
 };
 
-layout(set = 3, std430, binding = 7) buffer LightDistanceSSBO
-{
-    uint LightDepthSlices[];
-};
-
 const uint Sun = 1;
 const uint Point = 2;
 const uint Spot = 3;
