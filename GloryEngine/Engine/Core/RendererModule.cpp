@@ -457,22 +457,22 @@ namespace Glory
 
 	bool RendererModule::PickResultValid(size_t index) const
 	{
-		return m_LastFramePickResults.size() > index;
+		return m_PickResults.size() > index;
 	}
 
 	bool RendererModule::PickResultIndex(UUID cameraID, size_t& index) const
 	{
-		auto iter = std::find_if(m_LastFramePickResults.begin(), m_LastFramePickResults.end(), [cameraID](const PickResult& result) {
+		auto iter = std::find_if(m_PickResults.begin(), m_PickResults.end(), [cameraID](const PickResult& result) {
 			return result.m_CameraID == cameraID;
 		});
-		if (iter == m_LastFramePickResults.end()) return false;
-		index = iter - m_LastFramePickResults.begin();
+		if (iter == m_PickResults.end()) return false;
+		index = iter - m_PickResults.begin();
 		return true;
 	}
 
 	const PickResult& RendererModule::GetPickResult(size_t index) const
 	{
-		return m_LastFramePickResults[index];
+		return m_PickResults[index];
 	}
 
 	void RendererModule::GetPickResult(UUID cameraID, std::function<void(const PickResult&)> callback)
@@ -480,7 +480,7 @@ namespace Glory
 		std::scoped_lock<std::mutex> lock(m_PickLock);
 		size_t index;
 		if (!PickResultIndex(cameraID, index)) return;
-		callback(m_LastFramePickResults[index]);
+		callback(m_PickResults[index]);
 	}
 
 	void RendererModule::OnWindowResize(glm::uvec2 size)

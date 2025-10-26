@@ -48,6 +48,15 @@ namespace Glory
 		uint32_t m_LightCount;
 	};
 
+	struct PickingConstants
+	{
+		uint32_t m_CameraIndex;
+		uint32_t m_NumPickings;
+		uint32_t m_Padding1;
+		uint32_t m_Padding2;
+		glm::ivec2 m_Picks[16];
+	};
+
 	/*struct DeferredConstants
 	{
 		glm::uvec4 TileSizes;
@@ -80,6 +89,14 @@ namespace Glory
 			DescriptorSetHandle m_ObjectDataSet = 0;
 			DescriptorSetHandle m_MaterialSet = 0;
 			std::vector<DescriptorSetHandle> m_TextureSets;
+		};
+
+		struct GPUPickResult
+		{
+			UUID SceneID;
+			UUID ObjectID;
+			glm::vec4 Normal;
+			glm::vec4 Position;
 		};
 
 	public:
@@ -158,6 +175,7 @@ namespace Glory
 		BufferHandle m_CameraDatasBuffer = 0;
 		BufferHandle m_LightCameraDatasBuffer = 0;
 		BufferHandle m_RenderConstantsBuffer = 0;
+		BufferHandle m_PickingConstantsBuffer = 0;
 		BufferHandle m_ClusterConstantsBuffer = 0;
 		BufferHandle m_DeferredConstantsBuffer = 0;
 		BufferHandle m_LightsSSBO = 0;
@@ -168,6 +186,7 @@ namespace Glory
 		/* Descriptor set layouts */
 		DescriptorSetLayoutHandle m_GlobalRenderSetLayout;
 		DescriptorSetLayoutHandle m_GlobalShadowRenderSetLayout;
+		DescriptorSetLayoutHandle m_GlobalPickingSetLayout;
 		DescriptorSetLayoutHandle m_GlobalClusterSetLayout;
 		DescriptorSetLayoutHandle m_GlobalLightSetLayout;
 		DescriptorSetLayoutHandle m_GlobalSampleDomeSetLayout;
@@ -177,14 +196,17 @@ namespace Glory
 		DescriptorSetLayoutHandle m_NoiseSamplerSetLayout;
 		DescriptorSetLayoutHandle m_CameraSamplerSetLayout;
 		DescriptorSetLayoutHandle m_ShadowAtlasSamplerSetLayout;
-		DescriptorSetLayoutHandle m_ObjectDataSetLayout = 0;
-		DescriptorSetLayoutHandle m_LightDistancesSetLayout = 0;
+		DescriptorSetLayoutHandle m_ObjectDataSetLayout;
+		DescriptorSetLayoutHandle m_LightDistancesSetLayout;
+		DescriptorSetLayoutHandle m_PickingResultSetLayout;
+		DescriptorSetLayoutHandle m_PickingSamplerSetLayout;
 
 		DescriptorSetLayoutHandle m_DisplayCopySamplerSetLayout;
 
 		/* Descriptor sets */
 		DescriptorSetHandle m_GlobalRenderSet;
 		DescriptorSetHandle m_GlobalShadowRenderSet;
+		DescriptorSetHandle m_GlobalPickingSet;
 		DescriptorSetHandle m_GlobalClusterSet;
 		DescriptorSetHandle m_GlobalDeferredSet;
 		DescriptorSetHandle m_GlobalLightSet;
@@ -205,6 +227,7 @@ namespace Glory
 		/* Compute pipelines */
 		PipelineHandle m_ClusterGeneratorPipeline = 0;
 		PipelineHandle m_ClusterCullLightPipeline = 0;
+		PipelineHandle m_PickingPipeline = 0;
 
 		/* Effects pipelines */
 		PipelineHandle m_SSAOPipeline = 0;
@@ -240,10 +263,15 @@ namespace Glory
 			std::vector<RenderPassHandle> m_SSAORenderPasses;
 			std::vector<BufferHandle> m_LightIndexSSBOs;
 			std::vector<BufferHandle> m_LightGridSSBOs;
+			std::vector<BufferHandle> m_PickResultsSSBOs;
 
 			std::vector<DescriptorSetHandle> m_LightSets;
 			std::vector<DescriptorSetHandle> m_SSAOSamplersSets;
 			std::vector<DescriptorSetHandle> m_FinalColorSamplerSets;
+			std::vector<DescriptorSetHandle> m_PickingResultSets;
+			std::vector<DescriptorSetHandle> m_PickingSamplersSets;
+
+			std::vector<glm::ivec2> m_Picks;
 		};
 		std::vector<BufferHandle> m_LightDistancesSSBOs;
 		std::vector<uint32_t> m_ClosestLightDepthSlices;

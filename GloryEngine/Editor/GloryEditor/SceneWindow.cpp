@@ -264,21 +264,25 @@ namespace Glory::Editor
 		viewportCoord = viewportCoord / glm::vec2(size.x, size.y);
 
 		glm::uvec2 resolution = m_SceneCamera.m_Camera.GetResolution();
-		glm::uvec2 textureCoord = viewportCoord * (glm::vec2)resolution;
+		glm::uvec2 textureCoord = viewportCoord*(glm::vec2)resolution;
 		textureCoord.y = resolution.y - textureCoord.y;
 		m_PickPos = textureCoord;
 
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		size_t pickIndex = 0;
+		if (!pRenderer->PickResultIndex(m_SceneCamera.m_Camera.GetUUID(), pickIndex)) return;
+		const PickResult& pickResult = pRenderer->GetPickResult(pickIndex);
+
 		if (!m_BlockNextPick && !ImGuizmo::IsOver() && ImGui::IsWindowHovered() && ImGui::IsMouseReleased(0) && ImGui::IsMouseHoveringRect(min, viewportMax))
 		{
-			Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-			GScene* pScene = pEngine->GetSceneManager()->GetHoveringEntityScene();
+			GScene* pScene = pEngine->GetSceneManager()->GetOpenScene(pickResult.m_Object.SceneUUID());
 			if (!pScene)
 			{
 				Selection::SetActiveObject(nullptr);
 				return;
 			}
-			const UUID objectID = pEngine->GetSceneManager()->GetHoveringEntityUUID();
-			Entity entityHandle = pScene->GetEntityByUUID(objectID);
+			Entity entityHandle = pScene->GetEntityByUUID(pickResult.m_Object.ObjectUUID());
 			if (!entityHandle.IsValid())
 			{
 				Selection::SetActiveObject(nullptr);

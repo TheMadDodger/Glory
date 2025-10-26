@@ -84,3 +84,7 @@
   ID: 44
 - Path: "Pipelines\\Compute\\ClusterCullLight.gpln"
   ID: 45
+- Path: "Shaders\\Compute\\Picking.shader"
+  ID: 46
+- Path: "Pipelines\\Compute\\Picking.gpln"
+  ID: 47
