@@ -2,6 +2,8 @@
 #include "EditorWindow.h"
 #include "SceneViewCamera.h"
 
+#include <SceneObjectRef.h>
+
 #include <ImGuizmo.h>
 
 namespace Glory
@@ -53,5 +55,12 @@ namespace Glory::Editor
         GScene* m_pPreviewScene;
         glm::uvec2 m_PickPos;
         bool m_BlockNextPick{ false };
+
+        struct
+        {
+            SceneObjectRef m_Object;
+            glm::vec3 m_WorldPosition;
+            glm::vec3 m_Normal;
+        } m_CurrentPick;
     };
 }

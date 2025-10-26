@@ -271,8 +271,12 @@ namespace Glory::Editor
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
 		size_t pickIndex = 0;
+		m_CurrentPick.m_Object = SceneObjectRef();
 		if (!pRenderer->PickResultIndex(m_SceneCamera.m_Camera.GetUUID(), pickIndex)) return;
 		const PickResult& pickResult = pRenderer->GetPickResult(pickIndex);
+		m_CurrentPick.m_Object = pickResult.m_Object;
+		m_CurrentPick.m_Normal = pickResult.m_Normal;
+		m_CurrentPick.m_WorldPosition = pickResult.m_WorldPosition;
 
 		if (!m_BlockNextPick && !ImGuizmo::IsOver() && ImGui::IsWindowHovered() && ImGui::IsMouseReleased(0) && ImGui::IsMouseHoveringRect(min, viewportMax))
 		{
@@ -374,9 +378,10 @@ namespace Glory::Editor
 	{
 		const float* snap = Gizmos::GetSnap(ImGuizmo::OPERATION::TRANSLATE);
 		SceneManager* scenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
-		glm::vec3 pos = scenes->GetHoveringPosition();
-		const UUID hoveringObject = scenes->GetHoveringEntityUUID();
-		const GScene* hoveringScene = scenes->GetHoveringEntityScene();
+		glm::vec3 pos = m_CurrentPick.m_WorldPosition;
+		const UUID hoveringObject = m_CurrentPick.m_Object.ObjectUUID();
+		const UUID hoveringSceneID = m_CurrentPick.m_Object.SceneUUID();
+		const GScene* hoveringScene = hoveringSceneID ? scenes->GetOpenScene(hoveringSceneID) : nullptr;
 		if (!hoveringScene || !hoveringObject)
 		{
 			const glm::uvec2 resolution = m_SceneCamera.m_Camera.GetResolution();
@@ -403,14 +408,15 @@ namespace Glory::Editor
 	const glm::quat SceneWindow::GetRotation() const
 	{
 		SceneManager* scenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
-		const UUID hoveringObject = scenes->GetHoveringEntityUUID();
-		const GScene* hoveringScene = scenes->GetHoveringEntityScene();
+		const UUID hoveringObject = m_CurrentPick.m_Object.ObjectUUID();
+		const UUID hoveringSceneID = m_CurrentPick.m_Object.SceneUUID();
+		const GScene* hoveringScene = hoveringSceneID ? scenes->GetOpenScene(hoveringSceneID) : nullptr;
 		if (!hoveringScene || !hoveringObject)
 		{
 			return glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 		}
 
-		const glm::vec3 normal = scenes->GetHoveringNormal();
+		const glm::vec3 normal = m_CurrentPick.m_Normal;
 		const glm::vec3 forward{ 0.0f, 0.0f, 1.0f };
 		const glm::vec3 right{ -1.0f, 0.0f, 0.0f };
 		const float forwardDot = std::abs(glm::dot(normal, forward));

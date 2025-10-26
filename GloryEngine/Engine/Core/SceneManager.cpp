@@ -90,42 +90,6 @@ namespace Glory
 		return m_pEngine;
 	}
 
-	GScene* SceneManager::GetHoveringEntityScene()
-	{
-		return m_HoveringObjectSceneID ? GetOpenScene(m_HoveringObjectSceneID) : nullptr;
-	}
-
-	UUID SceneManager::GetHoveringEntityUUID() const
-	{
-		return m_HoveringObjectID;
-	}
-
-	const glm::vec3& SceneManager::GetHoveringPosition() const
-	{
-		return m_HoveringPos;
-	}
-
-	const glm::vec3& SceneManager::GetHoveringNormal() const
-	{
-		return m_HoveringNormal;
-	}
-
-	void SceneManager::SetHoveringObject(UUID sceneID, UUID objectID)
-	{
-		m_HoveringObjectSceneID = sceneID;
-		m_HoveringObjectID = objectID;
-	}
-
-	void SceneManager::SetHoveringPosition(const glm::vec3& pos)
-	{
-		m_HoveringPos = pos;
-	}
-
-	void SceneManager::SetHoveringNormal(const glm::vec3& normal)
-	{
-		m_HoveringNormal = normal;
-	}
-
 	size_t SceneManager::OpenScenesCount()
 	{
 		return m_pOpenScenes.size();
