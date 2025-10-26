@@ -1,16 +1,18 @@
 #type compute
 #version 430 core
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 16) in;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 8) in;
 
 #ifdef PUSH_CONSTANTS
 layout(push_constant) uniform PickingConstantsUBO
 #else
-layout(set = 0, std140, binding = 0) readonly uniform RenderConstantsUBO
+layout(set = 0, std140, binding = 0) readonly uniform PickingConstantsUBO
 #endif
 {
     uint CameraIndex;
     uint NumPicks;
-    ivec2 Picks[16];
+    uint Padding1;
+    uint Padding2;
+    ivec2 Picks[8];
 } Constants;
 
 #include "../Internal/Camera.glsl"
@@ -23,10 +25,13 @@ struct PickResult
     vec4 Position;
 };
 
-layout(set = 1, std140, binding = 2) buffer PickingResultsSSBO
+layout(set = 1, std430, binding = 2) buffer PickingResultsSSBO
 {
     uint NumPicks;
-    PickResult Results[16];
+    uint Padding1;
+    uint Padding2;
+    uint Padding3;
+    PickResult Results[8];
 };
 
 layout (set = 2, binding = 0) uniform sampler2D ObjectID;

@@ -46,7 +46,7 @@ namespace Glory
 		"Shadow Atlas",
 	};
 
-	constexpr size_t MaxPicks = 16;
+	constexpr size_t MaxPicks = 8;
 
 	GLORY_MODULE_VERSION_CPP(GloryRendererModule);
 
@@ -455,7 +455,7 @@ namespace Glory
 
 		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::CameraDatas },
 			{ BufferType::BT_Storage }, { STF_Compute }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
-			m_GlobalPickingSetLayout, m_GlobalPickingSet, &m_PickingConstantsBuffer, STF_Compute, 0, sizeof(PickingConstants)*MaxPicks);
+			m_GlobalPickingSetLayout, m_GlobalPickingSet, &m_PickingConstantsBuffer, STF_Compute, 0, sizeof(PickingConstants));
 
 		assert(m_GlobalRenderSetLayout == m_GlobalShadowRenderSetLayout);
 
@@ -1883,6 +1883,8 @@ namespace Glory
 				setInfo.m_Layout = m_PickingResultSetLayout;
 				setInfo.m_Buffers.resize(1);
 				setInfo.m_Buffers[0].m_BufferHandle = pickResultsUBO;
+				setInfo.m_Buffers[0].m_Offset = 0;
+				setInfo.m_Buffers[0].m_Size = sizeof(GPUPickResult)*MaxPicks + sizeof(uint32_t)*4;
 				pickingResultsSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 			}
 

@@ -54,7 +54,7 @@ namespace Glory
 		uint32_t m_NumPickings;
 		uint32_t m_Padding1;
 		uint32_t m_Padding2;
-		glm::ivec2 m_Picks[16];
+		glm::ivec2 m_Picks[8];
 	};
 
 	/*struct DeferredConstants
