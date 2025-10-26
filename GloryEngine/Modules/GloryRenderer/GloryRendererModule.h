@@ -130,6 +130,7 @@ namespace Glory
 
 		void ClusterPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex);
 		void DynamicObjectsPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex);
+		void DynamicLateObjectsPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex);
 
 		void GenerateDomeSamplePointsSSBO(GraphicsDevice* pDevice, uint32_t size);
 		void GenerateNoiseTexture(GraphicsDevice* pDevice);
@@ -149,6 +150,7 @@ namespace Glory
 
 	private:
 		std::vector<PipelineBatchData> m_DynamicBatchData;
+		std::vector<PipelineBatchData> m_DynamicLateBatchData;
 		CPUBuffer<PerCameraData> m_CameraDatas;
 		CPUBuffer<PerCameraData> m_LightCameraDatas;
 
@@ -234,6 +236,7 @@ namespace Glory
 			DescriptorSetHandle m_ClusterSet = 0;
 
 			std::vector<RenderPassHandle> m_RenderPasses;
+			std::vector<RenderPassHandle> m_LateRenderPasses;
 			std::vector<RenderPassHandle> m_SSAORenderPasses;
 			std::vector<BufferHandle> m_LightIndexSSBOs;
 			std::vector<BufferHandle> m_LightGridSSBOs;

@@ -1428,10 +1428,57 @@ namespace Glory
 		CreateRenderTexture(vkRenderPass->m_VKRenderPass, *vkRenderTexture);
 	}
 
+	vk::AttachmentLoadOp GetLoadOp(RenderPassLoadOp loadOp)
+	{
+		switch (loadOp)
+		{
+		case Glory::OP_DontCare:
+			return vk::AttachmentLoadOp::eDontCare;
+		case Glory::OP_Clear:
+			return vk::AttachmentLoadOp::eClear;
+		case Glory::OP_Load:
+			return vk::AttachmentLoadOp::eLoad;
+		default:
+			break;
+		}
+	}
+
+	vk::ImageLayout GetInitialLayout(RenderPassPosition passPosition, VK_Texture* texture, VK_RenderTexture* renderTexture, vk::ImageLayout defaultLayout)
+	{
+		switch (passPosition)
+		{
+		case Glory::RP_Start:
+			return texture ? texture->m_VKInitialLayout : vk::ImageLayout::eUndefined;
+		case Glory::RP_Middle:
+		case Glory::RP_Final:
+			return renderTexture ? defaultLayout : vk::ImageLayout::eUndefined;
+		default:
+			return vk::ImageLayout::eUndefined;
+		}
+	}
+
+	vk::ImageLayout GetFinalLayout(RenderPassPosition passPosition, VK_Texture* texture, bool samplingEnabled, vk::ImageLayout defaultLayout)
+	{
+		switch (passPosition)
+		{
+		case Glory::RP_Start:
+		case Glory::RP_Middle:
+			return defaultLayout;
+		case Glory::RP_Final:
+			return texture ? texture->m_VKFinalLayout :
+				(samplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal : defaultLayout);
+		default:
+			break;
+		}
+	}
+
 	RenderPassHandle VulkanDevice::CreateRenderPass(RenderPassInfo&& info)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::CreateRenderPass" };
-		if (info.RenderTextureInfo.Width == 0 || info.RenderTextureInfo.Height == 0)
+
+		VK_RenderTexture* renderTexture = m_RenderTextures.Find(info.RenderTexture);
+		const RenderTextureCreateInfo& renderTextureInfo = renderTexture ? renderTexture->m_Info : info.RenderTextureInfo;
+		if (renderTextureInfo.Width == 0 || renderTextureInfo.Height == 0)
 		{
 			Debug().LogError("VulkanDevice::CreateRenderPass: Invalid RenderTexture size.");
 			return NULL;
@@ -1445,26 +1492,28 @@ namespace Glory
 		std::vector<vk::AttachmentDescription> attachments;
 		std::vector<vk::AttachmentReference> attachmentColorRefs;
 		vk::AttachmentReference attachmentDepthStencilRef;
-		const size_t attachmentCount = info.RenderTextureInfo.Attachments.size();
+		const size_t attachmentCount = renderTextureInfo.Attachments.size();
 		attachments.resize(attachmentCount + (
-			info.RenderTextureInfo.HasDepth || info.RenderTextureInfo.HasStencil ? 1 : 0));
+			renderTextureInfo.HasDepth || renderTextureInfo.HasStencil ? 1 : 0));
 		attachmentColorRefs.resize(attachmentCount);
+
+		const vk::AttachmentLoadOp loadOp = GetLoadOp(info.m_LoadOp);
+
 		for (size_t i = 0; i < attachmentCount; ++i)
 		{
-			const Attachment& attachment = info.RenderTextureInfo.Attachments[i];
+			const Attachment& attachment = renderTextureInfo.Attachments[i];
 
 			VK_Texture* texture = m_Textures.Find(attachment.Texture);
 			const vk::Format format = texture && texture->m_VKFormat != vk::Format::eUndefined ? texture->m_VKFormat :
 				VKConverter::GetVulkanFormat(attachment.InternalFormat);
-			const vk::ImageLayout initialLayout = texture ? texture->m_VKInitialLayout : vk::ImageLayout::eUndefined;
-			const vk::ImageLayout finalLayout = texture ? texture->m_VKFinalLayout :
-				(attachment.m_SamplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eColorAttachmentOptimal);
+			const vk::ImageLayout initialLayout = GetInitialLayout(info.m_Position, texture, renderTexture, vk::ImageLayout::eColorAttachmentOptimal);
+			const vk::ImageLayout finalLayout = GetFinalLayout(info.m_Position, texture, attachment.m_SamplingEnabled, vk::ImageLayout::eColorAttachmentOptimal);
 
 			// Create render pass
 			attachments[i] = vk::AttachmentDescription()
 				.setFormat(format)
 				.setSamples(vk::SampleCountFlagBits::e1)
-				.setLoadOp(vk::AttachmentLoadOp::eClear)
+				.setLoadOp(loadOp)
 				.setStoreOp(vk::AttachmentStoreOp::eStore)
 				.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
 				.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
@@ -1476,52 +1525,64 @@ namespace Glory
 				.setLayout(vk::ImageLayout::eColorAttachmentOptimal);
 		}
 
-		if (info.RenderTextureInfo.HasDepth && info.RenderTextureInfo.HasStencil)
+		if (renderTextureInfo.HasDepth && renderTextureInfo.HasStencil)
 		{
+			const vk::ImageLayout initialLayout = GetInitialLayout(info.m_Position, nullptr, renderTexture,
+				vk::ImageLayout::eDepthStencilAttachmentOptimal);
+			const vk::ImageLayout finalLayout = GetFinalLayout(info.m_Position, nullptr,
+				renderTextureInfo.EnableDepthStencilSampling, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+
 			attachments[attachmentCount] = vk::AttachmentDescription()
 				.setFormat(vk::Format::eD32SfloatS8Uint)
 				.setSamples(vk::SampleCountFlagBits::e1)
-				.setLoadOp(vk::AttachmentLoadOp::eClear)
+				.setLoadOp(loadOp)
 				.setStoreOp(vk::AttachmentStoreOp::eStore)
-				.setStencilLoadOp(vk::AttachmentLoadOp::eClear)
+				.setStencilLoadOp(loadOp)
 				.setStencilStoreOp(vk::AttachmentStoreOp::eStore)
-				.setInitialLayout(vk::ImageLayout::eUndefined)
-				.setFinalLayout(info.RenderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal :
-					vk::ImageLayout::eDepthStencilAttachmentOptimal);
+				.setInitialLayout(initialLayout)
+				.setFinalLayout(finalLayout);
 
 			attachmentDepthStencilRef = vk::AttachmentReference()
 				.setAttachment(attachmentCount)
 				.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
 		}
-		else if (info.RenderTextureInfo.HasDepth)
+		else if (renderTextureInfo.HasDepth)
 		{
+			const vk::ImageLayout initialLayout = GetInitialLayout(info.m_Position, nullptr, renderTexture,
+				vk::ImageLayout::eDepthAttachmentOptimal);
+			const vk::ImageLayout finalLayout = GetFinalLayout(info.m_Position, nullptr,
+				renderTextureInfo.EnableDepthStencilSampling, vk::ImageLayout::eDepthAttachmentOptimal);
+
 			attachments[attachmentCount] = vk::AttachmentDescription()
 				.setFormat(vk::Format::eD32Sfloat)
 				.setSamples(vk::SampleCountFlagBits::e1)
-				.setLoadOp(vk::AttachmentLoadOp::eClear)
+				.setLoadOp(loadOp)
 				.setStoreOp(vk::AttachmentStoreOp::eStore)
-				.setStencilLoadOp(vk::AttachmentLoadOp::eClear)
+				.setStencilLoadOp(loadOp)
 				.setStencilStoreOp(vk::AttachmentStoreOp::eStore)
-				.setInitialLayout(vk::ImageLayout::eUndefined)
-				.setFinalLayout(info.RenderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal :
-					vk::ImageLayout::eDepthAttachmentOptimal);
+				.setInitialLayout(initialLayout)
+				.setFinalLayout(finalLayout);
 
 			attachmentDepthStencilRef = vk::AttachmentReference()
 				.setAttachment(attachmentCount)
 				.setLayout(vk::ImageLayout::eDepthAttachmentOptimal);
 		}
-		else if (info.RenderTextureInfo.HasStencil)
+		else if (renderTextureInfo.HasStencil)
 		{
+			const vk::ImageLayout initialLayout = GetInitialLayout(info.m_Position, nullptr, renderTexture,
+				vk::ImageLayout::eStencilAttachmentOptimal);
+			const vk::ImageLayout finalLayout = GetFinalLayout(info.m_Position, nullptr,
+				renderTextureInfo.EnableDepthStencilSampling, vk::ImageLayout::eStencilAttachmentOptimal);
+
 			attachments[attachmentCount] = vk::AttachmentDescription()
 				.setFormat(vk::Format::eS8Uint)
 				.setSamples(vk::SampleCountFlagBits::e1)
-				.setLoadOp(vk::AttachmentLoadOp::eClear)
+				.setLoadOp(loadOp)
 				.setStoreOp(vk::AttachmentStoreOp::eStore)
-				.setStencilLoadOp(vk::AttachmentLoadOp::eClear)
+				.setStencilLoadOp(loadOp)
 				.setStencilStoreOp(vk::AttachmentStoreOp::eStore)
-				.setInitialLayout(vk::ImageLayout::eUndefined)
-				.setFinalLayout(info.RenderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal :
-					vk::ImageLayout::eStencilAttachmentOptimal);
+				.setInitialLayout(initialLayout)
+				.setFinalLayout(finalLayout);
 
 			attachmentDepthStencilRef = vk::AttachmentReference()
 				.setAttachment(attachmentCount)
@@ -1532,7 +1593,7 @@ namespace Glory
 			.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
 			.setColorAttachmentCount(static_cast<uint32_t>(attachmentColorRefs.size()))
 			.setPColorAttachments(attachmentColorRefs.empty() ? nullptr : attachmentColorRefs.data());
-		if (info.RenderTextureInfo.HasDepth || info.RenderTextureInfo.HasStencil)
+		if (renderTextureInfo.HasDepth || renderTextureInfo.HasStencil)
 			subPass.setPDepthStencilAttachment(&attachmentDepthStencilRef);
 
 		vk::SubpassDependency dependancy = vk::SubpassDependency()
@@ -1559,7 +1620,8 @@ namespace Glory
 			return NULL;
 		}
 
-		renderPass.m_RenderTexture = CreateRenderTexture(handle, std::move(info.RenderTextureInfo));
+		renderPass.m_RenderTexture = renderTexture ? info.RenderTexture :
+			CreateRenderTexture(handle, std::move(info.RenderTextureInfo));
 
 		if (!renderPass.m_RenderTexture)
 		{

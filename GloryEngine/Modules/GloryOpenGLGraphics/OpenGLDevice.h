@@ -61,6 +61,7 @@ namespace Glory
         glm::vec4 m_ClearColor;
         float m_DepthClear;
         uint8_t m_StencilClear;
+        bool m_Clear;
     };
 
     struct GL_Shader

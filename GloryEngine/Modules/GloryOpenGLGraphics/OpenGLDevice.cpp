@@ -406,12 +406,26 @@ namespace Glory
 			return;
 		}
 
+		glDisable(GL_SCISSOR_TEST);
 		glBindFramebuffer(GL_FRAMEBUFFER, glRenderTexture->m_GLFramebufferID);
-		
+		glViewport(0, 0, glRenderTexture->m_Info.Width, glRenderTexture->m_Info.Height);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
 		const bool hasDepth = glRenderTexture->m_Info.HasDepth;
 		const bool hasStencil = glRenderTexture->m_Info.HasStencil;
 		const bool hasStencilOrDepth = hasDepth || hasStencil;
 		const bool hasColor = glRenderTexture->m_Textures.size() > hasStencilOrDepth ? 1 : 0;
+
+		glColorMask(hasColor, hasColor, hasColor, hasColor);
+		glDepthMask(hasDepth);
+		glStencilMask(hasStencil);
+
+		if (!glRenderPass->m_Clear)
+		{
+			glClear(0);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			return;
+		}
 
 		if (hasColor)
 			glClearColor(glRenderPass->m_ClearColor.x, glRenderPass->m_ClearColor.y, glRenderPass->m_ClearColor.z, glRenderPass->m_ClearColor.w);
@@ -429,9 +443,7 @@ namespace Glory
 			clearFlags |= GL_STENCIL_BUFFER_BIT;
 
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glClear(clearFlags);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glViewport(0, 0, glRenderTexture->m_Info.Width, glRenderTexture->m_Info.Height);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
@@ -594,11 +606,14 @@ namespace Glory
 		glScissor(x, y, width, height);
 	}
 
-	void OpenGLDevice::PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>&,
+	void OpenGLDevice::PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>& buffers,
 		const std::vector<TextureHandle>&, PipelineStageFlagBits, PipelineStageFlagBits)
 	{
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		if (!buffers.empty())
+		{
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
 	}
 
 	GraphicsDevice::SwapchainResult OpenGLDevice::AqcuireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle)
@@ -1139,10 +1154,12 @@ namespace Glory
 
 		RenderPassHandle handle;
 		GL_RenderPass& renderPass = m_RenderPasses.Emplace(handle, GL_RenderPass());
-		renderPass.m_RenderTexture = CreateRenderTexture(handle, std::move(info.RenderTextureInfo));
+		renderPass.m_RenderTexture = info.RenderTexture ? info.RenderTexture :
+			CreateRenderTexture(handle, std::move(info.RenderTextureInfo));
 		renderPass.m_ClearColor = std::move(info.m_ClearColor);
 		renderPass.m_DepthClear = info.m_DepthClear;
 		renderPass.m_StencilClear = info.m_StencilClear;
+		renderPass.m_Clear = info.m_LoadOp == RenderPassLoadOp::OP_Clear;
 
 		if (!renderPass.m_RenderTexture)
 		{

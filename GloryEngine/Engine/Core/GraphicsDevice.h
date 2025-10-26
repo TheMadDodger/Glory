@@ -197,9 +197,34 @@ namespace Glory
 		std::vector<UUID> m_IDs;
 	};
 
+	/** @brief Load operation for render passes */
+	enum RenderPassLoadOp
+	{
+		/** @brief Don't care */
+		OP_DontCare = 0,
+		/** @brief Clear all attachments */
+		OP_Clear = 1,
+		/** @brief Load all attachments */
+		OP_Load = 2,
+	};
+
+	/** @brief Position of the renderpass if there are multiple operating on the same framebuffer */
+	enum RenderPassPosition
+	{
+		/** @brief First renderpass */
+		RP_Start,
+		/** @brief Middle renderpass */
+		RP_Middle,
+		/** @brief Final renderpass */
+		RP_Final
+	};
+
 	/** @brief Render pass info */
 	struct RenderPassInfo
 	{
+		RenderTextureHandle RenderTexture = NULL;
+		RenderPassLoadOp m_LoadOp = RenderPassLoadOp::OP_Clear;
+		RenderPassPosition m_Position = RenderPassPosition::RP_Final;
 		RenderTextureCreateInfo RenderTextureInfo;
 		glm::vec4 m_ClearColor{ 0.0f, 0.0f, 0.0f, 0.0f };
 		float m_DepthClear{ 1.0f };
