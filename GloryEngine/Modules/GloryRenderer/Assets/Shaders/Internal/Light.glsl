@@ -68,3 +68,42 @@ float SpotAttenuation(vec3 lightToPixelDir, vec3 lightDir, float innerCos, float
     float angleCos = dot(lightToPixelDir, lightDir);
     return angleCos > outerCos ? smoothstep(outerCos, innerCos, angleCos) : 0.0;
 }
+
+#ifdef WITH_RECEIVE_SHADOWS
+float ShadowCalculation(vec4 fragPosLightSpace, LightData lightData, vec3 normal, vec3 lightDir)
+{
+    /* perform perspective divide */
+    vec3 projCoords = fragPosLightSpace.xyz/fragPosLightSpace.w;
+    /* transform to [0,1] range */
+    projCoords = projCoords*0.5 + 0.5;
+    /* get depth of current fragment from light's perspective */
+    float currentDepth = projCoords.z;
+
+	/* calculate texture coords */
+	vec4 shadowCoords = lightData.ShadowCoords;
+	vec2 coordRanges = vec2(shadowCoords.z - shadowCoords.x, shadowCoords.w - shadowCoords.y);
+	vec2 actualCoords = vec2(shadowCoords.x + coordRanges.x*projCoords.x, shadowCoords.y + coordRanges.y*projCoords.y);
+
+	/* Calculate bias based on surface normal */
+	float bias = lightData.ShadowBias;
+	float surfaceBias = max(bias*(1.0 - dot(normal, lightDir)), bias*0.01);
+
+	/* PCF samples */
+	float shadow = 0.0;
+	vec2 texelSize = 1.0/textureSize(ShadowAtlas, 0);
+	int sampleCounts = 1;
+	float totalSamples = pow((float(sampleCounts)*2.0 + 1.0), 2.0);
+	for (int x = -sampleCounts; x <= sampleCounts; ++x)
+	{
+		for (int y = -sampleCounts; y <= sampleCounts; ++y)
+		{
+			vec2 pcfCoord = actualCoords + vec2(x, y)*texelSize;
+			pcfCoord = clamp(pcfCoord, shadowCoords.xy, shadowCoords.zw);
+			float pcfDepth = texture(ShadowAtlas, pcfCoord).r; 
+			shadow += currentDepth - surfaceBias > pcfDepth ? 1.0 : 0.0;
+		}    
+	}
+	shadow /= totalSamples;
+    return shadow;
+}
+#endif
