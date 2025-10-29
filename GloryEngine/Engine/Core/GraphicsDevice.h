@@ -480,7 +480,8 @@ namespace Glory
 		 * @param attributeTypes Attribute types
 		 */
 		PipelineHandle AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
-			std::vector<DescriptorSetLayoutHandle>&& descriptorSets, size_t stride, const std::vector<AttributeType>& attributeTypes);
+			std::vector<DescriptorSetLayoutHandle>&& descriptorSets, size_t stride,
+			const std::vector<AttributeType>& attributeTypes, PrimitiveType primitiveType=PrimitiveType::PT_Triangles);
 		/**
 		 * @brief Acquire a cached mesh or create a new one
 		 * @param pMesh The mesh data to create a mesh from
@@ -539,12 +540,10 @@ namespace Glory
 		 * @param vertexCount Numnber of vertices
 		 * @param indexCount Numnber of indexCount
 		 * @param stride Size of a vertex
-		 * @param primitiveType Type of the primitives in the mesh
 		 * @param attributeTypes Attribute types of the vertices in the mesh
 		 */
 		virtual MeshHandle CreateMesh(std::vector<BufferHandle>&& buffers, uint32_t vertexCount,
-			uint32_t indexCount, uint32_t stride, PrimitiveType primitiveType,
-			const std::vector<AttributeType>& attributeTypes) = 0;
+			uint32_t indexCount, uint32_t stride, const std::vector<AttributeType>& attributeTypes) = 0;
 
 		/**
 		 * @brief Update a mesh
@@ -637,10 +636,11 @@ namespace Glory
 		 * @param descriptorSetLayouts Descriptor set layouts that this pipeline will use
 		 * @param stride Size of the vertex type used by this pipeline
 		 * @param attributeTypes Attribute types of the vertex type used by this pipeline
+		 * @param primitiveType Type of primitives the pipeline will render
 		 */
 		virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
 			std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride,
-			const std::vector<AttributeType>& attributeTypes) = 0;
+			const std::vector<AttributeType>& attributeTypes, PrimitiveType primitiveType) = 0;
 
 		/**
 		 * @brief Create a compute pipeline on this device

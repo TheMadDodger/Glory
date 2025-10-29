@@ -223,8 +223,7 @@ namespace Glory
         virtual void ReadBuffer(BufferHandle handle, void* outData, uint32_t offset, uint32_t size) override;
 
         virtual MeshHandle CreateMesh(std::vector<BufferHandle>&& buffers, uint32_t vertexCount,
-            uint32_t indexCount, uint32_t stride, PrimitiveType primitiveType,
-            const std::vector<AttributeType>& attributeTypes) override;
+            uint32_t indexCount, uint32_t stride, const std::vector<AttributeType>& attributeTypes) override;
         virtual void UpdateMesh(MeshHandle mesh, std::vector<BufferHandle>&& buffers,
             uint32_t vertexCount, uint32_t indexCount) override;
 
@@ -238,7 +237,8 @@ namespace Glory
         virtual void SetRenderPassClear(RenderPassHandle renderPass, const glm::vec4& color, float depth=1.0f, uint8_t stencil=0) override;
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
         virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
-            std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride, const std::vector<AttributeType>& attributeTypes) override;
+            std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride,
+            const std::vector<AttributeType>& attributeTypes, PrimitiveType primitiveType) override;
         virtual PipelineHandle CreateComputePipeline(PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts) override;
         virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo) override;
         virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) override;

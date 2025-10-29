@@ -39,12 +39,14 @@ namespace Glory
 	}
 
 	PipelineHandle GraphicsDevice::AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
-		std::vector<DescriptorSetLayoutHandle>&& descriptorSets, size_t stride, const std::vector<AttributeType>& attributeTypes)
+		std::vector<DescriptorSetLayoutHandle>&& descriptorSets, size_t stride,
+		const std::vector<AttributeType>& attributeTypes, PrimitiveType primitiveType)
 	{
 		auto iter = m_PipelineHandles.find(pPipeline->GetGPUUUID());
 		if (iter == m_PipelineHandles.end())
 		{
-			PipelineHandle newPipeline = CreatePipeline(renderPass, pPipeline, std::move(descriptorSets), stride, attributeTypes);
+			PipelineHandle newPipeline = CreatePipeline(renderPass, pPipeline,
+				std::move(descriptorSets), stride, attributeTypes, primitiveType);
 			iter = m_PipelineHandles.emplace(pPipeline->GetGPUUUID(), newPipeline).first;
 		}
 
@@ -96,7 +98,7 @@ namespace Glory
 		AssignBuffer(buffers[0], pMeshData->Vertices(), pMeshData->VertexCount()*pMeshData->VertexSize());
 		AssignBuffer(buffers[1], pMeshData->Indices(), pMeshData->IndexCount()*sizeof(uint32_t));
 		return CreateMesh(std::move(buffers), pMeshData->VertexCount(), pMeshData->IndexCount(),
-			pMeshData->VertexSize(), PrimitiveType::PT_Triangles, pMeshData->AttributeTypesVector());
+			pMeshData->VertexSize(), pMeshData->AttributeTypesVector());
 	}
 
 	Debug& GraphicsDevice::Debug()
@@ -126,7 +128,7 @@ namespace Glory
 		};
 		BufferHandle buffer = CreateBuffer(sizeof(vertices), BufferType::BT_Vertex, BF_CopyDst);
 		AssignBuffer(buffer, vertices, sizeof(vertices));
-		m_ScreenMesh = CreateMesh({ buffer }, 6, 0, sizeof(glm::vec3), PrimitiveType::PT_Triangles, { AttributeType::Float3 });
+		m_ScreenMesh = CreateMesh({ buffer }, 6, 0, sizeof(glm::vec3), { AttributeType::Float3 });
 
 		TextureCreateInfo defaultTextureInfo;
 		defaultTextureInfo.m_Width = 1;

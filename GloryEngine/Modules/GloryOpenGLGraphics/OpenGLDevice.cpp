@@ -345,7 +345,8 @@ namespace Glory
 		return 0;
 	}
 
-	OpenGLDevice::OpenGLDevice(OpenGLGraphicsModule* pModule): GraphicsDevice(pModule)
+	OpenGLDevice::OpenGLDevice(OpenGLGraphicsModule* pModule): GraphicsDevice(pModule),
+		m_GLCurrentPrimitives(PrimitiveTypes.at(PrimitiveType::PT_Triangles))
 	{
 		m_APIFeatures = APIFeatures::All & ~APIFeatures::PushConstants;
 	}
@@ -466,6 +467,8 @@ namespace Glory
 		}
 		else glDisable(GL_CULL_FACE);
 		glDisable(GL_SCISSOR_TEST);
+
+		m_GLCurrentPrimitives = glPipeline->m_GLPrimitiveType;
 	}
 
 	void OpenGLDevice::End(CommandBufferHandle)
@@ -564,8 +567,8 @@ namespace Glory
 		glBindVertexArray(mesh->m_GLVertexArrayID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
-		if (mesh->m_IndexCount == 0) glDrawArrays(mesh->m_GLPrimitiveType, 0, mesh->m_VertexCount);
-		else glDrawElements(mesh->m_GLPrimitiveType, mesh->m_IndexCount, GL_UNSIGNED_INT, NULL);
+		if (mesh->m_IndexCount == 0) glDrawArrays(m_GLCurrentPrimitives, 0, mesh->m_VertexCount);
+		else glDrawElements(m_GLCurrentPrimitives, mesh->m_IndexCount, GL_UNSIGNED_INT, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindVertexArray(NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
@@ -819,13 +822,11 @@ namespace Glory
 	}
 
 	MeshHandle OpenGLDevice::CreateMesh(std::vector<BufferHandle>&& buffers, uint32_t vertexCount,
-		uint32_t indexCount, uint32_t stride, PrimitiveType primitiveType,
-		const std::vector<AttributeType>& attributeTypes)
+		uint32_t indexCount, uint32_t stride, const std::vector<AttributeType>& attributeTypes)
 	{
 		MeshHandle handle;
 		GL_Mesh& mesh = m_Meshes.Emplace(handle, GL_Mesh());
 		mesh.m_Buffers = std::move(buffers);
-		mesh.m_GLPrimitiveType = PrimitiveTypes.at(primitiveType);
 		mesh.m_VertexCount = vertexCount;
 		mesh.m_IndexCount = indexCount;
 
@@ -1282,7 +1283,7 @@ namespace Glory
 	}
 
 	PipelineHandle OpenGLDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
-		std::vector<DescriptorSetLayoutHandle>&&, size_t, const std::vector<AttributeType>&)
+		std::vector<DescriptorSetLayoutHandle>&&, size_t, const std::vector<AttributeType>&, PrimitiveType primitiveType)
 	{
 		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
 
@@ -1297,6 +1298,7 @@ namespace Glory
 		GL_Pipeline& pipeline = m_Pipelines.Emplace(handle, GL_Pipeline());
 		pipeline.m_RenderPass = renderPass;
 		pipeline.m_CullFace = GetGLCullFace(pPipeline->GetCullFace());
+		pipeline.m_GLPrimitiveType = PrimitiveTypes.at(primitiveType);
 
 		int success;
 		char infoLog[512];

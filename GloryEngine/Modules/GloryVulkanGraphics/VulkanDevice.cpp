@@ -1156,8 +1156,8 @@ namespace Glory
 		}
 	}
 
-	MeshHandle VulkanDevice::CreateMesh(std::vector<BufferHandle>&& buffers, uint32_t vertexCount, uint32_t indexCount,
-		uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes)
+	MeshHandle VulkanDevice::CreateMesh(std::vector<BufferHandle>&& buffers, uint32_t vertexCount,
+		uint32_t indexCount, uint32_t stride, const std::vector<AttributeType>& attributeTypes)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::CreateMesh" };
 		MeshHandle handle;
@@ -1714,8 +1714,42 @@ namespace Glory
 		}
 	}
 
+	vk::PrimitiveTopology GetVKTopology(PrimitiveType primitiveType)
+	{
+		switch (primitiveType)
+		{
+		case Glory::PrimitiveType::PT_Point:
+			return vk::PrimitiveTopology::ePointList;
+		case Glory::PrimitiveType::PT_LineStrip:
+			return vk::PrimitiveTopology::eLineStrip;
+		case Glory::PrimitiveType::PT_LineLoop:
+			return vk::PrimitiveTopology::eLineList;
+		case Glory::PrimitiveType::PT_Lines:
+			return vk::PrimitiveTopology::eLineList;
+		case Glory::PrimitiveType::PT_LineStripAdjacency:
+			return vk::PrimitiveTopology::eLineStripWithAdjacency;
+		case Glory::PrimitiveType::PT_LinesAdjacency:
+			return vk::PrimitiveTopology::eLineListWithAdjacency;
+		case Glory::PrimitiveType::PT_TriangleStrip:
+			return vk::PrimitiveTopology::eTriangleStrip;
+		case Glory::PrimitiveType::PT_TriangleFan:
+			return vk::PrimitiveTopology::eTriangleFan;
+		case Glory::PrimitiveType::PT_Triangles:
+			return vk::PrimitiveTopology::eTriangleList;
+		case Glory::PrimitiveType::PT_TriangleStripAdjacency:
+			return vk::PrimitiveTopology::eTriangleStripWithAdjacency;
+		case Glory::PrimitiveType::PT_TrianglesAdjacency:
+			return vk::PrimitiveTopology::eTriangleListWithAdjacency;
+		case Glory::PrimitiveType::PT_Patches:
+			return vk::PrimitiveTopology::ePatchList;
+		default:
+			return vk::PrimitiveTopology::eTriangleList;
+		}
+	}
+
 	PipelineHandle VulkanDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
-		std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride, const std::vector<AttributeType>& attributeTypes)
+		std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride,
+		const std::vector<AttributeType>& attributeTypes, PrimitiveType primitiveType)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::CreatePipeline" };
 		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
@@ -1795,7 +1829,7 @@ namespace Glory
 
 		// Input assembly
 		vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo()
-			.setTopology(vk::PrimitiveTopology::eTriangleList)
+			.setTopology(GetVKTopology(primitiveType))
 			.setPrimitiveRestartEnable(VK_FALSE);
 
 		// Viewport and scissor
