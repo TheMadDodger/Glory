@@ -546,6 +546,16 @@ namespace Glory
 			uint32_t indexCount, uint32_t stride, PrimitiveType primitiveType,
 			const std::vector<AttributeType>& attributeTypes) = 0;
 
+		/**
+		 * @brief Update a mesh
+		 * @param mesh Mesh to update
+		 * @param buffers New buffers to bind to the mesh, leave empty to keep original
+		 * @param vertexCount New number of vertices
+		 * @param indexCount New number of indices
+		 */
+		virtual void UpdateMesh(MeshHandle mesh, std::vector<BufferHandle>&& buffers,
+			uint32_t vertexCount, uint32_t indexCount) = 0;
+
 		/* Texture */
 
 		/**

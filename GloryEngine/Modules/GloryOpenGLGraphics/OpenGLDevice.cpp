@@ -942,6 +942,36 @@ namespace Glory
 		return handle;
 	}
 
+	void OpenGLDevice::UpdateMesh(MeshHandle mesh, std::vector<BufferHandle>&& buffers, uint32_t vertexCount, uint32_t indexCount)
+	{
+		GL_Mesh* glMesh = m_Meshes.Find(mesh);
+		if (!glMesh)
+		{
+			Debug().LogError("OpenGLDevice::UpdateMesh: Invalid mesh handle.");
+			return;
+		}
+
+		glMesh->m_IndexCount = indexCount;
+		glMesh->m_VertexCount = vertexCount;
+
+		if (buffers.empty()) return;
+		glMesh->m_Buffers = std::move(buffers);
+		glBindVertexArray(glMesh->m_GLVertexArrayID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		for (auto& bufferHandle : glMesh->m_Buffers)
+		{
+			GL_Buffer* buffer = m_Buffers.Find(bufferHandle);
+			if (!buffer)
+			{
+				Debug().LogError("OpenGLDevice::UpdateMesh: Invalid buffer handle.");
+				return;
+			}
+			glBindBuffer(buffer->m_GLTarget, buffer->m_GLBufferID);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+	}
+
 	TextureHandle OpenGLDevice::CreateTexture(TextureData* pTexture)
 	{
 		ImageData* pImageData = pTexture->GetImageData(&m_pModule->GetEngine()->GetAssetManager());

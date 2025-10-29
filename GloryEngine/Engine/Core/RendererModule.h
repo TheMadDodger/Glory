@@ -252,10 +252,6 @@ namespace Glory
 		size_t m_LastSubmittedCameraCount;
 
 		uint32_t m_LineVertexCount;
-		Buffer* m_pLineBuffer;
-		Mesh* m_pLineMesh;
-		MaterialData* m_pLinesMaterialData;
-
 		static const uint32_t MAX_LINE_VERTICES = 100000;
 		LineVertex* m_pLineVertices;
 		LineVertex* m_pLineVertex;

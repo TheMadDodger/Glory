@@ -414,6 +414,7 @@ namespace Glory
 	void GloryRendererModule::OnPostInitialize()
 	{
 		const ModuleSettings& settings = Settings();
+		const UUID linesPipeline = settings.Value<uint64_t>("Lines Pipeline");
 		const UUID screenPipeline = settings.Value<uint64_t>("Screen Pipeline");
 		const UUID SSAOPrePassPipeline = settings.Value<uint64_t>("SSAO Prepass Pipeline");
 		const UUID SSAOBlurPipeline = settings.Value<uint64_t>("SSAO Blur Pipeline");
@@ -456,6 +457,10 @@ namespace Glory
 		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::CameraDatas },
 			{ BufferType::BT_Storage }, { STF_Compute }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
 			m_GlobalPickingSetLayout, m_GlobalPickingSet, &m_PickingConstantsBuffer, STF_Compute, 0, sizeof(PickingConstants));
+
+		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::CameraDatas },
+			{ BufferType::BT_Storage }, { STF_Vertex }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
+			m_GlobalLineRenderSetLayout, m_GlobalLineRenderSet, & m_LineRenderConstantsBuffer, STF_Vertex, 0, sizeof(uint32_t));
 
 		assert(m_GlobalRenderSetLayout == m_GlobalShadowRenderSetLayout);
 
@@ -568,6 +573,9 @@ namespace Glory
 		m_ClosestLightDepthSlices.resize(MAX_LIGHTS, NUM_DEPTH_SLICES);
 		GenerateShadowLODDivisions(m_MaxShadowLODs);
 		GenerateShadowMapLODResolutions();
+
+		m_LineBuffers.resize(m_ImageCount, 0ull);
+		m_LineMeshes.resize(m_ImageCount, 0ull);
 	}
 
 	void GloryRendererModule::Update()
@@ -575,6 +583,7 @@ namespace Glory
 		ModuleSettings& settings = Settings();
 		if (!settings.IsDirty()) return;
 
+		const UUID linesPipeline = settings.Value<uint64_t>("Lines Pipeline");
 		const UUID screenPipeline = settings.Value<uint64_t>("Screen Pipeline");
 		const UUID SSAOPrePassPipeline = settings.Value<uint64_t>("SSAO Prepass Pipeline");
 		const UUID SSAOBlurPipeline = settings.Value<uint64_t>("SSAO Blur Pipeline");
@@ -678,6 +687,13 @@ namespace Glory
 					{ m_GlobalClusterSetLayout, m_GlobalSampleDomeSetLayout, m_SSAOSamplersSetLayout, m_NoiseSamplerSetLayout },
 					sizeof(glm::vec3), { AttributeType::Float3 });
 			}
+			if (!m_LineRenderPipeline)
+			{
+				const UUID lineRenderPipeline = settings.Value<uint64_t>("Lines Pipeline");
+				PipelineData* pPipeline = pipelines.GetPipelineData(lineRenderPipeline);
+				m_LineRenderPipeline = pDevice->CreatePipeline(uniqueCameraData.m_RenderPasses[0], pPipeline,
+					{ m_GlobalLineRenderSetLayout }, sizeof(LineVertex), { AttributeType::Float3, AttributeType::Float4 });
+			}
 
 			BufferHandle& clusterSSBOHandle = uniqueCameraData.m_ClusterSSBO;
 			if (!uniqueCameraData.m_ClusterSSBO)
@@ -734,6 +750,19 @@ namespace Glory
 			pDevice->SetRenderPassClear(renderPass, camera.GetClearColor());
 			pDevice->BeginRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex], renderPass);
 			DynamicObjectsPass(m_FrameCommandBuffers[m_CurrentFrameIndex], static_cast<uint32_t>(i));
+
+			if (m_LineVertexCount)
+			{
+				uint32_t cameraIndex = static_cast<uint32_t>(i);
+				pDevice->BeginPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex], m_LineRenderPipeline);
+				pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_LineRenderPipeline, { m_GlobalLineRenderSet });
+				if (usePushConstants)
+					pDevice->PushConstants(m_FrameCommandBuffers[m_CurrentFrameIndex], m_LineRenderPipeline, 0, sizeof(uint32_t), &cameraIndex, STF_Vertex);
+				else
+					pDevice->AssignBuffer(m_LineRenderConstantsBuffer, &cameraIndex, sizeof(uint32_t));
+				pDevice->DrawMesh(m_FrameCommandBuffers[m_CurrentFrameIndex], m_LineMeshes[m_CurrentFrameIndex]);
+				pDevice->EndPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex]);
+			}
 			pDevice->EndRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 		}
 
@@ -891,6 +920,7 @@ namespace Glory
 	void GloryRendererModule::LoadSettings(ModuleSettings& settings)
 	{
 		RendererModule::LoadSettings(settings);
+		settings.RegisterAssetReference<PipelineData>("Lines Pipeline", 19);
 		settings.RegisterAssetReference<PipelineData>("Screen Pipeline", 20);
 		settings.RegisterAssetReference<PipelineData>("SSAO Prepass Pipeline", 21);
 		settings.RegisterAssetReference<PipelineData>("SSAO Blur Pipeline", 22);
@@ -1017,6 +1047,8 @@ namespace Glory
 		m_FinalFrameColorSets.resize(m_ImageCount, 0ull);
 		m_LightDistancesSSBOs.resize(m_ImageCount, 0ull);
 		m_LightDistancesSets.resize(m_ImageCount, 0ull);
+		m_LineBuffers.resize(m_ImageCount, 0ull);
+		m_LineMeshes.resize(m_ImageCount, 0ull);
 
 		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
 		const ModuleSettings& settings = Settings();
@@ -1330,6 +1362,7 @@ namespace Glory
 
 		PrepareBatches(m_DynamicPipelineRenderDatas, m_DynamicBatchData);
 		PrepareBatches(m_DynamicLatePipelineRenderDatas, m_DynamicLateBatchData);
+		PrepareLineMesh(pDevice);
 	}
 
 	void GloryRendererModule::PrepareBatches(const std::vector<PipelineBatch>& batches, std::vector<PipelineBatchData>& batchDatas)
@@ -1565,6 +1598,44 @@ namespace Glory
 		pDevice->Commit(commandBuffer);
 		pDevice->Wait(commandBuffer);
 		pDevice->Release(commandBuffer);
+	}
+
+	void GloryRendererModule::PrepareLineMesh(GraphicsDevice* pDevice)
+	{
+		/* Update line buffer */
+		if (m_LineVertexCount == 0) return;
+		bool resizeBuffer = false;
+		if (m_LineVertices->size() < m_LineVertexCount)
+		{
+			m_LineVertices.resize(m_LineVertexCount);
+			resizeBuffer = true;
+		}
+		for (size_t i = 0; i < m_LineVertexCount; ++i)
+		{
+			if (std::memcmp(&m_pLineVertices[i], &m_LineVertices.m_Data[i], sizeof(LineVertex)) == 0)
+				continue;
+			m_LineVertices.m_Data[i] = m_pLineVertices[i];
+			m_LineVertices.SetDirty(i);
+		}
+
+		if (m_LineBuffers[m_CurrentFrameIndex] && resizeBuffer)
+			pDevice->FreeBuffer(m_LineBuffers[m_CurrentFrameIndex]);
+		if (!m_LineBuffers[m_CurrentFrameIndex])
+		{
+			m_LineBuffers[m_CurrentFrameIndex] = pDevice->CreateBuffer(m_LineVertices->size()*sizeof(LineVertex), BT_Vertex, BF_None);
+			m_LineMeshes[m_CurrentFrameIndex] = pDevice->CreateMesh({ m_LineBuffers[m_CurrentFrameIndex] }, m_LineVertexCount, 0, sizeof(LineVertex),
+				PrimitiveType::PT_Lines, { AttributeType::Float3, AttributeType::Float4 });
+			resizeBuffer = false;
+		}
+		if (m_LineVertices)
+		{
+			pDevice->AssignBuffer(m_LineBuffers[m_CurrentFrameIndex], m_LineVertices.m_Data.data());
+
+			if (resizeBuffer)
+				pDevice->UpdateMesh(m_LineMeshes[m_CurrentFrameIndex], { m_LineBuffers[m_CurrentFrameIndex] }, m_LineVertexCount, 0);
+			else
+				pDevice->UpdateMesh(m_LineMeshes[m_CurrentFrameIndex], { }, m_LineVertexCount, 0);
+		}
 	}
 
 	void GloryRendererModule::ClusterPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex)

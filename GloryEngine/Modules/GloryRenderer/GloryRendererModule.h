@@ -144,6 +144,7 @@ namespace Glory
 		void PrepareDataPass();
 		void PrepareBatches(const std::vector<PipelineBatch>& batches, std::vector<PipelineBatchData>& batchDatas);
 		void GenerateClusterSSBO(uint32_t cameraIndex, GraphicsDevice* pDevice, CameraRef camera, DescriptorSetHandle clusterSet);
+		void PrepareLineMesh(GraphicsDevice* pDevice);
 
 		void ClusterPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex);
 		void DynamicObjectsPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex);
@@ -176,6 +177,7 @@ namespace Glory
 		BufferHandle m_LightCameraDatasBuffer = 0;
 		BufferHandle m_RenderConstantsBuffer = 0;
 		BufferHandle m_PickingConstantsBuffer = 0;
+		BufferHandle m_LineRenderConstantsBuffer = 0;
 		BufferHandle m_ClusterConstantsBuffer = 0;
 		BufferHandle m_DeferredConstantsBuffer = 0;
 		BufferHandle m_LightsSSBO = 0;
@@ -187,6 +189,7 @@ namespace Glory
 		DescriptorSetLayoutHandle m_GlobalRenderSetLayout;
 		DescriptorSetLayoutHandle m_GlobalShadowRenderSetLayout;
 		DescriptorSetLayoutHandle m_GlobalPickingSetLayout;
+		DescriptorSetLayoutHandle m_GlobalLineRenderSetLayout;
 		DescriptorSetLayoutHandle m_GlobalClusterSetLayout;
 		DescriptorSetLayoutHandle m_GlobalLightSetLayout;
 		DescriptorSetLayoutHandle m_GlobalSampleDomeSetLayout;
@@ -200,13 +203,13 @@ namespace Glory
 		DescriptorSetLayoutHandle m_LightDistancesSetLayout;
 		DescriptorSetLayoutHandle m_PickingResultSetLayout;
 		DescriptorSetLayoutHandle m_PickingSamplerSetLayout;
-
 		DescriptorSetLayoutHandle m_DisplayCopySamplerSetLayout;
 
 		/* Descriptor sets */
 		DescriptorSetHandle m_GlobalRenderSet;
 		DescriptorSetHandle m_GlobalShadowRenderSet;
 		DescriptorSetHandle m_GlobalPickingSet;
+		DescriptorSetHandle m_GlobalLineRenderSet;
 		DescriptorSetHandle m_GlobalClusterSet;
 		DescriptorSetHandle m_GlobalDeferredSet;
 		DescriptorSetHandle m_GlobalLightSet;
@@ -235,6 +238,9 @@ namespace Glory
 		/* Shadow rendering */
 		PipelineHandle m_ShadowRenderPipeline = 0;
 		PipelineHandle m_TransparentShadowRenderPipeline = 0;
+
+		/* Debug rendering */
+		PipelineHandle m_LineRenderPipeline = 0;
 
 		/* SSAO */
 		SSAOSettings m_GlobalSSAOSetting;
@@ -293,5 +299,9 @@ namespace Glory
 		static const uint32_t MAX_SHADOW_LODS = 24;
 		std::vector<uint32_t> m_ShadowLODDivisions;
 		std::vector<glm::uvec2> m_ShadowMapResolutions;
+
+		CPUBuffer<LineVertex> m_LineVertices;
+		std::vector<BufferHandle> m_LineBuffers;
+		std::vector<MeshHandle> m_LineMeshes;
 	};
 }

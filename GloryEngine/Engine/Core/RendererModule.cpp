@@ -18,7 +18,6 @@ namespace Glory
 {
 	RendererModule::RendererModule()
 		: m_LastSubmittedObjectCount(0), m_LastSubmittedCameraCount(0), m_LineVertexCount(0),
-		m_pLineBuffer(nullptr), m_pLineMesh(nullptr), m_pLinesMaterialData(nullptr),
 		m_pLineVertex(nullptr), m_pLineVertices(nullptr),
 		m_FrameData(size_t(MAX_LIGHTS))
 	{
@@ -26,8 +25,6 @@ namespace Glory
 
 	RendererModule::~RendererModule()
 	{
-		if (m_pLinesMaterialData) delete m_pLinesMaterialData;
-		m_pLinesMaterialData = nullptr;
 	}
 
 	const std::type_info& RendererModule::GetModuleType()
@@ -320,14 +317,15 @@ namespace Glory
 		m_FrameData.Reset();
 		std::for_each(m_DynamicPipelineRenderDatas.begin(), m_DynamicPipelineRenderDatas.end(), [](PipelineBatch& batch) { batch.Reset(); });
 		std::for_each(m_DynamicLatePipelineRenderDatas.begin(), m_DynamicLatePipelineRenderDatas.end(), [](PipelineBatch& batch) { batch.Reset(); });
-
-		m_pLineVertex = m_pLineVertices;
 	}
 
 	void RendererModule::OnEndFrame()
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::OnEndFrame" };
 		m_LastResolution = m_Resolution;
+
+		m_pLineVertex = m_pLineVertices;
+		m_LineVertexCount = 0;
 	}
 
 	size_t RendererModule::LastSubmittedObjectCount()
@@ -345,6 +343,13 @@ namespace Glory
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::DrawLine" };
 		const glm::vec4 transfromedP1 = transform * glm::vec4(p1, 1.0f);
 		const glm::vec4 transfromedP2 = transform * glm::vec4(p2, 1.0f);
+
+		if (m_LineVertexCount + 1 >= MAX_LINE_VERTICES)
+		{
+			m_pEngine->GetDebug().LogError("RendererModule::DrawLine: Exceeded max line vertixes.");
+			return;
+		}
+
 		m_pLineVertex->Pos = { transfromedP1.x, transfromedP1.y, transfromedP1.z };
 		m_pLineVertex->Color = color;
 		++m_pLineVertex;
@@ -538,11 +543,6 @@ namespace Glory
 	{
 		m_pLineVertices = new LineVertex[MAX_LINE_VERTICES];
 		m_pLineVertex = m_pLineVertices;
-
-		/* Line rendering */
-		const UUID linesPipeline = Settings().Value<uint64_t>("Lines Pipeline");
-		m_pLinesMaterialData = new MaterialData();
-		m_pLinesMaterialData->SetPipeline(linesPipeline);
 	}
 
 	void RendererModule::PostInitialize()

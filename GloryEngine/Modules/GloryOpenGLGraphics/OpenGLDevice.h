@@ -159,6 +159,8 @@ namespace Glory
         virtual MeshHandle CreateMesh(std::vector<BufferHandle>&& buffers, uint32_t vertexCount,
             uint32_t indexCount, uint32_t stride, PrimitiveType primitiveType,
             const std::vector<AttributeType>& attributeTypes) override;
+        virtual void UpdateMesh(MeshHandle mesh, std::vector<BufferHandle>&& buffers,
+            uint32_t vertexCount, uint32_t indexCount) override;
 
         virtual TextureHandle CreateTexture(TextureData* pTexture) override;
         virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) override;

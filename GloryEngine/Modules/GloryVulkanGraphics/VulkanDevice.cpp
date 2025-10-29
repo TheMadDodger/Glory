@@ -1190,6 +1190,21 @@ namespace Glory
 		return handle;
 	}
 
+	void VulkanDevice::UpdateMesh(MeshHandle mesh, std::vector<BufferHandle>&& buffers, uint32_t vertexCount, uint32_t indexCount)
+	{
+		VK_Mesh* vkMesh = m_Meshes.Find(mesh);
+		if (!vkMesh)
+		{
+			Debug().LogError("VulkanDevice::UpdateMesh: Invalid mesh handle.");
+			return;
+		}
+
+		vkMesh->m_VertexCount = vertexCount;
+		vkMesh->m_IndexCount = indexCount;
+		if (buffers.empty()) return;
+		vkMesh->m_Buffers = std::move(buffers);
+	}
+
 	TextureHandle VulkanDevice::CreateTexture(TextureData* pTexture)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::CreateTexture" };
