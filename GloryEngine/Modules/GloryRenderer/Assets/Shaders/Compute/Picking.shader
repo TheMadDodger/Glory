@@ -20,7 +20,7 @@ layout(set = 0, std140, binding = 0) readonly uniform PickingConstantsUBO
 
 struct PickResult
 {
-    vec4 ObjectID;
+    uvec4 ObjectID;
     vec4 Normal;
     vec4 Position;
 };
@@ -34,7 +34,7 @@ layout(set = 1, std430, binding = 2) buffer PickingResultsSSBO
     PickResult Results[8];
 };
 
-layout (set = 2, binding = 0) uniform sampler2D ObjectID;
+layout (set = 2, binding = 0) uniform usampler2D ObjectID;
 layout (set = 2, binding = 1) uniform sampler2D Normal;
 layout (set = 2, binding = 2) uniform sampler2D Depth;
 

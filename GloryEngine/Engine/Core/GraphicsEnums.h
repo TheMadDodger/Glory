@@ -1008,6 +1008,7 @@ namespace Glory
         bool HasStencil;
         bool EnableDepthStencilSampling = true;
         std::vector<Attachment> Attachments;
+        TextureHandle m_DepthStencilTexture = 0;
     };
 
     struct ShaderBufferInfo

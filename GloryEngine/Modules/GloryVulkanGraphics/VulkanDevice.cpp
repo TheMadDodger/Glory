@@ -1440,6 +1440,11 @@ namespace Glory
 		vkRenderTexture->m_Textures.clear();
 		vkRenderTexture->m_AttachmentNames.clear();
 		m_LogicalDevice.destroyFramebuffer(vkRenderTexture->m_VKFramebuffer);
+
+		for (size_t i = 0; i < vkRenderTexture->m_Info.Attachments.size(); ++i)
+			vkRenderTexture->m_Info.Attachments[i].Texture = NULL;
+		vkRenderTexture->m_Info.m_DepthStencilTexture = NULL;
+
 		CreateRenderTexture(vkRenderPass->m_VKRenderPass, *vkRenderTexture);
 	}
 
@@ -1521,8 +1526,10 @@ namespace Glory
 			VK_Texture* texture = m_Textures.Find(attachment.Texture);
 			const vk::Format format = texture && texture->m_VKFormat != vk::Format::eUndefined ? texture->m_VKFormat :
 				VKConverter::GetVulkanFormat(attachment.InternalFormat);
-			const vk::ImageLayout initialLayout = GetInitialLayout(info.m_Position, texture, renderTexture, vk::ImageLayout::eColorAttachmentOptimal);
-			const vk::ImageLayout finalLayout = GetFinalLayout(info.m_Position, texture, attachment.m_SamplingEnabled, vk::ImageLayout::eColorAttachmentOptimal);
+			const vk::ImageLayout initialLayout = GetInitialLayout(info.m_Position, texture, renderTexture,
+				attachment.m_SamplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eColorAttachmentOptimal);
+			const vk::ImageLayout finalLayout = GetFinalLayout(info.m_Position, texture, attachment.m_SamplingEnabled,
+				attachment.m_SamplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eColorAttachmentOptimal);
 
 			// Create render pass
 			attachments[i] = vk::AttachmentDescription()
@@ -1542,10 +1549,11 @@ namespace Glory
 
 		if (renderTextureInfo.HasDepth && renderTextureInfo.HasStencil)
 		{
-			const vk::ImageLayout initialLayout = GetInitialLayout(info.m_Position, nullptr, renderTexture,
-				vk::ImageLayout::eDepthStencilAttachmentOptimal);
-			const vk::ImageLayout finalLayout = GetFinalLayout(info.m_Position, nullptr,
-				renderTextureInfo.EnableDepthStencilSampling, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+			VK_Texture* texture = m_Textures.Find(renderTextureInfo.m_DepthStencilTexture);
+			const vk::ImageLayout initialLayout = GetInitialLayout(info.m_Position, texture, renderTexture,
+				renderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthStencilAttachmentOptimal);
+			const vk::ImageLayout finalLayout = GetFinalLayout(info.m_Position, texture, renderTextureInfo.EnableDepthStencilSampling,
+				renderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
 			attachments[attachmentCount] = vk::AttachmentDescription()
 				.setFormat(vk::Format::eD32SfloatS8Uint)
@@ -1563,10 +1571,11 @@ namespace Glory
 		}
 		else if (renderTextureInfo.HasDepth)
 		{
-			const vk::ImageLayout initialLayout = GetInitialLayout(info.m_Position, nullptr, renderTexture,
-				vk::ImageLayout::eDepthAttachmentOptimal);
-			const vk::ImageLayout finalLayout = GetFinalLayout(info.m_Position, nullptr,
-				renderTextureInfo.EnableDepthStencilSampling, vk::ImageLayout::eDepthAttachmentOptimal);
+			VK_Texture* texture = m_Textures.Find(renderTextureInfo.m_DepthStencilTexture);
+			const vk::ImageLayout initialLayout = GetInitialLayout(info.m_Position, texture, renderTexture,
+				renderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthAttachmentOptimal);
+			const vk::ImageLayout finalLayout = GetFinalLayout(info.m_Position, texture, renderTextureInfo.EnableDepthStencilSampling,
+				renderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthAttachmentOptimal);
 
 			attachments[attachmentCount] = vk::AttachmentDescription()
 				.setFormat(vk::Format::eD32Sfloat)
@@ -1584,10 +1593,11 @@ namespace Glory
 		}
 		else if (renderTextureInfo.HasStencil)
 		{
-			const vk::ImageLayout initialLayout = GetInitialLayout(info.m_Position, nullptr, renderTexture,
-				vk::ImageLayout::eStencilAttachmentOptimal);
-			const vk::ImageLayout finalLayout = GetFinalLayout(info.m_Position, nullptr,
-				renderTextureInfo.EnableDepthStencilSampling, vk::ImageLayout::eStencilAttachmentOptimal);
+			VK_Texture* texture = m_Textures.Find(renderTextureInfo.m_DepthStencilTexture);
+			const vk::ImageLayout initialLayout = GetInitialLayout(info.m_Position, texture, renderTexture,
+				renderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eStencilAttachmentOptimal);
+			const vk::ImageLayout finalLayout = GetFinalLayout(info.m_Position, texture, renderTextureInfo.EnableDepthStencilSampling,
+				renderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eStencilAttachmentOptimal);
 
 			attachments[attachmentCount] = vk::AttachmentDescription()
 				.setFormat(vk::Format::eS8Uint)
@@ -3016,6 +3026,13 @@ namespace Glory
 		renderTexture.m_VKFramebuffer = m_LogicalDevice.createFramebuffer(frameBufferCreateInfo);
 		if (renderTexture.m_VKFramebuffer == nullptr)
 			Debug().LogError("VulkanDevice::CreateRenderTexture: There was an error when trying to create a frame buffer.");
+
+		for (size_t i = 0; i < renderTexture.m_Info.Attachments.size(); ++i)
+		{
+			renderTexture.m_Info.Attachments[i].Texture = renderTexture.m_Textures[i];
+		}
+		if (renderTexture.m_Info.HasDepth || renderTexture.m_Info.HasStencil)
+			renderTexture.m_Info.m_DepthStencilTexture = renderTexture.m_Textures.back();
 	}
 
 	bool VulkanDevice::CreateSwapchain(VK_Swapchain& swapchain, const vk::SurfaceCapabilitiesKHR& capabilities,
