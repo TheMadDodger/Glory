@@ -225,18 +225,18 @@ namespace Glory
 
 	const std::map<PrimitiveType, GLuint> PrimitiveTypes =
 	{
-		{ PrimitiveType::PT_Point, GL_POINT  },
-		{ PrimitiveType::PT_LineStrip, GL_LINE_STRIP  },
-		{ PrimitiveType::PT_LineLoop, GL_LINE_LOOP  },
-		{ PrimitiveType::PT_Lines, GL_LINES  },
-		{ PrimitiveType::PT_LineStripAdjacency, GL_LINE_STRIP_ADJACENCY  },
-		{ PrimitiveType::PT_LinesAdjacency, GL_LINES_ADJACENCY  },
-		{ PrimitiveType::PT_TriangleStrip, GL_TRIANGLE_STRIP },
-		{ PrimitiveType::PT_TriangleFan, GL_TRIANGLE_FAN },
-		{ PrimitiveType::PT_Triangles, GL_TRIANGLES },
-		{ PrimitiveType::PT_TriangleStripAdjacency, GL_TRIANGLE_STRIP_ADJACENCY },
-		{ PrimitiveType::PT_TrianglesAdjacency, GL_TRIANGLES_ADJACENCY },
-		{ PrimitiveType::PT_Patches, GL_PATCHES },
+		{ PrimitiveType::Point, GL_POINT  },
+		{ PrimitiveType::LineStrip, GL_LINE_STRIP  },
+		{ PrimitiveType::LineLoop, GL_LINE_LOOP  },
+		{ PrimitiveType::Lines, GL_LINES  },
+		{ PrimitiveType::LineStripAdjacency, GL_LINE_STRIP_ADJACENCY  },
+		{ PrimitiveType::LinesAdjacency, GL_LINES_ADJACENCY  },
+		{ PrimitiveType::TriangleStrip, GL_TRIANGLE_STRIP },
+		{ PrimitiveType::TriangleFan, GL_TRIANGLE_FAN },
+		{ PrimitiveType::Triangles, GL_TRIANGLES },
+		{ PrimitiveType::TriangleStripAdjacency, GL_TRIANGLE_STRIP_ADJACENCY },
+		{ PrimitiveType::TrianglesAdjacency, GL_TRIANGLES_ADJACENCY },
+		{ PrimitiveType::Patches, GL_PATCHES },
 	};
 
 	const std::map<Filter, GLint> Filters = {
@@ -346,7 +346,7 @@ namespace Glory
 	}
 
 	OpenGLDevice::OpenGLDevice(OpenGLGraphicsModule* pModule): GraphicsDevice(pModule),
-		m_GLCurrentPrimitives(PrimitiveTypes.at(PrimitiveType::PT_Triangles))
+		m_GLCurrentPrimitives(PrimitiveTypes.at(PrimitiveType::Triangles))
 	{
 		m_APIFeatures = APIFeatures::All & ~APIFeatures::PushConstants;
 	}
@@ -460,10 +460,10 @@ namespace Glory
 		glUseProgram(glPipeline->m_GLProgramID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
-		if (glPipeline->m_CullFace != 0)
+		if (glPipeline->m_GLCullFace != 0)
 		{
 			glEnable(GL_CULL_FACE);
-			glCullFace(glPipeline->m_CullFace);
+			glCullFace(glPipeline->m_GLCullFace);
 		}
 		else glDisable(GL_CULL_FACE);
 		glDisable(GL_SCISSOR_TEST);
@@ -619,7 +619,7 @@ namespace Glory
 		}
 	}
 
-	GraphicsDevice::SwapchainResult OpenGLDevice::AqcuireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle)
+	GraphicsDevice::SwapchainResult OpenGLDevice::AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle)
 	{
 		GL_Swapchain* glSwapchain = m_Swapchains.Find(swapchain);
 		if (!glSwapchain)
@@ -1283,7 +1283,7 @@ namespace Glory
 	}
 
 	PipelineHandle OpenGLDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
-		std::vector<DescriptorSetLayoutHandle>&&, size_t, const std::vector<AttributeType>&, PrimitiveType primitiveType)
+		std::vector<DescriptorSetLayoutHandle>&&, size_t, const std::vector<AttributeType>&)
 	{
 		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
 
@@ -1297,42 +1297,13 @@ namespace Glory
 		PipelineHandle handle;
 		GL_Pipeline& pipeline = m_Pipelines.Emplace(handle, GL_Pipeline());
 		pipeline.m_RenderPass = renderPass;
-		pipeline.m_CullFace = GetGLCullFace(pPipeline->GetCullFace());
-		pipeline.m_GLPrimitiveType = PrimitiveTypes.at(primitiveType);
+		pipeline.m_GLCullFace = GetGLCullFace(pPipeline->GetCullFace());
+		pipeline.m_GLPrimitiveType = PrimitiveTypes.at(pPipeline->GetPrimitiveType());
 
-		int success;
-		char infoLog[512];
-
-		pipeline.m_GLProgramID = glCreateProgram();
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		for (size_t i = 0; i < pPipeline->ShaderCount(); ++i)
+		if (!CreatePipeline(pipeline, pPipeline))
 		{
-			const FileData* pShader = pPipeline->Shader(pipelines, i);
-			const ShaderType type = pPipeline->GetShaderType(pipelines, i);
-			ShaderHandle shaderHandle = CreateShader(pShader, type, "main");
-			if (!shaderHandle)
-			{
-				Debug().LogError("OpenGLDevice::CreatePipeline: Invalid render pass handle.");
-				continue;
-			}
-
-			GL_Shader* shader = m_Shaders.Find(shaderHandle);
-
-			glAttachShader(pipeline.m_GLProgramID, shader->m_GLShaderID);
-			OpenGLGraphicsModule::LogGLError(glGetError());
-		}
-
-		glLinkProgram(pipeline.m_GLProgramID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
-		glGetProgramiv(pipeline.m_GLProgramID, GL_LINK_STATUS, &success);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		if (!success)
-		{
-			glGetProgramInfoLog(pipeline.m_GLProgramID, 512, NULL, infoLog);
-			OpenGLGraphicsModule::LogGLError(glGetError());
-			Debug().LogError(infoLog);
+			Debug().LogError("OpenGLDevice::CreatePipeline: Failed to create pipeline.");
+			return NULL;
 		}
 
 		std::stringstream str;
@@ -1340,6 +1311,45 @@ namespace Glory
 		Debug().LogInfo(str.str());
 
 		return handle;
+	}
+
+	void OpenGLDevice::UpdatePipelineSettings(PipelineHandle pipeline, PipelineData* pPipeline)
+	{
+		GL_Pipeline* glPipeline = m_Pipelines.Find(pipeline);
+		if (!glPipeline)
+		{
+			Debug().LogError("OpenGLDevice::UpdatePipelineSettings: Invalid pipeline handle.");
+			return;
+		}
+
+		glPipeline->m_GLCullFace = GetGLCullFace(pPipeline->GetCullFace());
+		glPipeline->m_GLPrimitiveType = PrimitiveTypes.at(pPipeline->GetPrimitiveType());
+	}
+
+	void OpenGLDevice::RecreatePipeline(PipelineHandle pipeline, PipelineData* pPipeline)
+	{
+		GL_Pipeline* glPipeline = m_Pipelines.Find(pipeline);
+		if (!glPipeline)
+		{
+			Debug().LogError("OpenGLDevice::RecreatePipeline: Invalid pipeline handle.");
+			return;
+		}
+
+		glPipeline->m_GLCullFace = GetGLCullFace(pPipeline->GetCullFace());
+		glPipeline->m_GLPrimitiveType = PrimitiveTypes.at(pPipeline->GetPrimitiveType());
+
+		for (auto& shader : glPipeline->m_Shaders)
+		{
+			GL_Shader* glShader = m_Shaders.Find(shader);
+			if (!glShader) continue;
+			glDetachShader(glPipeline->m_GLProgramID, glShader->m_GLShaderID);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			FreeShader(shader);
+		}
+		glPipeline->m_Shaders.clear();
+
+		if (!CreatePipeline(*glPipeline, pPipeline))
+			Debug().LogError("OpenGLDevice::RecreatePipeline: Failed to create pipeline.");
 	}
 
 	PipelineHandle OpenGLDevice::CreateComputePipeline(PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts)
@@ -1845,6 +1855,48 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindFramebuffer(GL_FRAMEBUFFER, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	bool OpenGLDevice::CreatePipeline(GL_Pipeline& pipeline, PipelineData* pPipeline)
+	{
+		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
+
+		int success;
+		char infoLog[512];
+
+		pipeline.m_GLProgramID = glCreateProgram();
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		for (size_t i = 0; i < pPipeline->ShaderCount(); ++i)
+		{
+			const FileData* pShader = pPipeline->Shader(pipelines, i);
+			const ShaderType type = pPipeline->GetShaderType(pipelines, i);
+			ShaderHandle shaderHandle = CreateShader(pShader, type, "main");
+			if (!shaderHandle)
+			{
+				Debug().LogError("OpenGLDevice::CreatePipeline: Invalid render pass handle.");
+				continue;
+			}
+
+			GL_Shader* shader = m_Shaders.Find(shaderHandle);
+
+			glAttachShader(pipeline.m_GLProgramID, shader->m_GLShaderID);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+
+		glLinkProgram(pipeline.m_GLProgramID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glGetProgramiv(pipeline.m_GLProgramID, GL_LINK_STATUS, &success);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		if (!success)
+		{
+			glGetProgramInfoLog(pipeline.m_GLProgramID, 512, NULL, infoLog);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			Debug().LogError(infoLog);
+			return false;
+		}
+		return true;
 	}
 
 #pragma endregion

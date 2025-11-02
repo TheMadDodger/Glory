@@ -16,6 +16,9 @@
 
 namespace Glory
 {
+	PFN_vkCmdSetCullMode PFNCmdSetCullModeEXT = nullptr;
+	PFN_vkCmdSetPrimitiveTopologyEXT PFNCmdSetPrimitiveTopologyEXT = nullptr;
+
 	constexpr size_t ShaderTypeFlagsCount = 6;
 	constexpr vk::ShaderStageFlagBits ShaderTypeFlags[ShaderTypeFlagsCount] = {
 		vk::ShaderStageFlagBits::eVertex,
@@ -168,9 +171,29 @@ namespace Glory
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
 
-		vk::PhysicalDeviceVulkan12Features vk12Features = vk::PhysicalDeviceVulkan12Features();
 		vk::PhysicalDeviceFeatures deviceFeatures = vk::PhysicalDeviceFeatures();
+		deviceFeatures.samplerAnisotropy = VK_TRUE;
+		deviceFeatures.shaderInt64 = VK_TRUE;
+		deviceFeatures.vertexPipelineStoresAndAtomics = VK_TRUE;
+		deviceFeatures.fragmentStoresAndAtomics = VK_TRUE;
+
+		vk::PhysicalDeviceVulkan12Features vk12Features = vk::PhysicalDeviceVulkan12Features();
+		vk12Features.separateDepthStencilLayouts = VK_TRUE;
+
 		vk::PhysicalDeviceRobustness2FeaturesKHR robustnessFeatures = vk::PhysicalDeviceRobustness2FeaturesKHR();
+
+		vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT extendedDynamicStateFeatures = vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT();
+		robustnessFeatures.nullDescriptor = VK_FALSE;
+		extendedDynamicStateFeatures.extendedDynamicState = VK_TRUE;
+
+		vk::PhysicalDeviceExtendedDynamicState3PropertiesEXT extendedDynamicStateProperties =
+			vk::PhysicalDeviceExtendedDynamicState3PropertiesEXT();
+		extendedDynamicStateProperties.dynamicPrimitiveTopologyUnrestricted = VK_TRUE;
+
+		vk12Features.pNext = &robustnessFeatures;
+		robustnessFeatures.pNext = &extendedDynamicStateFeatures;
+		extendedDynamicStateFeatures.pNext = &extendedDynamicStateProperties;
+
 		vk::DeviceCreateInfo deviceCreateInfo = vk::DeviceCreateInfo()
 			.setPQueueCreateInfos(queueCreateInfos.data())
 			.setQueueCreateInfoCount(static_cast<uint32_t>(queueCreateInfos.size()))
@@ -178,13 +201,6 @@ namespace Glory
 			.setEnabledExtensionCount(static_cast<uint32_t>(m_DeviceExtensions.size()))
 			.setPpEnabledExtensionNames(m_DeviceExtensions.data())
 			.setPNext(&vk12Features);
-		deviceFeatures.samplerAnisotropy = VK_TRUE;
-		deviceFeatures.shaderInt64 = VK_TRUE;
-		deviceFeatures.vertexPipelineStoresAndAtomics = VK_TRUE;
-		deviceFeatures.fragmentStoresAndAtomics = VK_TRUE;
-		vk12Features.separateDepthStencilLayouts = VK_TRUE;
-		vk12Features.pNext = &robustnessFeatures;
-		robustnessFeatures.nullDescriptor = VK_FALSE;
 
 #if defined(_DEBUG)
 		const std::vector<const char*>& validationLayers = GraphicsModule()->GetValidationLayers();
@@ -205,10 +221,23 @@ namespace Glory
 		m_GraphicsAndComputeQueue = m_LogicalDevice.getQueue(m_GraphicsAndComputeFamily.value(), 0);
 		m_PresentQueue = m_LogicalDevice.getQueue(m_PresentFamily.value(), 0);
 
+		PFNCmdSetCullModeEXT = (PFN_vkCmdSetCullModeEXT)m_LogicalDevice.getProcAddr("vkCmdSetCullModeEXT");
+		PFNCmdSetPrimitiveTopologyEXT = (PFN_vkCmdSetPrimitiveTopologyEXT)m_LogicalDevice.getProcAddr("vkCmdSetPrimitiveTopologyEXT");
+		if (PFNCmdSetCullModeEXT == nullptr)
+		{
+			Debug().LogFatalError("Vulkan: Failed to get vkCmdSetCullModeEXT address: Vulkan Error Code: "
+				+ std::to_string((uint32_t)result));
+			return;
+		}
+		if (PFNCmdSetPrimitiveTopologyEXT == nullptr)
+		{
+			Debug().LogFatalError("Vulkan: Failed to get vkCmdSetPrimitiveTopologyEXT address: Vulkan Error Code: "
+				+ std::to_string((uint32_t)result));
+			return;
+		}
+
 		CreateGraphicsCommandPool();
 		AllocateFreeFences(10);
-
-		//m_CommandBufferAllocator
 	}
 
 	void VulkanDevice::AllocateFreeFences(size_t numFences)
@@ -403,12 +432,15 @@ namespace Glory
 		VK_CommandBuffer& vkCommandBuffer = iter->second;
 
 		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
-		if (!pipeline)
+		if (!vkPipeline)
 		{
 			Debug().LogError("VulkanDevice::BeginPipeline: Invalid pipeline handle.");
 			return;
 		}
 		vkCommandBuffer->bindPipeline(vkPipeline->m_VKBindPoint, vkPipeline->m_VKPipeline);
+		if (vkPipeline->m_VKBindPoint != vk::PipelineBindPoint::eGraphics) return;
+		PFNCmdSetCullModeEXT(VkCommandBuffer(*vkCommandBuffer), VkCullModeFlags(vkPipeline->m_VKCullMode));
+		PFNCmdSetPrimitiveTopologyEXT(VkCommandBuffer(*vkCommandBuffer), VkPrimitiveTopology(vkPipeline->m_VKPrimitiveTopology));
 	}
 
 	void VulkanDevice::End(CommandBufferHandle commandBuffer)
@@ -774,7 +806,7 @@ namespace Glory
 		);
 	}
 
-	GraphicsDevice::SwapchainResult VulkanDevice::AqcuireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex,
+	GraphicsDevice::SwapchainResult VulkanDevice::AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex,
 		SemaphoreHandle signalSemaphore)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::AqcuireNextSwapchainImage" };
@@ -1728,29 +1760,29 @@ namespace Glory
 	{
 		switch (primitiveType)
 		{
-		case Glory::PrimitiveType::PT_Point:
+		case Glory::PrimitiveType::Point:
 			return vk::PrimitiveTopology::ePointList;
-		case Glory::PrimitiveType::PT_LineStrip:
+		case Glory::PrimitiveType::LineStrip:
 			return vk::PrimitiveTopology::eLineStrip;
-		case Glory::PrimitiveType::PT_LineLoop:
+		case Glory::PrimitiveType::LineLoop:
 			return vk::PrimitiveTopology::eLineList;
-		case Glory::PrimitiveType::PT_Lines:
+		case Glory::PrimitiveType::Lines:
 			return vk::PrimitiveTopology::eLineList;
-		case Glory::PrimitiveType::PT_LineStripAdjacency:
+		case Glory::PrimitiveType::LineStripAdjacency:
 			return vk::PrimitiveTopology::eLineStripWithAdjacency;
-		case Glory::PrimitiveType::PT_LinesAdjacency:
+		case Glory::PrimitiveType::LinesAdjacency:
 			return vk::PrimitiveTopology::eLineListWithAdjacency;
-		case Glory::PrimitiveType::PT_TriangleStrip:
+		case Glory::PrimitiveType::TriangleStrip:
 			return vk::PrimitiveTopology::eTriangleStrip;
-		case Glory::PrimitiveType::PT_TriangleFan:
+		case Glory::PrimitiveType::TriangleFan:
 			return vk::PrimitiveTopology::eTriangleFan;
-		case Glory::PrimitiveType::PT_Triangles:
+		case Glory::PrimitiveType::Triangles:
 			return vk::PrimitiveTopology::eTriangleList;
-		case Glory::PrimitiveType::PT_TriangleStripAdjacency:
+		case Glory::PrimitiveType::TriangleStripAdjacency:
 			return vk::PrimitiveTopology::eTriangleStripWithAdjacency;
-		case Glory::PrimitiveType::PT_TrianglesAdjacency:
+		case Glory::PrimitiveType::TrianglesAdjacency:
 			return vk::PrimitiveTopology::eTriangleListWithAdjacency;
-		case Glory::PrimitiveType::PT_Patches:
+		case Glory::PrimitiveType::Patches:
 			return vk::PrimitiveTopology::ePatchList;
 		default:
 			return vk::PrimitiveTopology::eTriangleList;
@@ -1759,11 +1791,10 @@ namespace Glory
 
 	PipelineHandle VulkanDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
 		std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride,
-		const std::vector<AttributeType>& attributeTypes, PrimitiveType primitiveType)
+		const std::vector<AttributeType>& attributeTypes)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::CreatePipeline" };
 		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
-		std::vector<vk::PushConstantRange> pushConstants;
 
 		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(renderPass);
 		if (!vkRenderPass)
@@ -1780,6 +1811,7 @@ namespace Glory
 		}
 
 		std::vector<vk::DescriptorSetLayout> vkDescriptorSetLayouts(descriptorSetLayouts.size());
+		std::vector<vk::PushConstantRange> vkPushConstants;
 		for (size_t i = 0; i < descriptorSetLayouts.size(); ++i)
 		{
 			VK_DescriptorSetLayout* vkSetLayout = m_DescriptorSetLayouts.Find(descriptorSetLayouts[i]);
@@ -1791,13 +1823,17 @@ namespace Glory
 			vkDescriptorSetLayouts[i] = vkSetLayout->m_VKLayout;
 
 			if (vkSetLayout->m_PushConstantRange.size)
-				pushConstants.push_back(vkSetLayout->m_PushConstantRange);
+				vkPushConstants.push_back(vkSetLayout->m_PushConstantRange);
 		}
 
 		PipelineHandle handle;
 		VK_Pipeline& pipeline = m_Pipelines.Emplace(handle, VK_Pipeline());
 		pipeline.m_RenderPass = renderPass;
 		pipeline.m_VKBindPoint = vk::PipelineBindPoint::eGraphics;
+		pipeline.m_VKCullMode = GetVKCullMode(pPipeline->GetCullFace());
+		pipeline.m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
+		pipeline.m_VKDescriptorSetLayouts = std::move(vkDescriptorSetLayouts);
+		pipeline.m_VKPushConstantRanges = std::move(vkPushConstants);
 
 		const uint32_t binding = 0;
 
@@ -1816,152 +1852,9 @@ namespace Glory
 			GetNextOffset(attributeTypes[i], currentOffset);
 		}
 
-		pipeline.m_Shaders.resize(pPipeline->ShaderCount());
-		for (size_t i = 0; i < pipeline.m_Shaders.size(); ++i)
-			pipeline.m_Shaders[i] = CreateShader(pPipeline->Shader(pipelines, i), pPipeline->GetShaderType(pipelines, i), "main");
-
-		std::vector<vk::PipelineShaderStageCreateInfo> shaderStages(pPipeline->ShaderCount());
-		for (size_t i = 0; i < shaderStages.size(); ++i)
+		if (!CreatePipeline(pipeline, pPipeline))
 		{
-			VK_Shader* shader = m_Shaders.Find(pipeline.m_Shaders[i]);
-			shaderStages[i] = vk::PipelineShaderStageCreateInfo()
-				.setStage(shader->m_VKStage)
-				.setModule(shader->m_VKModule)
-				.setPName(shader->m_Function.data());
-		}
-
-		// Vertex input state
-		vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo()
-			.setVertexBindingDescriptionCount(1)
-			.setPVertexBindingDescriptions(&pipeline.m_VertexDescription)
-			.setVertexAttributeDescriptionCount(static_cast<uint32_t>(pipeline.m_AttributeDescriptions.size()))
-			.setPVertexAttributeDescriptions(pipeline.m_AttributeDescriptions.data());
-
-		// Input assembly
-		vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo()
-			.setTopology(GetVKTopology(primitiveType))
-			.setPrimitiveRestartEnable(VK_FALSE);
-
-		// Viewport and scissor
-		vk::Viewport viewport = vk::Viewport()
-			.setX(0.0f)
-			.setY(m_InvertViewport ? (float)vkRenderTexture->m_Info.Height : 0.0f)
-			.setWidth((float)vkRenderTexture->m_Info.Width)
-			.setHeight((float)vkRenderTexture->m_Info.Height*(m_InvertViewport ? -1.0f : 1.0f))
-			.setMinDepth(0.0f)
-			.setMaxDepth(1.0f);
-
-		vk::Rect2D scissor = vk::Rect2D()
-			.setOffset({ 0,0 })
-			.setExtent({ vkRenderTexture->m_Info.Width, vkRenderTexture->m_Info.Height });
-
-		vk::PipelineViewportStateCreateInfo viewportStateCreateInfo = vk::PipelineViewportStateCreateInfo()
-			.setViewportCount(1)
-			.setPViewports(&viewport)
-			.setScissorCount(1)
-			.setPScissors(&scissor);
-
-		// Rasterizer state
-		vk::PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = vk::PipelineRasterizationStateCreateInfo()
-			.setDepthClampEnable(VK_FALSE) // Requires a GPU feature
-			.setRasterizerDiscardEnable(VK_FALSE)
-			.setPolygonMode(vk::PolygonMode::eFill)
-			.setLineWidth(1.0f)
-			.setCullMode(GetVKCullMode(pPipeline->GetCullFace()))
-			.setFrontFace(m_InvertViewport ? vk::FrontFace::eCounterClockwise : vk::FrontFace::eClockwise)
-			.setDepthBiasEnable(VK_FALSE)
-			.setDepthBiasConstantFactor(0.0f)
-			.setDepthBiasClamp(0.0f)
-			.setDepthBiasSlopeFactor(0.0f);
-
-		// Multisampling state
-		vk::PipelineMultisampleStateCreateInfo multisampleStateCreateInfo = vk::PipelineMultisampleStateCreateInfo()
-			.setSampleShadingEnable(VK_FALSE)
-			.setRasterizationSamples(vk::SampleCountFlagBits::e1)
-			.setMinSampleShading(1.0f)
-			.setPSampleMask(nullptr)
-			.setAlphaToCoverageEnable(VK_FALSE)
-			.setAlphaToOneEnable(VK_FALSE);
-
-		// Blend state
-		const size_t attachmentCount = vkRenderTexture->m_Textures.size() - (vkRenderTexture->m_HasDepthOrStencil ? 1 : 0);
-		std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates(attachmentCount);
-		for (size_t i = 0; i < attachmentCount; ++i)
-		{
-			colorBlendAttachmentStates[i] = vk::PipelineColorBlendAttachmentState()
-				.setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA)
-				.setBlendEnable(VK_FALSE)
-				.setSrcColorBlendFactor(vk::BlendFactor::eOne)
-				.setDstColorBlendFactor(vk::BlendFactor::eZero)
-				.setColorBlendOp(vk::BlendOp::eAdd)
-				.setSrcAlphaBlendFactor(vk::BlendFactor::eOne)
-				.setDstAlphaBlendFactor(vk::BlendFactor::eZero)
-				.setAlphaBlendOp(vk::BlendOp::eAdd);
-		}
-
-		vk::PipelineColorBlendStateCreateInfo colorBlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo()
-			.setLogicOpEnable(VK_FALSE)
-			.setLogicOp(vk::LogicOp::eCopy)
-			.setAttachmentCount(colorBlendAttachmentStates.size())
-			.setPAttachments(colorBlendAttachmentStates.data())
-			.setBlendConstants({ 0.0f, 0.0f, 0.0f, 0.0f });
-
-		vk::PipelineDepthStencilStateCreateInfo depthStencil = vk::PipelineDepthStencilStateCreateInfo();
-		depthStencil.depthTestEnable = VK_TRUE;
-		depthStencil.depthWriteEnable = VK_TRUE;
-		depthStencil.depthCompareOp = vk::CompareOp::eLess;
-		depthStencil.depthBoundsTestEnable = VK_FALSE;
-		depthStencil.minDepthBounds = 0.0f; // Optional
-		depthStencil.maxDepthBounds = 1.0f; // Optional
-		depthStencil.stencilTestEnable = VK_FALSE;
-		//depthStencil.front = {}; // Optional
-		//depthStencil.back = {}; // Optional
-
-		// Dynamic state
-		vk::DynamicState dynamicStates[] = {
-		    vk::DynamicState::eViewport,
-		    vk::DynamicState::eScissor,
-		    //vk::DynamicState::eLineWidth
-		};
-
-		vk::PipelineDynamicStateCreateInfo dynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
-		    .setDynamicStateCount(2)
-		    .setPDynamicStates(dynamicStates);
-
-		vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
-			.setSetLayoutCount(static_cast<uint32_t>(vkDescriptorSetLayouts.size()))
-			.setPSetLayouts(vkDescriptorSetLayouts.data())
-			.setPushConstantRangeCount(static_cast<uint32_t>(pushConstants.size()))
-			.setPPushConstantRanges(pushConstants.data());
-
-		pipeline.m_VKLayout = m_LogicalDevice.createPipelineLayout(pipelineLayoutCreateInfo);
-		if (pipeline.m_VKLayout == nullptr)
-		{
-			Debug().LogError("VulkanDevice::CreatePipeline: Failed to create pipeline layout.");
-			return NULL;
-		}
-
-		// Create the pipeline
-		vk::GraphicsPipelineCreateInfo pipelineCreateInfo = vk::GraphicsPipelineCreateInfo()
-			.setStageCount(static_cast<uint32_t>(shaderStages.size()))
-			.setPStages(shaderStages.data())
-			.setPVertexInputState(&vertexInputStateCreateInfo)
-			.setPInputAssemblyState(&inputAssemblyStateCreateInfo)
-			.setPViewportState(&viewportStateCreateInfo)
-			.setPRasterizationState(&rasterizationStateCreateInfo)
-			.setPMultisampleState(&multisampleStateCreateInfo)
-			.setPDepthStencilState(&depthStencil)
-			.setPColorBlendState(&colorBlendStateCreateInfo)
-			.setPDynamicState(&dynamicStateCreateInfo)
-			.setLayout(pipeline.m_VKLayout)
-			.setRenderPass(vkRenderPass->m_VKRenderPass)
-			.setSubpass(0)
-			.setBasePipelineHandle(VK_NULL_HANDLE)
-			.setBasePipelineIndex(-1);
-
-		if (m_LogicalDevice.createGraphicsPipelines(VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &pipeline.m_VKPipeline) != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::CreatePipeline: Failed to create graphics pipeline.");
+			Debug().LogError("VulkanDevice::CreatePipeline: Failed to create pipeline.");
 			return NULL;
 		}
 
@@ -1970,6 +1863,46 @@ namespace Glory
 		Debug().LogInfo(str.str());
 
 		return handle;
+	}
+
+	void VulkanDevice::UpdatePipelineSettings(PipelineHandle pipeline, PipelineData* pPipeline)
+	{
+		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
+		if (!vkPipeline)
+		{
+			Debug().LogError("VulkanDevice::UpdatePipelineSettings: Invalid pipeline handle.");
+			return;
+		}
+
+		vkPipeline->m_VKCullMode = GetVKCullMode(pPipeline->GetCullFace());
+		vkPipeline->m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
+	}
+
+	void VulkanDevice::RecreatePipeline(PipelineHandle pipeline, PipelineData* pPipeline)
+	{
+		WaitIdle();
+
+		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
+		if (!vkPipeline)
+		{
+			Debug().LogError("VulkanDevice::RecreatePipeline: Invalid pipeline handle.");
+			return;
+		}
+
+		vkPipeline->m_VKCullMode = GetVKCullMode(pPipeline->GetCullFace());
+		vkPipeline->m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
+
+		m_LogicalDevice.destroyPipeline(vkPipeline->m_VKPipeline);
+		m_LogicalDevice.destroyPipelineLayout(vkPipeline->m_VKLayout);
+		for (auto& shader : vkPipeline->m_Shaders)
+		{
+			VK_Shader* glShader = m_Shaders.Find(shader);
+			FreeShader(shader);
+		}
+		vkPipeline->m_Shaders.clear();
+
+		if (!CreatePipeline(*vkPipeline, pPipeline))
+			Debug().LogError("OpenGLDevice::RecreatePipeline: Failed to create pipeline.");
 	}
 
 	PipelineHandle VulkanDevice::CreateComputePipeline(PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts)
@@ -2800,7 +2733,7 @@ namespace Glory
 			blit.srcSubresource.baseArrayLayer = 0;
 			blit.srcSubresource.layerCount = 1;
 			blit.dstOffsets[0] = vk::Offset3D{ 0, 0, 0 };
-			blit.dstOffsets[1] = vk::Offset3D{ mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1 };
+			blit.dstOffsets[1] = vk::Offset3D{ mipWidth > 1 ? mipWidth/2 : 1, mipHeight > 1 ? mipHeight/2 : 1, 1 };
 			blit.dstSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
 			blit.dstSubresource.mipLevel = i;
 			blit.dstSubresource.baseArrayLayer = 0;
@@ -3167,6 +3100,166 @@ namespace Glory
 			vkTexture->m_IsSwapchainImage = true;
 		}
 
+		return true;
+	}
+
+	bool VulkanDevice::CreatePipeline(VK_Pipeline& pipeline, PipelineData* pPipeline)
+	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreatePipeline" };
+		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
+
+		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(pipeline.m_RenderPass);
+		VK_RenderTexture* vkRenderTexture = m_RenderTextures.Find(vkRenderPass->m_RenderTexture);
+
+		pipeline.m_Shaders.resize(pPipeline->ShaderCount());
+		for (size_t i = 0; i < pipeline.m_Shaders.size(); ++i)
+			pipeline.m_Shaders[i] = CreateShader(pPipeline->Shader(pipelines, i), pPipeline->GetShaderType(pipelines, i), "main");
+
+		std::vector<vk::PipelineShaderStageCreateInfo> shaderStages(pPipeline->ShaderCount());
+		for (size_t i = 0; i < shaderStages.size(); ++i)
+		{
+			VK_Shader* shader = m_Shaders.Find(pipeline.m_Shaders[i]);
+			shaderStages[i] = vk::PipelineShaderStageCreateInfo()
+				.setStage(shader->m_VKStage)
+				.setModule(shader->m_VKModule)
+				.setPName(shader->m_Function.data());
+		}
+
+		// Vertex input state
+		vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo()
+			.setVertexBindingDescriptionCount(1)
+			.setPVertexBindingDescriptions(&pipeline.m_VertexDescription)
+			.setVertexAttributeDescriptionCount(static_cast<uint32_t>(pipeline.m_AttributeDescriptions.size()))
+			.setPVertexAttributeDescriptions(pipeline.m_AttributeDescriptions.data());
+
+		// Input assembly
+		vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo()
+			.setTopology(pipeline.m_VKPrimitiveTopology)
+			.setPrimitiveRestartEnable(VK_FALSE);
+
+		// Viewport and scissor
+		vk::Viewport viewport = vk::Viewport()
+			.setX(0.0f)
+			.setY(m_InvertViewport ? (float)vkRenderTexture->m_Info.Height : 0.0f)
+			.setWidth((float)vkRenderTexture->m_Info.Width)
+			.setHeight((float)vkRenderTexture->m_Info.Height*(m_InvertViewport ? -1.0f : 1.0f))
+			.setMinDepth(0.0f)
+			.setMaxDepth(1.0f);
+
+		vk::Rect2D scissor = vk::Rect2D()
+			.setOffset({ 0,0 })
+			.setExtent({ vkRenderTexture->m_Info.Width, vkRenderTexture->m_Info.Height });
+
+		vk::PipelineViewportStateCreateInfo viewportStateCreateInfo = vk::PipelineViewportStateCreateInfo()
+			.setViewportCount(1)
+			.setPViewports(&viewport)
+			.setScissorCount(1)
+			.setPScissors(&scissor);
+
+		// Rasterizer state
+		vk::PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = vk::PipelineRasterizationStateCreateInfo()
+			.setDepthClampEnable(VK_FALSE) // Requires a GPU feature
+			.setRasterizerDiscardEnable(VK_FALSE)
+			.setPolygonMode(vk::PolygonMode::eFill)
+			.setLineWidth(1.0f)
+			.setCullMode(pipeline.m_VKCullMode)
+			.setFrontFace(m_InvertViewport ? vk::FrontFace::eCounterClockwise : vk::FrontFace::eClockwise)
+			.setDepthBiasEnable(VK_FALSE)
+			.setDepthBiasConstantFactor(0.0f)
+			.setDepthBiasClamp(0.0f)
+			.setDepthBiasSlopeFactor(0.0f);
+
+		// Multisampling state
+		vk::PipelineMultisampleStateCreateInfo multisampleStateCreateInfo = vk::PipelineMultisampleStateCreateInfo()
+			.setSampleShadingEnable(VK_FALSE)
+			.setRasterizationSamples(vk::SampleCountFlagBits::e1)
+			.setMinSampleShading(1.0f)
+			.setPSampleMask(nullptr)
+			.setAlphaToCoverageEnable(VK_FALSE)
+			.setAlphaToOneEnable(VK_FALSE);
+
+		// Blend state
+		const size_t attachmentCount = vkRenderTexture->m_Textures.size() - (vkRenderTexture->m_HasDepthOrStencil ? 1 : 0);
+		std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates(attachmentCount);
+		for (size_t i = 0; i < attachmentCount; ++i)
+		{
+			colorBlendAttachmentStates[i] = vk::PipelineColorBlendAttachmentState()
+				.setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA)
+				.setBlendEnable(VK_FALSE)
+				.setSrcColorBlendFactor(vk::BlendFactor::eOne)
+				.setDstColorBlendFactor(vk::BlendFactor::eZero)
+				.setColorBlendOp(vk::BlendOp::eAdd)
+				.setSrcAlphaBlendFactor(vk::BlendFactor::eOne)
+				.setDstAlphaBlendFactor(vk::BlendFactor::eZero)
+				.setAlphaBlendOp(vk::BlendOp::eAdd);
+		}
+
+		vk::PipelineColorBlendStateCreateInfo colorBlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo()
+			.setLogicOpEnable(VK_FALSE)
+			.setLogicOp(vk::LogicOp::eCopy)
+			.setAttachmentCount(colorBlendAttachmentStates.size())
+			.setPAttachments(colorBlendAttachmentStates.data())
+			.setBlendConstants({ 0.0f, 0.0f, 0.0f, 0.0f });
+
+		vk::PipelineDepthStencilStateCreateInfo depthStencil = vk::PipelineDepthStencilStateCreateInfo();
+		depthStencil.depthTestEnable = VK_TRUE;
+		depthStencil.depthWriteEnable = VK_TRUE;
+		depthStencil.depthCompareOp = vk::CompareOp::eLess;
+		depthStencil.depthBoundsTestEnable = VK_FALSE;
+		depthStencil.minDepthBounds = 0.0f; // Optional
+		depthStencil.maxDepthBounds = 1.0f; // Optional
+		depthStencil.stencilTestEnable = VK_FALSE;
+		//depthStencil.front = {}; // Optional
+		//depthStencil.back = {}; // Optional
+
+		// Dynamic state
+		vk::DynamicState dynamicStates[] = {
+			vk::DynamicState::eViewport,
+			vk::DynamicState::eScissor,
+			vk::DynamicState::eCullMode,
+			vk::DynamicState::ePrimitiveTopology,
+		};
+
+		vk::PipelineDynamicStateCreateInfo dynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
+			.setDynamicStateCount(4)
+			.setPDynamicStates(dynamicStates);
+
+		vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
+			.setSetLayoutCount(static_cast<uint32_t>(pipeline.m_VKDescriptorSetLayouts.size()))
+			.setPSetLayouts(pipeline.m_VKDescriptorSetLayouts.data())
+			.setPushConstantRangeCount(static_cast<uint32_t>(pipeline.m_VKPushConstantRanges.size()))
+			.setPPushConstantRanges(pipeline.m_VKPushConstantRanges.data());
+
+		pipeline.m_VKLayout = m_LogicalDevice.createPipelineLayout(pipelineLayoutCreateInfo);
+		if (pipeline.m_VKLayout == nullptr)
+		{
+			Debug().LogError("VulkanDevice::CreatePipeline: Failed to create pipeline layout.");
+			return false;
+		}
+
+		// Create the pipeline
+		vk::GraphicsPipelineCreateInfo pipelineCreateInfo = vk::GraphicsPipelineCreateInfo()
+			.setStageCount(static_cast<uint32_t>(shaderStages.size()))
+			.setPStages(shaderStages.data())
+			.setPVertexInputState(&vertexInputStateCreateInfo)
+			.setPInputAssemblyState(&inputAssemblyStateCreateInfo)
+			.setPViewportState(&viewportStateCreateInfo)
+			.setPRasterizationState(&rasterizationStateCreateInfo)
+			.setPMultisampleState(&multisampleStateCreateInfo)
+			.setPDepthStencilState(&depthStencil)
+			.setPColorBlendState(&colorBlendStateCreateInfo)
+			.setPDynamicState(&dynamicStateCreateInfo)
+			.setLayout(pipeline.m_VKLayout)
+			.setRenderPass(vkRenderPass->m_VKRenderPass)
+			.setSubpass(0)
+			.setBasePipelineHandle(VK_NULL_HANDLE)
+			.setBasePipelineIndex(-1);
+
+		if (m_LogicalDevice.createGraphicsPipelines(VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &pipeline.m_VKPipeline) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreatePipeline: Failed to create graphics pipeline.");
+			return false;
+		}
 		return true;
 	}
 }

@@ -183,6 +183,7 @@ namespace Glory::Editor
 		Utils::YAMLFileRef& file = **pPipeline;
 
 		bool change = EditorUI::InputEnum<PipelineType>(file, "Type", { PipelineType::PT_Unknown, PipelineType::PT_Count });
+		const PipelineType pipelineType = file["Type"].AsEnum<PipelineType>(PipelineType::PT_Phong);
 
 		ImGui::PushID("Shaders");
 		if (EditorUI::Header("Shaders"))
@@ -191,13 +192,13 @@ namespace Glory::Editor
 		}
 		ImGui::PopID();
 
+		PipelineData* pPipelineData = EditorApplication::GetInstance()->
+			GetPipelineManager().GetPipelineData(pPipeline->GetUUID());
+
 		ImGui::Spacing();
 		ImGui::PushID("Features");
 		if (EditorUI::Header("Features"))
 		{
-			PipelineData* pPipelineData = EditorApplication::GetInstance()->
-				GetPipelineManager().GetPipelineData(pPipeline->GetUUID());
-
 			auto features = file["Features"];
 			if (!features.Exists() || !features.IsMap())
 				features.SetMap();
@@ -223,11 +224,35 @@ namespace Glory::Editor
 		}
 		ImGui::PopID();
 
+		bool settingsChanged = false;
+		if (pipelineType != PipelineType::PT_Compute)
+		{
+			ImGui::Spacing();
+			ImGui::PushID("Settings");
+			if (EditorUI::Header("Settings"))
+			{
+				auto settings = file["Settings"];
+				if (!settings.Exists() || !settings.IsMap())
+					settings.SetMap();
+				settingsChanged |= EditorUI::InputEnum<CullFace>(file, settings["CullFace"].Path());
+				settingsChanged |= EditorUI::InputEnum<PrimitiveType>(file, settings["PrimitiveType"].Path());
+			}
+			ImGui::PopID();
+		}
+		change |= settingsChanged;
+		if (settingsChanged && pPipelineData)
+		{
+			auto settings = file["Settings"];
+			pPipelineData->GetCullFace() = settings["CullFace"].AsEnum<CullFace>(CullFace::Back);
+			pPipelineData->GetPrimitiveType() = settings["PrimitiveType"].AsEnum<PrimitiveType>(PrimitiveType::Triangles);
+			pPipelineData->SettingsDirty() = true;
+		}
+
 		ImGui::Spacing();
 		const char* error = GetPipelineError(pPipeline);
 		if (error)
 		{
-			const float childHeight = ImGui::CalcTextSize("A").y * 6;
+			const float childHeight = ImGui::CalcTextSize("A").y*6;
 			ImGui::BeginChild("error", { 0.0f, childHeight }, true, ImGuiWindowFlags_MenuBar);
 			if (ImGui::BeginMenuBar())
 			{

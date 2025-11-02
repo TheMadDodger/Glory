@@ -47,6 +47,20 @@ REFLECTABLE_ENUM_NS(Glory, CullFace,
     Back,
     FrontAndBack);
 
+REFLECTABLE_ENUM_NS(Glory, PrimitiveType,
+    Point,
+    LineStrip,
+    LineLoop,
+    Lines,
+    LineStripAdjacency,
+    LinesAdjacency,
+    TriangleStrip,
+    TriangleFan,
+    Triangles,
+    TriangleStripAdjacency,
+    TrianglesAdjacency,
+    Patches);
+
 namespace Glory
 {
     constexpr size_t AspectRatioCount = 5;
@@ -603,22 +617,6 @@ namespace Glory
         //MU_DeviceCoherentAMD = 1 << 6,
         //MU_DeviceUncachedAMD = 1 << 7,
         //MU_RdmaCapableNV = 1 << 8,
-    };
-
-    enum class PrimitiveType
-    {
-        PT_Point,
-        PT_LineStrip,
-        PT_LineLoop,
-        PT_Lines,
-        PT_LineStripAdjacency,
-        PT_LinesAdjacency,
-        PT_TriangleStrip,
-        PT_TriangleFan,
-        PT_Triangles,
-        PT_TriangleStripAdjacency,
-        PT_TrianglesAdjacency,
-        PT_Patches
     };
 
     enum class DataType

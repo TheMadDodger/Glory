@@ -2,3 +2,6 @@ Type: "Shadow"
 Shaders: [36, 37]
 Features:
   FEATURE_TRANSPARENT_TEXTURED: true
+Settings:
+  CullFace: Front
+  PrimitiveType: Triangles

@@ -665,7 +665,7 @@ namespace Glory
 		std::vector<SemaphoreHandle> signalSemaphores;
 		if (m_Swapchain)
 		{
-			pDevice->AqcuireNextSwapchainImage(m_Swapchain, &m_CurrentFrameIndex, m_ImageAvailableSemaphores[m_CurrentSemaphoreIndex]);
+			pDevice->AcquireNextSwapchainImage(m_Swapchain, &m_CurrentFrameIndex, m_ImageAvailableSemaphores[m_CurrentSemaphoreIndex]);
 			waitSemaphores.push_back(m_ImageAvailableSemaphores[m_CurrentSemaphoreIndex]);
 			signalSemaphores.push_back(m_RenderingFinishedSemaphores[m_CurrentSemaphoreIndex]);
 		}
@@ -685,7 +685,7 @@ namespace Glory
 				PipelineData* pPipeline = pipelines.GetPipelineData(ssaoPipeline);
 				m_SSAOPipeline = pDevice->CreatePipeline(uniqueCameraData.m_SSAORenderPasses[0], pPipeline,
 					{ m_GlobalClusterSetLayout, m_GlobalSampleDomeSetLayout, m_SSAOSamplersSetLayout, m_NoiseSamplerSetLayout },
-					sizeof(glm::vec3), { AttributeType::Float3 }, PrimitiveType::PT_Triangles);
+					sizeof(glm::vec3), { AttributeType::Float3 });
 			}
 			if (!m_LineRenderPipeline)
 			{
@@ -693,7 +693,7 @@ namespace Glory
 				PipelineData* pPipeline = pipelines.GetPipelineData(lineRenderPipeline);
 				m_LineRenderPipeline = pDevice->CreatePipeline(uniqueCameraData.m_RenderPasses[0], pPipeline,
 					{ m_GlobalLineRenderSetLayout }, sizeof(LineVertex),
-					{ AttributeType::Float3, AttributeType::Float4 }, PrimitiveType::PT_Lines);
+					{ AttributeType::Float3, AttributeType::Float4 });
 			}
 
 			BufferHandle& clusterSSBOHandle = uniqueCameraData.m_ClusterSSBO;
@@ -1266,25 +1266,23 @@ namespace Glory
 		{
 			PipelineData* pPipeline = pipelines.GetPipelineData(displayPipeline);
 			m_DisplayCopyPipeline = pDevice->CreatePipeline(m_FinalFrameColorPasses[0], pPipeline, { m_DisplayCopySamplerSetLayout },
-				sizeof(glm::vec3), { AttributeType::Float3 }, PrimitiveType::PT_Triangles);
+				sizeof(glm::vec3), { AttributeType::Float3 });
 		}
 		if (!m_ShadowRenderPipeline)
 		{
 			const UUID shadowsPipeline = settings.Value<uint64_t>("Shadows Pipeline");
 			PipelineData* pPipeline = pipelines.GetPipelineData(shadowsPipeline);
-			pPipeline->GetCullFace() = CullFace::Front;
 			m_ShadowRenderPipeline = pDevice->CreatePipeline(m_ShadowsPasses[0], pPipeline, {m_GlobalShadowRenderSetLayout, m_ObjectDataSetLayout }, sizeof(DefaultVertex3D),
 				{ AttributeType::Float3, AttributeType::Float3, AttributeType::Float3,
-				AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 }, PrimitiveType::PT_Triangles);
+				AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 });
 		}
 		/*if (!m_TransparentShadowRenderPipeline)
 		{
 			const UUID shadowsTransparentPipeline = settings.Value<uint64_t>("Shadows Transparent Textured Pipeline");
 			PipelineData* pPipeline = pipelines.GetPipelineData(shadowsTransparentPipeline);
-			pPipeline->GetCullFace() = CullFace::Front;
 			m_TransparentShadowRenderPipeline = pDevice->CreatePipeline(m_ShadowsPasses[0], pPipeline, {}, sizeof(DefaultVertex3D),
 				{ AttributeType::Float3, AttributeType::Float3, AttributeType::Float3,
-				AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 }, PrimitiveType::PT_Triangles);
+				AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 });
 		}*/
 
 		PrepareCameras();
@@ -1550,7 +1548,7 @@ namespace Glory
 				batchData.m_MaterialSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 			}
 
-			if (!batchData.m_Pipeline)
+			if (!batchData.m_Pipeline || pPipelineData->IsDirty() || pPipelineData->SettingsDirty())
 			{
 				std::vector<DescriptorSetLayoutHandle> descriptorSetLayouts(textureCount ? 7 : 6);
 				descriptorSetLayouts[0] = m_GlobalRenderSetLayout;

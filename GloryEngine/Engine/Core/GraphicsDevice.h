@@ -456,7 +456,7 @@ namespace Glory
 		 * @returns Result of aqcuiring the image, @ref SwapchainResult::S_Success on success,
 		 *			@ref SwapchainResult::S_OutOfDate if the swapchain needs to be recreated.
 		 */
-		virtual SwapchainResult AqcuireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex,
+		virtual SwapchainResult AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex,
 			SemaphoreHandle signalSemaphore=NULL) = 0;
 		/**
 		 * @brief Swap the backbuffer
@@ -478,10 +478,13 @@ namespace Glory
 		 * @param descriptorSets The descriptor sets to use in this pipeline
 		 * @param stride Size of a vertex
 		 * @param attributeTypes Attribute types
+		 *
+		 * The pipeline gets recreated if the shaders have changed,
+		 * and gets updated if its settings were changed.
 		 */
 		PipelineHandle AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
 			std::vector<DescriptorSetLayoutHandle>&& descriptorSets, size_t stride,
-			const std::vector<AttributeType>& attributeTypes, PrimitiveType primitiveType=PrimitiveType::PT_Triangles);
+			const std::vector<AttributeType>& attributeTypes);
 		/**
 		 * @brief Acquire a cached mesh or create a new one
 		 * @param pMesh The mesh data to create a mesh from
@@ -636,11 +639,26 @@ namespace Glory
 		 * @param descriptorSetLayouts Descriptor set layouts that this pipeline will use
 		 * @param stride Size of the vertex type used by this pipeline
 		 * @param attributeTypes Attribute types of the vertex type used by this pipeline
-		 * @param primitiveType Type of primitives the pipeline will render
 		 */
 		virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
 			std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride,
-			const std::vector<AttributeType>& attributeTypes, PrimitiveType primitiveType) = 0;
+			const std::vector<AttributeType>& attributeTypes) = 0;
+
+		/**
+		 * @brief Update a graphics pipelines settings
+		 * @param pipeline Pipeline to update
+		 * @param pPipeline Pipeline data
+		 */
+		virtual void UpdatePipelineSettings(PipelineHandle pipeline, PipelineData* pPipeline) = 0;
+		/**
+		 * @brief Recreate a graphics pipeline on this device
+		 * @param pipeline Pipeline to recreate
+		 * @param pPipeline Pipeline data
+		 * @param descriptorSetLayouts Descriptor set layouts that this pipeline will use
+		 * @param stride Size of the vertex type used by this pipeline
+		 * @param attributeTypes Attribute types of the vertex type used by this pipeline
+		 */
+		virtual void RecreatePipeline(PipelineHandle pipeline, PipelineData* pPipeline) = 0;
 
 		/**
 		 * @brief Create a compute pipeline on this device

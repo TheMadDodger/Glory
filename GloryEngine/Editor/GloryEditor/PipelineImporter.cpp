@@ -43,6 +43,10 @@ namespace Glory::Editor
 			}
 		}
 
+		auto settings = file["Settings"];
+		pPipeline->GetCullFace() = settings["CullFace"].AsEnum<CullFace>(CullFace::Back);
+		pPipeline->GetPrimitiveType() = settings["PrimitiveType"].AsEnum<PrimitiveType>(PrimitiveType::Triangles);
+
 		return ImportedResource(path, pPipeline);
 	}
 
@@ -65,6 +69,12 @@ namespace Glory::Editor
 			const bool isOn = pResource->FeatureEnabled(i);
 			features[name].Set(isOn);
 		}
+
+		auto settings = file["Settings"];
+		if (!settings.Exists() || !settings.IsMap())
+			settings.SetMap();
+		settings["CullFace"].SetEnum<CullFace>(pResource->GetCullFace());
+		settings["PrimitiveType"].SetEnum<PrimitiveType>(pResource->GetPrimitiveType());
 
 		file.Save();
 		return true;

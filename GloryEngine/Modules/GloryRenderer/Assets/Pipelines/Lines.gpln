@@ -1,2 +1,5 @@
 Type: "Other"
 Shaders: [11, 12]
+Settings:
+  CullFace: Back
+  PrimitiveType: Lines

@@ -40,19 +40,30 @@ namespace Glory
 
 	PipelineHandle GraphicsDevice::AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
 		std::vector<DescriptorSetLayoutHandle>&& descriptorSets, size_t stride,
-		const std::vector<AttributeType>& attributeTypes, PrimitiveType primitiveType)
+		const std::vector<AttributeType>& attributeTypes)
 	{
 		auto iter = m_PipelineHandles.find(pPipeline->GetGPUUUID());
 		if (iter == m_PipelineHandles.end())
 		{
 			PipelineHandle newPipeline = CreatePipeline(renderPass, pPipeline,
-				std::move(descriptorSets), stride, attributeTypes, primitiveType);
-			iter = m_PipelineHandles.emplace(pPipeline->GetGPUUUID(), newPipeline).first;
+				std::move(descriptorSets), stride, attributeTypes);
+			m_PipelineHandles.emplace(pPipeline->GetGPUUUID(), newPipeline).first;
+
+			pPipeline->SetDirty(false);
+			pPipeline->SettingsDirty() = false;
+
+			return newPipeline;
 		}
 
 		PipelineHandle pipeline = iter->second;
 
-		/* @todo: Update and/or move pipeline if needed */
+		if (pPipeline->IsDirty())
+			RecreatePipeline(pipeline, pPipeline);
+		else if (pPipeline->SettingsDirty())
+			UpdatePipelineSettings(pipeline, pPipeline);
+
+		pPipeline->SetDirty(false);
+		pPipeline->SettingsDirty() = false;
 
 		return pipeline;
 	}

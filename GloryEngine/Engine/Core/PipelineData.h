@@ -139,10 +139,20 @@ namespace Glory
         /** @brief Get total size of properties buffer in bytes */
         size_t TotalPropertiesByteSize() const;
 
+        /** @brief Are settings dirty */
+        bool& SettingsDirty() { return m_SettingsDirty; };
+        /** @overload */
+        const bool& SettingsDirty() const { return m_SettingsDirty; };
+
         /** @brief Face to cull */
         CullFace& GetCullFace() { return m_CullFace; }
         /** @overload */
         const CullFace& GetCullFace() const { return m_CullFace; }
+
+        /** @brief Primitive type to render */
+        PrimitiveType& GetPrimitiveType() { return m_PrimitiveType; }
+        /** @overload */
+        const PrimitiveType& GetPrimitiveType() const { return m_PrimitiveType; }
 
     private:
         virtual void References(Engine*, std::vector<UUID>&) const override {}
@@ -164,6 +174,8 @@ namespace Glory
         size_t m_CurrentOffset = 0;
         size_t m_NumResources = 0;
 
+        bool m_SettingsDirty = false;
         CullFace m_CullFace = CullFace::Back;
+        PrimitiveType m_PrimitiveType = PrimitiveType::Triangles;
 	};
 }

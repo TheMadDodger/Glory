@@ -2,3 +2,6 @@ Type: "Screen"
 Shaders: [13, 29]
 Features:
   FEATURE_PBR: false
+Settings:
+  CullFace: Back
+  PrimitiveType: Triangles

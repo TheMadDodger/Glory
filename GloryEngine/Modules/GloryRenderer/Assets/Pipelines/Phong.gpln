@@ -3,3 +3,6 @@ Shaders: [1, 2]
 Features:
   FEATURE_TEXTURED: false
   FEATURE_RECEIVE_SHADOWS: true
+Settings:
+  CullFace: Back
+  PrimitiveType: Triangles

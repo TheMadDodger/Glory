@@ -1,2 +1,5 @@
 Type: "Other"
 Shaders: [34, 32]
+Settings:
+  CullFace: Back
+  PrimitiveType: Triangles

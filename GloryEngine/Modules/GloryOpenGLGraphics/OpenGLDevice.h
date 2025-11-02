@@ -75,10 +75,12 @@ namespace Glory
     {
         static constexpr GraphicsHandleType HandleType = H_Pipeline;
 
+        std::vector<ShaderHandle> m_Shaders;
+
         RenderPassHandle m_RenderPass;
         uint32_t m_GLProgramID;
+        uint32_t m_GLCullFace;
         uint32_t m_GLPrimitiveType;
-        uint32_t m_CullFace;
     };
 
     struct GL_DescriptorSetLayout
@@ -143,7 +145,7 @@ namespace Glory
 
         virtual void PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>&,
             const std::vector<TextureHandle>&, PipelineStageFlagBits, PipelineStageFlagBits) override;
-        virtual SwapchainResult AqcuireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle) override;
+        virtual SwapchainResult AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle) override;
         virtual SwapchainResult Present(SwapchainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>& waitSemaphores={}) override;
 
         virtual void WaitIdle() override;
@@ -170,8 +172,10 @@ namespace Glory
         virtual RenderTextureHandle GetRenderPassRenderTexture(RenderPassHandle renderPass) override;
         virtual void SetRenderPassClear(RenderPassHandle renderPass, const glm::vec4& color, float depth=1.0f, uint8_t stencil=0) override;
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
-        virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&&,
-            size_t, const std::vector<AttributeType>&, PrimitiveType primitiveType) override;
+        virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
+            std::vector<DescriptorSetLayoutHandle>&&, size_t, const std::vector<AttributeType>&) override;
+        virtual void UpdatePipelineSettings(PipelineHandle pipeline, PipelineData* pPipeline) override;
+        virtual void RecreatePipeline(PipelineHandle pipeline, PipelineData* pPipeline) override;
         virtual PipelineHandle CreateComputePipeline(PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts) override;
         virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo) override;
         virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) override;
@@ -196,6 +200,7 @@ namespace Glory
 
     private:
         void CreateRenderTexture(GL_RenderTexture& renderTexture);
+        bool CreatePipeline(GL_Pipeline& pipeline, PipelineData* pPipeline);
 
     private:
         GraphicsResources<GL_Buffer> m_Buffers;

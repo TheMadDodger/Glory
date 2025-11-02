@@ -2,3 +2,6 @@ Type: "PBR_BRDF"
 Shaders: [24, 2]
 Features:
   FEATURE_TEXTURED: true
+Settings:
+  CullFace: Back
+  PrimitiveType: Triangles

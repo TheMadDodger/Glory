@@ -85,12 +85,18 @@ namespace Glory
         static constexpr GraphicsHandleType HandleType = H_Pipeline;
 
         RenderPassHandle m_RenderPass;
+        std::vector<vk::DescriptorSetLayout> m_VKDescriptorSetLayouts;
+        std::vector<vk::PushConstantRange> m_VKPushConstantRanges;
         vk::PipelineLayout m_VKLayout;
         vk::Pipeline m_VKPipeline;
+
         vk::PipelineBindPoint m_VKBindPoint;
         vk::VertexInputBindingDescription m_VertexDescription;
         std::vector<vk::VertexInputAttributeDescription> m_AttributeDescriptions;
         std::vector<ShaderHandle> m_Shaders;
+
+        vk::CullModeFlags m_VKCullMode;
+        vk::PrimitiveTopology m_VKPrimitiveTopology;
     };
 
     struct VK_DescriptorSetLayout
@@ -146,6 +152,7 @@ namespace Glory
 
         vk::CommandBuffer* operator->() { return &m_VKCommandBuffer; }
         const vk::CommandBuffer* operator->() const { return &m_VKCommandBuffer; }
+        vk::CommandBuffer operator*() { return m_VKCommandBuffer; }
     };
 
     class VulkanGraphicsModule;
@@ -208,7 +215,7 @@ namespace Glory
         virtual void PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>& buffers,
             const std::vector<TextureHandle>& textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage) override;
 
-        virtual SwapchainResult AqcuireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex,
+        virtual SwapchainResult AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex,
             SemaphoreHandle signalSemaphore=NULL) override;
         virtual SwapchainResult Present(SwapchainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>& waitSemaphores={}) override;
 
@@ -238,7 +245,9 @@ namespace Glory
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
         virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
             std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride,
-            const std::vector<AttributeType>& attributeTypes, PrimitiveType primitiveType) override;
+            const std::vector<AttributeType>& attributeTypes) override;
+        virtual void UpdatePipelineSettings(PipelineHandle pipeline, PipelineData* pPipeline) override;
+        virtual void RecreatePipeline(PipelineHandle pipeline, PipelineData* pPipeline) override;
         virtual PipelineHandle CreateComputePipeline(PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts) override;
         virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo) override;
         virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) override;
@@ -282,6 +291,7 @@ namespace Glory
         void CreateRenderTexture(vk::RenderPass vkRenderPass, VK_RenderTexture& renderTexture);
         bool CreateSwapchain(VK_Swapchain& swapchain, const vk::SurfaceCapabilitiesKHR& capabilities, vk::SurfaceKHR surface,
             const glm::uvec2& resolution, bool vsync, uint32_t minImageCount);
+        bool CreatePipeline(VK_Pipeline& pipeline, PipelineData* pPipeline);
 
     private:
         vk::PhysicalDevice m_VKDevice;
@@ -301,6 +311,7 @@ namespace Glory
         vk::CommandPool m_GraphicsCommandPool;
 
         vk::PhysicalDeviceFeatures m_Features;
+        vk::PhysicalDeviceFeatures2 m_Features2;
         vk::PhysicalDeviceProperties m_DeviceProperties;
 
         GraphicsResources<VK_Buffer> m_Buffers;
