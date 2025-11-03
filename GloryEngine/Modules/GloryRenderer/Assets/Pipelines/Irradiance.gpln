@@ -3,3 +3,5 @@ Shaders: [34, 32]
 Settings:
   CullFace: Back
   PrimitiveType: Triangles
+  DepthTestEnabled: true
+  DepthWriteEnabled: true

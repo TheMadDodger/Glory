@@ -8,6 +8,8 @@
 
 #include <optional>
 
+#include <BitSet.h>
+
 namespace Glory
 {
     struct VK_Buffer
@@ -97,6 +99,7 @@ namespace Glory
 
         vk::CullModeFlags m_VKCullMode;
         vk::PrimitiveTopology m_VKPrimitiveTopology;
+        Utils::BitSet m_SettingToggles;
     };
 
     struct VK_DescriptorSetLayout
@@ -235,6 +238,7 @@ namespace Glory
             uint32_t vertexCount, uint32_t indexCount) override;
 
         virtual TextureHandle CreateTexture(TextureData* pTexture) override;
+        virtual TextureHandle CreateTexture(CubemapData* pCubemap) override;
         virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) override;
         virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info) override;
         virtual TextureHandle GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index) override;

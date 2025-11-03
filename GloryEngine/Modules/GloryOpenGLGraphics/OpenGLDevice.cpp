@@ -9,6 +9,7 @@
 #include <PipelineData.h>
 #include <ImageData.h>
 #include <TextureData.h>
+#include <CubemapData.h>
 #include <FileData.h>
 
 namespace Glory
@@ -468,6 +469,12 @@ namespace Glory
 		else glDisable(GL_CULL_FACE);
 		glDisable(GL_SCISSOR_TEST);
 
+		if (glPipeline->m_SettingToggles.IsSet(PipelineData::DepthTestEnable))
+			glEnable(GL_DEPTH_TEST);
+		else
+			glDisable(GL_DEPTH_TEST);
+		glDepthMask(glPipeline->m_SettingToggles.IsSet(PipelineData::DepthWriteEnable));
+
 		m_GLCurrentPrimitives = glPipeline->m_GLPrimitiveType;
 	}
 
@@ -540,7 +547,7 @@ namespace Glory
 
 				glActiveTexture(GL_TEXTURE0 + glSetLayout->m_BindingIndices[index]);
 				OpenGLGraphicsModule::LogGLError(glGetError());
-				glBindTexture(GL_TEXTURE_2D, glTexture ? glTexture->m_GLTextureID : 0);
+				glBindTexture(glTexture ? glTexture->m_GLTextureType : GL_TEXTURE_2D, glTexture ? glTexture->m_GLTextureID : 0);
 				OpenGLGraphicsModule::LogGLError(glGetError());
 
 				glActiveTexture(GL_TEXTURE0);
@@ -1027,7 +1034,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_MAX_LOD, sampler.MaxLOD);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_LOD_BIAS, 0.0);
+		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_LOD_BIAS, sampler.MipLODBias);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		float aniso = 0.0f;
@@ -1042,6 +1049,84 @@ namespace Glory
 
 		std::stringstream str;
 		str << "OpenGLDevice: Texture " << handle << " created.";
+		Debug().LogInfo(str.str());
+
+		return handle;
+	}
+
+	TextureHandle OpenGLDevice::CreateTexture(CubemapData* pCubemap)
+	{
+		ImageData* pImageData = pCubemap->GetImageData(&m_pModule->GetEngine()->GetAssetManager(), 0);
+		if (!pImageData) return NULL;
+
+		TextureHandle handle;
+		GL_Texture& texture = m_Textures.Emplace(handle, GL_Texture());
+		texture.m_GLTextureType = GL_TEXTURE_CUBE_MAP;
+
+		texture.m_GLFormat = Formats.at(pImageData->GetFormat());
+		texture.m_GLInternalFormat = pImageData->GetFormat() == PixelFormat::PF_Stencil ? GL_STENCIL_INDEX8 :
+			Formats.at(pImageData->GetInternalFormat());
+		texture.m_GLDataType = Datatypes.at(pImageData->GetDataType());
+
+		SamplerSettings& sampler = pCubemap->GetSamplerSettings();
+		texture.m_GLMinFilter = GetMinFilter(sampler.MipmapMode, sampler.MinFilter);
+		texture.m_GLMagFilter = Filters.at(sampler.MagFilter);
+		texture.m_GLTextureWrapS = Texturewraps.at(sampler.AddressModeU);
+		texture.m_GLTextureWrapT = Texturewraps.at(sampler.AddressModeV);
+		texture.m_GLTextureWrapR = Texturewraps.at(sampler.AddressModeW);
+
+		if (pImageData->GetBytesPerPixel() == 1)
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		glGenTextures(1, &texture.m_GLTextureID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glBindTexture(texture.m_GLTextureType, texture.m_GLTextureID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		for (unsigned int i = 0; i < 6; ++i)
+		{
+			ImageData* pImageData = pCubemap->GetImageData(&m_pModule->GetEngine()->GetAssetManager(), i);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, texture.m_GLInternalFormat,
+				(GLsizei)pImageData->GetWidth(), (GLsizei)pImageData->GetHeight(), 0, texture.m_GLFormat, texture.m_GLDataType, pImageData->GetPixels());
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+
+		glTexParameteri(texture.m_GLTextureType, GL_TEXTURE_MIN_FILTER, texture.m_GLMinFilter);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameteri(texture.m_GLTextureType, GL_TEXTURE_MAG_FILTER, texture.m_GLMagFilter);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameteri(texture.m_GLTextureType, GL_TEXTURE_WRAP_S, texture.m_GLTextureWrapS);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameteri(texture.m_GLTextureType, GL_TEXTURE_WRAP_T, texture.m_GLTextureWrapT);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameteri(texture.m_GLTextureType, GL_TEXTURE_WRAP_R, texture.m_GLTextureWrapR);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_MIN_LOD, sampler.MinLOD);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_MAX_LOD, sampler.MaxLOD);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_LOD_BIAS, sampler.MipLODBias);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		float aniso = 0.0f;
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		aniso = std::min(sampler.MaxAnisotropy, aniso);
+		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		if (sampler.MipmapMode != Filter::F_None)
+		{
+			glGenerateMipmap(texture.m_GLTextureType);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+
+		glBindTexture(texture.m_GLTextureType, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		std::stringstream str;
+		str << "OpenGLDevice: Texture(Cubemap) " << handle << " created.";
 		Debug().LogInfo(str.str());
 
 		return handle;
@@ -1095,7 +1180,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_MAX_LOD, sampler.MaxLOD);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_LOD_BIAS, 0.0);
+		glTexParameterf(texture.m_GLTextureType, GL_TEXTURE_LOD_BIAS, sampler.MipLODBias);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		float aniso = 0.0f;
@@ -1299,6 +1384,7 @@ namespace Glory
 		pipeline.m_RenderPass = renderPass;
 		pipeline.m_GLCullFace = GetGLCullFace(pPipeline->GetCullFace());
 		pipeline.m_GLPrimitiveType = PrimitiveTypes.at(pPipeline->GetPrimitiveType());
+		pipeline.m_SettingToggles = pPipeline->SettingsTogglesBitSet();
 
 		if (!CreatePipeline(pipeline, pPipeline))
 		{
@@ -1324,6 +1410,7 @@ namespace Glory
 
 		glPipeline->m_GLCullFace = GetGLCullFace(pPipeline->GetCullFace());
 		glPipeline->m_GLPrimitiveType = PrimitiveTypes.at(pPipeline->GetPrimitiveType());
+		glPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
 	}
 
 	void OpenGLDevice::RecreatePipeline(PipelineHandle pipeline, PipelineData* pPipeline)
@@ -1337,6 +1424,7 @@ namespace Glory
 
 		glPipeline->m_GLCullFace = GetGLCullFace(pPipeline->GetCullFace());
 		glPipeline->m_GLPrimitiveType = PrimitiveTypes.at(pPipeline->GetPrimitiveType());
+		glPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
 
 		for (auto& shader : glPipeline->m_Shaders)
 		{

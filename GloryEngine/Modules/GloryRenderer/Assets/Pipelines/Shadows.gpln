@@ -5,3 +5,5 @@ Features:
 Settings:
   CullFace: Front
   PrimitiveType: Triangles
+  DepthTestEnabled: true
+  DepthWriteEnabled: true

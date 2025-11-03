@@ -3,3 +3,5 @@ Shaders: [11, 12]
 Settings:
   CullFace: Back
   PrimitiveType: Lines
+  DepthTestEnabled: false
+  DepthWriteEnabled: false

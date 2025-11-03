@@ -10,8 +10,10 @@ namespace Glory::Utils
 	public:
 		BitSet(size_t capacity = 32, bool defaultOn = false);
 		BitSet(BitSet&& other) noexcept;
+		BitSet(const BitSet& other);
 		~BitSet();
 		void operator=(BitSet&& other) noexcept;
+		void operator=(const BitSet& other) noexcept;
 
 	public:
 		void Set(Element index);

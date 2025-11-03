@@ -38,6 +38,11 @@ namespace Glory
 		DrawMesh(commandBuffer, m_ScreenMesh);
 	}
 
+	void GraphicsDevice::DrawUnitCube(CommandBufferHandle commandBuffer)
+	{
+		DrawMesh(commandBuffer, m_UnitCubeMesh);
+	}
+
 	PipelineHandle GraphicsDevice::AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
 		std::vector<DescriptorSetLayoutHandle>&& descriptorSets, size_t stride,
 		const std::vector<AttributeType>& attributeTypes)
@@ -91,6 +96,21 @@ namespace Glory
 		{
 			TextureHandle newTexture = CreateTexture(pTexture);
 			iter = m_TextureHandles.emplace(pTexture->GetGPUUUID(), newTexture).first;
+			pTexture->SetDirty(false);
+			return newTexture;
+		}
+		return iter->second;
+	}
+
+	TextureHandle GraphicsDevice::AcquireCachedTexture(CubemapData* pCubemap)
+	{
+		auto iter = m_TextureHandles.find(pCubemap->GetGPUUUID());
+		if (iter == m_TextureHandles.end())
+		{
+			TextureHandle newTexture = CreateTexture(pCubemap);
+			iter = m_TextureHandles.emplace(pCubemap->GetGPUUUID(), newTexture).first;
+			pCubemap->SetDirty(false);
+			return newTexture;
 		}
 		return iter->second;
 	}
@@ -140,6 +160,48 @@ namespace Glory
 		BufferHandle buffer = CreateBuffer(sizeof(vertices), BufferType::BT_Vertex, BF_CopyDst);
 		AssignBuffer(buffer, vertices, sizeof(vertices));
 		m_ScreenMesh = CreateMesh({ buffer }, 6, 0, sizeof(glm::vec3), { AttributeType::Float3 });
+
+		static const float cubeVertices[] = {
+			-1.0f,-1.0f,-1.0f,
+			-1.0f,-1.0f, 1.0f,
+			-1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f,-1.0f,
+			-1.0f,-1.0f,-1.0f,
+			-1.0f, 1.0f,-1.0f,
+			1.0f,-1.0f, 1.0f,
+			-1.0f,-1.0f,-1.0f,
+			1.0f,-1.0f,-1.0f,
+			1.0f, 1.0f,-1.0f,
+			1.0f,-1.0f,-1.0f,
+			-1.0f,-1.0f,-1.0f,
+			-1.0f,-1.0f,-1.0f,
+			-1.0f, 1.0f, 1.0f,
+			-1.0f, 1.0f,-1.0f,
+			1.0f,-1.0f, 1.0f,
+			-1.0f,-1.0f, 1.0f,
+			-1.0f,-1.0f,-1.0f,
+			-1.0f, 1.0f, 1.0f,
+			-1.0f,-1.0f, 1.0f,
+			1.0f,-1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
+			1.0f,-1.0f,-1.0f,
+			1.0f, 1.0f,-1.0f,
+			1.0f,-1.0f,-1.0f,
+			1.0f, 1.0f, 1.0f,
+			1.0f,-1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f,-1.0f,
+			-1.0f, 1.0f,-1.0f,
+			1.0f, 1.0f, 1.0f,
+			-1.0f, 1.0f,-1.0f,
+			-1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
+			-1.0f, 1.0f, 1.0f,
+			1.0f,-1.0f, 1.0f
+		};
+		buffer = CreateBuffer(sizeof(cubeVertices), BufferType::BT_Vertex, BF_CopyDst);
+		AssignBuffer(buffer, cubeVertices, sizeof(cubeVertices));
+		m_UnitCubeMesh = CreateMesh({ buffer }, 36, 0, sizeof(glm::vec3), { AttributeType::Float3 });
 
 		TextureCreateInfo defaultTextureInfo;
 		defaultTextureInfo.m_Width = 1;

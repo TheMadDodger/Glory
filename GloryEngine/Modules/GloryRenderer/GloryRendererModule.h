@@ -145,8 +145,10 @@ namespace Glory
 		void PrepareBatches(const std::vector<PipelineBatch>& batches, std::vector<PipelineBatchData>& batchDatas);
 		void GenerateClusterSSBO(uint32_t cameraIndex, GraphicsDevice* pDevice, CameraRef camera, DescriptorSetHandle clusterSet);
 		void PrepareLineMesh(GraphicsDevice* pDevice);
+		void PrepareSkybox(GraphicsDevice* pDevice);
 
 		void ClusterPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex);
+		void SkyboxPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex);
 		void DynamicObjectsPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex);
 		void DynamicLateObjectsPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex);
 
@@ -177,6 +179,7 @@ namespace Glory
 		BufferHandle m_LightCameraDatasBuffer = 0;
 		BufferHandle m_RenderConstantsBuffer = 0;
 		BufferHandle m_PickingConstantsBuffer = 0;
+		BufferHandle m_SkyboxRenderConstantsBuffer = 0;
 		BufferHandle m_LineRenderConstantsBuffer = 0;
 		BufferHandle m_ClusterConstantsBuffer = 0;
 		BufferHandle m_DeferredConstantsBuffer = 0;
@@ -186,13 +189,18 @@ namespace Glory
 		BufferHandle m_SamplePointsDomeSSBO = 0;
 
 		/* Descriptor set layouts */
+		/* Global */
 		DescriptorSetLayoutHandle m_GlobalRenderSetLayout;
 		DescriptorSetLayoutHandle m_GlobalShadowRenderSetLayout;
 		DescriptorSetLayoutHandle m_GlobalPickingSetLayout;
+		DescriptorSetLayoutHandle m_GlobalSkyboxRenderSetLayout;
+		DescriptorSetLayoutHandle m_GlobalSkyboxSamplerSetLayout;
 		DescriptorSetLayoutHandle m_GlobalLineRenderSetLayout;
 		DescriptorSetLayoutHandle m_GlobalClusterSetLayout;
 		DescriptorSetLayoutHandle m_GlobalLightSetLayout;
 		DescriptorSetLayoutHandle m_GlobalSampleDomeSetLayout;
+
+		/* Individual */
 		DescriptorSetLayoutHandle m_CameraClusterSetLayout;
 		DescriptorSetLayoutHandle m_CameraLightSetLayout;
 		DescriptorSetLayoutHandle m_SSAOSamplersSetLayout;
@@ -206,14 +214,19 @@ namespace Glory
 		DescriptorSetLayoutHandle m_DisplayCopySamplerSetLayout;
 
 		/* Descriptor sets */
+		/* Global */
 		DescriptorSetHandle m_GlobalRenderSet;
 		DescriptorSetHandle m_GlobalShadowRenderSet;
 		DescriptorSetHandle m_GlobalPickingSet;
+		DescriptorSetHandle m_GlobalSkyboxRenderSet;
+		DescriptorSetHandle m_GlobalSkyboxSamplerSet = 0;
 		DescriptorSetHandle m_GlobalLineRenderSet;
 		DescriptorSetHandle m_GlobalClusterSet;
 		DescriptorSetHandle m_GlobalDeferredSet;
 		DescriptorSetHandle m_GlobalLightSet;
 		DescriptorSetHandle m_GlobalSampleDomeSet;
+
+		/* Individual */
 		DescriptorSetHandle m_SSAOCameraSet;
 		DescriptorSetHandle m_NoiseSamplerSet;
 
@@ -226,6 +239,7 @@ namespace Glory
 
 		/* Textures */
 		TextureHandle m_SampleNoiseTexture = 0;
+		TextureHandle m_SkyboxCubemap = 0;
 
 		/* Compute pipelines */
 		PipelineHandle m_ClusterGeneratorPipeline = 0;
@@ -234,6 +248,7 @@ namespace Glory
 
 		/* Effects pipelines */
 		PipelineHandle m_SSAOPipeline = 0;
+		PipelineHandle m_SkyboxPipeline = 0;
 
 		/* Shadow rendering */
 		PipelineHandle m_ShadowRenderPipeline = 0;

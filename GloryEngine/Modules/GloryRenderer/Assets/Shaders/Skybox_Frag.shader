@@ -2,13 +2,15 @@
 #version 450
 
 layout(location = 0) in vec3 TexCoords;
-layout(location = 2) out vec4 outColor;
-layout(location = 5) out vec4 outData;
+layout(location = 0) out uvec4 outID;
+layout(location = 1) out vec4 outColor;
+layout(location = 2) out vec4 outNormal;
 
-layout(binding = 0) uniform samplerCube skybox;
+layout(set = 1, binding = 0) uniform samplerCube Color;
 
 void main()
 {
-    outColor = texture(skybox, TexCoords);
-    outData.a = 0.0;
+    outID = uvec4(0);
+    outColor = texture(Color, TexCoords);
+    outNormal = vec4(0.0);
 }

@@ -15,6 +15,13 @@ namespace Glory
 	class PipelineData : public Resource
 	{
     public:
+        enum SettingBitsIndices : uint8_t
+        {
+            DepthTestEnable = 0,
+            DepthWriteEnable = 0,
+        };
+
+    public:
         /** @brief Constructor */
         PipelineData();
         /** @brief Destructor */
@@ -140,9 +147,9 @@ namespace Glory
         size_t TotalPropertiesByteSize() const;
 
         /** @brief Are settings dirty */
-        bool& SettingsDirty() { return m_SettingsDirty; };
+        bool& SettingsDirty() { return m_SettingsDirty; }
         /** @overload */
-        const bool& SettingsDirty() const { return m_SettingsDirty; };
+        const bool& SettingsDirty() const { return m_SettingsDirty; }
 
         /** @brief Face to cull */
         CullFace& GetCullFace() { return m_CullFace; }
@@ -153,6 +160,19 @@ namespace Glory
         PrimitiveType& GetPrimitiveType() { return m_PrimitiveType; }
         /** @overload */
         const PrimitiveType& GetPrimitiveType() const { return m_PrimitiveType; }
+
+        /** @brief Enable/disable depth test */
+        void SetDepthTestEnabled(bool enable);
+        /** @brief Is depth test enabled */
+        const bool DepthTestEnabled() const;
+
+        /** @brief Enable/disable depth write */
+        void SetDepthWriteEnabled(bool enable);
+        /** @brief Is depth write enabled */
+        const bool DepthWriteEnabled() const;
+
+        /** @brief BitSet containing state of toggelable settings */
+        const Utils::BitSet& SettingsTogglesBitSet() const { return m_SettingsToggles; }
 
     private:
         virtual void References(Engine*, std::vector<UUID>&) const override {}
@@ -177,5 +197,6 @@ namespace Glory
         bool m_SettingsDirty = false;
         CullFace m_CullFace = CullFace::Back;
         PrimitiveType m_PrimitiveType = PrimitiveType::Triangles;
+        Utils::BitSet m_SettingsToggles{ 32, true };
 	};
 }

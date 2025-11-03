@@ -11,13 +11,25 @@
 #include <ImageData.h>
 #include <MeshData.h>
 #include <TextureData.h>
+#include <CubemapData.h>
 #include <FileData.h>
 #include <EngineProfiler.h>
+
+#define LOAD_VK_EXT(f, t, str)\
+f = (t)m_LogicalDevice.getProcAddr(str);\
+if (f == nullptr)\
+{\
+	Debug().LogFatalError("Vulkan: Failed to get " str " address: Vulkan Error Code: "\
+	+ std::to_string((uint32_t)result));\
+	return;\
+}
 
 namespace Glory
 {
 	PFN_vkCmdSetCullMode PFNCmdSetCullModeEXT = nullptr;
 	PFN_vkCmdSetPrimitiveTopologyEXT PFNCmdSetPrimitiveTopologyEXT = nullptr;
+	PFN_vkCmdSetDepthTestEnableEXT PFNCmdSetDepthTestEnableEXT = nullptr;
+	PFN_vkCmdSetDepthWriteEnableEXT PFNCmdSetDepthWriteEnableEXT = nullptr;
 
 	constexpr size_t ShaderTypeFlagsCount = 6;
 	constexpr vk::ShaderStageFlagBits ShaderTypeFlags[ShaderTypeFlagsCount] = {
@@ -221,20 +233,10 @@ namespace Glory
 		m_GraphicsAndComputeQueue = m_LogicalDevice.getQueue(m_GraphicsAndComputeFamily.value(), 0);
 		m_PresentQueue = m_LogicalDevice.getQueue(m_PresentFamily.value(), 0);
 
-		PFNCmdSetCullModeEXT = (PFN_vkCmdSetCullModeEXT)m_LogicalDevice.getProcAddr("vkCmdSetCullModeEXT");
-		PFNCmdSetPrimitiveTopologyEXT = (PFN_vkCmdSetPrimitiveTopologyEXT)m_LogicalDevice.getProcAddr("vkCmdSetPrimitiveTopologyEXT");
-		if (PFNCmdSetCullModeEXT == nullptr)
-		{
-			Debug().LogFatalError("Vulkan: Failed to get vkCmdSetCullModeEXT address: Vulkan Error Code: "
-				+ std::to_string((uint32_t)result));
-			return;
-		}
-		if (PFNCmdSetPrimitiveTopologyEXT == nullptr)
-		{
-			Debug().LogFatalError("Vulkan: Failed to get vkCmdSetPrimitiveTopologyEXT address: Vulkan Error Code: "
-				+ std::to_string((uint32_t)result));
-			return;
-		}
+		LOAD_VK_EXT(PFNCmdSetCullModeEXT, PFN_vkCmdSetCullModeEXT, "vkCmdSetCullModeEXT");
+		LOAD_VK_EXT(PFNCmdSetPrimitiveTopologyEXT, PFN_vkCmdSetPrimitiveTopologyEXT, "vkCmdSetPrimitiveTopologyEXT");
+		LOAD_VK_EXT(PFNCmdSetDepthTestEnableEXT, PFN_vkCmdSetDepthTestEnableEXT, "vkCmdSetDepthTestEnableEXT");
+		LOAD_VK_EXT(PFNCmdSetDepthWriteEnableEXT, PFN_vkCmdSetDepthWriteEnableEXT, "vkCmdSetDepthWriteEnableEXT");
 
 		CreateGraphicsCommandPool();
 		AllocateFreeFences(10);
@@ -441,6 +443,8 @@ namespace Glory
 		if (vkPipeline->m_VKBindPoint != vk::PipelineBindPoint::eGraphics) return;
 		PFNCmdSetCullModeEXT(VkCommandBuffer(*vkCommandBuffer), VkCullModeFlags(vkPipeline->m_VKCullMode));
 		PFNCmdSetPrimitiveTopologyEXT(VkCommandBuffer(*vkCommandBuffer), VkPrimitiveTopology(vkPipeline->m_VKPrimitiveTopology));
+		PFNCmdSetDepthTestEnableEXT(VkCommandBuffer(*vkCommandBuffer), vkPipeline->m_SettingToggles.IsSet(PipelineData::DepthTestEnable));
+		PFNCmdSetDepthWriteEnableEXT(VkCommandBuffer(*vkCommandBuffer), vkPipeline->m_SettingToggles.IsSet(PipelineData::DepthWriteEnable));
 	}
 
 	void VulkanDevice::End(CommandBufferHandle commandBuffer)
@@ -1260,6 +1264,29 @@ namespace Glory
 		return CreateTexture(createInfo, pImage->GetPixels(), pImage->DataSize());
 	}
 
+	TextureHandle VulkanDevice::CreateTexture(CubemapData* pCubemap)
+	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateTexture" };
+		ImageData* pFaceImage = pCubemap->GetImageData(&m_pModule->GetEngine()->GetAssetManager(), 0);
+		if (!pFaceImage)
+		{
+			Debug().LogError("VulkanDevice::CreateTexture(TextureData): Could not get ImageData.");
+			return NULL;
+		}
+
+		TextureCreateInfo createInfo;
+		createInfo.m_Width = pFaceImage->GetWidth();
+		createInfo.m_Height = pFaceImage->GetHeight();
+		createInfo.m_ImageAspectFlags = IA_Color;
+		createInfo.m_ImageType = ImageType::IT_Cube;
+		createInfo.m_InternalFormat = pFaceImage->GetInternalFormat();
+		createInfo.m_PixelFormat = pFaceImage->GetFormat();
+		createInfo.m_Type = pFaceImage->GetDataType();
+		createInfo.m_SamplerSettings = pCubemap->GetSamplerSettings();
+
+		return CreateTexture(createInfo, pFaceImage->GetPixels(), pFaceImage->DataSize());
+	}
+
 	void EnsureSupportedFormat(vk::Format& format, vk::ImageViewCreateInfo& viewInfo)
 	{
 		switch (format)
@@ -1832,6 +1859,7 @@ namespace Glory
 		pipeline.m_VKBindPoint = vk::PipelineBindPoint::eGraphics;
 		pipeline.m_VKCullMode = GetVKCullMode(pPipeline->GetCullFace());
 		pipeline.m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
+		pipeline.m_SettingToggles = pPipeline->SettingsTogglesBitSet();
 		pipeline.m_VKDescriptorSetLayouts = std::move(vkDescriptorSetLayouts);
 		pipeline.m_VKPushConstantRanges = std::move(vkPushConstants);
 
@@ -1876,6 +1904,7 @@ namespace Glory
 
 		vkPipeline->m_VKCullMode = GetVKCullMode(pPipeline->GetCullFace());
 		vkPipeline->m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
+		vkPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
 	}
 
 	void VulkanDevice::RecreatePipeline(PipelineHandle pipeline, PipelineData* pPipeline)
@@ -1891,6 +1920,7 @@ namespace Glory
 
 		vkPipeline->m_VKCullMode = GetVKCullMode(pPipeline->GetCullFace());
 		vkPipeline->m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
+		vkPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
 
 		m_LogicalDevice.destroyPipeline(vkPipeline->m_VKPipeline);
 		m_LogicalDevice.destroyPipelineLayout(vkPipeline->m_VKLayout);
@@ -3202,8 +3232,8 @@ namespace Glory
 			.setBlendConstants({ 0.0f, 0.0f, 0.0f, 0.0f });
 
 		vk::PipelineDepthStencilStateCreateInfo depthStencil = vk::PipelineDepthStencilStateCreateInfo();
-		depthStencil.depthTestEnable = VK_TRUE;
-		depthStencil.depthWriteEnable = VK_TRUE;
+		depthStencil.depthTestEnable = pipeline.m_SettingToggles.IsSet(PipelineData::DepthTestEnable);
+		depthStencil.depthWriteEnable = pipeline.m_SettingToggles.IsSet(PipelineData::DepthWriteEnable);
 		depthStencil.depthCompareOp = vk::CompareOp::eLess;
 		depthStencil.depthBoundsTestEnable = VK_FALSE;
 		depthStencil.minDepthBounds = 0.0f; // Optional
@@ -3218,6 +3248,8 @@ namespace Glory
 			vk::DynamicState::eScissor,
 			vk::DynamicState::eCullMode,
 			vk::DynamicState::ePrimitiveTopology,
+			vk::DynamicState::eDepthTestEnable,
+			vk::DynamicState::eDepthWriteEnable,
 		};
 
 		vk::PipelineDynamicStateCreateInfo dynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()

@@ -8,10 +8,13 @@
 #include <PipelineManager.h>
 #include <MaterialManager.h>
 #include <AssetManager.h>
+#include <SceneManager.h>
+#include <GScene.h>
 
 #include <PipelineData.h>
 #include <MeshData.h>
 #include <TextureData.h>
+#include <CubemapData.h>
 
 #include <EngineProfiler.h>
 #include <random>
@@ -461,6 +464,10 @@ namespace Glory
 		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::CameraDatas },
 			{ BufferType::BT_Storage }, { STF_Vertex }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
 			m_GlobalLineRenderSetLayout, m_GlobalLineRenderSet, & m_LineRenderConstantsBuffer, STF_Vertex, 0, sizeof(uint32_t));
+		
+		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::CameraDatas },
+			{ BufferType::BT_Storage }, { STF_Vertex }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
+			m_GlobalSkyboxRenderSetLayout, m_GlobalSkyboxRenderSet, & m_SkyboxRenderConstantsBuffer, STF_Vertex, 0, sizeof(uint32_t));
 
 		assert(m_GlobalRenderSetLayout == m_GlobalShadowRenderSetLayout);
 
@@ -496,6 +503,7 @@ namespace Glory
 
 		m_PickingResultSetLayout = CreateBufferDescriptorLayout(pDevice, 1, { BufferBindingIndices::PickingResults }, { BT_Storage }, { STF_Compute });
 		m_PickingSamplerSetLayout = CreateSamplerDescriptorLayout(pDevice, 3, { 0, 1, 2 }, { STF_Compute }, { "ObjectID", "Normal", "Depth" });
+		m_GlobalSkyboxSamplerSetLayout = CreateSamplerDescriptorLayout(pDevice, 1, { 0 }, { STF_Fragment }, { "Skybox" });
 
 		ResetLightDistances = new uint32_t[MAX_LIGHTS];
 		for (size_t i = 0; i < MAX_LIGHTS; ++i)
@@ -687,6 +695,14 @@ namespace Glory
 					{ m_GlobalClusterSetLayout, m_GlobalSampleDomeSetLayout, m_SSAOSamplersSetLayout, m_NoiseSamplerSetLayout },
 					sizeof(glm::vec3), { AttributeType::Float3 });
 			}
+			if (!m_SkyboxPipeline)
+			{
+				const UUID skyboxPipeline = settings.Value<uint64_t>("Skybox Pipeline");
+				PipelineData* pPipeline = pipelines.GetPipelineData(skyboxPipeline);
+				m_SkyboxPipeline = pDevice->CreatePipeline(uniqueCameraData.m_RenderPasses[0], pPipeline,
+					{ m_GlobalSkyboxRenderSetLayout, m_GlobalSkyboxSamplerSetLayout },
+					sizeof(glm::vec3), { AttributeType::Float3 });
+			}
 			if (!m_LineRenderPipeline)
 			{
 				const UUID lineRenderPipeline = settings.Value<uint64_t>("Lines Pipeline");
@@ -750,6 +766,7 @@ namespace Glory
 			const RenderPassHandle& renderPass = uniqueCameraData.m_RenderPasses[m_CurrentFrameIndex];
 			pDevice->SetRenderPassClear(renderPass, camera.GetClearColor());
 			pDevice->BeginRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex], renderPass);
+			SkyboxPass(m_FrameCommandBuffers[m_CurrentFrameIndex], static_cast<uint32_t>(i));
 			DynamicObjectsPass(m_FrameCommandBuffers[m_CurrentFrameIndex], static_cast<uint32_t>(i));
 
 			if (m_LineVertexCount)
@@ -1272,7 +1289,8 @@ namespace Glory
 		{
 			const UUID shadowsPipeline = settings.Value<uint64_t>("Shadows Pipeline");
 			PipelineData* pPipeline = pipelines.GetPipelineData(shadowsPipeline);
-			m_ShadowRenderPipeline = pDevice->CreatePipeline(m_ShadowsPasses[0], pPipeline, {m_GlobalShadowRenderSetLayout, m_ObjectDataSetLayout }, sizeof(DefaultVertex3D),
+			m_ShadowRenderPipeline = pDevice->CreatePipeline(m_ShadowsPasses[0], pPipeline,
+				{m_GlobalShadowRenderSetLayout, m_ObjectDataSetLayout }, sizeof(DefaultVertex3D),
 				{ AttributeType::Float3, AttributeType::Float3, AttributeType::Float3,
 				AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 });
 		}
@@ -1362,6 +1380,7 @@ namespace Glory
 		PrepareBatches(m_DynamicPipelineRenderDatas, m_DynamicBatchData);
 		PrepareBatches(m_DynamicLatePipelineRenderDatas, m_DynamicLateBatchData);
 		PrepareLineMesh(pDevice);
+		PrepareSkybox(pDevice);
 	}
 
 	void GloryRendererModule::PrepareBatches(const std::vector<PipelineBatch>& batches, std::vector<PipelineBatchData>& batchDatas)
@@ -1637,6 +1656,34 @@ namespace Glory
 		}
 	}
 
+	void GloryRendererModule::PrepareSkybox(GraphicsDevice* pDevice)
+	{
+		GScene* pActiveScene = m_pEngine->GetSceneManager()->GetActiveScene();
+		if (!pActiveScene) return;
+		const UUID skyboxID = pActiveScene->Settings().m_LightingSettings.m_Skybox;
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(skyboxID);
+		if (!pResource)
+		{
+			m_SkyboxCubemap = 0;
+			return;
+		}
+		CubemapData* pCubemap = static_cast<CubemapData*>(pResource);
+		TextureHandle previousCubemapTexture = m_SkyboxCubemap;
+		const bool cubemapDirty = pCubemap->IsDirty();
+		m_SkyboxCubemap = pDevice->AcquireCachedTexture(pCubemap);
+		if (!m_SkyboxCubemap) return;
+		if (!m_GlobalSkyboxSamplerSet)
+		{
+			m_GlobalSkyboxSamplerSet = CreateSamplerDescriptorSet(pDevice, 1, { m_SkyboxCubemap }, m_GlobalSkyboxSamplerSetLayout);
+			return;
+		}
+		if (!cubemapDirty && previousCubemapTexture == m_SkyboxCubemap) return;
+
+		DescriptorSetUpdateInfo dsUpdateInfo;
+		dsUpdateInfo.m_Samplers = { { m_SkyboxCubemap, 0 } };
+		pDevice->UpdateDescriptorSet(m_GlobalSkyboxSamplerSet, dsUpdateInfo);
+	}
+
 	void GloryRendererModule::ClusterPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::ClusterPass" };
@@ -1662,6 +1709,28 @@ namespace Glory
 		else
 			pDevice->AssignBuffer(m_ClusterConstantsBuffer, &constants, sizeof(ClusterConstants));
 		pDevice->Dispatch(commandBuffer, 1, 1, 6);
+		pDevice->EndPipeline(commandBuffer);
+	}
+
+	void GloryRendererModule::SkyboxPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex)
+	{
+		GScene* pActiveScene = m_pEngine->GetSceneManager()->GetActiveScene();
+		if (!pActiveScene) return;
+		const UUID skyboxID = pActiveScene->Settings().m_LightingSettings.m_Skybox;
+		if (!skyboxID) return;
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(skyboxID);
+		if (!pResource) return;
+		CubemapData* pCubemap = static_cast<CubemapData*>(pResource);
+
+		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::SkyboxPass" };
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+		pDevice->BeginPipeline(commandBuffer, m_SkyboxPipeline);
+		pDevice->BindDescriptorSets(commandBuffer, m_SkyboxPipeline, { m_GlobalSkyboxRenderSet, m_GlobalSkyboxSamplerSet });
+		if (!m_SkyboxRenderConstantsBuffer)
+			pDevice->PushConstants(commandBuffer, m_SkyboxPipeline, 0, sizeof(uint32_t), &cameraIndex, STF_Vertex);
+		else
+			pDevice->AssignBuffer(m_SkyboxRenderConstantsBuffer, &cameraIndex, sizeof(uint32_t));
+		pDevice->DrawUnitCube(commandBuffer);
 		pDevice->EndPipeline(commandBuffer);
 	}
 

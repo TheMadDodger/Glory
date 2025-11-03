@@ -1,5 +1,7 @@
 Type: "Skybox"
 Shaders: [31, 32]
 Settings:
-  CullFace: Back
+  CullFace: Front
   PrimitiveType: Triangles
+  DepthTestEnabled: false
+  DepthWriteEnabled: false

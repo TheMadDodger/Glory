@@ -118,9 +118,9 @@ namespace Glory
 	class Resource;
 	class MeshData;
 	class TextureData;
+	class CubemapData;
 	class FileData;
 	class MaterialData;
-	class CubemapData;
 	class TextureAtlas;
 	class PipelineData;
 
@@ -429,6 +429,11 @@ namespace Glory
 		 * @param commandBuffer The handle to the command buffer
 		 */
 		void DrawQuad(CommandBufferHandle commandBuffer);
+		/**
+		 * @brief Record commands to draw a basic unit cube, this cube consists of 36 vec3's for positions
+		 * @param commandBuffer The handle to the command buffer
+		 */
+		void DrawUnitCube(CommandBufferHandle commandBuffer);
 
 		/**
 		 * @brief Push a pipeline barrier onto a command buffer
@@ -495,6 +500,11 @@ namespace Glory
 		 * @param pTexture The texture data to create a texture from
 		 */
 		TextureHandle AcquireCachedTexture(TextureData* pTexture);
+		/**
+		 * @brief Acquire a cached cubemap texture or create a new one
+		 * @param pTexture The cubemap data to create a texture from
+		 */
+		TextureHandle AcquireCachedTexture(CubemapData* pCubemap);
 		bool CachedTextureExists(TextureData* pTexture);
 
 	public: /* Resource management */
@@ -565,6 +575,11 @@ namespace Glory
 		 * @param pTexture Texture data
 		 */
 		virtual TextureHandle CreateTexture(TextureData* pTexture) = 0;
+		/**
+		 * @brief Create a cubemap texture on this device
+		 * @param pCubemap Cubemap data
+		 */
+		virtual TextureHandle CreateTexture(CubemapData* pCubemap) = 0;
 		/**
 		 * @brief Create a texture on this device
 		 * @param textureInfo Texture creation info
@@ -725,6 +740,7 @@ namespace Glory
 		Module* m_pModule;
 		APIFeatures m_APIFeatures;
 		MeshHandle m_ScreenMesh;
+		MeshHandle m_UnitCubeMesh;
 		TextureHandle m_DefaultTexture;
 
 	private:

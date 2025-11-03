@@ -213,7 +213,7 @@ namespace Glory
 		container.Write(m_TotalPropertiesByteSize);
 
 		/* Write settings */
-		container.Write(m_CullFace).Write(m_PrimitiveType);
+		container.Write(m_CullFace).Write(m_PrimitiveType).Write(m_SettingsToggles);
 	}
 
 	void PipelineData::Deserialize(BinaryStream& container)
@@ -268,7 +268,7 @@ namespace Glory
 		container.Read(m_TotalPropertiesByteSize);
 
 		/* Read settings */
-		container.Read(m_CullFace).Read(m_PrimitiveType);
+		container.Read(m_CullFace).Read(m_PrimitiveType).Read(m_SettingsToggles);
 	}
 
 	void PipelineData::LoadIntoMaterial(MaterialData* pMaterial) const
@@ -341,5 +341,24 @@ namespace Glory
 	size_t PipelineData::TotalPropertiesByteSize() const
 	{
 		return m_TotalPropertiesByteSize;
+	}
+
+	void PipelineData::SetDepthTestEnabled(bool enable)
+	{
+		m_SettingsToggles.Set(SettingBitsIndices::DepthTestEnable, enable);
+	}
+	const bool PipelineData::DepthTestEnabled() const
+	{
+		return m_SettingsToggles.IsSet(SettingBitsIndices::DepthTestEnable);
+	}
+
+	void PipelineData::SetDepthWriteEnabled(bool enable)
+	{
+		m_SettingsToggles.Set(SettingBitsIndices::DepthWriteEnable, enable);
+	}
+
+	const bool PipelineData::DepthWriteEnabled() const
+	{
+		return m_SettingsToggles.IsSet(SettingBitsIndices::DepthWriteEnable);
 	}
 }

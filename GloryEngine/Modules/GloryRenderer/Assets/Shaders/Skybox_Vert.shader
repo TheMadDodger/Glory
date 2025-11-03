@@ -1,13 +1,24 @@
 #type vert
 #version 450
 
-layout (location = 0) in vec3 aPos;
+layout (location = 0) in vec3 InPosition;
 layout (location = 0) out vec3 TexCoords;
 
-#include "internal/ObjectData.glsl"
+#ifdef PUSH_CONSTANTS
+layout(push_constant) uniform SkyboxRenderConstantsUBO
+#else
+layout(set = 0, std140, binding = 0) readonly uniform SkyboxRenderConstantsUBO
+#endif
+{
+	uint CameraIndex;
+} Constants;
+
+
+#include "Internal/Camera.glsl"
 
 void main()
 {
-    TexCoords = aPos;
-    gl_Position = Object.proj * Object.view * vec4(aPos, 1.0);
+    CameraData camera = CurrentCamera();
+    TexCoords = InPosition;
+    gl_Position = camera.Projection*mat4(mat3(camera.View))*vec4(InPosition, 1.0);
 }

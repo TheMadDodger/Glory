@@ -46,6 +46,8 @@ namespace Glory::Editor
 		auto settings = file["Settings"];
 		pPipeline->GetCullFace() = settings["CullFace"].AsEnum<CullFace>(CullFace::Back);
 		pPipeline->GetPrimitiveType() = settings["PrimitiveType"].AsEnum<PrimitiveType>(PrimitiveType::Triangles);
+		pPipeline->SetDepthTestEnabled(settings["DepthTestEnabled"].As<bool>(true));
+		pPipeline->SetDepthWriteEnabled(settings["DepthWriteEnabled"].As<bool>(true));
 
 		return ImportedResource(path, pPipeline);
 	}
@@ -75,6 +77,8 @@ namespace Glory::Editor
 			settings.SetMap();
 		settings["CullFace"].SetEnum<CullFace>(pResource->GetCullFace());
 		settings["PrimitiveType"].SetEnum<PrimitiveType>(pResource->GetPrimitiveType());
+		settings["DepthTestEnabled"].Set<bool>(pResource->DepthTestEnabled());
+		settings["DepthWriteEnabled"].Set<bool>(pResource->DepthWriteEnabled());
 
 		file.Save();
 		return true;

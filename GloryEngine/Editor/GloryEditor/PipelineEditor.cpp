@@ -236,6 +236,8 @@ namespace Glory::Editor
 					settings.SetMap();
 				settingsChanged |= EditorUI::InputEnum<CullFace>(file, settings["CullFace"].Path());
 				settingsChanged |= EditorUI::InputEnum<PrimitiveType>(file, settings["PrimitiveType"].Path());
+				settingsChanged |= EditorUI::CheckBox(file, settings["DepthTestEnabled"].Path());
+				settingsChanged |= EditorUI::CheckBox(file, settings["DepthWriteEnabled"].Path());
 			}
 			ImGui::PopID();
 		}
@@ -245,6 +247,8 @@ namespace Glory::Editor
 			auto settings = file["Settings"];
 			pPipelineData->GetCullFace() = settings["CullFace"].AsEnum<CullFace>(CullFace::Back);
 			pPipelineData->GetPrimitiveType() = settings["PrimitiveType"].AsEnum<PrimitiveType>(PrimitiveType::Triangles);
+			pPipelineData->SetDepthTestEnabled(settings["DepthTestEnabled"].As<bool>());
+			pPipelineData->SetDepthWriteEnabled(settings["DepthWriteEnabled"].As<bool>());
 			pPipelineData->SettingsDirty() = true;
 		}
 

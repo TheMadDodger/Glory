@@ -2,6 +2,8 @@
 #include <GraphicsDevice.h>
 #include <Glory.h>
 
+#include <BitSet.h>
+
 namespace Glory
 {
     struct GL_Buffer
@@ -81,6 +83,7 @@ namespace Glory
         uint32_t m_GLProgramID;
         uint32_t m_GLCullFace;
         uint32_t m_GLPrimitiveType;
+        Utils::BitSet m_SettingToggles;
     };
 
     struct GL_DescriptorSetLayout
@@ -164,6 +167,7 @@ namespace Glory
             uint32_t vertexCount, uint32_t indexCount) override;
 
         virtual TextureHandle CreateTexture(TextureData* pTexture) override;
+        virtual TextureHandle CreateTexture(CubemapData* pCubemap) override;
         virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) override;
         virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info) override;
         virtual TextureHandle GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index) override;
