@@ -238,6 +238,7 @@ namespace Glory::Editor
 				settingsChanged |= EditorUI::InputEnum<PrimitiveType>(file, settings["PrimitiveType"].Path());
 				settingsChanged |= EditorUI::CheckBox(file, settings["DepthTestEnabled"].Path());
 				settingsChanged |= EditorUI::CheckBox(file, settings["DepthWriteEnabled"].Path());
+				settingsChanged |= EditorUI::InputEnum<CompareOp>(file, settings["DepthCompareOp"].Path());
 			}
 			ImGui::PopID();
 		}
@@ -249,6 +250,7 @@ namespace Glory::Editor
 			pPipelineData->GetPrimitiveType() = settings["PrimitiveType"].AsEnum<PrimitiveType>(PrimitiveType::Triangles);
 			pPipelineData->SetDepthTestEnabled(settings["DepthTestEnabled"].As<bool>());
 			pPipelineData->SetDepthWriteEnabled(settings["DepthWriteEnabled"].As<bool>());
+			pPipelineData->GetDepthCompareOp() = settings["DepthCompareOp"].AsEnum<CompareOp>();
 			pPipelineData->SettingsDirty() = true;
 		}
 

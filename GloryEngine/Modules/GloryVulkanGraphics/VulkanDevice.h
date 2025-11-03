@@ -100,6 +100,7 @@ namespace Glory
         vk::CullModeFlags m_VKCullMode;
         vk::PrimitiveTopology m_VKPrimitiveTopology;
         Utils::BitSet m_SettingToggles;
+        vk::CompareOp m_VKDepthCompareOp;
     };
 
     struct VK_DescriptorSetLayout

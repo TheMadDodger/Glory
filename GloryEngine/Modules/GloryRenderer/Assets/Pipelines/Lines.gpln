@@ -5,3 +5,4 @@ Settings:
   PrimitiveType: Lines
   DepthTestEnabled: false
   DepthWriteEnabled: false
+  DepthCompareOp: OP_Less

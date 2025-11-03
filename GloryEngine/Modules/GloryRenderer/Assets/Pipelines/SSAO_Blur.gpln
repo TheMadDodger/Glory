@@ -5,3 +5,4 @@ Settings:
   PrimitiveType: Triangles
   DepthTestEnabled: true
   DepthWriteEnabled: true
+  DepthCompareOp: OP_Less

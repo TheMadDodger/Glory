@@ -48,6 +48,7 @@ namespace Glory::Editor
 		pPipeline->GetPrimitiveType() = settings["PrimitiveType"].AsEnum<PrimitiveType>(PrimitiveType::Triangles);
 		pPipeline->SetDepthTestEnabled(settings["DepthTestEnabled"].As<bool>(true));
 		pPipeline->SetDepthWriteEnabled(settings["DepthWriteEnabled"].As<bool>(true));
+		pPipeline->GetDepthCompareOp() = settings["DepthCompareOp"].AsEnum<CompareOp>(CompareOp::OP_Less);
 
 		return ImportedResource(path, pPipeline);
 	}
@@ -79,6 +80,7 @@ namespace Glory::Editor
 		settings["PrimitiveType"].SetEnum<PrimitiveType>(pResource->GetPrimitiveType());
 		settings["DepthTestEnabled"].Set<bool>(pResource->DepthTestEnabled());
 		settings["DepthWriteEnabled"].Set<bool>(pResource->DepthWriteEnabled());
+		settings["DepthCompareOp"].SetEnum<CompareOp>(pResource->GetDepthCompareOp());
 
 		file.Save();
 		return true;

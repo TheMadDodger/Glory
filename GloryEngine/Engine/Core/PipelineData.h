@@ -171,6 +171,11 @@ namespace Glory
         /** @brief Is depth write enabled */
         const bool DepthWriteEnabled() const;
 
+        /** @brief Depth compare operator */
+        CompareOp& GetDepthCompareOp() { return m_DepthCompare; }
+        /** @overload */
+        const CompareOp& GetDepthCompareOp() const { return m_DepthCompare; }
+
         /** @brief BitSet containing state of toggelable settings */
         const Utils::BitSet& SettingsTogglesBitSet() const { return m_SettingsToggles; }
 
@@ -197,6 +202,7 @@ namespace Glory
         bool m_SettingsDirty = false;
         CullFace m_CullFace = CullFace::Back;
         PrimitiveType m_PrimitiveType = PrimitiveType::Triangles;
+        CompareOp m_DepthCompare = CompareOp::OP_Less;
         Utils::BitSet m_SettingsToggles{ 32, true };
 	};
 }

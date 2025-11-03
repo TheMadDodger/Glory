@@ -30,6 +30,7 @@ namespace Glory
 	PFN_vkCmdSetPrimitiveTopologyEXT PFNCmdSetPrimitiveTopologyEXT = nullptr;
 	PFN_vkCmdSetDepthTestEnableEXT PFNCmdSetDepthTestEnableEXT = nullptr;
 	PFN_vkCmdSetDepthWriteEnableEXT PFNCmdSetDepthWriteEnableEXT = nullptr;
+	PFN_vkCmdSetDepthCompareOpEXT PFNCmdSetDepthCompareOpEXT = nullptr;
 
 	constexpr size_t ShaderTypeFlagsCount = 6;
 	constexpr vk::ShaderStageFlagBits ShaderTypeFlags[ShaderTypeFlagsCount] = {
@@ -237,6 +238,7 @@ namespace Glory
 		LOAD_VK_EXT(PFNCmdSetPrimitiveTopologyEXT, PFN_vkCmdSetPrimitiveTopologyEXT, "vkCmdSetPrimitiveTopologyEXT");
 		LOAD_VK_EXT(PFNCmdSetDepthTestEnableEXT, PFN_vkCmdSetDepthTestEnableEXT, "vkCmdSetDepthTestEnableEXT");
 		LOAD_VK_EXT(PFNCmdSetDepthWriteEnableEXT, PFN_vkCmdSetDepthWriteEnableEXT, "vkCmdSetDepthWriteEnableEXT");
+		LOAD_VK_EXT(PFNCmdSetDepthCompareOpEXT, PFN_vkCmdSetDepthCompareOpEXT, "vkCmdSetDepthCompareOpEXT");
 
 		CreateGraphicsCommandPool();
 		AllocateFreeFences(10);
@@ -445,6 +447,7 @@ namespace Glory
 		PFNCmdSetPrimitiveTopologyEXT(VkCommandBuffer(*vkCommandBuffer), VkPrimitiveTopology(vkPipeline->m_VKPrimitiveTopology));
 		PFNCmdSetDepthTestEnableEXT(VkCommandBuffer(*vkCommandBuffer), vkPipeline->m_SettingToggles.IsSet(PipelineData::DepthTestEnable));
 		PFNCmdSetDepthWriteEnableEXT(VkCommandBuffer(*vkCommandBuffer), vkPipeline->m_SettingToggles.IsSet(PipelineData::DepthWriteEnable));
+		PFNCmdSetDepthCompareOpEXT(VkCommandBuffer(*vkCommandBuffer), VkCompareOp(vkPipeline->m_VKDepthCompareOp));
 	}
 
 	void VulkanDevice::End(CommandBufferHandle commandBuffer)
@@ -1816,6 +1819,30 @@ namespace Glory
 		}
 	}
 
+	vk::CompareOp GetVulkanCompareOp(const CompareOp& op)
+	{
+		switch (op)
+		{
+		case Glory::CompareOp::OP_Never:
+			return vk::CompareOp::eNever;
+		case Glory::CompareOp::OP_Less:
+			return vk::CompareOp::eLess;
+		case Glory::CompareOp::OP_Equal:
+			return vk::CompareOp::eEqual;
+		case Glory::CompareOp::OP_LessOrEqual:
+			return vk::CompareOp::eLessOrEqual;
+		case Glory::CompareOp::OP_Greater:
+			return vk::CompareOp::eGreater;
+		case Glory::CompareOp::OP_NotEqual:
+			return vk::CompareOp::eNotEqual;
+		case Glory::CompareOp::OP_GreaterOrEqual:
+			return vk::CompareOp::eGreaterOrEqual;
+		case Glory::CompareOp::OP_Always:
+			return vk::CompareOp::eAlways;
+		}
+		return (vk::CompareOp)0;
+	}
+
 	PipelineHandle VulkanDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
 		std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride,
 		const std::vector<AttributeType>& attributeTypes)
@@ -1859,6 +1886,7 @@ namespace Glory
 		pipeline.m_VKBindPoint = vk::PipelineBindPoint::eGraphics;
 		pipeline.m_VKCullMode = GetVKCullMode(pPipeline->GetCullFace());
 		pipeline.m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
+		pipeline.m_VKDepthCompareOp = GetVulkanCompareOp(pPipeline->GetDepthCompareOp());
 		pipeline.m_SettingToggles = pPipeline->SettingsTogglesBitSet();
 		pipeline.m_VKDescriptorSetLayouts = std::move(vkDescriptorSetLayouts);
 		pipeline.m_VKPushConstantRanges = std::move(vkPushConstants);
@@ -1905,6 +1933,7 @@ namespace Glory
 		vkPipeline->m_VKCullMode = GetVKCullMode(pPipeline->GetCullFace());
 		vkPipeline->m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
 		vkPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
+		vkPipeline->m_VKDepthCompareOp = GetVulkanCompareOp(pPipeline->GetDepthCompareOp());
 	}
 
 	void VulkanDevice::RecreatePipeline(PipelineHandle pipeline, PipelineData* pPipeline)
@@ -1921,6 +1950,7 @@ namespace Glory
 		vkPipeline->m_VKCullMode = GetVKCullMode(pPipeline->GetCullFace());
 		vkPipeline->m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
 		vkPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
+		vkPipeline->m_VKDepthCompareOp = GetVulkanCompareOp(pPipeline->GetDepthCompareOp());
 
 		m_LogicalDevice.destroyPipeline(vkPipeline->m_VKPipeline);
 		m_LogicalDevice.destroyPipelineLayout(vkPipeline->m_VKLayout);
@@ -3234,7 +3264,7 @@ namespace Glory
 		vk::PipelineDepthStencilStateCreateInfo depthStencil = vk::PipelineDepthStencilStateCreateInfo();
 		depthStencil.depthTestEnable = pipeline.m_SettingToggles.IsSet(PipelineData::DepthTestEnable);
 		depthStencil.depthWriteEnable = pipeline.m_SettingToggles.IsSet(PipelineData::DepthWriteEnable);
-		depthStencil.depthCompareOp = vk::CompareOp::eLess;
+		depthStencil.depthCompareOp = pipeline.m_VKDepthCompareOp;
 		depthStencil.depthBoundsTestEnable = VK_FALSE;
 		depthStencil.minDepthBounds = 0.0f; // Optional
 		depthStencil.maxDepthBounds = 1.0f; // Optional
@@ -3250,10 +3280,11 @@ namespace Glory
 			vk::DynamicState::ePrimitiveTopology,
 			vk::DynamicState::eDepthTestEnable,
 			vk::DynamicState::eDepthWriteEnable,
+			vk::DynamicState::eDepthCompareOp,
 		};
 
 		vk::PipelineDynamicStateCreateInfo dynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
-			.setDynamicStateCount(4)
+			.setDynamicStateCount(7)
 			.setPDynamicStates(dynamicStates);
 
 		vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()

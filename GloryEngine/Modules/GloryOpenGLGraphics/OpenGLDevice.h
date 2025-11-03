@@ -83,6 +83,7 @@ namespace Glory
         uint32_t m_GLProgramID;
         uint32_t m_GLCullFace;
         uint32_t m_GLPrimitiveType;
+        uint32_t m_GLDepthFunc;
         Utils::BitSet m_SettingToggles;
     };
 

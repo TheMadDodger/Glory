@@ -213,7 +213,8 @@ namespace Glory
 		container.Write(m_TotalPropertiesByteSize);
 
 		/* Write settings */
-		container.Write(m_CullFace).Write(m_PrimitiveType).Write(m_SettingsToggles);
+		container.Write(m_CullFace).Write(m_PrimitiveType)
+			.Write(m_SettingsToggles).Write(m_DepthCompare);
 	}
 
 	void PipelineData::Deserialize(BinaryStream& container)
@@ -268,7 +269,8 @@ namespace Glory
 		container.Read(m_TotalPropertiesByteSize);
 
 		/* Read settings */
-		container.Read(m_CullFace).Read(m_PrimitiveType).Read(m_SettingsToggles);
+		container.Read(m_CullFace).Read(m_PrimitiveType)
+			.Read(m_SettingsToggles).Read(m_DepthCompare);
 	}
 
 	void PipelineData::LoadIntoMaterial(MaterialData* pMaterial) const

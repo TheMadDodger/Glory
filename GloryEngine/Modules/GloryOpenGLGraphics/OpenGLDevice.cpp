@@ -270,6 +270,17 @@ namespace Glory
 		{ DataType::DT_Double, GL_DOUBLE },
 	};
 
+	const std::map<CompareOp, GLenum> CompareOps = {
+		{ CompareOp::OP_Never, GL_NEVER },
+		{ CompareOp::OP_Less, GL_LESS },
+		{ CompareOp::OP_Equal, GL_EQUAL },
+		{ CompareOp::OP_LessOrEqual, GL_LEQUAL },
+		{ CompareOp::OP_Greater, GL_GREATER },
+		{ CompareOp::OP_NotEqual, GL_NOTEQUAL },
+		{ CompareOp::OP_GreaterOrEqual, GL_GEQUAL },
+		{ CompareOp::OP_Always, GL_ALWAYS },
+	};
+
 	GLint GetMinFilter(Filter mipMap, Filter minFilter)
 	{
 		switch (mipMap)
@@ -470,11 +481,13 @@ namespace Glory
 		glDisable(GL_SCISSOR_TEST);
 
 		if (glPipeline->m_SettingToggles.IsSet(PipelineData::DepthTestEnable))
+		{
 			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(glPipeline->m_GLDepthFunc);
+		}
 		else
 			glDisable(GL_DEPTH_TEST);
 		glDepthMask(glPipeline->m_SettingToggles.IsSet(PipelineData::DepthWriteEnable));
-
 		m_GLCurrentPrimitives = glPipeline->m_GLPrimitiveType;
 	}
 
@@ -1385,6 +1398,7 @@ namespace Glory
 		pipeline.m_GLCullFace = GetGLCullFace(pPipeline->GetCullFace());
 		pipeline.m_GLPrimitiveType = PrimitiveTypes.at(pPipeline->GetPrimitiveType());
 		pipeline.m_SettingToggles = pPipeline->SettingsTogglesBitSet();
+		pipeline.m_GLDepthFunc = CompareOps.at(pPipeline->GetDepthCompareOp());
 
 		if (!CreatePipeline(pipeline, pPipeline))
 		{
@@ -1411,6 +1425,7 @@ namespace Glory
 		glPipeline->m_GLCullFace = GetGLCullFace(pPipeline->GetCullFace());
 		glPipeline->m_GLPrimitiveType = PrimitiveTypes.at(pPipeline->GetPrimitiveType());
 		glPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
+		glPipeline->m_GLDepthFunc = CompareOps.at(pPipeline->GetDepthCompareOp());
 	}
 
 	void OpenGLDevice::RecreatePipeline(PipelineHandle pipeline, PipelineData* pPipeline)
@@ -1425,6 +1440,7 @@ namespace Glory
 		glPipeline->m_GLCullFace = GetGLCullFace(pPipeline->GetCullFace());
 		glPipeline->m_GLPrimitiveType = PrimitiveTypes.at(pPipeline->GetPrimitiveType());
 		glPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
+		glPipeline->m_GLDepthFunc = CompareOps.at(pPipeline->GetDepthCompareOp());
 
 		for (auto& shader : glPipeline->m_Shaders)
 		{
