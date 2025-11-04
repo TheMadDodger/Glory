@@ -40,6 +40,7 @@ namespace Glory::Editor
         std::vector<char> Source;
         std::vector<char> ProcessedSource;
         std::vector<std::string> Features;
+        std::vector<std::filesystem::path> Includes;
     };
 
     std::vector<std::filesystem::path> ShaderIncludeDirs;
@@ -77,6 +78,8 @@ namespace Glory::Editor
             return nullptr;
         }
 
+        shaderData.Includes.push_back(pathToFile);
+
         TemporaryShaderData includeShader;
         includeShader.Type = ShaderType::ST_Unknown;
 
@@ -107,6 +110,14 @@ namespace Glory::Editor
         const size_t currentSize = shaderData.ProcessedSource.size();
         shaderData.ProcessedSource.resize(currentSize + includeShader.ProcessedSource.size());
         std::memcpy(&shaderData.ProcessedSource[currentSize], includeShader.ProcessedSource.data(), includeShader.ProcessedSource.size());
+
+        if (!includeShader.Includes.empty())
+        {
+            const size_t includeCount = shaderData.Includes.size();
+            shaderData.Includes.resize(shaderData.Includes.size() + includeShader.Includes.size());
+            std::memcpy(&shaderData.Includes[includeCount], includeShader.Includes.data(), includeShader.Includes.size());
+        }
+
         return true;
     }
 
@@ -219,7 +230,7 @@ namespace Glory::Editor
         }
 
         return { path, new ShaderSourceData(shaderData.Type, std::move(shaderData.Source),
-            std::move(shaderData.ProcessedSource), std::move(shaderData.Features)) };
+            std::move(shaderData.ProcessedSource), std::move(shaderData.Features), std::move(shaderData.Includes)) };
     }
 
     void ShaderImporter::Initialize()

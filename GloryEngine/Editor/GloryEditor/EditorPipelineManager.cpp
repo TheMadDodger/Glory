@@ -417,7 +417,7 @@ namespace Glory::Editor
 		const auto time = std::filesystem::last_write_time(cachePath);
 		const uint64_t cacheWriteTime = std::chrono::duration_cast<std::chrono::seconds>(
 			time.time_since_epoch()).count();
-		return cacheWriteTime < shaderSource->TimeSinceLastWrite();
+		return shaderSource->IsOutdated(cacheWriteTime);
 	}
 
 	EditorPipeline* EditorPipelineManager::CompilePipelineForEditor(PipelineData* pPipeline)
@@ -472,6 +472,8 @@ namespace Glory::Editor
 			}
 
 			shaderc::CompileOptions options{};
+			options.SetOptimizationLevel(shaderc_optimization_level_performance);
+			options.SetGenerateDebugInfo();
 
 			for (size_t j = 0; j < pShaderSource->FeatureCount(); ++j)
 			{
@@ -573,6 +575,14 @@ namespace Glory::Editor
 		const auto time = std::filesystem::last_write_time(assetPath);
 		pShaderSource->TimeSinceLastWrite() = std::chrono::duration_cast<std::chrono::seconds>(
 			time.time_since_epoch()).count();
+
+		for (size_t i = 0; i < pShaderSource->IncludeCount(); ++i)
+		{
+			const auto& includePath = pShaderSource->IncludePath(i);
+			const auto time = std::filesystem::last_write_time(includePath);
+			pShaderSource->TimeSinceLastWrite(i) = std::chrono::duration_cast<std::chrono::seconds>(
+				time.time_since_epoch()).count();
+		}
 
 		m_pLoadedShaderSources.Set(pShaderSource->GetUUID(), pShaderSource);
 
