@@ -91,6 +91,7 @@ namespace Glory::Editor
 
 	void SceneWindow::Draw()
 	{
+		RendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>();
 		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->Submit(m_PickPos, m_SceneCamera.m_Camera.GetUUID());
 	}
 
@@ -136,11 +137,13 @@ namespace Glory::Editor
 				{
 					m_SceneCamera.m_IsOrthographic = false;
 					m_SceneCamera.UpdateCamera();
+					pRenderer->UpdateCamera(m_SceneCamera.m_Camera);
 				}
 				if (ImGui::MenuItem("Orthographic", Shortcuts::GetShortcutString(Shortcut_View_Orthographic).data(), m_SceneCamera.m_IsOrthographic))
 				{
 					m_SceneCamera.m_IsOrthographic = true;
 					m_SceneCamera.UpdateCamera();
+					pRenderer->UpdateCamera(m_SceneCamera.m_Camera);
 				}
 				ImGui::EndMenu();
 			}
@@ -156,7 +159,11 @@ namespace Glory::Editor
 				EditorUI::InputFloat("Fly Speed", &m_SceneCamera.m_MovementSpeed, 0.001f);
 				EditorUI::InputFloat("Sensitivity", &m_SceneCamera.m_FreeLookSensitivity, 0.001f);
 				EditorUI::InputFloat("Zoom Sensitivity", &m_SceneCamera.m_ZoomSensitivity, 0.001f);
-				if (change) m_SceneCamera.UpdateCamera();
+				if (change)
+				{
+					m_SceneCamera.UpdateCamera();
+					pRenderer->UpdateCamera(m_SceneCamera.m_Camera);
+				}
 				ImGui::EndMenu();
 			}
 

@@ -7,7 +7,6 @@
 
 namespace Glory
 {
-	class RenderTexture;
 	class GraphicsDevice;
 
 	/** @brief Texture atlas for Open GL graphics API */

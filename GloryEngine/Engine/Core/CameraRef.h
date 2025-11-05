@@ -6,7 +6,6 @@
 
 namespace Glory
 {
-	class RenderTexture;
 	class CameraManager;
 
 	struct CameraRef

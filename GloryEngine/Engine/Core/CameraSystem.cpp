@@ -50,7 +50,7 @@ namespace Glory
 		pComponent.m_Camera.SetPriority(pComponent.m_Priority);
 		pComponent.m_Camera.SetLayerMask(pComponent.m_LayerMask);
 
-		pEngine->GetMainModule<RendererModule>()->UpdateCamera(pComponent.m_Camera);
+		pRenderer->UpdateCamera(pComponent.m_Camera);
 	}
 
 	void CameraSystem::OnComponentAdded(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
@@ -85,14 +85,18 @@ namespace Glory
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		pEngine->GetMainModule<RendererModule>()->SubmitCamera(pComponent.m_Camera);
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		if (!pRenderer) return;
+		pRenderer->SubmitCamera(pComponent.m_Camera);
 	}
 
 	void CameraSystem::OnDisableDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		pEngine->GetMainModule<RendererModule>()->UnsubmitCamera(pComponent.m_Camera);
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		if (!pRenderer) return;
+		pRenderer->UnsubmitCamera(pComponent.m_Camera);
 	}
 
 	std::string CameraSystem::Name()
