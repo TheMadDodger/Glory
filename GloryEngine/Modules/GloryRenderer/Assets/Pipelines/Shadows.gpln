@@ -8,3 +8,4 @@ Settings:
   DepthTestEnabled: true
   DepthWriteEnabled: true
   DepthCompareOp: OP_Less
+  ColorWriteMask: 0

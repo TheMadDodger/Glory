@@ -489,6 +489,12 @@ namespace Glory
 			glDisable(GL_DEPTH_TEST);
 		glDepthMask(glPipeline->m_SettingToggles.IsSet(PipelineData::DepthWriteEnable));
 		m_GLCurrentPrimitives = glPipeline->m_GLPrimitiveType;
+
+		const bool r = glPipeline->m_SettingToggles.IsSet(PipelineData::ColorWriteRed);
+		const bool g = glPipeline->m_SettingToggles.IsSet(PipelineData::ColorWriteGreen);
+		const bool b = glPipeline->m_SettingToggles.IsSet(PipelineData::ColorWriteBlue);
+		const bool a = glPipeline->m_SettingToggles.IsSet(PipelineData::ColorWriteAlpha);
+		glColorMask(r, g, b, a);
 	}
 
 	void OpenGLDevice::End(CommandBufferHandle)

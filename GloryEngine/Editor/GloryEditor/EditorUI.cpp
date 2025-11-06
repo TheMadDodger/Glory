@@ -547,6 +547,24 @@ namespace Glory::Editor
 		return false;
 	}
 
+	bool EditorUI::CheckBoxFlags(Utils::YAMLFileRef& file, const std::filesystem::path& path, const std::vector<std::string_view>& names, const std::vector<uint32_t>& values)
+	{
+		Scope s{ path };
+		const uint32_t oldValue = file[path].As<uint32_t>();
+		uint32_t newValue = oldValue;
+		auto end = path.end();
+		--end;
+		const std::filesystem::path label = *end;
+		if (CheckBoxFlags(MakeCleanName(label.string()), &newValue, names, values))
+		{
+			const bool record = Undo::StartRecord(label.string());
+			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
+			if (record) Undo::StopRecord();
+			return true;
+		}
+		return false;
+	}
+
 	bool EditorUI::InputColor(std::string_view label, glm::vec4* value, const bool hdr)
 	{
 		ImGui::PushID(label.data());

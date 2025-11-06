@@ -101,6 +101,7 @@ namespace Glory
         vk::PrimitiveTopology m_VKPrimitiveTopology;
         Utils::BitSet m_SettingToggles;
         vk::CompareOp m_VKDepthCompareOp;
+        std::vector<vk::ColorComponentFlags> m_VKColorWriteMasks;
     };
 
     struct VK_DescriptorSetLayout

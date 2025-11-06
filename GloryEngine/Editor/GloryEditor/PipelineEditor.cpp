@@ -239,6 +239,7 @@ namespace Glory::Editor
 				settingsChanged |= EditorUI::CheckBox(file, settings["DepthTestEnabled"].Path());
 				settingsChanged |= EditorUI::CheckBox(file, settings["DepthWriteEnabled"].Path());
 				settingsChanged |= EditorUI::InputEnum<CompareOp>(file, settings["DepthCompareOp"].Path());
+				settingsChanged |= EditorUI::CheckBoxFlags(file, settings["ColorWriteMask"].Path(), { "r", "g", "b", "a" }, { 1, 2, 4, 8 });
 			}
 			ImGui::PopID();
 		}
@@ -248,9 +249,10 @@ namespace Glory::Editor
 			auto settings = file["Settings"];
 			pPipelineData->GetCullFace() = settings["CullFace"].AsEnum<CullFace>(CullFace::Back);
 			pPipelineData->GetPrimitiveType() = settings["PrimitiveType"].AsEnum<PrimitiveType>(PrimitiveType::Triangles);
-			pPipelineData->SetDepthTestEnabled(settings["DepthTestEnabled"].As<bool>());
-			pPipelineData->SetDepthWriteEnabled(settings["DepthWriteEnabled"].As<bool>());
-			pPipelineData->GetDepthCompareOp() = settings["DepthCompareOp"].AsEnum<CompareOp>();
+			pPipelineData->SetDepthTestEnabled(settings["DepthTestEnabled"].As<bool>(true));
+			pPipelineData->SetDepthWriteEnabled(settings["DepthWriteEnabled"].As<bool>(true));
+			pPipelineData->GetDepthCompareOp() = settings["DepthCompareOp"].AsEnum<CompareOp>(CompareOp::OP_Less);
+			pPipelineData->SetColorWriteMask(settings["ColorWriteMask"].As<uint8_t>(uint8_t(15)));
 			pPipelineData->SettingsDirty() = true;
 		}
 

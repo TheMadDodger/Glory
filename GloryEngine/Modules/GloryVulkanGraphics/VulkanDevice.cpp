@@ -31,6 +31,7 @@ namespace Glory
 	PFN_vkCmdSetDepthTestEnableEXT PFNCmdSetDepthTestEnableEXT = nullptr;
 	PFN_vkCmdSetDepthWriteEnableEXT PFNCmdSetDepthWriteEnableEXT = nullptr;
 	PFN_vkCmdSetDepthCompareOpEXT PFNCmdSetDepthCompareOpEXT = nullptr;
+	PFN_vkCmdSetColorWriteMaskEXT PFNCmdSetColorWriteMaskEXT = nullptr;
 
 	constexpr size_t ShaderTypeFlagsCount = 6;
 	constexpr vk::ShaderStageFlagBits ShaderTypeFlags[ShaderTypeFlagsCount] = {
@@ -184,28 +185,31 @@ namespace Glory
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
 
-		vk::PhysicalDeviceFeatures deviceFeatures = vk::PhysicalDeviceFeatures();
+		vk::PhysicalDeviceFeatures deviceFeatures{};
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
 		deviceFeatures.shaderInt64 = VK_TRUE;
 		deviceFeatures.vertexPipelineStoresAndAtomics = VK_TRUE;
 		deviceFeatures.fragmentStoresAndAtomics = VK_TRUE;
 
-		vk::PhysicalDeviceVulkan12Features vk12Features = vk::PhysicalDeviceVulkan12Features();
+		vk::PhysicalDeviceVulkan12Features vk12Features{};
 		vk12Features.separateDepthStencilLayouts = VK_TRUE;
 
-		vk::PhysicalDeviceRobustness2FeaturesKHR robustnessFeatures = vk::PhysicalDeviceRobustness2FeaturesKHR();
+		vk::PhysicalDeviceRobustness2FeaturesKHR robustnessFeatures{};
 
-		vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT extendedDynamicStateFeatures = vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT();
+		vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT extendedDynamicStateFeatures{};
 		robustnessFeatures.nullDescriptor = VK_FALSE;
 		extendedDynamicStateFeatures.extendedDynamicState = VK_TRUE;
 
-		vk::PhysicalDeviceExtendedDynamicState3PropertiesEXT extendedDynamicStateProperties =
-			vk::PhysicalDeviceExtendedDynamicState3PropertiesEXT();
-		extendedDynamicStateProperties.dynamicPrimitiveTopologyUnrestricted = VK_TRUE;
+		vk::PhysicalDeviceExtendedDynamicState3PropertiesEXT extendedDynamicState3Properties{};
+		extendedDynamicState3Properties.dynamicPrimitiveTopologyUnrestricted = VK_TRUE;
+
+		vk::PhysicalDeviceExtendedDynamicState3FeaturesEXT extendedDynamicState3Features{};
+		extendedDynamicState3Features.extendedDynamicState3ColorWriteMask = VK_TRUE;
 
 		vk12Features.pNext = &robustnessFeatures;
 		robustnessFeatures.pNext = &extendedDynamicStateFeatures;
-		extendedDynamicStateFeatures.pNext = &extendedDynamicStateProperties;
+		extendedDynamicStateFeatures.pNext = &extendedDynamicState3Properties;
+		extendedDynamicState3Properties.pNext = &extendedDynamicState3Features;
 
 		vk::DeviceCreateInfo deviceCreateInfo = vk::DeviceCreateInfo()
 			.setPQueueCreateInfos(queueCreateInfos.data())
@@ -239,6 +243,7 @@ namespace Glory
 		LOAD_VK_EXT(PFNCmdSetDepthTestEnableEXT, PFN_vkCmdSetDepthTestEnableEXT, "vkCmdSetDepthTestEnableEXT");
 		LOAD_VK_EXT(PFNCmdSetDepthWriteEnableEXT, PFN_vkCmdSetDepthWriteEnableEXT, "vkCmdSetDepthWriteEnableEXT");
 		LOAD_VK_EXT(PFNCmdSetDepthCompareOpEXT, PFN_vkCmdSetDepthCompareOpEXT, "vkCmdSetDepthCompareOpEXT");
+		LOAD_VK_EXT(PFNCmdSetColorWriteMaskEXT, PFN_vkCmdSetColorWriteMaskEXT, "vkCmdSetColorWriteMaskEXT");
 
 		CreateGraphicsCommandPool();
 		AllocateFreeFences(10);
@@ -448,6 +453,10 @@ namespace Glory
 		PFNCmdSetDepthTestEnableEXT(VkCommandBuffer(*vkCommandBuffer), vkPipeline->m_SettingToggles.IsSet(PipelineData::DepthTestEnable));
 		PFNCmdSetDepthWriteEnableEXT(VkCommandBuffer(*vkCommandBuffer), vkPipeline->m_SettingToggles.IsSet(PipelineData::DepthWriteEnable));
 		PFNCmdSetDepthCompareOpEXT(VkCommandBuffer(*vkCommandBuffer), VkCompareOp(vkPipeline->m_VKDepthCompareOp));
+
+		if(!vkPipeline->m_VKColorWriteMasks.empty())
+			PFNCmdSetColorWriteMaskEXT(VkCommandBuffer(*vkCommandBuffer), 0, vkPipeline->m_VKColorWriteMasks.size(),
+				reinterpret_cast<VkColorComponentFlags*>(vkPipeline->m_VKColorWriteMasks.data()));
 	}
 
 	void VulkanDevice::End(CommandBufferHandle commandBuffer)
@@ -1866,6 +1875,7 @@ namespace Glory
 
 		std::vector<vk::DescriptorSetLayout> vkDescriptorSetLayouts(descriptorSetLayouts.size());
 		std::vector<vk::PushConstantRange> vkPushConstants;
+		size_t numLayouts = 0;
 		for (size_t i = 0; i < descriptorSetLayouts.size(); ++i)
 		{
 			VK_DescriptorSetLayout* vkSetLayout = m_DescriptorSetLayouts.Find(descriptorSetLayouts[i]);
@@ -1874,11 +1884,18 @@ namespace Glory
 				Debug().LogError("VulkanDevice::CreatePipeline: Invalid descriptor set layout handle.");
 				return NULL;
 			}
-			vkDescriptorSetLayouts[i] = vkSetLayout->m_VKLayout;
 
 			if (vkSetLayout->m_PushConstantRange.size)
 				vkPushConstants.push_back(vkSetLayout->m_PushConstantRange);
+
+			if (!vkSetLayout->m_VKLayout) continue;
+
+			vkDescriptorSetLayouts[numLayouts] = vkSetLayout->m_VKLayout;
+			++numLayouts;
 		}
+
+		while (vkDescriptorSetLayouts.size() > numLayouts)
+			vkDescriptorSetLayouts.erase(vkDescriptorSetLayouts.begin() + numLayouts);
 
 		PipelineHandle handle;
 		VK_Pipeline& pipeline = m_Pipelines.Emplace(handle, VK_Pipeline());
@@ -1890,6 +1907,13 @@ namespace Glory
 		pipeline.m_SettingToggles = pPipeline->SettingsTogglesBitSet();
 		pipeline.m_VKDescriptorSetLayouts = std::move(vkDescriptorSetLayouts);
 		pipeline.m_VKPushConstantRanges = std::move(vkPushConstants);
+
+		bool r, g, b, a;
+		pPipeline->ColorWriteMask(r, g, b, a);
+		const uint8_t colorMaskBits = (*pipeline.m_SettingToggles.Data() >> PipelineData::ColorWriteRed) & 0x0F;
+
+		const size_t numAttachments = vkRenderTexture->m_Textures.size() - (vkRenderTexture->m_HasDepthOrStencil ? 1 : 0);
+		pipeline.m_VKColorWriteMasks.resize(numAttachments, vk::ColorComponentFlags(colorMaskBits));
 
 		const uint32_t binding = 0;
 
@@ -1934,6 +1958,9 @@ namespace Glory
 		vkPipeline->m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
 		vkPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
 		vkPipeline->m_VKDepthCompareOp = GetVulkanCompareOp(pPipeline->GetDepthCompareOp());
+
+		const uint8_t colorMaskBits = (*vkPipeline->m_SettingToggles.Data() >> PipelineData::ColorWriteRed) & 0x0F;
+		vkPipeline->m_VKColorWriteMasks.assign(vkPipeline->m_VKColorWriteMasks.size(), vk::ColorComponentFlags(colorMaskBits));
 	}
 
 	void VulkanDevice::RecreatePipeline(PipelineHandle pipeline, PipelineData* pPipeline)
@@ -1951,6 +1978,9 @@ namespace Glory
 		vkPipeline->m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
 		vkPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
 		vkPipeline->m_VKDepthCompareOp = GetVulkanCompareOp(pPipeline->GetDepthCompareOp());
+
+		const uint8_t colorMaskBits = (*vkPipeline->m_SettingToggles.Data() >> PipelineData::ColorWriteRed) & 0x0F;
+		vkPipeline->m_VKColorWriteMasks.assign(vkPipeline->m_VKColorWriteMasks.size(), vk::ColorComponentFlags(colorMaskBits));
 
 		m_LogicalDevice.destroyPipeline(vkPipeline->m_VKPipeline);
 		m_LogicalDevice.destroyPipelineLayout(vkPipeline->m_VKLayout);
@@ -3244,7 +3274,7 @@ namespace Glory
 		for (size_t i = 0; i < attachmentCount; ++i)
 		{
 			colorBlendAttachmentStates[i] = vk::PipelineColorBlendAttachmentState()
-				.setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA)
+				.setColorWriteMask(pipeline.m_VKColorWriteMasks[i])
 				.setBlendEnable(VK_FALSE)
 				.setSrcColorBlendFactor(vk::BlendFactor::eOne)
 				.setDstColorBlendFactor(vk::BlendFactor::eZero)
@@ -3281,10 +3311,11 @@ namespace Glory
 			vk::DynamicState::eDepthTestEnable,
 			vk::DynamicState::eDepthWriteEnable,
 			vk::DynamicState::eDepthCompareOp,
+			vk::DynamicState::eColorWriteMaskEXT,
 		};
 
 		vk::PipelineDynamicStateCreateInfo dynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
-			.setDynamicStateCount(7)
+			.setDynamicStateCount(8)
 			.setPDynamicStates(dynamicStates);
 
 		vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()

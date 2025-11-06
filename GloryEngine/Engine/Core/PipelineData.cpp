@@ -340,6 +340,7 @@ namespace Glory
 		m_Features.clear();
 		m_FeaturesEnabled.Clear();
 	}
+
 	size_t PipelineData::TotalPropertiesByteSize() const
 	{
 		return m_TotalPropertiesByteSize;
@@ -349,6 +350,7 @@ namespace Glory
 	{
 		m_SettingsToggles.Set(SettingBitsIndices::DepthTestEnable, enable);
 	}
+
 	const bool PipelineData::DepthTestEnabled() const
 	{
 		return m_SettingsToggles.IsSet(SettingBitsIndices::DepthTestEnable);
@@ -362,5 +364,34 @@ namespace Glory
 	const bool PipelineData::DepthWriteEnabled() const
 	{
 		return m_SettingsToggles.IsSet(SettingBitsIndices::DepthWriteEnable);
+	}
+
+	void PipelineData::SetColorWriteMask(bool r, bool g, bool b, bool a)
+	{
+		m_SettingsToggles.Set(SettingBitsIndices::ColorWriteRed, r);
+		m_SettingsToggles.Set(SettingBitsIndices::ColorWriteGreen, g);
+		m_SettingsToggles.Set(SettingBitsIndices::ColorWriteBlue, b);
+		m_SettingsToggles.Set(SettingBitsIndices::ColorWriteAlpha, a);
+	}
+
+	void PipelineData::SetColorWriteMask(uint8_t mask)
+	{
+		m_SettingsToggles.Set(SettingBitsIndices::ColorWriteRed, mask & 1);
+		m_SettingsToggles.Set(SettingBitsIndices::ColorWriteGreen, mask & 2);
+		m_SettingsToggles.Set(SettingBitsIndices::ColorWriteBlue, mask & 4);
+		m_SettingsToggles.Set(SettingBitsIndices::ColorWriteAlpha, mask & 8);
+	}
+
+	const void PipelineData::ColorWriteMask(bool& r, bool& g, bool& b, bool& a) const
+	{
+		r = m_SettingsToggles.IsSet(SettingBitsIndices::ColorWriteRed);
+		g = m_SettingsToggles.IsSet(SettingBitsIndices::ColorWriteGreen);
+		b = m_SettingsToggles.IsSet(SettingBitsIndices::ColorWriteBlue);
+		a = m_SettingsToggles.IsSet(SettingBitsIndices::ColorWriteAlpha);
+	}
+
+	const uint8_t PipelineData::ColorWriteMask() const
+	{
+		return (*m_SettingsToggles.Data() << PipelineData::ColorWriteRed) & 0x0F;
 	}
 }

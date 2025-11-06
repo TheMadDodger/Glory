@@ -18,7 +18,11 @@ namespace Glory
         enum SettingBitsIndices : uint8_t
         {
             DepthTestEnable = 0,
-            DepthWriteEnable = 0,
+            DepthWriteEnable = 1,
+            ColorWriteRed = 2,
+            ColorWriteGreen = 3,
+            ColorWriteBlue = 4,
+            ColorWriteAlpha = 5,
         };
 
     public:
@@ -170,6 +174,15 @@ namespace Glory
         void SetDepthWriteEnabled(bool enable);
         /** @brief Is depth write enabled */
         const bool DepthWriteEnabled() const;
+
+        /** @brief Set color write mask */
+        void SetColorWriteMask(bool r, bool g, bool b, bool a);
+        /** @overload */
+        void SetColorWriteMask(uint8_t mask);
+        /** @brief Get color write mask */
+        const void ColorWriteMask(bool& r, bool& g, bool& b, bool& a) const;
+        /** @overload */
+        const uint8_t ColorWriteMask() const;
 
         /** @brief Depth compare operator */
         CompareOp& GetDepthCompareOp() { return m_DepthCompare; }
