@@ -281,6 +281,17 @@ namespace Glory
 		{ CompareOp::OP_Always, GL_ALWAYS },
 	};
 
+	const std::map<Func, GLenum> GLFuncs = {
+		{ Func::OP_Keep, GL_KEEP },
+		{ Func::OP_Zero, GL_ZERO },
+		{ Func::OP_Replace, GL_REPLACE },
+		{ Func::OP_Increment, GL_INCR },
+		{ Func::OP_IncrementWrap, GL_INCR_WRAP },
+		{ Func::OP_Decrement, GL_DECR },
+		{ Func::OP_DecrementWrap, GL_DECR_WRAP },
+		{ Func::OP_Invert, GL_INVERT },
+	};
+
 	GLint GetMinFilter(Filter mipMap, Filter minFilter)
 	{
 		switch (mipMap)
@@ -495,6 +506,20 @@ namespace Glory
 		const bool b = glPipeline->m_SettingToggles.IsSet(PipelineData::ColorWriteBlue);
 		const bool a = glPipeline->m_SettingToggles.IsSet(PipelineData::ColorWriteAlpha);
 		glColorMask(r, g, b, a);
+
+		if (glPipeline->m_SettingToggles.IsSet(PipelineData::StencilTestEnable))
+		{
+			glEnable(GL_STENCIL_TEST);
+			const uint8_t compareMask = static_cast<uint8_t>(*glPipeline->m_SettingToggles.Data() << PipelineData::StencilCompareMaskBegin);
+			const uint8_t ref = static_cast<uint8_t>(*glPipeline->m_SettingToggles.Data() << PipelineData::StencilReferenceBegin);
+			glStencilOp(glPipeline->m_GLStencilFailOp, glPipeline->m_GLStencilDepthFailOp, glPipeline->m_GLStencilPassOp);
+			glStencilFunc(glPipeline->m_GLStencilCompareOp, int32_t(ref), uint32_t(compareMask));
+		}
+		else
+			glDisable(GL_STENCIL_TEST);
+
+		const uint8_t writeMask = static_cast<uint8_t>(*glPipeline->m_SettingToggles.Data() << PipelineData::StencilWriteMaskBegin);
+		glStencilMask(uint32_t(writeMask));
 	}
 
 	void OpenGLDevice::End(CommandBufferHandle)
@@ -1405,6 +1430,10 @@ namespace Glory
 		pipeline.m_GLPrimitiveType = PrimitiveTypes.at(pPipeline->GetPrimitiveType());
 		pipeline.m_SettingToggles = pPipeline->SettingsTogglesBitSet();
 		pipeline.m_GLDepthFunc = CompareOps.at(pPipeline->GetDepthCompareOp());
+		pipeline.m_GLStencilCompareOp = CompareOps.at(pPipeline->GetStencilCompareOp());
+		pipeline.m_GLStencilFailOp = GLFuncs.at(pPipeline->GetStencilFailOp());
+		pipeline.m_GLStencilDepthFailOp = GLFuncs.at(pPipeline->GetStencilDepthFailOp());
+		pipeline.m_GLStencilPassOp = GLFuncs.at(pPipeline->GetStencilPassOp());
 
 		if (!CreatePipeline(pipeline, pPipeline))
 		{
@@ -1432,6 +1461,10 @@ namespace Glory
 		glPipeline->m_GLPrimitiveType = PrimitiveTypes.at(pPipeline->GetPrimitiveType());
 		glPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
 		glPipeline->m_GLDepthFunc = CompareOps.at(pPipeline->GetDepthCompareOp());
+		glPipeline->m_GLStencilCompareOp = CompareOps.at(pPipeline->GetStencilCompareOp());
+		glPipeline->m_GLStencilFailOp = GLFuncs.at(pPipeline->GetStencilFailOp());
+		glPipeline->m_GLStencilDepthFailOp = GLFuncs.at(pPipeline->GetStencilDepthFailOp());
+		glPipeline->m_GLStencilPassOp = GLFuncs.at(pPipeline->GetStencilPassOp());
 	}
 
 	void OpenGLDevice::RecreatePipeline(PipelineHandle pipeline, PipelineData* pPipeline)
@@ -1447,6 +1480,10 @@ namespace Glory
 		glPipeline->m_GLPrimitiveType = PrimitiveTypes.at(pPipeline->GetPrimitiveType());
 		glPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
 		glPipeline->m_GLDepthFunc = CompareOps.at(pPipeline->GetDepthCompareOp());
+		glPipeline->m_GLStencilCompareOp = CompareOps.at(pPipeline->GetStencilCompareOp());
+		glPipeline->m_GLStencilFailOp = GLFuncs.at(pPipeline->GetStencilFailOp());
+		glPipeline->m_GLStencilDepthFailOp = GLFuncs.at(pPipeline->GetStencilDepthFailOp());
+		glPipeline->m_GLStencilPassOp = GLFuncs.at(pPipeline->GetStencilPassOp());
 
 		for (auto& shader : glPipeline->m_Shaders)
 		{

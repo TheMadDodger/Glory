@@ -23,6 +23,10 @@ namespace Glory
             ColorWriteGreen = 3,
             ColorWriteBlue = 4,
             ColorWriteAlpha = 5,
+            StencilTestEnable = 6,
+            StencilCompareMaskBegin = 7,
+            StencilWriteMaskBegin = 15,
+            StencilReferenceBegin = 23,
         };
 
     public:
@@ -189,6 +193,46 @@ namespace Glory
         /** @overload */
         const CompareOp& GetDepthCompareOp() const { return m_DepthCompare; }
 
+        /** @brief Enable/disable depth test */
+        void SetStencilTestEnabled(bool enable);
+        /** @brief Is depth test enabled */
+        const bool StencilTestEnabled() const;
+
+        /** @brief Set stencil compare mask */
+        void SetStencilCompareMask(uint8_t mask);
+        /** @brief Get stencil compare mask */
+        const uint8_t StencilCompareMask() const;
+
+        /** @brief Set stencil write mask */
+        void SetStencilWriteMask(uint8_t mask);
+        /** @brief Get stencil write mask */
+        const uint8_t StencilWriteMask() const;
+
+        /** @brief Set stencil reference */
+        void SetStencilReference(uint8_t ref);
+        /** @brief Get stencil reference */
+        const uint8_t StencilReference() const;
+
+        /** @brief Stencil compare operator */
+        CompareOp& GetStencilCompareOp() { return m_StencilCompareOp; }
+        /** @overload */
+        const CompareOp& GetStencilCompareOp() const { return m_StencilCompareOp; }
+
+        /** @brief Stencil fail func */
+        Func& GetStencilFailOp() { return m_StencilFailOp; }
+        /** @overload */
+        const Func& GetStencilFailOp() const { return m_StencilFailOp; }
+
+        /** @brief Stencil depth fail func */
+        Func& GetStencilDepthFailOp() { return m_StencilDepthFailOp; }
+        /** @overload */
+        const Func& GetStencilDepthFailOp() const { return m_StencilDepthFailOp; }
+
+        /** @brief Stencil pass func */
+        Func& GetStencilPassOp() { return m_StencilPassOp; }
+        /** @overload */
+        const Func& GetStencilPassOp() const { return m_StencilPassOp; }
+
         /** @brief BitSet containing state of toggelable settings */
         const Utils::BitSet& SettingsTogglesBitSet() const { return m_SettingsToggles; }
 
@@ -216,6 +260,10 @@ namespace Glory
         CullFace m_CullFace = CullFace::Back;
         PrimitiveType m_PrimitiveType = PrimitiveType::Triangles;
         CompareOp m_DepthCompare = CompareOp::OP_Less;
+        CompareOp m_StencilCompareOp = CompareOp::OP_Always;
+        Func m_StencilFailOp = Func::OP_Zero;
+        Func m_StencilDepthFailOp = Func::OP_Zero;
+        Func m_StencilPassOp = Func::OP_Zero;
         Utils::BitSet m_SettingsToggles{ 32, true };
 	};
 }

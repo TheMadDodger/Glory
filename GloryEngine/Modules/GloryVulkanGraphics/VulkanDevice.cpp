@@ -26,12 +26,17 @@ if (f == nullptr)\
 
 namespace Glory
 {
-	PFN_vkCmdSetCullMode PFNCmdSetCullModeEXT = nullptr;
-	PFN_vkCmdSetPrimitiveTopologyEXT PFNCmdSetPrimitiveTopologyEXT = nullptr;
-	PFN_vkCmdSetDepthTestEnableEXT PFNCmdSetDepthTestEnableEXT = nullptr;
-	PFN_vkCmdSetDepthWriteEnableEXT PFNCmdSetDepthWriteEnableEXT = nullptr;
-	PFN_vkCmdSetDepthCompareOpEXT PFNCmdSetDepthCompareOpEXT = nullptr;
+	PFN_vkCmdSetCullModeEXT PFNCmdSetCullMode = nullptr;
+	PFN_vkCmdSetPrimitiveTopologyEXT PFNCmdSetPrimitiveTopology = nullptr;
+	PFN_vkCmdSetDepthTestEnableEXT PFNCmdSetDepthTestEnable = nullptr;
+	PFN_vkCmdSetDepthWriteEnableEXT PFNCmdSetDepthWriteEnable = nullptr;
+	PFN_vkCmdSetDepthCompareOpEXT PFNCmdSetDepthCompareOp = nullptr;
 	PFN_vkCmdSetColorWriteMaskEXT PFNCmdSetColorWriteMaskEXT = nullptr;
+	PFN_vkCmdSetStencilTestEnableEXT PFNCmdSetStencilTestEnable = nullptr;
+	PFN_vkCmdSetStencilCompareMask PFNCmdSetStencilCompareMask = nullptr;
+	PFN_vkCmdSetStencilOpEXT PFNCmdSetStencilOp = nullptr;
+	PFN_vkCmdSetStencilWriteMask PFNCmdSetStencilWriteMask = nullptr;
+	PFN_vkCmdSetStencilReference PFNCmdSetStencilReference = nullptr;
 
 	constexpr size_t ShaderTypeFlagsCount = 6;
 	constexpr vk::ShaderStageFlagBits ShaderTypeFlags[ShaderTypeFlagsCount] = {
@@ -238,12 +243,18 @@ namespace Glory
 		m_GraphicsAndComputeQueue = m_LogicalDevice.getQueue(m_GraphicsAndComputeFamily.value(), 0);
 		m_PresentQueue = m_LogicalDevice.getQueue(m_PresentFamily.value(), 0);
 
-		LOAD_VK_EXT(PFNCmdSetCullModeEXT, PFN_vkCmdSetCullModeEXT, "vkCmdSetCullModeEXT");
-		LOAD_VK_EXT(PFNCmdSetPrimitiveTopologyEXT, PFN_vkCmdSetPrimitiveTopologyEXT, "vkCmdSetPrimitiveTopologyEXT");
-		LOAD_VK_EXT(PFNCmdSetDepthTestEnableEXT, PFN_vkCmdSetDepthTestEnableEXT, "vkCmdSetDepthTestEnableEXT");
-		LOAD_VK_EXT(PFNCmdSetDepthWriteEnableEXT, PFN_vkCmdSetDepthWriteEnableEXT, "vkCmdSetDepthWriteEnableEXT");
-		LOAD_VK_EXT(PFNCmdSetDepthCompareOpEXT, PFN_vkCmdSetDepthCompareOpEXT, "vkCmdSetDepthCompareOpEXT");
+		LOAD_VK_EXT(PFNCmdSetCullMode, PFN_vkCmdSetCullModeEXT, "vkCmdSetCullModeEXT");
+		LOAD_VK_EXT(PFNCmdSetPrimitiveTopology, PFN_vkCmdSetPrimitiveTopologyEXT, "vkCmdSetPrimitiveTopologyEXT");
+		LOAD_VK_EXT(PFNCmdSetDepthTestEnable, PFN_vkCmdSetDepthTestEnableEXT, "vkCmdSetDepthTestEnableEXT");
+		LOAD_VK_EXT(PFNCmdSetDepthWriteEnable, PFN_vkCmdSetDepthWriteEnableEXT, "vkCmdSetDepthWriteEnableEXT");
+		LOAD_VK_EXT(PFNCmdSetDepthCompareOp, PFN_vkCmdSetDepthCompareOpEXT, "vkCmdSetDepthCompareOpEXT");
 		LOAD_VK_EXT(PFNCmdSetColorWriteMaskEXT, PFN_vkCmdSetColorWriteMaskEXT, "vkCmdSetColorWriteMaskEXT");
+
+		LOAD_VK_EXT(PFNCmdSetStencilTestEnable, PFN_vkCmdSetStencilTestEnableEXT, "vkCmdSetStencilTestEnableEXT");
+		LOAD_VK_EXT(PFNCmdSetStencilCompareMask, PFN_vkCmdSetStencilCompareMask, "vkCmdSetStencilCompareMask");
+		LOAD_VK_EXT(PFNCmdSetStencilOp, PFN_vkCmdSetStencilOpEXT, "vkCmdSetStencilOpEXT");
+		LOAD_VK_EXT(PFNCmdSetStencilWriteMask, PFN_vkCmdSetStencilWriteMask, "vkCmdSetStencilWriteMask");
+		LOAD_VK_EXT(PFNCmdSetStencilReference, PFN_vkCmdSetStencilReference, "vkCmdSetStencilReference");
 
 		CreateGraphicsCommandPool();
 		AllocateFreeFences(10);
@@ -448,15 +459,27 @@ namespace Glory
 		}
 		vkCommandBuffer->bindPipeline(vkPipeline->m_VKBindPoint, vkPipeline->m_VKPipeline);
 		if (vkPipeline->m_VKBindPoint != vk::PipelineBindPoint::eGraphics) return;
-		PFNCmdSetCullModeEXT(VkCommandBuffer(*vkCommandBuffer), VkCullModeFlags(vkPipeline->m_VKCullMode));
-		PFNCmdSetPrimitiveTopologyEXT(VkCommandBuffer(*vkCommandBuffer), VkPrimitiveTopology(vkPipeline->m_VKPrimitiveTopology));
-		PFNCmdSetDepthTestEnableEXT(VkCommandBuffer(*vkCommandBuffer), vkPipeline->m_SettingToggles.IsSet(PipelineData::DepthTestEnable));
-		PFNCmdSetDepthWriteEnableEXT(VkCommandBuffer(*vkCommandBuffer), vkPipeline->m_SettingToggles.IsSet(PipelineData::DepthWriteEnable));
-		PFNCmdSetDepthCompareOpEXT(VkCommandBuffer(*vkCommandBuffer), VkCompareOp(vkPipeline->m_VKDepthCompareOp));
+		PFNCmdSetCullMode(VkCommandBuffer(*vkCommandBuffer), VkCullModeFlags(vkPipeline->m_VKCullMode));
+		PFNCmdSetPrimitiveTopology(VkCommandBuffer(*vkCommandBuffer), VkPrimitiveTopology(vkPipeline->m_VKPrimitiveTopology));
+		PFNCmdSetDepthTestEnable(VkCommandBuffer(*vkCommandBuffer), vkPipeline->m_SettingToggles.IsSet(PipelineData::DepthTestEnable));
+		PFNCmdSetDepthWriteEnable(VkCommandBuffer(*vkCommandBuffer), vkPipeline->m_SettingToggles.IsSet(PipelineData::DepthWriteEnable));
+		PFNCmdSetDepthCompareOp(VkCommandBuffer(*vkCommandBuffer), VkCompareOp(vkPipeline->m_VKDepthCompareOp));
 
 		if(!vkPipeline->m_VKColorWriteMasks.empty())
 			PFNCmdSetColorWriteMaskEXT(VkCommandBuffer(*vkCommandBuffer), 0, vkPipeline->m_VKColorWriteMasks.size(),
 				reinterpret_cast<VkColorComponentFlags*>(vkPipeline->m_VKColorWriteMasks.data()));
+
+		const uint8_t compareMask = static_cast<uint8_t>(*vkPipeline->m_SettingToggles.Data() << PipelineData::StencilCompareMaskBegin);
+		const int8_t ref = static_cast<int8_t>(*vkPipeline->m_SettingToggles.Data() << PipelineData::StencilReferenceBegin);
+		const uint8_t writeMask = static_cast<uint8_t>(*vkPipeline->m_SettingToggles.Data() << PipelineData::StencilWriteMaskBegin);
+
+		PFNCmdSetStencilTestEnable(VkCommandBuffer(*vkCommandBuffer), vkPipeline->m_SettingToggles.IsSet(PipelineData::StencilTestEnable));
+		PFNCmdSetStencilCompareMask(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK, uint32_t(compareMask));
+		PFNCmdSetStencilOp(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK,
+			VkStencilOp(vkPipeline->m_VKStencilFailOp), VkStencilOp(vkPipeline->m_VKStencilPassOp),
+			VkStencilOp(vkPipeline->m_VKStencilDepthFailOp), VkCompareOp(vkPipeline->m_VKStencilCompareOp));
+		PFNCmdSetStencilWriteMask(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK, uint32_t(writeMask));
+		PFNCmdSetStencilReference(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK, int32_t(ref));
 	}
 
 	void VulkanDevice::End(CommandBufferHandle commandBuffer)
@@ -1852,6 +1875,31 @@ namespace Glory
 		return (vk::CompareOp)0;
 	}
 
+	vk::StencilOp GetVulkanStencilOp(const Func& op)
+	{
+		switch (op)
+		{
+			case Func::OP_Keep:
+				return vk::StencilOp::eKeep;
+			case Func::OP_Zero:
+				vk::StencilOp::eZero;
+			case Func::OP_Replace:
+				vk::StencilOp::eReplace;
+			case Func::OP_Increment:
+				vk::StencilOp::eIncrementAndClamp;
+			case Func::OP_IncrementWrap:
+				vk::StencilOp::eIncrementAndWrap;
+			case Func::OP_Decrement:
+				vk::StencilOp::eDecrementAndClamp;
+			case Func::OP_DecrementWrap:
+				vk::StencilOp::eDecrementAndWrap;
+			case Func::OP_Invert:
+				vk::StencilOp::eInvert;
+		default:
+			return vk::StencilOp(0);
+		}
+	}
+
 	PipelineHandle VulkanDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
 		std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride,
 		const std::vector<AttributeType>& attributeTypes)
@@ -1907,6 +1955,10 @@ namespace Glory
 		pipeline.m_SettingToggles = pPipeline->SettingsTogglesBitSet();
 		pipeline.m_VKDescriptorSetLayouts = std::move(vkDescriptorSetLayouts);
 		pipeline.m_VKPushConstantRanges = std::move(vkPushConstants);
+		pipeline.m_VKStencilCompareOp = GetVulkanCompareOp(pPipeline->GetStencilCompareOp());
+		pipeline.m_VKStencilFailOp = GetVulkanStencilOp(pPipeline->GetStencilFailOp());
+		pipeline.m_VKStencilDepthFailOp = GetVulkanStencilOp(pPipeline->GetStencilDepthFailOp());
+		pipeline.m_VKStencilPassOp = GetVulkanStencilOp(pPipeline->GetStencilPassOp());
 
 		bool r, g, b, a;
 		pPipeline->ColorWriteMask(r, g, b, a);
@@ -1958,6 +2010,10 @@ namespace Glory
 		vkPipeline->m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
 		vkPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
 		vkPipeline->m_VKDepthCompareOp = GetVulkanCompareOp(pPipeline->GetDepthCompareOp());
+		vkPipeline->m_VKStencilCompareOp = GetVulkanCompareOp(pPipeline->GetStencilCompareOp());
+		vkPipeline->m_VKStencilFailOp = GetVulkanStencilOp(pPipeline->GetStencilFailOp());
+		vkPipeline->m_VKStencilDepthFailOp = GetVulkanStencilOp(pPipeline->GetStencilDepthFailOp());
+		vkPipeline->m_VKStencilPassOp = GetVulkanStencilOp(pPipeline->GetStencilPassOp());
 
 		const uint8_t colorMaskBits = (*vkPipeline->m_SettingToggles.Data() >> PipelineData::ColorWriteRed) & 0x0F;
 		vkPipeline->m_VKColorWriteMasks.assign(vkPipeline->m_VKColorWriteMasks.size(), vk::ColorComponentFlags(colorMaskBits));
@@ -1978,6 +2034,10 @@ namespace Glory
 		vkPipeline->m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
 		vkPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
 		vkPipeline->m_VKDepthCompareOp = GetVulkanCompareOp(pPipeline->GetDepthCompareOp());
+		vkPipeline->m_VKStencilCompareOp = GetVulkanCompareOp(pPipeline->GetStencilCompareOp());
+		vkPipeline->m_VKStencilFailOp = GetVulkanStencilOp(pPipeline->GetStencilFailOp());
+		vkPipeline->m_VKStencilDepthFailOp = GetVulkanStencilOp(pPipeline->GetStencilDepthFailOp());
+		vkPipeline->m_VKStencilPassOp = GetVulkanStencilOp(pPipeline->GetStencilPassOp());
 
 		const uint8_t colorMaskBits = (*vkPipeline->m_SettingToggles.Data() >> PipelineData::ColorWriteRed) & 0x0F;
 		vkPipeline->m_VKColorWriteMasks.assign(vkPipeline->m_VKColorWriteMasks.size(), vk::ColorComponentFlags(colorMaskBits));
@@ -3298,7 +3358,7 @@ namespace Glory
 		depthStencil.depthBoundsTestEnable = VK_FALSE;
 		depthStencil.minDepthBounds = 0.0f; // Optional
 		depthStencil.maxDepthBounds = 1.0f; // Optional
-		depthStencil.stencilTestEnable = VK_FALSE;
+		depthStencil.stencilTestEnable = pipeline.m_SettingToggles.IsSet(PipelineData::StencilTestEnable);
 		//depthStencil.front = {}; // Optional
 		//depthStencil.back = {}; // Optional
 
@@ -3312,10 +3372,15 @@ namespace Glory
 			vk::DynamicState::eDepthWriteEnable,
 			vk::DynamicState::eDepthCompareOp,
 			vk::DynamicState::eColorWriteMaskEXT,
+			vk::DynamicState::eStencilTestEnable,
+			vk::DynamicState::eStencilCompareMask,
+			vk::DynamicState::eStencilOp,
+			vk::DynamicState::eStencilWriteMask,
+			vk::DynamicState::eStencilReference,
 		};
 
 		vk::PipelineDynamicStateCreateInfo dynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
-			.setDynamicStateCount(8)
+			.setDynamicStateCount(13)
 			.setPDynamicStates(dynamicStates);
 
 		vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()

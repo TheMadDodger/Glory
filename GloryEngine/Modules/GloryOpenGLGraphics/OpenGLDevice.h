@@ -84,6 +84,10 @@ namespace Glory
         uint32_t m_GLCullFace;
         uint32_t m_GLPrimitiveType;
         uint32_t m_GLDepthFunc;
+        uint32_t m_GLStencilCompareOp;
+        uint32_t m_GLStencilFailOp;
+        uint32_t m_GLStencilDepthFailOp;
+        uint32_t m_GLStencilPassOp;
         Utils::BitSet m_SettingToggles;
     };
 

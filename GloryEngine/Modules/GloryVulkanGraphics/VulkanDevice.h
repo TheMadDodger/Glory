@@ -101,6 +101,10 @@ namespace Glory
         vk::PrimitiveTopology m_VKPrimitiveTopology;
         Utils::BitSet m_SettingToggles;
         vk::CompareOp m_VKDepthCompareOp;
+        vk::CompareOp m_VKStencilCompareOp;
+        vk::StencilOp m_VKStencilFailOp;
+        vk::StencilOp m_VKStencilDepthFailOp;
+        vk::StencilOp m_VKStencilPassOp;
         std::vector<vk::ColorComponentFlags> m_VKColorWriteMasks;
     };
 

@@ -240,6 +240,14 @@ namespace Glory::Editor
 				settingsChanged |= EditorUI::CheckBox(file, settings["DepthWriteEnabled"].Path());
 				settingsChanged |= EditorUI::InputEnum<CompareOp>(file, settings["DepthCompareOp"].Path());
 				settingsChanged |= EditorUI::CheckBoxFlags(file, settings["ColorWriteMask"].Path(), { "r", "g", "b", "a" }, { 1, 2, 4, 8 });
+				settingsChanged |= EditorUI::CheckBox(file, settings["StencilTestEnabled"].Path());
+				settingsChanged |= EditorUI::InputEnum<CompareOp>(file, settings["StencilCompareOp"].Path());
+				settingsChanged |= EditorUI::InputEnum<Func>(file, settings["StencilFailOp"].Path());
+				settingsChanged |= EditorUI::InputEnum<Func>(file, settings["StencilDepthFailOp"].Path());
+				settingsChanged |= EditorUI::InputEnum<Func>(file, settings["StencilPassOp"].Path());
+				settingsChanged |= EditorUI::InputUInt(file, settings["StencilCompareMask"].Path(), 0, 255, 1);
+				settingsChanged |= EditorUI::InputUInt(file, settings["StencilWriteMask"].Path(), 0, 255, 1);
+				settingsChanged |= EditorUI::InputUInt(file, settings["StencilReference"].Path(), 0, 255, 1);
 			}
 			ImGui::PopID();
 		}
@@ -253,6 +261,14 @@ namespace Glory::Editor
 			pPipelineData->SetDepthWriteEnabled(settings["DepthWriteEnabled"].As<bool>(true));
 			pPipelineData->GetDepthCompareOp() = settings["DepthCompareOp"].AsEnum<CompareOp>(CompareOp::OP_Less);
 			pPipelineData->SetColorWriteMask(settings["ColorWriteMask"].As<uint8_t>(uint8_t(15)));
+			pPipelineData->SetStencilTestEnabled(settings["StencilTestEnabled"].As<bool>(false));
+			pPipelineData->GetStencilCompareOp() = settings["StencilCompareOp"].AsEnum<CompareOp>(CompareOp::OP_Always);
+			pPipelineData->GetStencilFailOp() = settings["StencilFailOp"].AsEnum<Func>(Func::OP_Zero);
+			pPipelineData->GetStencilDepthFailOp() = settings["StencilDepthFailOp"].AsEnum<Func>(Func::OP_Zero);
+			pPipelineData->GetStencilPassOp() = settings["StencilPassOp"].AsEnum<Func>(Func::OP_Zero);
+			pPipelineData->SetStencilCompareMask(settings["StencilCompareMask"].As<uint8_t>(0xFF));
+			pPipelineData->SetStencilWriteMask(settings["StencilWriteMask"].As<uint8_t>(0x00));
+			pPipelineData->SetStencilReference(settings["StencilReference"].As<uint8_t>(0x00));
 			pPipelineData->SettingsDirty() = true;
 		}
 

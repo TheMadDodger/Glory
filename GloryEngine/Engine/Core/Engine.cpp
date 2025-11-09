@@ -659,6 +659,7 @@ namespace Glory
 		Reflect::RegisterEnum<Filter>();
 		Reflect::RegisterEnum<SamplerAddressMode>();
 		Reflect::RegisterEnum<CompareOp>();
+		Reflect::RegisterEnum<Func>();
 		Reflect::RegisterEnum<PipelineType>();
 		Reflect::RegisterEnum<BlurType>();
 		Reflect::RegisterEnum<Alignment>();

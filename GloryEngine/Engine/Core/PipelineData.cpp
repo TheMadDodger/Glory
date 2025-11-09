@@ -214,7 +214,8 @@ namespace Glory
 
 		/* Write settings */
 		container.Write(m_CullFace).Write(m_PrimitiveType)
-			.Write(m_SettingsToggles).Write(m_DepthCompare);
+			.Write(m_SettingsToggles).Write(m_DepthCompare).Write(m_StencilCompareOp)
+			.Write(m_StencilFailOp).Write(m_StencilDepthFailOp).Write(m_StencilPassOp);
 	}
 
 	void PipelineData::Deserialize(BinaryStream& container)
@@ -270,7 +271,8 @@ namespace Glory
 
 		/* Read settings */
 		container.Read(m_CullFace).Read(m_PrimitiveType)
-			.Read(m_SettingsToggles).Read(m_DepthCompare);
+			.Read(m_SettingsToggles).Read(m_DepthCompare).Read(m_StencilCompareOp)
+			.Read(m_StencilFailOp).Read(m_StencilDepthFailOp).Read(m_StencilPassOp);
 	}
 
 	void PipelineData::LoadIntoMaterial(MaterialData* pMaterial) const
@@ -392,6 +394,49 @@ namespace Glory
 
 	const uint8_t PipelineData::ColorWriteMask() const
 	{
-		return (*m_SettingsToggles.Data() << PipelineData::ColorWriteRed) & 0x0F;
+		return static_cast<uint8_t>(*m_SettingsToggles.Data() << PipelineData::ColorWriteRed) & 0x0F;
+	}
+
+	void PipelineData::SetStencilTestEnabled(bool enable)
+	{
+		m_SettingsToggles.Set(SettingBitsIndices::StencilTestEnable, enable);
+	}
+
+	const bool PipelineData::StencilTestEnabled() const
+	{
+		return m_SettingsToggles.IsSet(SettingBitsIndices::StencilTestEnable);
+	}
+
+	void PipelineData::SetStencilWriteMask(uint8_t mask)
+	{
+		const uint32_t shiftedMask = mask >> PipelineData::StencilWriteMaskBegin;
+		(*m_SettingsToggles.Data()) |= shiftedMask;
+	}
+
+	const uint8_t PipelineData::StencilWriteMask() const
+	{
+		return static_cast<uint8_t>(*m_SettingsToggles.Data() << PipelineData::StencilWriteMaskBegin);
+	}
+
+	void PipelineData::SetStencilCompareMask(uint8_t mask)
+	{
+		const uint32_t shiftedMask = mask >> PipelineData::StencilCompareMaskBegin;
+		(*m_SettingsToggles.Data()) |= shiftedMask;
+	}
+
+	const uint8_t PipelineData::StencilCompareMask() const
+	{
+		return static_cast<uint8_t>(*m_SettingsToggles.Data() << PipelineData::StencilCompareMaskBegin);
+	}
+
+	void PipelineData::SetStencilReference(uint8_t ref)
+	{
+		const uint32_t shiftedMask = ref >> PipelineData::StencilReferenceBegin;
+		(*m_SettingsToggles.Data()) |= shiftedMask;
+	}
+
+	const uint8_t PipelineData::StencilReference() const
+	{
+		return static_cast<uint8_t>(*m_SettingsToggles.Data() << PipelineData::StencilReferenceBegin);
 	}
 }
