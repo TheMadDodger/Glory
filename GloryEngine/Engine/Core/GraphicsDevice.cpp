@@ -80,11 +80,18 @@ namespace Glory
 		{
 			MeshHandle newMesh = CreateMesh(pMesh);
 			iter = m_MeshHandles.emplace(pMesh->GetGPUUUID(), newMesh).first;
+			pMesh->SetDirty(false);
+			return newMesh;
 		}
 
 		MeshHandle mesh = iter->second;
 
 		/* @todo: Update mesh if needed */
+		if (pMesh->IsDirty())
+		{
+			UpdateMesh(mesh, pMesh);
+			pMesh->SetDirty(false);
+		}
 
 		return mesh;
 	}

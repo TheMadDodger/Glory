@@ -170,6 +170,7 @@ namespace Glory
             uint32_t indexCount, uint32_t stride, const std::vector<AttributeType>& attributeTypes) override;
         virtual void UpdateMesh(MeshHandle mesh, std::vector<BufferHandle>&& buffers,
             uint32_t vertexCount, uint32_t indexCount) override;
+        virtual void UpdateMesh(MeshHandle mesh, MeshData* pMeshData) override;
 
         virtual TextureHandle CreateTexture(TextureData* pTexture) override;
         virtual TextureHandle CreateTexture(CubemapData* pCubemap) override;

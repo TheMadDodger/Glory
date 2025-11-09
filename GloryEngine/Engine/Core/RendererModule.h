@@ -18,6 +18,7 @@ namespace Glory
 	class CubemapData;
 	class MaterialData;
 	class GPUTextureAtlas;
+	class GraphicsDevice;
 	struct RenderPass;
 	struct TextureCreateInfo;
 
@@ -224,6 +225,8 @@ namespace Glory
 
 		void SetEnabled(bool enabled=true);
 
+		void InjectSwapchainSubpass(std::function<void(GraphicsDevice*, RenderPassHandle, CommandBufferHandle)> subpassFunc);
+
 	protected:
 		virtual void OnSubmitDynamic(const RenderData& renderData) {}
 		virtual void OnSubmitCamera(CameraRef camera) {}
@@ -273,5 +276,7 @@ namespace Glory
 
 		SwapchainHandle m_Swapchain = 0;
 		bool m_Enabled = true;
+
+		std::vector<std::function<void(GraphicsDevice*, RenderPassHandle, CommandBufferHandle)>> m_InjectedSwapchainSubpasses;
 	};
 }

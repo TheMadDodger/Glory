@@ -42,6 +42,6 @@ namespace Glory
 
 	namespace Utils
 	{
-		void GenerateTextMesh(MeshData* pMesh, FontData* pFontData, const TextData& renderData, float textWrap=0.0f);
+		glm::vec2 GenerateTextMesh(MeshData* pMesh, FontData* pFontData, const TextData& renderData, float textWrap=0.0f);
 	}
 }

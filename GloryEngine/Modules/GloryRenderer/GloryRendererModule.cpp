@@ -3,6 +3,7 @@
 #include <Engine.h>
 #include <Console.h>
 #include <GraphicsDevice.h>
+#include <DescriptorHelpers.h>
 #include <GPUTextureAtlas.h>
 
 #include <PipelineManager.h>
@@ -244,174 +245,6 @@ namespace Glory
 			GenerateShadowLODDivisions(cvar->m_Value);
 			ResizeShadowMapLODResolutions(m_MinShadowResolution, m_MaxShadowResolution);
 		});
-	}
-
-	void CreateBufferDescriptorLayoutAndSet(GraphicsDevice* pDevice, bool usePushConstants, size_t numBuffers,
-		const std::vector<uint32_t>& bindingIndices, const std::vector<BufferType>& bufferTypes,
-		const std::vector<ShaderTypeFlag>& shaderStages, const std::vector<BufferHandle>& bufferHandles,
-		const std::vector<std::pair<uint32_t, uint32_t>>& bufferOffsetsAndSizes, DescriptorSetLayoutHandle& layout,
-		DescriptorSetHandle& set, BufferHandle* pConstantsBuffer=nullptr, ShaderTypeFlag constantsShaderStage=ShaderTypeFlag(0),
-		uint32_t constantsOffset=0, uint32_t constantsSize=0)
-	{
-		DescriptorSetLayoutInfo setLayoutInfo = DescriptorSetLayoutInfo();
-		DescriptorSetInfo setInfo = DescriptorSetInfo();
-		size_t firstBufferindex = 0;
-		if (pConstantsBuffer)
-		{
-			if (!usePushConstants)
-			{
-				firstBufferindex = 1;
-				setLayoutInfo.m_Buffers.resize(numBuffers + 1);
-				setInfo.m_Buffers.resize(numBuffers + 1);
-				if (!(*pConstantsBuffer))
-					*pConstantsBuffer = pDevice->CreateBuffer(constantsSize, BufferType::BT_Uniform, BF_Write);
-				setInfo.m_Buffers[0].m_BufferHandle = *pConstantsBuffer;
-				setInfo.m_Buffers[0].m_Offset = constantsOffset;
-				setInfo.m_Buffers[0].m_Size = constantsSize;
-				setLayoutInfo.m_Buffers[0].m_BindingIndex = BufferBindingIndices::RenderConstants;
-				setLayoutInfo.m_Buffers[0].m_Type = BufferType::BT_Uniform;
-				setLayoutInfo.m_Buffers[0].m_ShaderStages = constantsShaderStage;
-			}
-			else
-			{
-				setLayoutInfo.m_Buffers.resize(numBuffers);
-				setInfo.m_Buffers.resize(numBuffers);
-				setLayoutInfo.m_PushConstantRange.m_Offset = constantsOffset;
-				setLayoutInfo.m_PushConstantRange.m_Size = constantsSize;
-				setLayoutInfo.m_PushConstantRange.m_ShaderStages = constantsShaderStage;
-			}
-		}
-		else
-		{
-			setLayoutInfo.m_Buffers.resize(numBuffers);
-			setInfo.m_Buffers.resize(numBuffers);
-		}
-
-		for (size_t i = 0; i < numBuffers; ++i)
-		{
-			const uint32_t bindingIndex = i >= bindingIndices.size() ? bindingIndices.back() : bindingIndices[i];
-			const BufferType bufferType = i >= bufferTypes.size() ? bufferTypes.back() : bufferTypes[i];
-			const ShaderTypeFlag shaderStage = i >= shaderStages.size() ? shaderStages.back() : shaderStages[i];
-
-			const size_t index = firstBufferindex + i;
-			setLayoutInfo.m_Buffers[index].m_BindingIndex = bindingIndex;
-			setLayoutInfo.m_Buffers[index].m_Type = bufferType;
-			setLayoutInfo.m_Buffers[index].m_ShaderStages = shaderStage;
-			setInfo.m_Buffers[index].m_BufferHandle = bufferHandles[i];
-			setInfo.m_Buffers[index].m_Offset = bufferOffsetsAndSizes[i].first;
-			setInfo.m_Buffers[index].m_Size = bufferOffsetsAndSizes[i].second;
-		}
-		layout = setInfo.m_Layout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
-		set = pDevice->CreateDescriptorSet(std::move(setInfo));
-	}
-
-	DescriptorSetLayoutHandle CreateBufferDescriptorLayout(GraphicsDevice* pDevice, size_t numBuffers,
-		const std::vector<uint32_t>& bindingIndices, const std::vector<BufferType>& bufferTypes,
-		const std::vector<ShaderTypeFlag>& shaderStages)
-	{
-		DescriptorSetLayoutInfo setLayoutInfo = DescriptorSetLayoutInfo();
-		setLayoutInfo.m_Buffers.resize(numBuffers);
-
-		for (size_t i = 0; i < numBuffers; ++i)
-		{
-			const uint32_t bindingIndex = i >= bindingIndices.size() ? bindingIndices.back() : bindingIndices[i];
-			const BufferType bufferType = i >= bufferTypes.size() ? bufferTypes.back() : bufferTypes[i];
-			const ShaderTypeFlag shaderStage = i >= shaderStages.size() ? shaderStages.back() : shaderStages[i];
-			setLayoutInfo.m_Buffers[i].m_BindingIndex = bindingIndex;
-			setLayoutInfo.m_Buffers[i].m_Type = bufferType;
-			setLayoutInfo.m_Buffers[i].m_ShaderStages = shaderStage;
-		}
-		return pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
-	}
-
-	DescriptorSetHandle CreateBufferDescriptorSet(GraphicsDevice* pDevice, bool usePushConstants, size_t numBuffers,
-		const std::vector<BufferHandle>& bufferHandles, const std::vector<std::pair<uint32_t, uint32_t>>& bufferOffsetsAndSizes,
-		DescriptorSetLayoutHandle layout, BufferHandle* pConstantsBuffer=nullptr, uint32_t constantsOffset=0, uint32_t constantsSize=0)
-	{
-		DescriptorSetInfo setInfo = DescriptorSetInfo();
-		size_t firstBufferindex = 0;
-		if (pConstantsBuffer)
-		{
-			if (!usePushConstants)
-			{
-				firstBufferindex = 1;
-				setInfo.m_Buffers.resize(numBuffers + 1);
-				if (!(*pConstantsBuffer))
-					*pConstantsBuffer = pDevice->CreateBuffer(constantsSize, BufferType::BT_Uniform, BF_Write);
-				setInfo.m_Buffers[0].m_BufferHandle = *pConstantsBuffer;
-				setInfo.m_Buffers[0].m_Offset = constantsOffset;
-				setInfo.m_Buffers[0].m_Size = constantsSize;
-			}
-			else
-				setInfo.m_Buffers.resize(numBuffers);
-		}
-		else
-			setInfo.m_Buffers.resize(numBuffers);
-
-		for (size_t i = 0; i < numBuffers; ++i)
-		{
-			const size_t index = firstBufferindex + i;
-			setInfo.m_Buffers[index].m_BufferHandle = bufferHandles[i];
-			setInfo.m_Buffers[index].m_Offset = bufferOffsetsAndSizes[i].first;
-			setInfo.m_Buffers[index].m_Size = bufferOffsetsAndSizes[i].second;
-		}
-		setInfo.m_Layout = layout;
-		return pDevice->CreateDescriptorSet(std::move(setInfo));
-	}
-
-	void CreateSamplerDescriptorLayoutAndSet(GraphicsDevice* pDevice, size_t numSamplers,
-		const std::vector<uint32_t>& bindingIndices, const std::vector<ShaderTypeFlag>& shaderStages,
-		std::vector<std::string>&& samplerNames, const std::vector<TextureHandle>& textureHandles,
-		DescriptorSetLayoutHandle& layout, DescriptorSetHandle& set)
-	{
-		DescriptorSetLayoutInfo setLayoutInfo = DescriptorSetLayoutInfo();
-		DescriptorSetInfo setInfo = DescriptorSetInfo();
-		setLayoutInfo.m_Samplers.resize(numSamplers);
-		setLayoutInfo.m_SamplerNames = std::move(samplerNames);
-		setInfo.m_Samplers.resize(numSamplers);
-
-		for (size_t i = 0; i < numSamplers; ++i)
-		{
-			const uint32_t bindingIndex = i >= bindingIndices.size() ? bindingIndices.back() : bindingIndices[i];
-			const ShaderTypeFlag shaderStage = i >= shaderStages.size() ? shaderStages.back() : shaderStages[i];
-			setLayoutInfo.m_Samplers[i].m_BindingIndex = bindingIndex;
-			setLayoutInfo.m_Samplers[i].m_ShaderStages = shaderStage;
-			setInfo.m_Samplers[i].m_TextureHandle = textureHandles[i];
-		}
-		setInfo.m_Layout = layout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
-		set = pDevice->CreateDescriptorSet(std::move(setInfo));
-	}
-
-	DescriptorSetLayoutHandle CreateSamplerDescriptorLayout(GraphicsDevice* pDevice, size_t numSamplers,
-		const std::vector<uint32_t>& bindingIndices, const std::vector<ShaderTypeFlag>& shaderStages,
-		std::vector<std::string>&& samplerNames)
-	{
-		DescriptorSetLayoutInfo setLayoutInfo = DescriptorSetLayoutInfo();
-		setLayoutInfo.m_Samplers.resize(numSamplers);
-		setLayoutInfo.m_SamplerNames = std::move(samplerNames);
-
-		for (size_t i = 0; i < numSamplers; ++i)
-		{
-			const uint32_t bindingIndex = i >= bindingIndices.size() ? bindingIndices.back() : bindingIndices[i];
-			const ShaderTypeFlag shaderStage = i >= shaderStages.size() ? shaderStages.back() : shaderStages[i];
-			setLayoutInfo.m_Samplers[i].m_BindingIndex = bindingIndex;
-			setLayoutInfo.m_Samplers[i].m_ShaderStages = shaderStage;
-		}
-		return pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
-	}
-
-	DescriptorSetHandle CreateSamplerDescriptorSet(GraphicsDevice* pDevice, size_t numSamplers,
-		const std::vector<TextureHandle>& textureHandles, DescriptorSetLayoutHandle layout)
-	{
-		DescriptorSetInfo setInfo = DescriptorSetInfo();
-		setInfo.m_Samplers.resize(numSamplers);
-
-		for (size_t i = 0; i < numSamplers; ++i)
-		{
-			setInfo.m_Samplers[i].m_TextureHandle = textureHandles[i];
-		}
-		setInfo.m_Layout = layout;
-		return pDevice->CreateDescriptorSet(std::move(setInfo));
 	}
 
 	void GloryRendererModule::OnPostInitialize()
@@ -925,6 +758,8 @@ namespace Glory
 			pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DisplayCopyPipeline, { m_FinalFrameColorSets[m_CurrentFrameIndex] });
 			pDevice->DrawQuad(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 			pDevice->EndPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex]);
+			for (auto& injectedSubpass : m_InjectedSwapchainSubpasses)
+				injectedSubpass(pDevice, m_SwapchainPasses[m_CurrentSemaphoreIndex], m_FrameCommandBuffers[m_CurrentFrameIndex]);
 			pDevice->EndRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 		}
 		pDevice->End(m_FrameCommandBuffers[m_CurrentFrameIndex]);
@@ -1105,7 +940,7 @@ namespace Glory
 			if (!m_ShadowAtlasses[i])
 			{
 				m_ShadowAtlasses[i] = CreateGPUTextureAtlas(std::move(info), texture);
-				m_ShadowAtlasSamplerSets[i] = CreateSamplerDescriptorSet(pDevice, 2, { NULL, texture }, m_ShadowAtlasSamplerSetLayout);
+				m_ShadowAtlasSamplerSets[i] = CreateSamplerDescriptorSet(pDevice, 1, { texture }, m_ShadowAtlasSamplerSetLayout);
 			}
 
 			RenderPassInfo finalColorPassInfo;

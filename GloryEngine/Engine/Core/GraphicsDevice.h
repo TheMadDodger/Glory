@@ -568,6 +568,8 @@ namespace Glory
 		virtual void UpdateMesh(MeshHandle mesh, std::vector<BufferHandle>&& buffers,
 			uint32_t vertexCount, uint32_t indexCount) = 0;
 
+		virtual void UpdateMesh(MeshHandle mesh, MeshData* pMeshData) = 0;
+
 		/* Texture */
 
 		/**

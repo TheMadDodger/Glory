@@ -7,6 +7,7 @@
 #include <Window.h>
 
 #include <PipelineData.h>
+#include <MeshData.h>
 #include <ImageData.h>
 #include <TextureData.h>
 #include <CubemapData.h>
@@ -510,15 +511,15 @@ namespace Glory
 		if (glPipeline->m_SettingToggles.IsSet(PipelineData::StencilTestEnable))
 		{
 			glEnable(GL_STENCIL_TEST);
-			const uint8_t compareMask = static_cast<uint8_t>(*glPipeline->m_SettingToggles.Data() << PipelineData::StencilCompareMaskBegin);
-			const uint8_t ref = static_cast<uint8_t>(*glPipeline->m_SettingToggles.Data() << PipelineData::StencilReferenceBegin);
+			const uint8_t compareMask = static_cast<uint8_t>(*glPipeline->m_SettingToggles.Data() >> PipelineData::StencilCompareMaskBegin);
+			const uint8_t ref = static_cast<uint8_t>(*glPipeline->m_SettingToggles.Data() >> PipelineData::StencilReferenceBegin);
 			glStencilOp(glPipeline->m_GLStencilFailOp, glPipeline->m_GLStencilDepthFailOp, glPipeline->m_GLStencilPassOp);
 			glStencilFunc(glPipeline->m_GLStencilCompareOp, int32_t(ref), uint32_t(compareMask));
 		}
 		else
 			glDisable(GL_STENCIL_TEST);
 
-		const uint8_t writeMask = static_cast<uint8_t>(*glPipeline->m_SettingToggles.Data() << PipelineData::StencilWriteMaskBegin);
+		const uint8_t writeMask = static_cast<uint8_t>(*glPipeline->m_SettingToggles.Data() >> PipelineData::StencilWriteMaskBegin);
 		glStencilMask(uint32_t(writeMask));
 	}
 
@@ -1022,6 +1023,22 @@ namespace Glory
 			glBindBuffer(buffer->m_GLTarget, buffer->m_GLBufferID);
 			OpenGLGraphicsModule::LogGLError(glGetError());
 		}
+	}
+
+	void OpenGLDevice::UpdateMesh(MeshHandle mesh, MeshData* pMeshData)
+	{
+		GL_Mesh* glMesh = m_Meshes.Find(mesh);
+		if (!glMesh)
+		{
+			Debug().LogError("OpenGLDevice::UpdateMesh: Invalid mesh handle.");
+			return;
+		}
+
+		glMesh->m_IndexCount = pMeshData->IndexCount();
+		glMesh->m_VertexCount = pMeshData->VertexCount();
+		AssignBuffer(glMesh->m_Buffers[0], pMeshData->Vertices(), pMeshData->VertexCount()*pMeshData->VertexSize());
+		if (glMesh->m_IndexCount > 0)
+			AssignBuffer(glMesh->m_Buffers.back(), pMeshData->Indices(), pMeshData->IndexCount()*sizeof(uint32_t));
 	}
 
 	TextureHandle OpenGLDevice::CreateTexture(TextureData* pTexture)
@@ -1956,7 +1973,7 @@ namespace Glory
 		if (renderTexture.m_Info.HasStencil)
 		{
 			stencilIndex = textureCounter;
-			renderTexture.m_Textures[stencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Stencil, sampler });
+			renderTexture.m_Textures[stencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UByte, 0, 0, ImageAspect::IA_Stencil, sampler });
 			renderTexture.m_AttachmentNames[stencilIndex] = "Stencil";
 			++textureCounter;
 		}

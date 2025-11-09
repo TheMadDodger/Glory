@@ -274,7 +274,8 @@ namespace Glory
 	void SDLWindow::SetupForOpenGL()
 	{
 		// Create OpenGL context
-		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
+		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
@@ -762,7 +763,8 @@ namespace Glory
 			m_pWindowManager->GetCurrentScreenResolution(m_Width, m_Height);
 
 		// Create an SDL window that supports Vulkan rendering.
-		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
+		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
 		m_pWindow = SDL_CreateWindow(m_WindowName.c_str(), SDL_WINDOWPOS_CENTERED,
 			SDL_WINDOWPOS_CENTERED, m_Width, m_Height, m_WindowFlags);
 		SetFullscreen(m_Fullscreen, false);

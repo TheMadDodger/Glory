@@ -469,9 +469,9 @@ namespace Glory
 			PFNCmdSetColorWriteMaskEXT(VkCommandBuffer(*vkCommandBuffer), 0, vkPipeline->m_VKColorWriteMasks.size(),
 				reinterpret_cast<VkColorComponentFlags*>(vkPipeline->m_VKColorWriteMasks.data()));
 
-		const uint8_t compareMask = static_cast<uint8_t>(*vkPipeline->m_SettingToggles.Data() << PipelineData::StencilCompareMaskBegin);
-		const int8_t ref = static_cast<int8_t>(*vkPipeline->m_SettingToggles.Data() << PipelineData::StencilReferenceBegin);
-		const uint8_t writeMask = static_cast<uint8_t>(*vkPipeline->m_SettingToggles.Data() << PipelineData::StencilWriteMaskBegin);
+		const uint8_t compareMask = static_cast<uint8_t>(*vkPipeline->m_SettingToggles.Data() >> PipelineData::StencilCompareMaskBegin);
+		const int8_t ref = static_cast<int8_t>(*vkPipeline->m_SettingToggles.Data() >> PipelineData::StencilReferenceBegin);
+		const uint8_t writeMask = static_cast<uint8_t>(*vkPipeline->m_SettingToggles.Data() >> PipelineData::StencilWriteMaskBegin);
 
 		PFNCmdSetStencilTestEnable(VkCommandBuffer(*vkCommandBuffer), vkPipeline->m_SettingToggles.IsSet(PipelineData::StencilTestEnable));
 		PFNCmdSetStencilCompareMask(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK, uint32_t(compareMask));
@@ -1276,6 +1276,40 @@ namespace Glory
 		vkMesh->m_Buffers = std::move(buffers);
 	}
 
+	void VulkanDevice::UpdateMesh(MeshHandle mesh, MeshData* pMeshData)
+	{
+		VK_Mesh* vkMesh = m_Meshes.Find(mesh);
+		if (!vkMesh)
+		{
+			Debug().LogError("VulkanDevice::UpdateMesh: Invalid mesh handle.");
+			return;
+		}
+
+		vkMesh->m_IndexCount = pMeshData->IndexCount();
+		vkMesh->m_VertexCount = pMeshData->VertexCount();
+
+		const size_t vertexBufferSize = pMeshData->VertexCount()*pMeshData->VertexSize();
+		const size_t indexBufferSize = pMeshData->IndexCount()*sizeof(uint32_t);
+
+		VK_Buffer* vkVertexBuffer = m_Buffers.Find(vkMesh->m_Buffers[0]);
+		if (vertexBufferSize > vkVertexBuffer->m_Size)
+		{
+			/* @todo: Resize buffer memory */
+		}
+
+		AssignBuffer(vkMesh->m_Buffers[0], pMeshData->Vertices(), vertexBufferSize);
+		if (vkMesh->m_IndexCount > 0)
+		{
+			VK_Buffer* vkIndexBuffer = m_Buffers.Find(vkMesh->m_Buffers.back());
+			if (indexBufferSize > vkIndexBuffer->m_Size)
+			{
+				/* @todo: Resize buffer memory */
+			}
+
+			AssignBuffer(vkMesh->m_Buffers.back(), pMeshData->Indices(), indexBufferSize);
+		}
+	}
+
 	TextureHandle VulkanDevice::CreateTexture(TextureData* pTexture)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::CreateTexture" };
@@ -1301,25 +1335,26 @@ namespace Glory
 
 	TextureHandle VulkanDevice::CreateTexture(CubemapData* pCubemap)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateTexture" };
-		ImageData* pFaceImage = pCubemap->GetImageData(&m_pModule->GetEngine()->GetAssetManager(), 0);
-		if (!pFaceImage)
-		{
-			Debug().LogError("VulkanDevice::CreateTexture(TextureData): Could not get ImageData.");
-			return NULL;
-		}
-
-		TextureCreateInfo createInfo;
-		createInfo.m_Width = pFaceImage->GetWidth();
-		createInfo.m_Height = pFaceImage->GetHeight();
-		createInfo.m_ImageAspectFlags = IA_Color;
-		createInfo.m_ImageType = ImageType::IT_Cube;
-		createInfo.m_InternalFormat = pFaceImage->GetInternalFormat();
-		createInfo.m_PixelFormat = pFaceImage->GetFormat();
-		createInfo.m_Type = pFaceImage->GetDataType();
-		createInfo.m_SamplerSettings = pCubemap->GetSamplerSettings();
-
-		return CreateTexture(createInfo, pFaceImage->GetPixels(), pFaceImage->DataSize());
+		//ProfileSample s{ &Profiler(), "VulkanDevice::CreateTexture" };
+		//ImageData* pFaceImage = pCubemap->GetImageData(&m_pModule->GetEngine()->GetAssetManager(), 0);
+		//if (!pFaceImage)
+		//{
+		//	Debug().LogError("VulkanDevice::CreateTexture(TextureData): Could not get ImageData.");
+		//	return NULL;
+		//}
+		//
+		//TextureCreateInfo createInfo;
+		//createInfo.m_Width = pFaceImage->GetWidth();
+		//createInfo.m_Height = pFaceImage->GetHeight();
+		//createInfo.m_ImageAspectFlags = IA_Color;
+		//createInfo.m_ImageType = ImageType::IT_Cube;
+		//createInfo.m_InternalFormat = pFaceImage->GetInternalFormat();
+		//createInfo.m_PixelFormat = pFaceImage->GetFormat();
+		//createInfo.m_Type = pFaceImage->GetDataType();
+		//createInfo.m_SamplerSettings = pCubemap->GetSamplerSettings();
+		//
+		//return CreateTexture(createInfo, pFaceImage->GetPixels(), pFaceImage->DataSize());
+		return NULL;
 	}
 
 	void EnsureSupportedFormat(vk::Format& format, vk::ImageViewCreateInfo& viewInfo)
