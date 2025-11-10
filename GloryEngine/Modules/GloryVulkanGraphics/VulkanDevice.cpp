@@ -1002,6 +1002,7 @@ namespace Glory
 		VK_Buffer& buffer = m_Buffers.Emplace(handle, VK_Buffer());
 		buffer.m_Size = bufferSize;
 		buffer.m_CPUVisible = (flags & BF_ReadAndWrite) != 0;
+		buffer.m_Flags = flags;
 
 		vk::BufferCreateInfo bufferInfo = vk::BufferCreateInfo();
 		bufferInfo.size = (vk::DeviceSize)buffer.m_Size;
@@ -1037,10 +1038,6 @@ namespace Glory
 		}
 
 		m_LogicalDevice.bindBufferMemory(buffer.m_VKBuffer, buffer.m_VKMemory, 0);
-
-		std::stringstream str;
-		str << "VulkanDevice: Buffer " << handle << " created with size " << bufferSize << ".";
-		Debug().LogInfo(str.str());
 
 		return handle;
 	}
@@ -1254,10 +1251,6 @@ namespace Glory
 			GetNextOffset(attributeTypes[i], currentOffset);
 		}
 
-		std::stringstream str;
-		str << "VulkanDevice: Mesh " << handle << " created.";
-		Debug().LogInfo(str.str());
-
 		return handle;
 	}
 
@@ -1294,7 +1287,8 @@ namespace Glory
 		VK_Buffer* vkVertexBuffer = m_Buffers.Find(vkMesh->m_Buffers[0]);
 		if (vertexBufferSize > vkVertexBuffer->m_Size)
 		{
-			/* @todo: Resize buffer memory */
+			vkVertexBuffer->m_Size = vertexBufferSize;
+			ResizeBuffer(*vkVertexBuffer);
 		}
 
 		AssignBuffer(vkMesh->m_Buffers[0], pMeshData->Vertices(), vertexBufferSize);
@@ -1303,7 +1297,8 @@ namespace Glory
 			VK_Buffer* vkIndexBuffer = m_Buffers.Find(vkMesh->m_Buffers.back());
 			if (indexBufferSize > vkIndexBuffer->m_Size)
 			{
-				/* @todo: Resize buffer memory */
+				vkIndexBuffer->m_Size = indexBufferSize;
+				ResizeBuffer(*vkIndexBuffer);
 			}
 
 			AssignBuffer(vkMesh->m_Buffers.back(), pMeshData->Indices(), indexBufferSize);
@@ -1491,10 +1486,6 @@ namespace Glory
 			}
 			texture.m_VKSampler = samplerIter->second;
 		}
-
-		std::stringstream str;
-		str << "VulkanDevice: Texture " << handle << " created.";
-		Debug().LogInfo(str.str());
 
 		return handle;
 	}
@@ -1784,10 +1775,6 @@ namespace Glory
 			return NULL;
 		}
 
-		std::stringstream str;
-		str << "VulkanDevice: RenderPass " << handle << " created.";
-		Debug().LogInfo(str.str());
-
 		return handle;
 	}
 
@@ -1828,10 +1815,6 @@ namespace Glory
 		shader.m_Function = function;
 		shader.m_VKStage = VKConverter::GetShaderStageFlag(shaderType);
 		shader.m_VKModule = m_LogicalDevice.createShaderModule(shaderModuleCreateInfo, nullptr);
-
-		std::stringstream str;
-		str << "VulkanDevice: Shader " << handle << " created.";
-		Debug().LogInfo(str.str());
 
 		return handle;
 	}
@@ -2025,10 +2008,6 @@ namespace Glory
 			return NULL;
 		}
 
-		std::stringstream str;
-		str << "VulkanDevice: Pipeline " << handle << " created.";
-		Debug().LogInfo(str.str());
-
 		return handle;
 	}
 
@@ -2154,10 +2133,6 @@ namespace Glory
 			Debug().LogError("VulkanDevice::CreateComputePipeline: Failed to create compute pipeline.");
 			return NULL;
 		}
-
-		std::stringstream str;
-		str << "VulkanDevice: Compute pipeline " << handle << " created.";
-		Debug().LogInfo(str.str());
 
 		return handle;
 	}
@@ -2531,10 +2506,6 @@ namespace Glory
 		m_LogicalDevice.freeMemory(buffer->m_VKMemory);
 		m_Buffers.Erase(handle);
 
-		std::stringstream str;
-		str << "VulkanDevice: Buffer " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
-
 		handle = 0;
 	}
 
@@ -2552,10 +2523,6 @@ namespace Glory
 			FreeBuffer(buffer);
 
 		m_Meshes.Erase(handle);
-
-		std::stringstream str;
-		str << "VulkanDevice: Mesh " << handle << " was freed.";
-		Debug().LogInfo(str.str());
 
 		handle = 0;
 	}
@@ -2576,10 +2543,6 @@ namespace Glory
 		m_LogicalDevice.freeMemory(texture->m_VKMemory, nullptr);
 
 		m_Textures.Erase(handle);
-
-		std::stringstream str;
-		str << "VulkanDevice: Texture " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
 
 		handle = 0;
 	}
@@ -2606,10 +2569,6 @@ namespace Glory
 
 		m_RenderTextures.Erase(handle);
 
-		std::stringstream str;
-		str << "VulkanDevice: RenderTexture " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
-
 		handle = 0;
 	}
 
@@ -2628,10 +2587,6 @@ namespace Glory
 
 		m_RenderPasses.Erase(handle);
 
-		std::stringstream str;
-		str << "VulkanDevice: RenderPass " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
-
 		handle = 0;
 	}
 
@@ -2648,10 +2603,6 @@ namespace Glory
 		m_LogicalDevice.destroyShaderModule(shader->m_VKModule);
 
 		m_Shaders.Erase(handle);
-
-		std::stringstream str;
-		str << "OpenGLDevice: Shader " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
 
 		handle = 0;
 	}
@@ -2670,10 +2621,6 @@ namespace Glory
 		m_LogicalDevice.destroyPipelineLayout(pipeline->m_VKLayout);
 		m_Pipelines.Erase(handle);
 
-		std::stringstream str;
-		str << "VulkanDevice: Pipeline " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
-
 		handle = 0;
 	}
 
@@ -2690,10 +2637,6 @@ namespace Glory
 		m_LogicalDevice.destroyDescriptorSetLayout(vkSetLayout->m_VKLayout);
 		m_DescriptorSetLayouts.Erase(handle);
 
-		std::stringstream str;
-		str << "VulkanDevice: Descriptor set layout " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
-
 		handle = 0;
 	}
 
@@ -2709,10 +2652,6 @@ namespace Glory
 		
 		m_LogicalDevice.freeDescriptorSets(vkSet->m_VKDescriptorPool, 1, &vkSet->m_VKDescriptorSet);
 		m_DescriptorSets.Erase(handle);
-
-		std::stringstream str;
-		str << "VulkanDevice: Descriptor set " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
 
 		handle = 0;
 	}
@@ -2759,10 +2698,6 @@ namespace Glory
 		m_LogicalDevice.destroySemaphore(vkSemaphore->m_VKSemaphore);
 
 		m_Semaphores.Erase(handle);
-
-		std::stringstream str;
-		str << "VulkanDevice: Semaphore " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
 
 		handle = 0;
 	}
@@ -3455,5 +3390,57 @@ namespace Glory
 			return false;
 		}
 		return true;
+	}
+
+	void VulkanDevice::ResizeBuffer(VK_Buffer& buffer)
+	{
+		WaitIdle();
+
+		if (buffer.m_pMappedMemory)
+		{
+			m_LogicalDevice.unmapMemory(buffer.m_VKMemory);
+			buffer.m_pMappedMemory = nullptr;
+		}
+
+		vk::BufferCreateInfo bufferInfo = vk::BufferCreateInfo();
+		bufferInfo.size = (vk::DeviceSize)buffer.m_Size;
+		bufferInfo.sharingMode = vk::SharingMode::eExclusive;
+		bufferInfo.usage = buffer.m_VKUsage;
+
+		vk::Buffer newBuffer;
+		vk::Result result = m_LogicalDevice.createBuffer(&bufferInfo, nullptr, &newBuffer);
+		if (result != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::ResizeBuffer: Failed to create buffer.");
+			return;
+		}
+
+		vk::MemoryRequirements memRequirements;
+		m_LogicalDevice.getBufferMemoryRequirements(newBuffer, &memRequirements);
+
+		const uint32_t typeFilter = memRequirements.memoryTypeBits;
+		const vk::MemoryPropertyFlags properties = GetBufferMemoryPropertyFlags(buffer.m_Flags);
+		const uint32_t memoryIndex = GetSupportedMemoryIndex(typeFilter, properties);
+
+		/* Allocate device memory */
+		vk::MemoryAllocateInfo allocateInfo = vk::MemoryAllocateInfo();
+		allocateInfo.allocationSize = memRequirements.size;
+		allocateInfo.memoryTypeIndex = memoryIndex;
+
+		vk::DeviceMemory newMemory;
+		result = m_LogicalDevice.allocateMemory(&allocateInfo, nullptr, &newMemory);
+		if (result != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::ResizeBuffer: Failed to create buffer memory.");
+			m_LogicalDevice.destroyBuffer(newBuffer);
+			return;
+		}
+
+		m_LogicalDevice.destroyBuffer(buffer.m_VKBuffer);
+		m_LogicalDevice.freeMemory(buffer.m_VKMemory);
+
+		buffer.m_VKBuffer = newBuffer;
+		buffer.m_VKMemory = newMemory;
+		m_LogicalDevice.bindBufferMemory(buffer.m_VKBuffer, buffer.m_VKMemory, 0);
 	}
 }

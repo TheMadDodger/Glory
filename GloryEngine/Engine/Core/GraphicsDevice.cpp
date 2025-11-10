@@ -73,12 +73,12 @@ namespace Glory
 		return pipeline;
 	}
 
-	MeshHandle GraphicsDevice::AcquireCachedMesh(MeshData* pMesh)
+	MeshHandle GraphicsDevice::AcquireCachedMesh(MeshData* pMesh, MeshUsage usage)
 	{
 		auto iter = m_MeshHandles.find(pMesh->GetGPUUUID());
 		if (iter == m_MeshHandles.end())
 		{
-			MeshHandle newMesh = CreateMesh(pMesh);
+			MeshHandle newMesh = CreateMesh(pMesh, usage);
 			iter = m_MeshHandles.emplace(pMesh->GetGPUUUID(), newMesh).first;
 			pMesh->SetDirty(false);
 			return newMesh;
@@ -128,8 +128,21 @@ namespace Glory
 		return iter != m_TextureHandles.end();
 	}
 
-	MeshHandle GraphicsDevice::CreateMesh(MeshData* pMeshData)
+	MeshHandle GraphicsDevice::CreateMesh(MeshData* pMeshData, MeshUsage usage)
 	{
+		BufferFlags bufferFlags = BF_None;
+		switch (usage)
+		{
+		case Glory::MU_Static:
+			bufferFlags = BF_CopyDst;
+			break;
+		case Glory::MU_Dynamic:
+			bufferFlags = BF_Write;
+			break;
+		default:
+			break;
+		}
+
 		std::vector<BufferHandle> buffers(2);
 		buffers[0] = CreateBuffer(pMeshData->VertexCount()*pMeshData->VertexSize(), BufferType::BT_Vertex, BF_CopyDst);
 		buffers[1] = CreateBuffer(pMeshData->IndexCount()*sizeof(uint32_t), BufferType::BT_Index, BF_CopyDst);

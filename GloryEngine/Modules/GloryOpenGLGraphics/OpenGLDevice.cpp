@@ -781,10 +781,6 @@ namespace Glory
 		glBindBuffer(buffer.m_GLTarget, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
-		std::stringstream str;
-		str << "OpenGLDevice: Buffer " << handle << " created with size " << bufferSize << ".";
-		Debug().LogInfo(str.str());
-
 		return handle;
 	}
 
@@ -988,10 +984,6 @@ namespace Glory
 			OpenGLGraphicsModule::LogGLError(glGetError());
 		}
 
-		std::stringstream str;
-		str << "OpenGLDevice: Mesh " << handle << " created.";
-		Debug().LogInfo(str.str());
-
 		return handle;
 	}
 
@@ -1108,10 +1100,6 @@ namespace Glory
 		glBindTexture(texture.m_GLTextureType, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
-		std::stringstream str;
-		str << "OpenGLDevice: Texture " << handle << " created.";
-		Debug().LogInfo(str.str());
-
 		return handle;
 	}
 
@@ -1186,10 +1174,6 @@ namespace Glory
 		glBindTexture(texture.m_GLTextureType, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
-		std::stringstream str;
-		str << "OpenGLDevice: Texture(Cubemap) " << handle << " created.";
-		Debug().LogInfo(str.str());
-
 		return handle;
 	}
 
@@ -1254,10 +1238,6 @@ namespace Glory
 		glBindTexture(texture.m_GLTextureType, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
-		std::stringstream str;
-		str << "OpenGLDevice: Texture " << handle << " created.";
-		Debug().LogInfo(str.str());
-
 		return handle;
 	}
 
@@ -1274,10 +1254,6 @@ namespace Glory
 		renderTexture.m_RenderPass = renderPass;
 		renderTexture.m_Info = std::move(info);
 		CreateRenderTexture(renderTexture);
-
-		std::stringstream str;
-		str << "OpenGLDevice: RenderTexture " << handle << " created with " << renderTexture.m_Textures.size() << " attachments.";
-		Debug().LogInfo(str.str());
 
 		return handle;
 	}
@@ -1345,10 +1321,6 @@ namespace Glory
 			return NULL;
 		}
 
-		std::stringstream str;
-		str << "OpenGLDevice: RenderPass " << handle << " created.";
-		Debug().LogInfo(str.str());
-
 		return handle;
 	}
 
@@ -1404,10 +1376,6 @@ namespace Glory
 			Debug().LogError(infoLog);
 		}
 
-		std::stringstream str;
-		str << "OpenGLDevice: Shader " << handle << " created.";
-		Debug().LogInfo(str.str());
-
 		return handle;
 	}
 
@@ -1457,10 +1425,6 @@ namespace Glory
 			Debug().LogError("OpenGLDevice::CreatePipeline: Failed to create pipeline.");
 			return NULL;
 		}
-
-		std::stringstream str;
-		str << "OpenGLDevice: Pipeline " << handle << " created.";
-		Debug().LogInfo(str.str());
 
 		return handle;
 	}
@@ -1559,10 +1523,6 @@ namespace Glory
 			Debug().LogError(infoLog);
 		}
 
-		std::stringstream str;
-		str << "OpenGLDevice: Compute pipeline " << handle << " created.";
-		Debug().LogInfo(str.str());
-
 		return handle;
 	}
 
@@ -1618,10 +1578,6 @@ namespace Glory
 		set.m_Buffers = std::move(bufferHandles);
 		set.m_Textures = std::move(textureHandles);
 		set.m_Layout = setInfo.m_Layout;
-
-		std::stringstream str;
-		str << "OpenGLDevice: Descriptor set " << handle << " created.";
-		Debug().LogInfo(str.str());
 
 		return handle;
 	}
@@ -1733,10 +1689,6 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		m_Buffers.Erase(handle);
 
-		std::stringstream str;
-		str << "OpenGLDevice: Buffer " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
-
 		handle = 0;
 	}
 
@@ -1757,10 +1709,6 @@ namespace Glory
 
 		m_Meshes.Erase(handle);
 
-		std::stringstream str;
-		str << "OpenGLDevice: Mesh " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
-
 		handle = 0;
 	}
 
@@ -1777,10 +1725,6 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		m_Textures.Erase(handle);
-
-		std::stringstream str;
-		str << "OpenGLDevice: Texture " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
 
 		handle = 0;
 	}
@@ -1807,10 +1751,6 @@ namespace Glory
 
 		m_RenderTextures.Erase(handle);
 
-		std::stringstream str;
-		str << "OpenGLDevice: RenderTexture " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
-
 		handle = 0;
 	}
 
@@ -1826,10 +1766,6 @@ namespace Glory
 		FreeRenderTexture(renderPass->m_RenderTexture);
 
 		m_RenderPasses.Erase(handle);
-
-		std::stringstream str;
-		str << "OpenGLDevice: RenderPass " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
 
 		handle = 0;
 	}
@@ -1848,10 +1784,6 @@ namespace Glory
 
 		m_Shaders.Erase(handle);
 
-		std::stringstream str;
-		str << "OpenGLDevice: Shader " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
-
 		handle = 0;
 	}
 
@@ -1869,10 +1801,6 @@ namespace Glory
 
 		m_Pipelines.Erase(handle);
 
-		std::stringstream str;
-		str << "OpenGLDevice: Pipeline " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
-
 		handle = 0;
 	}
 
@@ -1887,10 +1815,6 @@ namespace Glory
 
 		m_SetLayouts.Erase(handle);
 
-		std::stringstream str;
-		str << "OpenGLDevice: Set layout " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
-
 		handle = 0;
 	}
 
@@ -1904,10 +1828,6 @@ namespace Glory
 		}
 
 		m_Sets.Erase(handle);
-
-		std::stringstream str;
-		str << "OpenGLDevice: Set " << handle << " was freed from device memory.";
-		Debug().LogInfo(str.str());
 
 		handle = 0;
 	}

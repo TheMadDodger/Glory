@@ -17,6 +17,7 @@ namespace Glory
         static constexpr GraphicsHandleType HandleType = H_Buffer;
 
         size_t m_Size;
+        BufferFlags m_Flags;
         vk::Buffer m_VKBuffer;
         vk::DeviceMemory m_VKMemory;
         vk::BufferUsageFlags m_VKUsage;
@@ -303,6 +304,7 @@ namespace Glory
         bool CreateSwapchain(VK_Swapchain& swapchain, const vk::SurfaceCapabilitiesKHR& capabilities, vk::SurfaceKHR surface,
             const glm::uvec2& resolution, bool vsync, uint32_t minImageCount);
         bool CreatePipeline(VK_Pipeline& pipeline, PipelineData* pPipeline);
+        void ResizeBuffer(VK_Buffer& buffer);
 
     private:
         vk::PhysicalDevice m_VKDevice;

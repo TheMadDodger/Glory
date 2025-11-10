@@ -35,6 +35,15 @@ namespace Glory
 		BF_CopyDst = 1 << 2,
 	};
 
+	/** @brief Mesh usage */
+	enum MeshUsage
+	{
+		/** @brief The contents of the mesh never change */
+		MU_Static = 0,
+		/** @brief The contents of the mesh may change every frame */
+		MU_Dynamic = 1,
+	};
+
 	/** @brief Push constants range */
 	struct PushConstantsRange
 	{
@@ -494,7 +503,7 @@ namespace Glory
 		 * @brief Acquire a cached mesh or create a new one
 		 * @param pMesh The mesh data to create a mesh from
 		 */
-		MeshHandle AcquireCachedMesh(MeshData* pMesh);
+		MeshHandle AcquireCachedMesh(MeshData* pMesh, MeshUsage usage=MeshUsage::MU_Static);
 		/**
 		 * @brief Acquire a cached texture or create a new one
 		 * @param pTexture The texture data to create a texture from
@@ -546,7 +555,7 @@ namespace Glory
 		 * @brief Create a mesh on this device
 		 * @param pMeshData Mesh data
 		 */
-		MeshHandle CreateMesh(MeshData* pMeshData);
+		MeshHandle CreateMesh(MeshData* pMeshData, MeshUsage usage=MeshUsage::MU_Static);
 		/**
 		 * @brief Create a mesh on this device
 		 * @param buffers Vertex buffers and an index buffer at the last index
