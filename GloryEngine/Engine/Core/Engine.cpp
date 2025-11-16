@@ -666,6 +666,8 @@ namespace Glory
 		Reflect::RegisterEnum<LightType>();
 		Reflect::RegisterEnum<CullFace>();
 		Reflect::RegisterEnum<PrimitiveType>();
+		Reflect::RegisterEnum<BlendFactor>();
+		Reflect::RegisterEnum<BlendOp>();
 
 		/* Shape types */
 		Reflect::RegisterEnum<ShapeType>();

@@ -5,6 +5,7 @@
 
 #define FEATURE_TEXTURED
 #define FEATURE_RECEIVE_SHADOWS
+#define FEATURE_TRANSPARENCY
 
 struct Material
 {
@@ -55,7 +56,6 @@ void main()
 
 #ifdef WITH_TEXTURED
 	vec4 baseColor = TextureEnabled(0) ? texture(texSampler, fragTexCoord) : vec4(1.0);
-	if (baseColor.a < 1.0) discard;
 
 	baseColor = (TextureEnabled(0) ? vec4(pow(baseColor.rgb, vec3(2.2)), baseColor.a) : mat.Color)*inColor;
 	vec3 normal = TextureEnabled(1) ? normalize(TBN*(texture(normalSampler, fragTexCoord).xyz*2.0 - 1.0)) : TBN[2];
@@ -69,6 +69,11 @@ void main()
 	float roughness = mat.RoughnessFactor;
 	float metallic = mat.MetallicFactor;
 #endif
+
+#ifdef WITH_TRANSPARENCY
+	if (baseColor.a < 0.1) discard;
+#endif
+
 	outID = Constants.ObjectID;
 	outNormal = vec4((normalize(normal) + 1.0)*0.5, 1.0);
 

@@ -61,6 +61,37 @@ REFLECTABLE_ENUM_NS(Glory, PrimitiveType,
     TrianglesAdjacency,
     Patches);
 
+
+REFLECTABLE_ENUM_NS(Glory, BlendFactor,
+    Zero,
+    One,
+    SrcColor,
+    OneMinusSrcColor,
+    DstColor,
+    OneMinusDstColor,
+    SrcAlpha,
+    OneMinusSrcAlpha,
+    DstAlpha,
+    OneMinusDstAlpha,
+    ConstantColor,
+    OneMinusConstantColor,
+    ConstantAlpha,
+    OneMinusConstantAlpha,
+    SrcAlphaSaturate,
+    Src1Color,
+    OneMinusSrc1Color,
+    Src1Alpha,
+    OneMinusSrc1Alpha
+);
+
+REFLECTABLE_ENUM_NS(Glory, BlendOp,
+    Add,
+    Subtract,
+    ReverseSubtract,
+    Min,
+    Max
+);
+
 namespace Glory
 {
     constexpr size_t AspectRatioCount = 5;

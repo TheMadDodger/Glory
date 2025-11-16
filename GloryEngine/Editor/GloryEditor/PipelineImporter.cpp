@@ -1,5 +1,7 @@
 #include "PipelineImporter.h"
 
+#include <YAML_GLM.h>
+
 namespace Glory::Editor
 {
 	PipelineImporter::PipelineImporter()
@@ -59,6 +61,15 @@ namespace Glory::Editor
 		pPipeline->SetStencilWriteMask(settings["StencilWriteMask"].As<uint8_t>(0x00));
 		pPipeline->SetStencilReference(settings["StencilReference"].As<uint8_t>(0x00));
 
+		pPipeline->SetBlendEnabled(settings["BlendEnabled"].As<bool>(true));
+		pPipeline->SrcColorBlendFactor() = settings["SrcColorBlendFactor"].AsEnum<BlendFactor>(BlendFactor::One);
+		pPipeline->DstColorBlendFactor() = settings["DrcColorBlendFactor"].AsEnum<BlendFactor>(BlendFactor::Zero);
+		pPipeline->ColorBlendOp() = settings["ColorBlendOp"].AsEnum<BlendOp>(BlendOp::Add);
+		pPipeline->SrcAlphaBlendFactor() = settings["SrcAlphaBlendFactor"].AsEnum<BlendFactor>(BlendFactor::One);
+		pPipeline->DstAlphaBlendFactor() = settings["DstAlphaBlendFactor"].AsEnum<BlendFactor>(BlendFactor::Zero);
+		pPipeline->AlphaBlendOp() = settings["AlphaBlendOp"].AsEnum<BlendOp>(BlendOp::Add);
+		pPipeline->BlendConstants() = settings["BlendConstants"].As<glm::vec4>(glm::vec4{});
+
 		return ImportedResource(path, pPipeline);
 	}
 
@@ -99,6 +110,15 @@ namespace Glory::Editor
 		settings["StencilCompareMask"].Set<uint8_t>(pResource->StencilCompareMask());
 		settings["StencilWriteMask"].Set<uint8_t>(pResource->StencilWriteMask());
 		settings["StencilReference"].Set<uint8_t>(pResource->StencilReference());
+
+		settings["BlendEnabled"].Set<bool>(pResource->BlendEnabled());
+		settings["SrcColorBlendFactor"].SetEnum<BlendFactor>(pResource->SrcColorBlendFactor());
+		settings["DrcColorBlendFactor"].SetEnum<BlendFactor>(pResource->DstColorBlendFactor());
+		settings["ColorBlendOp"].SetEnum<BlendOp>(pResource->ColorBlendOp());
+		settings["SrcAlphaBlendFactor"].SetEnum<BlendFactor>(pResource->SrcAlphaBlendFactor());
+		settings["DstAlphaBlendFactor"].SetEnum<BlendFactor>(pResource->DstAlphaBlendFactor());
+		settings["AlphaBlendOp"].SetEnum<BlendOp>(pResource->AlphaBlendOp());
+		settings["BlendConstants"].As<glm::vec4>(pResource->BlendConstants());
 
 		file.Save();
 		return true;

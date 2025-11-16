@@ -5,6 +5,8 @@
 
 #include <BitSet.h>
 
+#include <glm/vec4.hpp>
+
 namespace Glory
 {
     class FileData;
@@ -27,6 +29,7 @@ namespace Glory
             StencilCompareMaskBegin = 7,
             StencilWriteMaskBegin = 15,
             StencilReferenceBegin = 23,
+            BlendEnable = 24,
         };
 
     public:
@@ -233,6 +236,32 @@ namespace Glory
         /** @overload */
         const Func& GetStencilPassOp() const { return m_StencilPassOp; }
 
+        /** @brief Enable/disable color blending */
+        void SetBlendEnabled(bool enable);
+        /** @brief Is color blending enabled */
+        const bool BlendEnabled() const;
+
+        BlendFactor& SrcColorBlendFactor() { return m_SrcColorBlendFactor; }
+        const BlendFactor& SrcColorBlendFactor() const { return m_SrcColorBlendFactor; }
+
+        BlendFactor& DstColorBlendFactor() { return m_DstColorBlendFactor; }
+        const BlendFactor& DstColorBlendFactor() const { return m_DstColorBlendFactor; }
+
+        BlendOp& ColorBlendOp() { return m_ColorBlendOp; }
+        const BlendOp& ColorBlendOp() const { return m_ColorBlendOp; }
+
+        BlendFactor& SrcAlphaBlendFactor() { return m_SrcAlphaBlendFactor; }
+        const BlendFactor& SrcAlphaBlendFactor() const { return m_SrcAlphaBlendFactor; }
+
+        BlendFactor& DstAlphaBlendFactor() { return m_DstAlphaBlendFactor; }
+        const BlendFactor& DstAlphaBlendFactor() const { return m_DstAlphaBlendFactor; }
+
+        BlendOp& AlphaBlendOp() { return m_AlphaBlendOp; }
+        const BlendOp& AlphaBlendOp() const { return m_AlphaBlendOp; }
+
+        glm::vec4& BlendConstants() { return m_BlendConstants; }
+        const glm::vec4& BlendConstants() const { return m_BlendConstants; }
+
         /** @brief BitSet containing state of toggelable settings */
         const Utils::BitSet& SettingsTogglesBitSet() const { return m_SettingsToggles; }
 
@@ -257,13 +286,29 @@ namespace Glory
         size_t m_NumResources = 0;
 
         bool m_SettingsDirty = false;
+
+        /* Render settings */
         CullFace m_CullFace = CullFace::Back;
         PrimitiveType m_PrimitiveType = PrimitiveType::Triangles;
+
+        /* Depth settings */
         CompareOp m_DepthCompare = CompareOp::OP_Less;
+
+        /* Stencil settings */
         CompareOp m_StencilCompareOp = CompareOp::OP_Always;
         Func m_StencilFailOp = Func::OP_Zero;
         Func m_StencilDepthFailOp = Func::OP_Zero;
         Func m_StencilPassOp = Func::OP_Zero;
+
+        /* Blend settings */
+        BlendFactor m_SrcColorBlendFactor = BlendFactor::SrcAlpha;
+        BlendFactor m_DstColorBlendFactor = BlendFactor::OneMinusSrcAlpha;
+        BlendOp m_ColorBlendOp = BlendOp::Add;
+        BlendFactor m_SrcAlphaBlendFactor = BlendFactor::One;
+        BlendFactor m_DstAlphaBlendFactor = BlendFactor::OneMinusSrcAlpha;
+        BlendOp m_AlphaBlendOp = BlendOp::Add;
+        glm::vec4 m_BlendConstants = glm::vec4{};
+
         Utils::BitSet m_SettingsToggles{ 32, true };
 	};
 }

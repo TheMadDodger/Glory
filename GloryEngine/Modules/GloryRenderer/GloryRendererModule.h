@@ -57,18 +57,6 @@ namespace Glory
 		glm::ivec2 m_Picks[8];
 	};
 
-	/*struct DeferredConstants
-	{
-		glm::uvec4 TileSizes;
-		uint64_t HasTexture;
-		uint32_t CameraIndex;
-		float Scale;
-		float Bias;
-		int32_t AOEnabled;
-		float AOMagnitude;
-		float AOContrast;
-	};*/
-
 	class GloryRendererModule : public RendererModule
 	{
 	private:

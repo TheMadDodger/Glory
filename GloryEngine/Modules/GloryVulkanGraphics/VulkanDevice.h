@@ -50,6 +50,7 @@ namespace Glory
         vk::Sampler m_VKSampler;
         vk::Format m_VKFormat = vk::Format::eUndefined;
         bool m_IsSwapchainImage = false;
+        bool m_BlendingSupported = false;
     };
 
     struct VK_RenderTexture
@@ -62,6 +63,7 @@ namespace Glory
         std::vector<std::string> m_AttachmentNames;
         bool m_HasDepthOrStencil;
         RenderTextureCreateInfo m_Info;
+        Utils::BitSet m_BlendingSupportedBits;
     };
 
     struct VK_RenderPass
@@ -107,6 +109,9 @@ namespace Glory
         vk::StencilOp m_VKStencilDepthFailOp;
         vk::StencilOp m_VKStencilPassOp;
         std::vector<vk::ColorComponentFlags> m_VKColorWriteMasks;
+        std::vector<vk::Bool32> m_VKBlendEnabled;
+        std::vector<vk::ColorBlendEquationEXT> m_VKBlendEquations;
+        glm::vec4 m_BlendConstants;
     };
 
     struct VK_DescriptorSetLayout

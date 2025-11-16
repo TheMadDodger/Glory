@@ -10,6 +10,7 @@
 #include <EditorUI.h>
 #include <ShaderSourceData.h>
 #include <GLORY_YAML.h>
+#include <YAML_GLM.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -234,20 +235,52 @@ namespace Glory::Editor
 				auto settings = file["Settings"];
 				if (!settings.Exists() || !settings.IsMap())
 					settings.SetMap();
-				settingsChanged |= EditorUI::InputEnum<CullFace>(file, settings["CullFace"].Path());
-				settingsChanged |= EditorUI::InputEnum<PrimitiveType>(file, settings["PrimitiveType"].Path());
-				settingsChanged |= EditorUI::CheckBox(file, settings["DepthTestEnabled"].Path());
-				settingsChanged |= EditorUI::CheckBox(file, settings["DepthWriteEnabled"].Path());
-				settingsChanged |= EditorUI::InputEnum<CompareOp>(file, settings["DepthCompareOp"].Path());
-				settingsChanged |= EditorUI::CheckBoxFlags(file, settings["ColorWriteMask"].Path(), { "r", "g", "b", "a" }, { 1, 2, 4, 8 });
-				settingsChanged |= EditorUI::CheckBox(file, settings["StencilTestEnabled"].Path());
-				settingsChanged |= EditorUI::InputEnum<CompareOp>(file, settings["StencilCompareOp"].Path());
-				settingsChanged |= EditorUI::InputEnum<Func>(file, settings["StencilFailOp"].Path());
-				settingsChanged |= EditorUI::InputEnum<Func>(file, settings["StencilDepthFailOp"].Path());
-				settingsChanged |= EditorUI::InputEnum<Func>(file, settings["StencilPassOp"].Path());
-				settingsChanged |= EditorUI::InputUInt(file, settings["StencilCompareMask"].Path(), 0, 255, 1);
-				settingsChanged |= EditorUI::InputUInt(file, settings["StencilWriteMask"].Path(), 0, 255, 1);
-				settingsChanged |= EditorUI::InputUInt(file, settings["StencilReference"].Path(), 0, 255, 1);
+
+				ImGui::PushID("General");
+				if (EditorUI::HeaderLight("General"))
+				{
+					settingsChanged |= EditorUI::InputEnum<CullFace>(file, settings["CullFace"].Path());
+					settingsChanged |= EditorUI::InputEnum<PrimitiveType>(file, settings["PrimitiveType"].Path());
+					settingsChanged |= EditorUI::CheckBoxFlags(file, settings["ColorWriteMask"].Path(), { "r", "g", "b", "a" }, { 1, 2, 4, 8 });
+					settingsChanged |= EditorUI::CheckBox(file, settings["StencilTestEnabled"].Path());
+				}
+				ImGui::PopID();
+
+				ImGui::PushID("Depth");
+				if (EditorUI::HeaderLight("Depth"))
+				{
+					settingsChanged |= EditorUI::CheckBox(file, settings["DepthTestEnabled"].Path());
+					settingsChanged |= EditorUI::CheckBox(file, settings["DepthWriteEnabled"].Path());
+					settingsChanged |= EditorUI::InputEnum<CompareOp>(file, settings["DepthCompareOp"].Path());
+				}
+				ImGui::PopID();
+
+				ImGui::PushID("Stencil");
+				if (EditorUI::HeaderLight("Stencil"))
+				{
+					settingsChanged |= EditorUI::InputEnum<CompareOp>(file, settings["StencilCompareOp"].Path());
+					settingsChanged |= EditorUI::InputEnum<Func>(file, settings["StencilFailOp"].Path());
+					settingsChanged |= EditorUI::InputEnum<Func>(file, settings["StencilDepthFailOp"].Path());
+					settingsChanged |= EditorUI::InputEnum<Func>(file, settings["StencilPassOp"].Path());
+					settingsChanged |= EditorUI::InputUInt(file, settings["StencilCompareMask"].Path(), 0, 255, 1);
+					settingsChanged |= EditorUI::InputUInt(file, settings["StencilWriteMask"].Path(), 0, 255, 1);
+					settingsChanged |= EditorUI::InputUInt(file, settings["StencilReference"].Path(), 0, 255, 1);
+				}
+				ImGui::PopID();
+
+				ImGui::PushID("Blending");
+				if (EditorUI::HeaderLight("Blending"))
+				{
+					settingsChanged |= EditorUI::CheckBox(file, settings["BlendEnabled"].Path());
+					settingsChanged |= EditorUI::InputEnum<BlendFactor>(file, settings["SrcColorBlendFactor"].Path());
+					settingsChanged |= EditorUI::InputEnum<BlendFactor>(file, settings["DrcColorBlendFactor"].Path());
+					settingsChanged |= EditorUI::InputEnum<BlendOp>(file, settings["ColorBlendOp"].Path());
+					settingsChanged |= EditorUI::InputEnum<BlendFactor>(file, settings["SrcAlphaBlendFactor"].Path());
+					settingsChanged |= EditorUI::InputEnum<BlendFactor>(file, settings["DstAlphaBlendFactor"].Path());
+					settingsChanged |= EditorUI::InputEnum<BlendOp>(file, settings["AlphaBlendOp"].Path());
+					settingsChanged |= EditorUI::InputFloat4(file, settings["BlendConstants"].Path());
+				}
+				ImGui::PopID();
 			}
 			ImGui::PopID();
 		}
@@ -269,6 +302,14 @@ namespace Glory::Editor
 			pPipelineData->SetStencilCompareMask(settings["StencilCompareMask"].As<uint8_t>(0xFF));
 			pPipelineData->SetStencilWriteMask(settings["StencilWriteMask"].As<uint8_t>(0x00));
 			pPipelineData->SetStencilReference(settings["StencilReference"].As<uint8_t>(0x00));
+			pPipelineData->SetBlendEnabled(settings["BlendEnabled"].As<bool>(true));
+			pPipelineData->SrcColorBlendFactor() = settings["SrcColorBlendFactor"].AsEnum<BlendFactor>(BlendFactor::One);
+			pPipelineData->DstColorBlendFactor() = settings["DrcColorBlendFactor"].AsEnum<BlendFactor>(BlendFactor::Zero);
+			pPipelineData->ColorBlendOp() = settings["ColorBlendOp"].AsEnum<BlendOp>(BlendOp::Add);
+			pPipelineData->SrcAlphaBlendFactor() = settings["SrcAlphaBlendFactor"].AsEnum<BlendFactor>(BlendFactor::One);
+			pPipelineData->DstAlphaBlendFactor() = settings["DstAlphaBlendFactor"].AsEnum<BlendFactor>(BlendFactor::Zero);
+			pPipelineData->AlphaBlendOp() = settings["AlphaBlendOp"].AsEnum<BlendOp>(BlendOp::Add);
+			pPipelineData->BlendConstants() = settings["BlendConstants"].As<glm::vec4>(glm::vec4{});
 			pPipelineData->SettingsDirty() = true;
 		}
 

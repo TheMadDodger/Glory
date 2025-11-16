@@ -439,4 +439,14 @@ namespace Glory
 	{
 		return static_cast<uint8_t>(*m_SettingsToggles.Data() << PipelineData::StencilReferenceBegin);
 	}
+
+	void PipelineData::SetBlendEnabled(bool enable)
+	{
+		m_SettingsToggles.Set(SettingBitsIndices::BlendEnable, enable);
+	}
+
+	const bool PipelineData::BlendEnabled() const
+	{
+		return m_SettingsToggles.IsSet(SettingBitsIndices::BlendEnable);
+	}
 }

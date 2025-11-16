@@ -37,6 +37,8 @@ namespace Glory
 	PFN_vkCmdSetStencilOpEXT PFNCmdSetStencilOp = nullptr;
 	PFN_vkCmdSetStencilWriteMask PFNCmdSetStencilWriteMask = nullptr;
 	PFN_vkCmdSetStencilReference PFNCmdSetStencilReference = nullptr;
+	PFN_vkCmdSetColorBlendEnableEXT PFNCmdSetColorBlendEnableEXT = nullptr;
+	PFN_vkCmdSetColorBlendEquationEXT PFNCmdSetColorBlendEquationEXT = nullptr;
 
 	constexpr size_t ShaderTypeFlagsCount = 6;
 	constexpr vk::ShaderStageFlagBits ShaderTypeFlags[ShaderTypeFlagsCount] = {
@@ -200,9 +202,9 @@ namespace Glory
 		vk12Features.separateDepthStencilLayouts = VK_TRUE;
 
 		vk::PhysicalDeviceRobustness2FeaturesKHR robustnessFeatures{};
+		robustnessFeatures.nullDescriptor = VK_FALSE;
 
 		vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT extendedDynamicStateFeatures{};
-		robustnessFeatures.nullDescriptor = VK_FALSE;
 		extendedDynamicStateFeatures.extendedDynamicState = VK_TRUE;
 
 		vk::PhysicalDeviceExtendedDynamicState3PropertiesEXT extendedDynamicState3Properties{};
@@ -210,6 +212,8 @@ namespace Glory
 
 		vk::PhysicalDeviceExtendedDynamicState3FeaturesEXT extendedDynamicState3Features{};
 		extendedDynamicState3Features.extendedDynamicState3ColorWriteMask = VK_TRUE;
+		extendedDynamicState3Features.extendedDynamicState3ColorBlendEnable = VK_TRUE;
+		extendedDynamicState3Features.extendedDynamicState3ColorBlendEquation = VK_TRUE;
 
 		vk12Features.pNext = &robustnessFeatures;
 		robustnessFeatures.pNext = &extendedDynamicStateFeatures;
@@ -255,6 +259,9 @@ namespace Glory
 		LOAD_VK_EXT(PFNCmdSetStencilOp, PFN_vkCmdSetStencilOpEXT, "vkCmdSetStencilOpEXT");
 		LOAD_VK_EXT(PFNCmdSetStencilWriteMask, PFN_vkCmdSetStencilWriteMask, "vkCmdSetStencilWriteMask");
 		LOAD_VK_EXT(PFNCmdSetStencilReference, PFN_vkCmdSetStencilReference, "vkCmdSetStencilReference");
+
+		LOAD_VK_EXT(PFNCmdSetColorBlendEnableEXT, PFN_vkCmdSetColorBlendEnableEXT, "vkCmdSetColorBlendEnableEXT");
+		LOAD_VK_EXT(PFNCmdSetColorBlendEquationEXT, PFN_vkCmdSetColorBlendEquationEXT, "vkCmdSetColorBlendEquationEXT");
 
 		CreateGraphicsCommandPool();
 		AllocateFreeFences(10);
@@ -459,6 +466,7 @@ namespace Glory
 		}
 		vkCommandBuffer->bindPipeline(vkPipeline->m_VKBindPoint, vkPipeline->m_VKPipeline);
 		if (vkPipeline->m_VKBindPoint != vk::PipelineBindPoint::eGraphics) return;
+
 		PFNCmdSetCullMode(VkCommandBuffer(*vkCommandBuffer), VkCullModeFlags(vkPipeline->m_VKCullMode));
 		PFNCmdSetPrimitiveTopology(VkCommandBuffer(*vkCommandBuffer), VkPrimitiveTopology(vkPipeline->m_VKPrimitiveTopology));
 		PFNCmdSetDepthTestEnable(VkCommandBuffer(*vkCommandBuffer), vkPipeline->m_SettingToggles.IsSet(PipelineData::DepthTestEnable));
@@ -480,6 +488,16 @@ namespace Glory
 			VkStencilOp(vkPipeline->m_VKStencilDepthFailOp), VkCompareOp(vkPipeline->m_VKStencilCompareOp));
 		PFNCmdSetStencilWriteMask(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK, uint32_t(writeMask));
 		PFNCmdSetStencilReference(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK, int32_t(ref));
+
+		if (!vkPipeline->m_VKBlendEnabled.empty())
+		{
+			PFNCmdSetColorBlendEnableEXT(VkCommandBuffer(*vkCommandBuffer), 0, static_cast<uint32_t>(vkPipeline->m_VKBlendEnabled.size()),
+				static_cast<const vk::Bool32*>(vkPipeline->m_VKBlendEnabled.data()));
+			vkCommandBuffer->setBlendConstants(static_cast<float*>(&vkPipeline->m_BlendConstants.x));
+		}
+		if (!vkPipeline->m_VKBlendEquations.empty())
+			PFNCmdSetColorBlendEquationEXT(VkCommandBuffer(*vkCommandBuffer), 0, static_cast<uint32_t>(vkPipeline->m_VKBlendEquations.size()),
+				reinterpret_cast<const VkColorBlendEquationEXT*>(vkPipeline->m_VKBlendEquations.data()));
 	}
 
 	void VulkanDevice::End(CommandBufferHandle commandBuffer)
@@ -1398,6 +1416,17 @@ namespace Glory
 		if (imageInfo.mipLevels > 1)
 			imageInfo.usage |= vk::ImageUsageFlagBits::eTransferSrc;
 
+		switch (format)
+		{
+		case vk::Format::eR32G32B32A32Sfloat:
+		case vk::Format::eR16G16B16A16Sfloat:
+		case vk::Format::eR8G8B8A8Srgb:
+		case vk::Format::eR8G8B8A8Snorm:
+		case vk::Format::eR8G8B8A8Unorm:
+			texture.m_BlendingSupported = true;
+			break;
+		}
+
 		vk::ImageViewCreateInfo viewInfo = vk::ImageViewCreateInfo();
 		EnsureSupportedFormat(imageInfo.format, viewInfo);
 
@@ -1978,11 +2007,25 @@ namespace Glory
 		pipeline.m_VKStencilDepthFailOp = GetVulkanStencilOp(pPipeline->GetStencilDepthFailOp());
 		pipeline.m_VKStencilPassOp = GetVulkanStencilOp(pPipeline->GetStencilPassOp());
 
+		const size_t numAttachments = vkRenderTexture->m_Textures.size() - (vkRenderTexture->m_HasDepthOrStencil ? 1 : 0);
+		vk::ColorBlendEquationEXT blendEquation;
+		blendEquation.srcColorBlendFactor = vk::BlendFactor(pPipeline->SrcColorBlendFactor());
+		blendEquation.dstColorBlendFactor = vk::BlendFactor(pPipeline->DstColorBlendFactor());
+		blendEquation.colorBlendOp = vk::BlendOp(pPipeline->ColorBlendOp());
+		blendEquation.srcAlphaBlendFactor = vk::BlendFactor(pPipeline->SrcAlphaBlendFactor());
+		blendEquation.dstAlphaBlendFactor = vk::BlendFactor(pPipeline->DstAlphaBlendFactor());
+		blendEquation.alphaBlendOp = vk::BlendOp(pPipeline->AlphaBlendOp());
+		pipeline.m_VKBlendEnabled.resize(numAttachments, vk::Bool32(pPipeline->BlendEnabled()));
+		for (size_t i = 0; i < numAttachments; ++i)
+			pipeline.m_VKBlendEnabled[i] &= vkRenderTexture->m_BlendingSupportedBits.IsSet(i);
+
+		pipeline.m_VKBlendEquations.resize(numAttachments, blendEquation);
+		pipeline.m_BlendConstants = pPipeline->BlendConstants();
+
 		bool r, g, b, a;
 		pPipeline->ColorWriteMask(r, g, b, a);
 		const uint8_t colorMaskBits = (*pipeline.m_SettingToggles.Data() >> PipelineData::ColorWriteRed) & 0x0F;
 
-		const size_t numAttachments = vkRenderTexture->m_Textures.size() - (vkRenderTexture->m_HasDepthOrStencil ? 1 : 0);
 		pipeline.m_VKColorWriteMasks.resize(numAttachments, vk::ColorComponentFlags(colorMaskBits));
 
 		const uint32_t binding = 0;
@@ -2020,6 +2063,9 @@ namespace Glory
 			return;
 		}
 
+		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(vkPipeline->m_RenderPass);
+		VK_RenderTexture* vkRenderTexture = m_RenderTextures.Find(vkRenderPass->m_RenderTexture);
+
 		vkPipeline->m_VKCullMode = GetVKCullMode(pPipeline->GetCullFace());
 		vkPipeline->m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
 		vkPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
@@ -2028,6 +2074,19 @@ namespace Glory
 		vkPipeline->m_VKStencilFailOp = GetVulkanStencilOp(pPipeline->GetStencilFailOp());
 		vkPipeline->m_VKStencilDepthFailOp = GetVulkanStencilOp(pPipeline->GetStencilDepthFailOp());
 		vkPipeline->m_VKStencilPassOp = GetVulkanStencilOp(pPipeline->GetStencilPassOp());
+
+		vk::ColorBlendEquationEXT blendEquation;
+		blendEquation.srcColorBlendFactor = vk::BlendFactor(pPipeline->SrcColorBlendFactor());
+		blendEquation.dstColorBlendFactor = vk::BlendFactor(pPipeline->DstColorBlendFactor());
+		blendEquation.colorBlendOp = vk::BlendOp(pPipeline->ColorBlendOp());
+		blendEquation.srcAlphaBlendFactor = vk::BlendFactor(pPipeline->SrcAlphaBlendFactor());
+		blendEquation.dstAlphaBlendFactor = vk::BlendFactor(pPipeline->DstAlphaBlendFactor());
+		blendEquation.alphaBlendOp = vk::BlendOp(pPipeline->AlphaBlendOp());
+		vkPipeline->m_VKBlendEnabled.assign(vkPipeline->m_VKBlendEnabled.size(), vk::Bool32(pPipeline->BlendEnabled()));
+		for (size_t i = 0; i < vkPipeline->m_VKBlendEnabled.size(); ++i)
+			vkPipeline->m_VKBlendEnabled[i] &= vkRenderTexture->m_BlendingSupportedBits.IsSet(i);
+		vkPipeline->m_VKBlendEquations.assign(vkPipeline->m_VKBlendEquations.size(), blendEquation);
+		vkPipeline->m_BlendConstants = pPipeline->BlendConstants();
 
 		const uint8_t colorMaskBits = (*vkPipeline->m_SettingToggles.Data() >> PipelineData::ColorWriteRed) & 0x0F;
 		vkPipeline->m_VKColorWriteMasks.assign(vkPipeline->m_VKColorWriteMasks.size(), vk::ColorComponentFlags(colorMaskBits));
@@ -2044,6 +2103,9 @@ namespace Glory
 			return;
 		}
 
+		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(vkPipeline->m_RenderPass);
+		VK_RenderTexture* vkRenderTexture = m_RenderTextures.Find(vkRenderPass->m_RenderTexture);
+
 		vkPipeline->m_VKCullMode = GetVKCullMode(pPipeline->GetCullFace());
 		vkPipeline->m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
 		vkPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
@@ -2052,6 +2114,19 @@ namespace Glory
 		vkPipeline->m_VKStencilFailOp = GetVulkanStencilOp(pPipeline->GetStencilFailOp());
 		vkPipeline->m_VKStencilDepthFailOp = GetVulkanStencilOp(pPipeline->GetStencilDepthFailOp());
 		vkPipeline->m_VKStencilPassOp = GetVulkanStencilOp(pPipeline->GetStencilPassOp());
+
+		vk::ColorBlendEquationEXT blendEquation;
+		blendEquation.srcColorBlendFactor = vk::BlendFactor(pPipeline->SrcColorBlendFactor());
+		blendEquation.dstColorBlendFactor = vk::BlendFactor(pPipeline->DstColorBlendFactor());
+		blendEquation.colorBlendOp = vk::BlendOp(pPipeline->ColorBlendOp());
+		blendEquation.srcAlphaBlendFactor = vk::BlendFactor(pPipeline->SrcAlphaBlendFactor());
+		blendEquation.dstAlphaBlendFactor = vk::BlendFactor(pPipeline->DstAlphaBlendFactor());
+		blendEquation.alphaBlendOp = vk::BlendOp(pPipeline->AlphaBlendOp());
+		vkPipeline->m_VKBlendEnabled.assign(vkPipeline->m_VKBlendEnabled.size(), vk::Bool32(pPipeline->BlendEnabled()));
+		for (size_t i = 0; i < vkPipeline->m_VKBlendEnabled.size(); ++i)
+			vkPipeline->m_VKBlendEnabled[i] &= vkRenderTexture->m_BlendingSupportedBits.IsSet(i);
+		vkPipeline->m_VKBlendEquations.assign(vkPipeline->m_VKBlendEquations.size(), blendEquation);
+		vkPipeline->m_BlendConstants = pPipeline->BlendConstants();
 
 		const uint8_t colorMaskBits = (*vkPipeline->m_SettingToggles.Data() >> PipelineData::ColorWriteRed) & 0x0F;
 		vkPipeline->m_VKColorWriteMasks.assign(vkPipeline->m_VKColorWriteMasks.size(), vk::ColorComponentFlags(colorMaskBits));
@@ -3021,6 +3096,7 @@ namespace Glory
 			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[i]);
 			vkTexture->m_VKFinalLayout = attachment.m_SamplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eColorAttachmentOptimal;
 			renderTexture.m_AttachmentNames[i] = attachment.Name;
+			renderTexture.m_BlendingSupportedBits.Set(i, vkTexture->m_BlendingSupported);
 			++textureCounter;
 		}
 
@@ -3305,13 +3381,13 @@ namespace Glory
 		{
 			colorBlendAttachmentStates[i] = vk::PipelineColorBlendAttachmentState()
 				.setColorWriteMask(pipeline.m_VKColorWriteMasks[i])
-				.setBlendEnable(VK_FALSE)
-				.setSrcColorBlendFactor(vk::BlendFactor::eOne)
-				.setDstColorBlendFactor(vk::BlendFactor::eZero)
-				.setColorBlendOp(vk::BlendOp::eAdd)
-				.setSrcAlphaBlendFactor(vk::BlendFactor::eOne)
-				.setDstAlphaBlendFactor(vk::BlendFactor::eZero)
-				.setAlphaBlendOp(vk::BlendOp::eAdd);
+				.setBlendEnable(pipeline.m_VKBlendEnabled[i])
+				.setSrcColorBlendFactor(pipeline.m_VKBlendEquations[i].srcColorBlendFactor)
+				.setDstColorBlendFactor(pipeline.m_VKBlendEquations[i].dstColorBlendFactor)
+				.setColorBlendOp(pipeline.m_VKBlendEquations[i].colorBlendOp)
+				.setSrcAlphaBlendFactor(pipeline.m_VKBlendEquations[i].srcAlphaBlendFactor)
+				.setDstAlphaBlendFactor(pipeline.m_VKBlendEquations[i].dstColorBlendFactor)
+				.setAlphaBlendOp(pipeline.m_VKBlendEquations[i].alphaBlendOp);
 		}
 
 		vk::PipelineColorBlendStateCreateInfo colorBlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo()
@@ -3319,7 +3395,8 @@ namespace Glory
 			.setLogicOp(vk::LogicOp::eCopy)
 			.setAttachmentCount(colorBlendAttachmentStates.size())
 			.setPAttachments(colorBlendAttachmentStates.data())
-			.setBlendConstants({ 0.0f, 0.0f, 0.0f, 0.0f });
+			.setBlendConstants({ pipeline.m_BlendConstants.x, pipeline.m_BlendConstants.y,
+				pipeline.m_BlendConstants.z, pipeline.m_BlendConstants.w });
 
 		vk::PipelineDepthStencilStateCreateInfo depthStencil = vk::PipelineDepthStencilStateCreateInfo();
 		depthStencil.depthTestEnable = pipeline.m_SettingToggles.IsSet(PipelineData::DepthTestEnable);
@@ -3347,10 +3424,13 @@ namespace Glory
 			vk::DynamicState::eStencilOp,
 			vk::DynamicState::eStencilWriteMask,
 			vk::DynamicState::eStencilReference,
+			vk::DynamicState::eColorBlendEnableEXT,
+			vk::DynamicState::eColorBlendEquationEXT,
+			vk::DynamicState::eBlendConstants,
 		};
 
 		vk::PipelineDynamicStateCreateInfo dynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
-			.setDynamicStateCount(13)
+			.setDynamicStateCount(16)
 			.setPDynamicStates(dynamicStates);
 
 		vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
