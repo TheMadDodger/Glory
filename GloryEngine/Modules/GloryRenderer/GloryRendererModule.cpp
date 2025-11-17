@@ -1060,10 +1060,6 @@ namespace Glory
 					if (cameraMask != 0 && meshBatch.m_LayerMasks[i] != 0 &&
 						(cameraMask & meshBatch.m_LayerMasks[i]) == 0) continue;
 
-					const UUID materialID = pipelineRenderData.m_UniqueMaterials[meshBatch.m_MaterialIndices[i]];
-					MaterialData* pMaterialData = materialManager.GetMaterial(materialID);
-					if (!pMaterialData) continue;
-
 					const auto& ids = meshBatch.m_ObjectIDs[i];
 					constants.m_ObjectID = ids.second;
 					constants.m_SceneID = ids.first;
@@ -1298,6 +1294,7 @@ namespace Glory
 				{
 					std::memcpy(&batchData.m_MaterialDatas.m_Data[i*finalPropertyDataSize], buffer.data(), buffer.size());
 					batchData.m_MaterialDatas.SetDirty(i);
+					batchData.m_MaterialDatas.SetDirty(i + finalPropertyDataSize - 1);
 				}
 				const uint32_t textureBits = pMaterialData->TextureSetBits();
 				if (textureCount && batchData.m_TextureBits.m_Data[i] != textureBits)
@@ -1306,7 +1303,11 @@ namespace Glory
 					batchData.m_TextureBits.SetDirty(i);
 				}
 
-				if (textureCount == 0) continue;
+				if (textureCount == 0)
+				{
+					pMaterialData->SetDirty(false);
+					continue;
+				}
 
 				/* Textures */
 				if (!batchData.m_TextureSets[i])
@@ -1320,14 +1321,37 @@ namespace Glory
 						Resource* pResource = assets.FindResource(textureID);
 						if (!pResource)
 						{
-							setInfo.m_Samplers[j].m_TextureHandle = 0;
+							setInfo.m_Samplers[j].m_TextureHandle = NULL;
 							continue;
 						}
 						TextureData* pTexture = static_cast<TextureData*>(pResource);
 						setInfo.m_Samplers[j].m_TextureHandle = pDevice->AcquireCachedTexture(pTexture);
 					}
 					batchData.m_TextureSets[i] = pDevice->CreateDescriptorSet(std::move(setInfo));
+					pMaterialData->SetDirty(false);
+					continue;
 				}
+
+				if (pMaterialData->IsDirty())
+				{
+					DescriptorSetUpdateInfo dsUpdateInfo;
+					dsUpdateInfo.m_Samplers.resize(textureCount);
+					for (size_t j = 0; j < textureCount; ++j)
+					{
+						const UUID textureID = pMaterialData->GetResourceUUIDPointer(j)->AssetUUID();
+						dsUpdateInfo.m_Samplers[j].m_DescriptorIndex = j;
+						Resource* pResource = assets.FindResource(textureID);
+						if (!pResource)
+						{
+							dsUpdateInfo.m_Samplers[j].m_TextureHandle = NULL;
+							continue;
+						}
+						TextureData* pTexture = static_cast<TextureData*>(pResource);
+						dsUpdateInfo.m_Samplers[j].m_TextureHandle = pDevice->AcquireCachedTexture(pTexture);
+					}
+					pDevice->UpdateDescriptorSet(batchData.m_TextureSets[i], dsUpdateInfo);
+				}
+				pMaterialData->SetDirty(false);
 			}
 
 			if (!batchData.m_WorldsBuffer)

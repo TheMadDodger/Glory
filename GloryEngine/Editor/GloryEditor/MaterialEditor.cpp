@@ -59,6 +59,7 @@ namespace Glory::Editor
 		{
 			EditorAssetDatabase::SetAssetDirty(pMaterial);
 			pMaterial->SetDirty(true);
+			pMaterialData->SetDirty(true);
 		}
 		return change;
 	}
@@ -257,12 +258,6 @@ namespace Glory::Editor
 					pMaterialProperty->TypeHash(), pMaterialProperty->Offset(), pMaterialProperty->Size(), propValue);
 				change = true;
 			}
-		}
-
-		if (change)
-		{
-			pMaterial->SetDirty(true);
-			EditorAssetDatabase::SetAssetDirty(pMaterial);
 		}
 		return change;
 	}
