@@ -278,7 +278,7 @@ namespace Glory::Editor
 					settingsChanged |= EditorUI::InputEnum<BlendFactor>(file, settings["SrcAlphaBlendFactor"].Path());
 					settingsChanged |= EditorUI::InputEnum<BlendFactor>(file, settings["DstAlphaBlendFactor"].Path());
 					settingsChanged |= EditorUI::InputEnum<BlendOp>(file, settings["AlphaBlendOp"].Path());
-					settingsChanged |= EditorUI::InputFloat4(file, settings["BlendConstants"].Path());
+					settingsChanged |= EditorUI::InputColor(file, settings["BlendConstants"].Path(), false);
 				}
 				ImGui::PopID();
 			}

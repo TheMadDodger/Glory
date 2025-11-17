@@ -508,6 +508,18 @@ namespace Glory
 		const bool a = glPipeline->m_SettingToggles.IsSet(PipelineData::ColorWriteAlpha);
 		glColorMask(r, g, b, a);
 
+		if (glPipeline->m_SettingToggles.IsSet(PipelineData::BlendEnable))
+		{
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(glPipeline->m_GLSrcColorBlendFactor, glPipeline->m_GLDstColorBlendFactor,
+				glPipeline->m_GLSrcAlphaBlendFactor, glPipeline->m_GLDstAlphaBlendFactor);
+			glBlendEquationSeparate(glPipeline->m_GLColorBlendOp, glPipeline->m_GLAlphaBlendOp);
+			glBlendColor(glPipeline->m_BlendConstants.r, glPipeline->m_BlendConstants.g,
+				glPipeline->m_BlendConstants.b, glPipeline->m_BlendConstants.a);
+		}
+		else
+			glDisable(GL_BLEND);
+
 		if (glPipeline->m_SettingToggles.IsSet(PipelineData::StencilTestEnable))
 		{
 			glEnable(GL_STENCIL_TEST);
@@ -1396,6 +1408,72 @@ namespace Glory
 		}
 	}
 
+	GLenum GtGLBlendFactor(BlendFactor blendFactor)
+	{
+		switch (blendFactor)
+		{
+		case Glory::BlendFactor::Zero:
+			return GL_ZERO;
+		case Glory::BlendFactor::One:
+			return GL_ONE;
+		case Glory::BlendFactor::SrcColor:
+			return GL_SRC_COLOR;
+		case Glory::BlendFactor::OneMinusSrcColor:
+			return GL_ONE_MINUS_SRC_COLOR;
+		case Glory::BlendFactor::DstColor:
+			return GL_DST_COLOR;
+		case Glory::BlendFactor::OneMinusDstColor:
+			return GL_ONE_MINUS_DST_COLOR;
+		case Glory::BlendFactor::SrcAlpha:
+			return GL_SRC_ALPHA;
+		case Glory::BlendFactor::OneMinusSrcAlpha:
+			return GL_ONE_MINUS_SRC_ALPHA;
+		case Glory::BlendFactor::DstAlpha:
+			return GL_DST_ALPHA;
+		case Glory::BlendFactor::OneMinusDstAlpha:
+			return GL_ONE_MINUS_DST_ALPHA;
+		case Glory::BlendFactor::ConstantColor:
+			return GL_CONSTANT_COLOR;
+		case Glory::BlendFactor::OneMinusConstantColor:
+			return GL_ONE_MINUS_CONSTANT_COLOR;
+		case Glory::BlendFactor::ConstantAlpha:
+			return GL_CONSTANT_ALPHA;
+		case Glory::BlendFactor::OneMinusConstantAlpha:
+			return GL_ONE_MINUS_CONSTANT_ALPHA;
+		case Glory::BlendFactor::SrcAlphaSaturate:
+			return GL_SRC_ALPHA_SATURATE;
+		case Glory::BlendFactor::Src1Color:
+			return GL_SRC1_COLOR;
+		case Glory::BlendFactor::OneMinusSrc1Color:
+			return GL_ONE_MINUS_SRC1_COLOR;
+		case Glory::BlendFactor::Src1Alpha:
+			return GL_SRC1_ALPHA;
+		case Glory::BlendFactor::OneMinusSrc1Alpha:
+			return GL_ONE_MINUS_SRC1_ALPHA;
+		default:
+			return GL_ZERO;
+		}
+	}
+
+	GLenum GetGLBlendOp(BlendOp blendOp)
+	{
+		switch (blendOp)
+		{
+		case Glory::BlendOp::Add:
+			return GL_FUNC_ADD;
+		case Glory::BlendOp::Subtract:
+			return GL_FUNC_SUBTRACT;
+		case Glory::BlendOp::ReverseSubtract:
+			return GL_FUNC_REVERSE_SUBTRACT;
+		case Glory::BlendOp::Min:
+			return GL_MIN;
+		case Glory::BlendOp::Max:
+			return GL_MAX;
+		default:
+			return GL_ADD;
+		}
+	}
+
 	PipelineHandle OpenGLDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
 		std::vector<DescriptorSetLayoutHandle>&&, size_t, const std::vector<AttributeType>&)
 	{
@@ -1419,6 +1497,14 @@ namespace Glory
 		pipeline.m_GLStencilFailOp = GLFuncs.at(pPipeline->GetStencilFailOp());
 		pipeline.m_GLStencilDepthFailOp = GLFuncs.at(pPipeline->GetStencilDepthFailOp());
 		pipeline.m_GLStencilPassOp = GLFuncs.at(pPipeline->GetStencilPassOp());
+
+		pipeline.m_GLSrcColorBlendFactor = GtGLBlendFactor(pPipeline->SrcColorBlendFactor());
+		pipeline.m_GLDstColorBlendFactor = GtGLBlendFactor(pPipeline->DstColorBlendFactor());
+		pipeline.m_GLColorBlendOp = GetGLBlendOp(pPipeline->ColorBlendOp());
+		pipeline.m_GLSrcAlphaBlendFactor = GtGLBlendFactor(pPipeline->SrcAlphaBlendFactor());
+		pipeline.m_GLDstAlphaBlendFactor = GtGLBlendFactor(pPipeline->DstAlphaBlendFactor());
+		pipeline.m_GLAlphaBlendOp = GetGLBlendOp(pPipeline->AlphaBlendOp());
+		pipeline.m_BlendConstants = pPipeline->BlendConstants();
 
 		if (!CreatePipeline(pipeline, pPipeline))
 		{
@@ -1446,6 +1532,14 @@ namespace Glory
 		glPipeline->m_GLStencilFailOp = GLFuncs.at(pPipeline->GetStencilFailOp());
 		glPipeline->m_GLStencilDepthFailOp = GLFuncs.at(pPipeline->GetStencilDepthFailOp());
 		glPipeline->m_GLStencilPassOp = GLFuncs.at(pPipeline->GetStencilPassOp());
+
+		glPipeline->m_GLSrcColorBlendFactor = GtGLBlendFactor(pPipeline->SrcColorBlendFactor());
+		glPipeline->m_GLDstColorBlendFactor = GtGLBlendFactor(pPipeline->DstColorBlendFactor());
+		glPipeline->m_GLColorBlendOp = GetGLBlendOp(pPipeline->ColorBlendOp());
+		glPipeline->m_GLSrcAlphaBlendFactor = GtGLBlendFactor(pPipeline->SrcAlphaBlendFactor());
+		glPipeline->m_GLDstAlphaBlendFactor = GtGLBlendFactor(pPipeline->DstAlphaBlendFactor());
+		glPipeline->m_GLAlphaBlendOp = GetGLBlendOp(pPipeline->AlphaBlendOp());
+		glPipeline->m_BlendConstants = pPipeline->BlendConstants();
 	}
 
 	void OpenGLDevice::RecreatePipeline(PipelineHandle pipeline, PipelineData* pPipeline)
@@ -1465,6 +1559,14 @@ namespace Glory
 		glPipeline->m_GLStencilFailOp = GLFuncs.at(pPipeline->GetStencilFailOp());
 		glPipeline->m_GLStencilDepthFailOp = GLFuncs.at(pPipeline->GetStencilDepthFailOp());
 		glPipeline->m_GLStencilPassOp = GLFuncs.at(pPipeline->GetStencilPassOp());
+
+		glPipeline->m_GLSrcColorBlendFactor = GtGLBlendFactor(pPipeline->SrcColorBlendFactor());
+		glPipeline->m_GLDstColorBlendFactor = GtGLBlendFactor(pPipeline->DstColorBlendFactor());
+		glPipeline->m_GLColorBlendOp = GetGLBlendOp(pPipeline->ColorBlendOp());
+		glPipeline->m_GLSrcAlphaBlendFactor = GtGLBlendFactor(pPipeline->SrcAlphaBlendFactor());
+		glPipeline->m_GLDstAlphaBlendFactor = GtGLBlendFactor(pPipeline->DstAlphaBlendFactor());
+		glPipeline->m_GLAlphaBlendOp = GetGLBlendOp(pPipeline->AlphaBlendOp());
+		glPipeline->m_BlendConstants = pPipeline->BlendConstants();
 
 		for (auto& shader : glPipeline->m_Shaders)
 		{

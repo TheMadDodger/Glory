@@ -88,6 +88,13 @@ namespace Glory
         uint32_t m_GLStencilFailOp;
         uint32_t m_GLStencilDepthFailOp;
         uint32_t m_GLStencilPassOp;
+        uint32_t m_GLSrcColorBlendFactor;
+        uint32_t m_GLDstColorBlendFactor;
+        uint32_t m_GLColorBlendOp;
+        uint32_t m_GLSrcAlphaBlendFactor;
+        uint32_t m_GLDstAlphaBlendFactor;
+        uint32_t m_GLAlphaBlendOp;
+        glm::vec4 m_BlendConstants = glm::vec4{};
         Utils::BitSet m_SettingToggles;
     };
 
