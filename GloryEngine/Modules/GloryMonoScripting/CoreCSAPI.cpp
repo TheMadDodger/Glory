@@ -219,6 +219,7 @@ namespace Glory
 		}
 		const std::string propNameStr = mono_string_to_utf8(propName);
 		pMaterial->Set<T>(propNameStr, value);
+		pMaterial->SetDirty(true);
 	}
 
 	template<typename T>
@@ -245,6 +246,7 @@ namespace Glory
 		const std::string propNameStr = mono_string_to_utf8(propName);
 		TextureData* pImage = value ? Core_EngineInstance->GetAssetManager().GetAssetImmediate<TextureData>(value) : nullptr;
 		pMaterial->SetTexture(propNameStr, pImage);
+		pMaterial->SetDirty(true);
 	}
 
 	bool Material_GetTexture(uint64_t matID, MonoString* propName, uint64_t& value)
