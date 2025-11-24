@@ -262,6 +262,19 @@ namespace Glory
 		uint32_t m_CurrentFrameIndex = 0;
 		uint32_t m_ImageCount = 1;
 
+		struct PostProcessPass
+		{
+			void Swap()
+			{
+				RenderPassHandle temp = m_FrontBufferPass;
+				m_FrontBufferPass = m_BackBufferPass;
+				m_BackBufferPass = temp;
+			}
+
+			RenderPassHandle m_FrontBufferPass = 0;
+			RenderPassHandle m_BackBufferPass = 0;
+		};
+
 		struct UniqueCameraData
 		{
 			BufferHandle m_ClusterSSBO = 0;
@@ -270,6 +283,7 @@ namespace Glory
 			std::vector<RenderPassHandle> m_RenderPasses;
 			std::vector<RenderPassHandle> m_LateRenderPasses;
 			std::vector<RenderPassHandle> m_SSAORenderPasses;
+			std::vector<PostProcessPass> m_PostProcessPasses;
 			std::vector<BufferHandle> m_LightIndexSSBOs;
 			std::vector<BufferHandle> m_LightGridSSBOs;
 			std::vector<BufferHandle> m_PickResultsSSBOs;

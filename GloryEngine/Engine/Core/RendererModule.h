@@ -143,6 +143,13 @@ namespace Glory
 		bool m_Dirty;
 	};
 
+	struct PostProcess
+	{
+		std::string m_Name;
+		uint32_t m_Priority = -10;
+		std::function<bool(GraphicsDevice*, CameraRef, size_t, CommandBufferHandle, RenderPassHandle, const PostProcess&)> m_Callback;
+	};
+
 	class RendererModule : public Module
 	{
 	public:
@@ -227,6 +234,8 @@ namespace Glory
 
 		void InjectSwapchainSubpass(std::function<void(GraphicsDevice*, RenderPassHandle, CommandBufferHandle)> subpassFunc);
 
+		void AddPostProcess(PostProcess&& postProcess);
+
 	protected:
 		virtual void OnSubmitDynamic(const RenderData& renderData) {}
 		virtual void OnSubmitCamera(CameraRef camera) {}
@@ -270,6 +279,8 @@ namespace Glory
 		std::vector<PipelineBatch> m_StaticPipelineRenderDatas;
 		std::vector<PipelineBatch> m_DynamicPipelineRenderDatas;
 		std::vector<PipelineBatch> m_DynamicLatePipelineRenderDatas;
+
+		std::vector<PostProcess> m_PostProcesses;
 
 		glm::uvec2 m_Resolution{ 1920, 1080 };
 		glm::uvec2 m_LastResolution{ 1920, 1080 };
