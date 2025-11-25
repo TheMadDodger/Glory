@@ -147,7 +147,8 @@ namespace Glory
 	{
 		std::string m_Name;
 		uint32_t m_Priority = -10;
-		std::function<bool(GraphicsDevice*, CameraRef, size_t, CommandBufferHandle, RenderPassHandle, const PostProcess&)> m_Callback;
+		std::function<bool(GraphicsDevice*, CameraRef, size_t, CommandBufferHandle,
+			RenderPassHandle, DescriptorSetHandle, const PostProcess&)> m_Callback;
 	};
 
 	class RendererModule : public Module

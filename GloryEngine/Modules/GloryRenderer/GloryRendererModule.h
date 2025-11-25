@@ -200,6 +200,7 @@ namespace Glory
 		DescriptorSetLayoutHandle m_PickingResultSetLayout;
 		DescriptorSetLayoutHandle m_PickingSamplerSetLayout;
 		DescriptorSetLayoutHandle m_DisplayCopySamplerSetLayout;
+		DescriptorSetLayoutHandle m_SSAOPostSamplerSetLayout;
 
 		/* Descriptor sets */
 		/* Global */
@@ -248,6 +249,7 @@ namespace Glory
 		/* SSAO */
 		SSAOSettings m_GlobalSSAOSetting;
 		uint32_t m_SSAOKernelSize = 0;
+		PipelineHandle m_SSAOPostPassPipeline = 0;
 
 		/* Shadows */
 		std::vector<RenderPassHandle> m_ShadowsPasses;
@@ -269,10 +271,15 @@ namespace Glory
 				RenderPassHandle temp = m_FrontBufferPass;
 				m_FrontBufferPass = m_BackBufferPass;
 				m_BackBufferPass = temp;
+				DescriptorSetHandle tempDs = m_FrontDescriptor;
+				m_FrontDescriptor = m_BackDescriptor;
+				m_BackDescriptor = tempDs;
 			}
 
 			RenderPassHandle m_FrontBufferPass = 0;
+			DescriptorSetHandle m_FrontDescriptor = 0;
 			RenderPassHandle m_BackBufferPass = 0;
+			DescriptorSetHandle m_BackDescriptor = 0;
 		};
 
 		struct UniqueCameraData
@@ -290,6 +297,7 @@ namespace Glory
 
 			std::vector<DescriptorSetHandle> m_LightSets;
 			std::vector<DescriptorSetHandle> m_SSAOSamplersSets;
+			std::vector<DescriptorSetHandle> m_SSAOPostSamplersSets;
 			std::vector<DescriptorSetHandle> m_FinalColorSamplerSets;
 			std::vector<DescriptorSetHandle> m_PickingResultSets;
 			std::vector<DescriptorSetHandle> m_PickingSamplersSets;

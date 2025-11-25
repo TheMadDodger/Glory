@@ -88,3 +88,7 @@
   ID: 46
 - Path: "Pipelines\\Compute\\Picking.gpln"
   ID: 47
+- Path: "Shaders\\SSAOPost_Frag.shader"
+  ID: 48
+- Path: "Pipelines\\SSAO_Postpass.gpln"
+  ID: 49
