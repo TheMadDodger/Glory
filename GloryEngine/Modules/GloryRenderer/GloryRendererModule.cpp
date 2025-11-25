@@ -36,11 +36,8 @@ namespace Glory
 	constexpr size_t AttachmentNameCount = 5;
 	constexpr std::string_view AttachmentNames[AttachmentNameCount] = {
 		"ObjectID",
-		//"Debug",
 		"Color",
 		"Normal",
-		//"AOBlurred",
-		//"Data",
 		"AO",
 		"Final",
 	};
@@ -299,7 +296,6 @@ namespace Glory
 			m_pEngine->GetDebug().LogError("Renderer: No graphics device active");
 			return;
 		}
-		const bool usePushConstants = pDevice->IsSupported(APIFeatures::PushConstants);
 
 		/* Global data buffers */
 		m_CameraDatasBuffer = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_CAMERAS, BufferType::BT_Storage, BF_Write);
@@ -311,46 +307,46 @@ namespace Glory
 		GenerateNoiseTexture(pDevice);
 
 		/* Global set */
-		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::CameraDatas },
+		CreateBufferDescriptorLayoutAndSet(pDevice, 1, { BufferBindingIndices::CameraDatas },
 			{ BufferType::BT_Storage }, { ShaderTypeFlag(STF_Vertex | STF_Fragment) }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
-			m_GlobalRenderSetLayout, m_GlobalRenderSet, &m_RenderConstantsBuffer, ShaderTypeFlag(STF_Vertex | STF_Fragment), 0, sizeof(RenderConstants));
+			m_GlobalRenderSetLayout, m_GlobalRenderSet, ShaderTypeFlag(STF_Vertex | STF_Fragment), 0, sizeof(RenderConstants));
 
-		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::CameraDatas },
+		CreateBufferDescriptorLayoutAndSet(pDevice, 1, { BufferBindingIndices::CameraDatas },
 			{ BufferType::BT_Storage }, { ShaderTypeFlag(STF_Vertex | STF_Fragment) }, { m_LightCameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_LIGHTS } },
-			m_GlobalShadowRenderSetLayout, m_GlobalShadowRenderSet, &m_RenderConstantsBuffer, ShaderTypeFlag(STF_Vertex | STF_Fragment), 0, sizeof(RenderConstants));
+			m_GlobalShadowRenderSetLayout, m_GlobalShadowRenderSet, ShaderTypeFlag(STF_Vertex | STF_Fragment), 0, sizeof(RenderConstants));
 
-		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::CameraDatas },
+		CreateBufferDescriptorLayoutAndSet(pDevice, 1, { BufferBindingIndices::CameraDatas },
 			{ BufferType::BT_Storage }, { STF_Compute }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
-			m_GlobalPickingSetLayout, m_GlobalPickingSet, &m_PickingConstantsBuffer, STF_Compute, 0, sizeof(PickingConstants));
+			m_GlobalPickingSetLayout, m_GlobalPickingSet, STF_Compute, 0, sizeof(PickingConstants));
 
-		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::CameraDatas },
+		CreateBufferDescriptorLayoutAndSet(pDevice, 1, { BufferBindingIndices::CameraDatas },
 			{ BufferType::BT_Storage }, { STF_Vertex }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
-			m_GlobalLineRenderSetLayout, m_GlobalLineRenderSet, & m_LineRenderConstantsBuffer, STF_Vertex, 0, sizeof(uint32_t));
+			m_GlobalLineRenderSetLayout, m_GlobalLineRenderSet, STF_Vertex, 0, sizeof(uint32_t));
 		
-		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::CameraDatas },
+		CreateBufferDescriptorLayoutAndSet(pDevice, 1, { BufferBindingIndices::CameraDatas },
 			{ BufferType::BT_Storage }, { STF_Vertex }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
-			m_GlobalSkyboxRenderSetLayout, m_GlobalSkyboxRenderSet, & m_SkyboxRenderConstantsBuffer, STF_Vertex, 0, sizeof(uint32_t));
+			m_GlobalSkyboxRenderSetLayout, m_GlobalSkyboxRenderSet, STF_Vertex, 0, sizeof(uint32_t));
 
 		assert(m_GlobalRenderSetLayout == m_GlobalShadowRenderSetLayout);
 
-		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::CameraDatas },
+		CreateBufferDescriptorLayoutAndSet(pDevice, 1, { BufferBindingIndices::CameraDatas },
 			{ BufferType::BT_Storage }, { ShaderTypeFlag(STF_Compute | STF_Fragment) }, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
-			m_GlobalClusterSetLayout, m_GlobalClusterSet, &m_ClusterConstantsBuffer, ShaderTypeFlag(STF_Compute | STF_Fragment), 0, sizeof(ClusterConstants));
+			m_GlobalClusterSetLayout, m_GlobalClusterSet, ShaderTypeFlag(STF_Compute | STF_Fragment), 0, sizeof(ClusterConstants));
 
 		m_CameraClusterSetLayout = CreateBufferDescriptorLayout(pDevice, 1, { BufferBindingIndices::Clusters },
 			{ BufferType::BT_Storage }, { ShaderTypeFlag(STF_Compute | STF_Fragment) });
 
-		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 2, { BufferBindingIndices::LightDatas, BufferBindingIndices::LightSpaceTransforms },
+		CreateBufferDescriptorLayoutAndSet(pDevice, 2, { BufferBindingIndices::LightDatas, BufferBindingIndices::LightSpaceTransforms },
 			{ BufferType::BT_Storage }, { ShaderTypeFlag(STF_Compute | STF_Fragment) }, { m_LightsSSBO, m_LightSpaceTransformsSSBO }, { { 0, sizeof(LightData)*MAX_LIGHTS }, { 0, sizeof(glm::mat4)*MAX_LIGHTS } },
 			m_GlobalLightSetLayout, m_GlobalLightSet);
 
 		m_CameraLightSetLayout = CreateBufferDescriptorLayout(pDevice, 3, { BufferBindingIndices::LightIndices, BufferBindingIndices::LightGrid, BufferBindingIndices::LightDistances },
 			{ BufferType::BT_Storage }, { ShaderTypeFlag(STF_Compute | STF_Fragment) });
 
-		m_SSAOCameraSet = CreateBufferDescriptorSet(pDevice, usePushConstants, 1, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
-			m_GlobalClusterSetLayout, &m_SSAOConstantsBuffer, 0, sizeof(SSAOConstants));
+		m_SSAOCameraSet = CreateBufferDescriptorSet(pDevice, 1, { m_CameraDatasBuffer }, { { 0, sizeof(PerCameraData)*MAX_CAMERAS } },
+			m_GlobalClusterSetLayout, 0, sizeof(SSAOConstants));
 
-		CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 1, { BufferBindingIndices::SampleDome },
+		CreateBufferDescriptorLayoutAndSet(pDevice, 1, { BufferBindingIndices::SampleDome },
 			{ BufferType::BT_Uniform }, { STF_Fragment }, { m_SamplePointsDomeSSBO },
 			{ {0, sizeof(glm::vec3)*m_SSAOKernelSize} }, m_GlobalSampleDomeSetLayout, m_GlobalSampleDomeSet);
 
@@ -529,7 +525,6 @@ namespace Glory
 
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice) return;
-		const bool usePushConstants = pDevice->IsSupported(APIFeatures::PushConstants);
 
 		for (;;)
 		{
@@ -683,10 +678,7 @@ namespace Glory
 				uint32_t cameraIndex = static_cast<uint32_t>(i);
 				pDevice->BeginPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex], m_LineRenderPipeline);
 				pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_LineRenderPipeline, { m_GlobalLineRenderSet });
-				if (usePushConstants)
-					pDevice->PushConstants(m_FrameCommandBuffers[m_CurrentFrameIndex], m_LineRenderPipeline, 0, sizeof(uint32_t), &cameraIndex, STF_Vertex);
-				else
-					pDevice->AssignBuffer(m_LineRenderConstantsBuffer, &cameraIndex, sizeof(uint32_t));
+				pDevice->PushConstants(m_FrameCommandBuffers[m_CurrentFrameIndex], m_LineRenderPipeline, 0, sizeof(uint32_t), &cameraIndex, STF_Vertex);
 				pDevice->DrawMesh(m_FrameCommandBuffers[m_CurrentFrameIndex], m_LineMeshes[m_CurrentFrameIndex]);
 				pDevice->EndPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 			}
@@ -724,11 +716,8 @@ namespace Glory
 			pDevice->BeginPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex], m_PickingPipeline);
 			pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_PickingPipeline,
 				{ m_GlobalPickingSet, pickingResultSet, pickingSamplersSet });
-			if (usePushConstants)
-				pDevice->PushConstants(m_FrameCommandBuffers[m_CurrentFrameIndex], m_PickingPipeline,
-					0, sizeof(PickingConstants), &constants, STF_Compute);
-			else
-				pDevice->AssignBuffer(m_PickingConstantsBuffer, &constants, sizeof(PickingConstants));
+			pDevice->PushConstants(m_FrameCommandBuffers[m_CurrentFrameIndex], m_PickingPipeline,
+				0, sizeof(PickingConstants), &constants, STF_Compute);
 			pDevice->Dispatch(m_FrameCommandBuffers[m_CurrentFrameIndex], 1, 1, 1);
 			pDevice->EndPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 		}
@@ -785,10 +774,7 @@ namespace Glory
 			pDevice->SetViewport(m_FrameCommandBuffers[m_CurrentFrameIndex], 0.0f, 0.0f, float(resolution.x), float(resolution.y));
 			pDevice->SetScissor(m_FrameCommandBuffers[m_CurrentFrameIndex], 0, 0, resolution.x, resolution.y);
 			pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_SSAOPipeline, { m_SSAOCameraSet, m_GlobalSampleDomeSet, ssaoSamplersSet, m_NoiseSamplerSet });
-			if (!m_SSAOConstantsBuffer)
-				pDevice->PushConstants(m_FrameCommandBuffers[m_CurrentFrameIndex], m_SSAOPipeline, 0, sizeof(SSAOConstants), &constants, ShaderTypeFlag(STF_Fragment | STF_Compute));
-			else
-				pDevice->AssignBuffer(m_SSAOConstantsBuffer, &constants, sizeof(SSAOConstants));
+			pDevice->PushConstants(m_FrameCommandBuffers[m_CurrentFrameIndex], m_SSAOPipeline, 0, sizeof(SSAOConstants), &constants, ShaderTypeFlag(STF_Fragment | STF_Compute));
 			pDevice->DrawQuad(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 			pDevice->EndPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 			pDevice->EndRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
@@ -1103,8 +1089,6 @@ namespace Glory
 		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
 		AssetManager& assets = m_pEngine->GetAssetManager();
 
-		const bool usePushConstants = pDevice->IsSupported(APIFeatures::PushConstants);
-
 		RenderConstants constants;
 		constants.m_CameraIndex = static_cast<uint32_t>(cameraIndex);
 		constants.m_LightCount = m_FrameData.ActiveLights.count();
@@ -1113,7 +1097,6 @@ namespace Glory
 		const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
 		const DescriptorSetHandle lightSet = uniqueCameraData.m_LightSets[m_CurrentFrameIndex];
 		const LayerMask& cameraMask = camera.GetLayerMask();
-		if (!usePushConstants) pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(RenderConstants));
 
 		size_t batchIndex = 0;
 		for (const PipelineBatch& pipelineRenderData : batches)
@@ -1161,10 +1144,7 @@ namespace Glory
 					constants.m_ObjectDataIndex = currentObject;
 					constants.m_MaterialIndex = meshBatch.m_MaterialIndices[i];
 
-					if (usePushConstants)
-						pDevice->PushConstants(commandBuffer, batchData.m_Pipeline, 0, sizeof(RenderConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
-					else
-						pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(RenderConstants));
+					pDevice->PushConstants(commandBuffer, batchData.m_Pipeline, 0, sizeof(RenderConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
 					if (!batchData.m_TextureSets.empty())
 						pDevice->BindDescriptorSets(commandBuffer, batchData.m_Pipeline, { batchData.m_TextureSets[constants.m_MaterialIndex] }, 6);
 					pDevice->DrawMesh(commandBuffer, mesh);
@@ -1574,10 +1554,7 @@ namespace Glory
 		pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));
 		pDevice->SetScissor(commandBuffer, 0, 0, resolution.x, resolution.y);
 		pDevice->BindDescriptorSets(commandBuffer, m_ClusterGeneratorPipeline, { m_GlobalClusterSet, clusterSet });
-		if (!m_ClusterConstantsBuffer)
-			pDevice->PushConstants(commandBuffer, m_ClusterGeneratorPipeline, 0, sizeof(ClusterConstants), &constants, ShaderTypeFlag(STF_Fragment | STF_Compute));
-		else
-			pDevice->AssignBuffer(m_ClusterConstantsBuffer, &constants, sizeof(ClusterConstants));
+		pDevice->PushConstants(commandBuffer, m_ClusterGeneratorPipeline, 0, sizeof(ClusterConstants), &constants, ShaderTypeFlag(STF_Fragment | STF_Compute));
 		pDevice->Dispatch(commandBuffer, constants.GridSize.x, constants.GridSize.y, constants.GridSize.z);
 		pDevice->EndPipeline(commandBuffer);
 		pDevice->End(commandBuffer);
@@ -1672,10 +1649,7 @@ namespace Glory
 
 		pDevice->BeginPipeline(commandBuffer, m_ClusterCullLightPipeline);
 		pDevice->BindDescriptorSets(commandBuffer, m_ClusterCullLightPipeline, { m_GlobalClusterSet, clusterSet, m_GlobalLightSet, lightSet, lightDistancesSet });
-		if (!m_ClusterConstantsBuffer)
-			pDevice->PushConstants(commandBuffer, m_ClusterCullLightPipeline, 0, sizeof(ClusterConstants), &constants, ShaderTypeFlag(STF_Fragment | STF_Compute));
-		else
-			pDevice->AssignBuffer(m_ClusterConstantsBuffer, &constants, sizeof(ClusterConstants));
+		pDevice->PushConstants(commandBuffer, m_ClusterCullLightPipeline, 0, sizeof(ClusterConstants), &constants, ShaderTypeFlag(STF_Fragment | STF_Compute));
 		pDevice->Dispatch(commandBuffer, 1, 1, 6);
 		pDevice->EndPipeline(commandBuffer);
 	}
@@ -1694,10 +1668,7 @@ namespace Glory
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		pDevice->BeginPipeline(commandBuffer, m_SkyboxPipeline);
 		pDevice->BindDescriptorSets(commandBuffer, m_SkyboxPipeline, { m_GlobalSkyboxRenderSet, m_GlobalSkyboxSamplerSet });
-		if (!m_SkyboxRenderConstantsBuffer)
-			pDevice->PushConstants(commandBuffer, m_SkyboxPipeline, 0, sizeof(uint32_t), &cameraIndex, STF_Vertex);
-		else
-			pDevice->AssignBuffer(m_SkyboxRenderConstantsBuffer, &cameraIndex, sizeof(uint32_t));
+		pDevice->PushConstants(commandBuffer, m_SkyboxPipeline, 0, sizeof(uint32_t), &cameraIndex, STF_Vertex);
 		pDevice->DrawUnitCube(commandBuffer);
 		pDevice->EndPipeline(commandBuffer);
 	}
@@ -1807,12 +1778,9 @@ namespace Glory
 		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
 		AssetManager& assets = m_pEngine->GetAssetManager();
 
-		const bool usePushConstants = pDevice->IsSupported(APIFeatures::PushConstants);
-
 		RenderConstants constants;
 		constants.m_CameraIndex = static_cast<uint32_t>(lightIndex);
 		constants.m_LightCount = m_FrameData.ActiveLights.count();
-		if (!usePushConstants) pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(RenderConstants));
 
 		pDevice->BeginPipeline(commandBuffer, m_ShadowRenderPipeline);
 
@@ -1857,10 +1825,7 @@ namespace Glory
 					constants.m_ObjectDataIndex = currentObject;
 					constants.m_MaterialIndex = meshBatch.m_MaterialIndices[i];
 
-					if (usePushConstants)
-						pDevice->PushConstants(commandBuffer, batchData.m_Pipeline, 0, sizeof(RenderConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
-					else
-						pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(RenderConstants));
+					pDevice->PushConstants(commandBuffer, batchData.m_Pipeline, 0, sizeof(RenderConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
 					pDevice->DrawMesh(commandBuffer, mesh);
 				}
 			}

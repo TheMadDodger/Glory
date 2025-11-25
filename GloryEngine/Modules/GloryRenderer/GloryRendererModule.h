@@ -165,15 +165,8 @@ namespace Glory
 		/* Buffers */
 		BufferHandle m_CameraDatasBuffer = 0;
 		BufferHandle m_LightCameraDatasBuffer = 0;
-		BufferHandle m_RenderConstantsBuffer = 0;
-		BufferHandle m_PickingConstantsBuffer = 0;
-		BufferHandle m_SkyboxRenderConstantsBuffer = 0;
-		BufferHandle m_LineRenderConstantsBuffer = 0;
-		BufferHandle m_ClusterConstantsBuffer = 0;
-		BufferHandle m_DeferredConstantsBuffer = 0;
 		BufferHandle m_LightsSSBO = 0;
 		BufferHandle m_LightSpaceTransformsSSBO = 0;
-		BufferHandle m_SSAOConstantsBuffer = 0;
 		BufferHandle m_SamplePointsDomeSSBO = 0;
 
 		/* Descriptor set layouts */

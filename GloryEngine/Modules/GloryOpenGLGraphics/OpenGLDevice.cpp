@@ -614,9 +614,14 @@ namespace Glory
 		}
 	}
 
-	void OpenGLDevice::PushConstants(CommandBufferHandle, PipelineHandle, uint32_t, uint32_t, const void*, ShaderTypeFlag)
+	void OpenGLDevice::PushConstants(CommandBufferHandle, PipelineHandle, uint32_t offset, uint32_t size, const void* data, ShaderTypeFlag)
 	{
-		Debug().LogError("OpenGLDevice::PushConstants: Not supported on OpenGL device.");
+		GL_Buffer* glBuffer = m_Buffers.Find(m_ConstantsBuffer);
+		AssignBuffer(m_ConstantsBuffer, data, offset, size);
+		glBindBuffer(glBuffer->m_GLTarget, glBuffer->m_GLBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindBufferBase(glBuffer->m_GLTarget, 0, glBuffer->m_GLBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
 	void OpenGLDevice::DrawMesh(CommandBufferHandle, MeshHandle handle)
@@ -1954,6 +1959,11 @@ namespace Glory
 
 	void OpenGLDevice::FreeSemaphore(SemaphoreHandle& handle)
 	{
+	}
+
+	void OpenGLDevice::OnInitialize()
+	{
+		m_ConstantsBuffer = CreateBuffer(128, BT_Uniform, BF_Write);
 	}
 
 	void OpenGLDevice::CreateRenderTexture(GL_RenderTexture& renderTexture)

@@ -249,14 +249,18 @@ namespace Glory
 		TextureData* pTextureData = pFont->GetGlyphTexture(m_pEngine->GetAssetManager());
 		if (!pTextureData) return;
 
-		const bool usePushConstants = pDevice->IsSupported(APIFeatures::PushConstants);
+		if (!m_RenderConstantsSetLayout)
+		{
+			DescriptorSetLayoutInfo backgroundSetInfo;
+			backgroundSetInfo.m_PushConstantRange.m_Offset = 0;
+			backgroundSetInfo.m_PushConstantRange.m_ShaderStages = STF_Vertex;
+			backgroundSetInfo.m_PushConstantRange.m_Size = sizeof(ConsoleRenderConstants);
+			m_RenderConstantsSetLayout = pDevice->CreateDescriptorSetLayout(std::move(backgroundSetInfo));
+		}
 
-		if (!m_BackgroundRenderSetLayout)
+		if (!m_TextRenderSetLayout)
 		{
 			TextureHandle texture = pDevice->AcquireCachedTexture(pTextureData);
-			CreateBufferDescriptorLayoutAndSet(pDevice, usePushConstants, 0, {}, {}, {}, {}, {},
-				m_BackgroundRenderSetLayout, m_BackgroundRenderSet, &m_RenderConstantsBuffer,
-				STF_Vertex, 0, sizeof(ConsoleRenderConstants));
 			m_TextRenderSetLayout = CreateSamplerDescriptorLayout(pDevice, 1, { 0 }, { STF_Fragment }, { "Color" });
 			m_TextRenderSet = CreateSamplerDescriptorSet(pDevice, 1, { texture }, m_TextRenderSetLayout);
 			m_LastFontID = consoleFontID;
@@ -271,10 +275,10 @@ namespace Glory
 		}
 
 		PipelineHandle consoleBackgroundPipeline = pDevice->AcquireCachedPipeline(renderPass, pConsoleBackgroundPipeline,
-			{ m_BackgroundRenderSetLayout }, sizeof(VertexPosColorTex),
+			{ m_RenderConstantsSetLayout }, sizeof(VertexPosColorTex),
 			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
 		PipelineHandle consoleTextPipeline = pDevice->AcquireCachedPipeline(renderPass, pConsoleTextPipeline,
-			{ m_BackgroundRenderSetLayout, m_TextRenderSetLayout },
+			{ m_RenderConstantsSetLayout, m_TextRenderSetLayout },
 			sizeof(VertexPosColorTex), { AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
 
 		if (!consoleBackgroundPipeline || !consoleTextPipeline) return;
@@ -382,40 +386,22 @@ namespace Glory
 
 		///* Draw background */
 		pDevice->BeginPipeline(commandBuffer, consoleBackgroundPipeline);
-		if (usePushConstants)
-			pDevice->PushConstants(commandBuffer, consoleBackgroundPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
-		else
-		{
-			pDevice->BindDescriptorSets(commandBuffer, consoleBackgroundPipeline, { m_BackgroundRenderSet });
-			pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(ConsoleRenderConstants));
-		}
+		pDevice->PushConstants(commandBuffer, consoleBackgroundPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
 		pDevice->DrawMesh(commandBuffer, m_ConsoleMesh);
 		pDevice->EndPipeline(commandBuffer);
 
 		///* Draw text */
 		constants.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, windowHeight + animatedConsoleHeight - textStart, 0.0f));
 		pDevice->BeginPipeline(commandBuffer, consoleTextPipeline);
-		if (usePushConstants)
-		{
-			pDevice->BindDescriptorSets(commandBuffer, consoleTextPipeline, { m_TextRenderSet });
-			pDevice->PushConstants(commandBuffer, consoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
-		}
-		else
-		{
-			pDevice->BindDescriptorSets(commandBuffer, consoleTextPipeline, { m_BackgroundRenderSet, m_TextRenderSet });
-			pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(ConsoleRenderConstants));
-		}
+		pDevice->BindDescriptorSets(commandBuffer, consoleTextPipeline, { m_TextRenderSet });
+		pDevice->PushConstants(commandBuffer, consoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
 		pDevice->DrawMesh(commandBuffer, m_ConsoleTextMesh);
 
 		/* Draw input text bracket */
 		const float inputTextHeight = windowHeight + animatedConsoleHeight - consoleHeight + textLineHeight + consolePadding;
 		constants.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, inputTextHeight, 0.0f));
 
-		if (usePushConstants)
-			pDevice->PushConstants(commandBuffer, consoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
-		else
-			pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(ConsoleRenderConstants));
-
+		pDevice->PushConstants(commandBuffer, consoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
 		pDevice->DrawMesh(commandBuffer, m_InputTextBracketMesh);
 
 		/* Draw input text */
@@ -426,10 +412,7 @@ namespace Glory
 		{
 			m_InputTextMesh = pDevice->AcquireCachedMesh(m_pInputTextMesh.get(), MU_Dynamic);
 			constants.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(inputTextXOffset, inputTextHeight, 0.0f));
-			if (usePushConstants)
-				pDevice->PushConstants(commandBuffer, consoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
-			else
-				pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(ConsoleRenderConstants));
+			pDevice->PushConstants(commandBuffer, consoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
 			pDevice->DrawMesh(commandBuffer, m_InputTextMesh);
 		}
 
@@ -437,10 +420,7 @@ namespace Glory
 		if (m_CursorBlink)
 		{
 			constants.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(inputTextXOffset + m_InputTextWidth, inputTextHeight, 0.0f));
-			if (usePushConstants)
-				pDevice->PushConstants(commandBuffer, consoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
-			else
-				pDevice->AssignBuffer(m_RenderConstantsBuffer, &constants, sizeof(ConsoleRenderConstants));
+			pDevice->PushConstants(commandBuffer, consoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
 			pDevice->DrawMesh(commandBuffer, m_CursorTextMesh);
 		}
 		pDevice->EndPipeline(commandBuffer);

@@ -240,6 +240,8 @@ namespace Glory
 			255, 0, 255, 255
 		};
 		m_DefaultTexture = CreateTexture(defaultTextureInfo, defaultTexturePixels, sizeof(defaultTexturePixels));
+
+		OnInitialize();
 	}
 
 	CommandBufferHandle GraphicsDevice::Begin()

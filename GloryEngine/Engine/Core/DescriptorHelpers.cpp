@@ -3,46 +3,22 @@
 
 namespace Glory
 {
-	void CreateBufferDescriptorLayoutAndSet(GraphicsDevice* pDevice, bool usePushConstants, size_t numBuffers,
+	void CreateBufferDescriptorLayoutAndSet(GraphicsDevice* pDevice, size_t numBuffers,
 		const std::vector<uint32_t>& bindingIndices, const std::vector<BufferType>& bufferTypes,
 		const std::vector<ShaderTypeFlag>& shaderStages, const std::vector<BufferHandle>& bufferHandles,
 		const std::vector<std::pair<uint32_t, uint32_t>>& bufferOffsetsAndSizes, DescriptorSetLayoutHandle& layout,
-		DescriptorSetHandle& set, BufferHandle* pConstantsBuffer, ShaderTypeFlag constantsShaderStage,
+		DescriptorSetHandle& set, ShaderTypeFlag constantsShaderStage,
 		uint32_t constantsOffset, uint32_t constantsSize)
 	{
 		DescriptorSetLayoutInfo setLayoutInfo = DescriptorSetLayoutInfo();
 		DescriptorSetInfo setInfo = DescriptorSetInfo();
 		size_t firstBufferindex = 0;
-		if (pConstantsBuffer)
-		{
-			if (!usePushConstants)
-			{
-				firstBufferindex = 1;
-				setLayoutInfo.m_Buffers.resize(numBuffers + 1);
-				setInfo.m_Buffers.resize(numBuffers + 1);
-				if (!(*pConstantsBuffer))
-					*pConstantsBuffer = pDevice->CreateBuffer(constantsSize, BufferType::BT_Uniform, BF_Write);
-				setInfo.m_Buffers[0].m_BufferHandle = *pConstantsBuffer;
-				setInfo.m_Buffers[0].m_Offset = constantsOffset;
-				setInfo.m_Buffers[0].m_Size = constantsSize;
-				setLayoutInfo.m_Buffers[0].m_BindingIndex = 0;
-				setLayoutInfo.m_Buffers[0].m_Type = BufferType::BT_Uniform;
-				setLayoutInfo.m_Buffers[0].m_ShaderStages = constantsShaderStage;
-			}
-			else
-			{
-				setLayoutInfo.m_Buffers.resize(numBuffers);
-				setInfo.m_Buffers.resize(numBuffers);
-				setLayoutInfo.m_PushConstantRange.m_Offset = constantsOffset;
-				setLayoutInfo.m_PushConstantRange.m_Size = constantsSize;
-				setLayoutInfo.m_PushConstantRange.m_ShaderStages = constantsShaderStage;
-			}
-		}
-		else
-		{
-			setLayoutInfo.m_Buffers.resize(numBuffers);
-			setInfo.m_Buffers.resize(numBuffers);
-		}
+		setLayoutInfo.m_Buffers.resize(numBuffers);
+		setInfo.m_Buffers.resize(numBuffers);
+
+		setLayoutInfo.m_PushConstantRange.m_Offset = constantsOffset;
+		setLayoutInfo.m_PushConstantRange.m_Size = constantsSize;
+		setLayoutInfo.m_PushConstantRange.m_ShaderStages = constantsShaderStage;
 
 		for (size_t i = 0; i < numBuffers; ++i)
 		{
@@ -59,7 +35,7 @@ namespace Glory
 			setInfo.m_Buffers[index].m_Size = bufferOffsetsAndSizes[i].second;
 		}
 		layout = setInfo.m_Layout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
-		if (usePushConstants && numBuffers == 0) return;
+		if (numBuffers == 0) return;
 		set = pDevice->CreateDescriptorSet(std::move(setInfo));
 	}
 
@@ -82,29 +58,13 @@ namespace Glory
 		return pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
 	}
 
-	DescriptorSetHandle CreateBufferDescriptorSet(GraphicsDevice* pDevice, bool usePushConstants, size_t numBuffers,
+	DescriptorSetHandle CreateBufferDescriptorSet(GraphicsDevice* pDevice, size_t numBuffers,
 		const std::vector<BufferHandle>& bufferHandles, const std::vector<std::pair<uint32_t, uint32_t>>& bufferOffsetsAndSizes,
-		DescriptorSetLayoutHandle layout, BufferHandle* pConstantsBuffer, uint32_t constantsOffset, uint32_t constantsSize)
+		DescriptorSetLayoutHandle layout, uint32_t constantsOffset, uint32_t constantsSize)
 	{
 		DescriptorSetInfo setInfo = DescriptorSetInfo();
 		size_t firstBufferindex = 0;
-		if (pConstantsBuffer)
-		{
-			if (!usePushConstants)
-			{
-				firstBufferindex = 1;
-				setInfo.m_Buffers.resize(numBuffers + 1);
-				if (!(*pConstantsBuffer))
-					*pConstantsBuffer = pDevice->CreateBuffer(constantsSize, BufferType::BT_Uniform, BF_Write);
-				setInfo.m_Buffers[0].m_BufferHandle = *pConstantsBuffer;
-				setInfo.m_Buffers[0].m_Offset = constantsOffset;
-				setInfo.m_Buffers[0].m_Size = constantsSize;
-			}
-			else
-				setInfo.m_Buffers.resize(numBuffers);
-		}
-		else
-			setInfo.m_Buffers.resize(numBuffers);
+		setInfo.m_Buffers.resize(numBuffers);
 
 		for (size_t i = 0; i < numBuffers; ++i)
 		{

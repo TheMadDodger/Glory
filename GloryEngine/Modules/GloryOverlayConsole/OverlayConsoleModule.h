@@ -81,10 +81,8 @@ namespace Glory
 		int m_HistoryRewindIndex;
 		std::string m_BackedUpInput;
 
-		BufferHandle m_RenderConstantsBuffer = 0;
-		DescriptorSetLayoutHandle m_BackgroundRenderSetLayout = 0;
+		DescriptorSetLayoutHandle m_RenderConstantsSetLayout = 0;
 		DescriptorSetLayoutHandle m_TextRenderSetLayout = 0;
-		DescriptorSetHandle m_BackgroundRenderSet = 0;
 		DescriptorSetHandle m_TextRenderSet = 0;
 		UUID m_LastFontID = 0;
 	};

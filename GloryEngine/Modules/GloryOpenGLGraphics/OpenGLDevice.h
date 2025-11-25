@@ -215,6 +215,8 @@ namespace Glory
         virtual void FreeSwapchain(SwapchainHandle& handle) override;
         virtual void FreeSemaphore(SemaphoreHandle& handle) override;
 
+        virtual void OnInitialize() override;
+
     private:
         void CreateRenderTexture(GL_RenderTexture& renderTexture);
         bool CreatePipeline(GL_Pipeline& pipeline, PipelineData* pPipeline);
@@ -233,5 +235,8 @@ namespace Glory
         std::unordered_map<DescriptorSetLayoutInfo, DescriptorSetLayoutHandle> m_CachedDescriptorSetLayouts;
 
         uint32_t m_GLCurrentPrimitives;
+
+        /* For push constant emulation */
+        BufferHandle m_ConstantsBuffer;
     };
 }

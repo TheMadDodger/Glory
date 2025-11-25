@@ -748,6 +748,9 @@ namespace Glory
 		virtual void FreeSemaphore(SemaphoreHandle& handle) = 0;
 
 	protected:
+		virtual void OnInitialize() {}
+
+	protected:
 		Module* m_pModule;
 		APIFeatures m_APIFeatures;
 		MeshHandle m_ScreenMesh;
