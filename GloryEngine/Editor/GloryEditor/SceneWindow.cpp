@@ -116,6 +116,7 @@ namespace Glory::Editor
 					if (ImGui::MenuItem(pRenderer->CameraAttachmentPreviewName(i).data(), NULL, m_SelectedRenderTextureIndex == i))
 					{
 						m_SelectedRenderTextureIndex = i;
+						pRenderer->VisualizeAttachment(m_SceneCamera.m_Camera, size_t(m_SelectedRenderTextureIndex));
 					}
 				}
 
@@ -207,7 +208,7 @@ namespace Glory::Editor
 		}
 
 		const float cursorPosYStart = ImGui::GetCursorPosY();
-		TextureHandle texture = pRenderer->CameraAttachmentPreview(m_SceneCamera.m_Camera, m_SelectedRenderTextureIndex);
+		TextureHandle texture = pRenderer->CameraAttachmentPreview(m_SceneCamera.m_Camera, pRenderer->DefaultAttachmenmtIndex());
 		ImVec2 viewportSize = ImVec2(width, height);
 		ImGui::Image(pRenderImpl->GetTextureID(texture), viewportSize, ImVec2(0, 1), ImVec2(1, 0));
 

@@ -105,8 +105,11 @@ namespace Glory
 			/* Update descriptor sets */
 			const DescriptorSetHandle& ssaoSamplersSet = uniqueCameraData.m_SSAOSamplersSets[i];
 			const DescriptorSetHandle& ssaoPostSamplersSet = uniqueCameraData.m_SSAOPostSamplersSets[i];
-			const DescriptorSetHandle& colorSamplerSet = uniqueCameraData.m_FinalColorSamplerSets[i];
+			const DescriptorSetHandle& colorSamplerSet = uniqueCameraData.m_ColorSamplerSets[i];
 			const DescriptorSetHandle& pickingSamplersSet = uniqueCameraData.m_PickingSamplersSets[i];
+			const DescriptorSetHandle& objectIDSamplerSet = uniqueCameraData.m_ObjectIDSamplerSets[i];
+			const DescriptorSetHandle& normalSamplerSet = uniqueCameraData.m_NormalSamplerSets[i];
+			const DescriptorSetHandle& aoSamplerSet = uniqueCameraData.m_AOSamplerSets[i];
 			TextureHandle objectID = pDevice->GetRenderTextureAttachment(renderTexture, 0);
 			TextureHandle color = pDevice->GetRenderTextureAttachment(renderTexture, 1);
 			TextureHandle normals = pDevice->GetRenderTextureAttachment(renderTexture, 2);
@@ -156,6 +159,24 @@ namespace Glory
 			updateInfo.m_Samplers[0].m_TextureHandle = ppFront;
 			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
 			pDevice->UpdateDescriptorSet(postProcessPass.m_FrontDescriptor, updateInfo);
+			
+			updateInfo = DescriptorSetUpdateInfo();
+			updateInfo.m_Samplers.resize(1);
+			updateInfo.m_Samplers[0].m_TextureHandle = normals;
+			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
+			pDevice->UpdateDescriptorSet(normalSamplerSet, updateInfo);
+			
+			updateInfo = DescriptorSetUpdateInfo();
+			updateInfo.m_Samplers.resize(1);
+			updateInfo.m_Samplers[0].m_TextureHandle = ao;
+			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
+			pDevice->UpdateDescriptorSet(aoSamplerSet, updateInfo);
+			
+			updateInfo = DescriptorSetUpdateInfo();
+			updateInfo.m_Samplers.resize(1);
+			updateInfo.m_Samplers[0].m_TextureHandle = objectID;
+			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
+			pDevice->UpdateDescriptorSet(objectIDSamplerSet, updateInfo);
 		}
 
 		/* When the camera rendertexture resizes we need to generate a new grid of clusters for that camera */
@@ -203,6 +224,8 @@ namespace Glory
 		newReferences.push_back(settings.Value<uint64_t>("Cluster Cull Light"));
 		newReferences.push_back(settings.Value<uint64_t>("Picking"));
 		newReferences.push_back(settings.Value<uint64_t>("SSAO Postpass"));
+		newReferences.push_back(settings.Value<uint64_t>("SSAO Visualizer"));
+		newReferences.push_back(settings.Value<uint64_t>("ObjectID Visualizer"));
 
 		for (size_t i = 0; i < newReferences.size(); ++i)
 		{
@@ -289,6 +312,7 @@ namespace Glory
 		const UUID clusterCullLightPipeline = settings.Value<uint64_t>("Cluster Cull Light");
 		const UUID pickingPipeline = settings.Value<uint64_t>("Picking");
 		const UUID ssaoPostpassPipeline = settings.Value<uint64_t>("SSAO Postpass");
+		const UUID objectIDVisualizerPipeline = settings.Value<uint64_t>("ObjectID Visualizer");
 
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice)
@@ -446,13 +470,17 @@ namespace Glory
 
 		PostProcess displayCopyPP;
 		displayCopyPP.m_Name = "Initial Display Copy";
-		displayCopyPP.m_Priority = UINT32_MAX;
+		displayCopyPP.m_Priority = INT32_MAX;
 		displayCopyPP.m_Callback = [this](GraphicsDevice* pDevice, CameraRef camera, size_t cameraIndex,
 			CommandBufferHandle commandBuffer, RenderPassHandle renderPass, DescriptorSetHandle, const PostProcess& pp) {
 			const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
+
+			const glm::uvec2& resolution = camera.GetResolution();
 			pDevice->BeginRenderPass(commandBuffer, renderPass);
 			pDevice->BeginPipeline(commandBuffer, m_DisplayCopyPipeline);
-			pDevice->BindDescriptorSets(commandBuffer, m_DisplayCopyPipeline, { uniqueCameraData.m_FinalColorSamplerSets[m_CurrentFrameIndex] });
+			pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));
+			pDevice->SetScissor(commandBuffer, 0, 0, resolution.x, resolution.y);
+			pDevice->BindDescriptorSets(commandBuffer, m_DisplayCopyPipeline, { uniqueCameraData.m_ColorSamplerSets[m_CurrentFrameIndex] });
 			pDevice->DrawQuad(commandBuffer);
 			pDevice->EndPipeline(commandBuffer);
 			pDevice->EndRenderPass(commandBuffer);
@@ -463,12 +491,11 @@ namespace Glory
 
 		PostProcess ssaoPP;
 		ssaoPP.m_Name = "SSAO";
-		ssaoPP.m_Priority = UINT32_MAX;
+		ssaoPP.m_Priority = 0;
 		ssaoPP.m_Callback = [this](GraphicsDevice* pDevice, CameraRef camera, size_t cameraIndex,
 			CommandBufferHandle commandBuffer, RenderPassHandle renderPass, DescriptorSetHandle colorSet, const PostProcess& pp)
 		{
 			if (!m_GlobalSSAOSetting.m_Enabled) return false;
-
 			const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
 			const DescriptorSetHandle& ssaoSamplersSet = uniqueCameraData.m_SSAOPostSamplersSets[m_CurrentFrameIndex];
 
@@ -477,8 +504,11 @@ namespace Glory
 				m_GlobalSSAOSetting.m_Contrast,
 			};
 
+			const glm::uvec2& resolution = camera.GetResolution();
 			pDevice->BeginRenderPass(commandBuffer, renderPass);
 			pDevice->BeginPipeline(commandBuffer, m_SSAOPostPassPipeline);
+			pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));
+			pDevice->SetScissor(commandBuffer, 0, 0, resolution.x, resolution.y);
 			pDevice->BindDescriptorSets(commandBuffer, m_SSAOPostPassPipeline, { colorSet, ssaoSamplersSet });
 			pDevice->PushConstants(commandBuffer, m_SSAOPostPassPipeline, 0, sizeof(aoSettings), aoSettings, STF_Fragment);
 			pDevice->DrawQuad(commandBuffer);
@@ -488,6 +518,53 @@ namespace Glory
 		};
 
 		AddPostProcess(std::move(ssaoPP));
+
+		PostProcess attachmentVisPP;
+		attachmentVisPP.m_Name = "Camera Attachment Visualizer";
+		attachmentVisPP.m_Priority = INT32_MIN;
+		attachmentVisPP.m_Callback = [this](GraphicsDevice* pDevice, CameraRef camera, size_t cameraIndex,
+			CommandBufferHandle commandBuffer, RenderPassHandle renderPass, DescriptorSetHandle colorSet, const PostProcess& pp)
+		{
+			const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
+
+			DescriptorSetHandle previewSamplerSet = NULL;
+			PipelineHandle previewPipeline = NULL;
+
+			switch (uniqueCameraData.m_VisualizedAttachment)
+			{
+			case CameraAttachment::ObjectID:
+				previewPipeline = m_VisualizeObjectIDPipeline;
+				previewSamplerSet = uniqueCameraData.m_ObjectIDSamplerSets[m_CurrentFrameIndex];
+				break;
+			case CameraAttachment::Color:
+				previewPipeline = m_DisplayCopyPipeline;
+				previewSamplerSet = uniqueCameraData.m_ColorSamplerSets[m_CurrentFrameIndex];
+				break;
+			case CameraAttachment::Normal:
+				previewPipeline = m_DisplayCopyPipeline;
+				previewSamplerSet = uniqueCameraData.m_NormalSamplerSets[m_CurrentFrameIndex];
+				break;
+			case CameraAttachment::AO:
+				previewPipeline = m_VisualizeSSAOPipeline;
+				previewSamplerSet = uniqueCameraData.m_AOSamplerSets[m_CurrentFrameIndex];
+				break;
+			default:
+				return false;
+			}
+
+			const glm::uvec2& resolution = camera.GetResolution();
+			pDevice->BeginRenderPass(commandBuffer, renderPass);
+			pDevice->BeginPipeline(commandBuffer, previewPipeline);
+			pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));
+			pDevice->SetScissor(commandBuffer, 0, 0, resolution.x, resolution.y);
+			pDevice->BindDescriptorSets(commandBuffer, previewPipeline, { previewSamplerSet });
+			pDevice->DrawQuad(commandBuffer);
+			pDevice->EndPipeline(commandBuffer);
+			pDevice->EndRenderPass(commandBuffer);
+			return true;
+		};
+
+		AddPostProcess(std::move(attachmentVisPP));
 	}
 
 	void GloryRendererModule::Update()
@@ -509,6 +586,8 @@ namespace Glory
 		const UUID clusterCullLightPipeline = settings.Value<uint64_t>("Cluster Cull Light");
 		const UUID pickingPipeline = settings.Value<uint64_t>("Picking");
 		const UUID ssaoPostpassPipeline = settings.Value<uint64_t>("SSAO Postpass");
+		const UUID ssaoVisualizerPipeline = settings.Value<uint64_t>("SSAO Visualizer");
+		const UUID objectIDVisualizerPipeline = settings.Value<uint64_t>("ObjectID Visualizer");
 
 		settings.SetDirty(false);
 	}
@@ -817,7 +896,7 @@ namespace Glory
 			ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::Draw: Render output from camera " + std::to_string(i) };
 			CameraRef camera = m_OutputCameras[i];
 			const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
-			pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DisplayCopyPipeline, { uniqueCameraData.m_FinalColorSamplerSets[m_CurrentFrameIndex] });
+			pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DisplayCopyPipeline, { uniqueCameraData.m_ColorSamplerSets[m_CurrentFrameIndex] });
 			pDevice->DrawQuad(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 		}
 		pDevice->EndPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex]);
@@ -866,6 +945,8 @@ namespace Glory
 		settings.RegisterAssetReference<PipelineData>("Cluster Cull Light", 45);
 		settings.RegisterAssetReference<PipelineData>("Picking", 47);
 		settings.RegisterAssetReference<PipelineData>("SSAO Postpass", 49);
+		settings.RegisterAssetReference<PipelineData>("SSAO Visualizer", 51);
+		settings.RegisterAssetReference<PipelineData>("ObjectID Visualizer", 50);
 	}
 
 	size_t GloryRendererModule::DefaultAttachmenmtIndex() const
@@ -911,6 +992,13 @@ namespace Glory
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_FinalFrameColorPasses[m_CurrentFrameIndex]);
 		return pDevice->GetRenderTextureAttachment(renderTexture, 0);
+	}
+
+	void GloryRendererModule::VisualizeAttachment(CameraRef camera, size_t index)
+	{
+		if (index >= CameraAttachment::Count) return;
+		UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
+		uniqueCameraData.m_VisualizedAttachment = CameraAttachment(index);
 	}
 
 	size_t GloryRendererModule::DebugOverlayCount() const
@@ -1164,6 +1252,8 @@ namespace Glory
 		const UUID pickingPipeline = settings.Value<uint64_t>("Picking");
 		const UUID displayPipeline = settings.Value<uint64_t>("Display Copy Pipeline");
 		const UUID ssaoPostPassPipeline = settings.Value<uint64_t>("SSAO Postpass");
+		const UUID visualizeSSAOPipeline = settings.Value<uint64_t>("SSAO Visualizer");
+		const UUID visualizeObjectIDPipeline = settings.Value<uint64_t>("ObjectID Visualizer");
 
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice) return;
@@ -1190,6 +1280,18 @@ namespace Glory
 		{
 			PipelineData* pPipeline = pipelines.GetPipelineData(displayPipeline);
 			m_DisplayCopyPipeline = pDevice->CreatePipeline(m_FinalFrameColorPasses[0], pPipeline, { m_DisplayCopySamplerSetLayout },
+				sizeof(glm::vec3), { AttributeType::Float3 });
+		}
+		if (!m_VisualizeSSAOPipeline)
+		{
+			PipelineData* pPipeline = pipelines.GetPipelineData(visualizeSSAOPipeline);
+			m_VisualizeSSAOPipeline = pDevice->CreatePipeline(m_FinalFrameColorPasses[0], pPipeline, { m_DisplayCopySamplerSetLayout },
+				sizeof(glm::vec3), { AttributeType::Float3 });
+		}
+		if (!m_VisualizeObjectIDPipeline)
+		{
+			PipelineData* pPipeline = pipelines.GetPipelineData(visualizeObjectIDPipeline);
+			m_VisualizeObjectIDPipeline = pDevice->CreatePipeline(m_FinalFrameColorPasses[0], pPipeline, { m_DisplayCopySamplerSetLayout },
 				sizeof(glm::vec3), { AttributeType::Float3 });
 		}
 		if (!m_SSAOPostPassPipeline)
@@ -1846,6 +1948,7 @@ namespace Glory
 		const size_t cameraIndex = iter - m_ActiveCameras.begin();
 
 		UniqueCameraData& cameraData = m_UniqueCameraDatas[camera.GetUUID()];
+		cameraData.m_VisualizedAttachment = CameraAttachment(DefaultAttachmenmtIndex());
 		cameraData.m_RenderPasses.resize(m_ImageCount, 0ull);
 		cameraData.m_LateRenderPasses.resize(m_ImageCount, 0ull);
 		cameraData.m_SSAORenderPasses.resize(m_ImageCount, 0ull);
@@ -1855,10 +1958,14 @@ namespace Glory
 		cameraData.m_LightSets.resize(m_ImageCount, 0ull);
 		cameraData.m_SSAOSamplersSets.resize(m_ImageCount, 0ull);
 		cameraData.m_SSAOPostSamplersSets.resize(m_ImageCount, 0ull);
-		cameraData.m_FinalColorSamplerSets.resize(m_ImageCount, 0ull);
+		cameraData.m_ColorSamplerSets.resize(m_ImageCount, 0ull);
 		cameraData.m_PickingResultSets.resize(m_ImageCount, 0ull);
 		cameraData.m_PickingSamplersSets.resize(m_ImageCount, 0ull);
 		cameraData.m_PostProcessPasses.resize(m_ImageCount);
+
+		cameraData.m_ObjectIDSamplerSets.resize(m_ImageCount, 0ull);
+		cameraData.m_NormalSamplerSets.resize(m_ImageCount, 0ull);
+		cameraData.m_AOSamplerSets.resize(m_ImageCount, 0ull);
 
 		for (size_t i = 0; i < m_ImageCount; ++i)
 		{
@@ -1939,7 +2046,7 @@ namespace Glory
 			DescriptorSetHandle& lightSet = cameraData.m_LightSets[i];
 			DescriptorSetHandle& ssaoSamplersSet = cameraData.m_SSAOSamplersSets[i];
 			DescriptorSetHandle& ssaoPostSamplersSet = cameraData.m_SSAOPostSamplersSets[i];
-			DescriptorSetHandle& colorSamplerSet = cameraData.m_FinalColorSamplerSets[i];
+			DescriptorSetHandle& colorSamplerSet = cameraData.m_ColorSamplerSets[i];
 			DescriptorSetHandle& pickingResultsSet = cameraData.m_PickingResultSets[i];
 			DescriptorSetHandle& pickingSamplersSet = cameraData.m_PickingSamplersSets[i];
 			BufferHandle& lightIndexSSBO = cameraData.m_LightIndexSSBOs[i];
@@ -1952,6 +2059,10 @@ namespace Glory
 			TextureHandle normals = pDevice->GetRenderTextureAttachment(renderTexture, 2);
 			TextureHandle depth = pDevice->GetRenderTextureAttachment(renderTexture, 3);
 			TextureHandle ao = pDevice->GetRenderTextureAttachment(ssaoRenderTexture, 0);
+
+			DescriptorSetHandle& objectIDSamplerSet = cameraData.m_ObjectIDSamplerSets[i];
+			DescriptorSetHandle& normalSamplerSet = cameraData.m_NormalSamplerSets[i];
+			DescriptorSetHandle& aoSamplerSet = cameraData.m_AOSamplerSets[i];
 
 			if (!lightIndexSSBO)
 				lightIndexSSBO = pDevice->CreateBuffer(sizeof(uint32_t)*(NUM_CLUSTERS*MAX_LIGHTS_PER_TILE + 1), BufferType::BT_Storage, BF_None);
@@ -2022,6 +2133,33 @@ namespace Glory
 				setInfo.m_Samplers[1].m_TextureHandle = normals;
 				setInfo.m_Samplers[2].m_TextureHandle = depth;
 				pickingSamplersSet = pDevice->CreateDescriptorSet(std::move(setInfo));
+			}
+			
+			if (!objectIDSamplerSet)
+			{
+				DescriptorSetInfo setInfo = DescriptorSetInfo();
+				setInfo.m_Layout = m_DisplayCopySamplerSetLayout;
+				setInfo.m_Samplers.resize(1);
+				setInfo.m_Samplers[0].m_TextureHandle = objectID;
+				objectIDSamplerSet = pDevice->CreateDescriptorSet(std::move(setInfo));
+			}
+
+			if (!normalSamplerSet)
+			{
+				DescriptorSetInfo setInfo = DescriptorSetInfo();
+				setInfo.m_Layout = m_DisplayCopySamplerSetLayout;
+				setInfo.m_Samplers.resize(1);
+				setInfo.m_Samplers[0].m_TextureHandle = normals;
+				normalSamplerSet = pDevice->CreateDescriptorSet(std::move(setInfo));
+			}
+			
+			if (!aoSamplerSet)
+			{
+				DescriptorSetInfo setInfo = DescriptorSetInfo();
+				setInfo.m_Layout = m_DisplayCopySamplerSetLayout;
+				setInfo.m_Samplers.resize(1);
+				setInfo.m_Samplers[0].m_TextureHandle = ao;
+				aoSamplerSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 			}
 		}
 	}

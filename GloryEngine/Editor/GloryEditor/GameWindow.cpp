@@ -112,6 +112,8 @@ namespace Glory::Editor
 					if (ImGui::MenuItem(pRenderer->CameraAttachmentPreviewName(i).data(), NULL, m_SelectedRenderTextureIndex == i))
 					{
 						m_SelectedRenderTextureIndex = i;
+						pRenderer->VisualizeAttachment(pRenderer->GetOutputCamera(m_CurrentOutputCameraIndex),
+							size_t(m_SelectedRenderTextureIndex));
 					}
 				}
 
@@ -143,7 +145,7 @@ namespace Glory::Editor
 		else
 		{
 			CameraRef camera = pRenderer->GetOutputCamera(m_CurrentOutputCameraIndex);
-			texture = pRenderer->CameraAttachmentPreview(camera, size_t(m_SelectedRenderTextureIndex));
+			texture = pRenderer->CameraAttachmentPreview(camera, pRenderer->DefaultAttachmenmtIndex());
 			resolution = camera.GetResolution();
 		}
 

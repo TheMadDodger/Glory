@@ -614,7 +614,7 @@ namespace Glory
 	{
 		m_PostProcesses.emplace_back(std::move(postProcess));
 		static auto comparer = [](const PostProcess& a, const PostProcess& b) {
-			return a.m_Priority < b.m_Priority;
+			return a.m_Priority > b.m_Priority;
 		};
 		std::sort(m_PostProcesses.begin(), m_PostProcesses.end(), comparer);
 	}

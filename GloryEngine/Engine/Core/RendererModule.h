@@ -146,7 +146,7 @@ namespace Glory
 	struct PostProcess
 	{
 		std::string m_Name;
-		uint32_t m_Priority = -10;
+		int32_t m_Priority = -10;
 		std::function<bool(GraphicsDevice*, CameraRef, size_t, CommandBufferHandle,
 			RenderPassHandle, DescriptorSetHandle, const PostProcess&)> m_Callback;
 	};
@@ -219,6 +219,7 @@ namespace Glory
 		virtual std::string_view CameraAttachmentPreviewName(size_t index) const = 0;
 		virtual TextureHandle CameraAttachmentPreview(CameraRef camera, size_t index) const = 0;
 		virtual TextureHandle FinalColor() const = 0;
+		virtual void VisualizeAttachment(CameraRef camera, size_t index) = 0;
 
 		virtual size_t DebugOverlayCount() const = 0;
 		virtual std::string_view DebugOverlayName(size_t index) const = 0;

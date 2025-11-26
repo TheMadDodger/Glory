@@ -1,7 +1,7 @@
 Type: "Screen"
 Shaders: [13, 29]
 Features:
-  FEATURE_RED_CHANNEL_ONLY: false
+  FEATURE_RED_CHANNEL_ONLY: true
   FEATURE_USAMPLER: false
 Settings:
   CullFace: Back

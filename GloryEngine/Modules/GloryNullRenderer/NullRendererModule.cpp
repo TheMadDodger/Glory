@@ -80,6 +80,10 @@ namespace Glory
 		return NULL;
 	}
 
+	void NullRendererModule::VisualizeAttachment(CameraRef, size_t)
+	{
+	}
+
 	size_t NullRendererModule::DebugOverlayCount() const
 	{
 		return 0;

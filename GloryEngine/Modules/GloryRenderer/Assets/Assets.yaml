@@ -92,3 +92,7 @@
   ID: 48
 - Path: "Pipelines\\SSAO_Postpass.gpln"
   ID: 49
+- Path: "Pipelines\\VisualizeObjectID.gpln"
+  ID: 50
+- Path: "Pipelines\\VisualizeSSAO.gpln"
+  ID: 51

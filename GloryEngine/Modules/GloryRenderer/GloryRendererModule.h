@@ -115,6 +115,7 @@ namespace Glory
 		virtual std::string_view CameraAttachmentPreviewName(size_t index) const override;
 		virtual TextureHandle CameraAttachmentPreview(CameraRef camera, size_t index) const override;
 		virtual TextureHandle FinalColor() const override;
+		virtual void VisualizeAttachment(CameraRef camera, size_t index) override;
 
 		virtual size_t DebugOverlayCount() const override;
 		virtual std::string_view DebugOverlayName(size_t index) const override;
@@ -275,6 +276,17 @@ namespace Glory
 			DescriptorSetHandle m_BackDescriptor = 0;
 		};
 
+		enum CameraAttachment
+		{
+			ObjectID,
+			Color,
+			Normal,
+			AO,
+			Final,
+
+			Count
+		};
+
 		struct UniqueCameraData
 		{
 			BufferHandle m_ClusterSSBO = 0;
@@ -291,11 +303,17 @@ namespace Glory
 			std::vector<DescriptorSetHandle> m_LightSets;
 			std::vector<DescriptorSetHandle> m_SSAOSamplersSets;
 			std::vector<DescriptorSetHandle> m_SSAOPostSamplersSets;
-			std::vector<DescriptorSetHandle> m_FinalColorSamplerSets;
 			std::vector<DescriptorSetHandle> m_PickingResultSets;
 			std::vector<DescriptorSetHandle> m_PickingSamplersSets;
 
+			std::vector<DescriptorSetHandle> m_ObjectIDSamplerSets;
+			std::vector<DescriptorSetHandle> m_ColorSamplerSets;
+			std::vector<DescriptorSetHandle> m_NormalSamplerSets;
+			std::vector<DescriptorSetHandle> m_AOSamplerSets;
+
 			std::vector<glm::ivec2> m_Picks;
+
+			CameraAttachment m_VisualizedAttachment;
 		};
 		std::vector<BufferHandle> m_LightDistancesSSBOs;
 		std::vector<uint32_t> m_ClosestLightDepthSlices;
@@ -309,6 +327,8 @@ namespace Glory
 		std::vector<RenderPassHandle> m_FinalFrameColorPasses;
 		std::vector<DescriptorSetHandle> m_FinalFrameColorSets;
 		PipelineHandle m_DisplayCopyPipeline = 0;
+		PipelineHandle m_VisualizeSSAOPipeline = 0;
+		PipelineHandle m_VisualizeObjectIDPipeline = 0;
 
 		uint32_t m_MinShadowResolution;
 		uint32_t m_MaxShadowResolution;

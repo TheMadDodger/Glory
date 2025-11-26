@@ -404,7 +404,11 @@ namespace Glory::Editor
 				for (size_t i = 0; i < editorShader.m_Features.size(); ++i)
 				{
 					const size_t featureIndex = pPipeline->FeatureIndex(editorShader.m_Features[i]);
-					if (!pPipeline->FeatureEnabled(featureIndex)) continue;
+					if (!pPipeline->FeatureEnabled(featureIndex))
+					{
+						std::CombineHash(hash, "~" + editorShader.m_Features[i]);
+						continue;
+					}
 					std::CombineHash(hash, editorShader.m_Features[i]);
 				}
 
