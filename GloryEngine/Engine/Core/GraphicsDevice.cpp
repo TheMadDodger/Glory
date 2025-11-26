@@ -7,6 +7,7 @@
 #include "MaterialData.h"
 #include "PipelineData.h"
 #include "MeshData.h"
+#include "FileData.h"
 #include "CubemapData.h"
 
 #define TEMPLATE_GETTER(type) template<> \
@@ -126,6 +127,19 @@ namespace Glory
 	{
 		auto iter = m_TextureHandles.find(pTexture->GetGPUUUID());
 		return iter != m_TextureHandles.end();
+	}
+
+	ShaderHandle GraphicsDevice::AcquireCachedShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function)
+	{
+		const size_t hash = pShaderFileData->GetMetaData<PipelineShaderMetaData>().m_Hash;
+		auto iter = m_ShaderHandles.find(hash);
+		if (iter == m_ShaderHandles.end())
+		{
+			ShaderHandle newShader = CreateShader(pShaderFileData, shaderType, function);
+			iter = m_ShaderHandles.emplace(hash, newShader).first;
+			return newShader;
+		}
+		return iter->second;
 	}
 
 	MeshHandle GraphicsDevice::CreateMesh(MeshData* pMeshData, MeshUsage usage)

@@ -980,6 +980,7 @@ namespace Glory
     {
         uint64_t PipelineID;
         ShaderType Type;
+        size_t m_Hash;
     };
 
     struct TextureCreateInfo

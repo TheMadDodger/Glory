@@ -28,6 +28,7 @@ namespace Glory::Editor
 	std::mutex EditorPipelineManager::m_WaitMutex;
 	std::condition_variable EditorPipelineManager::m_WaitCondition;
 	ThreadedUMap<UUID, ShaderSourceData*> EditorPipelineManager::m_pLoadedShaderSources;
+	std::unordered_map<UUID, size_t> EditorPipelineManager::m_ShaderVersions;
 	std::vector<ShaderSourceData*> EditorPipelineManager::m_pOutdatedShaders;
 
 	std::map<ShaderType, shaderc_shader_kind> ShaderTypeToKindOne = {
@@ -347,6 +348,8 @@ namespace Glory::Editor
 		m_pLoadedShaderSources.DoErase(callback.m_UUID,
 			[this](ShaderSourceData** pShader) { m_pOutdatedShaders.push_back(*pShader); });
 
+		++m_ShaderVersions[callback.m_UUID];
+
 		/* Recompile pipelines that use this shader */
 		for (const UUID pipelineID : m_Pipelines)
 		{
@@ -367,6 +370,10 @@ namespace Glory::Editor
 
 		pPipeline->ClearProperties();
 		pPipeline->ClearFeatures();
+		EditorResourceManager& resourceManager = EditorApplication::GetInstance()->GetResourceManager();
+		YAMLResource<PipelineData>* pPipelineData = static_cast<YAMLResource<PipelineData>*>(
+			resourceManager.GetEditableResource(pPipeline->GetUUID()));
+		auto features = (**pPipelineData)["Features"];
 		for (size_t i = 0; i < pPipeline->ShaderCount(); ++i)
 		{
 			const UUID shaderID = pPipeline->ShaderID(i);
@@ -376,7 +383,8 @@ namespace Glory::Editor
 			for (size_t i = 0; i < shader.m_Features.size(); ++i)
 			{
 				const std::string_view feature = shader.m_Features[i];
-				pPipeline->AddFeature(feature, true);
+				const bool enabled = features[feature].As<bool>(true);
+				pPipeline->AddFeature(feature, enabled);
 			}
 		}
 
@@ -387,12 +395,23 @@ namespace Glory::Editor
 			m_ShaderTypes[i].clear();
 			m_CompiledShaders[i].reserve(pEditorPipeline->m_EditorPlatformShaders.size());
 			m_ShaderTypes[i].reserve(pEditorPipeline->m_EditorPlatformShaders.size());
+
 			for (size_t j = 0; j < pEditorPipeline->m_EditorPlatformShaders.size(); ++j)
 			{
+				const EditorShaderData& editorShader = pEditorPipeline->m_EditorShaderDatas[j];
+				size_t hash = std::hash<UUID>()(pPipeline->ShaderID(j));
+				std::CombineHash(hash, m_ShaderVersions[pPipeline->ShaderID(j)]);
+				for (size_t i = 0; i < editorShader.m_Features.size(); ++i)
+				{
+					const size_t featureIndex = pPipeline->FeatureIndex(editorShader.m_Features[i]);
+					if (!pPipeline->FeatureEnabled(featureIndex)) continue;
+					std::CombineHash(hash, editorShader.m_Features[i]);
+				}
+
 				const size_t index = m_CompiledShaders[i].size();
 				m_CompiledShaders[i].push_back(FileData(pEditorPipeline->m_EditorPlatformShaders[j]));
-				m_ShaderTypes[i].push_back(pEditorPipeline->m_EditorShaderDatas[j].m_ShaderType);
-				m_CompiledShaders[i][index].SetMetaData(PipelineShaderMetaData{ m_Pipelines[i], m_ShaderTypes[i][index] });
+				m_ShaderTypes[i].push_back(editorShader.m_ShaderType);
+				m_CompiledShaders[i][index].SetMetaData(PipelineShaderMetaData{ m_Pipelines[i], m_ShaderTypes[i][index], hash });
 			}
 		}
 

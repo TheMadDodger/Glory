@@ -186,7 +186,7 @@ namespace Glory
         void CreateLogicalDevice();
         void AllocateFreeFences(size_t numFences);
         void AllocateFreeCommandBuffers(size_t numBuffers);
-        uint32_t VulkanDevice::GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags);
+        uint32_t GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags);
 
         GLORY_API uint32_t GraphicsFamily() const { return m_GraphicsAndComputeFamily.value(); }
         GLORY_API uint32_t PresentFamily() const { return m_PresentFamily.value(); }

@@ -516,6 +516,14 @@ namespace Glory
 		TextureHandle AcquireCachedTexture(CubemapData* pCubemap);
 		bool CachedTextureExists(TextureData* pTexture);
 
+		/**
+		 * @brief Acquire a cached shader or create a new one
+		 * @param pShaderFileData Shader data
+		 * @param shaderType Type of the shader
+		 * @param function Main function to invoke in the shader
+		 */
+		ShaderHandle AcquireCachedShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function);
+
 	public: /* Resource management */
 		
 		/* Buffer */
@@ -762,5 +770,6 @@ namespace Glory
 		std::map<UUID, PipelineHandle> m_PipelineHandles;
 		std::map<UUID, MeshHandle> m_MeshHandles;
 		std::map<UUID, TextureHandle> m_TextureHandles;
+		std::map<size_t, ShaderHandle> m_ShaderHandles;
 	};
 }

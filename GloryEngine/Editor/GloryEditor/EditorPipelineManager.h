@@ -166,6 +166,7 @@ namespace Glory::Editor
 		static std::mutex m_WaitMutex;
 		static std::condition_variable m_WaitCondition;
 		static ThreadedUMap<UUID, ShaderSourceData*> m_pLoadedShaderSources;
+		static std::unordered_map<UUID, size_t> m_ShaderVersions;
 		static std::vector<ShaderSourceData*> m_pOutdatedShaders;
 	};
 }

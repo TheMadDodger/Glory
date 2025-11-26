@@ -326,7 +326,7 @@ namespace Glory
 		return m_Features[index];
 	}
 
-	bool PipelineData::FeatureEnabled(size_t index)
+	bool PipelineData::FeatureEnabled(size_t index) const
 	{
 		if (index >= m_Features.size()) return true;
 		return m_FeaturesEnabled.IsSet(index);

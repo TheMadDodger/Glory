@@ -2177,7 +2177,7 @@ namespace Glory
 		pipeline.m_VKBindPoint = vk::PipelineBindPoint::eCompute;
 
 		pipeline.m_Shaders.resize(1);
-		pipeline.m_Shaders[0] = CreateShader(pPipeline->Shader(pipelines, 0), ShaderType::ST_Compute, "main");
+		pipeline.m_Shaders[0] = AcquireCachedShader(pPipeline->Shader(pipelines, 0), ShaderType::ST_Compute, "main");
 
 		VK_Shader* shader = m_Shaders.Find(pipeline.m_Shaders[0]);
 		vk::PipelineShaderStageCreateInfo shaderStage = vk::PipelineShaderStageCreateInfo()
@@ -3309,7 +3309,7 @@ namespace Glory
 
 		pipeline.m_Shaders.resize(pPipeline->ShaderCount());
 		for (size_t i = 0; i < pipeline.m_Shaders.size(); ++i)
-			pipeline.m_Shaders[i] = CreateShader(pPipeline->Shader(pipelines, i), pPipeline->GetShaderType(pipelines, i), "main");
+			pipeline.m_Shaders[i] = AcquireCachedShader(pPipeline->Shader(pipelines, i), pPipeline->GetShaderType(pipelines, i), "main");
 
 		std::vector<vk::PipelineShaderStageCreateInfo> shaderStages(pPipeline->ShaderCount());
 		for (size_t i = 0; i < shaderStages.size(); ++i)

@@ -1605,7 +1605,7 @@ namespace Glory
 		{
 			const FileData* pShader = pPipeline->Shader(pipelines, i);
 			const ShaderType type = pPipeline->GetShaderType(pipelines, i);
-			ShaderHandle shaderHandle = CreateShader(pShader, type, "main");
+			ShaderHandle shaderHandle = AcquireCachedShader(pShader, type, "main");
 			if (!shaderHandle)
 			{
 				Debug().LogError("OpenGLDevice::CreatePipeline: Invalid render pass handle.");
@@ -2067,7 +2067,7 @@ namespace Glory
 		{
 			const FileData* pShader = pPipeline->Shader(pipelines, i);
 			const ShaderType type = pPipeline->GetShaderType(pipelines, i);
-			ShaderHandle shaderHandle = CreateShader(pShader, type, "main");
+			ShaderHandle shaderHandle = AcquireCachedShader(pShader, type, "main");
 			if (!shaderHandle)
 			{
 				Debug().LogError("OpenGLDevice::CreatePipeline: Invalid render pass handle.");

@@ -147,7 +147,7 @@ namespace Glory
         std::string_view FeatureName(size_t index) const;
 
         /** @brief Check if a feature is enabled */
-        bool FeatureEnabled(size_t index);
+        bool FeatureEnabled(size_t index) const;
 
         /** @brief Enable a feature */
         void SetFeatureEnabled(size_t index, bool enabled);
