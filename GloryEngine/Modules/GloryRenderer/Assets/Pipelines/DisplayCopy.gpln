@@ -3,6 +3,7 @@ Shaders: [13, 29]
 Features:
   FEATURE_RED_CHANNEL_ONLY: false
   FEATURE_USAMPLER: false
+  FEATURE_LINEARDEPTH: false
 Settings:
   CullFace: Back
   PrimitiveType: Triangles

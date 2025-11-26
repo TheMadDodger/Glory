@@ -282,6 +282,7 @@ namespace Glory
 			Color,
 			Normal,
 			AO,
+			Depth,
 			Final,
 
 			Count
@@ -310,6 +311,7 @@ namespace Glory
 			std::vector<DescriptorSetHandle> m_ColorSamplerSets;
 			std::vector<DescriptorSetHandle> m_NormalSamplerSets;
 			std::vector<DescriptorSetHandle> m_AOSamplerSets;
+			std::vector<DescriptorSetHandle> m_DepthSamplerSets;
 
 			std::vector<glm::ivec2> m_Picks;
 
@@ -329,6 +331,7 @@ namespace Glory
 		PipelineHandle m_DisplayCopyPipeline = 0;
 		PipelineHandle m_VisualizeSSAOPipeline = 0;
 		PipelineHandle m_VisualizeObjectIDPipeline = 0;
+		PipelineHandle m_VisualizeDepthPipeline = 0;
 
 		uint32_t m_MinShadowResolution;
 		uint32_t m_MaxShadowResolution;

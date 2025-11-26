@@ -33,12 +33,13 @@ namespace Glory
 
 	static uint32_t* ResetLightDistances;
 
-	constexpr size_t AttachmentNameCount = 5;
+	constexpr size_t AttachmentNameCount = 6;
 	constexpr std::string_view AttachmentNames[AttachmentNameCount] = {
 		"ObjectID",
 		"Color",
 		"Normal",
 		"AO",
+		"Depth",
 		"Final",
 	};
 
@@ -110,6 +111,7 @@ namespace Glory
 			const DescriptorSetHandle& objectIDSamplerSet = uniqueCameraData.m_ObjectIDSamplerSets[i];
 			const DescriptorSetHandle& normalSamplerSet = uniqueCameraData.m_NormalSamplerSets[i];
 			const DescriptorSetHandle& aoSamplerSet = uniqueCameraData.m_AOSamplerSets[i];
+			const DescriptorSetHandle& depthSamplerSet = uniqueCameraData.m_DepthSamplerSets[i];
 			TextureHandle objectID = pDevice->GetRenderTextureAttachment(renderTexture, 0);
 			TextureHandle color = pDevice->GetRenderTextureAttachment(renderTexture, 1);
 			TextureHandle normals = pDevice->GetRenderTextureAttachment(renderTexture, 2);
@@ -177,6 +179,12 @@ namespace Glory
 			updateInfo.m_Samplers[0].m_TextureHandle = objectID;
 			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
 			pDevice->UpdateDescriptorSet(objectIDSamplerSet, updateInfo);
+			
+			updateInfo = DescriptorSetUpdateInfo();
+			updateInfo.m_Samplers.resize(1);
+			updateInfo.m_Samplers[0].m_TextureHandle = depth;
+			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
+			pDevice->UpdateDescriptorSet(depthSamplerSet, updateInfo);
 		}
 
 		/* When the camera rendertexture resizes we need to generate a new grid of clusters for that camera */
@@ -226,6 +234,7 @@ namespace Glory
 		newReferences.push_back(settings.Value<uint64_t>("SSAO Postpass"));
 		newReferences.push_back(settings.Value<uint64_t>("SSAO Visualizer"));
 		newReferences.push_back(settings.Value<uint64_t>("ObjectID Visualizer"));
+		newReferences.push_back(settings.Value<uint64_t>("Depth Visualizer"));
 
 		for (size_t i = 0; i < newReferences.size(); ++i)
 		{
@@ -313,6 +322,7 @@ namespace Glory
 		const UUID pickingPipeline = settings.Value<uint64_t>("Picking");
 		const UUID ssaoPostpassPipeline = settings.Value<uint64_t>("SSAO Postpass");
 		const UUID objectIDVisualizerPipeline = settings.Value<uint64_t>("ObjectID Visualizer");
+		const UUID depthVisualizerPipeline = settings.Value<uint64_t>("Depth Visualizer");
 
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice)
@@ -548,6 +558,10 @@ namespace Glory
 				previewPipeline = m_VisualizeSSAOPipeline;
 				previewSamplerSet = uniqueCameraData.m_AOSamplerSets[m_CurrentFrameIndex];
 				break;
+			case CameraAttachment::Depth:
+				previewPipeline = m_VisualizeDepthPipeline;
+				previewSamplerSet = uniqueCameraData.m_DepthSamplerSets[m_CurrentFrameIndex];
+				break;
 			default:
 				return false;
 			}
@@ -557,6 +571,14 @@ namespace Glory
 			pDevice->BeginPipeline(commandBuffer, previewPipeline);
 			pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));
 			pDevice->SetScissor(commandBuffer, 0, 0, resolution.x, resolution.y);
+			if (uniqueCameraData.m_VisualizedAttachment == CameraAttachment::Depth)
+			{
+				float aoSettings[2] = {
+					camera.GetNear(),
+					camera.GetFar(),
+				};
+				pDevice->PushConstants(commandBuffer, previewPipeline, 0, sizeof(aoSettings), aoSettings, STF_Fragment);
+			}
 			pDevice->BindDescriptorSets(commandBuffer, previewPipeline, { previewSamplerSet });
 			pDevice->DrawQuad(commandBuffer);
 			pDevice->EndPipeline(commandBuffer);
@@ -588,6 +610,7 @@ namespace Glory
 		const UUID ssaoPostpassPipeline = settings.Value<uint64_t>("SSAO Postpass");
 		const UUID ssaoVisualizerPipeline = settings.Value<uint64_t>("SSAO Visualizer");
 		const UUID objectIDVisualizerPipeline = settings.Value<uint64_t>("ObjectID Visualizer");
+		const UUID depthVisualizerPipeline = settings.Value<uint64_t>("Depth Visualizer");
 
 		settings.SetDirty(false);
 	}
@@ -947,11 +970,12 @@ namespace Glory
 		settings.RegisterAssetReference<PipelineData>("SSAO Postpass", 49);
 		settings.RegisterAssetReference<PipelineData>("SSAO Visualizer", 51);
 		settings.RegisterAssetReference<PipelineData>("ObjectID Visualizer", 50);
+		settings.RegisterAssetReference<PipelineData>("Depth Visualizer", 52);
 	}
 
 	size_t GloryRendererModule::DefaultAttachmenmtIndex() const
 	{
-		return 4;
+		return 5;
 	}
 
 	size_t GloryRendererModule::CameraAttachmentPreviewCount() const
@@ -972,15 +996,15 @@ namespace Glory
 		RenderPassHandle ssaoRenderPass = uniqueCameraData.m_SSAORenderPasses[m_CurrentFrameIndex];
 		const PostProcessPass& pp = uniqueCameraData.m_PostProcessPasses[m_CurrentFrameIndex];
 		if (!renderPass || !ssaoRenderPass) return NULL;
-		if (index == 4)
+		if (index == 5)
 		{
 			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(pp.m_FrontBufferPass);
 			return pDevice->GetRenderTextureAttachment(renderTexture, 0);
 		}
-		if (index >= 3)
+		if (index >= 4)
 		{
 			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(ssaoRenderPass);
-			return pDevice->GetRenderTextureAttachment(renderTexture, index-3);
+			return pDevice->GetRenderTextureAttachment(renderTexture, index-4);
 		}
 
 		RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(renderPass);
@@ -1254,9 +1278,21 @@ namespace Glory
 		const UUID ssaoPostPassPipeline = settings.Value<uint64_t>("SSAO Postpass");
 		const UUID visualizeSSAOPipeline = settings.Value<uint64_t>("SSAO Visualizer");
 		const UUID visualizeObjectIDPipeline = settings.Value<uint64_t>("ObjectID Visualizer");
+		const UUID visualizeDepthPipeline = settings.Value<uint64_t>("Depth Visualizer");
 
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice) return;
+
+		static DescriptorSetLayoutHandle doubleFloatPushConstantsLayout = NULL;
+
+		if (!doubleFloatPushConstantsLayout)
+		{
+			DescriptorSetLayoutInfo ssaoConstantsInfo;
+			ssaoConstantsInfo.m_PushConstantRange.m_Offset = 0;
+			ssaoConstantsInfo.m_PushConstantRange.m_ShaderStages = STF_Fragment;
+			ssaoConstantsInfo.m_PushConstantRange.m_Size = sizeof(float)*2;
+			doubleFloatPushConstantsLayout = pDevice->CreateDescriptorSetLayout(std::move(ssaoConstantsInfo));
+		}
 
 		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
 		if (!m_ClusterGeneratorPipeline)
@@ -1294,17 +1330,18 @@ namespace Glory
 			m_VisualizeObjectIDPipeline = pDevice->CreatePipeline(m_FinalFrameColorPasses[0], pPipeline, { m_DisplayCopySamplerSetLayout },
 				sizeof(glm::vec3), { AttributeType::Float3 });
 		}
+		if (!m_VisualizeDepthPipeline)
+		{
+			PipelineData* pPipeline = pipelines.GetPipelineData(visualizeDepthPipeline);
+			m_VisualizeDepthPipeline = pDevice->CreatePipeline(m_FinalFrameColorPasses[0], pPipeline,
+				{ doubleFloatPushConstantsLayout, m_DisplayCopySamplerSetLayout },
+				sizeof(glm::vec3), { AttributeType::Float3 });
+		}
 		if (!m_SSAOPostPassPipeline)
 		{
-			DescriptorSetLayoutInfo ssaoConstantsInfo;
-			ssaoConstantsInfo.m_PushConstantRange.m_Offset = 0;
-			ssaoConstantsInfo.m_PushConstantRange.m_ShaderStages = STF_Fragment;
-			ssaoConstantsInfo.m_PushConstantRange.m_Size = sizeof(float)*2;
-			DescriptorSetLayoutHandle pushConstantsLayout = pDevice->CreateDescriptorSetLayout(std::move(ssaoConstantsInfo));
-
 			PipelineData* pPipeline = pipelines.GetPipelineData(ssaoPostPassPipeline);
 			m_SSAOPostPassPipeline = pDevice->CreatePipeline(m_FinalFrameColorPasses[0], pPipeline,
-				{ pushConstantsLayout, m_DisplayCopySamplerSetLayout, m_SSAOPostSamplerSetLayout },
+				{ doubleFloatPushConstantsLayout, m_DisplayCopySamplerSetLayout, m_SSAOPostSamplerSetLayout },
 				sizeof(glm::vec3), { AttributeType::Float3 });
 		}
 		if (!m_ShadowRenderPipeline)
@@ -1966,6 +2003,7 @@ namespace Glory
 		cameraData.m_ObjectIDSamplerSets.resize(m_ImageCount, 0ull);
 		cameraData.m_NormalSamplerSets.resize(m_ImageCount, 0ull);
 		cameraData.m_AOSamplerSets.resize(m_ImageCount, 0ull);
+		cameraData.m_DepthSamplerSets.resize(m_ImageCount, 0ull);
 
 		for (size_t i = 0; i < m_ImageCount; ++i)
 		{
@@ -2063,6 +2101,7 @@ namespace Glory
 			DescriptorSetHandle& objectIDSamplerSet = cameraData.m_ObjectIDSamplerSets[i];
 			DescriptorSetHandle& normalSamplerSet = cameraData.m_NormalSamplerSets[i];
 			DescriptorSetHandle& aoSamplerSet = cameraData.m_AOSamplerSets[i];
+			DescriptorSetHandle& depthSamplerSet = cameraData.m_DepthSamplerSets[i];
 
 			if (!lightIndexSSBO)
 				lightIndexSSBO = pDevice->CreateBuffer(sizeof(uint32_t)*(NUM_CLUSTERS*MAX_LIGHTS_PER_TILE + 1), BufferType::BT_Storage, BF_None);
@@ -2160,6 +2199,15 @@ namespace Glory
 				setInfo.m_Samplers.resize(1);
 				setInfo.m_Samplers[0].m_TextureHandle = ao;
 				aoSamplerSet = pDevice->CreateDescriptorSet(std::move(setInfo));
+			}
+			
+			if (!depthSamplerSet)
+			{
+				DescriptorSetInfo setInfo = DescriptorSetInfo();
+				setInfo.m_Layout = m_DisplayCopySamplerSetLayout;
+				setInfo.m_Samplers.resize(1);
+				setInfo.m_Samplers[0].m_TextureHandle = depth;
+				depthSamplerSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 			}
 		}
 	}

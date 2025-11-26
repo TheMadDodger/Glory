@@ -1,9 +1,9 @@
 Type: "Screen"
 Shaders: [13, 29]
 Features:
-  FEATURE_RED_CHANNEL_ONLY: true
+  FEATURE_RED_CHANNEL_ONLY: false
   FEATURE_USAMPLER: false
-  FEATURE_LINEARDEPTH: false
+  FEATURE_LINEARDEPTH: true
 Settings:
   CullFace: Back
   PrimitiveType: Triangles

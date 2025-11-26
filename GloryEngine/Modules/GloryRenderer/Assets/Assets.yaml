@@ -96,3 +96,5 @@
   ID: 50
 - Path: "Pipelines\\VisualizeSSAO.gpln"
   ID: 51
+- Path: "Pipelines\\VisualizeDepth.gpln"
+  ID: 52
