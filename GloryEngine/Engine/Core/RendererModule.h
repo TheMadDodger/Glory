@@ -223,7 +223,8 @@ namespace Glory
 
 		virtual size_t DebugOverlayCount() const = 0;
 		virtual std::string_view DebugOverlayName(size_t index) const = 0;
-		virtual TextureHandle DebugOverlay(size_t index) const = 0;
+		virtual void SetDebugOverlayEnabled(CameraRef camera, size_t index, bool enabled=true) = 0;
+		virtual bool DebugOverlayEnabled(CameraRef camera, size_t index) const = 0;
 
 		bool ResolutionChanged() const;
 		const glm::uvec2& Resolution() const;

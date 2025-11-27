@@ -94,9 +94,13 @@ namespace Glory
 		return "";
 	}
 
-	TextureHandle NullRendererModule::DebugOverlay(size_t) const
+	void NullRendererModule::SetDebugOverlayEnabled(CameraRef, size_t, bool)
 	{
-		return NULL;
+	}
+
+	bool NullRendererModule::DebugOverlayEnabled(CameraRef, size_t) const
+	{
+		return false;
 	}
 
 	void NullRendererModule::Cleanup()

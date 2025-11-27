@@ -48,6 +48,12 @@ namespace Glory
 		"Shadow Atlas",
 	};
 
+	enum DebugOverlayBitIndices : uint8_t
+	{
+		ShadowAtlas = 0,
+		LightComplexity = 1
+	};
+
 	constexpr size_t MaxPicks = 8;
 
 	GLORY_MODULE_VERSION_CPP(GloryRendererModule);
@@ -573,11 +579,11 @@ namespace Glory
 			pDevice->SetScissor(commandBuffer, 0, 0, resolution.x, resolution.y);
 			if (uniqueCameraData.m_VisualizedAttachment == CameraAttachment::Depth)
 			{
-				float aoSettings[2] = {
+				float constants[2] = {
 					camera.GetNear(),
 					camera.GetFar(),
 				};
-				pDevice->PushConstants(commandBuffer, previewPipeline, 0, sizeof(aoSettings), aoSettings, STF_Fragment);
+				pDevice->PushConstants(commandBuffer, previewPipeline, 0, sizeof(constants), constants, STF_Fragment);
 			}
 			pDevice->BindDescriptorSets(commandBuffer, previewPipeline, { previewSamplerSet });
 			pDevice->DrawQuad(commandBuffer);
@@ -587,6 +593,54 @@ namespace Glory
 		};
 
 		AddPostProcess(std::move(attachmentVisPP));
+
+		PostProcess debugOverlayPP;
+		debugOverlayPP.m_Name = "Debug Overlays";
+		debugOverlayPP.m_Priority = INT32_MIN;
+		debugOverlayPP.m_Callback = [this](GraphicsDevice* pDevice, CameraRef camera, size_t cameraIndex,
+			CommandBufferHandle commandBuffer, RenderPassHandle renderPass, DescriptorSetHandle colorSet, const PostProcess& pp)
+		{
+			const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
+			if (!m_DebugOverlayBits.HasAnySet() && !uniqueCameraData.m_DebugOverlayBits.HasAnySet()) return false;
+
+			const bool shadowAtlas = m_DebugOverlayBits.IsSet(DebugOverlayBitIndices::ShadowAtlas) ||
+				uniqueCameraData.m_DebugOverlayBits.IsSet(DebugOverlayBitIndices::ShadowAtlas);
+			const bool lightComplexity = m_DebugOverlayBits.IsSet(DebugOverlayBitIndices::LightComplexity) ||
+				uniqueCameraData.m_DebugOverlayBits.IsSet(DebugOverlayBitIndices::LightComplexity);
+
+			const glm::uvec2& resolution = camera.GetResolution();
+			pDevice->BeginRenderPass(commandBuffer, renderPass);
+
+			/* Copy the display first so we can render overlays on top */
+			pDevice->BeginPipeline(commandBuffer, m_DisplayCopyPipeline);
+			pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));
+			pDevice->SetScissor(commandBuffer, 0, 0, resolution.x, resolution.y);
+			pDevice->BindDescriptorSets(commandBuffer, m_DisplayCopyPipeline, { colorSet });
+			pDevice->DrawQuad(commandBuffer);
+			pDevice->EndPipeline(commandBuffer);
+
+			if (shadowAtlas)
+			{
+				const uint32_t size = resolution.y/2;
+
+				pDevice->BeginPipeline(commandBuffer, m_VisualizeDepthPipeline);
+				pDevice->SetViewport(commandBuffer, 0.0f, float(resolution.y - size), float(size), float(size));
+				pDevice->SetScissor(commandBuffer, 0, resolution.y - size, size, size);
+				float constants[2] = {
+					camera.GetNear(),
+					camera.GetFar(),
+				};
+				pDevice->PushConstants(commandBuffer, m_VisualizeDepthPipeline, 0, sizeof(constants), constants, STF_Fragment);
+				pDevice->BindDescriptorSets(commandBuffer, m_VisualizeDepthPipeline, { m_ShadowAtlasSamplerSets[m_CurrentFrameIndex]});
+				pDevice->DrawQuad(commandBuffer);
+				pDevice->EndPipeline(commandBuffer);
+			}
+
+			pDevice->EndRenderPass(commandBuffer);
+			return true;
+		};
+
+		AddPostProcess(std::move(debugOverlayPP));
 	}
 
 	void GloryRendererModule::Update()
@@ -1035,14 +1089,25 @@ namespace Glory
 		return DebugOverlayNames[index];
 	}
 
-	TextureHandle GloryRendererModule::DebugOverlay(size_t index) const
+	void GloryRendererModule::SetDebugOverlayEnabled(CameraRef camera, size_t index, bool enabled)
 	{
-		switch (index == 0)
+		if (camera == NULL)
 		{
-		default:
-			return GetGPUTextureAtlas(m_ShadowAtlasses[m_CurrentFrameIndex]).GetTexture();
+			m_DebugOverlayBits.Set(index, enabled);
+			return;
 		}
-		return NULL;
+
+		UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
+		uniqueCameraData.m_DebugOverlayBits.Set(index, enabled);
+	}
+
+	bool GloryRendererModule::DebugOverlayEnabled(CameraRef camera, size_t index) const
+	{
+		if (camera == NULL)
+			return m_DebugOverlayBits.IsSet(index);
+
+		const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
+		return uniqueCameraData.m_DebugOverlayBits.IsSet(index);
 	}
 
 	void GloryRendererModule::OnWindowResized()

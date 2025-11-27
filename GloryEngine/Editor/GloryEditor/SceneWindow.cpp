@@ -30,8 +30,7 @@ namespace Glory::Editor
 
 	SceneWindow::SceneWindow()
 		: EditorWindowTemplate("Scene", 1280.0f, 720.0f),
-		m_DrawGrid(true), m_SelectedRenderTextureIndex(-1), m_DebugOverlays(32),
-		m_ViewEventID(0)
+		m_DrawGrid(true), m_SelectedRenderTextureIndex(-1), m_ViewEventID(0)
 	{
 		m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar;
 		m_pPreviewScene = new GScene("Preview");
@@ -126,8 +125,12 @@ namespace Glory::Editor
 			if (ImGui::BeginMenu("Debug Overlays"))
 			{
 				for (size_t i = 0; i < pRenderer->DebugOverlayCount(); ++i)
-					if (ImGui::MenuItem(pRenderer->DebugOverlayName(i).data(), NULL, m_DebugOverlays.IsSet(i)))
-						m_DebugOverlays.Toggle(i);
+				{
+					const bool enabled = pRenderer->DebugOverlayEnabled(m_SceneCamera.m_Camera, i);
+					if (ImGui::MenuItem(pRenderer->DebugOverlayName(i).data(), NULL, enabled))
+						pRenderer->SetDebugOverlayEnabled(m_SceneCamera.m_Camera, i, !enabled);
+				}
+						
 
 				ImGui::EndMenu();
 			}
@@ -250,18 +253,6 @@ namespace Glory::Editor
 
 		float camDistance = 8.f;
 		ImGuizmo::ViewManipulate(m_SceneCamera.m_Camera.GetViewPointer(), camDistance, ImVec2(viewManipulateRight - 256, viewManipulateTop + 64), ImVec2(256, 256), 0x10101010);
-
-		if (!m_DebugOverlays.HasAnySet()) return;
-		ImGui::SetCursorPosY(cursorPosYStart);
-
-		size_t overlayIndex = 0;
-		for (size_t i = 0; i < pRenderer->DebugOverlayCount(); ++i)
-		{
-			if (!m_DebugOverlays.IsSet(i)) continue;
-			TextureHandle overlay = pRenderer->DebugOverlay(i);
-			ImGui::Image(pRenderImpl->GetTextureID(overlay), { height/2.0f, height/2.0f }, ImVec2(0, 1), ImVec2(1, 0));
-			++overlayIndex;
-		}
 	}
 
 	void SceneWindow::Picking(const ImVec2& min, const ImVec2& size)

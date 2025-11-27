@@ -119,7 +119,8 @@ namespace Glory
 
 		virtual size_t DebugOverlayCount() const override;
 		virtual std::string_view DebugOverlayName(size_t index) const override;
-		virtual TextureHandle DebugOverlay(size_t index) const override;
+		virtual void SetDebugOverlayEnabled(CameraRef camera, size_t index, bool enabled=true) override;
+		virtual bool DebugOverlayEnabled(CameraRef camera, size_t index) const override;
 
 		virtual void OnWindowResized() override;
 		virtual void OnSwapchainChanged() override;
@@ -316,6 +317,7 @@ namespace Glory
 			std::vector<glm::ivec2> m_Picks;
 
 			CameraAttachment m_VisualizedAttachment;
+			Utils::BitSet m_DebugOverlayBits;
 		};
 		std::vector<BufferHandle> m_LightDistancesSSBOs;
 		std::vector<uint32_t> m_ClosestLightDepthSlices;
@@ -344,5 +346,7 @@ namespace Glory
 		CPUBuffer<LineVertex> m_LineVertices;
 		std::vector<BufferHandle> m_LineBuffers;
 		std::vector<MeshHandle> m_LineMeshes;
+
+		Utils::BitSet m_DebugOverlayBits;
 	};
 }

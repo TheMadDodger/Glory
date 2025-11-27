@@ -41,7 +41,8 @@ namespace Glory
 
 		virtual size_t DebugOverlayCount() const override;
 		virtual std::string_view DebugOverlayName(size_t) const override;
-		virtual TextureHandle DebugOverlay(size_t) const override;
+		virtual void SetDebugOverlayEnabled(CameraRef, size_t, bool) override;
+		virtual bool DebugOverlayEnabled(CameraRef, size_t) const override;
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
 	};
