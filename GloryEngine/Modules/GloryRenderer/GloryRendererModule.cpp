@@ -31,6 +31,10 @@ namespace Glory
 	static constexpr std::string_view ShadowAtlasResolution = "r_shadowAtlasResolution";
 	static constexpr std::string_view MaxShadowLODs = "r_maxShadowLODs";
 
+	static constexpr std::string_view CameraOutputAttachment = "r_cameraOutputAttachment";
+	static constexpr std::string_view VisualizeShadowAtlas = "r_visualizeShadowAtlas";
+	static constexpr std::string_view VisualizeLightComplexity = "r_visualizeLightComplexity";
+
 	static uint32_t* ResetLightDistances;
 
 	constexpr size_t AttachmentNameCount = 6;
@@ -294,11 +298,23 @@ namespace Glory
 	void GloryRendererModule::Initialize()
 	{
 		RendererModule::Initialize();
-		m_pEngine->GetConsole().RegisterCVar({ std::string{ ScreenSpaceAOCVarName }, "Enables/disables screen space ambient occlusion.", float(m_GlobalSSAOSetting.m_Enabled), CVar::Flags::Save });
-		m_pEngine->GetConsole().RegisterCVar({ std::string{ MinShadowResolutionVarName }, "Sets the minimum resolution for shadow maps.", float(m_MinShadowResolution), CVar::Flags::Save });
-		m_pEngine->GetConsole().RegisterCVar({ std::string{ MaxShadowResolutionVarName }, "Sets the maximum resolution for shadow maps.", float(m_MaxShadowResolution), CVar::Flags::Save });
-		m_pEngine->GetConsole().RegisterCVar({ std::string{ ShadowAtlasResolution }, "Sets the resolution for the shadow atlas.", float(m_ShadowAtlasResolution), CVar::Flags::Save });
-		m_pEngine->GetConsole().RegisterCVar({ std::string{ MaxShadowLODs }, "Sets the number of shadow map LODs.", float(m_MaxShadowLODs), CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ ScreenSpaceAOCVarName }, "Enables/disables screen space ambient occlusion.",
+			float(m_GlobalSSAOSetting.m_Enabled), CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ MinShadowResolutionVarName }, "Sets the minimum resolution for shadow maps.",
+			float(m_MinShadowResolution), CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ MaxShadowResolutionVarName }, "Sets the maximum resolution for shadow maps.",
+			float(m_MaxShadowResolution), CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ ShadowAtlasResolution }, "Sets the resolution for the shadow atlas.",
+			float(m_ShadowAtlasResolution), CVar::Flags::Save });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ MaxShadowLODs }, "Sets the number of shadow map LODs.",
+			float(m_MaxShadowLODs), CVar::Flags::Save });
+
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ CameraOutputAttachment }, "Sets which attachment on the camera should be outputed.",
+			float(DefaultAttachmenmtIndex()), CVar::Flags::None });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ VisualizeShadowAtlas }, "Enables/disables shadow atlas debug overlay.",
+			float(DefaultAttachmenmtIndex()), CVar::Flags::None });
+		m_pEngine->GetConsole().RegisterCVar({ std::string{ VisualizeLightComplexity }, "Enables/disables light complexity debug overlay.",
+			float(DefaultAttachmenmtIndex()), CVar::Flags::None });
 
 		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ ScreenSpaceAOCVarName }, [this](const CVar* cvar) {
 			m_GlobalSSAOSetting.m_Enabled = cvar->m_Value == 1.0f;
@@ -317,6 +333,19 @@ namespace Glory
 			m_MaxShadowLODs = cvar->m_Value;
 			GenerateShadowLODDivisions(cvar->m_Value);
 			ResizeShadowMapLODResolutions(m_MinShadowResolution, m_MaxShadowResolution);
+		});
+
+		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ CameraOutputAttachment }, [this](const CVar* cvar) {
+			for (size_t i = 0; i < m_OutputCameras.size(); ++i)
+				VisualizeAttachment(m_OutputCameras[i], size_t(cvar->m_Value));
+		});
+
+		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ VisualizeShadowAtlas }, [this](const CVar* cvar) {
+			SetDebugOverlayEnabled(NULL, DebugOverlayBitIndices::ShadowAtlas, cvar->m_Value != 0.0f);
+		});
+
+		m_pEngine->GetConsole().RegisterCVarChangeHandler(std::string{ VisualizeLightComplexity }, [this](const CVar* cvar) {
+			SetDebugOverlayEnabled(NULL, DebugOverlayBitIndices::LightComplexity, cvar->m_Value != 0.0f);
 		});
 	}
 
@@ -994,7 +1023,15 @@ namespace Glory
 				ProfileSample profile{ &m_pEngine->Profiler(), "GloryRendererModule::Draw: Camera Post Process: " + pp.m_Name };
 				const bool rendered = pp.m_Callback(pDevice, camera, i, m_FrameCommandBuffers[m_CurrentFrameIndex],
 					postProcessPass.m_BackBufferPass, postProcessPass.m_FrontDescriptor, pp);
-				if (rendered) postProcessPass.Swap();
+				if (rendered)
+				{
+					RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(postProcessPass.m_BackBufferPass);
+					TextureHandle color = pDevice->GetRenderTextureAttachment(renderTexture, 0);
+
+					pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, { color },
+						PipelineStageFlagBits::PST_ColorAttachmentOutput, PipelineStageFlagBits::PST_FragmentShader);
+					postProcessPass.Swap();
+				}
 			}
 		}
 
@@ -1005,7 +1042,8 @@ namespace Glory
 			ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::Draw: Render output from camera " + std::to_string(i) };
 			CameraRef camera = m_OutputCameras[i];
 			const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
-			pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DisplayCopyPipeline, { uniqueCameraData.m_ColorSamplerSets[m_CurrentFrameIndex] });
+			pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DisplayCopyPipeline,
+				{ uniqueCameraData.m_PostProcessPasses[m_CurrentFrameIndex].m_FrontDescriptor });
 			pDevice->DrawQuad(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 		}
 		pDevice->EndPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex]);
@@ -1022,7 +1060,8 @@ namespace Glory
 
 			pDevice->BeginRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex], m_SwapchainPasses[m_CurrentSemaphoreIndex]);
 			pDevice->BeginPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DisplayCopyPipeline);
-			pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DisplayCopyPipeline, { m_FinalFrameColorSets[m_CurrentFrameIndex] });
+			pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_DisplayCopyPipeline,
+				{ m_FinalFrameColorSets[m_CurrentFrameIndex] });
 			pDevice->DrawQuad(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 			pDevice->EndPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 			for (auto& injectedSubpass : m_InjectedSwapchainSubpasses)
