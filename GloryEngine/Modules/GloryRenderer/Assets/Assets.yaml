@@ -98,3 +98,7 @@
   ID: 51
 - Path: "Pipelines\\VisualizeDepth.gpln"
   ID: 52
+- Path: "Shaders\\LightComplexity_Frag.shader"
+  ID: 53
+- Path: "Pipelines\\LightComplexity.gpln"
+  ID: 54

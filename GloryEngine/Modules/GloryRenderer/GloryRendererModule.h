@@ -196,6 +196,7 @@ namespace Glory
 		DescriptorSetLayoutHandle m_PickingSamplerSetLayout;
 		DescriptorSetLayoutHandle m_DisplayCopySamplerSetLayout;
 		DescriptorSetLayoutHandle m_SSAOPostSamplerSetLayout;
+		DescriptorSetLayoutHandle m_LightGridSetLayout;
 
 		/* Descriptor sets */
 		/* Global */
@@ -314,6 +315,8 @@ namespace Glory
 			std::vector<DescriptorSetHandle> m_AOSamplerSets;
 			std::vector<DescriptorSetHandle> m_DepthSamplerSets;
 
+			std::vector<DescriptorSetHandle> m_LightGridSets;
+
 			std::vector<glm::ivec2> m_Picks;
 
 			CameraAttachment m_VisualizedAttachment;
@@ -334,6 +337,7 @@ namespace Glory
 		PipelineHandle m_VisualizeSSAOPipeline = 0;
 		PipelineHandle m_VisualizeObjectIDPipeline = 0;
 		PipelineHandle m_VisualizeDepthPipeline = 0;
+		PipelineHandle m_VisualizeLightComplexityPipeline = 0;
 
 		uint32_t m_MinShadowResolution;
 		uint32_t m_MaxShadowResolution;

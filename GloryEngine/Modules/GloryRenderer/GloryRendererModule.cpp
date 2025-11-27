@@ -43,9 +43,10 @@ namespace Glory
 		"Final",
 	};
 
-	constexpr size_t DebugOverlayNameCount = 1;
+	constexpr size_t DebugOverlayNameCount = 2;
 	constexpr std::string_view DebugOverlayNames[AttachmentNameCount] = {
 		"Shadow Atlas",
+		"Light Complexity"
 	};
 
 	enum DebugOverlayBitIndices : uint8_t
@@ -75,6 +76,14 @@ namespace Glory
 
 		static constexpr uint32_t Clusters = 2;
 		static constexpr uint32_t SampleDome = 2;
+	};
+
+	struct LightComplexityConstants
+	{
+		glm::uvec4 GridSize;
+		glm::uvec2 Resolution;
+		float zNear;
+		float zFar;
 	};
 
 	GloryRendererModule::GloryRendererModule(): m_MinShadowResolution(256), m_MaxShadowResolution(2048),
@@ -241,6 +250,7 @@ namespace Glory
 		newReferences.push_back(settings.Value<uint64_t>("SSAO Visualizer"));
 		newReferences.push_back(settings.Value<uint64_t>("ObjectID Visualizer"));
 		newReferences.push_back(settings.Value<uint64_t>("Depth Visualizer"));
+		newReferences.push_back(settings.Value<uint64_t>("Light Complexity Visualizer"));
 
 		for (size_t i = 0; i < newReferences.size(); ++i)
 		{
@@ -329,6 +339,7 @@ namespace Glory
 		const UUID ssaoPostpassPipeline = settings.Value<uint64_t>("SSAO Postpass");
 		const UUID objectIDVisualizerPipeline = settings.Value<uint64_t>("ObjectID Visualizer");
 		const UUID depthVisualizerPipeline = settings.Value<uint64_t>("Depth Visualizer");
+		const UUID lightComplexityVisualizerPipeline = settings.Value<uint64_t>("Light Complexity Visualizer");
 
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice)
@@ -403,6 +414,7 @@ namespace Glory
 		m_PickingResultSetLayout = CreateBufferDescriptorLayout(pDevice, 1, { BufferBindingIndices::PickingResults }, { BT_Storage }, { STF_Compute });
 		m_PickingSamplerSetLayout = CreateSamplerDescriptorLayout(pDevice, 3, { 0, 1, 2 }, { STF_Compute }, { "ObjectID", "Normal", "Depth" });
 		m_GlobalSkyboxSamplerSetLayout = CreateSamplerDescriptorLayout(pDevice, 1, { 0 }, { STF_Fragment }, { "Skybox" });
+		m_LightGridSetLayout = CreateBufferDescriptorLayout(pDevice, 1, { 1 }, { BT_Storage }, { STF_Fragment });
 
 		ResetLightDistances = new uint32_t[MAX_LIGHTS];
 		for (size_t i = 0; i < MAX_LIGHTS; ++i)
@@ -619,6 +631,25 @@ namespace Glory
 			pDevice->DrawQuad(commandBuffer);
 			pDevice->EndPipeline(commandBuffer);
 
+			if (lightComplexity)
+			{
+				pDevice->BeginPipeline(commandBuffer, m_VisualizeLightComplexityPipeline);
+				pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));
+				pDevice->SetScissor(commandBuffer, 0, 0, resolution.x, resolution.y);
+
+				LightComplexityConstants constants;
+				constants.zNear = camera.GetNear();
+				constants.zFar = camera.GetFar();
+				constants.Resolution = camera.GetResolution();
+				constants.GridSize = glm::uvec4(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES, 0.0f);
+
+				pDevice->PushConstants(commandBuffer, m_VisualizeLightComplexityPipeline, 0, sizeof(LightComplexityConstants), &constants, STF_Fragment);
+				pDevice->BindDescriptorSets(commandBuffer, m_VisualizeLightComplexityPipeline,
+					{ uniqueCameraData.m_DepthSamplerSets[m_CurrentFrameIndex], uniqueCameraData.m_LightGridSets[m_CurrentFrameIndex] });
+				pDevice->DrawQuad(commandBuffer);
+				pDevice->EndPipeline(commandBuffer);
+			}
+
 			if (shadowAtlas)
 			{
 				const uint32_t size = resolution.y/2;
@@ -665,6 +696,7 @@ namespace Glory
 		const UUID ssaoVisualizerPipeline = settings.Value<uint64_t>("SSAO Visualizer");
 		const UUID objectIDVisualizerPipeline = settings.Value<uint64_t>("ObjectID Visualizer");
 		const UUID depthVisualizerPipeline = settings.Value<uint64_t>("Depth Visualizer");
+		const UUID lightComplexityVisualizerPipeline = settings.Value<uint64_t>("Light Complexity Visualizer");
 
 		settings.SetDirty(false);
 	}
@@ -1025,6 +1057,7 @@ namespace Glory
 		settings.RegisterAssetReference<PipelineData>("SSAO Visualizer", 51);
 		settings.RegisterAssetReference<PipelineData>("ObjectID Visualizer", 50);
 		settings.RegisterAssetReference<PipelineData>("Depth Visualizer", 52);
+		settings.RegisterAssetReference<PipelineData>("Light Complexity Visualizer", 54);
 	}
 
 	size_t GloryRendererModule::DefaultAttachmenmtIndex() const
@@ -1344,6 +1377,7 @@ namespace Glory
 		const UUID visualizeSSAOPipeline = settings.Value<uint64_t>("SSAO Visualizer");
 		const UUID visualizeObjectIDPipeline = settings.Value<uint64_t>("ObjectID Visualizer");
 		const UUID visualizeDepthPipeline = settings.Value<uint64_t>("Depth Visualizer");
+		const UUID visualizeLightComplexityPipeline = settings.Value<uint64_t>("Light Complexity Visualizer");
 
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice) return;
@@ -1357,6 +1391,17 @@ namespace Glory
 			ssaoConstantsInfo.m_PushConstantRange.m_ShaderStages = STF_Fragment;
 			ssaoConstantsInfo.m_PushConstantRange.m_Size = sizeof(float)*2;
 			doubleFloatPushConstantsLayout = pDevice->CreateDescriptorSetLayout(std::move(ssaoConstantsInfo));
+		}
+
+		static DescriptorSetLayoutHandle lightComplexityPushConstantsLayout = NULL;
+
+		if (!lightComplexityPushConstantsLayout)
+		{
+			DescriptorSetLayoutInfo ssaoConstantsInfo;
+			ssaoConstantsInfo.m_PushConstantRange.m_Offset = 0;
+			ssaoConstantsInfo.m_PushConstantRange.m_ShaderStages = STF_Fragment;
+			ssaoConstantsInfo.m_PushConstantRange.m_Size = sizeof(LightComplexityConstants);
+			lightComplexityPushConstantsLayout = pDevice->CreateDescriptorSetLayout(std::move(ssaoConstantsInfo));
 		}
 
 		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
@@ -1400,6 +1445,13 @@ namespace Glory
 			PipelineData* pPipeline = pipelines.GetPipelineData(visualizeDepthPipeline);
 			m_VisualizeDepthPipeline = pDevice->CreatePipeline(m_FinalFrameColorPasses[0], pPipeline,
 				{ doubleFloatPushConstantsLayout, m_DisplayCopySamplerSetLayout },
+				sizeof(glm::vec3), { AttributeType::Float3 });
+		}
+		if (!m_VisualizeLightComplexityPipeline)
+		{
+			PipelineData* pPipeline = pipelines.GetPipelineData(visualizeLightComplexityPipeline);
+			m_VisualizeLightComplexityPipeline = pDevice->CreatePipeline(m_FinalFrameColorPasses[0], pPipeline,
+				{ lightComplexityPushConstantsLayout, m_DisplayCopySamplerSetLayout, m_LightGridSetLayout },
 				sizeof(glm::vec3), { AttributeType::Float3 });
 		}
 		if (!m_SSAOPostPassPipeline)
@@ -2069,6 +2121,7 @@ namespace Glory
 		cameraData.m_NormalSamplerSets.resize(m_ImageCount, 0ull);
 		cameraData.m_AOSamplerSets.resize(m_ImageCount, 0ull);
 		cameraData.m_DepthSamplerSets.resize(m_ImageCount, 0ull);
+		cameraData.m_LightGridSets.resize(m_ImageCount, 0ull);
 
 		for (size_t i = 0; i < m_ImageCount; ++i)
 		{
@@ -2167,6 +2220,7 @@ namespace Glory
 			DescriptorSetHandle& normalSamplerSet = cameraData.m_NormalSamplerSets[i];
 			DescriptorSetHandle& aoSamplerSet = cameraData.m_AOSamplerSets[i];
 			DescriptorSetHandle& depthSamplerSet = cameraData.m_DepthSamplerSets[i];
+			DescriptorSetHandle& lightGridSet = cameraData.m_LightGridSets[i];
 
 			if (!lightIndexSSBO)
 				lightIndexSSBO = pDevice->CreateBuffer(sizeof(uint32_t)*(NUM_CLUSTERS*MAX_LIGHTS_PER_TILE + 1), BufferType::BT_Storage, BF_None);
@@ -2273,6 +2327,17 @@ namespace Glory
 				setInfo.m_Samplers.resize(1);
 				setInfo.m_Samplers[0].m_TextureHandle = depth;
 				depthSamplerSet = pDevice->CreateDescriptorSet(std::move(setInfo));
+			}
+
+			if (!lightGridSet)
+			{
+				DescriptorSetInfo setInfo = DescriptorSetInfo();
+				setInfo.m_Layout = m_LightGridSetLayout;
+				setInfo.m_Buffers.resize(1);
+				setInfo.m_Buffers[0].m_BufferHandle = lightGridSSBO;
+				setInfo.m_Buffers[0].m_Offset = 0;
+				setInfo.m_Buffers[0].m_Size = sizeof(LightGrid) * NUM_CLUSTERS;
+				lightGridSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 			}
 		}
 	}
