@@ -202,7 +202,7 @@ namespace Glory
         GLORY_API vk::ImageView GetVKImageView(TextureHandle texture);
         GLORY_API vk::Sampler GetVKSampler(TextureHandle texture);
 
-        GLORY_API void DisableViewportInversion();
+        GLORY_API virtual ViewportOrigin GetViewportOrigin() const { return ViewportOrigin::TopLeft; }
 
     private: /* Render commands */
         virtual CommandBufferHandle CreateCommandBuffer() override;
@@ -353,7 +353,5 @@ namespace Glory
 
         DescriptorAllocator m_DescriptorAllocator;
         CommandBufferAllocator m_CommandBufferAllocator;
-
-        bool m_InvertViewport = true;
     };
 }

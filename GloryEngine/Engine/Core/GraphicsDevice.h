@@ -307,6 +307,7 @@ namespace Glory
 		 * @param features Features to check for
 		 */
 		virtual bool IsSupported(const APIFeatures& features) const;
+		virtual ViewportOrigin GetViewportOrigin() const { return ViewportOrigin::BottomLeft; }
 
 		void Initialize();
 

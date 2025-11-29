@@ -63,7 +63,6 @@ namespace Glory::Editor
 		VulkanGraphicsModule* pGraphicsModule = pEngine->GetMainModule<VulkanGraphicsModule>();
 		VkInstance instance = pGraphicsModule->GetCInstance();
 		m_pDevice = static_cast<VulkanDevice*>(pEngine->ActiveGraphicsDevice());
-		m_pDevice->DisableViewportInversion();
 
 		m_MainWindow = ImGui_ImplVulkanH_Window();
 		VkSurfaceKHR surface = pGraphicsModule->GetCSurface();

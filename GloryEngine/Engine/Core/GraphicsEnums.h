@@ -1046,4 +1046,10 @@ namespace Glory
         std::string Name;
         ShaderTypeFlag ShaderFlags;
     };
+
+    enum ViewportOrigin
+    {
+        TopLeft,
+        BottomLeft
+    };
 }

@@ -1,6 +1,4 @@
 #pragma once
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include "Entity.h"
 
 #include "ModelData.h"
@@ -22,7 +20,6 @@
 
 #include <Reflection.h>
 #include <map>
-
 
 REFLECTABLE_ENUM_NS(Glory, CameraPerspective, Orthographic, Perspective)
 REFLECTABLE_ENUM_NS(Glory, PhysicsShapeType, Sphere, Box)

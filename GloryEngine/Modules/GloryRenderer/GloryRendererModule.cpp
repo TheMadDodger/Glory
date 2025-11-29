@@ -90,6 +90,23 @@ namespace Glory
 		float zFar;
 	};
 
+	void FixProjection(glm::mat4& projection, GraphicsDevice* pDevice)
+	{
+		const ViewportOrigin origin = pDevice->GetViewportOrigin();
+		switch (origin)
+		{
+		case Glory::TopLeft:
+			/* Flip Y */
+			projection[1][1] *= -1.0f;
+			break;
+		case Glory::BottomLeft:
+			/* No need to do anything */
+			break;
+		default:
+			break;
+		}
+	}
+
 	GloryRendererModule::GloryRendererModule(): m_MinShadowResolution(256), m_MaxShadowResolution(2048),
 		m_ShadowAtlasResolution(8192), m_ShadowMapResolutions{}, m_MaxShadowLODs(6)
 	{
@@ -957,44 +974,47 @@ namespace Glory
 			pDevice->EndRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 		}
 
-		/* SSAO pass */
-		for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
+		if (m_GlobalSSAOSetting.m_Enabled)
 		{
-			ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::Draw: Camera " + std::to_string(i) + " SSAO pass" };
-			CameraRef camera = m_ActiveCameras[i];
-			const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
-
-			const RenderPassHandle& renderPass = uniqueCameraData.m_RenderPasses[m_CurrentFrameIndex];
-			const RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(renderPass);
-			const RenderPassHandle& ssaoRenderPass = uniqueCameraData.m_SSAORenderPasses[m_CurrentFrameIndex];
-			const DescriptorSetHandle& ssaoSamplersSet = uniqueCameraData.m_SSAOSamplersSets[m_CurrentFrameIndex];
-
-			SSAOConstants constants;
-			constants.CameraIndex = i;
-			constants.KernelSize = m_GlobalSSAOSetting.m_KernelSize;
-			constants.SampleRadius = m_GlobalSSAOSetting.m_SampleRadius;
-			constants.SampleBias = m_GlobalSSAOSetting.m_SampleBias;
-
-			const glm::uvec2& resolution = camera.GetResolution();
-
-			const TextureHandle color = pDevice->GetRenderTextureAttachment(renderTexture, 1);
-			const TextureHandle normals = pDevice->GetRenderTextureAttachment(renderTexture, 2);
-			const TextureHandle depth = pDevice->GetRenderTextureAttachment(renderTexture, 3);
-
-			/* Wait for rendering to finish */
-			pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, { normals, depth },
-				PipelineStageFlagBits::PST_ColorAttachmentOutput, PipelineStageFlagBits::PST_FragmentShader);
-
 			/* SSAO pass */
-			pDevice->BeginRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex], ssaoRenderPass);
-			pDevice->BeginPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex], m_SSAOPipeline);
-			pDevice->SetViewport(m_FrameCommandBuffers[m_CurrentFrameIndex], 0.0f, 0.0f, float(resolution.x), float(resolution.y));
-			pDevice->SetScissor(m_FrameCommandBuffers[m_CurrentFrameIndex], 0, 0, resolution.x, resolution.y);
-			pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_SSAOPipeline, { m_SSAOCameraSet, m_GlobalSampleDomeSet, ssaoSamplersSet, m_NoiseSamplerSet });
-			pDevice->PushConstants(m_FrameCommandBuffers[m_CurrentFrameIndex], m_SSAOPipeline, 0, sizeof(SSAOConstants), &constants, ShaderTypeFlag(STF_Fragment | STF_Compute));
-			pDevice->DrawQuad(m_FrameCommandBuffers[m_CurrentFrameIndex]);
-			pDevice->EndPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex]);
-			pDevice->EndRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
+			for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
+			{
+				ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::Draw: Camera " + std::to_string(i) + " SSAO pass" };
+				CameraRef camera = m_ActiveCameras[i];
+				const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
+
+				const RenderPassHandle& renderPass = uniqueCameraData.m_RenderPasses[m_CurrentFrameIndex];
+				const RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(renderPass);
+				const RenderPassHandle& ssaoRenderPass = uniqueCameraData.m_SSAORenderPasses[m_CurrentFrameIndex];
+				const DescriptorSetHandle& ssaoSamplersSet = uniqueCameraData.m_SSAOSamplersSets[m_CurrentFrameIndex];
+
+				SSAOConstants constants;
+				constants.CameraIndex = i;
+				constants.KernelSize = m_GlobalSSAOSetting.m_KernelSize;
+				constants.SampleRadius = m_GlobalSSAOSetting.m_SampleRadius;
+				constants.SampleBias = m_GlobalSSAOSetting.m_SampleBias;
+
+				const glm::uvec2& resolution = camera.GetResolution();
+
+				const TextureHandle color = pDevice->GetRenderTextureAttachment(renderTexture, 1);
+				const TextureHandle normals = pDevice->GetRenderTextureAttachment(renderTexture, 2);
+				const TextureHandle depth = pDevice->GetRenderTextureAttachment(renderTexture, 3);
+
+				/* Wait for rendering to finish */
+				pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, { normals, depth },
+					PipelineStageFlagBits::PST_ColorAttachmentOutput, PipelineStageFlagBits::PST_FragmentShader);
+
+				/* SSAO pass */
+				pDevice->BeginRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex], ssaoRenderPass);
+				pDevice->BeginPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex], m_SSAOPipeline);
+				pDevice->SetViewport(m_FrameCommandBuffers[m_CurrentFrameIndex], 0.0f, 0.0f, float(resolution.x), float(resolution.y));
+				pDevice->SetScissor(m_FrameCommandBuffers[m_CurrentFrameIndex], 0, 0, resolution.x, resolution.y);
+				pDevice->BindDescriptorSets(m_FrameCommandBuffers[m_CurrentFrameIndex], m_SSAOPipeline, { m_SSAOCameraSet, m_GlobalSampleDomeSet, ssaoSamplersSet, m_NoiseSamplerSet });
+				pDevice->PushConstants(m_FrameCommandBuffers[m_CurrentFrameIndex], m_SSAOPipeline, 0, sizeof(SSAOConstants), &constants, ShaderTypeFlag(STF_Fragment | STF_Compute));
+				pDevice->DrawQuad(m_FrameCommandBuffers[m_CurrentFrameIndex]);
+				pDevice->EndPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex]);
+				pDevice->EndRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
+			}
 		}
 
 		std::vector<TextureHandle> colorTextures(m_ActiveCameras.size());
@@ -1359,7 +1379,7 @@ namespace Glory
 			pDevice->BeginPipeline(commandBuffer, batchData.m_Pipeline);
 			if (viewport.z > 0.0f && viewport.w > 0.0f)
 			{
-				pDevice->SetViewport(commandBuffer, int(viewport.x), int(viewport.y), viewport.z, viewport.w);
+				pDevice->SetViewport(commandBuffer, viewport.x, viewport.y, viewport.z, viewport.w);
 				pDevice->SetScissor(commandBuffer, int(viewport.x), int(viewport.y), viewport.z, viewport.w);
 			}
 
@@ -1846,8 +1866,6 @@ namespace Glory
 
 		CommandBufferHandle commandBuffer = pDevice->Begin();
 		pDevice->BeginPipeline(commandBuffer, m_ClusterGeneratorPipeline);
-		pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));
-		pDevice->SetScissor(commandBuffer, 0, 0, resolution.x, resolution.y);
 		pDevice->BindDescriptorSets(commandBuffer, m_ClusterGeneratorPipeline, { m_GlobalClusterSet, clusterSet });
 		pDevice->PushConstants(commandBuffer, m_ClusterGeneratorPipeline, 0, sizeof(ClusterConstants), &constants, ShaderTypeFlag(STF_Fragment | STF_Compute));
 		pDevice->Dispatch(commandBuffer, constants.GridSize.x, constants.GridSize.y, constants.GridSize.z);
@@ -2088,7 +2106,7 @@ namespace Glory
 
 			if (viewport.z > 0.0f && viewport.w > 0.0f)
 			{
-				pDevice->SetViewport(commandBuffer, int(viewport.x), int(viewport.y), viewport.z, viewport.w);
+				pDevice->SetViewport(commandBuffer, viewport.x, viewport.y, viewport.z, viewport.w);
 				pDevice->SetScissor(commandBuffer, int(viewport.x), int(viewport.y), viewport.z, viewport.w);
 			}
 
@@ -2403,7 +2421,12 @@ namespace Glory
 		{
 			CameraRef camera = m_ActiveCameras[i];
 
-			const PerCameraData cameraData{ camera.GetView(), camera.GetProjection(), camera.GetViewInverse(), camera.GetProjectionInverse(),
+			glm::mat4 projection = camera.GetProjection();
+			glm::mat4 projectionInverse = camera.GetProjectionInverse();
+			FixProjection(projection, pDevice);
+			FixProjection(projectionInverse, pDevice);
+
+			const PerCameraData cameraData{ camera.GetView(), projection, camera.GetViewInverse(), projectionInverse,
 				camera.GetNear(), camera.GetFar(), { static_cast<glm::vec2>(camera.GetResolution()) }};
 
 			if (std::memcmp(&m_CameraDatas.m_Data[i], &cameraData, sizeof(PerCameraData)) != 0)

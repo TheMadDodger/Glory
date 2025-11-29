@@ -62,6 +62,8 @@ project "GloryRuntime"
 	defines
 	{
 		"GLORY_RUNTIME_EXPORTS",
+		"GLM_FORCE_RADIANS",
+		"GLM_FORCE_DEPTH_ZERO_TO_ONE"
 	}
 
 	postbuildcommands

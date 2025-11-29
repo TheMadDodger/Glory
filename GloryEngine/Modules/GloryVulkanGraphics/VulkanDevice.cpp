@@ -344,11 +344,6 @@ namespace Glory
 		return vkTexture->m_VKSampler;
 	}
 
-	void VulkanDevice::DisableViewportInversion()
-	{
-		m_InvertViewport = false;
-	}
-
 	CommandBufferHandle VulkanDevice::CreateCommandBuffer()
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::CreateCommandBuffer" };
@@ -791,7 +786,7 @@ namespace Glory
 		}
 		const VK_CommandBuffer& vkCommandBuffer = iter->second;
 		const vk::Viewport viewport = vk::Viewport()
-			.setX(x).setY(m_InvertViewport ? height - y : y).setHeight(m_InvertViewport ? -height : height).setWidth(width)
+			.setX(x).setY(y).setHeight(height).setWidth(width)
 			.setMinDepth(minDepth).setMaxDepth(maxDepth);
 		vkCommandBuffer->setViewport(0, 1, &viewport);
 	}
@@ -3334,23 +3329,23 @@ namespace Glory
 			.setPrimitiveRestartEnable(VK_FALSE);
 
 		// Viewport and scissor
-		vk::Viewport viewport = vk::Viewport()
+		vk::Viewport vkViewport = vk::Viewport()
 			.setX(0.0f)
-			.setY(m_InvertViewport ? (float)vkRenderTexture->m_Info.Height : 0.0f)
+			.setY(0.0f)
 			.setWidth((float)vkRenderTexture->m_Info.Width)
-			.setHeight((float)vkRenderTexture->m_Info.Height*(m_InvertViewport ? -1.0f : 1.0f))
+			.setHeight((float)vkRenderTexture->m_Info.Height)
 			.setMinDepth(0.0f)
 			.setMaxDepth(1.0f);
 
-		vk::Rect2D scissor = vk::Rect2D()
-			.setOffset({ 0,0 })
+		vk::Rect2D vkScissor = vk::Rect2D()
+			.setOffset({ 0, 0 })
 			.setExtent({ vkRenderTexture->m_Info.Width, vkRenderTexture->m_Info.Height });
 
 		vk::PipelineViewportStateCreateInfo viewportStateCreateInfo = vk::PipelineViewportStateCreateInfo()
 			.setViewportCount(1)
-			.setPViewports(&viewport)
+			.setPViewports(&vkViewport)
 			.setScissorCount(1)
-			.setPScissors(&scissor);
+			.setPScissors(&vkScissor);
 
 		// Rasterizer state
 		vk::PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = vk::PipelineRasterizationStateCreateInfo()
@@ -3359,7 +3354,7 @@ namespace Glory
 			.setPolygonMode(vk::PolygonMode::eFill)
 			.setLineWidth(1.0f)
 			.setCullMode(pipeline.m_VKCullMode)
-			.setFrontFace(m_InvertViewport ? vk::FrontFace::eCounterClockwise : vk::FrontFace::eClockwise)
+			.setFrontFace(vk::FrontFace::eCounterClockwise)
 			.setDepthBiasEnable(VK_FALSE)
 			.setDepthBiasConstantFactor(0.0f)
 			.setDepthBiasClamp(0.0f)

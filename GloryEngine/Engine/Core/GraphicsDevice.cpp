@@ -183,13 +183,15 @@ namespace Glory
 
 	void GraphicsDevice::Initialize()
 	{
+		const bool flipY = GetViewportOrigin() == ViewportOrigin::TopLeft;
+
 		static const float vertices[] = {
-			-1.0f, -1.0f, 0.0f,
-			 1.0f, -1.0f, 0.0f,
-			-1.0f,  1.0f, 0.0f,
-			-1.0f,  1.0f, 0.0f,
-			 1.0f, -1.0f, 0.0f,
-			 1.0f,  1.0f, 0.0f,
+			-1.0f, -1.0f*(flipY? -1.0f : 1.0), 0.0f,
+			 1.0f, -1.0f*(flipY? -1.0f : 1.0), 0.0f,
+			-1.0f,  1.0f*(flipY? -1.0f : 1.0), 0.0f,
+			-1.0f,  1.0f*(flipY? -1.0f : 1.0), 0.0f,
+			 1.0f, -1.0f*(flipY? -1.0f : 1.0), 0.0f,
+			 1.0f,  1.0f*(flipY? -1.0f : 1.0), 0.0f,
 		};
 		BufferHandle buffer = CreateBuffer(sizeof(vertices), BufferType::BT_Vertex, BF_CopyDst);
 		AssignBuffer(buffer, vertices, sizeof(vertices));

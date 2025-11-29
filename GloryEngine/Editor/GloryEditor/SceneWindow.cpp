@@ -22,6 +22,7 @@
 #include <Dispatcher.h>
 #include <ImGuiHelpers.h>
 #include <Components.h>
+#include <GraphicsDevice.h>
 
 namespace Glory::Editor
 {
@@ -186,7 +187,9 @@ namespace Glory::Editor
 
 	void SceneWindow::DrawScene()
 	{
-		RendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>();
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 
 		ImVec2 screenPos = ImGui::GetCursorScreenPos();
@@ -213,7 +216,9 @@ namespace Glory::Editor
 		const float cursorPosYStart = ImGui::GetCursorPosY();
 		TextureHandle texture = pRenderer->CameraAttachmentPreview(m_SceneCamera.m_Camera, pRenderer->DefaultAttachmenmtIndex());
 		ImVec2 viewportSize = ImVec2(width, height);
-		ImGui::Image(pRenderImpl->GetTextureID(texture), viewportSize, ImVec2(0, 1), ImVec2(1, 0));
+
+		const bool flipY = pDevice->GetViewportOrigin() == ViewportOrigin::TopLeft;
+		ImGui::Image(pRenderImpl->GetTextureID(texture), viewportSize, ImVec2(0, flipY ? 0 : 1), ImVec2(1, flipY ? 1 : 0));
 
 		ImGuizmo::SetDrawlist();
 		ImGuizmo::SetRect(screenPos.x, screenPos.y, width, height);

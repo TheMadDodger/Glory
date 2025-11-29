@@ -10,7 +10,6 @@
 #include "GPUTextureAtlas.h"
 #include "GraphicsEnums.h"
 
-#define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/ext/scalar_constants.hpp>
 
