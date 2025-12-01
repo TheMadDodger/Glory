@@ -143,8 +143,8 @@ namespace Glory
 		{ PixelFormat::PF_R32G32B32Sint,             0 },
 		{ PixelFormat::PF_R32G32B32Sfloat,           0 },
 		{ PixelFormat::PF_R32G32B32A32Uint,          GL_RGBA32UI },
-		{ PixelFormat::PF_R32G32B32A32Sint,          0 },
-		{ PixelFormat::PF_R32G32B32A32Sfloat,        0 },
+		{ PixelFormat::PF_R32G32B32A32Sint,          GL_RGBA32I },
+		{ PixelFormat::PF_R32G32B32A32Sfloat,        GL_RGBA32F },
 		{ PixelFormat::PF_R64Uint,                   0 }, // Not supported
 		{ PixelFormat::PF_R64Sint,                   0 }, // Not supported
 		{ PixelFormat::PF_R64Sfloat,                 0 },
