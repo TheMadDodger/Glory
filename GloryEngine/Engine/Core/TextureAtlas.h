@@ -2,6 +2,7 @@
 #include "GraphicsHandles.h"
 
 #include <glm/vec4.hpp>
+#include <glm/vec2.hpp>
 
 namespace Glory
 {
@@ -64,6 +65,8 @@ namespace Glory
 		 * Note: this releases all chunks!
 		 */
 		void Resize(uint32_t newSize);
+
+		glm::uvec2 Resolution() const;
 
 	protected:
 		/** @brief Reserved chunk data */

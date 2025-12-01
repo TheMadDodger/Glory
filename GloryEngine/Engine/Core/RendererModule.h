@@ -168,7 +168,7 @@ namespace Glory
 		void UnsubmitCamera(CameraRef camera);
 		void UpdateCamera(CameraRef camera);
 		size_t Submit(const glm::ivec2& pickPos, UUID cameraID);
-		void Submit(LightData&& light, glm::mat4&& lightSpace, UUID id);
+		void Submit(LightData&& light, glm::mat4&& lightView, glm::mat4&& lightProjection, UUID id);
 
 		virtual void OnBeginFrame() override;
 		virtual void OnEndFrame() override;

@@ -297,12 +297,13 @@ namespace Glory
 		return index;
 	}
 
-	void RendererModule::Submit(LightData&& light, glm::mat4&& lightSpace, UUID id)
+	void RendererModule::Submit(LightData&& light, glm::mat4&& lightView, glm::mat4&& lightProjection, UUID id)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::Submit(light)" };
 		const size_t index = m_FrameData.ActiveLights.count();
 		m_FrameData.ActiveLights.push_back(std::move(light));
-		m_FrameData.LightSpaceTransforms.push_back(std::move(lightSpace));
+		m_FrameData.LightViews.push_back(std::move(lightView));
+		m_FrameData.LightProjections.push_back(std::move(lightProjection));
 		m_FrameData.ActiveLightIDs.push_back(id);
 		OnSubmit(m_FrameData.ActiveLights[index]);
 	}
@@ -594,7 +595,7 @@ namespace Glory
 	void RendererModule::SetSwapchain(SwapchainHandle swapchain)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::SetSwapchain" };
-		assert(m_Swapchain == NULL);
+		assert(m_Swapchain == nullptr);
 		m_Swapchain = swapchain;
 		OnSwapchainChanged();
 	}

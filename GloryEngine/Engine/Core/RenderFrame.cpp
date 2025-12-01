@@ -3,7 +3,7 @@
 namespace Glory
 {
     RenderFrame::RenderFrame(size_t maxLigts):
-        ActiveLights(maxLigts), LightSpaceTransforms(maxLigts)
+        ActiveLights(maxLigts), LightViews(maxLigts), LightProjections(maxLigts)
     {
     }
 
@@ -11,14 +11,17 @@ namespace Glory
     {
         Picking.clear();
         ActiveLights.reset();
-        LightSpaceTransforms.reset();
+        ActiveLightIDs.clear();
+        LightViews.reset();
+        LightProjections.reset();
     }
 
     void RenderFrame::Reset()
     {
         Picking.clear();
         ActiveLights.reset();
-        LightSpaceTransforms.reset();
         ActiveLightIDs.clear();
+        LightViews.reset();
+        LightProjections.reset();
     }
 }

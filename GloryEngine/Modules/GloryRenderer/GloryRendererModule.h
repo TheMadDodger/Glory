@@ -163,6 +163,7 @@ namespace Glory
 		std::vector<PipelineBatchData> m_DynamicLateBatchData;
 		CPUBuffer<PerCameraData> m_CameraDatas;
 		CPUBuffer<PerCameraData> m_LightCameraDatas;
+		CPUBuffer<glm::mat4> m_LightSpaceTransforms;
 
 		/* Buffers */
 		BufferHandle m_CameraDatasBuffer = 0;

@@ -25,7 +25,7 @@ void main()
 	CameraData camera = CurrentCamera();
 
 	mat4 world = WorldTransform();
-	gl_Position = camera.View*world*vec4(inPosition, 1.0);
+	gl_Position = camera.Projection*camera.View*world*vec4(inPosition, 1.0);
 #ifdef WITH_TRANSPARENT_TEXTURED
 	fragTexCoord = inTexCoord;
 #endif

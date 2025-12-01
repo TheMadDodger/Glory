@@ -146,4 +146,9 @@ namespace Glory
 		ReleaseAllChunks();
 		OnResize();
 	}
+
+	glm::uvec2 TextureAtlas::Resolution() const
+	{
+		return { m_Width, m_Height };
+	}
 }

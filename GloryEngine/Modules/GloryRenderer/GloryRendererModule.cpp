@@ -90,6 +90,68 @@ namespace Glory
 		float zFar;
 	};
 
+	void FixViewport(glm::vec4& viewport, const glm::uvec2& resolution, GraphicsDevice* pDevice)
+	{
+		const ViewportOrigin origin = pDevice->GetViewportOrigin();
+		switch (origin)
+		{
+		case Glory::TopLeft:
+			/* Transform the Y origin */
+			glm::vec4 temp = viewport;
+			viewport.y = float(resolution.y) - temp.y - temp.w;
+			break;
+		case Glory::BottomLeft:
+			/* No need to do anything */
+			break;
+		default:
+			break;
+		}
+	}
+
+	void InvertViewport(glm::vec4& viewport, GraphicsDevice* pDevice)
+	{
+		const ViewportOrigin origin = pDevice->GetViewportOrigin();
+		switch (origin)
+		{
+		case Glory::TopLeft:
+			/* Transform the Y origin */
+			glm::vec4 temp = viewport;
+			viewport.y = temp.w - temp.y;
+			viewport.w = -temp.w;
+			break;
+		case Glory::BottomLeft:
+			/* No need to do anything */
+			break;
+		default:
+			break;
+		}
+	}
+
+	void FixShadowCoords(glm::vec4& coords, GraphicsDevice* pDevice)
+	{
+		const ViewportOrigin origin = pDevice->GetViewportOrigin();
+		switch (origin)
+		{
+		case Glory::TopLeft:
+			/* Invert Y axis */
+			coords.y = 1.0f - coords.y;
+			coords.w = 1.0f - coords.w;
+			//coords.y = temp.w;
+			//coords.w = temp.y;
+			break;
+		case Glory::BottomLeft:
+			/* No need to do anything */
+			break;
+		default:
+			break;
+		}
+	}
+
+	//const glm::vec4 temp = coords;
+	//const float height = temp.w - temp.y;
+	//coords.y = 1.0f - temp.y - temp.w;
+	//coords.w = coords.y + height;
+
 	void FixProjection(glm::mat4& projection, GraphicsDevice* pDevice)
 	{
 		const ViewportOrigin origin = pDevice->GetViewportOrigin();
@@ -1557,14 +1619,32 @@ namespace Glory
 		}
 		m_DirtyCameraPerspectives.clear();
 
-		if (m_LightCameraDatas->size() < m_FrameData.LightSpaceTransforms.count()) m_LightCameraDatas.resize(m_FrameData.LightSpaceTransforms.count());
-		for (size_t i = 0; i < m_FrameData.LightSpaceTransforms.count(); ++i)
+		if (m_LightCameraDatas->size() < m_FrameData.LightViews.count())
 		{
-			m_LightCameraDatas.m_Data[i].m_Projection = glm::identity<glm::mat4>();
-			if (m_LightCameraDatas.m_Data[i].m_View != m_FrameData.LightSpaceTransforms[i])
+			m_LightCameraDatas.resize(m_FrameData.LightViews.count());
+			m_LightSpaceTransforms.resize(m_FrameData.LightViews.count());
+		}
+		for (size_t i = 0; i < m_FrameData.LightViews.count(); ++i)
+		{
+			glm::mat4 projection = m_FrameData.LightProjections[i];
+			FixProjection(projection, pDevice);
+
+			if (m_LightCameraDatas.m_Data[i].m_Projection != projection)
 			{
-				m_LightCameraDatas.m_Data[i].m_View = m_FrameData.LightSpaceTransforms[i];
+				m_LightCameraDatas.m_Data[i].m_Projection = projection;
 				m_LightCameraDatas.SetDirty(i);
+			}
+			if (m_LightCameraDatas.m_Data[i].m_View != m_FrameData.LightViews[i])
+			{
+				m_LightCameraDatas.m_Data[i].m_View = m_FrameData.LightViews[i];
+				m_LightCameraDatas.SetDirty(i);
+			}
+
+			const glm::mat4 lightSpace = projection*m_FrameData.LightViews[i];
+			if (m_LightSpaceTransforms.m_Data[i] != lightSpace)
+			{
+				m_LightSpaceTransforms.m_Data[i] = lightSpace;
+				m_LightSpaceTransforms.SetDirty(i);
 			}
 		}
 		if (m_LightCameraDatas)
@@ -1572,6 +1652,13 @@ namespace Glory
 			const size_t dirtySize = m_LightCameraDatas.DirtySize();
 			pDevice->AssignBuffer(m_LightCameraDatasBuffer, m_LightCameraDatas.DirtyStart(),
 				m_LightCameraDatas.m_DirtyRange.first*sizeof(PerCameraData), dirtySize*sizeof(PerCameraData));
+		}
+
+		if (m_LightSpaceTransforms)
+		{
+			const size_t dirtySize = m_LightSpaceTransforms.DirtySize();
+			pDevice->AssignBuffer(m_LightSpaceTransformsSSBO, m_LightSpaceTransforms.DirtyStart(),
+				m_LightSpaceTransforms.m_DirtyRange.first*sizeof(glm::mat4), dirtySize*sizeof(glm::mat4));
 		}
 
 		/* Prepare shadow resolutions and atlas coords */
@@ -1582,7 +1669,6 @@ namespace Glory
 		for (size_t i = 0; i < m_FrameData.ActiveLights.count(); ++i)
 		{
 			auto& lightData = m_FrameData.ActiveLights[i];
-			const auto& lightTransform = m_FrameData.LightSpaceTransforms[i];
 			const auto& lightID = m_FrameData.ActiveLightIDs[i];
 
 			if (!lightData.shadowsEnabled) continue;
@@ -1606,11 +1692,11 @@ namespace Glory
 				continue;
 			}
 			lightData.shadowCoords = shadowAtlas.GetChunkCoords(lightID);
+			FixShadowCoords(lightData.shadowCoords, pDevice);
 		}
 
 		/* Update light data */
 		pDevice->AssignBuffer(m_LightsSSBO, m_FrameData.ActiveLights.data(), 0, MAX_LIGHTS*sizeof(LightData));
-		pDevice->AssignBuffer(m_LightSpaceTransformsSSBO, m_FrameData.LightSpaceTransforms.data(), 0, MAX_LIGHTS*sizeof(glm::mat4));
 
 		PrepareBatches(m_DynamicPipelineRenderDatas, m_DynamicBatchData);
 		PrepareBatches(m_DynamicLatePipelineRenderDatas, m_DynamicLateBatchData);
@@ -2074,10 +2160,10 @@ namespace Glory
 		for (size_t i = 0; i < m_FrameData.ActiveLights.count(); ++i)
 		{
 			auto& lightData = m_FrameData.ActiveLights[i];
-			const auto& lightTransform = m_FrameData.LightSpaceTransforms[i];
 			const auto& lightID = m_FrameData.ActiveLightIDs[i];
 			if (!lightData.shadowsEnabled) continue;
-			const glm::vec4 chunkRect = shadowAtlas.GetChunkPositionAndSize(lightID);
+			glm::vec4 chunkRect = shadowAtlas.GetChunkPositionAndSize(lightID);
+			FixViewport(chunkRect, shadowAtlas.Resolution(), pDevice);
 			RenderShadows(commandBuffer, i, chunkRect);
 		}
 		pDevice->EndRenderPass(commandBuffer);

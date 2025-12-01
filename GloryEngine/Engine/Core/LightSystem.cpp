@@ -50,9 +50,8 @@ namespace Glory
 		default:
 			break;
 		}
-
-		glm::mat4 lightSpace = lightProjection*lightView;
-		pEngine->GetMainModule<RendererModule>()->Submit(std::move(light), std::move(lightSpace), pScene->GetEntityUUID(entity));
+		pEngine->GetMainModule<RendererModule>()->Submit(std::move(light), std::move(lightView),
+			std::move(lightProjection), pScene->GetEntityUUID(entity));
 	}
 
 	LightSystem::LightSystem()
