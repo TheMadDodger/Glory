@@ -1094,7 +1094,10 @@ namespace Glory
 			BufferHandle staging = CreateBuffer(size, BufferType::BT_TransferRead, BufferFlags::BF_Write);
 			AssignBuffer(staging, data, offset, size);
 			VK_Buffer* vkStaging = m_Buffers.Find(staging);
-			CopyFromBuffer(buffer->m_VKBuffer, vkStaging->m_VKBuffer, offset, 0, size);
+
+			vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
+			CopyFromBuffer(commandBuffer, buffer->m_VKBuffer, vkStaging->m_VKBuffer, offset, 0, size);
+			EndSingleTimeCommands(commandBuffer);
 			FreeBuffer(staging);
 			return;
 		}
@@ -1471,8 +1474,11 @@ namespace Glory
 		/* Transition image layout */
 		if (pixels)
 		{
-			TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal,
-				texture.m_VKAspect, imageInfo.mipLevels, imageInfo.arrayLayers);
+			vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+			TransitionImageLayout(commandBuffer, texture.m_VKImage, format, vk::ImageLayout::eUndefined,
+				vk::ImageLayout::eTransferDstOptimal, texture.m_VKAspect,
+				imageInfo.mipLevels, imageInfo.arrayLayers);
 			const vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
 			BufferHandle stagingBuffer = CreateBuffer(memRequirements.size, BufferType::BT_TransferRead, BufferFlags::BF_Write);
 			VK_Buffer* vkStagingBuffer = m_Buffers.Find(stagingBuffer);
@@ -1480,15 +1486,17 @@ namespace Glory
 
 			const size_t layerSize = dataSize/imageInfo.arrayLayers;
 
-			CopyFromBuffer(vkStagingBuffer->m_VKBuffer, texture.m_VKImage, texture.m_VKAspect,
+			CopyFromBuffer(commandBuffer, vkStagingBuffer->m_VKBuffer, texture.m_VKImage, texture.m_VKAspect,
 				textureInfo.m_Width, textureInfo.m_Height, imageInfo.arrayLayers, layerSize);
 
 			/* Transtion layout again so it can be sampled */
 			if (imageInfo.mipLevels > 1)
-				GenerateMipMaps(texture.m_VKImage, textureInfo.m_Width, textureInfo.m_Height, imageInfo.mipLevels);
+				GenerateMipMaps(commandBuffer, texture.m_VKImage, textureInfo.m_Width, textureInfo.m_Height, imageInfo.mipLevels);
 			else
-				TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eTransferDstOptimal,
+				TransitionImageLayout(commandBuffer, texture.m_VKImage, format, vk::ImageLayout::eTransferDstOptimal,
 					vk::ImageLayout::eShaderReadOnlyOptimal, texture.m_VKAspect, imageInfo.mipLevels, imageInfo.arrayLayers);
+
+			EndSingleTimeCommands(commandBuffer);
 
 			FreeBuffer(stagingBuffer);
 
@@ -2827,11 +2835,11 @@ namespace Glory
 		m_LogicalDevice.freeCommandBuffers(commandPool, 1, &commandBuffer);
 	}
 
-	void VulkanDevice::TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout,
-		vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags, uint32_t mipLevels, uint32_t layerCount)
+	void VulkanDevice::TransitionImageLayout(vk::CommandBuffer commandBuffer, vk::Image image, vk::Format format,
+		vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags,
+		uint32_t mipLevels, uint32_t layerCount)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::TransitionImageLayout" };
-		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
 
 		vk::ImageMemoryBarrier barrier = vk::ImageMemoryBarrier();
 		barrier.oldLayout = oldLayout;
@@ -2901,14 +2909,12 @@ namespace Glory
 			0, nullptr,
 			1, &barrier
 		);
-
-		EndSingleTimeCommands(commandBuffer);
 	}
 
-	void VulkanDevice::GenerateMipMaps(vk::Image image, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
+	void VulkanDevice::GenerateMipMaps(vk::CommandBuffer commandBuffer, vk::Image image,
+		int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::GenerateMipMaps" };
-		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
 
 		vk::ImageMemoryBarrier barrier{};
 		barrier.image = image;
@@ -2971,23 +2977,22 @@ namespace Glory
 
 		commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eFragmentShader,
 			(vk::DependencyFlags)0, 0, nullptr, 0, nullptr, 1, &barrier);
-
-		EndSingleTimeCommands(commandBuffer);
 	}
 
-	void VulkanDevice::CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags,
-		uint32_t width, uint32_t height, uint32_t layerCount, uint32_t layerSize)
+	void VulkanDevice::CopyFromBuffer(vk::CommandBuffer commandBuffer, vk::Buffer buffer,
+		vk::Image image, vk::ImageAspectFlags aspectFlags, uint32_t width, uint32_t height,
+		uint32_t layerCount, uint32_t layerSize)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::CopyFromBuffer" };
-		CopyFromBuffer(buffer, image, aspectFlags, 0, 0, 0, width, height, 1, layerCount, layerSize);
+		CopyFromBuffer(commandBuffer, buffer, image, aspectFlags, 0, 0, 0, width, height, 1, layerCount, layerSize);
 	}
 
-	void VulkanDevice::CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags,
-		int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height,
-		uint32_t depth, uint32_t layerCount, uint32_t layerSize)
+	void VulkanDevice::CopyFromBuffer(vk::CommandBuffer commandBuffer, vk::Buffer buffer,
+		vk::Image image, vk::ImageAspectFlags aspectFlags, int32_t offsetX, int32_t offsetY,
+		int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth, uint32_t layerCount,
+		uint32_t layerSize)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::CopyFromBuffer(offset)" };
-		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
 
 		std::vector<vk::BufferImageCopy> bufferImageCopies(layerCount);
 		for (size_t i = 0; i < layerCount; ++i)
@@ -3007,19 +3012,16 @@ namespace Glory
 
 		commandBuffer.copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal,
 			static_cast<uint32_t>(bufferImageCopies.size()), bufferImageCopies.data());
-
-		EndSingleTimeCommands(commandBuffer);
 	}
 
-	void VulkanDevice::CopyFromBuffer(vk::Buffer dst, vk::Buffer src, int32_t dstOffset, int32_t srcOffset, uint32_t size)
+	void VulkanDevice::CopyFromBuffer(vk::CommandBuffer commandBuffer, vk::Buffer dst, vk::Buffer src,
+		int32_t dstOffset, int32_t srcOffset, uint32_t size)
 	{
-		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
 		vk::BufferCopy copyRegion = vk::BufferCopy();
 		copyRegion.dstOffset = dstOffset;
 		copyRegion.srcOffset = srcOffset;
 		copyRegion.size = size;
 		commandBuffer.copyBuffer(src, dst, 1, &copyRegion);
-		EndSingleTimeCommands(commandBuffer);
 	}
 
 	vk::CommandBuffer VulkanDevice::GetNewResetableCommandBuffer(CommandBufferHandle commandBufferHandle)

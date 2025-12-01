@@ -290,16 +290,20 @@ namespace Glory
     private: /* Internal */
         vk::CommandBuffer BeginSingleTimeCommands();
         void EndSingleTimeCommands(vk::CommandBuffer commandBuffer);
-        void TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout,
-            vk::ImageAspectFlags aspectFlags, uint32_t mipLevels, uint32_t layerCount);
-        void GenerateMipMaps(vk::Image image, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
-        void CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags,
-            uint32_t width, uint32_t height, uint32_t layerCount, uint32_t layerSize);
-        void CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags,
-            int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height,
-            uint32_t depth, uint32_t layerCount, uint32_t layerSize);
+        void TransitionImageLayout(vk::CommandBuffer commandBuffer, vk::Image image, vk::Format format,
+            vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags,
+            uint32_t mipLevels, uint32_t layerCount);
+        void GenerateMipMaps(vk::CommandBuffer commandBuffer, vk::Image image, int32_t texWidth,
+            int32_t texHeight, uint32_t mipLevels);
+        void CopyFromBuffer(vk::CommandBuffer commandBuffer, vk::Buffer buffer, vk::Image image,
+            vk::ImageAspectFlags aspectFlags, uint32_t width, uint32_t height,
+            uint32_t layerCount, uint32_t layerSize);
+        void CopyFromBuffer(vk::CommandBuffer commandBuffer, vk::Buffer buffer, vk::Image image,
+            vk::ImageAspectFlags aspectFlags, int32_t offsetX, int32_t offsetY, int32_t offsetZ,
+            uint32_t width, uint32_t height, uint32_t depth, uint32_t layerCount, uint32_t layerSize);
 
-        void CopyFromBuffer(vk::Buffer dst, vk::Buffer src, int32_t dstOffset, int32_t srcOffset, uint32_t size);
+        void CopyFromBuffer(vk::CommandBuffer commandBuffer, vk::Buffer dst, vk::Buffer src,
+            int32_t dstOffset, int32_t srcOffset, uint32_t size);
 
         vk::CommandBuffer GetNewResetableCommandBuffer(CommandBufferHandle commandBufferHandle);
 
