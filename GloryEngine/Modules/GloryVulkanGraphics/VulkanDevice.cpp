@@ -1343,26 +1343,37 @@ namespace Glory
 
 	TextureHandle VulkanDevice::CreateTexture(CubemapData* pCubemap)
 	{
-		//ProfileSample s{ &Profiler(), "VulkanDevice::CreateTexture" };
-		//ImageData* pFaceImage = pCubemap->GetImageData(&m_pModule->GetEngine()->GetAssetManager(), 0);
-		//if (!pFaceImage)
-		//{
-		//	Debug().LogError("VulkanDevice::CreateTexture(TextureData): Could not get ImageData.");
-		//	return NULL;
-		//}
-		//
-		//TextureCreateInfo createInfo;
-		//createInfo.m_Width = pFaceImage->GetWidth();
-		//createInfo.m_Height = pFaceImage->GetHeight();
-		//createInfo.m_ImageAspectFlags = IA_Color;
-		//createInfo.m_ImageType = ImageType::IT_Cube;
-		//createInfo.m_InternalFormat = pFaceImage->GetInternalFormat();
-		//createInfo.m_PixelFormat = pFaceImage->GetFormat();
-		//createInfo.m_Type = pFaceImage->GetDataType();
-		//createInfo.m_SamplerSettings = pCubemap->GetSamplerSettings();
-		//
-		//return CreateTexture(createInfo, pFaceImage->GetPixels(), pFaceImage->DataSize());
-		return NULL;
+		ProfileSample s{ &Profiler(), "VulkanDevice::CreateTexture(CubemapData)" };
+		ImageData* pFaceImage = pCubemap->GetImageData(&m_pModule->GetEngine()->GetAssetManager(), 0);
+		if (!pFaceImage)
+		{
+			Debug().LogError("VulkanDevice::CreateTexture(TextureData): Could not get ImageData.");
+			return NULL;
+		}
+		
+		TextureCreateInfo createInfo;
+		createInfo.m_Width = pFaceImage->GetWidth();
+		createInfo.m_Height = pFaceImage->GetHeight();
+		createInfo.m_ImageAspectFlags = IA_Color;
+		createInfo.m_ImageType = ImageType::IT_Cube;
+		createInfo.m_InternalFormat = pFaceImage->GetInternalFormat();
+		createInfo.m_PixelFormat = pFaceImage->GetFormat();
+		createInfo.m_Type = pFaceImage->GetDataType();
+		createInfo.m_SamplerSettings = pCubemap->GetSamplerSettings();
+
+		const size_t numFaces = 6;
+		const size_t faceDataSize = pFaceImage->DataSize();
+		const size_t totalDataSize = faceDataSize*numFaces;
+
+		std::vector<char> pixels(totalDataSize);
+
+		for (size_t i = 0; i < 6; ++i)
+		{
+			pFaceImage = pCubemap->GetImageData(&m_pModule->GetEngine()->GetAssetManager(), i);
+			std::memcpy(&pixels[i*faceDataSize], pFaceImage->GetPixels(), faceDataSize);
+		}
+
+		return CreateTexture(createInfo, pixels.data(), totalDataSize);
 	}
 
 	void EnsureSupportedFormat(vk::Format& format, vk::ImageViewCreateInfo& viewInfo)
@@ -1391,12 +1402,14 @@ namespace Glory
 		const uint32_t mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(textureInfo.m_Width, textureInfo.m_Height)))) + 1;
 		const vk::Format format = VKConverter::GetVulkanFormat(textureInfo.m_InternalFormat); //vk::Format::eR8G8B8A8Srgb;
 		const vk::ImageType imageType = VKConverter::GetVulkanImageType(textureInfo.m_ImageType);
+		const bool isCubemap = textureInfo.m_ImageType == ImageType::IT_Cube || textureInfo.m_ImageType == ImageType::IT_CubeArray;
+
 		vk::ImageCreateInfo imageInfo = vk::ImageCreateInfo();
 		imageInfo.imageType = imageType;
 		imageInfo.extent.width = textureInfo.m_Width;
 		imageInfo.extent.height = textureInfo.m_Height;
 		imageInfo.extent.depth = 1;
-		imageInfo.arrayLayers = 1;
+		imageInfo.arrayLayers = isCubemap ? 6 : 1;
 		imageInfo.format = format;
 		imageInfo.tiling = vk::ImageTiling::eOptimal;
 		imageInfo.initialLayout = vk::ImageLayout::eUndefined;
@@ -1405,7 +1418,7 @@ namespace Glory
 		if (pixels) imageInfo.usage |= vk::ImageUsageFlagBits::eTransferDst;
 		imageInfo.sharingMode = vk::SharingMode::eExclusive;
 		imageInfo.samples = vk::SampleCountFlagBits::e1;
-		imageInfo.flags = (vk::ImageCreateFlags)0;
+		imageInfo.flags = isCubemap ? vk::ImageCreateFlagBits::eCubeCompatible : (vk::ImageCreateFlags)0;
 		imageInfo.mipLevels = !textureInfo.m_SamplingEnabled ||
 			textureInfo.m_SamplerSettings.MipmapMode == Filter::F_None ? 1 : mipLevels;
 		if (imageInfo.mipLevels > 1)
@@ -1458,19 +1471,24 @@ namespace Glory
 		/* Transition image layout */
 		if (pixels)
 		{
-			TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, texture.m_VKAspect, imageInfo.mipLevels);
+			TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal,
+				texture.m_VKAspect, imageInfo.mipLevels, imageInfo.arrayLayers);
 			const vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
 			BufferHandle stagingBuffer = CreateBuffer(memRequirements.size, BufferType::BT_TransferRead, BufferFlags::BF_Write);
 			VK_Buffer* vkStagingBuffer = m_Buffers.Find(stagingBuffer);
 			AssignBuffer(stagingBuffer, pixels, uint32_t(dataSize));
 
-			CopyFromBuffer(vkStagingBuffer->m_VKBuffer, texture.m_VKImage, texture.m_VKAspect, textureInfo.m_Width, textureInfo.m_Height);
+			const size_t layerSize = dataSize/imageInfo.arrayLayers;
+
+			CopyFromBuffer(vkStagingBuffer->m_VKBuffer, texture.m_VKImage, texture.m_VKAspect,
+				textureInfo.m_Width, textureInfo.m_Height, imageInfo.arrayLayers, layerSize);
 
 			/* Transtion layout again so it can be sampled */
 			if (imageInfo.mipLevels > 1)
 				GenerateMipMaps(texture.m_VKImage, textureInfo.m_Width, textureInfo.m_Height, imageInfo.mipLevels);
 			else
-				TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, texture.m_VKAspect, imageInfo.mipLevels);
+				TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eTransferDstOptimal,
+					vk::ImageLayout::eShaderReadOnlyOptimal, texture.m_VKAspect, imageInfo.mipLevels, imageInfo.arrayLayers);
 
 			FreeBuffer(stagingBuffer);
 
@@ -1485,7 +1503,7 @@ namespace Glory
 		viewInfo.subresourceRange.baseMipLevel = 0;
 		viewInfo.subresourceRange.levelCount = imageInfo.mipLevels;
 		viewInfo.subresourceRange.baseArrayLayer = 0;
-		viewInfo.subresourceRange.layerCount = 1;
+		viewInfo.subresourceRange.layerCount = imageInfo.arrayLayers;
 
 		if (m_LogicalDevice.createImageView(&viewInfo, nullptr, &texture.m_VKImageView) != vk::Result::eSuccess)
 		{
@@ -2809,7 +2827,8 @@ namespace Glory
 		m_LogicalDevice.freeCommandBuffers(commandPool, 1, &commandBuffer);
 	}
 
-	void VulkanDevice::TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags, uint32_t mipLevels)
+	void VulkanDevice::TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout,
+		vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags, uint32_t mipLevels, uint32_t layerCount)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::TransitionImageLayout" };
 		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
@@ -2824,7 +2843,7 @@ namespace Glory
 		barrier.subresourceRange.baseMipLevel = 0;
 		barrier.subresourceRange.levelCount = mipLevels;
 		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
+		barrier.subresourceRange.layerCount = layerCount;
 
 		vk::PipelineStageFlags sourceStage;
 		vk::PipelineStageFlags destinationStage;
@@ -2956,31 +2975,38 @@ namespace Glory
 		EndSingleTimeCommands(commandBuffer);
 	}
 
-	void VulkanDevice::CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags, uint32_t width, uint32_t height)
+	void VulkanDevice::CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags,
+		uint32_t width, uint32_t height, uint32_t layerCount, uint32_t layerSize)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::CopyFromBuffer" };
-		CopyFromBuffer(buffer, image, aspectFlags, 0, 0, 0, width, height, 1);
+		CopyFromBuffer(buffer, image, aspectFlags, 0, 0, 0, width, height, 1, layerCount, layerSize);
 	}
 
-	void VulkanDevice::CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags, int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth)
+	void VulkanDevice::CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags,
+		int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height,
+		uint32_t depth, uint32_t layerCount, uint32_t layerSize)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::CopyFromBuffer(offset)" };
 		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
 
-		vk::BufferImageCopy copyRegion = vk::BufferImageCopy();
-		copyRegion.bufferOffset = 0;
-		copyRegion.bufferRowLength = 0;
-		copyRegion.bufferImageHeight = 0;
+		std::vector<vk::BufferImageCopy> bufferImageCopies(layerCount);
+		for (size_t i = 0; i < layerCount; ++i)
+		{
+			bufferImageCopies[i].bufferOffset = i*layerSize;
+			bufferImageCopies[i].bufferRowLength = 0;
+			bufferImageCopies[i].bufferImageHeight = 0;
 
-		copyRegion.imageSubresource.aspectMask = aspectFlags;
-		copyRegion.imageSubresource.mipLevel = 0;
-		copyRegion.imageSubresource.baseArrayLayer = 0;
-		copyRegion.imageSubresource.layerCount = 1;
+			bufferImageCopies[i].imageSubresource.aspectMask = aspectFlags;
+			bufferImageCopies[i].imageSubresource.mipLevel = 0;
+			bufferImageCopies[i].imageSubresource.baseArrayLayer = i;
+			bufferImageCopies[i].imageSubresource.layerCount = 1;
 
-		copyRegion.imageOffset = vk::Offset3D(offsetX, offsetY, offsetZ);
-		copyRegion.imageExtent = vk::Extent3D(width, height, depth);
+			bufferImageCopies[i].imageOffset = vk::Offset3D(offsetX, offsetY, offsetZ);
+			bufferImageCopies[i].imageExtent = vk::Extent3D(width, height, depth);
+		}
 
-		commandBuffer.copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal, 1, &copyRegion);
+		commandBuffer.copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal,
+			static_cast<uint32_t>(bufferImageCopies.size()), bufferImageCopies.data());
 
 		EndSingleTimeCommands(commandBuffer);
 	}

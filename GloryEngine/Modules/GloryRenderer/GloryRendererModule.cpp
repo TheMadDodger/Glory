@@ -2012,20 +2012,21 @@ namespace Glory
 			return;
 		}
 		CubemapData* pCubemap = static_cast<CubemapData*>(pResource);
-		TextureHandle previousCubemapTexture = m_SkyboxCubemap;
 		const bool cubemapDirty = pCubemap->IsDirty();
-		m_SkyboxCubemap = pDevice->AcquireCachedTexture(pCubemap);
-		if (!m_SkyboxCubemap) return;
+		TextureHandle cubemap = pDevice->AcquireCachedTexture(pCubemap);
+		if (!cubemap) return;
 		if (!m_GlobalSkyboxSamplerSet)
 		{
-			m_GlobalSkyboxSamplerSet = CreateSamplerDescriptorSet(pDevice, 1, { m_SkyboxCubemap }, m_GlobalSkyboxSamplerSetLayout);
+			m_GlobalSkyboxSamplerSet = CreateSamplerDescriptorSet(pDevice, 1, { cubemap }, m_GlobalSkyboxSamplerSetLayout);
+			m_SkyboxCubemap = cubemap;
 			return;
 		}
-		if (!cubemapDirty && previousCubemapTexture == m_SkyboxCubemap) return;
+		if (!cubemapDirty && cubemap == m_SkyboxCubemap) return;
 
 		DescriptorSetUpdateInfo dsUpdateInfo;
-		dsUpdateInfo.m_Samplers = { { m_SkyboxCubemap, 0 } };
+		dsUpdateInfo.m_Samplers = { { cubemap, 0 } };
 		pDevice->UpdateDescriptorSet(m_GlobalSkyboxSamplerSet, dsUpdateInfo);
+		m_SkyboxCubemap = cubemap;
 	}
 
 	void GloryRendererModule::ClusterPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex)
@@ -2061,13 +2062,17 @@ namespace Glory
 		if (!skyboxID) return;
 		Resource* pResource = m_pEngine->GetAssetManager().FindResource(skyboxID);
 		if (!pResource) return;
-		CubemapData* pCubemap = static_cast<CubemapData*>(pResource);
+
+		CameraRef camera = m_ActiveCameras[cameraIndex];
+		const glm::uvec2& resolution = camera.GetResolution();
 
 		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::SkyboxPass" };
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		pDevice->BeginPipeline(commandBuffer, m_SkyboxPipeline);
 		pDevice->BindDescriptorSets(commandBuffer, m_SkyboxPipeline, { m_GlobalSkyboxRenderSet, m_GlobalSkyboxSamplerSet });
 		pDevice->PushConstants(commandBuffer, m_SkyboxPipeline, 0, sizeof(uint32_t), &cameraIndex, STF_Vertex);
+		pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));
+		pDevice->SetScissor(commandBuffer, 0, 0, resolution.x, resolution.y);
 		pDevice->DrawUnitCube(commandBuffer);
 		pDevice->EndPipeline(commandBuffer);
 	}

@@ -42,7 +42,7 @@ namespace Glory
 
 	uint32_t ImageData::GetByteSize() const
 	{
-		return m_Header.m_Width * m_Header.m_Height * m_Header.m_BytesPerPixel;
+		return m_Header.m_Width*m_Header.m_Height*m_Header.m_BytesPerPixel;
 	}
 
 	const void* ImageData::GetPixels() const

@@ -240,8 +240,12 @@ namespace Glory
         switch (imageType)
         {
         case Glory::ImageType::IT_1D:
+        case Glory::ImageType::IT_1DArray:
             return vk::ImageType::e1D;
+        case Glory::ImageType::IT_Cube:
+        case Glory::ImageType::IT_CubeArray:
         case Glory::ImageType::IT_2D:
+        case Glory::ImageType::IT_2DArray:
             return vk::ImageType::e2D;
         case Glory::ImageType::IT_3D:
             return vk::ImageType::e3D;
