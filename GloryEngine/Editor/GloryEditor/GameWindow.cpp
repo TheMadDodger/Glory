@@ -6,6 +6,7 @@
 #include <imgui.h>
 #include <InputModule.h>
 #include <RendererModule.h>
+#include <GraphicsDevice.h>
 
 namespace Glory::Editor
 {
@@ -126,7 +127,9 @@ namespace Glory::Editor
 
 	void GameWindow::View()
 	{
-		RendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>();
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
 
 		const size_t outputCameraCount = pRenderer->GetOutputCameraCount();
 		if (m_CurrentOutputCameraIndex != -1 && m_CurrentOutputCameraIndex > outputCameraCount)
@@ -192,8 +195,9 @@ namespace Glory::Editor
 			}
 		}
 
+		const bool flipY = pDevice->GetViewportOrigin() == ViewportOrigin::TopLeft;
 		ImGui::GetWindowDrawList()->AddImage(
 			pRenderImpl->GetTextureID(texture), topLeft,
-			bottomRight, ImVec2(0, 1), ImVec2(1, 0));
+			bottomRight, ImVec2(0, flipY ? 0 : 1), ImVec2(1, flipY ? 1 : 0));
 	}
 }
