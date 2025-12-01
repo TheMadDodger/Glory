@@ -30,14 +30,19 @@ layout(set = 1, std140, binding = 2) readonly uniform SampleDomeUBO
 
 void main()
 {
+    float depth = texture(Depth, Coord).r;
+    if(depth == 1.0)
+    {
+        out_Color = 1.0;
+        return;
+    }
+
     CameraData camera = CurrentCamera();
-
     vec2 noiseScale = vec2(camera.Resolution.x/4.0, camera.Resolution.y/4.0);
-
 	vec3 normal = texture(Normal, Coord).xyz*2.0 - 1.0;
     normal = mat3(camera.View)*normalize(normal);
 	vec3 randomVec = texture(Noise, Coord*noiseScale).xyz;
-	float depth = texture(Depth, Coord).r;
+
 	vec4 fragPosition = ViewPosFromDepth(depth, camera.ProjectionInverse, Coord);
 
     vec3 tangent   = normalize(randomVec - normal*dot(randomVec, normal));
