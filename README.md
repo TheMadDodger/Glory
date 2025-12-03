@@ -18,18 +18,37 @@ It has a detailed [profiler](https://github.com/TheMadDodger/Glory/wiki/Profilin
 - Built-in [profiler](https://github.com/TheMadDodger/Glory/wiki/Profiling)
 - [Launcher/Hub](https://github.com/TheMadDodger/Glory/wiki/Editor-Launcher-Hub) with support for multiple editor installations (similar to Unity)
 - Built-in version checking
+- Entity Component System
 
 ## Built-in Modules
 - Clustered Renderer
 - OpenGL Graphics API
-- Model loader using ASSIMP
+- Vulkan Graphics API
 - ECS Scene System
 - Texture loading using SDL image
 - SDL Window
 - Physics engine using the Jolt Physics library
 - Scripting in C# using mono
 - Input processing with SDL
-- Vulkan Graphics API (WIP)
+- SDL Mixer Audio
+- Steam Audio (3D audio simulation)
+- Finite State Machines module
+- UI Renderer
+- Localization module
+- Overlay console
+
+## Built-in editor extensions
+- ASSIMP importer
+- Font importer based on FreeType2
+- FSM editor
+- Audio importer
+- Jolt Physics editor
+- Localization editor
+- Mono Scripting editor
+- SDL Audio editor
+- SDL Image importer
+- HDRI importer and cubemap generator using stb_image and HdriToCubemap
+- Steam Audio editor
 
 ## Tech
 
@@ -43,6 +62,7 @@ Glory uses the following libraries:
 - [yaml-cpp](https://github.com/jbeder/yaml-cpp) - YAML file parser for C++.
 - [SDL](https://www.libsdl.org/) - Simple Direct Media Layer library, used for opening a window.
 - [SDL_Image](https://github.com/libsdl-org/SDL_image) - Image loading library for SDL.
+- [SDL_mixer](https://github.com/libsdl-org/SDL_mixer) - An audio management library.
 - [Vulkan SDK](https://www.lunarg.com/vulkan-sdk/) - The future of computer graphics.
 - [GLEW](http://glew.sourceforge.net/) - OpenGL extension wrangler library.
 - [GLM](https://github.com/g-truc/glm) - Mathematics library for graphics software.
@@ -59,11 +79,17 @@ Glory uses the following libraries:
 - [tinyfiledialogs](https://github.com/native-toolkit/libtinyfiledialogs) - Simple and fast cross platform file dialog.
 - [FontAwesome](https://fontawesome.com/) - Large collection of icons contained in a font.
 - [zlib](https://www.zlib.net/) - A Massively Spiffy Yet Delicately Unobtrusive Compression Library.
+- [HdriToCubemap](https://github.com/ivarout/HdriToCubemap) - A simple C++ library to convert hdri (equirectangular) environment maps to cubemaps.
+- [SteamAudio](https://github.com/ValveSoftware/steam-audio) - A 3D audio simulation engine made by Valve.
+- [CRCpp](https://github.com/d-bahr/CRCpp) - A fast C++ CRC calculator.
+- [FreeType](https://github.com/freetype/freetype) - A freely available software library to render fonts.
 
 ## Installation
 
 ### Install Dependencies
 
+Make sure to install Vulkan SDK 1.4.321.1 [here](https://vulkan.lunarg.com/sdk/home), and the latest version of [mono](https://www.mono-project.com/download/stable/).
+Also make sure to install [.NET Framework 4.7.2](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net472).
 To build and install dependencies, run the install-dependencies.sh script using the following command line:
 `./install-dependencies.sh [configuration]`
 There are currently 2 options for configuration, `Debug` and `Release`.
@@ -75,6 +101,8 @@ Open `GloryEngine.sln` and build the whole solution.
 Run the editor by running Glorious.
 
 Run the luncher/hub by running GloriousLauncher.
+
+Run the runtime by running RuntimeTestApplication, make sure to package the Sponza demo through the editor before running this.
 
 ## License
 
