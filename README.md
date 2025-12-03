@@ -4,7 +4,7 @@
 Glory is an under development, modular game engine and editor, written in C++.
 It has a detailed [profiler](https://github.com/TheMadDodger/Glory/wiki/Profiling), comes with a clustered renderer supporting 3000+ dynamic lights, is fully customizable and is platform independant thanks to its modularity.
 
-![Glory Editor](https://glory-engine.com/static/media/Editor.05d1513b28ecf536e655.png)
+![Glory Editor](https://glory-engine.com/static/media/Editor.192132f3ded68e7992eb.png)
 
 ## Features
 - Extremely expandable due to modular design
