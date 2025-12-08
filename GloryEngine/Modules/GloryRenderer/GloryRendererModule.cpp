@@ -1731,22 +1731,27 @@ namespace Glory
 
 			PipelineBatchData& batchData = batchDatas.at(batchIndex);
 			++batchIndex;
-			size_t meshIndex = 0;
 
 			if (pipelineBatch.m_UniqueMeshOrder.empty()) continue;
 
+			size_t objectCount = 0;
 			for (const UUID meshID : pipelineBatch.m_UniqueMeshOrder)
 			{
 				const PipelineMeshBatch& meshBatch = pipelineBatch.m_Meshes.at(meshID);
-				if (batchData.m_Worlds->size() < meshIndex + meshBatch.m_Worlds.size())
-					batchData.m_Worlds.resize(meshIndex + meshBatch.m_Worlds.size());
+				if (batchData.m_Worlds->size() < objectCount + meshBatch.m_Worlds.size())
+					batchData.m_Worlds.resize(objectCount + meshBatch.m_Worlds.size());
 
-				if (std::memcmp(&batchData.m_Worlds.m_Data[meshIndex], meshBatch.m_Worlds.data(), meshBatch.m_Worlds.size()*sizeof(glm::mat4)) != 0)
+				for (size_t i = 0; i < meshBatch.m_Worlds.size(); ++i)
 				{
-					std::memcpy(&batchData.m_Worlds.m_Data[meshIndex], meshBatch.m_Worlds.data(), meshBatch.m_Worlds.size()*sizeof(glm::mat4));
-					batchData.m_Worlds.SetDirty(meshIndex);
+					if (std::memcmp(&batchData.m_Worlds.m_Data[objectCount + i],
+						&meshBatch.m_Worlds[i], sizeof(glm::mat4)) != 0)
+					{
+						std::memcpy(&batchData.m_Worlds.m_Data[objectCount + i],
+							&meshBatch.m_Worlds[i], sizeof(glm::mat4));
+						batchData.m_Worlds.SetDirty(objectCount + i);
+					}
 				}
-				meshIndex += meshBatch.m_Worlds.size();
+				objectCount += meshBatch.m_Worlds.size();
 			}
 
 			const size_t propertyDataSize = pPipelineData->TotalPropertiesByteSize();
@@ -1886,7 +1891,7 @@ namespace Glory
 				setInfo.m_Buffers.resize(1);
 				setInfo.m_Buffers[0].m_BufferHandle = batchData.m_WorldsBuffer;
 				setInfo.m_Buffers[0].m_Offset = 0;
-				setInfo.m_Buffers[0].m_Size = batchData.m_Worlds->size() * sizeof(glm::mat4);
+				setInfo.m_Buffers[0].m_Size = batchData.m_Worlds->size()*sizeof(glm::mat4);
 				setInfo.m_Layout = m_ObjectDataSetLayout;
 				batchData.m_ObjectDataSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 			}
@@ -1914,6 +1919,36 @@ namespace Glory
 
 				batchData.m_MaterialSetLayout = setInfo.m_Layout = pDevice->CreateDescriptorSetLayout(std::move(setLayoutInfo));
 				batchData.m_MaterialSet = pDevice->CreateDescriptorSet(std::move(setInfo));
+			}
+
+			if (batchData.m_Worlds.SizeDirty())
+			{
+				DescriptorSetUpdateInfo dsWrite;
+				dsWrite.m_Buffers.resize(1);
+				dsWrite.m_Buffers[0].m_BufferHandle = batchData.m_WorldsBuffer;
+				dsWrite.m_Buffers[0].m_DescriptorIndex = 0;
+				dsWrite.m_Buffers[0].m_Offset = 0;
+				dsWrite.m_Buffers[0].m_Size = batchData.m_Worlds->size()*sizeof(glm::mat4);
+				pDevice->UpdateDescriptorSet(batchData.m_ObjectDataSet, dsWrite);
+			}
+			if (batchData.m_MaterialDatas.SizeDirty() || batchData.m_TextureBits.SizeDirty())
+			{
+				DescriptorSetUpdateInfo dsWrite;
+				dsWrite.m_Buffers.resize(textureCount > 0 ? 2 : 1);
+				dsWrite.m_Buffers[0].m_BufferHandle = batchData.m_MaterialsBuffer;
+				dsWrite.m_Buffers[0].m_DescriptorIndex = 0;
+				dsWrite.m_Buffers[0].m_Offset = 0;
+				dsWrite.m_Buffers[0].m_Size = batchData.m_MaterialDatas->size();
+
+				if (batchData.m_TextureBitsBuffer)
+				{
+					dsWrite.m_Buffers[1].m_BufferHandle = batchData.m_TextureBitsBuffer;
+					dsWrite.m_Buffers[1].m_DescriptorIndex = 1;
+					dsWrite.m_Buffers[1].m_Offset = 0;
+					dsWrite.m_Buffers[1].m_Size = batchData.m_TextureBits->size()*sizeof(uint32_t);
+				}
+
+				pDevice->UpdateDescriptorSet(batchData.m_MaterialSet, dsWrite);
 			}
 
 			if (!batchData.m_Pipeline || pPipelineData->IsDirty() || pPipelineData->SettingsDirty())

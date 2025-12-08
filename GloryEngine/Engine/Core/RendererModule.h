@@ -66,12 +66,20 @@ namespace Glory
 			m_Dirty = true;
 			m_DirtyRange.first = 0;
 			m_DirtyRange.second = newSize;
+			m_SizeDirty = true;
 		}
 
 		operator bool()
 		{
 			const bool value = m_Dirty;
 			m_Dirty = false;
+			return value;
+		}
+
+		bool SizeDirty()
+		{
+			const bool value = m_SizeDirty;
+			m_SizeDirty = false;
 			return value;
 		}
 
@@ -115,6 +123,7 @@ namespace Glory
 
 		std::vector<T> m_Data;
 		bool m_Dirty{ false };
+		bool m_SizeDirty{ false };
 		std::pair<size_t, size_t> m_DirtyRange{ 0, 0 };
 	};
 
