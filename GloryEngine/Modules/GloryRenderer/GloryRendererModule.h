@@ -71,6 +71,8 @@ namespace Glory
 			BufferHandle m_MaterialsBuffer = 0;
 			BufferHandle m_TextureBitsBuffer = 0;
 
+			std::vector<UUID> m_LastFrameUniqueMaterials;
+
 			PipelineHandle m_Pipeline = 0;
 			DescriptorSetLayoutHandle m_TextureSetLayout = 0;
 			DescriptorSetLayoutHandle m_MaterialSetLayout = 0;

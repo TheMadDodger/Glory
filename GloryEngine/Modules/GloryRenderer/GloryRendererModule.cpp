@@ -1763,8 +1763,10 @@ namespace Glory
 				batchData.m_MaterialDatas.resize(totalBufferSize);
 			if (textureCount && batchData.m_TextureBits->size() < pipelineBatch.m_UniqueMaterials.size())
 				batchData.m_TextureBits.resize(pipelineBatch.m_UniqueMaterials.size());
+			if (batchData.m_LastFrameUniqueMaterials.size() < pipelineBatch.m_UniqueMaterials.size())
+				batchData.m_LastFrameUniqueMaterials.resize(pipelineBatch.m_UniqueMaterials.size(), NULL);
 
-			if (textureCount)
+			if (!batchData.m_TextureSetLayout && textureCount > 0)
 			{
 				DescriptorSetLayoutInfo texturesSetLayoutInfo;
 				texturesSetLayoutInfo.m_Samplers.resize(textureCount);
@@ -1776,12 +1778,16 @@ namespace Glory
 					texturesSetLayoutInfo.m_Samplers[i].m_ShaderStages = STF_Fragment;
 				}
 				batchData.m_TextureSetLayout = pDevice->CreateDescriptorSetLayout(std::move(texturesSetLayoutInfo));
-				batchData.m_TextureSets.resize(pipelineBatch.m_UniqueMaterials.size(), nullptr);
 			}
+			if (textureCount > 0 && batchData.m_TextureSets.size() < pipelineBatch.m_UniqueMaterials.size())
+				batchData.m_TextureSets.resize(pipelineBatch.m_UniqueMaterials.size(), nullptr);
 
 			for (size_t i = 0; i < pipelineBatch.m_UniqueMaterials.size(); ++i)
 			{
 				const UUID materialID = pipelineBatch.m_UniqueMaterials[i];
+				const bool differentMaterial = batchData.m_LastFrameUniqueMaterials[i] != materialID;
+				batchData.m_LastFrameUniqueMaterials[i] = materialID;
+
 				MaterialData* pMaterialData = materials.GetMaterial(materialID);
 				if (!pMaterialData) continue;
 				const auto& buffer = pMaterialData->GetBufferReference();
@@ -1827,7 +1833,7 @@ namespace Glory
 					continue;
 				}
 
-				if (pMaterialData->IsDirty())
+				if (pMaterialData->IsDirty() || differentMaterial)
 				{
 					DescriptorSetUpdateInfo dsUpdateInfo;
 					dsUpdateInfo.m_Samplers.resize(textureCount);
