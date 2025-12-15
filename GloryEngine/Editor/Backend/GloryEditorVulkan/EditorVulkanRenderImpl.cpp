@@ -32,13 +32,11 @@ namespace Glory::Editor
 	{
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		m_pDevice = static_cast<VulkanDevice*>(pEngine->ActiveGraphicsDevice());
-		auto iter = m_DesciptorSets.find(texture);
-		if (iter == m_DesciptorSets.end())
-		{
-			vk::DescriptorSet ds = ImGui_ImplVulkan_AddTexture(m_pDevice->GetVKSampler(texture), m_pDevice->GetVKImageView(texture), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-			iter = m_DesciptorSets.emplace(texture, ds).first;
-		}
-		return (void*)iter->second;
+		const bool hasImage = m_pDevice->TextureHasImage(texture);
+		if (!hasImage)
+			return GetTextureID_Internal(m_pDevice->GetDefaultTexture());
+
+		return GetTextureID_Internal(texture);
 	}
 
 	std::string EditorVulkanRenderImpl::ShadingLanguage()
@@ -383,5 +381,29 @@ namespace Glory::Editor
 	void EditorVulkanRenderImpl::FramePresent()
 	{
 		FramePresent(&m_MainWindow);
+	}
+
+	void* EditorVulkanRenderImpl::GetTextureID_Internal(TextureHandle texture)
+	{
+		const vk::ImageView imageView = m_pDevice->GetVKImageView(texture);
+
+		auto iter = m_DesciptorSets.find(texture);
+		if (iter == m_DesciptorSets.end())
+		{
+			vk::DescriptorSet ds = ImGui_ImplVulkan_AddTexture(m_pDevice->GetVKSampler(texture), imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			iter = m_DesciptorSets.emplace(texture, ds).first;
+			m_ImageViews.emplace(texture, imageView).first;
+		}
+
+		vk::ImageView& otherImageView = m_ImageViews.at(texture);
+		if (imageView != otherImageView)
+		{
+			/* Update image */
+			ImGui_ImplVulkan_RemoveTexture(iter->second);
+			iter->second = ImGui_ImplVulkan_AddTexture(m_pDevice->GetVKSampler(texture), imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			otherImageView = imageView;
+		}
+		
+		return (void*)iter->second;
 	}
 }

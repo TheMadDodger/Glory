@@ -12,6 +12,8 @@ namespace Glory
 		H_Buffer,
 		/** @brief Mesh */
 		H_Mesh,
+		/** @brief Image */
+		H_Image,
 		/** @brief Texture */
 		H_Texture,
 		/** @brief RenderTexture */
@@ -65,7 +67,11 @@ namespace Glory
 		/** @overload Comparator */
 		bool operator==(const GraphicsHandle& other) const { return m_ID == other.m_ID; }
 		/** @overload Comparator */
+		bool operator!=(const GraphicsHandle& other) const { return m_ID != other.m_ID; }
+		/** @overload Comparator */
 		bool operator==(std::nullptr_t) const { return m_ID == NULL; }
+		/** @overload Comparator */
+		bool operator!=(std::nullptr_t) const { return m_ID != NULL; }
 		/** @overload Comparator */
 		bool operator==(UUID id) const { return m_ID == id; }
 
@@ -84,6 +90,8 @@ namespace Glory
 	typedef GraphicsHandle<H_Buffer> BufferHandle;
 	/** @brief Mesh handle */
 	typedef GraphicsHandle<H_Mesh> MeshHandle;
+	/** @brief Image handle */
+	typedef GraphicsHandle<H_Image> ImageHandle;
 	/** @brief Texture handle */
 	typedef GraphicsHandle<H_Texture> TextureHandle;
 	/** @brief RenderTexture handle */

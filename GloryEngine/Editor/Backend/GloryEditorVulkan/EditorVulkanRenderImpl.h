@@ -49,12 +49,15 @@ namespace Glory::Editor
         virtual void FrameRender(ImDrawData* pDrawData) override;
         virtual void FramePresent() override;
 
+        void* GetTextureID_Internal(TextureHandle texture);
+
     private:
         VulkanDevice* m_pDevice;
         ImGui_ImplVulkanH_Window m_MainWindow;
         VkDescriptorPool m_DescriptorPool;
         bool m_SwapchainRebuild;
         std::map<UUID, vk::DescriptorSet> m_DesciptorSets;
+        std::map<UUID, vk::ImageView> m_ImageViews;
 
         const int MINIMAGECOUNT = 2;
     };

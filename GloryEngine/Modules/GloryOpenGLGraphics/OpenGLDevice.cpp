@@ -1258,6 +1258,59 @@ namespace Glory
 		return handle;
 	}
 
+	void OpenGLDevice::UpdateTexture(TextureHandle texture, TextureData* pTextureData)
+	{
+		GL_Texture* glTexture = m_Textures.Find(texture);
+		if (!glTexture)
+		{
+			Debug().LogError("OpenGLDevice::UpdateTexture: Invalid texture handle.");
+			return;
+		}
+
+		glBindTexture(glTexture->m_GLTextureType, glTexture->m_GLTextureID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		const SamplerSettings& sampler = pTextureData->GetSamplerSettings();
+		if (sampler.MipmapMode != Filter::F_None)
+		{
+			glGenerateMipmap(glTexture->m_GLTextureType);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+
+		glTexture->m_GLMinFilter = GetMinFilter(sampler.MipmapMode, sampler.MinFilter);
+		glTexture->m_GLMagFilter = Filters.at(sampler.MagFilter);
+		glTexture->m_GLTextureWrapS = Texturewraps.at(sampler.AddressModeU);
+		glTexture->m_GLTextureWrapT = Texturewraps.at(sampler.AddressModeV);
+		glTexture->m_GLTextureWrapR = Texturewraps.at(sampler.AddressModeW);
+
+		glTexParameteri(glTexture->m_GLTextureType, GL_TEXTURE_MIN_FILTER, glTexture->m_GLMinFilter);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameteri(glTexture->m_GLTextureType, GL_TEXTURE_MAG_FILTER, glTexture->m_GLMagFilter);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameteri(glTexture->m_GLTextureType, GL_TEXTURE_WRAP_S, glTexture->m_GLTextureWrapS);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameteri(glTexture->m_GLTextureType, GL_TEXTURE_WRAP_T, glTexture->m_GLTextureWrapT);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameteri(glTexture->m_GLTextureType, GL_TEXTURE_WRAP_R, glTexture->m_GLTextureWrapR);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameterf(glTexture->m_GLTextureType, GL_TEXTURE_MIN_LOD, sampler.MinLOD);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameterf(glTexture->m_GLTextureType, GL_TEXTURE_MAX_LOD, sampler.MaxLOD);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glTexParameterf(glTexture->m_GLTextureType, GL_TEXTURE_LOD_BIAS, sampler.MipLODBias);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		float aniso = 0.0f;
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		aniso = std::min(sampler.MaxAnisotropy, aniso);
+		glTexParameterf(glTexture->m_GLTextureType, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glBindTexture(glTexture->m_GLTextureType, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
 	RenderTextureHandle OpenGLDevice::CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info)
 	{
 		if (info.Width == 0 || info.Height == 0)

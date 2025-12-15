@@ -37,9 +37,9 @@ namespace Glory
         std::vector<BufferHandle> m_Buffers;
     };
 
-    struct VK_Texture
+    struct VK_Image
     {
-        static constexpr GraphicsHandleType HandleType = H_Texture;
+        static constexpr GraphicsHandleType HandleType = H_Image;
 
         vk::ImageLayout m_VKInitialLayout = vk::ImageLayout::eUndefined;
         vk::ImageLayout m_VKFinalLayout;
@@ -47,10 +47,19 @@ namespace Glory
         vk::Image m_VKImage;
         vk::ImageView m_VKImageView;
         vk::DeviceMemory m_VKMemory;
-        vk::Sampler m_VKSampler;
         vk::Format m_VKFormat = vk::Format::eUndefined;
         bool m_IsSwapchainImage = false;
         bool m_BlendingSupported = false;
+
+        size_t m_ReferenceCounter = 0;
+    };
+
+    struct VK_Texture
+    {
+        static constexpr GraphicsHandleType HandleType = H_Texture;
+
+        ImageHandle m_Image = NULL;
+        vk::Sampler m_VKSampler;
     };
 
     struct VK_RenderTexture
@@ -201,6 +210,7 @@ namespace Glory
 
         GLORY_API vk::ImageView GetVKImageView(TextureHandle texture);
         GLORY_API vk::Sampler GetVKSampler(TextureHandle texture);
+        GLORY_API bool TextureHasImage(TextureHandle texture);
 
         GLORY_API virtual ViewportOrigin GetViewportOrigin() const { return ViewportOrigin::TopLeft; }
 
@@ -236,6 +246,8 @@ namespace Glory
 
         virtual void WaitIdle() override;
 
+        virtual void OnInitialize() override;
+
     private: /* Resource management */
         virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type, BufferFlags flags=BF_None) override;
 
@@ -253,6 +265,8 @@ namespace Glory
         virtual TextureHandle CreateTexture(TextureData* pTexture) override;
         virtual TextureHandle CreateTexture(CubemapData* pCubemap) override;
         virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) override;
+        virtual void UpdateTexture(TextureHandle texture, TextureData* pTextureData) override;
+
         virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info) override;
         virtual TextureHandle GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index) override;
         virtual void ResizeRenderTexture(RenderTextureHandle renderTexture, uint32_t width, uint32_t height) override;
@@ -310,6 +324,10 @@ namespace Glory
         vk::PresentModeKHR SelectPresentMode(const std::vector<vk::PresentModeKHR>& presentModes, vk::SurfaceKHR surface);
         vk::SurfaceFormatKHR SelectSurfaceFormat(vk::SurfaceKHR surface, const std::vector<vk::Format> requestFormats, vk::ColorSpaceKHR requestColorSpace);
 
+        ImageHandle GetCachedImage(ImageData* pImage);
+        ImageHandle CreateImage(const TextureCreateInfo& textureInfo, const void* pixels, size_t dataSize);
+        void UpdateImage(ImageHandle image, ImageData* pImage);
+
     private:
         void CreateRenderTexture(vk::RenderPass vkRenderPass, VK_RenderTexture& renderTexture);
         bool CreateSwapchain(VK_Swapchain& swapchain, const vk::SurfaceCapabilitiesKHR& capabilities, vk::SurfaceKHR surface,
@@ -340,6 +358,7 @@ namespace Glory
 
         GraphicsResources<VK_Buffer> m_Buffers;
         GraphicsResources<VK_Mesh> m_Meshes;
+        GraphicsResources<VK_Image> m_Images;
         GraphicsResources<VK_Texture> m_Textures;
         GraphicsResources<VK_RenderTexture> m_RenderTextures;
         GraphicsResources<VK_RenderPass> m_RenderPasses;
@@ -351,6 +370,7 @@ namespace Glory
         GraphicsResources<VK_Semaphore> m_Semaphores;
 
         std::unordered_map<UUID, VK_CommandBuffer> m_CommandBuffers;
+        std::unordered_map<UUID, ImageHandle> m_ImageHandles;
         std::vector<vk::CommandBuffer> m_FreeCommandBuffers;
         std::vector<vk::Fence> m_FreeFences;
 
@@ -359,5 +379,7 @@ namespace Glory
 
         DescriptorAllocator m_DescriptorAllocator;
         CommandBufferAllocator m_CommandBufferAllocator;
+
+        ImageHandle m_DefaultImage;
     };
 }

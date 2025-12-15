@@ -1833,21 +1833,30 @@ namespace Glory
 					continue;
 				}
 
-				if (pMaterialData->IsDirty() || differentMaterial)
+				std::vector<TextureData*> textures(textureCount);
+				bool texturesDirty = false;
+				for (size_t j = 0; j < textureCount; ++j)
+				{
+					const UUID textureID = pMaterialData->GetResourceUUIDPointer(j)->AssetUUID();
+					Resource* pResource = assets.FindResource(textureID);
+					if (!pResource)
+					{
+						textures[j] = NULL;
+						continue;
+					}
+					textures[j] = static_cast<TextureData*>(pResource);
+					ImageData* pImage = textures[j]->GetImageData(&assets);
+					texturesDirty |= textures[j]->IsDirty() || pImage ? pImage->IsDirty() : false;
+				}
+
+				if (pMaterialData->IsDirty() || differentMaterial || texturesDirty)
 				{
 					DescriptorSetUpdateInfo dsUpdateInfo;
 					dsUpdateInfo.m_Samplers.resize(textureCount);
 					for (size_t j = 0; j < textureCount; ++j)
 					{
-						const UUID textureID = pMaterialData->GetResourceUUIDPointer(j)->AssetUUID();
+						TextureData* pTexture = textures[j];
 						dsUpdateInfo.m_Samplers[j].m_DescriptorIndex = j;
-						Resource* pResource = assets.FindResource(textureID);
-						if (!pResource)
-						{
-							dsUpdateInfo.m_Samplers[j].m_TextureHandle = NULL;
-							continue;
-						}
-						TextureData* pTexture = static_cast<TextureData*>(pResource);
 						dsUpdateInfo.m_Samplers[j].m_TextureHandle = pDevice->AcquireCachedTexture(pTexture);
 					}
 					pDevice->UpdateDescriptorSet(batchData.m_TextureSets[i], dsUpdateInfo);

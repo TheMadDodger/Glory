@@ -126,6 +126,7 @@ namespace Glory
 
 	class Resource;
 	class MeshData;
+	class ImageData;
 	class TextureData;
 	class CubemapData;
 	class FileData;
@@ -310,6 +311,8 @@ namespace Glory
 		virtual ViewportOrigin GetViewportOrigin() const { return ViewportOrigin::BottomLeft; }
 
 		void Initialize();
+
+		TextureHandle GetDefaultTexture() const { return m_DefaultTexture; }
 
 	public: /* Rendering commands */
 		/** @brief Create a new command buffer */
@@ -607,6 +610,8 @@ namespace Glory
 		 * @param dataSize Total size of the pixel data
 		 */
 		virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) = 0;
+
+		virtual void UpdateTexture(TextureHandle texture, TextureData* pTextureData) = 0;
 
 		/* Render texture */
 

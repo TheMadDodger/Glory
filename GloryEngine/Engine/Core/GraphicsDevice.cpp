@@ -87,7 +87,6 @@ namespace Glory
 
 		MeshHandle mesh = iter->second;
 
-		/* @todo: Update mesh if needed */
 		if (pMesh->IsDirty())
 		{
 			UpdateMesh(mesh, pMesh);
@@ -99,6 +98,8 @@ namespace Glory
 
 	TextureHandle GraphicsDevice::AcquireCachedTexture(TextureData* pTexture)
 	{
+		if (!pTexture) return m_DefaultTexture;
+
 		auto iter = m_TextureHandles.find(pTexture->GetGPUUUID());
 		if (iter == m_TextureHandles.end())
 		{
@@ -107,7 +108,17 @@ namespace Glory
 			pTexture->SetDirty(false);
 			return newTexture;
 		}
-		return iter->second;
+
+		TextureHandle texture = iter->second;
+		ImageData* pImage = pTexture->GetImageData(&m_pModule->GetEngine()->GetAssetManager());
+
+		if (pTexture->IsDirty() || (pImage && pImage->IsDirty()))
+		{
+			UpdateTexture(texture, pTexture);
+			pTexture->SetDirty(false);
+		}
+
+		return texture;
 	}
 
 	TextureHandle GraphicsDevice::AcquireCachedTexture(CubemapData* pCubemap)
