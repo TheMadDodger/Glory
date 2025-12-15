@@ -250,6 +250,8 @@ namespace Glory
 
     private: /* Resource management */
         virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type, BufferFlags flags=BF_None) override;
+        virtual void ResizeBuffer(BufferHandle buffer, size_t bufferSize) override;
+        virtual size_t BufferSize(BufferHandle buffer) override;
 
         virtual void AssignBuffer(BufferHandle handle, const void* data) override;
         virtual void AssignBuffer(BufferHandle handle, const void* data, uint32_t size) override;

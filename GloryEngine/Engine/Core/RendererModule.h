@@ -121,6 +121,11 @@ namespace Glory
 			return start + m_DirtyRange.first*sizeof(T);
 		}
 
+		size_t TotalByteSize()
+		{
+			return sizeof(T)*m_Data.size();
+		}
+
 		std::vector<T> m_Data;
 		bool m_Dirty{ false };
 		bool m_SizeDirty{ false };

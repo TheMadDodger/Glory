@@ -1869,6 +1869,8 @@ namespace Glory
 				batchData.m_WorldsBuffer = pDevice->CreateBuffer(batchData.m_Worlds->size()*sizeof(glm::mat4), BT_Storage, BF_Write);
 				batchData.m_Worlds.SetDirty();
 			}
+			if (pDevice->BufferSize(batchData.m_WorldsBuffer) < batchData.m_Worlds.TotalByteSize())
+				pDevice->ResizeBuffer(batchData.m_WorldsBuffer, batchData.m_Worlds.TotalByteSize());
 			if (batchData.m_Worlds)
 			{
 				const size_t dirtySize = batchData.m_Worlds.DirtySize();
@@ -1881,6 +1883,8 @@ namespace Glory
 				batchData.m_MaterialsBuffer = pDevice->CreateBuffer(batchData.m_MaterialDatas->size(), BT_Storage, BF_Write);
 				batchData.m_MaterialDatas.SetDirty();
 			}
+			if (pDevice->BufferSize(batchData.m_MaterialsBuffer) < batchData.m_MaterialDatas.TotalByteSize())
+				pDevice->ResizeBuffer(batchData.m_MaterialsBuffer, batchData.m_MaterialDatas.TotalByteSize());
 			if (batchData.m_MaterialDatas)
 			{
 				const size_t dirtySize = batchData.m_MaterialDatas.DirtySize();
@@ -1893,6 +1897,8 @@ namespace Glory
 				batchData.m_TextureBitsBuffer = pDevice->CreateBuffer(batchData.m_TextureBits->size()*sizeof(uint32_t), BT_Storage, BF_Write);
 				batchData.m_TextureBits.SetDirty();
 			}
+			if (textureCount && pDevice->BufferSize(batchData.m_TextureBitsBuffer) < batchData.m_TextureBits.TotalByteSize())
+				pDevice->ResizeBuffer(batchData.m_TextureBitsBuffer, batchData.m_TextureBits.TotalByteSize());
 			if (textureCount && batchData.m_TextureBits)
 			{
 				const size_t dirtySize = batchData.m_TextureBits.DirtySize();

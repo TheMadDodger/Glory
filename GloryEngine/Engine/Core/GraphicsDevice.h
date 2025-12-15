@@ -518,6 +518,10 @@ namespace Glory
 		 * @param pTexture The cubemap data to create a texture from
 		 */
 		TextureHandle AcquireCachedTexture(CubemapData* pCubemap);
+		/**
+		 * @brief Check if a texture exists on this device
+		 * @param pTexture The texture data to check for
+		 */
 		bool CachedTextureExists(TextureData* pTexture);
 
 		/**
@@ -539,6 +543,18 @@ namespace Glory
 		 * @param type Type of the buffer
 		 */
 		virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type, BufferFlags flags) = 0;
+		/**
+		 * @brief Resize a buffer on this device
+		 * @param buffer Buffer to resize
+		 * @param bufferSize New size of the buffer in bytes
+		 */
+		virtual void ResizeBuffer(BufferHandle buffer, size_t bufferSize) = 0;
+		/**
+		 * @brief Get the current size of a buffer on this device
+		 * @param buffer Buffer
+		 * @returns Size of the buffer or 0 if invalid
+		 */
+		virtual size_t BufferSize(BufferHandle buffer) = 0;
 
 		/** @overload */
 		virtual void AssignBuffer(BufferHandle handle, const void* data) = 0;
@@ -589,6 +605,7 @@ namespace Glory
 		virtual void UpdateMesh(MeshHandle mesh, std::vector<BufferHandle>&& buffers,
 			uint32_t vertexCount, uint32_t indexCount) = 0;
 
+		/** @overload */
 		virtual void UpdateMesh(MeshHandle mesh, MeshData* pMeshData) = 0;
 
 		/* Texture */
@@ -730,7 +747,6 @@ namespace Glory
 		virtual SwapchainHandle CreateSwapchain(Window* pWindow, bool vsync=false, uint32_t minImageCount=0) = 0;
 		virtual uint32_t GetSwapchainImageCount(SwapchainHandle swapchain) = 0;
 		virtual TextureHandle GetSwapchainImage(SwapchainHandle swapchain, uint32_t imageIndex) = 0;
-		//virtual void ChangeSwapchainImagecount(SwapchainHandle swapchain, bool vsync=false, uint32_t minImageCount=0) = 0;
 		virtual void RecreateSwapchain(SwapchainHandle swapchain) = 0;
 
 		/* Synchronization */

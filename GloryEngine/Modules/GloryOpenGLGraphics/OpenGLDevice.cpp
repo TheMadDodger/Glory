@@ -801,6 +801,35 @@ namespace Glory
 		return handle;
 	}
 
+	void OpenGLDevice::ResizeBuffer(BufferHandle buffer, size_t bufferSize)
+	{
+		GL_Buffer* glBuffer = m_Buffers.Find(buffer);
+		if (!glBuffer)
+		{
+			Debug().LogError("OpenGLDevice::ResizeBuffer: Invalid buffer handle.");
+			return;
+		}
+
+		glBuffer->m_Size = bufferSize;
+		glBindBuffer(glBuffer->m_GLTarget, glBuffer->m_GLBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBufferData(glBuffer->m_GLTarget, glBuffer->m_Size, NULL, glBuffer->m_GLUsage);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindBuffer(glBuffer->m_GLTarget, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	size_t OpenGLDevice::BufferSize(BufferHandle buffer)
+	{
+		GL_Buffer* glBuffer = m_Buffers.Find(buffer);
+		if (!glBuffer)
+		{
+			Debug().LogError("OpenGLDevice::BufferSize: Invalid buffer handle.");
+			return 0;
+		}
+		return glBuffer->m_Size;
+	}
+
 	void OpenGLDevice::AssignBuffer(BufferHandle handle, const void* data)
 	{
 		GL_Buffer* buffer = m_Buffers.Find(handle);

@@ -1086,6 +1086,32 @@ namespace Glory
 		return handle;
 	}
 
+	void VulkanDevice::ResizeBuffer(BufferHandle buffer, size_t bufferSize)
+	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::ResizeBuffer" };
+
+		VK_Buffer* vkBuffer = m_Buffers.Find(buffer);
+		if (!vkBuffer)
+		{
+			Debug().LogError("VulkanDevice::ResizeBuffer: Invalid buffer handle.");
+			return;
+		}
+
+		vkBuffer->m_Size = bufferSize;
+		ResizeBuffer(*vkBuffer);
+	}
+
+	size_t VulkanDevice::BufferSize(BufferHandle buffer)
+	{
+		VK_Buffer* vkBuffer = m_Buffers.Find(buffer);
+		if (!vkBuffer)
+		{
+			Debug().LogError("VulkanDevice::BufferSize: Invalid buffer handle.");
+			return 0;
+		}
+		return vkBuffer->m_Size;
+	}
+
 	void VulkanDevice::AssignBuffer(BufferHandle handle, const void* data)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::AssignBuffer" };
@@ -1331,6 +1357,7 @@ namespace Glory
 		const size_t vertexBufferSize = pMeshData->VertexCount()*pMeshData->VertexSize();
 		const size_t indexBufferSize = pMeshData->IndexCount()*sizeof(uint32_t);
 
+		WaitIdle();
 		VK_Buffer* vkVertexBuffer = m_Buffers.Find(vkMesh->m_Buffers[0]);
 		if (vertexBufferSize > vkVertexBuffer->m_Size)
 		{
@@ -3714,8 +3741,6 @@ namespace Glory
 
 	void VulkanDevice::ResizeBuffer(VK_Buffer& buffer)
 	{
-		WaitIdle();
-
 		if (buffer.m_pMappedMemory)
 		{
 			m_LogicalDevice.unmapMemory(buffer.m_VKMemory);
