@@ -13,6 +13,7 @@ project "Glorious"
 	{
 		"*.h",
 		"*.cpp",
+		"EditorAssets/**.*",
 		"premake5.lua"
 	}
 

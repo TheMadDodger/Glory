@@ -30,6 +30,8 @@ namespace Glory
     {
         static constexpr GraphicsHandleType HandleType = H_Texture;
 
+        uint32_t m_Width;
+        uint32_t m_Height;
         uint32_t m_GLTextureID;
         uint32_t m_GLTextureType;
         uint32_t m_GLFormat;
@@ -160,6 +162,8 @@ namespace Glory
 
         virtual void PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>&,
             const std::vector<TextureHandle>&, PipelineStageFlagBits, PipelineStageFlagBits) override;
+        virtual void CopyImage(CommandBufferHandle commandBuffer, TextureHandle src, TextureHandle dst) override;
+
         virtual SwapchainResult AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle) override;
         virtual SwapchainResult Present(SwapchainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>& waitSemaphores={}) override;
 
@@ -185,6 +189,7 @@ namespace Glory
         virtual TextureHandle CreateTexture(CubemapData* pCubemap) override;
         virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) override;
         virtual void UpdateTexture(TextureHandle texture, TextureData* pTextureData) override;
+        virtual void ReadTexturePixels(TextureHandle texture, void* dst, size_t offset, size_t size) override;
 
         virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info) override;
         virtual TextureHandle GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index) override;

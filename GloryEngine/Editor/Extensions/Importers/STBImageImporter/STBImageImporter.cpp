@@ -145,7 +145,7 @@ namespace Glory::Editor
 
 	bool STBHDRImageImporter::SaveResource(const std::filesystem::path& path, ImageData* pImage) const
 	{
-		const int result = stbi_write_hdr(path.string().data(), pImage->GetWidth(), pImage->GetHeight(), 3, static_cast<const float*>(pImage->GetPixels()));
+		const int result = stbi_write_hdr(path.string().data(), pImage->GetWidth(), pImage->GetHeight(), 4, static_cast<const float*>(pImage->GetPixels()));
 		return result != 0;
 	}
 }

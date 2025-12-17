@@ -883,6 +883,36 @@ namespace Glory
 		);
 	}
 
+	void VulkanDevice::CopyImage(CommandBufferHandle commandBuffer, TextureHandle src, TextureHandle dst)
+	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CopyImage" };
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		if (iter == m_CommandBuffers.end())
+		{
+			Debug().LogError("VulkanDevice::CopyImage: Invalid command buffer handle.");
+			return;
+		}
+
+		VK_Texture* vkSrcTexture = m_Textures.Find(src);
+		VK_Texture* vkDstTexture = m_Textures.Find(dst);
+		if (!vkSrcTexture)
+		{
+			Debug().LogError("VulkanDevice::CopyImage: Invalid src texture handle.");
+			return;
+		}
+		if (!vkDstTexture)
+		{
+			Debug().LogError("VulkanDevice::CopyImage: Invalid dst texture handle.");
+			return;
+		}
+
+		VK_Image* vkSrcImage = m_Images.Find(vkSrcTexture->m_Image);
+		VK_Image* vkDstImage = m_Images.Find(vkDstTexture->m_Image);
+
+		CopyImage(*iter->second, vkSrcImage->m_VKImage, vkSrcImage->m_VKFinalLayout, vkDstImage->m_VKImage, vkDstImage->m_VKFinalLayout, vkSrcImage->m_VKAspect, vkDstImage->m_VKAspect,
+			{}, {}, { vkSrcImage->m_Width, vkSrcImage->m_Height, 1 }, 1);
+	}
+
 	GraphicsDevice::SwapchainResult VulkanDevice::AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex,
 		SemaphoreHandle signalSemaphore)
 	{
@@ -1031,6 +1061,25 @@ namespace Glory
 			result |= vk::MemoryPropertyFlagBits::eHostCoherent;
 		}
 		if (flags & BF_Read)
+		{
+			result |= vk::MemoryPropertyFlagBits::eHostVisible;
+			result |= vk::MemoryPropertyFlagBits::eHostCoherent;
+			result |= vk::MemoryPropertyFlagBits::eHostCached;
+		}
+		return result;
+	}
+
+	vk::MemoryPropertyFlags GetImageMemoryPropertyFlags(ImageFlags flags)
+	{
+		if (flags == IF_None)
+			return vk::MemoryPropertyFlagBits::eDeviceLocal;
+		vk::MemoryPropertyFlags result;
+		if (flags & IF_Write)
+		{
+			result |= vk::MemoryPropertyFlagBits::eHostVisible;
+			result |= vk::MemoryPropertyFlagBits::eHostCoherent;
+		}
+		if (flags & IF_Read)
 		{
 			result |= vk::MemoryPropertyFlagBits::eHostVisible;
 			result |= vk::MemoryPropertyFlagBits::eHostCoherent;
@@ -1430,6 +1479,7 @@ namespace Glory
 		createInfo.m_PixelFormat = pFaceImage->GetFormat();
 		createInfo.m_Type = pFaceImage->GetDataType();
 		createInfo.m_SamplerSettings = pCubemap->GetSamplerSettings();
+		createInfo.m_Flags = IF_None;
 
 		const size_t numFaces = 6;
 		const size_t faceDataSize = pFaceImage->DataSize();
@@ -1530,6 +1580,27 @@ namespace Glory
 			samplerIter = m_CachedSamplers.emplace(samplerSettings, newSampler).first;
 		}
 		vkTexture->m_VKSampler = samplerIter->second;
+	}
+
+	void VulkanDevice::ReadTexturePixels(TextureHandle texture, void* dst, size_t offset, size_t size)
+	{
+		VK_Texture* vkTexture = m_Textures.Find(texture);
+		if (!vkTexture)
+		{
+			Debug().LogError("VulkanDevice::ReadTexturePixels: Invalid texture handle.");
+			return;
+		}
+		VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
+
+		if (!vkImage->m_CPUVisible)
+		{
+			Debug().LogError("VulkanDevice::ReadTexturePixels: Texture image is not CPU visible.");
+			return;
+		}
+
+		void* pMappedMemory = m_LogicalDevice.mapMemory(vkImage->m_VKMemory, offset, size);
+		std::memcpy(dst, pMappedMemory, size);
+		m_LogicalDevice.unmapMemory(vkImage->m_VKMemory);
 	}
 
 	RenderTextureHandle VulkanDevice::CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info)
@@ -1947,19 +2018,19 @@ namespace Glory
 			case Func::OP_Keep:
 				return vk::StencilOp::eKeep;
 			case Func::OP_Zero:
-				vk::StencilOp::eZero;
+				return vk::StencilOp::eZero;
 			case Func::OP_Replace:
-				vk::StencilOp::eReplace;
+				return vk::StencilOp::eReplace;
 			case Func::OP_Increment:
-				vk::StencilOp::eIncrementAndClamp;
+				return vk::StencilOp::eIncrementAndClamp;
 			case Func::OP_IncrementWrap:
-				vk::StencilOp::eIncrementAndWrap;
+				return vk::StencilOp::eIncrementAndWrap;
 			case Func::OP_Decrement:
-				vk::StencilOp::eDecrementAndClamp;
+				return vk::StencilOp::eDecrementAndClamp;
 			case Func::OP_DecrementWrap:
-				vk::StencilOp::eDecrementAndWrap;
+				return vk::StencilOp::eDecrementAndWrap;
 			case Func::OP_Invert:
-				vk::StencilOp::eInvert;
+				return vk::StencilOp::eInvert;
 		default:
 			return vk::StencilOp(0);
 		}
@@ -2890,6 +2961,14 @@ namespace Glory
 			sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
 			destinationStage = vk::PipelineStageFlagBits::eTransfer;
 		}
+		else if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eTransferSrcOptimal)
+		{
+			barrier.srcAccessMask = (vk::AccessFlags)0;
+			barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+
+			sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+			destinationStage = vk::PipelineStageFlagBits::eTransfer;
+		}
 		else if (oldLayout == vk::ImageLayout::eTransferDstOptimal && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
 		{
 			barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
@@ -3040,6 +3119,34 @@ namespace Glory
 			static_cast<uint32_t>(bufferImageCopies.size()), bufferImageCopies.data());
 	}
 
+	void VulkanDevice::CopyImage(vk::CommandBuffer commandBuffer, vk::Image src, vk::ImageLayout srcLayout, vk::Image dst,
+		vk::ImageLayout dstLayout, vk::ImageAspectFlags srcAspectFlags, vk::ImageAspectFlags dstAspectFlags, vk::Offset3D srcOffset,
+		vk::Offset3D dstOffset, vk::Extent3D extent, uint32_t layerCount)
+	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CopyFromBuffer(offset)" };
+
+		std::vector<vk::ImageCopy> imageCopies(layerCount);
+		for (size_t i = 0; i < layerCount; ++i)
+		{
+			imageCopies[i].srcOffset = srcOffset;
+			imageCopies[i].dstOffset = dstOffset;
+			imageCopies[i].extent = extent;
+
+			imageCopies[i].srcSubresource.aspectMask = srcAspectFlags;
+			imageCopies[i].srcSubresource.mipLevel = 0;
+			imageCopies[i].srcSubresource.baseArrayLayer = i;
+			imageCopies[i].srcSubresource.layerCount = 1;
+
+			imageCopies[i].dstSubresource.aspectMask = dstAspectFlags;
+			imageCopies[i].dstSubresource.mipLevel = 0;
+			imageCopies[i].dstSubresource.baseArrayLayer = i;
+			imageCopies[i].dstSubresource.layerCount = 1;
+		}
+
+		commandBuffer.copyImage(src, srcLayout, dst, dstLayout,
+			static_cast<uint32_t>(imageCopies.size()), imageCopies.data());
+	}
+
 	void VulkanDevice::CopyFromBuffer(vk::CommandBuffer commandBuffer, vk::Buffer dst, vk::Buffer src,
 		int32_t dstOffset, int32_t srcOffset, uint32_t size)
 	{
@@ -3141,6 +3248,7 @@ namespace Glory
 			createInfo.m_InternalFormat = pImage->GetInternalFormat();
 			createInfo.m_PixelFormat = pImage->GetFormat();
 			createInfo.m_Type = pImage->GetDataType();
+			createInfo.m_Flags = IF_None;
 			createInfo.m_SamplingEnabled = true;
 
 			ImageHandle newImage = CreateImage(createInfo, pImage->GetPixels(), pImage->DataSize());
@@ -3161,6 +3269,17 @@ namespace Glory
 		return image;
 	}
 
+	vk::ImageUsageFlags GetVKImageUsageFlags(ImageAspect imageAspect, ImageFlags imageFlags)
+	{
+		vk::ImageUsageFlags flags = vk::ImageUsageFlags();
+		if ((imageAspect & ImageAspect::IA_Color) > 0) flags |= vk::ImageUsageFlagBits::eColorAttachment;
+		if ((imageAspect & ImageAspect::IA_Depth) > 0) flags |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
+		if ((imageAspect & ImageAspect::IA_Stencil) > 0) flags |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
+		if ((imageFlags & ImageFlags::IF_CopyDst) > 0) flags |= vk::ImageUsageFlagBits::eTransferDst;
+		if ((imageFlags & ImageFlags::IF_CopySrc) > 0) flags |= vk::ImageUsageFlagBits::eTransferSrc;
+		return flags;
+	}
+
 	ImageHandle VulkanDevice::CreateImage(const TextureCreateInfo& textureInfo, const void* pixels, size_t dataSize)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::CreateImage()" };
@@ -3169,20 +3288,21 @@ namespace Glory
 
 		const uint32_t mipLevels = pixels ? static_cast<uint32_t>(
 			std::floor(std::log2(std::max(textureInfo.m_Width, textureInfo.m_Height)))) + 1 : 1;
-		const vk::Format format = VKConverter::GetVulkanFormat(textureInfo.m_InternalFormat); //vk::Format::eR8G8B8A8Srgb;
+		const vk::Format format = VKConverter::GetVulkanFormat(textureInfo.m_InternalFormat);
 		const vk::ImageType imageType = VKConverter::GetVulkanImageType(textureInfo.m_ImageType);
 		const bool isCubemap = textureInfo.m_ImageType == ImageType::IT_Cube || textureInfo.m_ImageType == ImageType::IT_CubeArray;
 
 		vk::ImageCreateInfo imageInfo = vk::ImageCreateInfo();
 		imageInfo.imageType = imageType;
-		imageInfo.extent.width = textureInfo.m_Width;
-		imageInfo.extent.height = textureInfo.m_Height;
+		image.m_Width = imageInfo.extent.width = textureInfo.m_Width;
+		image.m_Height = imageInfo.extent.height = textureInfo.m_Height;
+		image.m_CPUVisible = textureInfo.m_Flags & IF_Read || textureInfo.m_Flags & IF_Write;
 		imageInfo.extent.depth = 1;
 		imageInfo.arrayLayers = isCubemap ? 6 : 1;
 		imageInfo.format = format;
 		imageInfo.tiling = vk::ImageTiling::eOptimal;
 		imageInfo.initialLayout = vk::ImageLayout::eUndefined;
-		imageInfo.usage = VKConverter::GetVulkanImageUsageFlags(textureInfo.m_ImageAspectFlags);
+		imageInfo.usage = GetVKImageUsageFlags(textureInfo.m_ImageAspectFlags, textureInfo.m_Flags);
 		if (textureInfo.m_SamplingEnabled) imageInfo.usage |= vk::ImageUsageFlagBits::eSampled;
 		if (pixels) imageInfo.usage |= vk::ImageUsageFlagBits::eTransferDst;
 		imageInfo.sharingMode = vk::SharingMode::eExclusive;
@@ -3219,7 +3339,8 @@ namespace Glory
 		m_LogicalDevice.getImageMemoryRequirements(image.m_VKImage, &memRequirements);
 
 		const uint32_t typeFilter = memRequirements.memoryTypeBits;
-		const vk::MemoryPropertyFlags properties = vk::MemoryPropertyFlagBits::eDeviceLocal;
+
+		const vk::MemoryPropertyFlags properties = GetImageMemoryPropertyFlags(textureInfo.m_Flags);
 		const uint32_t memoryIndex = GetSupportedMemoryIndex(typeFilter, properties);
 
 		vk::MemoryAllocateInfo imageAllocInfo = vk::MemoryAllocateInfo();
@@ -3266,6 +3387,30 @@ namespace Glory
 			FreeBuffer(stagingBuffer);
 
 			image.m_VKFinalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+		}
+		else if (textureInfo.m_Flags & IF_CopySrc)
+		{
+			vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+			TransitionImageLayout(commandBuffer, image.m_VKImage, format, vk::ImageLayout::eUndefined,
+				vk::ImageLayout::eTransferSrcOptimal, image.m_VKAspect,
+				imageInfo.mipLevels, imageInfo.arrayLayers);
+
+			EndSingleTimeCommands(commandBuffer);
+
+			image.m_VKFinalLayout = vk::ImageLayout::eTransferSrcOptimal;
+		}
+		else if(textureInfo.m_Flags & IF_CopyDst)
+		{
+			vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+			TransitionImageLayout(commandBuffer, image.m_VKImage, format, vk::ImageLayout::eUndefined,
+				vk::ImageLayout::eTransferDstOptimal, image.m_VKAspect,
+				imageInfo.mipLevels, imageInfo.arrayLayers);
+
+			EndSingleTimeCommands(commandBuffer);
+
+			image.m_VKFinalLayout = vk::ImageLayout::eTransferDstOptimal;
 		}
 
 		/* Create texture image view */
@@ -3349,10 +3494,11 @@ namespace Glory
 		{
 			const Attachment& attachment = renderTexture.m_Info.Attachments[i];
 			renderTexture.m_Textures[i] = attachment.Texture ? attachment.Texture :
-				CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler, attachment.m_SamplingEnabled });
+				CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, IF_None, attachment.ImageAspect, sampler, attachment.m_SamplingEnabled });
 			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[i]);
 			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-			vkImage->m_VKFinalLayout = attachment.m_SamplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eColorAttachmentOptimal;
+			if (!attachment.Texture)
+				vkImage->m_VKFinalLayout = attachment.m_SamplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eColorAttachmentOptimal;
 			renderTexture.m_AttachmentNames[i] = attachment.Name;
 			renderTexture.m_BlendingSupportedBits.Set(i, vkImage->m_BlendingSupported);
 			++textureCounter;
@@ -3363,7 +3509,7 @@ namespace Glory
 		if (renderTexture.m_Info.HasDepth && renderTexture.m_Info.HasStencil)
 		{
 			depthStencilIndex = textureCounter;
-			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32SfloatS8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
+			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32SfloatS8Uint, ImageType::IT_2D, DataType::DT_UInt, IF_None, ImageAspect::IA_Depth, sampler });
 			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
 			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
 			vkImage->m_VKFinalLayout = renderTexture.m_Info.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eStencilAttachmentOptimal;
@@ -3373,7 +3519,7 @@ namespace Glory
 		else if (renderTexture.m_Info.HasDepth)
 		{
 			depthStencilIndex = textureCounter;
-			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32Sfloat, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
+			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32Sfloat, ImageType::IT_2D, DataType::DT_UInt, IF_None, ImageAspect::IA_Depth, sampler });
 			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
 			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
 			vkImage->m_VKFinalLayout = renderTexture.m_Info.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthAttachmentOptimal;
@@ -3383,7 +3529,7 @@ namespace Glory
 		else if (renderTexture.m_Info.HasStencil)
 		{
 			depthStencilIndex = textureCounter;
-			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Stencil, sampler });
+			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UInt, IF_None, ImageAspect::IA_Stencil, sampler });
 			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
 			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
 			vkImage->m_VKFinalLayout = renderTexture.m_Info.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthStencilAttachmentOptimal;

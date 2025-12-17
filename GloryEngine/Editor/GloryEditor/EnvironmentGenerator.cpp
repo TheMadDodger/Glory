@@ -4,11 +4,13 @@
 #include "EditorUI.h"
 #include "Importer.h"
 #include "EditorAssetDatabase.h"
+#include "EditorPipelineManager.h"
+#include "ShaderSourceData.h"
 
-#include <RendererModule.h>
 #include <AssetManager.h>
 #include <CubemapData.h>
-#include <GraphicsModule.h>
+#include <GraphicsDevice.h>
+#include <InternalPipeline.h>
 
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -21,17 +23,24 @@ namespace Glory
 
 namespace Glory::Editor
 {
+	bool EnvironmentGenerator::m_Initialized = false;
+
+	InternalPipeline IrradiancePipeline;
+	DescriptorSetLayoutHandle ConstantsLayout;
+	DescriptorSetLayoutHandle CubemapSetLayout;
+
 	static constexpr char* EnvironmentPassName = "Environment Generator Pass";
 
 	EnvironmentGenerator::EnvironmentGenerator() :
-		EditorWindowTemplate("Environment Generator", 600.0f, 600.0f), m_CurrentCubemap(0), m_Generate(false), m_pIrradianceResult(nullptr),
-		m_pFaces{
-			new float[32*32*3],
-			new float[32*32*3],
-			new float[32*32*3],
-			new float[32*32*3],
-			new float[32*32*3],
-			new float[32*32*3],
+		EditorWindowTemplate("Environment Generator", 600.0f, 600.0f), m_CurrentCubemap(0),
+		m_Generate(false), m_IrradianceRenderPass(NULL),
+		m_pFaces {
+			new float[32*32*4],
+			new float[32*32*4],
+			new float[32*32*4],
+			new float[32*32*4],
+			new float[32*32*4],
+			new float[32*32*4],
 		}
 	{
 	}
@@ -46,6 +55,8 @@ namespace Glory::Editor
 
 	void EnvironmentGenerator::OnGUI()
 	{
+		EnvironmentPass();
+
 		AssetManager& assets = EditorApplication::GetInstance()->GetEngine()->GetAssetManager();
 		if (AssetPicker::ResourceDropdown("Cubemap", ResourceTypes::GetHash<CubemapData>(), &m_CurrentCubemap))
 		{
@@ -77,23 +88,67 @@ namespace Glory::Editor
 	void EnvironmentGenerator::OnOpen()
 	{
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
-		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
-		pRenderer->AddRenderPass(RenderPassType::RP_Postpass, { EnvironmentPassName, [this](uint32_t, RendererModule*) { EnvironmentPass(); } });
+		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
 
-		RenderTextureCreateInfo textureInfo;
-		textureInfo.HasDepth = true;
-		textureInfo.HasStencil = false;
-		textureInfo.Width = 32;
-		textureInfo.Height = 32;
-		textureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGB, PixelFormat::PF_R16G16B16Sfloat, ImageType::IT_2D, ImageAspect::IA_Color, DataType::DT_Float));
-		m_pIrradianceResult = pGraphics->GetResourceManager()->CreateRenderTexture(textureInfo);
+		if (!m_Initialized)
+			Initialize();
+
+		TextureCreateInfo attachmentInfo;
+		attachmentInfo.m_Width = attachmentInfo.m_Height = 32;
+		attachmentInfo.m_ImageAspectFlags = IA_Color;
+		attachmentInfo.m_ImageType = ImageType::IT_2D;
+		attachmentInfo.m_PixelFormat = PixelFormat::PF_RGBA;
+		attachmentInfo.m_InternalFormat = PixelFormat::PF_R32G32B32A32Sfloat;
+		attachmentInfo.m_SamplingEnabled = false;
+		attachmentInfo.m_Type = DataType::DT_Float;
+		attachmentInfo.m_Flags = ImageFlags(IF_CopySrc);
+		TextureHandle attachment = pDevice->CreateTexture(attachmentInfo);
+
+		RenderPassInfo info;
+		info.RenderTextureInfo.HasDepth = false;
+		info.RenderTextureInfo.HasStencil = false;
+		info.RenderTextureInfo.Width = 32;
+		info.RenderTextureInfo.Height = 32;
+		info.RenderTextureInfo.Attachments.push_back(Attachment("Color", attachmentInfo.m_PixelFormat,
+			attachmentInfo.m_InternalFormat, attachmentInfo.m_ImageType, attachmentInfo.m_ImageAspectFlags, attachmentInfo.m_Type));
+		info.RenderTextureInfo.Attachments[0].Texture = attachment;
+
+		m_IrradianceRenderPass = pDevice->CreateRenderPass(std::move(info));
+
+		m_IrradiancePipeline = pDevice->CreatePipeline(m_IrradianceRenderPass, &IrradiancePipeline,
+			{ ConstantsLayout, CubemapSetLayout }, sizeof(glm::vec3), { AttributeType::Float3 });
+
+		DescriptorSetInfo setInfo;
+		setInfo.m_Layout = CubemapSetLayout;
+		setInfo.m_Samplers.resize(1);
+		setInfo.m_Samplers[0].m_TextureHandle = NULL;
+		m_CubemapSet = pDevice->CreateDescriptorSet(std::move(setInfo));
+
+		for (size_t i = 0; i < 6; ++i)
+		{
+			TextureCreateInfo texInfo;
+			texInfo.m_Width = texInfo.m_Height = 32;
+			texInfo.m_ImageAspectFlags = IA_Color;
+			texInfo.m_ImageType = ImageType::IT_2D;
+			texInfo.m_PixelFormat = PixelFormat::PF_RGBA;
+			texInfo.m_InternalFormat = PixelFormat::PF_R32G32B32A32Sfloat;
+			texInfo.m_SamplingEnabled = false;
+			texInfo.m_Type = DataType::DT_Float;
+			texInfo.m_Flags = ImageFlags(IF_Read | IF_CopyDst);
+			m_CubemapFaces[i] = pDevice->CreateTexture(texInfo);
+		}
 	}
 
 	void EnvironmentGenerator::OnClose()
 	{
-		RendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>();
-		pRenderer->RemoveRenderPass(RenderPassType::RP_Postpass, EnvironmentPassName);
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
+		pDevice->FreePipeline(m_IrradiancePipeline);
+		pDevice->FreeRenderPass(m_IrradianceRenderPass);
+		pDevice->FreeDescriptorSet(m_CubemapSet);
+
+		for (size_t i = 0; i < 6; ++i)
+			pDevice->FreeTexture(m_CubemapFaces[i]);
 	}
 
 	void EnvironmentGenerator::EnvironmentPass()
@@ -101,8 +156,7 @@ namespace Glory::Editor
 		if (!m_Generate) return;
 
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
-		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
+		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
 		AssetManager& assets = pEngine->GetAssetManager();
 
 		Resource* pResource = m_CurrentCubemap ? assets.FindResource(m_CurrentCubemap) : nullptr;
@@ -114,19 +168,18 @@ namespace Glory::Editor
 			return;
 		}
 
-		Texture* pCubemapTexture = pGraphics->GetResourceManager()->CreateCubemapTexture(pCubemap);
-		if (!pCubemapTexture)
+		TextureHandle cubemapTexture = pDevice->CreateTexture(pCubemap);
+		if (!cubemapTexture)
 		{
 			m_Generate = false;
 			return;
 		}
 
-		MaterialData* pIrradianceMaterial = pRenderer->GetInternalMaterial("irradiance");
-		if (!pIrradianceMaterial)
-		{
-			m_Generate = false;
-			return;
-		}
+		DescriptorSetUpdateInfo setUpdateInfo;
+		setUpdateInfo.m_Samplers.resize(1);
+		setUpdateInfo.m_Samplers[0].m_DescriptorIndex = 0;
+		setUpdateInfo.m_Samplers[0].m_TextureHandle = cubemapTexture;
+		pDevice->UpdateDescriptorSet(m_CubemapSet, setUpdateInfo);
 
 		glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 		glm::mat4 captureViews[] =
@@ -139,34 +192,34 @@ namespace Glory::Editor
 		   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
 		};
 
-		Material* pMaterial = pGraphics->UseMaterial(pIrradianceMaterial);
-		if (!pMaterial)
-		{
-			m_Generate = false;
-			return;
-		}
+		RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_IrradianceRenderPass);
+		TextureHandle irradianceResultTexture = pDevice->GetRenderTextureAttachment(renderTexture, 0);
 
-		ObjectData object;
-		object.Model = glm::identity<glm::mat4>();
-		object.Projection = captureProjection;
-		object.SceneID = 0;
-		object.ObjectID = 0;
+		CommandBufferHandle commandBuffer = pDevice->Begin();
 
-		pMaterial->SetCubemapTexture("cubemap", pCubemapTexture);
 		for (size_t i = 0; i < 6; ++i)
 		{
-			/* ReadColorPixels() unbinds the buffer so we should rebind is every iteration */
-			m_pIrradianceResult->BindForDraw();
-			/* Render irradiance */
-			object.View = captureViews[i];
-			pMaterial->SetObjectData(object);
-			pGraphics->Clear();
-			pGraphics->DrawUnitCube();
+			glm::mat4 constants[2] = { captureViews[i], captureProjection};
 
-			/* Read pixels to buffer */
-			m_pIrradianceResult->ReadColorPixels("Color", m_pFaces[i], DataType::DT_Float);
+			pDevice->BeginRenderPass(commandBuffer, m_IrradianceRenderPass);
+			pDevice->BeginPipeline(commandBuffer, m_IrradiancePipeline);
+			pDevice->PushConstants(commandBuffer, m_IrradiancePipeline, 0, sizeof(glm::mat4)*2, constants, STF_Vertex);
+			pDevice->BindDescriptorSets(commandBuffer, m_IrradiancePipeline, { m_CubemapSet });
+			pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, 32.0f, 32.0f);
+			pDevice->SetScissor(commandBuffer, 0, 0, 32, 32);
+			/* Render irradiance */
+			pDevice->DrawUnitCube(commandBuffer);
+			pDevice->EndPipeline(commandBuffer);
+			pDevice->EndRenderPass(commandBuffer);
+
+			pDevice->PipelineBarrier(commandBuffer, {}, { irradianceResultTexture }, PST_ColorAttachmentOutput, PST_AllCommands);
+			pDevice->CopyImage(commandBuffer, irradianceResultTexture, m_CubemapFaces[i]);
 		}
-		m_pIrradianceResult->UnBindForDraw();
+
+		pDevice->End(commandBuffer);
+		pDevice->Commit(commandBuffer);
+		pDevice->Wait(commandBuffer);
+		pDevice->Release(commandBuffer);
 
 		static constexpr std::string_view sides[6] = {
 			"Right",
@@ -181,9 +234,12 @@ namespace Glory::Editor
 		ImageData* pImages[6];
 		for (size_t i = 0; i < 6; ++i)
 		{
-			pImages[i] = new ImageData(32, 32, PixelFormat::PF_R16G16B16Sfloat, PixelFormat::PF_RGB,
-				3*sizeof(float), std::move((char*)m_pFaces[i]), 32*32*3*sizeof(float), false, DataType::DT_Float);
-			m_pFaces[i] = new float[32*32*3];
+			/* Read pixels to buffer */
+			pDevice->ReadTexturePixels(m_CubemapFaces[i], m_pFaces[i], 0, 32*32*4*sizeof(float));
+
+			pImages[i] = new ImageData(32, 32, PixelFormat::PF_R32G32B32A32Sfloat, PixelFormat::PF_RGBA,
+				4*sizeof(float), std::move((char*)m_pFaces[i]), 32*32*4*sizeof(float), false, DataType::DT_Float);
+			m_pFaces[i] = new float[32*32*4];
 			std::filesystem::path path = m_OutputPath;
 			path.append(m_Filename + "_irradiance_" + sides[i].data()).replace_extension(".hdr");
 			path = EditorAssetDatabase::GetAbsoluteAssetPath(path.string());
@@ -207,5 +263,46 @@ namespace Glory::Editor
 		EditorAssetDatabase::CreateAsset(pIrradianceMap, path.string());
 
 		m_Generate = false;
+	}
+
+	void EnvironmentGenerator::Initialize()
+	{
+		EditorApplication* pApplication = EditorApplication::GetInstance();
+		Engine* pEngine = pApplication->GetEngine();
+		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
+
+		ImportedResource vertexShader = Importer::Import("./EditorAssets/Shaders/Irradiance_Vert.shader");
+		ImportedResource fragmentShader = Importer::Import("./EditorAssets/Shaders/Irradiance_Frag.shader");
+
+		ShaderSourceData* pVertexSource = static_cast<ShaderSourceData*>(*vertexShader);
+		ShaderSourceData* pFragmentSource = static_cast<ShaderSourceData*>(*fragmentShader);
+
+		EditorPipelineManager& pipelines = pApplication->GetPipelineManager();
+
+		std::vector<FileData*> compiledShaders(2);
+		std::vector<ShaderType> shaderTypes = { ShaderType::ST_Vertex, ShaderType::ST_Fragment };
+
+		compiledShaders[0] = pipelines.CompileShader(pVertexSource);
+		compiledShaders[1] = pipelines.CompileShader(pFragmentSource);
+		IrradiancePipeline.SetShaders(std::move(compiledShaders), std::move(shaderTypes));
+		IrradiancePipeline.SetDepthTestEnabled(false);
+		IrradiancePipeline.SetDepthWriteEnabled(false);
+		IrradiancePipeline.SetBlendEnabled(false);
+		IrradiancePipeline.GetCullFace() = CullFace::None;
+
+		DescriptorSetLayoutInfo layoutInfo;
+		layoutInfo.m_PushConstantRange.m_Offset = 0;
+		layoutInfo.m_PushConstantRange.m_ShaderStages = STF_Vertex;
+		layoutInfo.m_PushConstantRange.m_Size = sizeof(glm::mat4)*2;
+		ConstantsLayout = pDevice->CreateDescriptorSetLayout(std::move(layoutInfo));
+
+		layoutInfo = DescriptorSetLayoutInfo();
+		layoutInfo.m_Samplers.resize(1);
+		layoutInfo.m_SamplerNames = { "cubemap" };
+		layoutInfo.m_Samplers[0].m_BindingIndex = 0;
+		layoutInfo.m_Samplers[0].m_ShaderStages = STF_Fragment;
+		CubemapSetLayout = pDevice->CreateDescriptorSetLayout(std::move(layoutInfo));
+
+		m_Initialized = true;
 	}
 }

@@ -1,7 +1,7 @@
 #pragma once
 #include "TextureAtlas.h"
 #include "GraphicsHandles.h"
-#include "GraphicsEnums.h"
+#include "GraphicsDevice.h"
 
 #include <memory>
 

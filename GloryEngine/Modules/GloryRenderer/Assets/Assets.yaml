@@ -60,10 +60,6 @@
   ID: 32
 - Path: "Pipelines\\Skybox.gpln"
   ID: 33
-- Path: "Shaders\\Irradiance_Frag.shader"
-  ID: 34
-- Path: "Pipelines\\Irradiance.gpln"
-  ID: 35
 - Path: "Shaders\\Shadows_frag.shader"
   ID: 36
 - Path: "Shaders\\Shadows_vert.shader"

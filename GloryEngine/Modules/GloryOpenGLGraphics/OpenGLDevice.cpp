@@ -681,11 +681,32 @@ namespace Glory
 	void OpenGLDevice::PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>& buffers,
 		const std::vector<TextureHandle>&, PipelineStageFlagBits, PipelineStageFlagBits)
 	{
+		glMemoryBarrier(GL_ALL_BARRIER_BITS);
 		if (!buffers.empty())
 		{
 			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 			OpenGLGraphicsModule::LogGLError(glGetError());
 		}
+	}
+
+	void OpenGLDevice::CopyImage(CommandBufferHandle commandBuffer, TextureHandle src, TextureHandle dst)
+	{
+		GL_Texture* glSrcTexture = m_Textures.Find(src);
+		GL_Texture* glDstTexture = m_Textures.Find(dst);
+		if (!glSrcTexture)
+		{
+			Debug().LogError("OpenGLDevice::CopyImage: Invalid src texture handle.");
+			return;
+		}
+		if (!glDstTexture)
+		{
+			Debug().LogError("OpenGLDevice::CopyImage: Invalid dst texture handle.");
+			return;
+		}
+
+		glCopyImageSubData(glSrcTexture->m_GLTextureID, glSrcTexture->m_GLTextureType, 0, 0, 0, 0,
+			glDstTexture->m_GLTextureID, glDstTexture->m_GLTextureType, 0, 0, 0, 0, glSrcTexture->m_Width, glSrcTexture->m_Height, 1);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
 	GraphicsDevice::SwapchainResult OpenGLDevice::AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle)
@@ -1086,6 +1107,8 @@ namespace Glory
 
 		TextureHandle handle;
 		GL_Texture& texture = m_Textures.Emplace(handle, GL_Texture());
+		texture.m_Width = pImageData->GetWidth();
+		texture.m_Height = pImageData->GetHeight();
 		
 		texture.m_GLTextureType = GL_TEXTURE_2D;
 
@@ -1156,6 +1179,8 @@ namespace Glory
 
 		TextureHandle handle;
 		GL_Texture& texture = m_Textures.Emplace(handle, GL_Texture());
+		texture.m_Width = pImageData->GetWidth();
+		texture.m_Height = pImageData->GetHeight();
 		texture.m_GLTextureType = GL_TEXTURE_CUBE_MAP;
 
 		texture.m_GLFormat = Formats.at(pImageData->GetFormat());
@@ -1227,6 +1252,8 @@ namespace Glory
 	{
 		TextureHandle handle;
 		GL_Texture& texture = m_Textures.Emplace(handle, GL_Texture());
+		texture.m_Width = textureInfo.m_Width;
+		texture.m_Height = textureInfo.m_Height;
 
 		texture.m_GLTextureType = GetGLImageType(textureInfo.m_ImageType);
 
@@ -1337,6 +1364,19 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		glBindTexture(glTexture->m_GLTextureType, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	void OpenGLDevice::ReadTexturePixels(TextureHandle texture, void* dst, size_t offset, size_t size)
+	{
+		GL_Texture* glTexture = m_Textures.Find(texture);
+		if (!glTexture)
+		{
+			Debug().LogError("OpenGLDevice::ReadTexturePixels: Invalid texture handle.");
+			return;
+		}
+
+		glGetTextureImage(glTexture->m_GLTextureID, 0, glTexture->m_GLFormat, glTexture->m_GLDataType, size, dst);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
@@ -2070,7 +2110,7 @@ namespace Glory
 		{
 			const Attachment& attachment = renderTexture.m_Info.Attachments[i];
 			renderTexture.m_Textures[i] = attachment.Texture ? attachment.Texture :
-				CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler });
+				CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, IF_None, attachment.ImageAspect, sampler });
 			renderTexture.m_AttachmentNames[i] = attachment.Name;
 			++textureCounter;
 		}
@@ -2079,7 +2119,7 @@ namespace Glory
 		if (renderTexture.m_Info.HasDepth)
 		{
 			depthIndex = textureCounter;
-			renderTexture.m_Textures[depthIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Depth, PixelFormat::PF_Depth32, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
+			renderTexture.m_Textures[depthIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Depth, PixelFormat::PF_Depth32, ImageType::IT_2D, DataType::DT_UInt, IF_None, ImageAspect::IA_Depth, sampler });
 			renderTexture.m_AttachmentNames[depthIndex] = "Depth";
 			++textureCounter;
 		}
@@ -2087,7 +2127,7 @@ namespace Glory
 		if (renderTexture.m_Info.HasStencil)
 		{
 			stencilIndex = textureCounter;
-			renderTexture.m_Textures[stencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UByte, 0, 0, ImageAspect::IA_Stencil, sampler });
+			renderTexture.m_Textures[stencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UByte, IF_None, ImageAspect::IA_Stencil, sampler });
 			renderTexture.m_AttachmentNames[stencilIndex] = "Stencil";
 			++textureCounter;
 		}

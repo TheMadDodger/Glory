@@ -41,8 +41,10 @@ namespace Glory
     {
         static constexpr GraphicsHandleType HandleType = H_Image;
 
+        uint32_t m_Width;
+        uint32_t m_Height;
         vk::ImageLayout m_VKInitialLayout = vk::ImageLayout::eUndefined;
-        vk::ImageLayout m_VKFinalLayout;
+        vk::ImageLayout m_VKFinalLayout = vk::ImageLayout::eUndefined;
         vk::ImageAspectFlags m_VKAspect;
         vk::Image m_VKImage;
         vk::ImageView m_VKImageView;
@@ -50,6 +52,7 @@ namespace Glory
         vk::Format m_VKFormat = vk::Format::eUndefined;
         bool m_IsSwapchainImage = false;
         bool m_BlendingSupported = false;
+        bool m_CPUVisible = false;
 
         size_t m_ReferenceCounter = 0;
     };
@@ -240,6 +243,8 @@ namespace Glory
         virtual void PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>& buffers,
             const std::vector<TextureHandle>& textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage) override;
 
+        virtual void CopyImage(CommandBufferHandle commandBuffer, TextureHandle src, TextureHandle dst) override;
+
         virtual SwapchainResult AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex,
             SemaphoreHandle signalSemaphore=NULL) override;
         virtual SwapchainResult Present(SwapchainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>& waitSemaphores={}) override;
@@ -268,6 +273,7 @@ namespace Glory
         virtual TextureHandle CreateTexture(CubemapData* pCubemap) override;
         virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) override;
         virtual void UpdateTexture(TextureHandle texture, TextureData* pTextureData) override;
+        virtual void ReadTexturePixels(TextureHandle texture, void* dst, size_t offset, size_t size) override;
 
         virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info) override;
         virtual TextureHandle GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index) override;
@@ -317,6 +323,10 @@ namespace Glory
         void CopyFromBuffer(vk::CommandBuffer commandBuffer, vk::Buffer buffer, vk::Image image,
             vk::ImageAspectFlags aspectFlags, int32_t offsetX, int32_t offsetY, int32_t offsetZ,
             uint32_t width, uint32_t height, uint32_t depth, uint32_t layerCount, uint32_t layerSize);
+
+        void CopyImage(vk::CommandBuffer commandBuffer, vk::Image src, vk::ImageLayout srcLayout, vk::Image dst,
+            vk::ImageLayout dstLayout, vk::ImageAspectFlags srcAspectFlags, vk::ImageAspectFlags dstAspectFlags, vk::Offset3D srcOffset,
+            vk::Offset3D dstOffset, vk::Extent3D extent, uint32_t layerCount);
 
         void CopyFromBuffer(vk::CommandBuffer commandBuffer, vk::Buffer dst, vk::Buffer src,
             int32_t dstOffset, int32_t srcOffset, uint32_t size);

@@ -93,6 +93,8 @@ namespace Glory::Editor
 
 		void RunCallbacks();
 
+		FileData* CompileShader(ShaderSourceData* pShaderSource);
+
 	private:
 		/** @brief Handler for @ref AssetCallbackType::CT_AssetRegistered events */
 		void AssetAddedCallback(const AssetCallbackData& callback);

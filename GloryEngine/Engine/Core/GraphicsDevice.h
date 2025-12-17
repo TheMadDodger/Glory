@@ -84,6 +84,80 @@ namespace Glory
 				std::memcmp(m_Samplers.data(), other.m_Samplers.data(), sizeof(SamplerDescritporLayout)*m_Samplers.size()) == 0;
 		}
 	};
+
+	/** @brief Image flags */
+	enum ImageFlags
+	{
+		/** @brief None */
+		IF_None = 0,
+		/** @brief The buffer will be used for reading to the CPU many times */
+		IF_Read = 1 << 0,
+		/** @brief The buffer will be written to from the CPU many times */
+		IF_Write = 1 << 1,
+		/** @brief The buffer will both be read and written to from the CPU many times */
+		IF_ReadAndWrite = BF_Read | BF_Write,
+		/** @brief Use this image as a copy source */
+		IF_CopySrc = 1 << 2,
+		/** @brief Use this image as a copy destination */
+		IF_CopyDst = 1 << 3,
+	};
+
+	struct TextureCreateInfo
+	{
+		uint32_t m_Width;
+		uint32_t m_Height;
+		PixelFormat m_PixelFormat;
+		PixelFormat m_InternalFormat;
+		ImageType m_ImageType;
+		DataType m_Type;
+		ImageFlags m_Flags;
+		ImageAspect m_ImageAspectFlags;
+		SamplerSettings m_SamplerSettings = SamplerSettings();
+		bool m_SamplingEnabled = true;
+	};
+
+	struct Attachment
+	{
+		Attachment(const std::string& name, const PixelFormat& pixelFormat, const PixelFormat& internalFormat,
+			const ImageType& imageType, const ImageAspect& imageAspect, DataType type = DataType::DT_UByte, bool autoBind = true) :
+			Name(name), InternalFormat(internalFormat), Format(pixelFormat), ImageType(imageType),
+			ImageAspect(imageAspect), m_Type(type), m_AutoBind(autoBind)
+		{}
+		Attachment(const std::string& name, const TextureCreateInfo& textureInfo, bool autoBind = true) :
+			Name(name), InternalFormat(textureInfo.m_InternalFormat), Format(textureInfo.m_PixelFormat), ImageType(textureInfo.m_ImageType),
+			ImageAspect(textureInfo.m_ImageAspectFlags), m_Type(textureInfo.m_Type), m_AutoBind(autoBind)
+		{}
+
+		//PixelFormat::PF_R8G8B8A8Srgb
+		std::string Name;
+		PixelFormat InternalFormat;
+		PixelFormat Format;
+		ImageType ImageType;
+		ImageAspect ImageAspect;
+		DataType m_Type;
+		bool m_AutoBind;
+		bool m_SamplingEnabled = true;
+		TextureHandle Texture = 0;
+	};
+
+	struct RenderTextureCreateInfo
+	{
+	public:
+		RenderTextureCreateInfo() : Width(1), Height(1),
+			HasDepth(false), HasStencil(false)
+		{}
+		RenderTextureCreateInfo(uint32_t width, uint32_t height, bool hasDepth, bool hasStencil = false) :
+			Width(width), Height(height), HasDepth(hasDepth), HasStencil(hasStencil)
+		{}
+
+		uint32_t Width;
+		uint32_t Height;
+		bool HasDepth;
+		bool HasStencil;
+		bool EnableDepthStencilSampling = true;
+		std::vector<Attachment> Attachments;
+		TextureHandle m_DepthStencilTexture = 0;
+	};
 }
 
 namespace std
@@ -459,6 +533,8 @@ namespace Glory
 		virtual void PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>& buffers,
 			const std::vector<TextureHandle>& textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage) = 0;
 
+		virtual void CopyImage(CommandBufferHandle commandBuffer, TextureHandle src, TextureHandle dst) = 0;
+
 		enum SwapchainResult
 		{
 			S_Error = -1,
@@ -629,6 +705,7 @@ namespace Glory
 		virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) = 0;
 
 		virtual void UpdateTexture(TextureHandle texture, TextureData* pTextureData) = 0;
+		virtual void ReadTexturePixels(TextureHandle texture, void* dst, size_t offset, size_t size) = 0;
 
 		/* Render texture */
 

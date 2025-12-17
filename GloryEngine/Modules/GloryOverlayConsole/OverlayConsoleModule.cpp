@@ -9,8 +9,7 @@
 #include <AssetManager.h>
 #include <GraphicsModule.h>
 #include <CameraManager.h>
-#include <InternalMaterial.h>
-#include <InternalPipeline.h>
+#include <PipelineData.h>
 #include <FontData.h>
 #include <FontDataStructs.h>
 #include <MaterialData.h>

@@ -282,6 +282,68 @@ namespace Glory::Editor
 		}
 	}
 
+	FileData* EditorPipelineManager::CompileShader(ShaderSourceData* pShaderSource)
+	{
+		if (!pShaderSource) return nullptr;
+
+		EditorRenderImpl* pEditorRenderer = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
+		Debug& debug = m_pEngine->GetDebug();
+
+		static const size_t featureLength = strlen("FEATURE_");
+
+		EditorShaderData editorShaderData;
+
+		const ShaderType shaderType = pShaderSource->GetShaderType();
+		if (ShaderTypeToKindOne.find(shaderType) == ShaderTypeToKindOne.end())
+		{
+			debug.LogError("Shader " + pShaderSource->Name() + " compilation failed due to unknown shader type.");
+			return nullptr;
+		}
+
+		shaderc::CompileOptions options{};
+		options.SetOptimizationLevel(shaderc_optimization_level_performance);
+		options.SetGenerateDebugInfo();
+
+		if (pEditorRenderer->PushConstantsSupported())
+			options.AddMacroDefinition("PUSH_CONSTANTS");
+
+		editorShaderData.m_ShaderType = shaderType;
+		shaderc::Compiler compiler;
+		shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(pShaderSource->Data(),
+			pShaderSource->Size(), ShaderTypeToKindOne.at(shaderType), pShaderSource->Name().data(),
+			options);
+
+		const size_t errors = result.GetNumErrors();
+		const size_t warnings = result.GetNumWarnings();
+
+		if (result.GetCompilationStatus() != shaderc_compilation_status::shaderc_compilation_status_success)
+		{
+			debug.LogError("Shader " + pShaderSource->Name() + " compilation failed with " + std::to_string(errors) + " errors and " + std::to_string(warnings) + " warnings.");
+			debug.LogError(result.GetErrorMessage());
+			return nullptr;
+		}
+		else
+			debug.LogInfo("Shader " + pShaderSource->Name() + " compilation succeeded with " + std::to_string(errors) + " errors and " + std::to_string(warnings) + " warnings.");
+
+		if (warnings > 0)
+			debug.LogWarning(result.GetErrorMessage());
+
+		editorShaderData.m_ShaderData.assign(result.begin(), result.end());
+
+		/* Cross compile for editor platform */
+		std::vector<char> compiledShader;
+		pEditorRenderer->CompileShaderForEditor(editorShaderData, compiledShader);
+
+		FileData* pCompiledShader = new FileData(std::move(compiledShader));
+
+		PipelineShaderMetaData metaData;
+		metaData.PipelineID = 0;
+		metaData.m_Hash = pShaderSource->GetUUID();
+		metaData.Type = shaderType;
+		pCompiledShader->SetMetaData(metaData);
+		return pCompiledShader;
+	}
+
 	void EditorPipelineManager::AssetAddedCallback(const AssetCallbackData& callback)
 	{
 		ResourceMeta meta;
