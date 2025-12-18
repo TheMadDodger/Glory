@@ -160,8 +160,8 @@ namespace Glory
         virtual void SetViewport(CommandBufferHandle commandBuffer, float x, float y, float width, float height, float minDepth=0.0f, float maxDepth=1.0f) override;
         virtual void SetScissor(CommandBufferHandle commandBuffer, int x, int y, uint32_t width, uint32_t height) override;
 
-        virtual void PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>&,
-            const std::vector<TextureHandle>&, PipelineStageFlagBits, PipelineStageFlagBits) override;
+        virtual void PipelineBarrier(CommandBufferHandle, const std::vector<BufferBarrier>& buffers,
+            const std::vector<ImageBarrier>& images, PipelineStageFlagBits, PipelineStageFlagBits) override;
         virtual void CopyImage(CommandBufferHandle commandBuffer, TextureHandle src, TextureHandle dst) override;
 
         virtual SwapchainResult AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle) override;

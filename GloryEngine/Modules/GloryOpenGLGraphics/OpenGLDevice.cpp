@@ -678,15 +678,36 @@ namespace Glory
 		glScissor(x, y, width, height);
 	}
 
-	void OpenGLDevice::PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>& buffers,
-		const std::vector<TextureHandle>&, PipelineStageFlagBits, PipelineStageFlagBits)
+	void OpenGLDevice::PipelineBarrier(CommandBufferHandle, const std::vector<BufferBarrier>& buffers,
+		const std::vector<ImageBarrier>& images, PipelineStageFlagBits, PipelineStageFlagBits)
 	{
-		glMemoryBarrier(GL_ALL_BARRIER_BITS);
-		if (!buffers.empty())
+		GLbitfield barrierBitField = 0;
+
+		for (size_t i = 0; i < buffers.size(); ++i)
 		{
-			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-			OpenGLGraphicsModule::LogGLError(glGetError());
+			GL_Buffer* glBuffer = m_Buffers.Find(buffers[i].m_Buffer);
+			switch (glBuffer->m_GLTarget)
+			{
+			case GL_UNIFORM_BUFFER:
+				barrierBitField |= GL_UNIFORM_BARRIER_BIT;
+				break;
+			case GL_SHADER_STORAGE_BUFFER:
+				barrierBitField |= GL_SHADER_STORAGE_BARRIER_BIT;
+				break;
+			default:
+				break;
+			}
 		}
+
+		if (!images.empty())
+		{
+			barrierBitField |= GL_SHADER_IMAGE_ACCESS_BARRIER_BIT;
+			barrierBitField |= GL_FRAMEBUFFER_BARRIER_BIT;
+		}
+
+		if (barrierBitField == 0) return;
+		glMemoryBarrier(barrierBitField);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
 	void OpenGLDevice::CopyImage(CommandBufferHandle commandBuffer, TextureHandle src, TextureHandle dst)

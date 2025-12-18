@@ -829,8 +829,33 @@ namespace Glory
 		vkCommandBuffer->setScissor(0, 1, &scissor);
 	}
 
-	void VulkanDevice::PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>& buffers,
-		const std::vector<TextureHandle>& textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage)
+	vk::AccessFlags GetVKAccessMask(AccessFlags flags)
+	{
+		if (flags == AF_None) return vk::AccessFlagBits::eNone;
+
+		vk::AccessFlags result = (vk::AccessFlags)0;
+		if (flags & AF_IndirectCommandRead) result |= vk::AccessFlagBits::eIndirectCommandRead;
+		if (flags & AF_IndexRead) result |= vk::AccessFlagBits::eIndexRead;
+		if (flags & AF_VertexAttributeRead) result |= vk::AccessFlagBits::eVertexAttributeRead;
+		if (flags & AF_UniformRead) result |= vk::AccessFlagBits::eUniformRead;
+		if (flags & AF_InputAttachmentRead) result |= vk::AccessFlagBits::eInputAttachmentRead;
+		if (flags & AF_ShaderRead) result |= vk::AccessFlagBits::eShaderRead;
+		if (flags & AF_ShaderWrite) result |= vk::AccessFlagBits::eShaderWrite;
+		if (flags & AF_ColorAttachmentRead) result |= vk::AccessFlagBits::eColorAttachmentRead;
+		if (flags & AF_ColorAttachmentWrite) result |= vk::AccessFlagBits::eColorAttachmentWrite;
+		if (flags & AF_DepthStencilAttachmentRead) result |= vk::AccessFlagBits::eDepthStencilAttachmentRead;
+		if (flags & AF_DepthStencilAttachmentWrite) result |= vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+		if (flags & AF_CopySrc) result |= vk::AccessFlagBits::eTransferRead;
+		if (flags & AF_CopyDst) result |= vk::AccessFlagBits::eTransferWrite;
+		if (flags & AF_CPURead) result |= vk::AccessFlagBits::eHostRead;
+		if (flags & AF_CPUWrite) result |= vk::AccessFlagBits::eHostWrite;
+		if (flags & AF_MemoryRead) result |= vk::AccessFlagBits::eMemoryRead;
+		if (flags & AF_MemoryWrite) result |= vk::AccessFlagBits::eMemoryWrite;
+		return result;
+	}
+
+	void VulkanDevice::PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferBarrier>& buffers,
+		const std::vector<ImageBarrier>& images, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::PipelineBarrier" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
@@ -841,23 +866,23 @@ namespace Glory
 		}
 
 		std::vector<vk::BufferMemoryBarrier> bufferBarriers(buffers.size());
-		std::vector<vk::ImageMemoryBarrier> imageBarriers(textures.size());
+		std::vector<vk::ImageMemoryBarrier> imageBarriers(images.size());
 		for (size_t i = 0; i < buffers.size(); ++i)
 		{
-			VK_Buffer* vkBuffer = m_Buffers.Find(buffers[i]);
+			VK_Buffer* vkBuffer = m_Buffers.Find(buffers[i].m_Buffer);
 			bufferBarriers[i] = vk::BufferMemoryBarrier();
 			bufferBarriers[i].buffer = vkBuffer->m_VKBuffer;
 			bufferBarriers[i].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 			bufferBarriers[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			bufferBarriers[i].offset = 0;
-			bufferBarriers[i].size = vkBuffer->m_Size;
-			//bufferBarriers[i].srcAccessMask
-			//bufferBarriers[i].dstAccessMask
+			bufferBarriers[i].offset = buffers[i].m_Offset;
+			bufferBarriers[i].size = buffers[i].m_Size > 0 ? buffers[i].m_Size : vkBuffer->m_Size;
+			bufferBarriers[i].srcAccessMask = GetVKAccessMask(buffers[i].m_SrcAccessMask);
+			bufferBarriers[i].dstAccessMask = GetVKAccessMask(buffers[i].m_DstAccessMask);
 		}
 
-		for (size_t i = 0; i < textures.size(); ++i)
+		for (size_t i = 0; i < images.size(); ++i)
 		{
-			VK_Texture* vkTexture = m_Textures.Find(textures[i]);
+			VK_Texture* vkTexture = m_Textures.Find(images[i].m_Texture);
 			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
 			if (!vkImage) continue;
 
@@ -867,13 +892,14 @@ namespace Glory
 			imageBarriers[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 			imageBarriers[i].oldLayout = vkImage->m_VKFinalLayout;
 			imageBarriers[i].newLayout = vkImage->m_VKFinalLayout;
+			imageBarriers[i].srcAccessMask = GetVKAccessMask(images[i].m_SrcAccessMask);
+			imageBarriers[i].dstAccessMask = GetVKAccessMask(images[i].m_DstAccessMask);
+
 			imageBarriers[i].subresourceRange.aspectMask = vkImage->m_VKAspect;
 			imageBarriers[i].subresourceRange.levelCount = 1;
 			imageBarriers[i].subresourceRange.layerCount = 1;
 			imageBarriers[i].subresourceRange.baseArrayLayer = 0;
 			imageBarriers[i].subresourceRange.baseMipLevel = 0;
-			//imageBarriers[i].srcAccessMask
-			//imageBarriers[i].dstAccessMask
 		}
 
 		const VK_CommandBuffer& vkCommandBuffer = iter->second;

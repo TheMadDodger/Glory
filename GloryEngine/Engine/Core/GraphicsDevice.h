@@ -360,6 +360,45 @@ namespace Glory
 		std::vector<SamplerDescriptorUpdate> m_Samplers;
 	};
 
+	enum AccessFlags : uint32_t
+	{
+		AF_None = 0,
+		AF_IndirectCommandRead = 1 << 0,
+		AF_IndexRead = 1 << 1,
+		AF_VertexAttributeRead = 1 << 2,
+		AF_UniformRead = 1 << 3,
+		AF_InputAttachmentRead = 1 << 4,
+		AF_ShaderRead = 1 << 5,
+		AF_ShaderWrite = 1 << 6,
+		AF_ColorAttachmentRead = 1 << 7,
+		AF_ColorAttachmentWrite = 1 << 8,
+		AF_DepthStencilAttachmentRead = 1 << 9,
+		AF_DepthStencilAttachmentWrite = 1 << 10,
+		AF_CopySrc = 1 << 11,
+		AF_CopyDst = 1 << 12,
+		AF_CPURead = 1 << 13,
+		AF_CPUWrite = 1 << 14,
+		AF_MemoryRead = 1 << 15,
+		AF_MemoryWrite = 1 << 16,
+	};
+
+	struct BufferBarrier
+	{
+		BufferHandle m_Buffer;
+		AccessFlags m_SrcAccessMask;
+		AccessFlags m_DstAccessMask;
+
+		size_t m_Offset = 0;
+		size_t m_Size = 0;
+	};
+
+	struct ImageBarrier
+	{
+		TextureHandle m_Texture;
+		AccessFlags m_SrcAccessMask;
+		AccessFlags m_DstAccessMask;
+	};
+
 	/** @brief Graphics device abstraction */
 	class GraphicsDevice
 	{
@@ -530,8 +569,8 @@ namespace Glory
 		 * @param srcStage Source stage
 		 * @param dstStage Destination stage
 		 */
-		virtual void PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferHandle>& buffers,
-			const std::vector<TextureHandle>& textures, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage) = 0;
+		virtual void PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferBarrier>& buffers,
+			const std::vector<ImageBarrier>& images, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage) = 0;
 
 		virtual void CopyImage(CommandBufferHandle commandBuffer, TextureHandle src, TextureHandle dst) = 0;
 

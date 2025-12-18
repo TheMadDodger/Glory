@@ -11,6 +11,7 @@
 #include <CubemapData.h>
 #include <GraphicsDevice.h>
 #include <InternalPipeline.h>
+#include <RenderHelpers.h>
 
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -182,6 +183,8 @@ namespace Glory::Editor
 		pDevice->UpdateDescriptorSet(m_CubemapSet, setUpdateInfo);
 
 		glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+		FixProjection(captureProjection, pDevice);
+
 		glm::mat4 captureViews[] =
 		{
 		   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
@@ -212,7 +215,11 @@ namespace Glory::Editor
 			pDevice->EndPipeline(commandBuffer);
 			pDevice->EndRenderPass(commandBuffer);
 
-			pDevice->PipelineBarrier(commandBuffer, {}, { irradianceResultTexture }, PST_ColorAttachmentOutput, PST_AllCommands);
+			ImageBarrier irradianceBarrier;
+			irradianceBarrier.m_Texture = irradianceResultTexture;
+			irradianceBarrier.m_SrcAccessMask = AF_ColorAttachmentWrite;
+			irradianceBarrier.m_DstAccessMask = AF_CopySrc;
+			pDevice->PipelineBarrier(commandBuffer, {}, { irradianceBarrier }, PST_ColorAttachmentOutput, PST_Transfer);
 			pDevice->CopyImage(commandBuffer, irradianceResultTexture, m_CubemapFaces[i]);
 		}
 

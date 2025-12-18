@@ -18,6 +18,7 @@
 #include <CubemapData.h>
 
 #include <EngineProfiler.h>
+#include <RenderHelpers.h>
 #include <random>
 
 #include <glm/glm.hpp>
@@ -89,85 +90,6 @@ namespace Glory
 		float zNear;
 		float zFar;
 	};
-
-	void FixViewport(glm::vec4& viewport, const glm::uvec2& resolution, GraphicsDevice* pDevice)
-	{
-		const ViewportOrigin origin = pDevice->GetViewportOrigin();
-		switch (origin)
-		{
-		case Glory::TopLeft:
-			/* Transform the Y origin */
-			glm::vec4 temp = viewport;
-			viewport.y = float(resolution.y) - temp.y - temp.w;
-			break;
-		case Glory::BottomLeft:
-			/* No need to do anything */
-			break;
-		default:
-			break;
-		}
-	}
-
-	void InvertViewport(glm::vec4& viewport, GraphicsDevice* pDevice)
-	{
-		const ViewportOrigin origin = pDevice->GetViewportOrigin();
-		switch (origin)
-		{
-		case Glory::TopLeft:
-			/* Transform the Y origin */
-			glm::vec4 temp = viewport;
-			viewport.y = temp.w - temp.y;
-			viewport.w = -temp.w;
-			break;
-		case Glory::BottomLeft:
-			/* No need to do anything */
-			break;
-		default:
-			break;
-		}
-	}
-
-	void FixShadowCoords(glm::vec4& coords, GraphicsDevice* pDevice)
-	{
-		const ViewportOrigin origin = pDevice->GetViewportOrigin();
-		switch (origin)
-		{
-		case Glory::TopLeft:
-			/* Invert Y axis */
-			coords.y = 1.0f - coords.y;
-			coords.w = 1.0f - coords.w;
-			//coords.y = temp.w;
-			//coords.w = temp.y;
-			break;
-		case Glory::BottomLeft:
-			/* No need to do anything */
-			break;
-		default:
-			break;
-		}
-	}
-
-	//const glm::vec4 temp = coords;
-	//const float height = temp.w - temp.y;
-	//coords.y = 1.0f - temp.y - temp.w;
-	//coords.w = coords.y + height;
-
-	void FixProjection(glm::mat4& projection, GraphicsDevice* pDevice)
-	{
-		const ViewportOrigin origin = pDevice->GetViewportOrigin();
-		switch (origin)
-		{
-		case Glory::TopLeft:
-			/* Flip Y */
-			projection[1][1] *= -1.0f;
-			break;
-		case Glory::BottomLeft:
-			/* No need to do anything */
-			break;
-		default:
-			break;
-		}
-	}
 
 	GloryRendererModule::GloryRendererModule(): m_MinShadowResolution(256), m_MaxShadowResolution(2048),
 		m_ShadowAtlasResolution(8192), m_ShadowMapResolutions{}, m_MaxShadowLODs(6)
@@ -946,9 +868,14 @@ namespace Glory
 		ShadowMapsPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 
 		const GPUTextureAtlas& shadowAtlas = GetGPUTextureAtlas(m_ShadowAtlasses[m_CurrentFrameIndex]);
-		/* Wait shadow rendering to finish */
-		pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, { shadowAtlas.GetTexture() },
-			PipelineStageFlagBits::PST_ColorAttachmentOutput, PipelineStageFlagBits::PST_FragmentShader);
+		/* Wait for shadow rendering to finish */
+
+		ImageBarrier shadowBarrier;
+		shadowBarrier.m_Texture = shadowAtlas.GetTexture();
+		shadowBarrier.m_SrcAccessMask = AF_DepthStencilAttachmentWrite;
+		shadowBarrier.m_DstAccessMask = AF_ShaderRead;
+		pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, { shadowBarrier },
+			PipelineStageFlagBits::PST_LateFragmentTests, PipelineStageFlagBits::PST_FragmentShader);
 
 		for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
 		{
@@ -959,7 +886,19 @@ namespace Glory
 			const BufferHandle& lightGridSSBO = uniqueCameraData.m_LightGridSSBOs[m_CurrentFrameIndex];
 
 			/* Wait for light culling to finish */
-			pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], { lightIndexSSBO, lightGridSSBO }, {},
+			const std::vector<BufferBarrier> lightCullingBarriers = {
+				{
+					lightIndexSSBO,
+					AF_ShaderWrite,
+					AF_ShaderRead
+				},
+				{
+					lightGridSSBO,
+					AF_ShaderWrite,
+					AF_ShaderRead
+				},
+			};
+			pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], lightCullingBarriers, {},
 				PipelineStageFlagBits::PST_ComputeShader, PipelineStageFlagBits::PST_FragmentShader);
 
 			/* Draw objects */
@@ -996,8 +935,28 @@ namespace Glory
 			const TextureHandle depth = pDevice->GetRenderTextureAttachment(renderTexture, 3);
 
 			/* Wait for rendering to finish */
-			pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, { objectID, normals, depth },
+			const std::vector<ImageBarrier> imageBarriers = {
+				{
+					objectID,
+					AF_ColorAttachmentWrite,
+					AF_ShaderRead
+				},
+				{
+					normals,
+					AF_ColorAttachmentWrite,
+					AF_ShaderRead
+				},
+			};
+			pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, imageBarriers,
 				PipelineStageFlagBits::PST_ColorAttachmentOutput, PipelineStageFlagBits::PST_ComputeShader);
+
+			ImageBarrier depthBarrier{
+				depth,
+				AF_DepthStencilAttachmentWrite,
+				AF_ShaderRead
+			};
+			pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, { depthBarrier },
+				PipelineStageFlagBits::PST_LateFragmentTests, PipelineStageFlagBits::PST_ComputeShader);
 
 			const DescriptorSetHandle pickingResultSet = uniqueCameraData.m_PickingResultSets[m_CurrentFrameIndex];
 			const DescriptorSetHandle pickingSamplersSet = uniqueCameraData.m_PickingSamplersSets[m_CurrentFrameIndex];
@@ -1026,7 +985,11 @@ namespace Glory
 			const BufferHandle pickResults = uniqueCameraData.m_PickResultsSSBOs[m_CurrentFrameIndex];
 
 			/* Wait for picking to finish */
-			pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], { pickResults }, {},
+			BufferBarrier pickingBarrier;
+			pickingBarrier.m_Buffer = pickResults;
+			pickingBarrier.m_SrcAccessMask = AF_ShaderWrite;
+			pickingBarrier.m_DstAccessMask = AF_None;
+			pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], { pickingBarrier }, {},
 				PipelineStageFlagBits::PST_ComputeShader, PipelineStageFlagBits::PST_FragmentShader);
 
 			/* Draw late objects */
@@ -1063,8 +1026,21 @@ namespace Glory
 				const TextureHandle depth = pDevice->GetRenderTextureAttachment(renderTexture, 3);
 
 				/* Wait for rendering to finish */
-				pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, { normals, depth },
+				ImageBarrier normalBarrier{
+					normals,
+					AF_ColorAttachmentWrite,
+					AF_ShaderRead
+				};
+				pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, { normalBarrier },
 					PipelineStageFlagBits::PST_ColorAttachmentOutput, PipelineStageFlagBits::PST_FragmentShader);
+
+				ImageBarrier depthBarrier{
+					depth,
+					AF_DepthStencilAttachmentWrite,
+					AF_ShaderRead
+				};
+				pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, { depthBarrier },
+					PipelineStageFlagBits::PST_LateFragmentTests, PipelineStageFlagBits::PST_FragmentShader);
 
 				/* SSAO pass */
 				pDevice->BeginRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex], ssaoRenderPass);
@@ -1079,17 +1055,19 @@ namespace Glory
 			}
 		}
 
-		std::vector<TextureHandle> colorTextures(m_ActiveCameras.size());
+		std::vector<ImageBarrier> colorBarriers(m_ActiveCameras.size());
 		for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
 		{
 			CameraRef camera = m_ActiveCameras[i];
 			const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
 			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(uniqueCameraData.m_RenderPasses[m_CurrentFrameIndex]);
-			colorTextures[i] = pDevice->GetRenderTextureAttachment(renderTexture, 1);
+			colorBarriers[i].m_Texture = pDevice->GetRenderTextureAttachment(renderTexture, 1);
+			colorBarriers[i].m_SrcAccessMask = AF_ColorAttachmentWrite;
+			colorBarriers[i].m_DstAccessMask = AF_ShaderRead;
 		}
 
-		if (!colorTextures.empty())
-			pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, colorTextures,
+		if (!colorBarriers.empty())
+			pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, colorBarriers,
 				PipelineStageFlagBits::PST_ColorAttachmentOutput, PipelineStageFlagBits::PST_FragmentShader);
 
 		/* Post processing */
@@ -1110,7 +1088,11 @@ namespace Glory
 					RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(postProcessPass.m_BackBufferPass);
 					TextureHandle color = pDevice->GetRenderTextureAttachment(renderTexture, 0);
 
-					pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, { color },
+					ImageBarrier colorBarrier;
+					colorBarrier.m_Texture = color;
+					colorBarrier.m_SrcAccessMask = AF_ColorAttachmentWrite;
+					colorBarrier.m_DstAccessMask = AF_ShaderRead;
+					pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, { colorBarrier },
 						PipelineStageFlagBits::PST_ColorAttachmentOutput, PipelineStageFlagBits::PST_FragmentShader);
 					postProcessPass.Swap();
 				}
@@ -1137,7 +1119,11 @@ namespace Glory
 			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_FinalFrameColorPasses[m_CurrentFrameIndex]);
 			TextureHandle color = pDevice->GetRenderTextureAttachment(renderTexture, 0);
 
-			pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, { color },
+			ImageBarrier colorBarrier;
+			colorBarrier.m_Texture = color;
+			colorBarrier.m_SrcAccessMask = AF_ColorAttachmentWrite;
+			colorBarrier.m_DstAccessMask = AF_ShaderRead;
+			pDevice->PipelineBarrier(m_FrameCommandBuffers[m_CurrentFrameIndex], {}, { colorBarrier },
 				PipelineStageFlagBits::PST_ColorAttachmentOutput, PipelineStageFlagBits::PST_FragmentShader);
 
 			pDevice->BeginRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex], m_SwapchainPasses[m_CurrentSemaphoreIndex]);
