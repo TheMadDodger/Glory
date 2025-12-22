@@ -23,6 +23,9 @@ namespace Glory
 		virtual UUID TextPipelineID() const override;
 		virtual void PresentFrame() override;
 
+		virtual uint32_t GetNumFramesInFlight() const override { return 0; };
+		virtual uint32_t GetCurrentFrameInFlight() const override { return 0; };
+
 		GLORY_MODULE_VERSION_H(1, 0, 0);
 
 	private:

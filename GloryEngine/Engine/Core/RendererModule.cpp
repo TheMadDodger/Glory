@@ -610,6 +610,11 @@ namespace Glory
 		m_InjectedSwapchainSubpasses.push_back(subpassFunc);
 	}
 
+	void RendererModule::InjectPreRenderPass(std::function<void(GraphicsDevice*, CommandBufferHandle, uint32_t)> passFunc)
+	{
+		m_InjectedPreRenderPasses.push_back(passFunc);
+	}
+
 	void RendererModule::AddPostProcess(PostProcess&& postProcess)
 	{
 		m_PostProcesses.emplace_back(std::move(postProcess));

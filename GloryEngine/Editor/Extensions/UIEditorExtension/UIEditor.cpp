@@ -65,7 +65,11 @@ namespace Glory::Editor
 
 	void UIEditor::OnGUI()
 	{
-		UIRendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetOptionalModule<UIRendererModule>();
+		EditorApplication* pApp = EditorApplication::GetInstance();
+		Engine* pEngine = pApp->GetEngine();
+		UIRendererModule* pUIRenderer = pEngine->GetOptionalModule<UIRendererModule>();
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
 
 		UIMainWindow* pMainWindow = GetMainWindow();
 		UIDocument* pDocument = pMainWindow->CurrentDocument();
@@ -74,12 +78,10 @@ namespace Glory::Editor
 
 		if (pMainWindow->CurrentDocumentID() == 0 || !pDocument) return;
 
-		RenderTexture* pUITexture = pDocument->GetUITexture();
-		if (pUITexture == nullptr) return;
-		Texture* pTexture = pUITexture->GetTextureAttachment(0);
+		TextureHandle texture = pDocument->GetUITexture(pDevice, pRenderer->GetCurrentFrameInFlight());
 
 		uint32_t width, height;
-		pUITexture->GetDimensions(width, height);
+		pDocument->GetResolution(width, height);
 		float textureAspect = (float)width / (float)height;
 
 		ImVec2 pos = ImGui::GetWindowPos();
@@ -113,11 +115,9 @@ namespace Glory::Editor
 
 		ImDrawList* drawList = ImGui::GetWindowDrawList();
 		drawList->AddImage(
-			pRenderImpl->GetTextureID(pTexture), topLeft,
+			pRenderImpl->GetTextureID(texture), topLeft,
 			bottomRight, ImVec2(0, 1), ImVec2(1, 0));
 
-		EditorApplication* pApp = EditorApplication::GetInstance();
-		Engine* pEngine = pApp->GetEngine();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(pDocument->OriginalDocumentID());
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
@@ -140,7 +140,7 @@ namespace Glory::Editor
 		static ImVec2 mousePosLastFrame{};
 		static glm::vec4 startRect;
 
-		MeshData* pMesh = pRenderer->GetImageMesh();
+		MeshData* pMesh = pUIRenderer->GetImageMesh();
 		const float* vertices = pMesh->Vertices();
 
 		std::vector<ImVec2> points(4);
@@ -202,21 +202,6 @@ namespace Glory::Editor
 
 	void UIEditor::Draw()
 	{
-		UIMainWindow* pMainWindow = GetMainWindow();
-		UIDocument* pDocument = pMainWindow->CurrentDocument();
-		const UUID documentID = pMainWindow->CurrentDocumentID();
-		const glm::uvec2 resolution = pMainWindow->Resolution();
-		if (documentID == 0 || !pDocument) return;
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		UIRendererModule* pRenderer = pEngine->GetOptionalModule<UIRendererModule>();
-
-		UIRenderData data;
-		data.m_DocumentID = documentID;
-		data.m_ObjectID = 0;
-		data.m_TargetCamera = 0;
-		data.m_Resolution = glm::vec2(resolution.x, resolution.y);
-
-		pRenderer->DrawDocument(pDocument, data);
 	}
 
 	void UIEditor::MenuBar(UIMainWindow* pMainWindow)

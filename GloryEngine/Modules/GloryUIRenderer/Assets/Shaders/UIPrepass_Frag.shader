@@ -1,19 +1,16 @@
 #type frag
 #version 450
 
-layout(binding = 0) uniform sampler2D texSampler;
-layout(location = 0) in vec2 inTexCoord;
-layout(location = 1) in vec3 inColor;
-layout(location = 0) out vec4 outColor;
+#include "Internal/UIConstants.glsl"
 
-layout(binding = 1, std430) readonly buffer PropertiesSSBO
-{
-	vec4 Color;
-    vec4 HasTexture;
-} Properties;
+layout(set = 1, binding = 0) uniform sampler2D Color;
+
+layout(location = 0) in vec2 inTexCoord;
+layout(location = 1) in vec4 inColor;
+layout(location = 0) out vec4 outColor;
 
 void main()
 {    
-    vec4 sampled = Properties.HasTexture.x == 1.0 ? texture(texSampler, inTexCoord) : vec4(1.0, 1.0, 1.0, 1.0);
-    outColor = vec4(inColor, 1.0)*sampled*Properties.Color;
+    vec4 sampled = Constants.HasTexture == 1 ? texture(Color, inTexCoord) : vec4(1.0, 1.0, 1.0, 1.0);
+    outColor = inColor*sampled;
 }

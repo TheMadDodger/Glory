@@ -10,7 +10,6 @@
 namespace Glory
 {
 	class MaterialData;
-	class RenderTexture;
 	class UIDocumentData;
 	class FontData;
 	class UIDocument;
@@ -55,7 +54,8 @@ namespace Glory
 		GLORY_API void Submit(UIRenderData&& data);
 		GLORY_API void Create(const UIRenderData& data, UIDocumentData* pDocument);
 
-		GLORY_API void DrawDocument(UIDocument* pDocument, const UIRenderData& data);
+		GLORY_API void DrawDocument(GraphicsDevice* pDevice, CommandBufferHandle commandBuffer,
+			uint32_t frameIndex, UIDocument* pDocument, const UIRenderData& data);
 
 		GLORY_API MaterialData* PrepassStencilMaterial();
 		GLORY_API MaterialData* PrepassMaterial();
@@ -64,7 +64,7 @@ namespace Glory
 
 		GLORY_API UIDocument* FindDocument(UUID uuid);
 
-		GLORY_MODULE_VERSION_H(0,2,0);
+		GLORY_MODULE_VERSION_H(0, 3, 0);
 
 	private:
 		virtual void Initialize() override;
@@ -93,6 +93,27 @@ namespace Glory
 
 		std::vector<UIRenderData> m_Frame;
 		std::unique_ptr<MeshData> m_pImageMesh;
+		MeshHandle m_ImageMesh = 0;
 		std::map<UUID, std::unique_ptr<MeshData>> m_pDocumentQuads;
+
+		struct UIBatchData
+		{
+			UIBatchData() {};
+			virtual ~UIBatchData() {};
+
+			CPUBuffer<glm::vec4> m_Colors;
+			CPUBuffer<glm::mat4> m_Worlds;
+
+			BufferHandle m_ColorsBuffers = 0;
+			BufferHandle m_WorldsBuffers = 0;
+			DescriptorSetHandle m_BuffersSet = 0;
+			std::vector<DescriptorSetHandle> m_TextureSets;
+			std::vector<UUID> m_LastTextureIDs;
+		};
+
+		std::map<UUID, UIBatchData> m_BatchDatas;
+
+		DescriptorSetLayoutHandle m_UIBuffersLayout = 0;
+		DescriptorSetLayoutHandle m_UISamplerLayout = 0;
 	};
 }

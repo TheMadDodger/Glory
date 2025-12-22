@@ -296,6 +296,16 @@ namespace Glory
 		m_CurrentSemaphoreIndex = (m_CurrentSemaphoreIndex + 1) % m_ImageCount;
 	}
 
+	uint32_t GloryRendererModule::GetNumFramesInFlight() const
+	{
+		return m_ImageCount;
+	}
+
+	uint32_t GloryRendererModule::GetCurrentFrameInFlight() const
+	{
+		return m_CurrentFrameIndex;
+	}
+
 	void GloryRendererModule::Initialize()
 	{
 		RendererModule::Initialize();
@@ -866,6 +876,9 @@ namespace Glory
 
 		/* Shadows */
 		ShadowMapsPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
+
+		for (auto& injectedPrePass : m_InjectedPreRenderPasses)
+			injectedPrePass(pDevice, m_FrameCommandBuffers[m_CurrentFrameIndex], m_CurrentFrameIndex);
 
 		const GPUTextureAtlas& shadowAtlas = GetGPUTextureAtlas(m_ShadowAtlasses[m_CurrentFrameIndex]);
 		/* Wait for shadow rendering to finish */

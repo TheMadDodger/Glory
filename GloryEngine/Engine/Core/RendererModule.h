@@ -250,8 +250,12 @@ namespace Glory
 		void SetEnabled(bool enabled=true);
 
 		void InjectSwapchainSubpass(std::function<void(GraphicsDevice*, RenderPassHandle, CommandBufferHandle)> subpassFunc);
+		void InjectPreRenderPass(std::function<void(GraphicsDevice*, CommandBufferHandle, uint32_t)> passFunc);
 
 		void AddPostProcess(PostProcess&& postProcess);
+
+		virtual uint32_t GetNumFramesInFlight() const = 0;
+		virtual uint32_t GetCurrentFrameInFlight() const = 0;
 
 	protected:
 		virtual void OnSubmitDynamic(const RenderData& renderData) {}
@@ -306,5 +310,6 @@ namespace Glory
 		bool m_Enabled = true;
 
 		std::vector<std::function<void(GraphicsDevice*, RenderPassHandle, CommandBufferHandle)>> m_InjectedSwapchainSubpasses;
+		std::vector<std::function<void(GraphicsDevice*, CommandBufferHandle, uint32_t)>> m_InjectedPreRenderPasses;
 	};
 }
