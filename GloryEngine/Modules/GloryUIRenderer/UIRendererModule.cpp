@@ -150,6 +150,10 @@ namespace Glory
 		PipelineHandle uiTextPipeline = pDevice->AcquireCachedPipeline(pDocument->m_UIPasses[0], pPipeline,
 			{ m_UIBuffersLayout, m_UISamplerLayout }, sizeof(VertexPosColorTex),
 			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+		pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Prepass Stencil Pipeline"));
+		PipelineHandle uiStencilPipeline = pDevice->AcquireCachedPipeline(pDocument->m_UIPasses[0], pPipeline,
+			{ m_UIBuffersLayout }, sizeof(VertexPosColorTex),
+			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
 
 		/* Prepare data */
 		auto iter = m_BatchDatas.find(pDocument->m_ObjectID);
@@ -241,7 +245,7 @@ namespace Glory
 			batchData.m_LastTextureIDs.resize(pDocument->m_UIBatch.m_TextureIDs.size(), 0ull);
 		}
 
-		for (size_t i = 0; i < batchData.m_TextureSets.size(); ++i)
+		for (size_t i = 0; i < pDocument->m_UIBatch.m_Worlds.size(); ++i)
 		{
 			UUID textureID = pDocument->m_UIBatch.m_TextureIDs[i];
 			Resource* pTextureResource = textureID ? assets.FindResource(textureID) : nullptr;
@@ -276,21 +280,71 @@ namespace Glory
 		pDevice->SetRenderPassClear(renderPass, { 0.0f, 0.0f, 0.0f, 1.0f });
 		pDevice->BeginRenderPass(commandBuffer, renderPass);
 
+		uint8_t mask = 0;
 		UIConstants constants;
 		constants.Projection = pDocument->m_Projection;
 		for (size_t i = 0; i < pDocument->m_UIBatch.m_Worlds.size(); ++i)
 		{
+			/* Setup constants */
 			constants.ObjectIndex = i;
 			constants.ColorIndex = pDocument->m_UIBatch.m_ColorIndices[i];
 			constants.HasTexture = pDocument->m_UIBatch.m_TextureIDs[i] ? 1 : 0;
 
-			PipelineHandle pipeline = pDocument->m_UIBatch.m_TextMeshes[i] ? uiTextPipeline : uiPipeline;
+			if (pDocument->m_UIBatch.m_MaskDecrements.IsSet(i))
+			{
+				/* Remove the shape from the stencil */
+				--mask;
+				pDevice->BeginPipeline(commandBuffer, uiStencilPipeline);
+				pDevice->SetStencilOp(commandBuffer, CompareOp::OP_Equal, Func::OP_Keep, Func::OP_Keep, Func::OP_Decrement, mask + 1, 255);
+				pDevice->PushConstants(commandBuffer, uiStencilPipeline, 0, sizeof(UIConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
+				pDevice->BindDescriptorSets(commandBuffer, uiStencilPipeline, { batchData.m_BuffersSet });
+				pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(pDocument->m_Resolution.x), float(pDocument->m_Resolution.y));
+				pDevice->SetScissor(commandBuffer, 0, 0, pDocument->m_Resolution.x, pDocument->m_Resolution.y);
+				pDevice->DrawMesh(commandBuffer, m_ImageMesh);
+				pDevice->EndPipeline(commandBuffer);
+				continue;
+			}
+
+			const bool isStencil = pDocument->m_UIBatch.m_MaskIncrements.IsSet(i);
+			if (isStencil)
+			{
+				/* Render the mask to the stencil buffer */
+				pDevice->BeginPipeline(commandBuffer, uiStencilPipeline);
+				/* First stencil pass increases stencil value by 1 */
+				pDevice->SetStencilOp(commandBuffer, CompareOp::OP_Always, Func::OP_Keep, Func::OP_Keep, Func::OP_Increment, mask, 255);
+				pDevice->PushConstants(commandBuffer, uiStencilPipeline, 0, sizeof(UIConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
+				pDevice->BindDescriptorSets(commandBuffer, uiStencilPipeline, { batchData.m_BuffersSet });
+				pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(pDocument->m_Resolution.x), float(pDocument->m_Resolution.y));
+				pDevice->SetScissor(commandBuffer, 0, 0, pDocument->m_Resolution.x, pDocument->m_Resolution.y);
+				pDevice->DrawMesh(commandBuffer, m_ImageMesh);
+				/* Second stencil pass compares stencil with the the expected addition, on fail it is reduced by 1 */
+				pDevice->SetStencilOp(commandBuffer, CompareOp::OP_Equal, Func::OP_Decrement, Func::OP_Decrement, Func::OP_Replace, mask + 1, 255);
+				pDevice->DrawMesh(commandBuffer, m_ImageMesh);
+				pDevice->EndPipeline(commandBuffer);
+
+				++mask;
+				continue;
+			}
+
+			const UUID meshID = pDocument->m_UIBatch.m_TextMeshes[i];
+
+			MeshData* pMesh = meshID ? pDocument->m_pTextMeshes.at(meshID).get() : nullptr;
+			MeshHandle mesh = pMesh ? pDevice->AcquireCachedMesh(pMesh, MU_Dynamic) : m_ImageMesh;
+
+			const PipelineHandle pipeline = meshID ? uiTextPipeline : uiPipeline;
 			pDevice->BeginPipeline(commandBuffer, pipeline);
+
+			if (mask > 0)
+			{
+				pDevice->SetStencilTestEnabled(commandBuffer, true);
+				pDevice->SetStencilOp(commandBuffer, CompareOp::OP_LessOrEqual, Func::OP_Keep, Func::OP_Keep, Func::OP_Keep, mask, 255);
+			}
+
 			pDevice->PushConstants(commandBuffer, pipeline, 0, sizeof(UIConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
 			pDevice->BindDescriptorSets(commandBuffer, pipeline, { batchData.m_BuffersSet, batchData.m_TextureSets[i] });
 			pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(pDocument->m_Resolution.x), float(pDocument->m_Resolution.y));
 			pDevice->SetScissor(commandBuffer, 0, 0, pDocument->m_Resolution.x, pDocument->m_Resolution.y);
-			pDevice->DrawMesh(commandBuffer, m_ImageMesh);
+			pDevice->DrawMesh(commandBuffer, mesh);
 			pDevice->EndPipeline(commandBuffer);
 		}
 		pDevice->EndRenderPass(commandBuffer);

@@ -649,6 +649,30 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
+	void OpenGLDevice::SetStencilTestEnabled(CommandBufferHandle, bool enable)
+	{
+		if (enable)
+			glEnable(GL_STENCIL_TEST);
+		else
+			glDisable(GL_STENCIL_TEST);
+	}
+
+	void OpenGLDevice::SetStencilOp(CommandBufferHandle, CompareOp compareOp,
+		Func fail, Func depthFail, Func pass, int8_t reference, uint8_t compareMask)
+	{
+		const GLenum glCompareOp = CompareOps.at(compareOp);
+		const GLenum glFail = GLFuncs.at(fail);
+		const GLenum glDepthFail = GLFuncs.at(depthFail);
+		const GLenum glPass = GLFuncs.at(pass);
+		glStencilOp(glFail, glDepthFail, glPass);
+		glStencilFunc(glCompareOp, GLint(reference), GLuint(compareMask));
+	}
+
+	void OpenGLDevice::SetStencilWriteMask(CommandBufferHandle, uint8_t mask)
+	{
+		glStencilMask(GLuint(mask));
+	}
+
 	void OpenGLDevice::Commit(CommandBufferHandle, const std::vector<SemaphoreHandle>&, const std::vector<SemaphoreHandle>&)
 	{
 		//glFlush();

@@ -61,6 +61,105 @@ namespace Glory
 		return result;
 	}
 
+	vk::CullModeFlagBits GetVKCullMode(CullFace cullFace)
+	{
+		switch (cullFace)
+		{
+		case Glory::CullFace::None:
+			return vk::CullModeFlagBits::eNone;
+		case Glory::CullFace::Front:
+			return vk::CullModeFlagBits::eFront;
+		case Glory::CullFace::Back:
+			return vk::CullModeFlagBits::eBack;
+		case Glory::CullFace::FrontAndBack:
+			return vk::CullModeFlagBits::eFrontAndBack;
+		default:
+			return vk::CullModeFlagBits::eNone;
+		}
+	}
+
+	vk::PrimitiveTopology GetVKTopology(PrimitiveType primitiveType)
+	{
+		switch (primitiveType)
+		{
+		case Glory::PrimitiveType::Point:
+			return vk::PrimitiveTopology::ePointList;
+		case Glory::PrimitiveType::LineStrip:
+			return vk::PrimitiveTopology::eLineStrip;
+		case Glory::PrimitiveType::LineLoop:
+			return vk::PrimitiveTopology::eLineList;
+		case Glory::PrimitiveType::Lines:
+			return vk::PrimitiveTopology::eLineList;
+		case Glory::PrimitiveType::LineStripAdjacency:
+			return vk::PrimitiveTopology::eLineStripWithAdjacency;
+		case Glory::PrimitiveType::LinesAdjacency:
+			return vk::PrimitiveTopology::eLineListWithAdjacency;
+		case Glory::PrimitiveType::TriangleStrip:
+			return vk::PrimitiveTopology::eTriangleStrip;
+		case Glory::PrimitiveType::TriangleFan:
+			return vk::PrimitiveTopology::eTriangleFan;
+		case Glory::PrimitiveType::Triangles:
+			return vk::PrimitiveTopology::eTriangleList;
+		case Glory::PrimitiveType::TriangleStripAdjacency:
+			return vk::PrimitiveTopology::eTriangleStripWithAdjacency;
+		case Glory::PrimitiveType::TrianglesAdjacency:
+			return vk::PrimitiveTopology::eTriangleListWithAdjacency;
+		case Glory::PrimitiveType::Patches:
+			return vk::PrimitiveTopology::ePatchList;
+		default:
+			return vk::PrimitiveTopology::eTriangleList;
+		}
+	}
+
+	vk::CompareOp GetVulkanCompareOp(const CompareOp& op)
+	{
+		switch (op)
+		{
+		case Glory::CompareOp::OP_Never:
+			return vk::CompareOp::eNever;
+		case Glory::CompareOp::OP_Less:
+			return vk::CompareOp::eLess;
+		case Glory::CompareOp::OP_Equal:
+			return vk::CompareOp::eEqual;
+		case Glory::CompareOp::OP_LessOrEqual:
+			return vk::CompareOp::eLessOrEqual;
+		case Glory::CompareOp::OP_Greater:
+			return vk::CompareOp::eGreater;
+		case Glory::CompareOp::OP_NotEqual:
+			return vk::CompareOp::eNotEqual;
+		case Glory::CompareOp::OP_GreaterOrEqual:
+			return vk::CompareOp::eGreaterOrEqual;
+		case Glory::CompareOp::OP_Always:
+			return vk::CompareOp::eAlways;
+		}
+		return (vk::CompareOp)0;
+	}
+
+	vk::StencilOp GetVulkanStencilOp(const Func& op)
+	{
+		switch (op)
+		{
+		case Func::OP_Keep:
+			return vk::StencilOp::eKeep;
+		case Func::OP_Zero:
+			return vk::StencilOp::eZero;
+		case Func::OP_Replace:
+			return vk::StencilOp::eReplace;
+		case Func::OP_Increment:
+			return vk::StencilOp::eIncrementAndClamp;
+		case Func::OP_IncrementWrap:
+			return vk::StencilOp::eIncrementAndWrap;
+		case Func::OP_Decrement:
+			return vk::StencilOp::eDecrementAndClamp;
+		case Func::OP_DecrementWrap:
+			return vk::StencilOp::eDecrementAndWrap;
+		case Func::OP_Invert:
+			return vk::StencilOp::eInvert;
+		default:
+			return vk::StencilOp(0);
+		}
+	}
+
 	VulkanDevice::VulkanDevice(VulkanGraphicsModule* pModule, vk::PhysicalDevice physicalDevice):
 		GraphicsDevice(pModule), m_VKDevice(physicalDevice), m_DidLastSupportCheckPass(false),
 		m_DescriptorAllocator(this), m_CommandBufferAllocator(this)
@@ -655,6 +754,57 @@ namespace Glory
 		}
 		VK_CommandBuffer& vkCommandBuffer = iter->second;
 		vkCommandBuffer->dispatch(x, y, z);
+	}
+
+	void VulkanDevice::SetStencilTestEnabled(CommandBufferHandle commandBuffer, bool enable)
+	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::SetStencilTestEnabled" };
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		if (iter == m_CommandBuffers.end())
+		{
+			Debug().LogError("VulkanDevice::SetStencilTestEnabled: Invalid command buffer handle.");
+			return;
+		}
+		VK_CommandBuffer& vkCommandBuffer = iter->second;
+		PFNCmdSetStencilTestEnable(VkCommandBuffer(*vkCommandBuffer), enable);
+	}
+
+	void VulkanDevice::SetStencilOp(CommandBufferHandle commandBuffer, CompareOp compareOp,
+		Func fail, Func depthFail, Func pass, int8_t reference, uint8_t compareMask)
+	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::SetStencilOp" };
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		if (iter == m_CommandBuffers.end())
+		{
+			Debug().LogError("VulkanDevice::SetStencilOp: Invalid command buffer handle.");
+			return;
+		}
+		VK_CommandBuffer& vkCommandBuffer = iter->second;
+
+		const vk::CompareOp vkCompareOp = GetVulkanCompareOp(compareOp);
+		const vk::StencilOp vkFail = GetVulkanStencilOp(fail);
+		const vk::StencilOp vkDepthFail = GetVulkanStencilOp(depthFail);
+		const vk::StencilOp vkPass = GetVulkanStencilOp(pass);
+
+		PFNCmdSetStencilOp(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK,
+			VkStencilOp(vkFail), VkStencilOp(vkPass),
+			VkStencilOp(vkDepthFail), VkCompareOp(vkCompareOp));
+
+		PFNCmdSetStencilCompareMask(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK, uint32_t(compareMask));
+		PFNCmdSetStencilReference(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK, int32_t(reference));
+	}
+
+	void VulkanDevice::SetStencilWriteMask(CommandBufferHandle commandBuffer, uint8_t mask)
+	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::Dispatch" };
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		if (iter == m_CommandBuffers.end())
+		{
+			Debug().LogError("VulkanDevice::SetStencilTestEnabled: Invalid command buffer handle.");
+			return;
+		}
+		VK_CommandBuffer& vkCommandBuffer = iter->second;
+		PFNCmdSetStencilWriteMask(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK, uint32_t(mask));
 	}
 
 	void VulkanDevice::Commit(CommandBufferHandle commandBuffer, const std::vector<SemaphoreHandle>& waitSemaphores,
@@ -1864,7 +2014,7 @@ namespace Glory
 				renderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eStencilAttachmentOptimal);
 
 			attachments[attachmentCount] = vk::AttachmentDescription()
-				.setFormat(vk::Format::eS8Uint)
+				.setFormat(vk::Format::eD16UnormS8Uint)
 				.setSamples(vk::SampleCountFlagBits::e1)
 				.setLoadOp(loadOp)
 				.setStoreOp(vk::AttachmentStoreOp::eStore)
@@ -1875,7 +2025,7 @@ namespace Glory
 
 			attachmentDepthStencilRef = vk::AttachmentReference()
 				.setAttachment(attachmentCount)
-				.setLayout(vk::ImageLayout::eStencilAttachmentOptimal);
+				.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
 		}
 
 		vk::SubpassDescription subPass = vk::SubpassDescription()
@@ -1961,105 +2111,6 @@ namespace Glory
 		shader.m_VKModule = m_LogicalDevice.createShaderModule(shaderModuleCreateInfo, nullptr);
 
 		return handle;
-	}
-
-	vk::CullModeFlagBits GetVKCullMode(CullFace cullFace)
-	{
-		switch (cullFace)
-		{
-		case Glory::CullFace::None:
-			return vk::CullModeFlagBits::eNone;
-		case Glory::CullFace::Front:
-			return vk::CullModeFlagBits::eFront;
-		case Glory::CullFace::Back:
-			return vk::CullModeFlagBits::eBack;
-		case Glory::CullFace::FrontAndBack:
-			return vk::CullModeFlagBits::eFrontAndBack;
-		default:
-			return vk::CullModeFlagBits::eNone;
-		}
-	}
-
-	vk::PrimitiveTopology GetVKTopology(PrimitiveType primitiveType)
-	{
-		switch (primitiveType)
-		{
-		case Glory::PrimitiveType::Point:
-			return vk::PrimitiveTopology::ePointList;
-		case Glory::PrimitiveType::LineStrip:
-			return vk::PrimitiveTopology::eLineStrip;
-		case Glory::PrimitiveType::LineLoop:
-			return vk::PrimitiveTopology::eLineList;
-		case Glory::PrimitiveType::Lines:
-			return vk::PrimitiveTopology::eLineList;
-		case Glory::PrimitiveType::LineStripAdjacency:
-			return vk::PrimitiveTopology::eLineStripWithAdjacency;
-		case Glory::PrimitiveType::LinesAdjacency:
-			return vk::PrimitiveTopology::eLineListWithAdjacency;
-		case Glory::PrimitiveType::TriangleStrip:
-			return vk::PrimitiveTopology::eTriangleStrip;
-		case Glory::PrimitiveType::TriangleFan:
-			return vk::PrimitiveTopology::eTriangleFan;
-		case Glory::PrimitiveType::Triangles:
-			return vk::PrimitiveTopology::eTriangleList;
-		case Glory::PrimitiveType::TriangleStripAdjacency:
-			return vk::PrimitiveTopology::eTriangleStripWithAdjacency;
-		case Glory::PrimitiveType::TrianglesAdjacency:
-			return vk::PrimitiveTopology::eTriangleListWithAdjacency;
-		case Glory::PrimitiveType::Patches:
-			return vk::PrimitiveTopology::ePatchList;
-		default:
-			return vk::PrimitiveTopology::eTriangleList;
-		}
-	}
-
-	vk::CompareOp GetVulkanCompareOp(const CompareOp& op)
-	{
-		switch (op)
-		{
-		case Glory::CompareOp::OP_Never:
-			return vk::CompareOp::eNever;
-		case Glory::CompareOp::OP_Less:
-			return vk::CompareOp::eLess;
-		case Glory::CompareOp::OP_Equal:
-			return vk::CompareOp::eEqual;
-		case Glory::CompareOp::OP_LessOrEqual:
-			return vk::CompareOp::eLessOrEqual;
-		case Glory::CompareOp::OP_Greater:
-			return vk::CompareOp::eGreater;
-		case Glory::CompareOp::OP_NotEqual:
-			return vk::CompareOp::eNotEqual;
-		case Glory::CompareOp::OP_GreaterOrEqual:
-			return vk::CompareOp::eGreaterOrEqual;
-		case Glory::CompareOp::OP_Always:
-			return vk::CompareOp::eAlways;
-		}
-		return (vk::CompareOp)0;
-	}
-
-	vk::StencilOp GetVulkanStencilOp(const Func& op)
-	{
-		switch (op)
-		{
-			case Func::OP_Keep:
-				return vk::StencilOp::eKeep;
-			case Func::OP_Zero:
-				return vk::StencilOp::eZero;
-			case Func::OP_Replace:
-				return vk::StencilOp::eReplace;
-			case Func::OP_Increment:
-				return vk::StencilOp::eIncrementAndClamp;
-			case Func::OP_IncrementWrap:
-				return vk::StencilOp::eIncrementAndWrap;
-			case Func::OP_Decrement:
-				return vk::StencilOp::eDecrementAndClamp;
-			case Func::OP_DecrementWrap:
-				return vk::StencilOp::eDecrementAndWrap;
-			case Func::OP_Invert:
-				return vk::StencilOp::eInvert;
-		default:
-			return vk::StencilOp(0);
-		}
 	}
 
 	PipelineHandle VulkanDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
@@ -3555,7 +3606,7 @@ namespace Glory
 		else if (renderTexture.m_Info.HasStencil)
 		{
 			depthStencilIndex = textureCounter;
-			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UInt, IF_None, ImageAspect::IA_Stencil, sampler });
+			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_D16UnormS8Uint, ImageType::IT_2D, DataType::DT_UInt, IF_None, ImageAspect::IA_Stencil, sampler });
 			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
 			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
 			vkImage->m_VKFinalLayout = renderTexture.m_Info.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthStencilAttachmentOptimal;

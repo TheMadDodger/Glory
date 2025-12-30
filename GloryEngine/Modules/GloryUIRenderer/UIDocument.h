@@ -43,6 +43,8 @@ namespace Glory
 		std::vector<UUID> m_TextMeshes;
 		std::vector<glm::mat4> m_Worlds;
 		std::vector<UUID> m_TextureIDs;
+		Utils::BitSet m_MaskIncrements;
+		Utils::BitSet m_MaskDecrements;
 
 		std::vector<glm::vec4> m_UniqueColors;
 		std::vector<uint32_t> m_ColorIndices;
@@ -98,6 +100,8 @@ namespace Glory
 		GLORY_API void SetEntityDirty(Utils::ECS::EntityID entity, bool setChildrenDirty, bool setParentsDirty);
 
 		GLORY_API void AddRender(UUID textMeshID, UUID textureID, glm::mat4&& world, const glm::vec4& color);
+		GLORY_API void BeginMask(glm::mat4&& world);
+		GLORY_API void EndMask();
 		GLORY_API void CreateRenderPasses(GraphicsDevice* pDevice, size_t imageCount, const glm::uvec2& resolution);
 		GLORY_API void ResizeRenderTexture(GraphicsDevice* pDevice, size_t imageCount, const glm::uvec2& resolution);
 		GLORY_API void SetClearColor(const glm::vec4& color);

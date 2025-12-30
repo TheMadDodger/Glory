@@ -499,6 +499,12 @@ namespace Glory
 		 * @param z Number of Z workgroups
 		 */
 		virtual void Dispatch(CommandBufferHandle commandBuffer, uint32_t x, uint32_t y, uint32_t z) = 0;
+
+		virtual void SetStencilTestEnabled(CommandBufferHandle commandBuffer, bool enable) = 0;
+		virtual void SetStencilOp(CommandBufferHandle commandBuffer, CompareOp compareOp,
+			Func fail, Func depthFail, Func pass, int8_t reference, uint8_t compareMask) = 0;
+		virtual void SetStencilWriteMask(CommandBufferHandle commandBuffer, uint8_t mask) = 0;
+
 		/**
 		 * @brief Commit a command buffer to the GPU
 		 * @param commandBuffer The handle to the command buffer

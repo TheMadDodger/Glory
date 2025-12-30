@@ -151,6 +151,12 @@ namespace Glory
 
         virtual void DrawMesh(CommandBufferHandle, MeshHandle handle) override;
         virtual void Dispatch(CommandBufferHandle, uint32_t x, uint32_t y, uint32_t z) override;
+
+        virtual void SetStencilTestEnabled(CommandBufferHandle, bool enable) override;
+        virtual void SetStencilOp(CommandBufferHandle, CompareOp compareOp,
+            Func fail, Func depthFail, Func pass, int8_t reference, uint8_t compareMask) override;
+        virtual void SetStencilWriteMask(CommandBufferHandle, uint8_t mask) override;
+
         virtual void Commit(CommandBufferHandle, const std::vector<SemaphoreHandle>&,
             const std::vector<SemaphoreHandle>&) override;
         virtual WaitResult Wait(CommandBufferHandle, uint64_t) override;

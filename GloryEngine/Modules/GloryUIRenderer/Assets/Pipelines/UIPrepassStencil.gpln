@@ -7,13 +7,13 @@ Settings:
   DepthWriteEnabled: false
   DepthCompareOp: OP_Less
   ColorWriteMask: 0
-  StencilTestEnabled: false
+  StencilTestEnabled: true
   StencilCompareOp: OP_Always
-  StencilFailOp: OP_Zero
-  StencilDepthFailOp: OP_Zero
-  StencilPassOp: OP_Zero
+  StencilFailOp: OP_Keep
+  StencilDepthFailOp: OP_Keep
+  StencilPassOp: OP_Increment
   StencilCompareMask: 255
-  StencilWriteMask: 0
+  StencilWriteMask: 255
   StencilReference: 0
   BlendEnabled: false
   SrcColorBlendFactor: SrcAlpha

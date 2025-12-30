@@ -121,6 +121,9 @@ namespace Glory
 
 	void UIDocument::Draw()
 	{
+		m_UIBatch.m_MaskIncrements.Clear();
+		m_UIBatch.m_MaskDecrements.Clear();
+
 		m_PanelCounter = 0;
 		m_Registry.SetUserData(this);
 
@@ -369,6 +372,7 @@ namespace Glory
 
 	void UIDocument::AddRender(UUID textMeshID, UUID textureID, glm::mat4&& world, const glm::vec4& color)
 	{
+		const size_t index = m_UIBatch.m_Worlds.size();
 		m_UIBatch.m_TextMeshes.emplace_back(textMeshID);
 		m_UIBatch.m_Worlds.emplace_back(std::move(world));
 		m_UIBatch.m_TextureIDs.emplace_back(textureID);
@@ -384,6 +388,37 @@ namespace Glory
 
 		const uint32_t materialIndex = static_cast<uint32_t>(iter - m_UIBatch.m_UniqueColors.begin());
 		m_UIBatch.m_ColorIndices.emplace_back(materialIndex);
+
+		m_UIBatch.m_MaskIncrements.Reserve(m_UIBatch.m_Worlds.size());
+		m_UIBatch.m_MaskDecrements.Reserve(m_UIBatch.m_Worlds.size());
+		m_UIBatch.m_MaskIncrements.Set(index, false);
+		m_UIBatch.m_MaskDecrements.Set(index, false);
+	}
+
+	void UIDocument::BeginMask(glm::mat4&& world)
+	{
+		const size_t index = m_UIBatch.m_Worlds.size();
+		m_UIBatch.m_TextMeshes.emplace_back(0);
+		m_UIBatch.m_Worlds.emplace_back(std::move(world));
+		m_UIBatch.m_TextureIDs.emplace_back(0);
+		m_UIBatch.m_ColorIndices.emplace_back(0);
+		m_UIBatch.m_MaskIncrements.Reserve(m_UIBatch.m_Worlds.size());
+		m_UIBatch.m_MaskDecrements.Reserve(m_UIBatch.m_Worlds.size());
+		m_UIBatch.m_MaskIncrements.Set(index, true);
+		m_UIBatch.m_MaskDecrements.Set(index, false);
+	}
+
+	void UIDocument::EndMask()
+	{
+		const size_t index = m_UIBatch.m_Worlds.size();
+		m_UIBatch.m_TextMeshes.emplace_back(0);
+		m_UIBatch.m_Worlds.emplace_back(glm::identity<glm::mat4>());
+		m_UIBatch.m_TextureIDs.emplace_back(0);
+		m_UIBatch.m_ColorIndices.emplace_back(0);
+		m_UIBatch.m_MaskIncrements.Reserve(m_UIBatch.m_Worlds.size());
+		m_UIBatch.m_MaskDecrements.Reserve(m_UIBatch.m_Worlds.size());
+		m_UIBatch.m_MaskIncrements.Set(index, false);
+		m_UIBatch.m_MaskDecrements.Set(index, true);
 	}
 
 	void UIDocument::CreateRenderPasses(GraphicsDevice* pDevice, size_t imageCount, const glm::uvec2& resolution)
@@ -397,7 +432,7 @@ namespace Glory
 
 			RenderPassInfo renderPassInfo;
 			renderPassInfo.RenderTextureInfo.HasDepth = false;
-			renderPassInfo.RenderTextureInfo.HasStencil = false;
+			renderPassInfo.RenderTextureInfo.HasStencil = true;
 			renderPassInfo.RenderTextureInfo.Width = m_Resolution.x;
 			renderPassInfo.RenderTextureInfo.Height = m_Resolution.y;
 			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA,
