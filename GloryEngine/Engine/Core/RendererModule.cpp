@@ -209,7 +209,10 @@ namespace Glory
 	void RendererModule::SubmitCamera(CameraRef camera)
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "RendererModule::SubmitCamera" };
-		auto it = std::find_if(m_ActiveCameras.begin(), m_ActiveCameras.end(), [camera, this](const CameraRef& other)
+		auto it = std::find(m_ActiveCameras.begin(), m_ActiveCameras.end(), camera);
+		if (it != m_ActiveCameras.end()) return;
+
+		it = std::find_if(m_ActiveCameras.begin(), m_ActiveCameras.end(), [camera, this](const CameraRef& other)
 		{
 			return camera.GetPriority() < other.GetPriority();
 		});
@@ -245,8 +248,8 @@ namespace Glory
 		if (camera.IsOutput())
 		{
 			auto outputIter = std::find(m_OutputCameras.begin(), m_OutputCameras.end(), camera);
-			if (outputIter != m_OutputCameras.end()) return;
-			m_OutputCameras.erase(outputIter);
+			if (outputIter != m_OutputCameras.end())
+				m_OutputCameras.erase(outputIter);
 		}
 
 		OnUnsubmitCamera(camera);
