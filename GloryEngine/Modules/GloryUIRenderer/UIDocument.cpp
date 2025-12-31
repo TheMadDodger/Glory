@@ -455,6 +455,8 @@ namespace Glory
 
 	void UIDocument::ResizeRenderTexture(GraphicsDevice* pDevice, size_t imageCount, const glm::uvec2& resolution, UIRendererModule* pUIRenderer)
 	{
+		m_Resolution = resolution;
+
 		if (m_UIPasses.size() < imageCount)
 			CreateRenderPasses(pDevice, imageCount, resolution, pUIRenderer);
 
