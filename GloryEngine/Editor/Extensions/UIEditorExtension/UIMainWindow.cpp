@@ -55,6 +55,7 @@ namespace Glory::Editor
 		m_EditingDocument = documentID;
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		UIRendererModule* pUIRenderer = pEngine->GetOptionalModule<UIRendererModule>();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
 		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(documentID);
@@ -74,7 +75,7 @@ namespace Glory::Editor
 		document.SetResourceUUID(documentID);
 		m_EditingDocumentIndex = m_pDocuments.size();
 		m_pDocuments.push_back(new UIDocument(&document));
-		m_pDocuments[m_EditingDocumentIndex]->CreateRenderPasses(pDevice, pRenderer->GetNumFramesInFlight(), m_Resolution);
+		m_pDocuments[m_EditingDocumentIndex]->CreateRenderPasses(pDevice, pRenderer->GetNumFramesInFlight(), m_Resolution, pUIRenderer);
 	}
 
 	UUID UIMainWindow::CurrentDocumentID() const
@@ -113,11 +114,12 @@ namespace Glory::Editor
 		m_Resolution = resolution;
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		UIRendererModule* pUIRenderer = pEngine->GetOptionalModule<UIRendererModule>();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
 
 		for (size_t i = 0; i < m_pDocuments.size(); ++i)
 		{
-			m_pDocuments[i]->ResizeRenderTexture(pDevice, pRenderer->GetNumFramesInFlight(), resolution);
+			m_pDocuments[i]->ResizeRenderTexture(pDevice, pRenderer->GetNumFramesInFlight(), resolution, pUIRenderer);
 			Utils::ECS::EntityRegistry& registry = m_pDocuments[i]->Registry();
 			for (size_t i = 0; i < registry.ChildCount(0); ++i)
 			{
@@ -296,6 +298,7 @@ namespace Glory::Editor
 			data.m_ObjectID = 0;
 			data.m_TargetCamera = 0;
 			data.m_Resolution = glm::vec2(resolution.x, resolution.y);
+			data.m_ClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 			pRenderer->DrawDocument(pDevice, commandBuffer, frameIndex, pDocument, data);
 		});

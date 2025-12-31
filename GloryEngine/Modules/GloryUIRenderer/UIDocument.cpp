@@ -1,6 +1,7 @@
 #include "UIDocument.h"
 #include "UIDocumentData.h"
 #include "UIComponents.h"
+#include "UIRendererModule.h"
 
 #include <FontData.h>
 #include <MeshData.h>
@@ -60,7 +61,7 @@ namespace Glory
 	}
 
 	UIDocument::UIDocument(UIDocumentData* pDocument):
-		m_OriginalDocumentID(pDocument->GetUUID()), m_SceneID(0), m_ObjectID(0),
+		m_OriginalDocumentID(pDocument->GetUUID()), m_Resolution(1, 1), m_SceneID(0), m_ObjectID(0),
 		m_pRenderer(nullptr), m_Projection(glm::identity<glm::mat4>()),
 		m_CursorPos(0.0f, 0.0f), m_CursorScrollDelta(0.0f, 0.0f), m_CursorDown(false),
 		m_WasCursorDown(false), m_InputEnabled(true), m_PanelCounter(0), m_Name(pDocument->m_Name),
@@ -421,11 +422,12 @@ namespace Glory
 		m_UIBatch.m_MaskDecrements.Set(index, true);
 	}
 
-	void UIDocument::CreateRenderPasses(GraphicsDevice* pDevice, size_t imageCount, const glm::uvec2& resolution)
+	void UIDocument::CreateRenderPasses(GraphicsDevice* pDevice, size_t imageCount, const glm::uvec2& resolution, UIRendererModule* pUIRenderer)
 	{
 		m_Resolution = resolution;
 
 		m_UIPasses.resize(imageCount, nullptr);
+		m_UIOverlaySets.resize(imageCount, nullptr);
 		for (size_t i = 0; i < m_UIPasses.size(); ++i)
 		{
 			if (m_UIPasses[i]) continue;
@@ -439,14 +441,22 @@ namespace Glory
 				PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
 
 			m_UIPasses[i] = pDevice->CreateRenderPass(std::move(renderPassInfo));
+			RenderTextureHandle uiRenderTexture = pDevice->GetRenderPassRenderTexture(m_UIPasses[i]);
+			TextureHandle uiTexture = pDevice->GetRenderTextureAttachment(uiRenderTexture, 0);
+
+			DescriptorSetInfo dsInfo;
+			dsInfo.m_Layout = pUIRenderer->UIOverlaySetLayout();
+			dsInfo.m_Samplers.resize(1);
+			dsInfo.m_Samplers[0].m_TextureHandle = uiTexture;
+			m_UIOverlaySets[i] = pDevice->CreateDescriptorSet(std::move(dsInfo));
 		}
 		m_DrawIsDirty.SetAll();
 	}
 
-	void UIDocument::ResizeRenderTexture(GraphicsDevice* pDevice, size_t imageCount, const glm::uvec2& resolution)
+	void UIDocument::ResizeRenderTexture(GraphicsDevice* pDevice, size_t imageCount, const glm::uvec2& resolution, UIRendererModule* pUIRenderer)
 	{
 		if (m_UIPasses.size() < imageCount)
-			CreateRenderPasses(pDevice, imageCount, resolution);
+			CreateRenderPasses(pDevice, imageCount, resolution, pUIRenderer);
 
 		pDevice->WaitIdle();
 		
@@ -454,6 +464,13 @@ namespace Glory
 		{
 			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_UIPasses[i]);
 			pDevice->ResizeRenderTexture(renderTexture, resolution.x, resolution.y);
+			TextureHandle uiTexture = pDevice->GetRenderTextureAttachment(renderTexture, 0);
+
+			DescriptorSetUpdateInfo dsWriteInfo;
+			dsWriteInfo.m_Samplers.resize(1);
+			dsWriteInfo.m_Samplers[0].m_TextureHandle = uiTexture;
+			dsWriteInfo.m_Samplers[0].m_DescriptorIndex = 0;
+			pDevice->UpdateDescriptorSet(m_UIOverlaySets[i], dsWriteInfo);
 		}
 		m_DrawIsDirty.SetAll();
 	}

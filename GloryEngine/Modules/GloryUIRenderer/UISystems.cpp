@@ -103,42 +103,6 @@ namespace Glory
 		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
 		glm::mat4 world = transform.m_Transform;
 		pDocument->AddRender(0ull, pComponent.m_Image.AssetUUID(), std::move(world), pComponent.m_Color);
-
-		//UIRendererModule* pUIRenderer = pDocument->Renderer();
-		//Engine* pEngine = pUIRenderer->GetEngine();
-
-		//AssetManager& assets = pEngine->GetAssetManager();
-		//MaterialManager& materials = pEngine->GetMaterialManager();
-		//RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
-		//GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
-		//GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
-		//
-		//TextureData* pTextureData = pComponent.m_Image.Get(&assets);
-		//if (!pTextureData) return;
-		//
-		//ImageData* pImage = pTextureData->GetImageData(&assets);
-		//if (!pImage) return;
-		//
-		//const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
-		//
-		//MeshData* pMeshData = pUIRenderer->GetImageMesh();
-		//Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
-		//ObjectData object;
-		//object.Model = transform.m_Transform;
-		//object.Projection = pDocument->Projection();
-		//
-		//MaterialData* pPrepassMaterial = pUIRenderer->PrepassMaterial();
-		//pPrepassMaterial->Set("Color", pComponent.m_Color);
-		//pPrepassMaterial->Set("HasTexture", glm::vec4{ 1.0f });
-		//
-		//Material* pMaterial = pGraphics->UseMaterial(pPrepassMaterial);
-		//pMaterial->SetProperties(pEngine);
-		//pMaterial->SetObjectData(object);
-		//
-		//Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
-		//if (pTexture) pMaterial->SetTexture("texSampler", pTexture);
-		//
-		//pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
 	}
 
 	void UIImageSystem::GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references)
@@ -224,24 +188,6 @@ namespace Glory
 		const glm::mat4 matTextOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(textOffset, 0.0f));
 		glm::mat4 world = transform.m_TransformNoScale*glm::inverse(matTextOffset);
 		pDocument->AddRender(meshID, pFont->Texture(), std::move(world), textData.m_Color);
-
-		//ObjectData object;
-		//const glm::mat4 matTextOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(textOffset, 0.0f));
-		//object.Model = transform.m_TransformNoScale*glm::inverse(matTextOffset);
-		//object.Projection = pDocument->Projection();
-		//
-		//Material* pMaterial = pGraphics->UseMaterial(pUIRenderer->TextPrepassMaterial());
-		//
-		//pMaterial->SetProperties(pEngine);
-		//pMaterial->SetObjectData(object);
-		//
-		//TextureData* pTextureData = pFont->GetGlyphTexture(assets);
-		//if (!pTextureData) return;
-		//
-		//Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
-		//if (pTexture) pMaterial->SetTexture("textSampler", pTexture);
-		//
-		//pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
     }
 
 	void UITextSystem::OnDirty(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent)
@@ -266,22 +212,6 @@ namespace Glory
 		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
 		glm::mat4 world = transform.m_Transform;
 		pDocument->AddRender(0, 0ull, std::move(world), pComponent.m_Color);
-
-		//MeshData* pMeshData = pUIRenderer->GetImageMesh();
-		//Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
-		//ObjectData object;
-		//object.Model = transform.m_Transform;
-		//object.Projection = pDocument->Projection();
-		//
-		//MaterialData* pPrepassMaterial = pUIRenderer->PrepassMaterial();
-		//pPrepassMaterial->Set("Color", pComponent.m_Color);
-		//pPrepassMaterial->Set("HasTexture", glm::vec4{ 0.0f });
-		//
-		//Material* pMaterial = pGraphics->UseMaterial(pPrepassMaterial);
-		//pMaterial->SetProperties(pEngine);
-		//pMaterial->SetObjectData(object);
-		//
-		//pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
 	}
 
 	void UIInteractionSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIInteraction& pComponent)

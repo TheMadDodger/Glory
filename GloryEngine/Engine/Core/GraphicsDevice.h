@@ -77,6 +77,10 @@ namespace Glory
 
 		bool operator==(const DescriptorSetLayoutInfo& other) const
 		{
+			if (m_SamplerNames.size() != other.m_SamplerNames.size()) return false;
+			for (size_t i = 0; i < m_SamplerNames.size(); ++i)
+				if (m_SamplerNames[i] != other.m_SamplerNames[i]) return false;
+
 			return std::memcmp(&m_PushConstantRange, &other.m_PushConstantRange, sizeof(PushConstantsRange)) == 0 &&
 				m_Buffers.size() == other.m_Buffers.size() &&
 				std::memcmp(m_Buffers.data(), other.m_Buffers.data(), sizeof(BufferDescriptorLayout)*m_Buffers.size()) == 0 &&

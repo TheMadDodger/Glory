@@ -539,8 +539,8 @@ namespace Glory
 		PostProcess displayCopyPP;
 		displayCopyPP.m_Name = "Initial Display Copy";
 		displayCopyPP.m_Priority = INT32_MAX;
-		displayCopyPP.m_Callback = [this](GraphicsDevice* pDevice, CameraRef camera, size_t cameraIndex,
-			CommandBufferHandle commandBuffer, RenderPassHandle renderPass, DescriptorSetHandle, const PostProcess& pp) {
+		displayCopyPP.m_Callback = [this](GraphicsDevice* pDevice, CameraRef camera, size_t,
+			CommandBufferHandle commandBuffer, size_t, RenderPassHandle renderPass, DescriptorSetHandle) {
 			const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
 
 			const glm::uvec2& resolution = camera.GetResolution();
@@ -560,8 +560,8 @@ namespace Glory
 		PostProcess ssaoPP;
 		ssaoPP.m_Name = "SSAO";
 		ssaoPP.m_Priority = 0;
-		ssaoPP.m_Callback = [this](GraphicsDevice* pDevice, CameraRef camera, size_t cameraIndex,
-			CommandBufferHandle commandBuffer, RenderPassHandle renderPass, DescriptorSetHandle colorSet, const PostProcess& pp)
+		ssaoPP.m_Callback = [this](GraphicsDevice* pDevice, CameraRef camera, size_t,
+			CommandBufferHandle commandBuffer, size_t, RenderPassHandle renderPass, DescriptorSetHandle colorSet)
 		{
 			if (!m_GlobalSSAOSetting.m_Enabled) return false;
 			const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
@@ -590,8 +590,8 @@ namespace Glory
 		PostProcess attachmentVisPP;
 		attachmentVisPP.m_Name = "Camera Attachment Visualizer";
 		attachmentVisPP.m_Priority = INT32_MIN;
-		attachmentVisPP.m_Callback = [this](GraphicsDevice* pDevice, CameraRef camera, size_t cameraIndex,
-			CommandBufferHandle commandBuffer, RenderPassHandle renderPass, DescriptorSetHandle colorSet, const PostProcess& pp)
+		attachmentVisPP.m_Callback = [this](GraphicsDevice* pDevice, CameraRef camera, size_t,
+			CommandBufferHandle commandBuffer, size_t, RenderPassHandle renderPass, DescriptorSetHandle colorSet)
 		{
 			const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
 
@@ -650,7 +650,7 @@ namespace Glory
 		debugOverlayPP.m_Name = "Debug Overlays";
 		debugOverlayPP.m_Priority = INT32_MIN;
 		debugOverlayPP.m_Callback = [this](GraphicsDevice* pDevice, CameraRef camera, size_t cameraIndex,
-			CommandBufferHandle commandBuffer, RenderPassHandle renderPass, DescriptorSetHandle colorSet, const PostProcess& pp)
+			CommandBufferHandle commandBuffer, size_t, RenderPassHandle renderPass, DescriptorSetHandle colorSet)
 		{
 			const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
 			if (!m_DebugOverlayBits.HasAnySet() && !uniqueCameraData.m_DebugOverlayBits.HasAnySet()) return false;
@@ -1094,8 +1094,8 @@ namespace Glory
 			for (const PostProcess& pp : m_PostProcesses)
 			{
 				ProfileSample profile{ &m_pEngine->Profiler(), "GloryRendererModule::Draw: Camera Post Process: " + pp.m_Name };
-				const bool rendered = pp.m_Callback(pDevice, camera, i, m_FrameCommandBuffers[m_CurrentFrameIndex],
-					postProcessPass.m_BackBufferPass, postProcessPass.m_FrontDescriptor, pp);
+				const bool rendered = pp.m_Callback(pDevice, camera, i, m_FrameCommandBuffers[m_CurrentFrameIndex], m_CurrentFrameIndex,
+					postProcessPass.m_BackBufferPass, postProcessPass.m_FrontDescriptor);
 				if (rendered)
 				{
 					RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(postProcessPass.m_BackBufferPass);

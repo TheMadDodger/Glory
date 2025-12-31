@@ -102,8 +102,8 @@ namespace Glory
 		GLORY_API void AddRender(UUID textMeshID, UUID textureID, glm::mat4&& world, const glm::vec4& color);
 		GLORY_API void BeginMask(glm::mat4&& world);
 		GLORY_API void EndMask();
-		GLORY_API void CreateRenderPasses(GraphicsDevice* pDevice, size_t imageCount, const glm::uvec2& resolution);
-		GLORY_API void ResizeRenderTexture(GraphicsDevice* pDevice, size_t imageCount, const glm::uvec2& resolution);
+		GLORY_API void CreateRenderPasses(GraphicsDevice* pDevice, size_t imageCount, const glm::uvec2& resolution, UIRendererModule* pUIRenderer);
+		GLORY_API void ResizeRenderTexture(GraphicsDevice* pDevice, size_t imageCount, const glm::uvec2& resolution, UIRendererModule* pUIRenderer);
 		GLORY_API void SetClearColor(const glm::vec4& color);
 
 		GLORY_API TextureHandle GetUITexture(GraphicsDevice* pDevice, uint32_t frameIndex);
@@ -121,6 +121,7 @@ namespace Glory
 		UUID m_OriginalDocumentID;
 		Utils::ECS::EntityRegistry m_Registry;
 		std::vector<RenderPassHandle> m_UIPasses;
+		std::vector<DescriptorSetHandle> m_UIOverlaySets;
 		glm::uvec2 m_Resolution;
 		UIRendererModule* m_pRenderer;
 		glm::mat4 m_Projection;

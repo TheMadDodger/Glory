@@ -37,6 +37,8 @@ namespace Glory
 		UUID m_MaterialID;
 		bool m_WorldDirty;
 		bool m_InputEnabled;
+
+		glm::vec4 m_ClearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 	};
 
 	class UIRendererModule : public Module
@@ -63,6 +65,7 @@ namespace Glory
 		GLORY_API MeshData* GetImageMesh();
 
 		GLORY_API UIDocument* FindDocument(UUID uuid);
+		GLORY_API const DescriptorSetLayoutHandle& UIOverlaySetLayout() const;
 
 		GLORY_MODULE_VERSION_H(0, 3, 0);
 
@@ -71,9 +74,10 @@ namespace Glory
 		virtual void PostInitialize() override;
 		virtual void Update() override;
 		virtual void Cleanup() override;
-		virtual void UIPrepass();
+		virtual void UIPrepass(GraphicsDevice* pDevice, CommandBufferHandle commandBuffer, uint32_t frameIndex);
 		virtual void UIWorldSpaceQuadPass(uint32_t cameraIndex, RendererModule* pRenderer);
-		virtual void UIOverlayPass(uint32_t cameraIndex, RendererModule* pRenderer);
+		virtual bool UIOverlayPass(GraphicsDevice* pDevice, CameraRef camera, CommandBufferHandle commandBuffer,
+			size_t frameIndex, RenderPassHandle renderPass, DescriptorSetHandle ds);
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
 
@@ -115,5 +119,6 @@ namespace Glory
 
 		DescriptorSetLayoutHandle m_UIBuffersLayout = 0;
 		DescriptorSetLayoutHandle m_UISamplerLayout = 0;
+		DescriptorSetLayoutHandle m_UIOverlaySamplerLayout = 0;
 	};
 }

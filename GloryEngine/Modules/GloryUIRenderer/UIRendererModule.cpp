@@ -116,32 +116,6 @@ namespace Glory
 		const ModuleSettings& settings = Settings();
 
 		/* Prepare pipelines */
-		if (!m_UIBuffersLayout)
-		{
-			DescriptorSetLayoutInfo bufferSetLayoutInfo;
-			bufferSetLayoutInfo.m_PushConstantRange.m_Offset = 0;
-			bufferSetLayoutInfo.m_PushConstantRange.m_ShaderStages = ShaderTypeFlag(STF_Vertex | STF_Fragment);
-			bufferSetLayoutInfo.m_PushConstantRange.m_Size = sizeof(UIConstants);
-			bufferSetLayoutInfo.m_Buffers.resize(2);
-			bufferSetLayoutInfo.m_Buffers[0].m_BindingIndex = 1;
-			bufferSetLayoutInfo.m_Buffers[0].m_ShaderStages = STF_Vertex;
-			bufferSetLayoutInfo.m_Buffers[0].m_Type = BT_Storage;
-			bufferSetLayoutInfo.m_Buffers[1].m_BindingIndex = 2;
-			bufferSetLayoutInfo.m_Buffers[1].m_ShaderStages = STF_Vertex;
-			bufferSetLayoutInfo.m_Buffers[1].m_Type = BT_Storage;
-			m_UIBuffersLayout = pDevice->CreateDescriptorSetLayout(std::move(bufferSetLayoutInfo));
-		}
-
-		if (!m_UISamplerLayout)
-		{
-			DescriptorSetLayoutInfo samplerSetLayoutInfo;
-			samplerSetLayoutInfo.m_SamplerNames = { "Color" };
-			samplerSetLayoutInfo.m_Samplers.resize(1);
-			samplerSetLayoutInfo.m_Samplers[0].m_BindingIndex = 0;
-			samplerSetLayoutInfo.m_Samplers[0].m_ShaderStages = STF_Fragment;
-			m_UISamplerLayout = pDevice->CreateDescriptorSetLayout(std::move(samplerSetLayoutInfo));
-		}
-
 		PipelineData* pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Prepass Pipeline"));
 		PipelineHandle uiPipeline = pDevice->AcquireCachedPipeline(pDocument->m_UIPasses[0], pPipeline,
 			{ m_UIBuffersLayout, m_UISamplerLayout }, sizeof(VertexPosColorTex),
@@ -277,7 +251,7 @@ namespace Glory
 		m_ImageMesh = pDevice->AcquireCachedMesh(m_pImageMesh.get());
 
 		RenderPassHandle renderPass = pDocument->m_UIPasses[frameIndex];
-		pDevice->SetRenderPassClear(renderPass, { 0.0f, 0.0f, 0.0f, 1.0f });
+		pDevice->SetRenderPassClear(renderPass, data.m_ClearColor);
 		pDevice->BeginRenderPass(commandBuffer, renderPass);
 
 		uint8_t mask = 0;
@@ -377,6 +351,11 @@ namespace Glory
 		return &iter->second;
 	}
 
+	const DescriptorSetLayoutHandle& UIRendererModule::UIOverlaySetLayout() const
+	{
+		return m_UIOverlaySamplerLayout;
+	}
+
 	void UIRendererModule::Initialize()
 	{
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
@@ -453,15 +432,6 @@ namespace Glory
 		m_pComponentTypes->RegisterInvokaction<UIScrollView>(Glory::Utils::ECS::InvocationType::PreUpdate, UIScrollViewSystem::OnPreUpdate);
 		m_pComponentTypes->RegisterInvokaction<UIScrollView>(Glory::Utils::ECS::InvocationType::Update, UIScrollViewSystem::OnUpdate);
 
-		//RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
-		//pRenderer->AddRenderPass(RenderPassType::RP_Prepass, { "UI Prepass", [this](uint32_t, RendererModule*) {
-		//	UIPrepass();
-		//} });
-		//
-		//pRenderer->AddRenderPass(RenderPassType::RP_CameraCompositePass, { "UI Overlay Pass", [this](uint32_t cameraIndex, RendererModule* pRenderer) {
-		//	UIOverlayPass(cameraIndex, pRenderer);
-		//} });
-		//
 		//pRenderer->AddRenderPass(RenderPassType::RP_ObjectPass, { "UI Worldspace Quad Pass", [this](uint32_t cameraIndex, RendererModule* pRenderer) {
 		//	UIWorldSpaceQuadPass(cameraIndex, pRenderer);
 		//} });
@@ -500,6 +470,22 @@ namespace Glory
 		m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[2]));
 		m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[3]));
 		m_pImageMesh->AddFace(0, 1, 2, 3);
+
+		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
+		pRenderer->InjectPreRenderPass([this](GraphicsDevice* pDevice, CommandBufferHandle commandBuffer, uint32_t frameIndex) {
+			UIPrepass(pDevice, commandBuffer, frameIndex);
+		});
+
+		PostProcess uiOverlayPostProcess;
+		uiOverlayPostProcess.m_Priority = INT32_MIN;
+		uiOverlayPostProcess.m_Name = "UI Overlay";
+		uiOverlayPostProcess.m_Callback =
+		[this](GraphicsDevice* pDevice, CameraRef camera, size_t, CommandBufferHandle commandBuffer,
+			size_t frameIndex, RenderPassHandle renderPass, DescriptorSetHandle ds)
+		{
+			return UIOverlayPass(pDevice, camera, commandBuffer, frameIndex, renderPass, ds);
+		};
+		pRenderer->AddPostProcess(std::move(uiOverlayPostProcess));
 	}
 
 	void UIRendererModule::PostInitialize()
@@ -520,6 +506,35 @@ namespace Glory
 		m_pUITextPrepassMaterial->SetPipeline(uiTextPrepassPipeline);
 		m_pUIOverlayMaterial = new MaterialData();
 		m_pUIOverlayMaterial->SetPipeline(uiOverlayPipeline);
+
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+
+		DescriptorSetLayoutInfo samplerSetLayoutInfo;
+		samplerSetLayoutInfo.m_SamplerNames = { "Color" };
+		samplerSetLayoutInfo.m_Samplers.resize(1);
+		samplerSetLayoutInfo.m_Samplers[0].m_BindingIndex = 0;
+		samplerSetLayoutInfo.m_Samplers[0].m_ShaderStages = STF_Fragment;
+		m_UISamplerLayout = pDevice->CreateDescriptorSetLayout(std::move(samplerSetLayoutInfo));
+
+		samplerSetLayoutInfo = DescriptorSetLayoutInfo();
+		samplerSetLayoutInfo.m_SamplerNames = { "UIColor" };
+		samplerSetLayoutInfo.m_Samplers.resize(1);
+		samplerSetLayoutInfo.m_Samplers[0].m_BindingIndex = 1;
+		samplerSetLayoutInfo.m_Samplers[0].m_ShaderStages = STF_Fragment;
+		m_UIOverlaySamplerLayout = pDevice->CreateDescriptorSetLayout(std::move(samplerSetLayoutInfo));
+
+		DescriptorSetLayoutInfo bufferSetLayoutInfo;
+		bufferSetLayoutInfo.m_PushConstantRange.m_Offset = 0;
+		bufferSetLayoutInfo.m_PushConstantRange.m_ShaderStages = ShaderTypeFlag(STF_Vertex | STF_Fragment);
+		bufferSetLayoutInfo.m_PushConstantRange.m_Size = sizeof(UIConstants);
+		bufferSetLayoutInfo.m_Buffers.resize(2);
+		bufferSetLayoutInfo.m_Buffers[0].m_BindingIndex = 1;
+		bufferSetLayoutInfo.m_Buffers[0].m_ShaderStages = STF_Vertex;
+		bufferSetLayoutInfo.m_Buffers[0].m_Type = BT_Storage;
+		bufferSetLayoutInfo.m_Buffers[1].m_BindingIndex = 2;
+		bufferSetLayoutInfo.m_Buffers[1].m_ShaderStages = STF_Vertex;
+		bufferSetLayoutInfo.m_Buffers[1].m_Type = BT_Storage;
+		m_UIBuffersLayout = pDevice->CreateDescriptorSetLayout(std::move(bufferSetLayoutInfo));
 	}
 
 	void UIRendererModule::Update()
@@ -544,7 +559,7 @@ namespace Glory
 		Utils::ECS::ComponentTypes::DestroyInstance();
 	}
 
-	void UIRendererModule::UIPrepass()
+	void UIRendererModule::UIPrepass(GraphicsDevice* pDevice, CommandBufferHandle commandBuffer, uint32_t frameIndex)
 	{
 		for (auto& data : m_Frame)
 		{
@@ -553,14 +568,12 @@ namespace Glory
 			UIDocumentData* pDocument = static_cast<UIDocumentData*>(pResource);
 
 			UIDocument& document = GetDocument(data, pDocument);
-			CalculateProjection(document.m_Projection, m_pEngine->ActiveGraphicsDevice(),
-				0.0f, 0.0f, float(data.m_Resolution.x), float(data.m_Resolution.y));
 			document.m_CursorPos = data.m_CursorPos;
 			document.m_CursorScrollDelta = data.m_CursorScrollDelta;
 			document.m_CursorDown = data.m_CursorDown;
 			document.m_InputEnabled = data.m_InputEnabled;
-			document.Update();
-			document.Draw();
+
+			DrawDocument(pDevice, commandBuffer, frameIndex, &document, data);
 		}
 	}
 
@@ -601,57 +614,40 @@ namespace Glory
 		//}
 	}
 
-	void UIRendererModule::UIOverlayPass(uint32_t cameraIndex, RendererModule* pRenderer)
+	bool UIRendererModule::UIOverlayPass(GraphicsDevice* pDevice, CameraRef camera,
+		CommandBufferHandle commandBuffer, size_t frameIndex, RenderPassHandle renderPass, DescriptorSetHandle ds)
 	{
-		//CameraRef camera = pRenderer->GetActiveCamera(cameraIndex);
-		//GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-		//GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
-		//
-		//RenderTexture* pCameraTexture = camera.GetOutputTexture();
-		//RenderTexture* pOutputTexture = camera.GetSecondaryOutputTexture();
-		//uint32_t width, height;
-		//pOutputTexture->GetDimensions(width, height);
-		//
-		//pGraphics->EnableDepthTest(false);
-		//pGraphics->SetViewport(0, 0, width, height);
-		//
-		//for (auto& data : m_Frame)
-		//{
-		//	if (data.m_Target != UITarget::CameraOverlay || camera.GetUUID() != data.m_TargetCamera) continue;
-		//
-		//	/* Get document */
-		//	auto& iter = m_Documents.find(data.m_ObjectID);
-		//	if (iter == m_Documents.end()) continue;
-		//	UIDocument& document = iter->second;
-		//	RenderTexture* pDocumentTexture = document.m_pUITexture;
-		//
-		//	pCameraTexture = camera.GetOutputTexture();
-		//	pOutputTexture = camera.GetSecondaryOutputTexture();
-		//
-		//	/* Render to the output texture */
-		//	pOutputTexture->BindForDraw();
-		//
-		//	/* Use overlay material */
-		//	Material* pMaterial = pGraphics->UseMaterial(m_pUIOverlayMaterial);
-		//
-		//	/* Bind camera texture and document texture */
-		//	pCameraTexture->BindAll(pMaterial);
-		//	pDocumentTexture->BindAll(pMaterial);
-		//
-		//	/* Draw the screen quad */
-		//	pGraphics->DrawScreenQuad();
-		//
-		//	pOutputTexture->UnBindForDraw();
-		//
-		//	pGraphics->UseMaterial(nullptr);
-		//
-		//	/* Swap the cameras textures for the next pass */
-		//	camera.Swap();
-		//}
-		//
-		///* Reset render textures and materials */
-		//pGraphics->UseMaterial(nullptr);
-		//pGraphics->EnableDepthTest(true);
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
+		const ModuleSettings& settings = Settings();
+		PipelineData* pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Overlay Pipeline"));
+		PipelineHandle uiOverlayPipeline = pDevice->AcquireCachedPipeline(renderPass, pPipeline,
+			{ m_UISamplerLayout, m_UIOverlaySamplerLayout }, sizeof(glm::vec3), { AttributeType::Float3 });
+
+		const glm::uvec2& resolution = camera.GetResolution();
+		
+		bool rendered = false;
+
+		for (auto& data : m_Frame)
+		{
+			if (data.m_Target != UITarget::CameraOverlay || camera.GetUUID() != data.m_TargetCamera) continue;
+		
+			/* Get document */
+			auto& iter = m_Documents.find(data.m_ObjectID);
+			if (iter == m_Documents.end()) continue;
+			UIDocument& document = iter->second;
+
+			pDevice->BeginRenderPass(commandBuffer, renderPass);
+			pDevice->BeginPipeline(commandBuffer, uiOverlayPipeline);
+			pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));
+			pDevice->SetScissor(commandBuffer, 0, 0, resolution.x, resolution.y);
+			pDevice->BindDescriptorSets(commandBuffer, uiOverlayPipeline, { ds, document.m_UIOverlaySets[frameIndex] });
+			pDevice->DrawQuad(commandBuffer);
+			pDevice->EndPipeline(commandBuffer);
+			pDevice->EndRenderPass(commandBuffer);
+
+			rendered = true;
+		}
+		return rendered;
 	}
 
 	void UIRendererModule::LoadSettings(ModuleSettings& settings)
@@ -674,7 +670,7 @@ namespace Glory
 		{
 			m_Documents.emplace(id, pDocument);
 			UIDocument& newDocument = m_Documents.at(id);
-			newDocument.CreateRenderPasses(pDevice, pRenderer->GetNumFramesInFlight(), glm::uvec2(uint32_t(data.m_Resolution.x), uint32_t(data.m_Resolution.y)));
+			newDocument.CreateRenderPasses(pDevice, pRenderer->GetNumFramesInFlight(), glm::uvec2(uint32_t(data.m_Resolution.x), uint32_t(data.m_Resolution.y)), this);
 			newDocument.m_SceneID = data.m_SceneID;
 			newDocument.m_ObjectID = data.m_ObjectID;
 			newDocument.m_pRenderer = this;
@@ -688,7 +684,7 @@ namespace Glory
 		if (width != data.m_Resolution.x || height != data.m_Resolution.y)
 		{
 			document.ResizeRenderTexture(pDevice, pRenderer->GetNumFramesInFlight(),
-				glm::uvec2(uint32_t(data.m_Resolution.x), uint32_t(data.m_Resolution.y)));
+				glm::uvec2(uint32_t(data.m_Resolution.x), uint32_t(data.m_Resolution.y)), this);
 			document.m_DrawIsDirty = true;
 		}
 
@@ -699,7 +695,10 @@ namespace Glory
 			UIDocument& newDocument = m_Documents.at(id);
 			newDocument.m_SceneID = data.m_SceneID;
 			newDocument.m_ObjectID = data.m_ObjectID;
-			newDocument.m_UIPasses = std::move(document.m_UIPasses);
+			if (!document.m_UIPasses.empty())
+				newDocument.m_UIPasses = std::move(document.m_UIPasses);
+			if (!document.m_UIOverlaySets.empty())
+				newDocument.m_UIOverlaySets = std::move(document.m_UIOverlaySets);
 			newDocument.m_Resolution = document.m_Resolution;
 			newDocument.m_pRenderer = this;
 			return newDocument;
