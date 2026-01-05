@@ -255,6 +255,9 @@ namespace Glory::Editor
 			if (meta.Hash() == ShaderSourceHash)
 				continue;
 
+			Resource* pResource = pEngine->GetAssetManager().FindResource(GlobalAssets[i]);
+			if (!pResource) continue;
+
 			/* We need pipelines to figure out which shaders to package */
 			if (meta.Hash() == PipelineDataHash)
 			{
