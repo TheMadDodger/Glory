@@ -361,6 +361,6 @@ namespace Glory
 		if (!pPropertyInfo->IsResource()) return false;
 		const size_t resourceIndex = pPropertyInfo->Offset();
 		*value = m_Resources[resourceIndex].Get(pManager);
-		return *value;
+		return true;
 	}
 }
