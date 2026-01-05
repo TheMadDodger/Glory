@@ -693,14 +693,24 @@ namespace Glory::Editor
 
     void Migrate_0_6_0_RemoveShaderAndPipelineAssets(ProjectSpace* pProject)
     {
-        static constexpr size_t removeAssetsCount = 6;
+        static constexpr size_t removeAssetsCount = 8;
         constexpr std::string_view toRemoveAssets[removeAssetsCount] = {
+            /* Phong textured fragment shader */
             "3",
+            /* Phong textured vertex shader */
             "4",
+            /* Clustered deferred fragment shader */
             "14",
-            "25",
+            /* Clustered deferred pipeline */
             "20",
+            /* PBR vertex shader */
+            "25",
+            /* Clustered deferred PBR pipeline */
             "27",
+            /* Irradiance generator shader */
+            "34",
+            /* Irradiance generator pipeline */
+            "35",
         };
 
         EditorApplication* pApplication = EditorApplication::GetInstance();
