@@ -1,8 +1,5 @@
 #pragma once
 #include <GraphicsDevice.h>
-#include <Glory.h>
-
-#include <BitSet.h>
 
 namespace Glory
 {
@@ -21,6 +18,7 @@ namespace Glory
         static constexpr GraphicsHandleType HandleType = H_Mesh;
 
         uint32_t m_GLVertexArrayID;
+        uint32_t m_GLPrimitiveType;
         uint32_t m_VertexCount;
         uint32_t m_IndexCount;
         std::vector<BufferHandle> m_Buffers;
@@ -30,8 +28,6 @@ namespace Glory
     {
         static constexpr GraphicsHandleType HandleType = H_Texture;
 
-        uint32_t m_Width;
-        uint32_t m_Height;
         uint32_t m_GLTextureID;
         uint32_t m_GLTextureType;
         uint32_t m_GLFormat;
@@ -50,10 +46,11 @@ namespace Glory
         static constexpr GraphicsHandleType HandleType = H_RenderTexture;
 
         uint32_t m_GLFramebufferID;
+        uint32_t m_Width;
+        uint32_t m_Height;
         RenderPassHandle m_RenderPass;
         std::vector<TextureHandle> m_Textures;
         std::vector<std::string> m_AttachmentNames;
-        RenderTextureCreateInfo m_Info;
     };
 
     struct GL_RenderPass
@@ -61,10 +58,6 @@ namespace Glory
         static constexpr GraphicsHandleType HandleType = H_RenderPass;
 
         RenderTextureHandle m_RenderTexture;
-        glm::vec4 m_ClearColor;
-        float m_DepthClear;
-        uint8_t m_StencilClear;
-        bool m_Clear;
     };
 
     struct GL_Shader
@@ -79,25 +72,8 @@ namespace Glory
     {
         static constexpr GraphicsHandleType HandleType = H_Pipeline;
 
-        std::vector<ShaderHandle> m_Shaders;
-
         RenderPassHandle m_RenderPass;
         uint32_t m_GLProgramID;
-        uint32_t m_GLCullFace;
-        uint32_t m_GLPrimitiveType;
-        uint32_t m_GLDepthFunc;
-        uint32_t m_GLStencilCompareOp;
-        uint32_t m_GLStencilFailOp;
-        uint32_t m_GLStencilDepthFailOp;
-        uint32_t m_GLStencilPassOp;
-        uint32_t m_GLSrcColorBlendFactor;
-        uint32_t m_GLDstColorBlendFactor;
-        uint32_t m_GLColorBlendOp;
-        uint32_t m_GLSrcAlphaBlendFactor;
-        uint32_t m_GLDstAlphaBlendFactor;
-        uint32_t m_GLAlphaBlendOp;
-        glm::vec4 m_BlendConstants = glm::vec4{};
-        Utils::BitSet m_SettingToggles;
     };
 
     struct GL_DescriptorSetLayout
@@ -117,15 +93,6 @@ namespace Glory
         std::vector<TextureHandle> m_Textures;
     };
 
-    struct GL_Swapchain
-    {
-        static constexpr GraphicsHandleType HandleType = H_Swapchain;
-
-        Window* m_pWindow;
-        std::vector<RenderTextureHandle> m_SwapchainImages;
-        uint32_t m_CurrentImageIndex = 0;
-    };
-
     class OpenGLGraphicsModule;
 
     class OpenGLDevice : public GraphicsDevice
@@ -136,87 +103,43 @@ namespace Glory
 
         OpenGLGraphicsModule* GraphicsModule();
 
-        GLORY_API uint32_t GetGLTextureID(TextureHandle texture);
-
     private: /* Render commands */
-        virtual CommandBufferHandle CreateCommandBuffer() override;
-        virtual void Begin(CommandBufferHandle) override;
+        virtual CommandBufferHandle Begin() override;
         virtual void BeginRenderPass(CommandBufferHandle, RenderPassHandle renderPass) override;
         virtual void BeginPipeline(CommandBufferHandle, PipelineHandle pipeline) override;
         virtual void End(CommandBufferHandle) override;
         virtual void EndRenderPass(CommandBufferHandle) override;
         virtual void EndPipeline(CommandBufferHandle) override;
-        virtual void BindDescriptorSets(CommandBufferHandle, PipelineHandle, const std::vector<DescriptorSetHandle>& sets, uint32_t firstSet=0) override;
-        virtual void PushConstants(CommandBufferHandle, PipelineHandle, uint32_t, uint32_t, const void*, ShaderTypeFlag) override;
+        virtual void BindDescriptorSets(CommandBufferHandle, PipelineHandle, std::vector<DescriptorSetHandle> sets, uint32_t firstSet=0) override;
+        virtual void PushConstants(CommandBufferHandle, PipelineHandle, uint32_t, uint32_t, const void*) override;
 
         virtual void DrawMesh(CommandBufferHandle, MeshHandle handle) override;
         virtual void Dispatch(CommandBufferHandle, uint32_t x, uint32_t y, uint32_t z) override;
-
-        virtual void SetStencilTestEnabled(CommandBufferHandle, bool enable) override;
-        virtual void SetStencilOp(CommandBufferHandle, CompareOp compareOp,
-            Func fail, Func depthFail, Func pass, int8_t reference, uint8_t compareMask) override;
-        virtual void SetStencilWriteMask(CommandBufferHandle, uint8_t mask) override;
-
-        virtual void Commit(CommandBufferHandle, const std::vector<SemaphoreHandle>&,
-            const std::vector<SemaphoreHandle>&) override;
-        virtual WaitResult Wait(CommandBufferHandle, uint64_t) override;
+        virtual void Commit(CommandBufferHandle) override;
+        virtual void Wait(CommandBufferHandle) override;
         virtual void Release(CommandBufferHandle) override;
-        virtual void Reset(CommandBufferHandle) override;
-
-        virtual void SetViewport(CommandBufferHandle commandBuffer, float x, float y, float width, float height, float minDepth=0.0f, float maxDepth=1.0f) override;
-        virtual void SetScissor(CommandBufferHandle commandBuffer, int x, int y, uint32_t width, uint32_t height) override;
-
-        virtual void PipelineBarrier(CommandBufferHandle, const std::vector<BufferBarrier>& buffers,
-            const std::vector<ImageBarrier>& images, PipelineStageFlagBits, PipelineStageFlagBits) override;
-        virtual void CopyImage(CommandBufferHandle commandBuffer, TextureHandle src, TextureHandle dst) override;
-
-        virtual SwapchainResult AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle) override;
-        virtual SwapchainResult Present(SwapchainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>& waitSemaphores={}) override;
-
-        virtual void WaitIdle() override;
 
     private: /* Resource management */
-        virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type, BufferFlags flags=BF_None) override;
-        virtual void ResizeBuffer(BufferHandle buffer, size_t bufferSize) override;
-        virtual size_t BufferSize(BufferHandle buffer) override;
+        virtual BufferHandle CreateBuffer(size_t bufferSize, BufferType type) override;
 
         virtual void AssignBuffer(BufferHandle handle, const void* data) override;
         virtual void AssignBuffer(BufferHandle handle, const void* data, uint32_t size) override;
         virtual void AssignBuffer(BufferHandle handle, const void* data, uint32_t offset, uint32_t size) override;
-        virtual void ReadBuffer(BufferHandle handle, void* outData, uint32_t offset, uint32_t size) override;
 
         virtual MeshHandle CreateMesh(std::vector<BufferHandle>&& buffers, uint32_t vertexCount,
-            uint32_t indexCount, uint32_t stride, const std::vector<AttributeType>& attributeTypes) override;
-        virtual void UpdateMesh(MeshHandle mesh, std::vector<BufferHandle>&& buffers,
-            uint32_t vertexCount, uint32_t indexCount) override;
-        virtual void UpdateMesh(MeshHandle texture, MeshData* pMeshData) override;
+            uint32_t indexCount, uint32_t stride, PrimitiveType primitiveType,
+            const std::vector<AttributeType>& attributeTypes) override;
 
         virtual TextureHandle CreateTexture(TextureData* pTexture) override;
-        virtual TextureHandle CreateTexture(CubemapData* pCubemap) override;
         virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) override;
-        virtual void UpdateTexture(TextureHandle texture, TextureData* pTextureData) override;
-        virtual void ReadTexturePixels(TextureHandle texture, void* dst, size_t offset, size_t size) override;
-
-        virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info) override;
-        virtual TextureHandle GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index) override;
-        virtual void ResizeRenderTexture(RenderTextureHandle renderTexture, uint32_t width, uint32_t height) override;
-        virtual RenderPassHandle CreateRenderPass(RenderPassInfo&& info) override;
-        virtual RenderTextureHandle GetRenderPassRenderTexture(RenderPassHandle renderPass) override;
-        virtual void SetRenderPassClear(RenderPassHandle renderPass, const glm::vec4& color, float depth=1.0f, uint8_t stencil=0) override;
+        virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info) override;
+        virtual RenderPassHandle CreateRenderPass(const RenderPassInfo& info) override;
         virtual ShaderHandle CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function) override;
-        virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
-            std::vector<DescriptorSetLayoutHandle>&&, size_t, const std::vector<AttributeType>&) override;
-        virtual void UpdatePipelineSettings(PipelineHandle pipeline, PipelineData* pPipeline) override;
-        virtual void RecreatePipeline(PipelineHandle pipeline, PipelineData* pPipeline) override;
+        virtual PipelineHandle CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&&,
+            size_t, const std::vector<AttributeType>&) override;
         virtual PipelineHandle CreateComputePipeline(PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts) override;
         virtual DescriptorSetLayoutHandle CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo) override;
         virtual DescriptorSetHandle CreateDescriptorSet(DescriptorSetInfo&& setInfo) override;
-        virtual void UpdateDescriptorSet(DescriptorSetHandle descriptorSet, const DescriptorSetUpdateInfo& setWriteInfo) override;
-        virtual SwapchainHandle CreateSwapchain(Window* pWindow, bool vsync=false, uint32_t minImageCount=0) override;
-        virtual uint32_t GetSwapchainImageCount(SwapchainHandle swapchain) override;
-        virtual TextureHandle GetSwapchainImage(SwapchainHandle swapchain, uint32_t imageIndex) override;
-        virtual void RecreateSwapchain(SwapchainHandle swapchain) override;
-        virtual SemaphoreHandle CreateSemaphore() override;
 
         virtual void FreeBuffer(BufferHandle& handle) override;
         virtual void FreeMesh(MeshHandle& handle) override;
@@ -227,14 +150,6 @@ namespace Glory
         virtual void FreePipeline(PipelineHandle& handle) override;
         virtual void FreeDescriptorSetLayout(DescriptorSetLayoutHandle& handle) override;
         virtual void FreeDescriptorSet(DescriptorSetHandle& handle) override;
-        virtual void FreeSwapchain(SwapchainHandle& handle) override;
-        virtual void FreeSemaphore(SemaphoreHandle& handle) override;
-
-        virtual void OnInitialize() override;
-
-    private:
-        void CreateRenderTexture(GL_RenderTexture& renderTexture);
-        bool CreatePipeline(GL_Pipeline& pipeline, PipelineData* pPipeline);
 
     private:
         GraphicsResources<GL_Buffer> m_Buffers;
@@ -246,12 +161,6 @@ namespace Glory
         GraphicsResources<GL_Pipeline> m_Pipelines;
         GraphicsResources<GL_DescriptorSetLayout> m_SetLayouts;
         GraphicsResources<GL_DescriptorSet> m_Sets;
-        GraphicsResources<GL_Swapchain> m_Swapchains;
         std::unordered_map<DescriptorSetLayoutInfo, DescriptorSetLayoutHandle> m_CachedDescriptorSetLayouts;
-
-        uint32_t m_GLCurrentPrimitives;
-
-        /* For push constant emulation */
-        BufferHandle m_ConstantsBuffer;
     };
 }

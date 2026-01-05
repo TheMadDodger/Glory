@@ -22,19 +22,20 @@ namespace Glory
 
 	DescriptorAllocator::DescriptorAllocator(VulkanDevice* pDevice): m_pDevice(pDevice), m_ActivePoolIndex(0)
 	{
+		for (auto pool : m_DescriptorPools)
+			m_pDevice->LogicalDevice().destroyDescriptorPool(pool, nullptr);
+		m_DescriptorPools.clear();
 	}
 
 	DescriptorAllocator::~DescriptorAllocator()
 	{
-		for (auto pool : m_DescriptorPools)
-			m_pDevice->LogicalDevice().destroyDescriptorPool(pool);
-		m_DescriptorPools.clear();
 	}
 
 	void DescriptorAllocator::ResetPools()
 	{
-		for (auto pool : m_DescriptorPools)
+		for (auto pool : m_DescriptorPools) {
 			m_pDevice->LogicalDevice().resetDescriptorPool(pool);
+		}
 		m_ActivePoolIndex = 0;
 	}
 
@@ -63,7 +64,7 @@ namespace Glory
 		m_DescriptorPools.emplace_back(descriptorPool);
 	}
 
-	void DescriptorAllocator::Allocate(vk::DescriptorSet* set, vk::DescriptorPool* pool, vk::DescriptorSetLayout layout)
+	void DescriptorAllocator::Allocate(vk::DescriptorSet* set, vk::DescriptorSetLayout layout)
 	{
 		if (m_DescriptorPools.empty())
 		{
@@ -76,7 +77,6 @@ namespace Glory
 		allocInfo.pSetLayouts = &layout;
 		allocInfo.descriptorPool = m_DescriptorPools[m_ActivePoolIndex];
 		allocInfo.descriptorSetCount = 1;
-		*pool = m_DescriptorPools[m_ActivePoolIndex];
 
 		//try to allocate the descriptor set
 		vk::Result allocResult = m_pDevice->LogicalDevice().allocateDescriptorSets(&allocInfo, set);

@@ -22,7 +22,6 @@ namespace Glory
 		GLORY_API virtual void SetCursorPosition(int x, int y) override;
 		GLORY_API virtual void SetFullscreen(bool fullscreen, bool borderless) override;
 		GLORY_API virtual void Maximize() override;
-		GLORY_API virtual void SetGLSwapInterval(int interval) override;
 
 		GLORY_API virtual void SetWindowTitle(const char* title) override;
 

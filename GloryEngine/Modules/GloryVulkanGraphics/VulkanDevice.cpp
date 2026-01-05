@@ -5,199 +5,18 @@
 
 #include <Debug.h>
 #include <Engine.h>
-#include <Window.h>
-
 #include <PipelineData.h>
-#include <ImageData.h>
-#include <MeshData.h>
-#include <TextureData.h>
-#include <CubemapData.h>
-#include <FileData.h>
-#include <EngineProfiler.h>
-
-#define LOAD_VK_EXT(f, t, str)\
-f = (t)m_LogicalDevice.getProcAddr(str);\
-if (f == nullptr)\
-{\
-	Debug().LogFatalError("Vulkan: Failed to get " str " address: Vulkan Error Code: "\
-	+ std::to_string((uint32_t)result));\
-	return;\
-}
 
 namespace Glory
 {
-	PFN_vkCmdSetCullModeEXT PFNCmdSetCullMode = nullptr;
-	PFN_vkCmdSetPrimitiveTopologyEXT PFNCmdSetPrimitiveTopology = nullptr;
-	PFN_vkCmdSetDepthTestEnableEXT PFNCmdSetDepthTestEnable = nullptr;
-	PFN_vkCmdSetDepthWriteEnableEXT PFNCmdSetDepthWriteEnable = nullptr;
-	PFN_vkCmdSetDepthCompareOpEXT PFNCmdSetDepthCompareOp = nullptr;
-	PFN_vkCmdSetColorWriteMaskEXT PFNCmdSetColorWriteMaskEXT = nullptr;
-	PFN_vkCmdSetStencilTestEnableEXT PFNCmdSetStencilTestEnable = nullptr;
-	PFN_vkCmdSetStencilCompareMask PFNCmdSetStencilCompareMask = nullptr;
-	PFN_vkCmdSetStencilOpEXT PFNCmdSetStencilOp = nullptr;
-	PFN_vkCmdSetStencilWriteMask PFNCmdSetStencilWriteMask = nullptr;
-	PFN_vkCmdSetStencilReference PFNCmdSetStencilReference = nullptr;
-	PFN_vkCmdSetColorBlendEnableEXT PFNCmdSetColorBlendEnableEXT = nullptr;
-	PFN_vkCmdSetColorBlendEquationEXT PFNCmdSetColorBlendEquationEXT = nullptr;
-
-	constexpr size_t ShaderTypeFlagsCount = 6;
-	constexpr vk::ShaderStageFlagBits ShaderTypeFlags[ShaderTypeFlagsCount] = {
-		vk::ShaderStageFlagBits::eVertex,
-		vk::ShaderStageFlagBits::eFragment,
-		vk::ShaderStageFlagBits::eGeometry,
-		vk::ShaderStageFlagBits::eTessellationControl,
-		vk::ShaderStageFlagBits::eTessellationEvaluation,
-		vk::ShaderStageFlagBits::eCompute,
-	};
-
-	vk::ShaderStageFlags GetShaderStageFlags(const ShaderTypeFlag& shaderTypeFlags)
-	{
-		vk::ShaderStageFlags result = vk::ShaderStageFlagBits(0);
-		for (size_t i = 0; i < ShaderTypeFlagsCount; ++i)
-		{
-			if (!(shaderTypeFlags & ShaderTypeFlag(1 << i))) continue;
-			result |= ShaderTypeFlags[i];
-		}
-		return result;
-	}
-
-	vk::CullModeFlagBits GetVKCullMode(CullFace cullFace)
-	{
-		switch (cullFace)
-		{
-		case Glory::CullFace::None:
-			return vk::CullModeFlagBits::eNone;
-		case Glory::CullFace::Front:
-			return vk::CullModeFlagBits::eFront;
-		case Glory::CullFace::Back:
-			return vk::CullModeFlagBits::eBack;
-		case Glory::CullFace::FrontAndBack:
-			return vk::CullModeFlagBits::eFrontAndBack;
-		default:
-			return vk::CullModeFlagBits::eNone;
-		}
-	}
-
-	vk::PrimitiveTopology GetVKTopology(PrimitiveType primitiveType)
-	{
-		switch (primitiveType)
-		{
-		case Glory::PrimitiveType::Point:
-			return vk::PrimitiveTopology::ePointList;
-		case Glory::PrimitiveType::LineStrip:
-			return vk::PrimitiveTopology::eLineStrip;
-		case Glory::PrimitiveType::LineLoop:
-			return vk::PrimitiveTopology::eLineList;
-		case Glory::PrimitiveType::Lines:
-			return vk::PrimitiveTopology::eLineList;
-		case Glory::PrimitiveType::LineStripAdjacency:
-			return vk::PrimitiveTopology::eLineStripWithAdjacency;
-		case Glory::PrimitiveType::LinesAdjacency:
-			return vk::PrimitiveTopology::eLineListWithAdjacency;
-		case Glory::PrimitiveType::TriangleStrip:
-			return vk::PrimitiveTopology::eTriangleStrip;
-		case Glory::PrimitiveType::TriangleFan:
-			return vk::PrimitiveTopology::eTriangleFan;
-		case Glory::PrimitiveType::Triangles:
-			return vk::PrimitiveTopology::eTriangleList;
-		case Glory::PrimitiveType::TriangleStripAdjacency:
-			return vk::PrimitiveTopology::eTriangleStripWithAdjacency;
-		case Glory::PrimitiveType::TrianglesAdjacency:
-			return vk::PrimitiveTopology::eTriangleListWithAdjacency;
-		case Glory::PrimitiveType::Patches:
-			return vk::PrimitiveTopology::ePatchList;
-		default:
-			return vk::PrimitiveTopology::eTriangleList;
-		}
-	}
-
-	vk::CompareOp GetVulkanCompareOp(const CompareOp& op)
-	{
-		switch (op)
-		{
-		case Glory::CompareOp::OP_Never:
-			return vk::CompareOp::eNever;
-		case Glory::CompareOp::OP_Less:
-			return vk::CompareOp::eLess;
-		case Glory::CompareOp::OP_Equal:
-			return vk::CompareOp::eEqual;
-		case Glory::CompareOp::OP_LessOrEqual:
-			return vk::CompareOp::eLessOrEqual;
-		case Glory::CompareOp::OP_Greater:
-			return vk::CompareOp::eGreater;
-		case Glory::CompareOp::OP_NotEqual:
-			return vk::CompareOp::eNotEqual;
-		case Glory::CompareOp::OP_GreaterOrEqual:
-			return vk::CompareOp::eGreaterOrEqual;
-		case Glory::CompareOp::OP_Always:
-			return vk::CompareOp::eAlways;
-		}
-		return (vk::CompareOp)0;
-	}
-
-	vk::StencilOp GetVulkanStencilOp(const Func& op)
-	{
-		switch (op)
-		{
-		case Func::OP_Keep:
-			return vk::StencilOp::eKeep;
-		case Func::OP_Zero:
-			return vk::StencilOp::eZero;
-		case Func::OP_Replace:
-			return vk::StencilOp::eReplace;
-		case Func::OP_Increment:
-			return vk::StencilOp::eIncrementAndClamp;
-		case Func::OP_IncrementWrap:
-			return vk::StencilOp::eIncrementAndWrap;
-		case Func::OP_Decrement:
-			return vk::StencilOp::eDecrementAndClamp;
-		case Func::OP_DecrementWrap:
-			return vk::StencilOp::eDecrementAndWrap;
-		case Func::OP_Invert:
-			return vk::StencilOp::eInvert;
-		default:
-			return vk::StencilOp(0);
-		}
-	}
-
 	VulkanDevice::VulkanDevice(VulkanGraphicsModule* pModule, vk::PhysicalDevice physicalDevice):
-		GraphicsDevice(pModule), m_VKDevice(physicalDevice), m_DidLastSupportCheckPass(false),
-		m_DescriptorAllocator(this), m_CommandBufferAllocator(this)
+		GraphicsDevice(pModule), m_VKDevice(physicalDevice), m_DidLastSupportCheckPass(false), m_DescriptorAllocator(this)
 	{
 		m_APIFeatures = APIFeatures::All;
 	}
 
 	VulkanDevice::~VulkanDevice()
 	{
-		m_LogicalDevice.waitIdle();
-		m_Semaphores.FreeAll(std::bind(&VulkanDevice::FreeSemaphore, this, std::placeholders::_1));
-		m_Swapchains.FreeAll(std::bind(&VulkanDevice::FreeSwapchain, this, std::placeholders::_1));
-		m_Pipelines.FreeAll(std::bind(&VulkanDevice::FreePipeline, this, std::placeholders::_1));
-		m_Shaders.FreeAll(std::bind(&VulkanDevice::FreeShader, this, std::placeholders::_1));
-		m_RenderPasses.FreeAll(std::bind(&VulkanDevice::FreeRenderPass, this, std::placeholders::_1));
-		m_RenderTextures.FreeAll(std::bind(&VulkanDevice::FreeRenderTexture, this, std::placeholders::_1));
-		m_Textures.FreeAll(std::bind(&VulkanDevice::FreeTexture, this, std::placeholders::_1));
-		m_Meshes.FreeAll(std::bind(&VulkanDevice::FreeMesh, this, std::placeholders::_1));
-		m_Buffers.FreeAll(std::bind(&VulkanDevice::FreeBuffer, this, std::placeholders::_1));
-		m_DescriptorSets.Clear();
-		m_DescriptorAllocator.ResetPools();
-		m_DescriptorSetLayouts.FreeAll(std::bind(&VulkanDevice::FreeDescriptorSetLayout, this, std::placeholders::_1));
-
-		m_LogicalDevice.destroyCommandPool(m_GraphicsCommandPool);
-		m_CommandBuffers.clear();
-		m_FreeCommandBuffers.clear();
-
-		m_CommandBufferAllocator.Cleanup();
-
-		for (auto fence : m_FreeFences)
-			m_LogicalDevice.destroyFence(fence);
-		m_FreeFences.clear();
-		for (auto& iter : m_CachedSamplers)
-			m_LogicalDevice.destroySampler(iter.second);
-		m_CachedSamplers.clear();
-		m_CachedDescriptorSetLayouts.clear();
-
-		m_LogicalDevice.destroy();
 	}
 
 	VulkanGraphicsModule* VulkanDevice::GraphicsModule()
@@ -260,6 +79,21 @@ namespace Glory
 			return;
 		}
 
+		// Check swapchain support
+		vk::SurfaceKHR surface = GraphicsModule()->GetSurface();
+		vk::Result result = m_VKDevice.getSurfaceCapabilitiesKHR(surface, &m_SwapChainCapabilities);
+		if (result != vk::Result::eSuccess)
+		{
+			Debug().LogFatalError("Vulkan: Failed to get surface capabilities: Vulkan Error Code: " + std::to_string((uint32_t)result));
+			return;
+		}
+		uint32_t formatCount = 0;
+		m_SwapChainFormats = m_VKDevice.getSurfaceFormatsKHR(surface);
+		m_SwapChainPresentModes = m_VKDevice.getSurfacePresentModesKHR(surface);
+
+		bool swapChainAdequite = !m_SwapChainFormats.empty() && !m_SwapChainPresentModes.empty();
+		if (!swapChainAdequite) return;
+
 		// Check feature support
 		m_VKDevice.getFeatures(&m_Features);
 		if (!m_Features.samplerAnisotropy) return;
@@ -291,34 +125,8 @@ namespace Glory
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
 
-		vk::PhysicalDeviceFeatures deviceFeatures{};
-		deviceFeatures.samplerAnisotropy = VK_TRUE;
-		deviceFeatures.shaderInt64 = VK_TRUE;
-		deviceFeatures.vertexPipelineStoresAndAtomics = VK_TRUE;
-		deviceFeatures.fragmentStoresAndAtomics = VK_TRUE;
-
-		vk::PhysicalDeviceVulkan12Features vk12Features{};
-		vk12Features.separateDepthStencilLayouts = VK_TRUE;
-
-		vk::PhysicalDeviceRobustness2FeaturesKHR robustnessFeatures{};
-		robustnessFeatures.nullDescriptor = VK_FALSE;
-
-		vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT extendedDynamicStateFeatures{};
-		extendedDynamicStateFeatures.extendedDynamicState = VK_TRUE;
-
-		vk::PhysicalDeviceExtendedDynamicState3PropertiesEXT extendedDynamicState3Properties{};
-		extendedDynamicState3Properties.dynamicPrimitiveTopologyUnrestricted = VK_TRUE;
-
-		vk::PhysicalDeviceExtendedDynamicState3FeaturesEXT extendedDynamicState3Features{};
-		extendedDynamicState3Features.extendedDynamicState3ColorWriteMask = VK_TRUE;
-		extendedDynamicState3Features.extendedDynamicState3ColorBlendEnable = VK_TRUE;
-		extendedDynamicState3Features.extendedDynamicState3ColorBlendEquation = VK_TRUE;
-
-		vk12Features.pNext = &robustnessFeatures;
-		robustnessFeatures.pNext = &extendedDynamicStateFeatures;
-		extendedDynamicStateFeatures.pNext = &extendedDynamicState3Properties;
-		extendedDynamicState3Properties.pNext = &extendedDynamicState3Features;
-
+		vk::PhysicalDeviceVulkan12Features vk12Features = vk::PhysicalDeviceVulkan12Features();
+		vk::PhysicalDeviceFeatures deviceFeatures = vk::PhysicalDeviceFeatures();
 		vk::DeviceCreateInfo deviceCreateInfo = vk::DeviceCreateInfo()
 			.setPQueueCreateInfos(queueCreateInfos.data())
 			.setQueueCreateInfoCount(static_cast<uint32_t>(queueCreateInfos.size()))
@@ -326,6 +134,11 @@ namespace Glory
 			.setEnabledExtensionCount(static_cast<uint32_t>(m_DeviceExtensions.size()))
 			.setPpEnabledExtensionNames(m_DeviceExtensions.data())
 			.setPNext(&vk12Features);
+		deviceFeatures.samplerAnisotropy = VK_TRUE;
+		deviceFeatures.shaderInt64 = VK_TRUE;
+		deviceFeatures.vertexPipelineStoresAndAtomics = VK_TRUE;
+		deviceFeatures.fragmentStoresAndAtomics = VK_TRUE;
+		vk12Features.separateDepthStencilLayouts = VK_TRUE;
 
 #if defined(_DEBUG)
 		const std::vector<const char*>& validationLayers = GraphicsModule()->GetValidationLayers();
@@ -346,48 +159,36 @@ namespace Glory
 		m_GraphicsAndComputeQueue = m_LogicalDevice.getQueue(m_GraphicsAndComputeFamily.value(), 0);
 		m_PresentQueue = m_LogicalDevice.getQueue(m_PresentFamily.value(), 0);
 
-		LOAD_VK_EXT(PFNCmdSetCullMode, PFN_vkCmdSetCullModeEXT, "vkCmdSetCullModeEXT");
-		LOAD_VK_EXT(PFNCmdSetPrimitiveTopology, PFN_vkCmdSetPrimitiveTopologyEXT, "vkCmdSetPrimitiveTopologyEXT");
-		LOAD_VK_EXT(PFNCmdSetDepthTestEnable, PFN_vkCmdSetDepthTestEnableEXT, "vkCmdSetDepthTestEnableEXT");
-		LOAD_VK_EXT(PFNCmdSetDepthWriteEnable, PFN_vkCmdSetDepthWriteEnableEXT, "vkCmdSetDepthWriteEnableEXT");
-		LOAD_VK_EXT(PFNCmdSetDepthCompareOp, PFN_vkCmdSetDepthCompareOpEXT, "vkCmdSetDepthCompareOpEXT");
-		LOAD_VK_EXT(PFNCmdSetColorWriteMaskEXT, PFN_vkCmdSetColorWriteMaskEXT, "vkCmdSetColorWriteMaskEXT");
-
-		LOAD_VK_EXT(PFNCmdSetStencilTestEnable, PFN_vkCmdSetStencilTestEnableEXT, "vkCmdSetStencilTestEnableEXT");
-		LOAD_VK_EXT(PFNCmdSetStencilCompareMask, PFN_vkCmdSetStencilCompareMask, "vkCmdSetStencilCompareMask");
-		LOAD_VK_EXT(PFNCmdSetStencilOp, PFN_vkCmdSetStencilOpEXT, "vkCmdSetStencilOpEXT");
-		LOAD_VK_EXT(PFNCmdSetStencilWriteMask, PFN_vkCmdSetStencilWriteMask, "vkCmdSetStencilWriteMask");
-		LOAD_VK_EXT(PFNCmdSetStencilReference, PFN_vkCmdSetStencilReference, "vkCmdSetStencilReference");
-
-		LOAD_VK_EXT(PFNCmdSetColorBlendEnableEXT, PFN_vkCmdSetColorBlendEnableEXT, "vkCmdSetColorBlendEnableEXT");
-		LOAD_VK_EXT(PFNCmdSetColorBlendEquationEXT, PFN_vkCmdSetColorBlendEquationEXT, "vkCmdSetColorBlendEquationEXT");
-
 		CreateGraphicsCommandPool();
-		AllocateFreeFences(10);
+		AllocateCommandBuffers(10);
 	}
 
-	void VulkanDevice::AllocateFreeFences(size_t numFences)
+	void VulkanDevice::AllocateCommandBuffers(size_t numBuffers)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::AllocateFreeFences" };
+		vk::CommandPool commandPool = GetGraphicsCommandPool(vk::CommandPoolCreateFlagBits::eTransient | vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
+
+		// Create command buffers
+		const size_t firstNewBufferIndex = m_FreeCommandBuffers.size();
 		const size_t firstNewFenceIndex = m_FreeFences.size();
-		m_FreeFences.resize(m_FreeFences.size() + numFences);
+		m_FreeCommandBuffers.resize(m_FreeCommandBuffers.size() + numBuffers);
+		m_FreeFences.resize(m_FreeFences.size() + numBuffers);
+
+		vk::CommandBufferAllocateInfo commandBufferAllocateInfo = vk::CommandBufferAllocateInfo()
+			.setCommandPool(commandPool)
+			.setLevel(vk::CommandBufferLevel::ePrimary)
+			.setCommandBufferCount(numBuffers);
+
+		if (m_LogicalDevice.allocateCommandBuffers(&commandBufferAllocateInfo, &m_FreeCommandBuffers[firstNewBufferIndex]) != vk::Result::eSuccess)
+			Debug().LogError("Vulkan: Failed to allocate command buffers.");
+
 		for (size_t i = firstNewFenceIndex; i < m_FreeFences.size(); ++i)
 		{
 			vk::FenceCreateInfo fenceCreateInfo = vk::FenceCreateInfo()
 				.setFlags((vk::FenceCreateFlagBits)0);
 
 			if (m_LogicalDevice.createFence(&fenceCreateInfo, nullptr, &m_FreeFences[i]) != vk::Result::eSuccess)
-				Debug().LogError("VulkanDevice::AllocateFreeFences: Failed to create fence.");
+				Debug().LogError("Vulkan: Failed to create sync objects for a frame.");
 		}
-	}
-
-	void VulkanDevice::AllocateFreeCommandBuffers(size_t numBuffers)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::AllocateFreeCommandBuffers" };
-		const size_t firstNewCommandBufferIndex = m_FreeCommandBuffers.size();
-		m_FreeCommandBuffers.resize(m_FreeCommandBuffers.size() + numBuffers);
-		m_CommandBufferAllocator.Allocate(vk::CommandPoolCreateFlagBits::eTransient | vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-			numBuffers, &m_FreeCommandBuffers[firstNewCommandBufferIndex]);
 	}
 
 	uint32_t VulkanDevice::GetSupportedMemoryIndex(uint32_t typeFilter, vk::MemoryPropertyFlags propertyFlags)
@@ -414,119 +215,55 @@ namespace Glory
 			throw std::runtime_error("failed to create command pool!");
 	}
 
+	vk::CommandPool VulkanDevice::CreateGraphicsCommandPool(vk::CommandPoolCreateFlags flags)
+	{
+		// Create command pool
+		vk::CommandPoolCreateInfo commandPoolCreateInfo = vk::CommandPoolCreateInfo()
+			.setQueueFamilyIndex(m_GraphicsAndComputeFamily.value())
+			.setFlags(flags);
+
+		vk::CommandPool pool = m_LogicalDevice.createCommandPool(commandPoolCreateInfo);
+		if (pool == nullptr)
+			throw std::runtime_error("failed to create command pool!");
+
+		m_GraphicsCommandPools.emplace(flags, pool);
+		return pool;
+	}
+
 	vk::CommandPool VulkanDevice::GetGraphicsCommandPool()
 	{
 		return m_GraphicsCommandPool;
 	}
 
-	vk::ImageView VulkanDevice::GetVKImageView(TextureHandle texture)
+	vk::CommandPool VulkanDevice::GetGraphicsCommandPool(vk::CommandPoolCreateFlags flags)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::GetVKImageView" };
-		VK_Texture* vkTexture = m_Textures.Find(texture);
-		if (!vkTexture)
-		{
-			Debug().LogError("VulkanDevice::GetVKImageView: Invalid texture handle.");
-			return nullptr;
-		}
-
-		VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-		if (!vkImage)
-		{
-			/* Return default texture */
-			vkImage = m_Images.Find(m_DefaultImage);
-			return vkImage->m_VKImageView;
-		}
-
-		return vkImage->m_VKImageView;
-	}
-
-	vk::Sampler VulkanDevice::GetVKSampler(TextureHandle texture)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::GetVKSampler" };
-		VK_Texture* vkTexture = m_Textures.Find(texture);
-		if (!vkTexture)
-		{
-			Debug().LogError("VulkanDevice::GetVKSampler: Invalid texture handle.");
-			return nullptr;
-		}
-		return vkTexture->m_VKSampler;
-	}
-
-	bool VulkanDevice::TextureHasImage(TextureHandle texture)
-	{
-		VK_Texture* vkTexture = m_Textures.Find(texture);
-		if (!vkTexture)
-		{
-			Debug().LogError("VulkanDevice::TextureHasImage: Invalid texture handle.");
-			return false;
-		}
-		VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-		const bool hasImage = vkImage != nullptr && vkTexture->m_Image != m_DefaultImage;
-		return hasImage;
-	}
-
-	CommandBufferHandle VulkanDevice::CreateCommandBuffer()
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateCommandBuffer" };
-		CommandBufferHandle handle;
-		this->GetNewResetableCommandBuffer(handle);
-		return handle;
+		if (flags == (vk::CommandPoolCreateFlags)0) return GetGraphicsCommandPool();
+		auto it = m_GraphicsCommandPools.find(flags);
+		if (it == m_GraphicsCommandPools.end()) return CreateGraphicsCommandPool(flags);
+		return m_GraphicsCommandPools[flags];
 	}
 
 	CommandBufferHandle VulkanDevice::Begin()
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::Begin" };
-		CommandBufferHandle handle;
-		VK_CommandBuffer& commandBuffer = m_CommandBuffers.emplace(handle, VK_CommandBuffer()).first->second;
-		m_CommandBufferAllocator.Allocate(vk::CommandPoolCreateFlags(0), 1, &commandBuffer.m_VKCommandBuffer);
-		commandBuffer.m_Resetable = false;
-
-		if (m_FreeFences.empty())
-			AllocateFreeFences(10);
-
-		commandBuffer.m_VKFence = m_FreeFences.back();
-		m_FreeFences.erase(--m_FreeFences.end());
-		if (m_LogicalDevice.resetFences(1, &commandBuffer.m_VKFence) != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::Begin: Failed to reset fence.");
-			return NULL;
-		}
-
-		const vk::CommandBufferBeginInfo commandBeginInfo = vk::CommandBufferBeginInfo()
-			.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit)
-			.setPInheritanceInfo(nullptr);
-		commandBuffer->begin(commandBeginInfo);
-
-		return handle;
-	}
-
-	void VulkanDevice::Begin(CommandBufferHandle commandBuffer)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::Begin(commandBuffer)" };
-		auto iter = m_CommandBuffers.find(commandBuffer);
-		if (iter == m_CommandBuffers.end())
-		{
-			Debug().LogError("VulkanDevice::BeginRenderPass: Invalid command buffer handle.");
-			return;
-		}
-		VK_CommandBuffer& vkCommandBuffer = iter->second;
-
 		vk::CommandBufferBeginInfo commandBeginInfo = vk::CommandBufferBeginInfo()
 			.setFlags(vk::CommandBufferUsageFlagBits::eSimultaneousUse)
 			.setPInheritanceInfo(nullptr);
-		vkCommandBuffer->begin(commandBeginInfo);
+
+		CommandBufferHandle handle;
+		vk::CommandBuffer commandBuffer = this->GetNewCommandBuffer(handle);
+		commandBuffer.begin(commandBeginInfo);
+		return handle;
 	}
 
 	void VulkanDevice::BeginRenderPass(CommandBufferHandle commandBuffer, RenderPassHandle renderPass)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::BeginRenderPass" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
 			Debug().LogError("VulkanDevice::BeginRenderPass: Invalid command buffer handle.");
 			return;
 		}
-		VK_CommandBuffer& vkCommandBuffer = iter->second;
+		vk::CommandBuffer vkCommandBuffer = iter->second;
 
 		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(renderPass);
 		if (!renderPass)
@@ -534,130 +271,97 @@ namespace Glory
 			Debug().LogError("VulkanDevice::BeginRenderPass: Invalid render pass handle.");
 			return;
 		}
-		VK_RenderTexture* vkRenderTexture = m_RenderTextures.Find(vkRenderPass->m_RenderTexture);
-		if (!vkRenderTexture)
+		VK_RenderTexture* renderTexture = m_RenderTextures.Find(vkRenderPass->m_RenderTexture);
+		if (!renderTexture)
 		{
 			Debug().LogError("VulkanDevice::BeginRenderPass: Render pass has an invalid render texture handle.");
 			return;
 		}
 
 		// Start a render pass
-        const vk::Rect2D renderArea = vk::Rect2D()
+        vk::Rect2D renderArea = vk::Rect2D()
             .setOffset(vk::Offset2D(0, 0))
-            .setExtent(vk::Extent2D(vkRenderTexture->m_Info.Width, vkRenderTexture->m_Info.Height));
+            .setExtent(vk::Extent2D(renderTexture->m_Width, renderTexture->m_Height));
 
-        std::vector<vk::ClearValue> clearColors = std::vector<vk::ClearValue>(vkRenderTexture->m_Textures.size());
+        std::vector<vk::ClearValue> clearColors = std::vector<vk::ClearValue>(renderTexture->m_Textures.size());
         for (size_t i = 0; i < clearColors.size(); ++i)
-            clearColors[i].setColor(vkRenderPass->m_ClearColor);
+        {
+			glm::vec4 value{0.0f, 0.0f, 0.0f, 1.0f};
+            vk::ClearColorValue clearColor;
+            memcpy(&clearColor, (const void*)&value, sizeof(float) * 4);
+            clearColors[i].setColor(clearColor);
+			//clearColors[i].setDepthStencil(vk::ClearDepthStencilValue(0.0f, 0));
+        }
 
-		if (vkRenderTexture->m_HasDepthOrStencil)
-			clearColors.back().setDepthStencil(vkRenderPass->m_DepthStencilClear);
+		if (renderTexture->m_HasDepthOrStencil)
+			clearColors.back().setDepthStencil(vk::ClearDepthStencilValue(1.0f, 0));
 
-        const vk::RenderPassBeginInfo renderPassBeginInfo = vk::RenderPassBeginInfo()
+        vk::RenderPassBeginInfo renderPassBeginInfo = vk::RenderPassBeginInfo()
             .setRenderPass(vkRenderPass->m_VKRenderPass)
-            .setFramebuffer(vkRenderTexture->m_VKFramebuffer)
+            .setFramebuffer(renderTexture->m_VKFramebuffer)
             .setRenderArea(renderArea)
             .setClearValueCount(static_cast<uint32_t>(clearColors.size()))
             .setPClearValues(clearColors.data());
 
-        vkCommandBuffer->beginRenderPass(&renderPassBeginInfo, vk::SubpassContents::eInline);
+        vkCommandBuffer.beginRenderPass(&renderPassBeginInfo, vk::SubpassContents::eInline);
 	}
 
 	void VulkanDevice::BeginPipeline(CommandBufferHandle commandBuffer, PipelineHandle pipeline)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::BeginPipeline" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
 			Debug().LogError("VulkanDevice::BeginPipeline: Invalid command buffer handle.");
 			return;
 		}
-		VK_CommandBuffer& vkCommandBuffer = iter->second;
+		vk::CommandBuffer vkCommandBuffer = iter->second;
 
 		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
-		if (!vkPipeline)
+		if (!pipeline)
 		{
 			Debug().LogError("VulkanDevice::BeginPipeline: Invalid pipeline handle.");
 			return;
 		}
-		vkCommandBuffer->bindPipeline(vkPipeline->m_VKBindPoint, vkPipeline->m_VKPipeline);
-		if (vkPipeline->m_VKBindPoint != vk::PipelineBindPoint::eGraphics) return;
-
-		PFNCmdSetCullMode(VkCommandBuffer(*vkCommandBuffer), VkCullModeFlags(vkPipeline->m_VKCullMode));
-		PFNCmdSetPrimitiveTopology(VkCommandBuffer(*vkCommandBuffer), VkPrimitiveTopology(vkPipeline->m_VKPrimitiveTopology));
-		PFNCmdSetDepthTestEnable(VkCommandBuffer(*vkCommandBuffer), vkPipeline->m_SettingToggles.IsSet(PipelineData::DepthTestEnable));
-		PFNCmdSetDepthWriteEnable(VkCommandBuffer(*vkCommandBuffer), vkPipeline->m_SettingToggles.IsSet(PipelineData::DepthWriteEnable));
-		PFNCmdSetDepthCompareOp(VkCommandBuffer(*vkCommandBuffer), VkCompareOp(vkPipeline->m_VKDepthCompareOp));
-
-		if(!vkPipeline->m_VKColorWriteMasks.empty())
-			PFNCmdSetColorWriteMaskEXT(VkCommandBuffer(*vkCommandBuffer), 0, vkPipeline->m_VKColorWriteMasks.size(),
-				reinterpret_cast<VkColorComponentFlags*>(vkPipeline->m_VKColorWriteMasks.data()));
-
-		const uint8_t compareMask = static_cast<uint8_t>(*vkPipeline->m_SettingToggles.Data() >> PipelineData::StencilCompareMaskBegin);
-		const int8_t ref = static_cast<int8_t>(*vkPipeline->m_SettingToggles.Data() >> PipelineData::StencilReferenceBegin);
-		const uint8_t writeMask = static_cast<uint8_t>(*vkPipeline->m_SettingToggles.Data() >> PipelineData::StencilWriteMaskBegin);
-
-		PFNCmdSetStencilTestEnable(VkCommandBuffer(*vkCommandBuffer), vkPipeline->m_SettingToggles.IsSet(PipelineData::StencilTestEnable));
-		PFNCmdSetStencilCompareMask(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK, uint32_t(compareMask));
-		PFNCmdSetStencilOp(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK,
-			VkStencilOp(vkPipeline->m_VKStencilFailOp), VkStencilOp(vkPipeline->m_VKStencilPassOp),
-			VkStencilOp(vkPipeline->m_VKStencilDepthFailOp), VkCompareOp(vkPipeline->m_VKStencilCompareOp));
-		PFNCmdSetStencilWriteMask(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK, uint32_t(writeMask));
-		PFNCmdSetStencilReference(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK, int32_t(ref));
-
-		if (!vkPipeline->m_VKBlendEnabled.empty())
-		{
-			PFNCmdSetColorBlendEnableEXT(VkCommandBuffer(*vkCommandBuffer), 0, static_cast<uint32_t>(vkPipeline->m_VKBlendEnabled.size()),
-				static_cast<const vk::Bool32*>(vkPipeline->m_VKBlendEnabled.data()));
-			vkCommandBuffer->setBlendConstants(static_cast<float*>(&vkPipeline->m_BlendConstants.x));
-		}
-		if (!vkPipeline->m_VKBlendEquations.empty())
-			PFNCmdSetColorBlendEquationEXT(VkCommandBuffer(*vkCommandBuffer), 0, static_cast<uint32_t>(vkPipeline->m_VKBlendEquations.size()),
-				reinterpret_cast<const VkColorBlendEquationEXT*>(vkPipeline->m_VKBlendEquations.data()));
+		vkCommandBuffer.bindPipeline(vkPipeline->m_VKBindPoint, vkPipeline->m_VKPipeline);
 	}
 
 	void VulkanDevice::End(CommandBufferHandle commandBuffer)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::End" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
 			Debug().LogError("VulkanDevice::End: Invalid command buffer handle.");
 			return;
 		}
-		VK_CommandBuffer& vkCommandBuffer = iter->second;
-		vkCommandBuffer->end();
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+		vkCommandBuffer.end();
 	}
 
 	void VulkanDevice::EndRenderPass(CommandBufferHandle commandBuffer)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::EndRenderPass" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
 			Debug().LogError("VulkanDevice::EndRenderPass: Invalid command buffer handle.");
 			return;
 		}
-		VK_CommandBuffer& vkCommandBuffer = iter->second;
-		vkCommandBuffer->endRenderPass();
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+		vkCommandBuffer.endRenderPass();
 	}
 
 	void VulkanDevice::EndPipeline(CommandBufferHandle)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::EndPipeline" };
 	}
 
-	void VulkanDevice::BindDescriptorSets(CommandBufferHandle commandBuffer, PipelineHandle pipeline,
-		const std::vector<DescriptorSetHandle>& sets, uint32_t firstSet)
+	void VulkanDevice::BindDescriptorSets(CommandBufferHandle commandBuffer, PipelineHandle pipeline, std::vector<DescriptorSetHandle> sets, uint32_t firstSet)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::BindDescriptorSets" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
 			Debug().LogError("VulkanDevice::BindDescriptorSets: Invalid command buffer handle.");
 			return;
 		}
-		VK_CommandBuffer& vkCommandBuffer = iter->second;
+		vk::CommandBuffer vkCommandBuffer = iter->second;
 
 		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
 		if (!vkPipeline)
@@ -677,20 +381,19 @@ namespace Glory
 			}
 			setsToBind[i] = vkSet->m_VKDescriptorSet;
 		}
-		vkCommandBuffer->bindDescriptorSets(vkPipeline->m_VKBindPoint, vkPipeline->m_VKLayout,
+		vkCommandBuffer.bindDescriptorSets(vkPipeline->m_VKBindPoint, vkPipeline->m_VKLayout,
 			firstSet, setsToBind.size(), setsToBind.data(), 0, nullptr);
 	}
 
-	void VulkanDevice::PushConstants(CommandBufferHandle commandBuffer, PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data, ShaderTypeFlag shaderStages)
+	void VulkanDevice::PushConstants(CommandBufferHandle commandBuffer, PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::PushConstants" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
 			Debug().LogError("VulkanDevice::PushConstants: Invalid command buffer handle.");
 			return;
 		}
-		VK_CommandBuffer& vkCommandBuffer = iter->second;
+		vk::CommandBuffer vkCommandBuffer = iter->second;
 
 		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
 		if (!vkPipeline)
@@ -698,20 +401,18 @@ namespace Glory
 			Debug().LogError("VulkanDevice::PushConstants: Invalid pipeline handle.");
 			return;
 		}
-		const vk::ShaderStageFlags stageFlags = GetShaderStageFlags(shaderStages);
-		vkCommandBuffer->pushConstants(vkPipeline->m_VKLayout, stageFlags, offset, size, data);
+		vkCommandBuffer.pushConstants(vkPipeline->m_VKLayout, vk::FlagTraits<vk::ShaderStageFlagBits>::allFlags, offset, size, data);
 	}
 
 	void VulkanDevice::DrawMesh(CommandBufferHandle commandBuffer, MeshHandle handle)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::DrawMesh" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
 			Debug().LogError("VulkanDevice::DrawMesh: Invalid command buffer handle.");
 			return;
 		}
-		VK_CommandBuffer& vkCommandBuffer = iter->second;
+		vk::CommandBuffer vkCommandBuffer = iter->second;
 
 		VK_Mesh* mesh = m_Meshes.Find(handle);
 		if (!mesh)
@@ -733,476 +434,120 @@ namespace Glory
 		}
 
 		VK_Buffer* indexBuffer = mesh->m_IndexCount > 0 ? m_Buffers.Find(mesh->m_Buffers.back()) : nullptr;
-		vkCommandBuffer->bindVertexBuffers(0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+		vkCommandBuffer.bindVertexBuffers(0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 		if (indexBuffer)
-			vkCommandBuffer->bindIndexBuffer(indexBuffer->m_VKBuffer, 0, vk::IndexType::eUint32);
+			vkCommandBuffer.bindIndexBuffer(indexBuffer->m_VKBuffer, 0, vk::IndexType::eUint32);
 
 		if (hasIndexBuffer)
-			vkCommandBuffer->drawIndexed(mesh->m_IndexCount, 1, 0, 0, 0);
+			vkCommandBuffer.drawIndexed(mesh->m_IndexCount, 1, 0, 0, 0);
 		else
-			vkCommandBuffer->draw(mesh->m_VertexCount, 1, 0, 0);
+			vkCommandBuffer.draw(mesh->m_VertexCount, 1, 0, 0);
 	}
 
 	void VulkanDevice::Dispatch(CommandBufferHandle commandBuffer, uint32_t x, uint32_t y, uint32_t z)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::Dispatch" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
 			Debug().LogError("VulkanDevice::Dispatch: Invalid command buffer handle.");
 			return;
 		}
-		VK_CommandBuffer& vkCommandBuffer = iter->second;
-		vkCommandBuffer->dispatch(x, y, z);
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+		vkCommandBuffer.dispatch(x, y, z);
 	}
 
-	void VulkanDevice::SetStencilTestEnabled(CommandBufferHandle commandBuffer, bool enable)
+	void VulkanDevice::Commit(CommandBufferHandle commandBuffer)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::SetStencilTestEnabled" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
+		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
 		if (iter == m_CommandBuffers.end())
 		{
-			Debug().LogError("VulkanDevice::SetStencilTestEnabled: Invalid command buffer handle.");
+			Debug().LogError("VulkanDevice::End: Invalid command buffer handle.");
 			return;
 		}
-		VK_CommandBuffer& vkCommandBuffer = iter->second;
-		PFNCmdSetStencilTestEnable(VkCommandBuffer(*vkCommandBuffer), enable);
-	}
-
-	void VulkanDevice::SetStencilOp(CommandBufferHandle commandBuffer, CompareOp compareOp,
-		Func fail, Func depthFail, Func pass, int8_t reference, uint8_t compareMask)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::SetStencilOp" };
-		auto iter = m_CommandBuffers.find(commandBuffer);
-		if (iter == m_CommandBuffers.end())
-		{
-			Debug().LogError("VulkanDevice::SetStencilOp: Invalid command buffer handle.");
-			return;
-		}
-		VK_CommandBuffer& vkCommandBuffer = iter->second;
-
-		const vk::CompareOp vkCompareOp = GetVulkanCompareOp(compareOp);
-		const vk::StencilOp vkFail = GetVulkanStencilOp(fail);
-		const vk::StencilOp vkDepthFail = GetVulkanStencilOp(depthFail);
-		const vk::StencilOp vkPass = GetVulkanStencilOp(pass);
-
-		PFNCmdSetStencilOp(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK,
-			VkStencilOp(vkFail), VkStencilOp(vkPass),
-			VkStencilOp(vkDepthFail), VkCompareOp(vkCompareOp));
-
-		PFNCmdSetStencilCompareMask(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK, uint32_t(compareMask));
-		PFNCmdSetStencilReference(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK, int32_t(reference));
-	}
-
-	void VulkanDevice::SetStencilWriteMask(CommandBufferHandle commandBuffer, uint8_t mask)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::Dispatch" };
-		auto iter = m_CommandBuffers.find(commandBuffer);
-		if (iter == m_CommandBuffers.end())
-		{
-			Debug().LogError("VulkanDevice::SetStencilTestEnabled: Invalid command buffer handle.");
-			return;
-		}
-		VK_CommandBuffer& vkCommandBuffer = iter->second;
-		PFNCmdSetStencilWriteMask(VkCommandBuffer(*vkCommandBuffer), VkStencilFaceFlagBits::VK_STENCIL_FACE_FRONT_AND_BACK, uint32_t(mask));
-	}
-
-	void VulkanDevice::Commit(CommandBufferHandle commandBuffer, const std::vector<SemaphoreHandle>& waitSemaphores,
-		const std::vector<SemaphoreHandle>& signalSemaphores)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::Commit" };
-		auto iter = m_CommandBuffers.find(commandBuffer);
-		if (iter == m_CommandBuffers.end())
-		{
-			Debug().LogError("VulkanDevice::Commit: Invalid command buffer handle.");
-			return;
-		}
-		VK_CommandBuffer& vkCommandBuffer = iter->second;
-		vk::Fence vkFence = vkCommandBuffer.m_VKFence;
-
-		if (m_LogicalDevice.resetFences(1, &vkFence) != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::Wait: Failed to reset fence.");
-			return;
-		}
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+		vk::Fence vkFence = fenceIter->second;
 
 		/* Submit command buffer */
+		//vk::Semaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
 		vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 
-		std::vector<vk::Semaphore> vkWaitSemaphores(waitSemaphores.size());
-		std::vector<vk::Semaphore> vkSignalSemaphores(signalSemaphores.size());
-		for (size_t i = 0; i < waitSemaphores.size(); ++i)
-		{
-			VK_Semaphore* vkSemaphore = m_Semaphores.Find(waitSemaphores[i]);
-			if (!vkSemaphore)
-			{
-				Debug().LogError("VulkanDevice::Commit: Invalid semaphore handle for waiting.");
-				return;
-			}
-			vkWaitSemaphores[i] = vkSemaphore->m_VKSemaphore;
-		}
-		for (size_t i = 0; i < signalSemaphores.size(); ++i)
-		{
-			VK_Semaphore* vkSemaphore = m_Semaphores.Find(signalSemaphores[i]);
-			if (!vkSemaphore)
-			{
-				Debug().LogError("VulkanDevice::Commit: Invalid semaphore handle for signaling.");
-				return;
-			}
-			vkSignalSemaphores[i] = vkSemaphore->m_VKSemaphore;
-		}
-
+		//vk::Semaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
 		vk::SubmitInfo submitInfo = vk::SubmitInfo()
-			.setWaitSemaphoreCount(static_cast<uint32_t>(vkWaitSemaphores.size()))
-			.setPWaitSemaphores(vkWaitSemaphores.data())
+			.setWaitSemaphoreCount(0)
+			.setPWaitSemaphores(nullptr)
 			.setPWaitDstStageMask(waitStages)
 			.setCommandBufferCount(1)
-			.setPCommandBuffers(&vkCommandBuffer.m_VKCommandBuffer)
-			.setSignalSemaphoreCount(static_cast<uint32_t>(vkSignalSemaphores.size()))
-			.setPSignalSemaphores(vkSignalSemaphores.data());
+			.setPCommandBuffers(&vkCommandBuffer)
+			.setSignalSemaphoreCount(0)
+			.setPSignalSemaphores(nullptr);
 
 		if (m_GraphicsAndComputeQueue.submit(1, &submitInfo, vkFence) != vk::Result::eSuccess)
 			throw std::runtime_error("failed to submit draw command buffer!");
 	}
 
-	GraphicsDevice::WaitResult VulkanDevice::Wait(CommandBufferHandle commandBuffer, uint64_t timeout)
+	void VulkanDevice::Wait(CommandBufferHandle commandBuffer)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::Wait" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
-		if (iter == m_CommandBuffers.end())
+		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
+		if (iter == m_CommandBuffers.end() || fenceIter == m_CommandBufferFences.end())
 		{
 			Debug().LogError("VulkanDevice::Wait: Invalid command buffer handle.");
-			return WR_Fail;
+			return;
 		}
-		VK_CommandBuffer& vkCommandBuffer = iter->second;
-		vk::Fence vkFence = vkCommandBuffer.m_VKFence;
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+		vk::Fence vkFence = fenceIter->second;
 
-		const vk::Result waitState = m_LogicalDevice.waitForFences(1, &vkFence, VK_TRUE, UINT64_MAX);
-		if (int32_t(waitState) < 0)
+		if (m_LogicalDevice.waitForFences(1, &vkFence, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess)
 		{
 			Debug().LogError("VulkanDevice::Wait: Failed to wait for fence.");
-			return WR_Fail;
+			return;
 		}
-
-		switch (waitState)
+		if (m_LogicalDevice.resetFences(1, &vkFence) != vk::Result::eSuccess)
 		{
-		case vk::Result::eSuccess:
-			return WR_Success;
-		case vk::Result::eTimeout:
-			return WR_Timeout;
+			Debug().LogError("VulkanDevice::Wait: Failed to reset fence.");
+			return;
 		}
-
-		return WR_Fail;
 	}
 
 	void VulkanDevice::Release(CommandBufferHandle commandBuffer)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::Release" };
 		auto iter = m_CommandBuffers.find(commandBuffer);
-		if (iter == m_CommandBuffers.end())
+		auto fenceIter = m_CommandBufferFences.find(commandBuffer);
+		if (iter == m_CommandBuffers.end() || fenceIter == m_CommandBufferFences.end())
 		{
 			Debug().LogError("VulkanDevice::Wait: Invalid command buffer handle.");
 			return;
 		}
-		VK_CommandBuffer& vkCommandBuffer = iter->second;
-		vk::Fence vkFence = vkCommandBuffer.m_VKFence;
+		vk::CommandBuffer vkCommandBuffer = iter->second;
+		vk::Fence vkFence = fenceIter->second;
 
-		m_FreeFences.push_back(vkFence);
-		vkCommandBuffer.m_VKFence = nullptr;
-
-		if (!vkCommandBuffer.m_Resetable)
-		{
-			m_CommandBuffers.erase(commandBuffer);
-			return;
-		}
-
-		vkCommandBuffer->reset();
-		m_FreeCommandBuffers.push_back(vkCommandBuffer.m_VKCommandBuffer);
+		vkCommandBuffer.reset();
 		m_CommandBuffers.erase(commandBuffer);
+		m_CommandBufferFences.erase(commandBuffer);
+		m_FreeCommandBuffers.push_back(vkCommandBuffer);
+		m_FreeFences.push_back(vkFence);
 	}
 
-	void VulkanDevice::Reset(CommandBufferHandle commandBuffer)
+	vk::BufferUsageFlags GetBufferUsageFlags(BufferType bufferType)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::Reset" };
-		auto iter = m_CommandBuffers.find(commandBuffer);
-		if (iter == m_CommandBuffers.end())
-		{
-			Debug().LogError("VulkanDevice::Reset: Invalid command buffer handle.");
-			return;
-		}
-		VK_CommandBuffer& vkCommandBuffer = iter->second;
-		vk::Fence vkFence = vkCommandBuffer.m_VKFence;
-
-		if (!vkCommandBuffer.m_Resetable)
-		{
-			Debug().LogError("VulkanDevice::Reset: Trying to reset a non-resetable command buffer.");
-			return;
-		}
-
-		vkCommandBuffer->reset();
-		if (m_LogicalDevice.resetFences(1, &vkFence) != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::Reset: Failed to reset fence.");
-			return;
-		}
-	}
-
-	void VulkanDevice::SetViewport(CommandBufferHandle commandBuffer, float x, float y, float width, float height, float minDepth, float maxDepth)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::SetViewport" };
-		auto iter = m_CommandBuffers.find(commandBuffer);
-		if (iter == m_CommandBuffers.end())
-		{
-			Debug().LogError("VulkanDevice::SetViewport: Invalid command buffer handle.");
-			return;
-		}
-		const VK_CommandBuffer& vkCommandBuffer = iter->second;
-		const vk::Viewport viewport = vk::Viewport()
-			.setX(x).setY(y).setHeight(height).setWidth(width)
-			.setMinDepth(minDepth).setMaxDepth(maxDepth);
-		vkCommandBuffer->setViewport(0, 1, &viewport);
-	}
-
-	void VulkanDevice::SetScissor(CommandBufferHandle commandBuffer, int x, int y, uint32_t width, uint32_t height)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::SetScissor" };
-		auto iter = m_CommandBuffers.find(commandBuffer);
-		if (iter == m_CommandBuffers.end())
-		{
-			Debug().LogError("VulkanDevice::SetScissor: Invalid command buffer handle.");
-			return;
-		}
-		const VK_CommandBuffer& vkCommandBuffer = iter->second;
-		const vk::Rect2D scissor = vk::Rect2D()
-			.setOffset({ x,y })
-			.setExtent({ width, height });
-		vkCommandBuffer->setScissor(0, 1, &scissor);
-	}
-
-	vk::AccessFlags GetVKAccessMask(AccessFlags flags)
-	{
-		if (flags == AF_None) return vk::AccessFlagBits::eNone;
-
-		vk::AccessFlags result = (vk::AccessFlags)0;
-		if (flags & AF_IndirectCommandRead) result |= vk::AccessFlagBits::eIndirectCommandRead;
-		if (flags & AF_IndexRead) result |= vk::AccessFlagBits::eIndexRead;
-		if (flags & AF_VertexAttributeRead) result |= vk::AccessFlagBits::eVertexAttributeRead;
-		if (flags & AF_UniformRead) result |= vk::AccessFlagBits::eUniformRead;
-		if (flags & AF_InputAttachmentRead) result |= vk::AccessFlagBits::eInputAttachmentRead;
-		if (flags & AF_ShaderRead) result |= vk::AccessFlagBits::eShaderRead;
-		if (flags & AF_ShaderWrite) result |= vk::AccessFlagBits::eShaderWrite;
-		if (flags & AF_ColorAttachmentRead) result |= vk::AccessFlagBits::eColorAttachmentRead;
-		if (flags & AF_ColorAttachmentWrite) result |= vk::AccessFlagBits::eColorAttachmentWrite;
-		if (flags & AF_DepthStencilAttachmentRead) result |= vk::AccessFlagBits::eDepthStencilAttachmentRead;
-		if (flags & AF_DepthStencilAttachmentWrite) result |= vk::AccessFlagBits::eDepthStencilAttachmentWrite;
-		if (flags & AF_CopySrc) result |= vk::AccessFlagBits::eTransferRead;
-		if (flags & AF_CopyDst) result |= vk::AccessFlagBits::eTransferWrite;
-		if (flags & AF_CPURead) result |= vk::AccessFlagBits::eHostRead;
-		if (flags & AF_CPUWrite) result |= vk::AccessFlagBits::eHostWrite;
-		if (flags & AF_MemoryRead) result |= vk::AccessFlagBits::eMemoryRead;
-		if (flags & AF_MemoryWrite) result |= vk::AccessFlagBits::eMemoryWrite;
-		return result;
-	}
-
-	void VulkanDevice::PipelineBarrier(CommandBufferHandle commandBuffer, const std::vector<BufferBarrier>& buffers,
-		const std::vector<ImageBarrier>& images, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::PipelineBarrier" };
-		auto iter = m_CommandBuffers.find(commandBuffer);
-		if (iter == m_CommandBuffers.end())
-		{
-			Debug().LogError("VulkanDevice::SetViewport: Invalid command buffer handle.");
-			return;
-		}
-
-		std::vector<vk::BufferMemoryBarrier> bufferBarriers(buffers.size());
-		std::vector<vk::ImageMemoryBarrier> imageBarriers(images.size());
-		for (size_t i = 0; i < buffers.size(); ++i)
-		{
-			VK_Buffer* vkBuffer = m_Buffers.Find(buffers[i].m_Buffer);
-			bufferBarriers[i] = vk::BufferMemoryBarrier();
-			bufferBarriers[i].buffer = vkBuffer->m_VKBuffer;
-			bufferBarriers[i].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			bufferBarriers[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			bufferBarriers[i].offset = buffers[i].m_Offset;
-			bufferBarriers[i].size = buffers[i].m_Size > 0 ? buffers[i].m_Size : vkBuffer->m_Size;
-			bufferBarriers[i].srcAccessMask = GetVKAccessMask(buffers[i].m_SrcAccessMask);
-			bufferBarriers[i].dstAccessMask = GetVKAccessMask(buffers[i].m_DstAccessMask);
-		}
-
-		for (size_t i = 0; i < images.size(); ++i)
-		{
-			VK_Texture* vkTexture = m_Textures.Find(images[i].m_Texture);
-			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-			if (!vkImage) continue;
-
-			imageBarriers[i] = vk::ImageMemoryBarrier();
-			imageBarriers[i].image = vkImage->m_VKImage;
-			imageBarriers[i].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			imageBarriers[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			imageBarriers[i].oldLayout = vkImage->m_VKFinalLayout;
-			imageBarriers[i].newLayout = vkImage->m_VKFinalLayout;
-			imageBarriers[i].srcAccessMask = GetVKAccessMask(images[i].m_SrcAccessMask);
-			imageBarriers[i].dstAccessMask = GetVKAccessMask(images[i].m_DstAccessMask);
-
-			imageBarriers[i].subresourceRange.aspectMask = vkImage->m_VKAspect;
-			imageBarriers[i].subresourceRange.levelCount = 1;
-			imageBarriers[i].subresourceRange.layerCount = 1;
-			imageBarriers[i].subresourceRange.baseArrayLayer = 0;
-			imageBarriers[i].subresourceRange.baseMipLevel = 0;
-		}
-
-		const VK_CommandBuffer& vkCommandBuffer = iter->second;
-		vkCommandBuffer->pipelineBarrier(vk::PipelineStageFlagBits(srcStage), vk::PipelineStageFlagBits(dstStage),
-			(vk::DependencyFlags)0, 0, nullptr, static_cast<uint32_t>(bufferBarriers.size()), bufferBarriers.data(),
-			static_cast<uint32_t>(imageBarriers.size()), imageBarriers.data()
-		);
-	}
-
-	void VulkanDevice::CopyImage(CommandBufferHandle commandBuffer, TextureHandle src, TextureHandle dst)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CopyImage" };
-		auto iter = m_CommandBuffers.find(commandBuffer);
-		if (iter == m_CommandBuffers.end())
-		{
-			Debug().LogError("VulkanDevice::CopyImage: Invalid command buffer handle.");
-			return;
-		}
-
-		VK_Texture* vkSrcTexture = m_Textures.Find(src);
-		VK_Texture* vkDstTexture = m_Textures.Find(dst);
-		if (!vkSrcTexture)
-		{
-			Debug().LogError("VulkanDevice::CopyImage: Invalid src texture handle.");
-			return;
-		}
-		if (!vkDstTexture)
-		{
-			Debug().LogError("VulkanDevice::CopyImage: Invalid dst texture handle.");
-			return;
-		}
-
-		VK_Image* vkSrcImage = m_Images.Find(vkSrcTexture->m_Image);
-		VK_Image* vkDstImage = m_Images.Find(vkDstTexture->m_Image);
-
-		CopyImage(*iter->second, vkSrcImage->m_VKImage, vkSrcImage->m_VKFinalLayout, vkDstImage->m_VKImage, vkDstImage->m_VKFinalLayout, vkSrcImage->m_VKAspect, vkDstImage->m_VKAspect,
-			{}, {}, { vkSrcImage->m_Width, vkSrcImage->m_Height, 1 }, 1);
-	}
-
-	GraphicsDevice::SwapchainResult VulkanDevice::AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex,
-		SemaphoreHandle signalSemaphore)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::AqcuireNextSwapchainImage" };
-		VK_Swapchain* vkSwapchain = m_Swapchains.Find(swapchain);
-		if (!vkSwapchain)
-		{
-			Debug().LogError("VulkanDevice::AqcuireNextSwapchainImage: Invalid swap chain handle.");
-			return GraphicsDevice::SwapchainResult::S_Error;
-		}
-
-		VK_Semaphore* vkSemaphore = m_Semaphores.Find(signalSemaphore);
-		vk::Semaphore semaphore = vkSemaphore ? vkSemaphore->m_VKSemaphore : nullptr;
-
-		const vk::Result result = m_LogicalDevice.acquireNextImageKHR(vkSwapchain->m_VKSwapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, imageIndex);
-		switch (result)
-		{
-		case vk::Result::eSuccess:
-			return GraphicsDevice::SwapchainResult::S_Success;
-		case vk::Result::eSuboptimalKHR:
-		case vk::Result::eErrorOutOfDateKHR:
-			return GraphicsDevice::SwapchainResult::S_OutOfDate;
-		}
-
-		Debug().LogError("VulkanDevice::AqcuireNextSwapchainImage: Failed to acquire image.");
-		return GraphicsDevice::SwapchainResult::S_Error;
-	}
-
-	GraphicsDevice::SwapchainResult VulkanDevice::Present(SwapchainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>& waitSemaphores)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::Present" };
-		VK_Swapchain* vkSwapchain = m_Swapchains.Find(swapchain);
-		if (!vkSwapchain)
-		{
-			Debug().LogError("VulkanDevice::Present: Invalid swap chain handle.");
-			return GraphicsDevice::SwapchainResult::S_Error;
-		}
-
-		std::vector<vk::Semaphore> vkWaitSemaphores(waitSemaphores.size());
-		for (size_t i = 0; i < waitSemaphores.size(); ++i)
-		{
-			VK_Semaphore* vkSemaphore = m_Semaphores.Find(waitSemaphores[i]);
-			if (!vkSemaphore)
-			{
-				Debug().LogError("VulkanDevice::Present: Invalid semaphore handle for waiting.");
-				return GraphicsDevice::SwapchainResult::S_Error;
-			}
-			vkWaitSemaphores[i] = vkSemaphore->m_VKSemaphore;
-		}
-
-		vk::PresentInfoKHR presentInfo{};
-		presentInfo.waitSemaphoreCount = static_cast<uint32_t>(vkWaitSemaphores.size());
-		presentInfo.pWaitSemaphores = vkWaitSemaphores.data();
-
-		vk::SwapchainKHR swapchains[] = { vkSwapchain->m_VKSwapchain };
-		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = swapchains;
-		presentInfo.pImageIndices = &imageIndex;
-		presentInfo.pResults = nullptr;
-
-		const vk::Result result = m_PresentQueue.presentKHR(presentInfo);
-		switch (result)
-		{
-		case vk::Result::eSuccess:
-			return GraphicsDevice::SwapchainResult::S_Success;
-		case vk::Result::eSuboptimalKHR:
-		case vk::Result::eErrorOutOfDateKHR:
-			return GraphicsDevice::SwapchainResult::S_OutOfDate;
-		}
-
-		Debug().LogError("VulkanDevice::Present: Failed to present image.");
-		return GraphicsDevice::SwapchainResult::S_Error;
-	}
-
-	void VulkanDevice::WaitIdle()
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::WaitIdle" };
-		m_LogicalDevice.waitIdle();
-	}
-
-	void VulkanDevice::OnInitialize()
-	{
-		VK_Texture* texture = m_Textures.Find(m_DefaultTexture);
-		m_DefaultImage = texture->m_Image;
-	}
-
-	vk::BufferUsageFlags GetBufferUsageFlags(BufferType bufferType, BufferFlags flags)
-	{
-		vk::BufferUsageFlags usageFlags;
-
 		switch (bufferType)
 		{
 		case Glory::BT_TransferRead:
-			usageFlags |= vk::BufferUsageFlagBits::eTransferSrc;
-			break;
+			return vk::BufferUsageFlagBits::eTransferSrc;
 		case Glory::BT_TransferWrite:
-			usageFlags |= vk::BufferUsageFlagBits::eTransferDst;
-			break;
+			return vk::BufferUsageFlagBits::eTransferDst;
 		case Glory::BT_Vertex:
-			usageFlags |= vk::BufferUsageFlagBits::eVertexBuffer;
-			break;
+			return vk::BufferUsageFlagBits::eVertexBuffer;
 		case Glory::BT_Index:
-			usageFlags |= vk::BufferUsageFlagBits::eIndexBuffer;
-			break;
+			return vk::BufferUsageFlagBits::eIndexBuffer;
 		case Glory::BT_Storage:
-			usageFlags |= vk::BufferUsageFlagBits::eStorageBuffer;
-			break;
+			return vk::BufferUsageFlagBits::eStorageBuffer;
 		case Glory::BT_Uniform:
-			usageFlags |= vk::BufferUsageFlagBits::eUniformBuffer;
-			break;
+			return vk::BufferUsageFlagBits::eUniformBuffer;
+		default:
+			return vk::BufferUsageFlagBits(0);
 		}
-		if (flags & BF_CopyDst)
-			usageFlags |= vk::BufferUsageFlagBits::eTransferDst;
-		return usageFlags;
 	}
 
 	vk::DescriptorType GetDescriptorType(BufferType bufferType)
@@ -1226,57 +571,16 @@ namespace Glory
 		}
 	}
 
-	vk::MemoryPropertyFlags GetBufferMemoryPropertyFlags(BufferFlags flags)
+	BufferHandle VulkanDevice::CreateBuffer(size_t bufferSize, BufferType type)
 	{
-		if (flags == BF_None)
-			return vk::MemoryPropertyFlagBits::eDeviceLocal;
-		vk::MemoryPropertyFlags result;
-		if (flags & BF_Write)
-		{
-			result |= vk::MemoryPropertyFlagBits::eHostVisible;
-			result |= vk::MemoryPropertyFlagBits::eHostCoherent;
-		}
-		if (flags & BF_Read)
-		{
-			result |= vk::MemoryPropertyFlagBits::eHostVisible;
-			result |= vk::MemoryPropertyFlagBits::eHostCoherent;
-			result |= vk::MemoryPropertyFlagBits::eHostCached;
-		}
-		return result;
-	}
-
-	vk::MemoryPropertyFlags GetImageMemoryPropertyFlags(ImageFlags flags)
-	{
-		if (flags == IF_None)
-			return vk::MemoryPropertyFlagBits::eDeviceLocal;
-		vk::MemoryPropertyFlags result;
-		if (flags & IF_Write)
-		{
-			result |= vk::MemoryPropertyFlagBits::eHostVisible;
-			result |= vk::MemoryPropertyFlagBits::eHostCoherent;
-		}
-		if (flags & IF_Read)
-		{
-			result |= vk::MemoryPropertyFlagBits::eHostVisible;
-			result |= vk::MemoryPropertyFlagBits::eHostCoherent;
-			result |= vk::MemoryPropertyFlagBits::eHostCached;
-		}
-		return result;
-	}
-
-	BufferHandle VulkanDevice::CreateBuffer(size_t bufferSize, BufferType type, BufferFlags flags)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateBuffer" };
 		BufferHandle handle;
 		VK_Buffer& buffer = m_Buffers.Emplace(handle, VK_Buffer());
 		buffer.m_Size = bufferSize;
-		buffer.m_CPUVisible = (flags & BF_ReadAndWrite) != 0;
-		buffer.m_Flags = flags;
 
 		vk::BufferCreateInfo bufferInfo = vk::BufferCreateInfo();
 		bufferInfo.size = (vk::DeviceSize)buffer.m_Size;
 		bufferInfo.sharingMode = vk::SharingMode::eExclusive;
-		bufferInfo.usage = buffer.m_VKUsage = GetBufferUsageFlags(type, flags);
+		bufferInfo.usage = buffer.m_VKUsage = GetBufferUsageFlags(type);
 
 		vk::Result result = m_LogicalDevice.createBuffer(&bufferInfo, nullptr, &buffer.m_VKBuffer);
 		if (result != vk::Result::eSuccess)
@@ -1289,9 +593,9 @@ namespace Glory
 		vk::MemoryRequirements memRequirements;
 		m_LogicalDevice.getBufferMemoryRequirements(buffer.m_VKBuffer, &memRequirements);
 
-		const uint32_t typeFilter = memRequirements.memoryTypeBits;
-		const vk::MemoryPropertyFlags properties = GetBufferMemoryPropertyFlags(flags);
-		const uint32_t memoryIndex = GetSupportedMemoryIndex(typeFilter, properties);
+		uint32_t typeFilter = memRequirements.memoryTypeBits;
+		vk::MemoryPropertyFlags properties = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;//(vk::MemoryPropertyFlagBits)m_MemoryFlags;
+		uint32_t memoryIndex = GetSupportedMemoryIndex(typeFilter, properties);
 
 		// Allocate device memory
 		vk::MemoryAllocateInfo allocateInfo = vk::MemoryAllocateInfo();
@@ -1308,59 +612,15 @@ namespace Glory
 
 		m_LogicalDevice.bindBufferMemory(buffer.m_VKBuffer, buffer.m_VKMemory, 0);
 
+		std::stringstream str;
+		str << "VulkanDevice: Buffer " << handle << " created with size " << bufferSize << ".";
+		Debug().LogInfo(str.str());
+
 		return handle;
-	}
-
-	void VulkanDevice::ResizeBuffer(BufferHandle buffer, size_t bufferSize)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::ResizeBuffer" };
-
-		VK_Buffer* vkBuffer = m_Buffers.Find(buffer);
-		if (!vkBuffer)
-		{
-			Debug().LogError("VulkanDevice::ResizeBuffer: Invalid buffer handle.");
-			return;
-		}
-
-		vkBuffer->m_Size = bufferSize;
-		ResizeBuffer(*vkBuffer);
-	}
-
-	size_t VulkanDevice::BufferSize(BufferHandle buffer)
-	{
-		VK_Buffer* vkBuffer = m_Buffers.Find(buffer);
-		if (!vkBuffer)
-		{
-			Debug().LogError("VulkanDevice::BufferSize: Invalid buffer handle.");
-			return 0;
-		}
-		return vkBuffer->m_Size;
 	}
 
 	void VulkanDevice::AssignBuffer(BufferHandle handle, const void* data)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::AssignBuffer" };
-		if (!data) return;
-
-		VK_Buffer* buffer = m_Buffers.Find(handle);
-		if (!buffer)
-		{
-			Debug().LogError("VulkanDevice::AssignBuffer: Invalid buffer handle.");
-			return;
-		}
-		AssignBuffer(handle, data, 0, buffer->m_Size);
-	}
-
-	void VulkanDevice::AssignBuffer(BufferHandle handle, const void* data, uint32_t size)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::AssignBuffer(size)" };
-		if (!data) return;
-		AssignBuffer(handle, data, 0, size);
-	}
-
-	void VulkanDevice::AssignBuffer(BufferHandle handle, const void* data, uint32_t offset, uint32_t size)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::AssignBuffer(offset, size)" };
 		if (!data) return;
 
 		VK_Buffer* buffer = m_Buffers.Find(handle);
@@ -1370,66 +630,59 @@ namespace Glory
 			return;
 		}
 
-		if (!buffer->m_CPUVisible)
+		void* dstData;
+		vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)0, (vk::DeviceSize)buffer->m_Size, (vk::MemoryMapFlags)0, &dstData);
+		if (result != vk::Result::eSuccess)
 		{
-			/* We have to assign it using a buffer copy */
-			BufferHandle staging = CreateBuffer(size, BufferType::BT_TransferRead, BufferFlags::BF_Write);
-			AssignBuffer(staging, data, offset, size);
-			VK_Buffer* vkStaging = m_Buffers.Find(staging);
-
-			vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
-			CopyFromBuffer(commandBuffer, buffer->m_VKBuffer, vkStaging->m_VKBuffer, offset, 0, size);
-			EndSingleTimeCommands(commandBuffer);
-			FreeBuffer(staging);
+			Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
 			return;
 		}
-
-		if (!buffer->m_pMappedMemory)
-		{
-			const vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)0, (vk::DeviceSize)buffer->m_Size, (vk::MemoryMapFlags)0, &buffer->m_pMappedMemory);
-			if (result != vk::Result::eSuccess)
-			{
-				Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
-				return;
-			}
-		}
-
-		char* p = (char*)buffer->m_pMappedMemory;
-		void* offsettedData = p + offset;
-		memcpy(offsettedData, data, size);
+		memcpy(dstData, data, buffer->m_Size);
+		m_LogicalDevice.unmapMemory(buffer->m_VKMemory);
 	}
 
-	void VulkanDevice::ReadBuffer(BufferHandle handle, void* outData, uint32_t offset, uint32_t size)
+	void VulkanDevice::AssignBuffer(BufferHandle handle, const void* data, uint32_t size)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::ReadBuffer(offset, size)" };
-		if (!outData) return;
+		if (!data) return;
 
 		VK_Buffer* buffer = m_Buffers.Find(handle);
 		if (!buffer)
 		{
-			Debug().LogError("VulkanDevice::ReadBuffer: Invalid buffer handle.");
+			Debug().LogError("VulkanDevice::FreeBuffer: Invalid buffer handle.");
 			return;
 		}
 
-		if (!buffer->m_CPUVisible)
+		void* dstData;
+		vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)0, (vk::DeviceSize)size, (vk::MemoryMapFlags)0, &dstData);
+		if (result != vk::Result::eSuccess)
 		{
-			Debug().LogError("VulkanDevice::ReadBuffer: Can't read a buffer that is not visible to the CPU.");
+			Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
+			return;
+		}
+		memcpy(dstData, data, size);
+		m_LogicalDevice.unmapMemory(buffer->m_VKMemory);
+	}
+
+	void VulkanDevice::AssignBuffer(BufferHandle handle, const void* data, uint32_t offset, uint32_t size)
+	{
+		if (!data) return;
+
+		VK_Buffer* buffer = m_Buffers.Find(handle);
+		if (!buffer)
+		{
+			Debug().LogError("VulkanDevice::FreeBuffer: Invalid buffer handle.");
 			return;
 		}
 
-		if (!buffer->m_pMappedMemory)
+		void* dstData;
+		vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)offset, (vk::DeviceSize)size, (vk::MemoryMapFlags)0, &dstData);
+		if (result != vk::Result::eSuccess)
 		{
-			const vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)0, (vk::DeviceSize)buffer->m_Size, (vk::MemoryMapFlags)0, &buffer->m_pMappedMemory);
-			if (result != vk::Result::eSuccess)
-			{
-				Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
-				return;
-			}
+			Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
+			return;
 		}
-
-		char* p = (char*)buffer->m_pMappedMemory;
-		void* offsettedData = p + offset;
-		std::memcpy(outData, offsettedData, size);
+		memcpy(dstData, data, size);
+		m_LogicalDevice.unmapMemory(buffer->m_VKMemory);
 	}
 
 	vk::Format GetFormat(const AttributeType& atributeType)
@@ -1522,10 +775,9 @@ namespace Glory
 		}
 	}
 
-	MeshHandle VulkanDevice::CreateMesh(std::vector<BufferHandle>&& buffers, uint32_t vertexCount,
-		uint32_t indexCount, uint32_t stride, const std::vector<AttributeType>& attributeTypes)
+	MeshHandle VulkanDevice::CreateMesh(std::vector<BufferHandle>&& buffers, uint32_t vertexCount, uint32_t indexCount,
+		uint32_t stride, PrimitiveType primitiveType, const std::vector<AttributeType>& attributeTypes)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateMesh" };
 		MeshHandle handle;
 		VK_Mesh& mesh = m_Meshes.Emplace(handle, VK_Mesh());
 		mesh.m_Buffers = std::move(buffers);
@@ -1549,127 +801,33 @@ namespace Glory
 			GetNextOffset(attributeTypes[i], currentOffset);
 		}
 
+		std::stringstream str;
+		str << "VulkanDevice: Mesh " << handle << " created.";
+		Debug().LogInfo(str.str());
+
 		return handle;
-	}
-
-	void VulkanDevice::UpdateMesh(MeshHandle mesh, std::vector<BufferHandle>&& buffers, uint32_t vertexCount, uint32_t indexCount)
-	{
-		VK_Mesh* vkMesh = m_Meshes.Find(mesh);
-		if (!vkMesh)
-		{
-			Debug().LogError("VulkanDevice::UpdateMesh: Invalid mesh handle.");
-			return;
-		}
-
-		vkMesh->m_VertexCount = vertexCount;
-		vkMesh->m_IndexCount = indexCount;
-		if (buffers.empty()) return;
-		vkMesh->m_Buffers = std::move(buffers);
-	}
-
-	void VulkanDevice::UpdateMesh(MeshHandle mesh, MeshData* pMeshData)
-	{
-		VK_Mesh* vkMesh = m_Meshes.Find(mesh);
-		if (!vkMesh)
-		{
-			Debug().LogError("VulkanDevice::UpdateMesh: Invalid mesh handle.");
-			return;
-		}
-
-		vkMesh->m_IndexCount = pMeshData->IndexCount();
-		vkMesh->m_VertexCount = pMeshData->VertexCount();
-
-		const size_t vertexBufferSize = pMeshData->VertexCount()*pMeshData->VertexSize();
-		const size_t indexBufferSize = pMeshData->IndexCount()*sizeof(uint32_t);
-
-		WaitIdle();
-		VK_Buffer* vkVertexBuffer = m_Buffers.Find(vkMesh->m_Buffers[0]);
-		if (vertexBufferSize > vkVertexBuffer->m_Size)
-		{
-			vkVertexBuffer->m_Size = vertexBufferSize;
-			ResizeBuffer(*vkVertexBuffer);
-		}
-
-		AssignBuffer(vkMesh->m_Buffers[0], pMeshData->Vertices(), vertexBufferSize);
-		if (vkMesh->m_IndexCount > 0)
-		{
-			VK_Buffer* vkIndexBuffer = m_Buffers.Find(vkMesh->m_Buffers.back());
-			if (indexBufferSize > vkIndexBuffer->m_Size)
-			{
-				vkIndexBuffer->m_Size = indexBufferSize;
-				ResizeBuffer(*vkIndexBuffer);
-			}
-
-			AssignBuffer(vkMesh->m_Buffers.back(), pMeshData->Indices(), indexBufferSize);
-		}
 	}
 
 	TextureHandle VulkanDevice::CreateTexture(TextureData* pTexture)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateTexture" };
 		ImageData* pImage = pTexture->GetImageData(&m_pModule->GetEngine()->GetAssetManager());
-
-		TextureHandle handle;
-		VK_Texture& texture = m_Textures.Emplace(handle, VK_Texture());
-
-		texture.m_Image = GetCachedImage(pImage);
-
-		if (texture.m_Image != m_DefaultImage)
-			++m_Images.Find(texture.m_Image)->m_ReferenceCounter;
-
-		const SamplerSettings& samplerSettings = pTexture->GetSamplerSettings();
-		auto samplerIter = m_CachedSamplers.find(samplerSettings);
-		if (samplerIter == m_CachedSamplers.end())
-		{
-			auto samplerCreateInfo = VKConverter::GetVulkanSamplerInfo(samplerSettings);
-
-			vk::Sampler newSampler;
-			if (m_LogicalDevice.createSampler(&samplerCreateInfo, nullptr, &newSampler) != vk::Result::eSuccess)
-			{
-				Debug().LogError("VulkanDevice::CreateTexture: Could not create image sampler.");
-				return NULL;
-			}
-			samplerIter = m_CachedSamplers.emplace(samplerSettings, newSampler).first;
-		}
-		texture.m_VKSampler = samplerIter->second;
-
-		return handle;
-	}
-
-	TextureHandle VulkanDevice::CreateTexture(CubemapData* pCubemap)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateTexture(CubemapData)" };
-		ImageData* pFaceImage = pCubemap->GetImageData(&m_pModule->GetEngine()->GetAssetManager(), 0);
-		if (!pFaceImage)
+		if (!pImage)
 		{
 			Debug().LogError("VulkanDevice::CreateTexture(TextureData): Could not get ImageData.");
 			return NULL;
 		}
-		
+
 		TextureCreateInfo createInfo;
-		createInfo.m_Width = pFaceImage->GetWidth();
-		createInfo.m_Height = pFaceImage->GetHeight();
+		createInfo.m_Width = pImage->GetWidth();
+		createInfo.m_Height = pImage->GetHeight();
 		createInfo.m_ImageAspectFlags = IA_Color;
-		createInfo.m_ImageType = ImageType::IT_Cube;
-		createInfo.m_InternalFormat = pFaceImage->GetInternalFormat();
-		createInfo.m_PixelFormat = pFaceImage->GetFormat();
-		createInfo.m_Type = pFaceImage->GetDataType();
-		createInfo.m_SamplerSettings = pCubemap->GetSamplerSettings();
-		createInfo.m_Flags = IF_None;
+		createInfo.m_ImageType = ImageType::IT_2D;
+		createInfo.m_InternalFormat = pImage->GetInternalFormat();
+		createInfo.m_PixelFormat = pImage->GetFormat();
+		createInfo.m_Type = pImage->GetDataType();
+		createInfo.m_SamplerSettings = pTexture->GetSamplerSettings();
 
-		const size_t numFaces = 6;
-		const size_t faceDataSize = pFaceImage->DataSize();
-		const size_t totalDataSize = faceDataSize*numFaces;
-
-		std::vector<char> pixels(totalDataSize);
-
-		for (size_t i = 0; i < 6; ++i)
-		{
-			pFaceImage = pCubemap->GetImageData(&m_pModule->GetEngine()->GetAssetManager(), i);
-			std::memcpy(&pixels[i*faceDataSize], pFaceImage->GetPixels(), faceDataSize);
-		}
-
-		return CreateTexture(createInfo, pixels.data(), totalDataSize);
+		return CreateTexture(createInfo, pImage->GetPixels(), pImage->DataSize());
 	}
 
 	void EnsureSupportedFormat(vk::Format& format, vk::ImageViewCreateInfo& viewInfo)
@@ -1691,97 +849,122 @@ namespace Glory
 
 	TextureHandle VulkanDevice::CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels, size_t dataSize)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateTexture(textureInfo)" };
 		TextureHandle handle;
 		VK_Texture& texture = m_Textures.Emplace(handle, VK_Texture());
 
-		texture.m_Image = CreateImage(textureInfo, pixels, dataSize);
+		const uint32_t mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(textureInfo.m_Width, textureInfo.m_Height)))) + 1;
+		const vk::Format format = VKConverter::GetVulkanFormat(textureInfo.m_InternalFormat); //vk::Format::eR8G8B8A8Srgb;
+		const vk::ImageType imageType = VKConverter::GetVulkanImageType(textureInfo.m_ImageType);
+		vk::ImageCreateInfo imageInfo = vk::ImageCreateInfo();
+		imageInfo.imageType = imageType;
+		imageInfo.extent.width = textureInfo.m_Width;
+		imageInfo.extent.height = textureInfo.m_Height;
+		imageInfo.extent.depth = 1;
+		imageInfo.arrayLayers = 1;
+		imageInfo.format = format;
+		imageInfo.tiling = vk::ImageTiling::eOptimal;
+		imageInfo.initialLayout = vk::ImageLayout::eUndefined;
+		imageInfo.usage = VKConverter::GetVulkanImageUsageFlags(textureInfo.m_ImageAspectFlags);
+		imageInfo.sharingMode = vk::SharingMode::eExclusive;
+		imageInfo.samples = vk::SampleCountFlagBits::e1;
+		imageInfo.flags = (vk::ImageCreateFlags)0;
+		imageInfo.mipLevels = textureInfo.m_SamplerSettings.MipmapMode == Filter::F_None ? 1 : mipLevels;
+		if (imageInfo.mipLevels > 1)
+			imageInfo.usage |= vk::ImageUsageFlagBits::eTransferSrc;
 
-		if (textureInfo.m_SamplingEnabled)
+		vk::ImageViewCreateInfo viewInfo = vk::ImageViewCreateInfo();
+		EnsureSupportedFormat(imageInfo.format, viewInfo);
+
+		const vk::ImageAspectFlags imageAspect = VKConverter::GetVulkanImageAspectFlags(textureInfo.m_ImageAspectFlags);
+
+		if (m_LogicalDevice.createImage(&imageInfo, nullptr, &texture.m_VKImage) != vk::Result::eSuccess)
 		{
-			auto samplerIter = m_CachedSamplers.find(textureInfo.m_SamplerSettings);
-			if (samplerIter == m_CachedSamplers.end())
-			{
-				auto samplerCreateInfo = VKConverter::GetVulkanSamplerInfo(textureInfo.m_SamplerSettings);
-
-				vk::Sampler newSampler;
-				if (m_LogicalDevice.createSampler(&samplerCreateInfo, nullptr, &newSampler) != vk::Result::eSuccess)
-				{
-					Debug().LogError("VulkanDevice::CreateTexture: Could not create image sampler.");
-					return NULL;
-				}
-				samplerIter = m_CachedSamplers.emplace(textureInfo.m_SamplerSettings, newSampler).first;
-			}
-			texture.m_VKSampler = samplerIter->second;
+			Debug().LogError("VulkanDevice::CreateTexture: Could not create image.");
+			m_Textures.Erase(handle);
+			return NULL;
 		}
 
-		return handle;
-	}
+		vk::MemoryRequirements memRequirements;
+		m_LogicalDevice.getImageMemoryRequirements(texture.m_VKImage, &memRequirements);
 
-	void VulkanDevice::UpdateTexture(TextureHandle texture, TextureData* pTextureData)
-	{
-		VK_Texture* vkTexture = m_Textures.Find(texture);
-		if (!vkTexture)
+		const uint32_t typeFilter = memRequirements.memoryTypeBits;
+		const vk::MemoryPropertyFlags properties = vk::MemoryPropertyFlagBits::eDeviceLocal;
+		const uint32_t memoryIndex = GetSupportedMemoryIndex(typeFilter, properties);
+
+		vk::MemoryAllocateInfo imageAllocInfo = vk::MemoryAllocateInfo();
+		imageAllocInfo.allocationSize = memRequirements.size;
+		imageAllocInfo.memoryTypeIndex = memoryIndex;
+
+		if (m_LogicalDevice.allocateMemory(&imageAllocInfo, nullptr, &texture.m_VKMemory) != vk::Result::eSuccess)
 		{
-			Debug().LogError("VulkanDevice::UpdateTexture: Invalid texture handle.");
-			return;
+			Debug().LogError("VulkanDevice::CreateTexture: Could not create image.");
+			m_LogicalDevice.destroyImage(texture.m_VKImage, nullptr);
+			m_Textures.Erase(handle);
+			return NULL;
+		}
+		m_LogicalDevice.bindImageMemory(texture.m_VKImage, texture.m_VKMemory, 0);
+
+		/* Copy buffer to image */
+		if (pixels)
+		{
+			/* Transition image layout */
+			TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, imageAspect, imageInfo.mipLevels);
+
+			const vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+			BufferHandle stagingBuffer = CreateBuffer(memRequirements.size, BufferType::BT_TransferRead);
+			VK_Buffer* vkStagingBuffer = m_Buffers.Find(stagingBuffer);
+			AssignBuffer(stagingBuffer, pixels, uint32_t(dataSize));
+			CopyFromBuffer(vkStagingBuffer->m_VKBuffer, texture.m_VKImage, imageAspect, textureInfo.m_Width, textureInfo.m_Height);
+
+			/* Transtion layout again so it can be sampled */
+			if (imageInfo.mipLevels > 1)
+				GenerateMipMaps(texture.m_VKImage, textureInfo.m_Width, textureInfo.m_Height, imageInfo.mipLevels);
+			else
+				TransitionImageLayout(texture.m_VKImage, format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, imageAspect, imageInfo.mipLevels);
+			
+			FreeBuffer(stagingBuffer);
 		}
 
-		ImageHandle oldImage = vkTexture->m_Image;
-		VK_Image* vkOldImage = m_Images.Find(oldImage);
-		ImageData* pImage = pTextureData->GetImageData(&m_pModule->GetEngine()->GetAssetManager());
-		vkTexture->m_Image = GetCachedImage(pImage);
-		VK_Image* vkNewImage = m_Images.Find(vkTexture->m_Image);
+		/* Create texture image view */
+		viewInfo.image = texture.m_VKImage;
+		viewInfo.viewType = VKConverter::GetVulkanImageViewType(textureInfo.m_ImageType);
+		viewInfo.format = format;
+		viewInfo.subresourceRange.aspectMask = imageAspect;
+		viewInfo.subresourceRange.baseMipLevel = 0;
+		viewInfo.subresourceRange.levelCount = imageInfo.mipLevels;
+		viewInfo.subresourceRange.baseArrayLayer = 0;
+		viewInfo.subresourceRange.layerCount = 1;
 
-		if (vkOldImage != vkNewImage)
+		if (m_LogicalDevice.createImageView(&viewInfo, nullptr, &texture.m_VKImageView) != vk::Result::eSuccess)
 		{
-			if (oldImage != m_DefaultImage)
-				--vkOldImage->m_ReferenceCounter;
-			if (vkTexture->m_Image != m_DefaultImage)
-				++vkNewImage->m_ReferenceCounter;
+			Debug().LogError("VulkanDevice::CreateTexture: Could not create image view.");
+			return NULL;
 		}
 
-		const SamplerSettings& samplerSettings = pTextureData->GetSamplerSettings();
-		auto samplerIter = m_CachedSamplers.find(samplerSettings);
-		if (samplerIter == m_CachedSamplers.end())
+		auto samplerIter = m_CachedSamlers.find(textureInfo.m_SamplerSettings);
+		if (samplerIter == m_CachedSamlers.end())
 		{
-			auto samplerCreateInfo = VKConverter::GetVulkanSamplerInfo(samplerSettings);
+			auto samplerCreateInfo = VKConverter::GetVulkanSamplerInfo(textureInfo.m_SamplerSettings);
 
 			vk::Sampler newSampler;
 			if (m_LogicalDevice.createSampler(&samplerCreateInfo, nullptr, &newSampler) != vk::Result::eSuccess)
 			{
-				Debug().LogError("VulkanDevice::UpdateTexture: Could not create image sampler.");
-				return;
+				Debug().LogError("VulkanDevice::CreateTexture: Could not create image sampler.");
+				return NULL;
 			}
-			samplerIter = m_CachedSamplers.emplace(samplerSettings, newSampler).first;
+			samplerIter = m_CachedSamlers.emplace(textureInfo.m_SamplerSettings, newSampler).first;
 		}
-		vkTexture->m_VKSampler = samplerIter->second;
+		texture.m_VKSampler = samplerIter->second;
+
+		std::stringstream str;
+		str << "VulkanDevice: Texture " << handle << " created.";
+		Debug().LogInfo(str.str());
+
+		return handle;
 	}
 
-	void VulkanDevice::ReadTexturePixels(TextureHandle texture, void* dst, size_t offset, size_t size)
+	RenderTextureHandle VulkanDevice::CreateRenderTexture(RenderPassHandle renderPass, const RenderTextureCreateInfo& info)
 	{
-		VK_Texture* vkTexture = m_Textures.Find(texture);
-		if (!vkTexture)
-		{
-			Debug().LogError("VulkanDevice::ReadTexturePixels: Invalid texture handle.");
-			return;
-		}
-		VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-
-		if (!vkImage->m_CPUVisible)
-		{
-			Debug().LogError("VulkanDevice::ReadTexturePixels: Texture image is not CPU visible.");
-			return;
-		}
-
-		void* pMappedMemory = m_LogicalDevice.mapMemory(vkImage->m_VKMemory, offset, size);
-		std::memcpy(dst, pMappedMemory, size);
-		m_LogicalDevice.unmapMemory(vkImage->m_VKMemory);
-	}
-
-	RenderTextureHandle VulkanDevice::CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateRenderTexture" };
 		if (info.Width == 0 || info.Height == 0)
 		{
 			Debug().LogError("VulkanDevice::CreateRenderTexture: Invalid RenderTexture size.");
@@ -1798,117 +981,91 @@ namespace Glory
 		RenderTextureHandle handle;
 		VK_RenderTexture& renderTexture = m_RenderTextures.Emplace(handle, VK_RenderTexture());
 		renderTexture.m_RenderPass = renderPass;
+		renderTexture.m_Width = info.Width;
+		renderTexture.m_Height = info.Height;
 		renderTexture.m_HasDepthOrStencil = info.HasDepth || info.HasStencil;
-		renderTexture.m_Info = std::move(info);
-		CreateRenderTexture(vkRenderPass->m_VKRenderPass, renderTexture);
+
+		const size_t numAttachments = info.Attachments.size() + (renderTexture.m_HasDepthOrStencil ? 1 : 0);
+		renderTexture.m_AttachmentNames.resize(numAttachments);
+		renderTexture.m_Textures.resize(numAttachments);
+
+		SamplerSettings sampler;
+		sampler.MipmapMode = Filter::F_None;
+		sampler.MinFilter = Filter::F_Nearest;
+		sampler.MagFilter = Filter::F_Nearest;
+
+		size_t textureCounter = 0;
+		for (size_t i = 0; i < info.Attachments.size(); ++i)
+		{
+			Attachment attachment = info.Attachments[i];
+			renderTexture.m_Textures[i] = CreateTexture({ info.Width, info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, 0, 0, attachment.ImageAspect, sampler });
+			renderTexture.m_AttachmentNames[i] = attachment.Name;
+			++textureCounter;
+		}
+
+		size_t depthStencilIndex = 0;
+
+		if (info.HasDepth && info.HasStencil)
+		{
+			depthStencilIndex = textureCounter;
+			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32SfloatS8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
+			renderTexture.m_AttachmentNames[depthStencilIndex] = "DepthStencil";
+			++textureCounter;
+		}
+		else if (info.HasDepth)
+		{
+			depthStencilIndex = textureCounter;
+			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32Sfloat, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Depth, sampler });
+			renderTexture.m_AttachmentNames[depthStencilIndex] = "Depth";
+			++textureCounter;
+		}
+		else if (info.HasStencil)
+		{
+			depthStencilIndex = textureCounter;
+			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ info.Width, info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_R8Uint, ImageType::IT_2D, DataType::DT_UInt, 0, 0, ImageAspect::IA_Stencil, sampler });
+			renderTexture.m_AttachmentNames[depthStencilIndex] = "Stencil";
+			++textureCounter;
+		}
+
+		std::vector<vk::ImageView> attachments(renderTexture.m_Textures.size());
+		for (size_t i = 0; i < renderTexture.m_Textures.size(); ++i)
+		{
+			TextureHandle textureHandle = renderTexture.m_Textures[i];
+			VK_Texture* texture = m_Textures.Find(textureHandle);
+			attachments[i] = texture->m_VKImageView;
+		}
+
+		if (info.HasDepth || info.HasStencil)
+		{
+			VK_Texture* texture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
+			attachments[depthStencilIndex] = texture->m_VKImageView;
+		}
+
+		vk::FramebufferCreateInfo frameBufferCreateInfo = vk::FramebufferCreateInfo()
+			.setRenderPass(vkRenderPass->m_VKRenderPass)
+			.setAttachmentCount(attachments.size())
+			.setPAttachments(attachments.data())
+			.setWidth(info.Width)
+			.setHeight(info.Height)
+			.setLayers(1);
+
+		renderTexture.m_VKFramebuffer = m_LogicalDevice.createFramebuffer(frameBufferCreateInfo);
+		if (renderTexture.m_VKFramebuffer == nullptr)
+		{
+			Debug().LogError("VulkanDevice::CreateRenderTexture: There was an error when trying to create a frame buffer.");
+			return NULL;
+		}
+
+		std::stringstream str;
+		str << "VulkanDevice: RenderTexture " << handle << " created with " << renderTexture.m_Textures.size() << " attachments.";
+		Debug().LogInfo(str.str());
+
 		return handle;
 	}
 
-	TextureHandle VulkanDevice::GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index)
+	RenderPassHandle VulkanDevice::CreateRenderPass(const RenderPassInfo& info)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::GetRenderTextureAttachment" };
-		VK_RenderTexture* vkRenderTexture = m_RenderTextures.Find(renderTexture);
-		if (!vkRenderTexture)
-		{
-			Debug().LogError("VulkanDevice::GetRenderTextureAttatchment: Invalid render texture handle");
-			return NULL;
-		}
-
-		if (index >= vkRenderTexture->m_Textures.size())
-		{
-			Debug().LogError("VulkanDevice::GetRenderTextureAttatchment: Invalid attachment index");
-			return NULL;
-		}
-		return vkRenderTexture->m_Textures[index];
-	}
-
-	void VulkanDevice::ResizeRenderTexture(RenderTextureHandle renderTexture, uint32_t width, uint32_t height)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::ResizeRenderTexture" };
-		VK_RenderTexture* vkRenderTexture = m_RenderTextures.Find(renderTexture);
-		if (!vkRenderTexture)
-		{
-			Debug().LogError("VulkanDevice::ResizeRenderTexture: Invalid render texture handle");
-			return;
-		}
-
-		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(vkRenderTexture->m_RenderPass);
-		if (!vkRenderPass)
-		{
-			Debug().LogError("VulkanDevice::ResizeRenderTexture: Invalid render pass handle");
-			return;
-		}
-
-		vkRenderTexture->m_Info.Width = width;
-		vkRenderTexture->m_Info.Height = height;
-
-		for (size_t i = 0; i < vkRenderTexture->m_Textures.size(); ++i)
-		{
-			FreeTexture(vkRenderTexture->m_Textures[i]);
-		}
-		vkRenderTexture->m_Textures.clear();
-		vkRenderTexture->m_AttachmentNames.clear();
-		m_LogicalDevice.destroyFramebuffer(vkRenderTexture->m_VKFramebuffer);
-
-		for (size_t i = 0; i < vkRenderTexture->m_Info.Attachments.size(); ++i)
-			vkRenderTexture->m_Info.Attachments[i].Texture = NULL;
-		vkRenderTexture->m_Info.m_DepthStencilTexture = NULL;
-
-		CreateRenderTexture(vkRenderPass->m_VKRenderPass, *vkRenderTexture);
-	}
-
-	vk::AttachmentLoadOp GetLoadOp(RenderPassLoadOp loadOp)
-	{
-		switch (loadOp)
-		{
-		case Glory::OP_DontCare:
-			return vk::AttachmentLoadOp::eDontCare;
-		case Glory::OP_Clear:
-			return vk::AttachmentLoadOp::eClear;
-		case Glory::OP_Load:
-			return vk::AttachmentLoadOp::eLoad;
-		default:
-			break;
-		}
-	}
-
-	vk::ImageLayout GetInitialLayout(RenderPassPosition passPosition, VK_Image* image, VK_RenderTexture* renderTexture, vk::ImageLayout defaultLayout)
-	{
-
-		switch (passPosition)
-		{
-		case Glory::RP_Start:
-			return image ? image->m_VKInitialLayout : vk::ImageLayout::eUndefined;
-		case Glory::RP_Middle:
-		case Glory::RP_Final:
-			return renderTexture ? defaultLayout : vk::ImageLayout::eUndefined;
-		default:
-			return vk::ImageLayout::eUndefined;
-		}
-	}
-
-	vk::ImageLayout GetFinalLayout(RenderPassPosition passPosition, VK_Image* image, bool samplingEnabled, vk::ImageLayout defaultLayout)
-	{
-		switch (passPosition)
-		{
-		case Glory::RP_Start:
-		case Glory::RP_Middle:
-			return defaultLayout;
-		case Glory::RP_Final:
-			return image ? image->m_VKFinalLayout :
-				(samplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal : defaultLayout);
-		default:
-			break;
-		}
-	}
-
-	RenderPassHandle VulkanDevice::CreateRenderPass(RenderPassInfo&& info)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateRenderPass" };
-
-		VK_RenderTexture* renderTexture = m_RenderTextures.Find(info.RenderTexture);
-		const RenderTextureCreateInfo& renderTextureInfo = renderTexture ? renderTexture->m_Info : info.RenderTextureInfo;
-		if (renderTextureInfo.Width == 0 || renderTextureInfo.Height == 0)
+		if (info.RenderTextureInfo.Width == 0 || info.RenderTextureInfo.Height == 0)
 		{
 			Debug().LogError("VulkanDevice::CreateRenderPass: Invalid RenderTexture size.");
 			return NULL;
@@ -1916,123 +1073,90 @@ namespace Glory
 
 		RenderPassHandle handle;
 		VK_RenderPass& renderPass = m_RenderPasses.Emplace(handle, VK_RenderPass());
-		memcpy(&renderPass.m_ClearColor, (const void*)&info.m_ClearColor, sizeof(float)*4);
-		renderPass.m_DepthStencilClear = vk::ClearDepthStencilValue(info.m_DepthClear, info.m_StencilClear);
 
 		std::vector<vk::AttachmentDescription> attachments;
 		std::vector<vk::AttachmentReference> attachmentColorRefs;
 		vk::AttachmentReference attachmentDepthStencilRef;
-		const size_t attachmentCount = renderTextureInfo.Attachments.size();
+		const size_t attachmentCount = info.RenderTextureInfo.Attachments.size();
 		attachments.resize(attachmentCount + (
-			renderTextureInfo.HasDepth || renderTextureInfo.HasStencil ? 1 : 0));
+			info.RenderTextureInfo.HasDepth || info.RenderTextureInfo.HasStencil ? 1 : 0));
 		attachmentColorRefs.resize(attachmentCount);
-
-		const vk::AttachmentLoadOp loadOp = GetLoadOp(info.m_LoadOp);
-
 		for (size_t i = 0; i < attachmentCount; ++i)
 		{
-			const Attachment& attachment = renderTextureInfo.Attachments[i];
+			const Attachment& attachment = info.RenderTextureInfo.Attachments[i];
 
-			VK_Texture* texture = m_Textures.Find(attachment.Texture);
-			VK_Image* image = texture ? m_Images.Find(texture->m_Image) : NULL;
-			const vk::Format format = image && image->m_VKFormat != vk::Format::eUndefined ? image->m_VKFormat :
-				VKConverter::GetVulkanFormat(attachment.InternalFormat);
-			const vk::ImageLayout initialLayout = GetInitialLayout(info.m_Position, image, renderTexture,
-				attachment.m_SamplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eColorAttachmentOptimal);
-			const vk::ImageLayout finalLayout = GetFinalLayout(info.m_Position, image, attachment.m_SamplingEnabled,
-				attachment.m_SamplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eColorAttachmentOptimal);
+			const vk::Format format = VKConverter::GetVulkanFormat(attachment.InternalFormat);
 
 			// Create render pass
 			attachments[i] = vk::AttachmentDescription()
 				.setFormat(format)
 				.setSamples(vk::SampleCountFlagBits::e1)
-				.setLoadOp(loadOp)
+				.setLoadOp(vk::AttachmentLoadOp::eClear)
 				.setStoreOp(vk::AttachmentStoreOp::eStore)
 				.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
 				.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-				.setInitialLayout(initialLayout)
-				.setFinalLayout(finalLayout);
+				.setInitialLayout(vk::ImageLayout::eUndefined)
+				.setFinalLayout(vk::ImageLayout::eColorAttachmentOptimal);
 
 			attachmentColorRefs[i] = vk::AttachmentReference()
 				.setAttachment(i)
 				.setLayout(vk::ImageLayout::eColorAttachmentOptimal);
 		}
 
-		if (renderTextureInfo.HasDepth && renderTextureInfo.HasStencil)
+		if (info.RenderTextureInfo.HasDepth && info.RenderTextureInfo.HasStencil)
 		{
-			VK_Texture* texture = m_Textures.Find(renderTextureInfo.m_DepthStencilTexture);
-			VK_Image* image = texture ? m_Images.Find(texture->m_Image) : NULL;
-			const vk::ImageLayout initialLayout = GetInitialLayout(info.m_Position, image, renderTexture,
-				renderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthStencilAttachmentOptimal);
-			const vk::ImageLayout finalLayout = GetFinalLayout(info.m_Position, image, renderTextureInfo.EnableDepthStencilSampling,
-				renderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthStencilAttachmentOptimal);
-
 			attachments[attachmentCount] = vk::AttachmentDescription()
 				.setFormat(vk::Format::eD32SfloatS8Uint)
 				.setSamples(vk::SampleCountFlagBits::e1)
-				.setLoadOp(loadOp)
-				.setStoreOp(vk::AttachmentStoreOp::eStore)
-				.setStencilLoadOp(loadOp)
-				.setStencilStoreOp(vk::AttachmentStoreOp::eStore)
-				.setInitialLayout(initialLayout)
-				.setFinalLayout(finalLayout);
+				.setLoadOp(vk::AttachmentLoadOp::eClear)
+				.setStoreOp(vk::AttachmentStoreOp::eDontCare)
+				.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+				.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+				.setInitialLayout(vk::ImageLayout::eUndefined)
+				.setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
 			attachmentDepthStencilRef = vk::AttachmentReference()
 				.setAttachment(attachmentCount)
 				.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
 		}
-		else if (renderTextureInfo.HasDepth)
+		else if (info.RenderTextureInfo.HasDepth)
 		{
-			VK_Texture* texture = m_Textures.Find(renderTextureInfo.m_DepthStencilTexture);
-			VK_Image* image = texture ? m_Images.Find(texture->m_Image) : NULL;
-			const vk::ImageLayout initialLayout = GetInitialLayout(info.m_Position, image, renderTexture,
-				renderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthAttachmentOptimal);
-			const vk::ImageLayout finalLayout = GetFinalLayout(info.m_Position, image, renderTextureInfo.EnableDepthStencilSampling,
-				renderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthAttachmentOptimal);
-
 			attachments[attachmentCount] = vk::AttachmentDescription()
 				.setFormat(vk::Format::eD32Sfloat)
 				.setSamples(vk::SampleCountFlagBits::e1)
-				.setLoadOp(loadOp)
-				.setStoreOp(vk::AttachmentStoreOp::eStore)
-				.setStencilLoadOp(loadOp)
-				.setStencilStoreOp(vk::AttachmentStoreOp::eStore)
-				.setInitialLayout(initialLayout)
-				.setFinalLayout(finalLayout);
+				.setLoadOp(vk::AttachmentLoadOp::eClear)
+				.setStoreOp(vk::AttachmentStoreOp::eDontCare)
+				.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+				.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+				.setInitialLayout(vk::ImageLayout::eUndefined)
+				.setFinalLayout(vk::ImageLayout::eDepthAttachmentOptimal);
 
 			attachmentDepthStencilRef = vk::AttachmentReference()
 				.setAttachment(attachmentCount)
 				.setLayout(vk::ImageLayout::eDepthAttachmentOptimal);
 		}
-		else if (renderTextureInfo.HasStencil)
+		else if (info.RenderTextureInfo.HasStencil)
 		{
-			VK_Texture* texture = m_Textures.Find(renderTextureInfo.m_DepthStencilTexture);
-			VK_Image* image = texture ? m_Images.Find(texture->m_Image) : NULL;
-			const vk::ImageLayout initialLayout = GetInitialLayout(info.m_Position, image, renderTexture,
-				renderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eStencilAttachmentOptimal);
-			const vk::ImageLayout finalLayout = GetFinalLayout(info.m_Position, image, renderTextureInfo.EnableDepthStencilSampling,
-				renderTextureInfo.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eStencilAttachmentOptimal);
-
 			attachments[attachmentCount] = vk::AttachmentDescription()
-				.setFormat(vk::Format::eD16UnormS8Uint)
+				.setFormat(vk::Format::eS8Uint)
 				.setSamples(vk::SampleCountFlagBits::e1)
-				.setLoadOp(loadOp)
-				.setStoreOp(vk::AttachmentStoreOp::eStore)
-				.setStencilLoadOp(loadOp)
-				.setStencilStoreOp(vk::AttachmentStoreOp::eStore)
-				.setInitialLayout(initialLayout)
-				.setFinalLayout(finalLayout);
+				.setLoadOp(vk::AttachmentLoadOp::eClear)
+				.setStoreOp(vk::AttachmentStoreOp::eDontCare)
+				.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+				.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+				.setInitialLayout(vk::ImageLayout::eUndefined)
+				.setFinalLayout(vk::ImageLayout::eStencilAttachmentOptimal);
 
 			attachmentDepthStencilRef = vk::AttachmentReference()
 				.setAttachment(attachmentCount)
-				.setLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+				.setLayout(vk::ImageLayout::eStencilAttachmentOptimal);
 		}
 
 		vk::SubpassDescription subPass = vk::SubpassDescription()
 			.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
 			.setColorAttachmentCount(static_cast<uint32_t>(attachmentColorRefs.size()))
 			.setPColorAttachments(attachmentColorRefs.empty() ? nullptr : attachmentColorRefs.data());
-		if (renderTextureInfo.HasDepth || renderTextureInfo.HasStencil)
+		if (info.RenderTextureInfo.HasDepth || info.RenderTextureInfo.HasStencil)
 			subPass.setPDepthStencilAttachment(&attachmentDepthStencilRef);
 
 		vk::SubpassDependency dependancy = vk::SubpassDependency()
@@ -2059,47 +1183,24 @@ namespace Glory
 			return NULL;
 		}
 
-		renderPass.m_RenderTexture = renderTexture ? info.RenderTexture : (info.m_CreateRenderTexture ?
-			CreateRenderTexture(handle, std::move(info.RenderTextureInfo)) : nullptr);
+		renderPass.m_RenderTexture = CreateRenderTexture(handle, info.RenderTextureInfo);
 
-		if (info.m_CreateRenderTexture && !renderPass.m_RenderTexture)
+		if (!renderPass.m_RenderTexture)
 		{
 			m_RenderPasses.Erase(handle);
 			Debug().LogError("VulkanDevice::CreateRenderPass: Failed to create RenderTexture for RenderPass.");
 			return NULL;
 		}
 
+		std::stringstream str;
+		str << "VulkanDevice: RenderPass " << handle << " created.";
+		Debug().LogInfo(str.str());
+
 		return handle;
-	}
-
-	RenderTextureHandle VulkanDevice::GetRenderPassRenderTexture(RenderPassHandle renderPass)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::GetRenderPassRenderTexture" };
-		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(renderPass);
-		if (!vkRenderPass)
-		{
-			Debug().LogError("VulkanDevice::GetRenderPassRenderTexture: Invalid render pass handle");
-			return NULL;
-		}
-		return vkRenderPass->m_RenderTexture;
-	}
-
-	void VulkanDevice::SetRenderPassClear(RenderPassHandle renderPass, const glm::vec4& color, float depth, uint8_t stencil)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::SetRenderPassClear" };
-		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(renderPass);
-		if (!vkRenderPass)
-		{
-			Debug().LogError("VulkanDevice::SetRenderPassClear: Invalid render pass handle");
-			return;
-		}
-		memcpy(&vkRenderPass->m_ClearColor, (const void*)&color, sizeof(float)*4);
-		vkRenderPass->m_DepthStencilClear = vk::ClearDepthStencilValue(depth, stencil);
 	}
 
 	ShaderHandle VulkanDevice::CreateShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateShader" };
 		ShaderHandle handle;
 		VK_Shader& shader = m_Shaders.Emplace(handle, VK_Shader());
 
@@ -2110,15 +1211,18 @@ namespace Glory
 		shader.m_VKStage = VKConverter::GetShaderStageFlag(shaderType);
 		shader.m_VKModule = m_LogicalDevice.createShaderModule(shaderModuleCreateInfo, nullptr);
 
+		std::stringstream str;
+		str << "VulkanDevice: Shader " << handle << " created.";
+		Debug().LogInfo(str.str());
+
 		return handle;
 	}
 
 	PipelineHandle VulkanDevice::CreatePipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
-		std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride,
-		const std::vector<AttributeType>& attributeTypes)
+		std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts, size_t stride, const std::vector<AttributeType>& attributeTypes)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreatePipeline" };
 		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
+		std::vector<vk::PushConstantRange> pushConstants;
 
 		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(renderPass);
 		if (!vkRenderPass)
@@ -2135,8 +1239,6 @@ namespace Glory
 		}
 
 		std::vector<vk::DescriptorSetLayout> vkDescriptorSetLayouts(descriptorSetLayouts.size());
-		std::vector<vk::PushConstantRange> vkPushConstants;
-		size_t numLayouts = 0;
 		for (size_t i = 0; i < descriptorSetLayouts.size(); ++i)
 		{
 			VK_DescriptorSetLayout* vkSetLayout = m_DescriptorSetLayouts.Find(descriptorSetLayouts[i]);
@@ -2145,54 +1247,16 @@ namespace Glory
 				Debug().LogError("VulkanDevice::CreatePipeline: Invalid descriptor set layout handle.");
 				return NULL;
 			}
+			vkDescriptorSetLayouts[i] = vkSetLayout->m_VKLayout;
 
 			if (vkSetLayout->m_PushConstantRange.size)
-				vkPushConstants.push_back(vkSetLayout->m_PushConstantRange);
-
-			if (!vkSetLayout->m_VKLayout) continue;
-
-			vkDescriptorSetLayouts[numLayouts] = vkSetLayout->m_VKLayout;
-			++numLayouts;
+				pushConstants.push_back(vkSetLayout->m_PushConstantRange);
 		}
-
-		while (vkDescriptorSetLayouts.size() > numLayouts)
-			vkDescriptorSetLayouts.erase(vkDescriptorSetLayouts.begin() + numLayouts);
 
 		PipelineHandle handle;
 		VK_Pipeline& pipeline = m_Pipelines.Emplace(handle, VK_Pipeline());
 		pipeline.m_RenderPass = renderPass;
 		pipeline.m_VKBindPoint = vk::PipelineBindPoint::eGraphics;
-		pipeline.m_VKCullMode = GetVKCullMode(pPipeline->GetCullFace());
-		pipeline.m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
-		pipeline.m_VKDepthCompareOp = GetVulkanCompareOp(pPipeline->GetDepthCompareOp());
-		pipeline.m_SettingToggles = pPipeline->SettingsTogglesBitSet();
-		pipeline.m_VKDescriptorSetLayouts = std::move(vkDescriptorSetLayouts);
-		pipeline.m_VKPushConstantRanges = std::move(vkPushConstants);
-		pipeline.m_VKStencilCompareOp = GetVulkanCompareOp(pPipeline->GetStencilCompareOp());
-		pipeline.m_VKStencilFailOp = GetVulkanStencilOp(pPipeline->GetStencilFailOp());
-		pipeline.m_VKStencilDepthFailOp = GetVulkanStencilOp(pPipeline->GetStencilDepthFailOp());
-		pipeline.m_VKStencilPassOp = GetVulkanStencilOp(pPipeline->GetStencilPassOp());
-
-		const size_t numAttachments = vkRenderTexture->m_Textures.size() - (vkRenderTexture->m_HasDepthOrStencil ? 1 : 0);
-		vk::ColorBlendEquationEXT blendEquation;
-		blendEquation.srcColorBlendFactor = vk::BlendFactor(pPipeline->SrcColorBlendFactor());
-		blendEquation.dstColorBlendFactor = vk::BlendFactor(pPipeline->DstColorBlendFactor());
-		blendEquation.colorBlendOp = vk::BlendOp(pPipeline->ColorBlendOp());
-		blendEquation.srcAlphaBlendFactor = vk::BlendFactor(pPipeline->SrcAlphaBlendFactor());
-		blendEquation.dstAlphaBlendFactor = vk::BlendFactor(pPipeline->DstAlphaBlendFactor());
-		blendEquation.alphaBlendOp = vk::BlendOp(pPipeline->AlphaBlendOp());
-		pipeline.m_VKBlendEnabled.resize(numAttachments, vk::Bool32(pPipeline->BlendEnabled()));
-		for (size_t i = 0; i < numAttachments; ++i)
-			pipeline.m_VKBlendEnabled[i] &= vkRenderTexture->m_BlendingSupportedBits.IsSet(i);
-
-		pipeline.m_VKBlendEquations.resize(numAttachments, blendEquation);
-		pipeline.m_BlendConstants = pPipeline->BlendConstants();
-
-		bool r, g, b, a;
-		pPipeline->ColorWriteMask(r, g, b, a);
-		const uint8_t colorMaskBits = (*pipeline.m_SettingToggles.Data() >> PipelineData::ColorWriteRed) & 0x0F;
-
-		pipeline.m_VKColorWriteMasks.resize(numAttachments, vk::ColorComponentFlags(colorMaskBits));
 
 		const uint32_t binding = 0;
 
@@ -2211,108 +1275,163 @@ namespace Glory
 			GetNextOffset(attributeTypes[i], currentOffset);
 		}
 
-		if (!CreatePipeline(pipeline, pPipeline))
+		pipeline.m_Shaders.resize(pPipeline->ShaderCount());
+		for (size_t i = 0; i < pipeline.m_Shaders.size(); ++i)
+			pipeline.m_Shaders[i] = CreateShader(pPipeline->Shader(pipelines, i), pPipeline->GetShaderType(pipelines, i), "main");
+
+		std::vector<vk::PipelineShaderStageCreateInfo> shaderStages(pPipeline->ShaderCount());
+		for (size_t i = 0; i < shaderStages.size(); ++i)
 		{
-			Debug().LogError("VulkanDevice::CreatePipeline: Failed to create pipeline.");
+			VK_Shader* shader = m_Shaders.Find(pipeline.m_Shaders[i]);
+			shaderStages[i] = vk::PipelineShaderStageCreateInfo()
+				.setStage(shader->m_VKStage)
+				.setModule(shader->m_VKModule)
+				.setPName(shader->m_Function.data());
+		}
+
+		// Vertex input state
+		vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo()
+			.setVertexBindingDescriptionCount(1)
+			.setPVertexBindingDescriptions(&pipeline.m_VertexDescription)
+			.setVertexAttributeDescriptionCount(static_cast<uint32_t>(pipeline.m_AttributeDescriptions.size()))
+			.setPVertexAttributeDescriptions(pipeline.m_AttributeDescriptions.data());
+
+		// Input assembly
+		vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo()
+			.setTopology(vk::PrimitiveTopology::eTriangleList)
+			.setPrimitiveRestartEnable(VK_FALSE);
+
+		// Viewport and scissor
+		vk::Viewport viewport = vk::Viewport()
+			.setX(0.0f)
+			.setY(0.0f)
+			.setWidth((float)vkRenderTexture->m_Width)
+			.setHeight((float)vkRenderTexture->m_Height)
+			.setMinDepth(0.0f)
+			.setMaxDepth(1.0f);
+
+		vk::Rect2D scissor = vk::Rect2D()
+			.setOffset({ 0,0 })
+			.setExtent({ vkRenderTexture->m_Width, vkRenderTexture->m_Height });
+
+		vk::PipelineViewportStateCreateInfo viewportStateCreateInfo = vk::PipelineViewportStateCreateInfo()
+			.setViewportCount(1)
+			.setPViewports(&viewport)
+			.setScissorCount(1)
+			.setPScissors(&scissor);
+
+		// Rasterizer state
+		vk::PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = vk::PipelineRasterizationStateCreateInfo()
+			.setDepthClampEnable(VK_FALSE) // Requires a GPU feature
+			.setRasterizerDiscardEnable(VK_FALSE)
+			.setPolygonMode(vk::PolygonMode::eFill)
+			.setLineWidth(1.0f)
+			.setCullMode(vk::CullModeFlagBits::eBack)
+			.setFrontFace(vk::FrontFace::eClockwise)
+			.setDepthBiasEnable(VK_FALSE)
+			.setDepthBiasConstantFactor(0.0f)
+			.setDepthBiasClamp(0.0f)
+			.setDepthBiasSlopeFactor(0.0f);
+
+		// Multisampling state
+		vk::PipelineMultisampleStateCreateInfo multisampleStateCreateInfo = vk::PipelineMultisampleStateCreateInfo()
+			.setSampleShadingEnable(VK_FALSE)
+			.setRasterizationSamples(vk::SampleCountFlagBits::e1)
+			.setMinSampleShading(1.0f)
+			.setPSampleMask(nullptr)
+			.setAlphaToCoverageEnable(VK_FALSE)
+			.setAlphaToOneEnable(VK_FALSE);
+
+		// Blend state
+		const size_t attachmentCount = vkRenderTexture->m_Textures.size() - (vkRenderTexture->m_HasDepthOrStencil ? 1 : 0);
+		std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates(attachmentCount);
+		for (size_t i = 0; i < attachmentCount; ++i)
+		{
+			colorBlendAttachmentStates[i] = vk::PipelineColorBlendAttachmentState()
+				.setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA)
+				.setBlendEnable(VK_FALSE)
+				.setSrcColorBlendFactor(vk::BlendFactor::eOne)
+				.setDstColorBlendFactor(vk::BlendFactor::eZero)
+				.setColorBlendOp(vk::BlendOp::eAdd)
+				.setSrcAlphaBlendFactor(vk::BlendFactor::eOne)
+				.setDstAlphaBlendFactor(vk::BlendFactor::eZero)
+				.setAlphaBlendOp(vk::BlendOp::eAdd);
+		}
+
+		vk::PipelineColorBlendStateCreateInfo colorBlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo()
+			.setLogicOpEnable(VK_FALSE)
+			.setLogicOp(vk::LogicOp::eCopy)
+			.setAttachmentCount(colorBlendAttachmentStates.size())
+			.setPAttachments(colorBlendAttachmentStates.data())
+			.setBlendConstants({ 0.0f, 0.0f, 0.0f, 0.0f });
+
+		vk::PipelineDepthStencilStateCreateInfo depthStencil = vk::PipelineDepthStencilStateCreateInfo();
+		depthStencil.depthTestEnable = VK_TRUE;
+		depthStencil.depthWriteEnable = VK_TRUE;
+		depthStencil.depthCompareOp = vk::CompareOp::eLess;
+		depthStencil.depthBoundsTestEnable = VK_FALSE;
+		depthStencil.minDepthBounds = 0.0f; // Optional
+		depthStencil.maxDepthBounds = 1.0f; // Optional
+		depthStencil.stencilTestEnable = VK_FALSE;
+		//depthStencil.front = {}; // Optional
+		//depthStencil.back = {}; // Optional
+
+		// Dynamic state
+		//vk::DynamicState dynamicStates[] = {
+		//    vk::DynamicState::eViewport,
+		//    vk::DynamicState::eLineWidth
+		//};
+		//
+		//vk::PipelineDynamicStateCreateInfo dynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
+		//    .setDynamicStateCount(2)
+		//    .setPDynamicStates(dynamicStates);
+
+		vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
+			.setSetLayoutCount(static_cast<uint32_t>(vkDescriptorSetLayouts.size()))
+			.setPSetLayouts(vkDescriptorSetLayouts.data())
+			.setPushConstantRangeCount(static_cast<uint32_t>(pushConstants.size()))
+			.setPPushConstantRanges(pushConstants.data());
+
+		pipeline.m_VKLayout = m_LogicalDevice.createPipelineLayout(pipelineLayoutCreateInfo);
+		if (pipeline.m_VKLayout == nullptr)
+		{
+			Debug().LogError("VulkanDevice::CreatePipeline: Failed to create pipeline layout.");
 			return NULL;
 		}
+
+		// Create the pipeline
+		vk::GraphicsPipelineCreateInfo pipelineCreateInfo = vk::GraphicsPipelineCreateInfo()
+			.setStageCount(static_cast<uint32_t>(shaderStages.size()))
+			.setPStages(shaderStages.data())
+			.setPVertexInputState(&vertexInputStateCreateInfo)
+			.setPInputAssemblyState(&inputAssemblyStateCreateInfo)
+			.setPViewportState(&viewportStateCreateInfo)
+			.setPRasterizationState(&rasterizationStateCreateInfo)
+			.setPMultisampleState(&multisampleStateCreateInfo)
+			.setPDepthStencilState(&depthStencil)
+			.setPColorBlendState(&colorBlendStateCreateInfo)
+			.setPDynamicState(nullptr)
+			.setLayout(pipeline.m_VKLayout)
+			.setRenderPass(vkRenderPass->m_VKRenderPass)
+			.setSubpass(0)
+			.setBasePipelineHandle(VK_NULL_HANDLE)
+			.setBasePipelineIndex(-1);
+
+		if (m_LogicalDevice.createGraphicsPipelines(VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &pipeline.m_VKPipeline) != vk::Result::eSuccess)
+		{
+			Debug().LogError("VulkanDevice::CreatePipeline: Failed to create graphics pipeline.");
+			return NULL;
+		}
+
+		std::stringstream str;
+		str << "VulkanDevice: Pipeline " << handle << " created.";
+		Debug().LogInfo(str.str());
 
 		return handle;
 	}
 
-	void VulkanDevice::UpdatePipelineSettings(PipelineHandle pipeline, PipelineData* pPipeline)
-	{
-		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
-		if (!vkPipeline)
-		{
-			Debug().LogError("VulkanDevice::UpdatePipelineSettings: Invalid pipeline handle.");
-			return;
-		}
-
-		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(vkPipeline->m_RenderPass);
-		VK_RenderTexture* vkRenderTexture = m_RenderTextures.Find(vkRenderPass->m_RenderTexture);
-
-		vkPipeline->m_VKCullMode = GetVKCullMode(pPipeline->GetCullFace());
-		vkPipeline->m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
-		vkPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
-		vkPipeline->m_VKDepthCompareOp = GetVulkanCompareOp(pPipeline->GetDepthCompareOp());
-		vkPipeline->m_VKStencilCompareOp = GetVulkanCompareOp(pPipeline->GetStencilCompareOp());
-		vkPipeline->m_VKStencilFailOp = GetVulkanStencilOp(pPipeline->GetStencilFailOp());
-		vkPipeline->m_VKStencilDepthFailOp = GetVulkanStencilOp(pPipeline->GetStencilDepthFailOp());
-		vkPipeline->m_VKStencilPassOp = GetVulkanStencilOp(pPipeline->GetStencilPassOp());
-
-		vk::ColorBlendEquationEXT blendEquation;
-		blendEquation.srcColorBlendFactor = vk::BlendFactor(pPipeline->SrcColorBlendFactor());
-		blendEquation.dstColorBlendFactor = vk::BlendFactor(pPipeline->DstColorBlendFactor());
-		blendEquation.colorBlendOp = vk::BlendOp(pPipeline->ColorBlendOp());
-		blendEquation.srcAlphaBlendFactor = vk::BlendFactor(pPipeline->SrcAlphaBlendFactor());
-		blendEquation.dstAlphaBlendFactor = vk::BlendFactor(pPipeline->DstAlphaBlendFactor());
-		blendEquation.alphaBlendOp = vk::BlendOp(pPipeline->AlphaBlendOp());
-		vkPipeline->m_VKBlendEnabled.assign(vkPipeline->m_VKBlendEnabled.size(), vk::Bool32(pPipeline->BlendEnabled()));
-		for (size_t i = 0; i < vkPipeline->m_VKBlendEnabled.size(); ++i)
-			vkPipeline->m_VKBlendEnabled[i] &= vkRenderTexture->m_BlendingSupportedBits.IsSet(i);
-		vkPipeline->m_VKBlendEquations.assign(vkPipeline->m_VKBlendEquations.size(), blendEquation);
-		vkPipeline->m_BlendConstants = pPipeline->BlendConstants();
-
-		const uint8_t colorMaskBits = (*vkPipeline->m_SettingToggles.Data() >> PipelineData::ColorWriteRed) & 0x0F;
-		vkPipeline->m_VKColorWriteMasks.assign(vkPipeline->m_VKColorWriteMasks.size(), vk::ColorComponentFlags(colorMaskBits));
-	}
-
-	void VulkanDevice::RecreatePipeline(PipelineHandle pipeline, PipelineData* pPipeline)
-	{
-		WaitIdle();
-
-		VK_Pipeline* vkPipeline = m_Pipelines.Find(pipeline);
-		if (!vkPipeline)
-		{
-			Debug().LogError("VulkanDevice::RecreatePipeline: Invalid pipeline handle.");
-			return;
-		}
-
-		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(vkPipeline->m_RenderPass);
-		VK_RenderTexture* vkRenderTexture = m_RenderTextures.Find(vkRenderPass->m_RenderTexture);
-
-		vkPipeline->m_VKCullMode = GetVKCullMode(pPipeline->GetCullFace());
-		vkPipeline->m_VKPrimitiveTopology = GetVKTopology(pPipeline->GetPrimitiveType());
-		vkPipeline->m_SettingToggles = pPipeline->SettingsTogglesBitSet();
-		vkPipeline->m_VKDepthCompareOp = GetVulkanCompareOp(pPipeline->GetDepthCompareOp());
-		vkPipeline->m_VKStencilCompareOp = GetVulkanCompareOp(pPipeline->GetStencilCompareOp());
-		vkPipeline->m_VKStencilFailOp = GetVulkanStencilOp(pPipeline->GetStencilFailOp());
-		vkPipeline->m_VKStencilDepthFailOp = GetVulkanStencilOp(pPipeline->GetStencilDepthFailOp());
-		vkPipeline->m_VKStencilPassOp = GetVulkanStencilOp(pPipeline->GetStencilPassOp());
-
-		vk::ColorBlendEquationEXT blendEquation;
-		blendEquation.srcColorBlendFactor = vk::BlendFactor(pPipeline->SrcColorBlendFactor());
-		blendEquation.dstColorBlendFactor = vk::BlendFactor(pPipeline->DstColorBlendFactor());
-		blendEquation.colorBlendOp = vk::BlendOp(pPipeline->ColorBlendOp());
-		blendEquation.srcAlphaBlendFactor = vk::BlendFactor(pPipeline->SrcAlphaBlendFactor());
-		blendEquation.dstAlphaBlendFactor = vk::BlendFactor(pPipeline->DstAlphaBlendFactor());
-		blendEquation.alphaBlendOp = vk::BlendOp(pPipeline->AlphaBlendOp());
-		vkPipeline->m_VKBlendEnabled.assign(vkPipeline->m_VKBlendEnabled.size(), vk::Bool32(pPipeline->BlendEnabled()));
-		for (size_t i = 0; i < vkPipeline->m_VKBlendEnabled.size(); ++i)
-			vkPipeline->m_VKBlendEnabled[i] &= vkRenderTexture->m_BlendingSupportedBits.IsSet(i);
-		vkPipeline->m_VKBlendEquations.assign(vkPipeline->m_VKBlendEquations.size(), blendEquation);
-		vkPipeline->m_BlendConstants = pPipeline->BlendConstants();
-
-		const uint8_t colorMaskBits = (*vkPipeline->m_SettingToggles.Data() >> PipelineData::ColorWriteRed) & 0x0F;
-		vkPipeline->m_VKColorWriteMasks.assign(vkPipeline->m_VKColorWriteMasks.size(), vk::ColorComponentFlags(colorMaskBits));
-
-		m_LogicalDevice.destroyPipeline(vkPipeline->m_VKPipeline);
-		m_LogicalDevice.destroyPipelineLayout(vkPipeline->m_VKLayout);
-		for (auto& shader : vkPipeline->m_Shaders)
-		{
-			VK_Shader* glShader = m_Shaders.Find(shader);
-			FreeShader(shader);
-		}
-		vkPipeline->m_Shaders.clear();
-
-		if (!CreatePipeline(*vkPipeline, pPipeline))
-			Debug().LogError("OpenGLDevice::RecreatePipeline: Failed to create pipeline.");
-	}
-
 	PipelineHandle VulkanDevice::CreateComputePipeline(PipelineData* pPipeline, std::vector<DescriptorSetLayoutHandle>&& descriptorSetLayouts)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateComputePipeline" };
 		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
 		std::vector<vk::PushConstantRange> pushConstants;
 
@@ -2343,7 +1462,7 @@ namespace Glory
 		pipeline.m_VKBindPoint = vk::PipelineBindPoint::eCompute;
 
 		pipeline.m_Shaders.resize(1);
-		pipeline.m_Shaders[0] = AcquireCachedShader(pPipeline->Shader(pipelines, 0), ShaderType::ST_Compute, "main");
+		pipeline.m_Shaders[0] = CreateShader(pPipeline->Shader(pipelines, 0), ShaderType::ST_Compute, "main");
 
 		VK_Shader* shader = m_Shaders.Find(pipeline.m_Shaders[0]);
 		vk::PipelineShaderStageCreateInfo shaderStage = vk::PipelineShaderStageCreateInfo()
@@ -2375,12 +1494,37 @@ namespace Glory
 			return NULL;
 		}
 
+		std::stringstream str;
+		str << "VulkanDevice: Compute pipeline " << handle << " created.";
+		Debug().LogInfo(str.str());
+
 		return handle;
+	}
+
+	constexpr size_t ShaderTypeFlagsCount = 6;
+	constexpr vk::ShaderStageFlagBits ShaderTypeFlags[ShaderTypeFlagsCount] = {
+		vk::ShaderStageFlagBits::eVertex,
+		vk::ShaderStageFlagBits::eFragment,
+		vk::ShaderStageFlagBits::eGeometry,
+		vk::ShaderStageFlagBits::eTessellationControl,
+		vk::ShaderStageFlagBits::eTessellationEvaluation,
+		vk::ShaderStageFlagBits::eCompute,
+
+	};
+
+	vk::ShaderStageFlags GetShaderStageFlags(const ShaderTypeFlag& shaderTypeFlags)
+	{
+		vk::ShaderStageFlags result = vk::ShaderStageFlagBits(0);
+		for (size_t i = 0; i < ShaderTypeFlagsCount; ++i)
+		{
+			if (!(shaderTypeFlags & ShaderTypeFlag(1 << i))) continue;
+			result |= ShaderTypeFlags[i];
+		}
+		return result;
 	}
 
 	DescriptorSetLayoutHandle VulkanDevice::CreateDescriptorSetLayout(DescriptorSetLayoutInfo&& setLayoutInfo)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateDescriptorSetLayout" };
 		auto iter = m_CachedDescriptorSetLayouts.find(setLayoutInfo);
 		if (iter == m_CachedDescriptorSetLayouts.end())
 		{
@@ -2440,7 +1584,6 @@ namespace Glory
 
 	DescriptorSetHandle VulkanDevice::CreateDescriptorSet(DescriptorSetInfo&& setInfo)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateDescriptorSet" };
 		VK_DescriptorSetLayout* vkDescriptorSetLayout = m_DescriptorSetLayouts.Find(setInfo.m_Layout);
 		if (!vkDescriptorSetLayout)
 		{
@@ -2481,16 +1624,9 @@ namespace Glory
 			const size_t index = setInfo.m_Buffers.size() + i;
 			auto& samplerInfo = setInfo.m_Samplers[i];
 			VK_Texture* vkTexture = m_Textures.Find(setInfo.m_Samplers[i].m_TextureHandle);
-			if (!vkTexture) vkTexture = m_Textures.Find(m_DefaultTexture);
-			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-			if (!vkImage)
-			{
-				vkTexture = m_Textures.Find(m_DefaultTexture);
-				vkImage = m_Images.Find(vkTexture->m_Image);
-			}
 
-			imageInfos[i].imageLayout = vkImage ? vkImage->m_VKFinalLayout : vk::ImageLayout::eUndefined;
-			imageInfos[i].imageView = vkImage ? vkImage->m_VKImageView : nullptr;
+			imageInfos[i].imageLayout = vkTexture ? vkTexture->m_VKLayout : vk::ImageLayout::eUndefined;
+			imageInfos[i].imageView = vkTexture ? vkTexture->m_VKImageView : nullptr;
 			imageInfos[i].sampler = vkTexture ? vkTexture->m_VKSampler : nullptr;
 
 			descriptorWrites[index].dstBinding = vkDescriptorSetLayout->m_BindingIndices[descriptorIndex];
@@ -2505,7 +1641,7 @@ namespace Glory
 		VK_DescriptorSet& set = m_DescriptorSets.Emplace(handle, VK_DescriptorSet());
 		set.m_Layout = setInfo.m_Layout;
 
-		m_DescriptorAllocator.Allocate(&set.m_VKDescriptorSet, &set.m_VKDescriptorPool, vkDescriptorSetLayout->m_VKLayout);
+		m_DescriptorAllocator.Allocate(&set.m_VKDescriptorSet, vkDescriptorSetLayout->m_VKLayout);
 		for (size_t i = 0; i < descriptorWrites.size(); ++i)
 			descriptorWrites[i].dstSet = set.m_VKDescriptorSet;
 		m_LogicalDevice.updateDescriptorSets(descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
@@ -2513,237 +1649,8 @@ namespace Glory
 		return handle;
 	}
 
-	void VulkanDevice::UpdateDescriptorSet(DescriptorSetHandle descriptorSet, const DescriptorSetUpdateInfo& setWriteInfo)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::UpdateDescriptorSet" };
-		VK_DescriptorSet* vkDescriptorSet = m_DescriptorSets.Find(descriptorSet);
-		if (!vkDescriptorSet)
-		{
-			Debug().LogError("VulkanDevice::UpdateDescriptorSet: Invalid descriptor set handle.");
-			return;
-		}
-
-		VK_DescriptorSetLayout* vkDescriptorSetLayout = m_DescriptorSetLayouts.Find(vkDescriptorSet->m_Layout);
-		if (!vkDescriptorSetLayout)
-		{
-			Debug().LogError("VulkanDevice::UpdateDescriptorSet: Invalid descriptor set layout handle.");
-			return;
-		}
-
-		std::vector<vk::WriteDescriptorSet> descriptorWrites(setWriteInfo.m_Buffers.size() + setWriteInfo.m_Samplers.size());
-		std::vector<vk::DescriptorBufferInfo> bufferInfos(setWriteInfo.m_Buffers.size());
-		std::vector<vk::DescriptorImageInfo> imageInfos(setWriteInfo.m_Samplers.size());
-		for (size_t i = 0; i < setWriteInfo.m_Buffers.size(); ++i)
-		{
-			auto& bufferInfo = setWriteInfo.m_Buffers[i];
-			VK_Buffer* vkBuffer = m_Buffers.Find(setWriteInfo.m_Buffers[i].m_BufferHandle);
-			if (!vkBuffer)
-			{
-				Debug().LogError("VulkanDevice::UpdateDescriptorSet: Invalid buffer handle.");
-				return;
-			}
-
-			bufferInfos[i].buffer = vkBuffer->m_VKBuffer;
-			bufferInfos[i].offset = bufferInfo.m_Offset;
-			bufferInfos[i].range = bufferInfo.m_Size;
-
-			descriptorWrites[i].dstBinding = vkDescriptorSetLayout->m_BindingIndices[bufferInfo.m_DescriptorIndex];
-			descriptorWrites[i].dstArrayElement = 0;
-			descriptorWrites[i].descriptorType = vkDescriptorSetLayout->m_DescriptorTypes[bufferInfo.m_DescriptorIndex];
-			descriptorWrites[i].descriptorCount = 1;
-			descriptorWrites[i].pBufferInfo = &bufferInfos[i];
-			descriptorWrites[i].pImageInfo = nullptr;
-			descriptorWrites[i].pTexelBufferView = nullptr;
-		}
-
-		for (size_t i = 0; i < setWriteInfo.m_Samplers.size(); ++i)
-		{
-			const size_t index = setWriteInfo.m_Buffers.size() + i;
-			auto& samplerInfo = setWriteInfo.m_Samplers[i];
-			VK_Texture* vkTexture = m_Textures.Find(setWriteInfo.m_Samplers[i].m_TextureHandle);
-			if (!vkTexture) vkTexture = m_Textures.Find(m_DefaultTexture);
-			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-			if (!vkImage)
-			{
-				vkTexture = m_Textures.Find(m_DefaultTexture);
-				vkImage = m_Images.Find(vkTexture->m_Image);
-			}
-
-			imageInfos[i].imageLayout = vkImage ? vkImage->m_VKFinalLayout : vk::ImageLayout::eUndefined;
-			imageInfos[i].imageView = vkImage ? vkImage->m_VKImageView : nullptr;
-			imageInfos[i].sampler = vkTexture ? vkTexture->m_VKSampler : nullptr;
-
-			descriptorWrites[index].dstBinding = vkDescriptorSetLayout->m_BindingIndices[samplerInfo.m_DescriptorIndex];
-			descriptorWrites[index].dstArrayElement = 0;
-			descriptorWrites[index].descriptorType = vkDescriptorSetLayout->m_DescriptorTypes[samplerInfo.m_DescriptorIndex];
-			descriptorWrites[index].descriptorCount = 1;
-			descriptorWrites[index].pImageInfo = &imageInfos[i];
-		}
-
-		for (size_t i = 0; i < descriptorWrites.size(); ++i)
-			descriptorWrites[i].dstSet = vkDescriptorSet->m_VKDescriptorSet;
-		m_LogicalDevice.updateDescriptorSets(descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
-	}
-
-	std::vector<vk::PresentModeKHR> VSyncPresentModes = { vk::PresentModeKHR::eFifo };
-	std::vector<vk::PresentModeKHR> InfiniteFPSPresentModes = { vk::PresentModeKHR::eMailbox, vk::PresentModeKHR::eImmediate, vk::PresentModeKHR::eFifo };
-
-	uint32_t GetMinImageCountFromPresentMode(vk::PresentModeKHR presentMode)
-	{
-		if (presentMode == vk::PresentModeKHR::eMailbox)
-			return 3u;
-		if (presentMode == vk::PresentModeKHR::eFifo || presentMode == vk::PresentModeKHR::eFifoRelaxed)
-			return 2u;
-		if (presentMode == vk::PresentModeKHR::eImmediate)
-			return 1u;
-		return 1u;
-	}
-
-	SwapchainHandle VulkanDevice::CreateSwapchain(Window* pWindow, bool vsync, uint32_t minImageCount)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateSwapchain" };
-		// Check swapchain support
-		vk::SurfaceCapabilitiesKHR swapchainCapabilities;
-		vk::SurfaceKHR surface;
-		pWindow->GetVulkanSurface(GraphicsModule()->GetCInstance(), &surface);
-		vk::Result vkError = m_VKDevice.getSurfaceCapabilitiesKHR(surface, &swapchainCapabilities);
-		if (vkError != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::CreateSwapchain: Failed to get surface capabilities: Vulkan Error Code: " + std::to_string((uint32_t)vkError));
-			return NULL;
-		}
-
-		std::vector<vk::SurfaceFormatKHR> swapchainFormats = m_VKDevice.getSurfaceFormatsKHR(surface);
-
-		if (swapchainFormats.empty())
-		{
-			Debug().LogError("VulkanDevice::CreateSwapchain: Surface does not support any formats");
-			return NULL;
-		}
-
-		int width, height;
-		pWindow->GetDrawableSize(&width, &height);
-		const glm::uvec2 resolution = {
-			static_cast<uint32_t>(width),
-			static_cast<uint32_t>(height)
-		};
-
-		SwapchainHandle handle;
-		VK_Swapchain& swapchain = m_Swapchains.Emplace(handle, VK_Swapchain());
-		swapchain.m_pWindow = pWindow;
-		swapchain.m_Vsync = vsync;
-		if (!CreateSwapchain(swapchain, swapchainCapabilities, surface, resolution, vsync, minImageCount))
-		{
-			m_Swapchains.Erase(handle);
-			return NULL;
-		}
-
-		std::stringstream str;
-		str << "VulkanDevice: Swap chain " << handle << " created.";
-		Debug().LogInfo(str.str());
-
-		return handle;
-	}
-
-	uint32_t VulkanDevice::GetSwapchainImageCount(SwapchainHandle swapchain)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::GetSwapchainImageCount" };
-		VK_Swapchain* vkSwapchain = m_Swapchains.Find(swapchain);
-		if (!vkSwapchain)
-		{
-			Debug().LogError("VulkanDevice::GetSwapchainImageCount: Invalid swap chain handle.");
-			return 0;
-		}
-		return vkSwapchain->m_Textures.size();
-	}
-
-	TextureHandle VulkanDevice::GetSwapchainImage(SwapchainHandle swapchain, uint32_t imageIndex)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::GetSwapchainImage" };
-		VK_Swapchain* vkSwapchain = m_Swapchains.Find(swapchain);
-		if (!vkSwapchain)
-		{
-			Debug().LogError("VulkanDevice::GetSwapchainImageCount: Invalid swap chain handle.");
-			return 0;
-		}
-		return vkSwapchain->m_Textures[imageIndex];
-	}
-
-	void VulkanDevice::RecreateSwapchain(SwapchainHandle swapchain)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::RecreateSwapchain" };
-		VK_Swapchain* vkSwapchain = m_Swapchains.Find(swapchain);
-		if (!vkSwapchain)
-		{
-			Debug().LogError("VulkanDevice::RecreateSwapchain: Invalid swap chain handle.");
-			return;
-		}
-
-		vk::SurfaceCapabilitiesKHR swapchainCapabilities;
-		vk::SurfaceKHR surface;
-		vkSwapchain->m_pWindow->GetVulkanSurface(GraphicsModule()->GetCInstance(), &surface);
-		vk::Result vkError = m_VKDevice.getSurfaceCapabilitiesKHR(surface, &swapchainCapabilities);
-		if (vkError != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::RecreateSwapchain: Failed to get surface capabilities: Vulkan Error Code: " + std::to_string((uint32_t)vkError));
-			return;
-		}
-
-		std::vector<vk::SurfaceFormatKHR> swapchainFormats = m_VKDevice.getSurfaceFormatsKHR(surface);
-
-		if (swapchainFormats.empty())
-		{
-			Debug().LogError("VulkanDevice::RecreateSwapchain: Surface does not support any formats");
-			return;
-		}
-
-		int width, height;
-		vkSwapchain->m_pWindow->GetDrawableSize(&width, &height);
-		const glm::uvec2 resolution = {
-			static_cast<uint32_t>(width),
-			static_cast<uint32_t>(height)
-		};
-		if (resolution.x == 0 || resolution.y == 0)
-			return;
-
-		m_LogicalDevice.waitIdle();
-		for (size_t i = 0; i < vkSwapchain->m_Textures.size(); ++i)
-		{
-			VK_Texture* vkTexture = m_Textures.Find(vkSwapchain->m_Textures[i]);
-			if (!vkTexture) continue;
-			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-			if (!vkImage) continue;
-			m_LogicalDevice.destroyImageView(vkImage->m_VKImageView);
-		}
-		m_LogicalDevice.destroySwapchainKHR(vkSwapchain->m_VKSwapchain);
-		if (!CreateSwapchain(*vkSwapchain, swapchainCapabilities, surface, resolution, vkSwapchain->m_Vsync, vkSwapchain->m_MinImageCount))
-		{
-			Debug().LogError("VulkanDevice::RecreateSwapchain: Failed to create swapchain!");
-			return;
-		}
-
-		std::stringstream str;
-		str << "VulkanDevice: Swap chain " << swapchain << " was recreated.";
-		Debug().LogInfo(str.str());
-	}
-
-	SemaphoreHandle VulkanDevice::CreateSemaphore()
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateSemaphore" };
-		SemaphoreHandle handle;
-		VK_Semaphore& semaphore = m_Semaphores.Emplace(handle, VK_Semaphore());
-		vk::SemaphoreCreateInfo createInfo;
-		if (m_LogicalDevice.createSemaphore(&createInfo, nullptr, &semaphore.m_VKSemaphore) != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::CreateSemaphore: Failed to create semaphore");
-			return NULL;
-		}
-		return handle;
-	}
-
 	void VulkanDevice::FreeBuffer(BufferHandle& handle)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::FreeBuffer" };
 		VK_Buffer* buffer = m_Buffers.Find(handle);
 		if (!buffer)
 		{
@@ -2751,22 +1658,16 @@ namespace Glory
 			return;
 		}
 
-		if (buffer->m_pMappedMemory)
-		{
-			m_LogicalDevice.unmapMemory(buffer->m_VKMemory);
-			buffer->m_pMappedMemory = nullptr;
-		}
-
 		m_LogicalDevice.destroyBuffer(buffer->m_VKBuffer);
 		m_LogicalDevice.freeMemory(buffer->m_VKMemory);
-		m_Buffers.Erase(handle);
 
-		handle = 0;
+		std::stringstream str;
+		str << "VulkanDevice: Buffer " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
 	}
 
 	void VulkanDevice::FreeMesh(MeshHandle& handle)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::FreeMesh" };
 		VK_Mesh* mesh = m_Meshes.Find(handle);
 		if (!mesh)
 		{
@@ -2779,12 +1680,15 @@ namespace Glory
 
 		m_Meshes.Erase(handle);
 
+		std::stringstream str;
+		str << "VulkanDevice: Mesh " << handle << " was freed.";
+		Debug().LogInfo(str.str());
+
 		handle = 0;
 	}
 
 	void VulkanDevice::FreeTexture(TextureHandle& handle)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::FreeTexture" };
 		VK_Texture* texture = m_Textures.Find(handle);
 		if (!texture)
 		{
@@ -2792,32 +1696,21 @@ namespace Glory
 			return;
 		}
 
-		ImageHandle image = texture->m_Image;
-		VK_Image* vkImage = m_Images.Find(image);
+		m_LogicalDevice.destroyImageView(texture->m_VKImageView, nullptr);
+		m_LogicalDevice.destroyImage(texture->m_VKImage, nullptr);
+		m_LogicalDevice.freeMemory(texture->m_VKMemory, nullptr);
+
 		m_Textures.Erase(handle);
+
+		std::stringstream str;
+		str << "VulkanDevice: Texture " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+
 		handle = 0;
-
-		if (image == m_DefaultImage)
-		{
-			m_Textures.Erase(handle);
-			return;
-		}
-
-		if (!vkImage) return;
-		if (vkImage->m_IsSwapchainImage) return;
-
-		--vkImage->m_ReferenceCounter;
-
-		if (vkImage->m_ReferenceCounter > 0) return;
-
-		m_LogicalDevice.destroyImageView(vkImage->m_VKImageView, nullptr);
-		m_LogicalDevice.destroyImage(vkImage->m_VKImage, nullptr);
-		m_LogicalDevice.freeMemory(vkImage->m_VKMemory, nullptr);
 	}
 
 	void VulkanDevice::FreeRenderTexture(RenderTextureHandle& handle)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::FreeRenderTexture" };
 		VK_RenderTexture* renderTexture = m_RenderTextures.Find(handle);
 		if (!renderTexture)
 		{
@@ -2837,12 +1730,15 @@ namespace Glory
 
 		m_RenderTextures.Erase(handle);
 
+		std::stringstream str;
+		str << "VulkanDevice: RenderTexture " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+
 		handle = 0;
 	}
 
 	void VulkanDevice::FreeRenderPass(RenderPassHandle& handle)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::FreeRenderPass" };
 		VK_RenderPass* renderPass = m_RenderPasses.Find(handle);
 		if (!renderPass)
 		{
@@ -2855,12 +1751,15 @@ namespace Glory
 
 		m_RenderPasses.Erase(handle);
 
+		std::stringstream str;
+		str << "VulkanDevice: RenderPass " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+
 		handle = 0;
 	}
 
 	void VulkanDevice::FreeShader(ShaderHandle& handle)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::FreeShader" };
 		VK_Shader* shader = m_Shaders.Find(handle);
 		if (!shader)
 		{
@@ -2872,12 +1771,15 @@ namespace Glory
 
 		m_Shaders.Erase(handle);
 
+		std::stringstream str;
+		str << "OpenGLDevice: Shader " << handle << " was freed from device memory.";
+		Debug().LogInfo(str.str());
+
 		handle = 0;
 	}
 
 	void VulkanDevice::FreePipeline(PipelineHandle& handle)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::FreePipeline" };
 		VK_Pipeline* pipeline = m_Pipelines.Find(handle);
 		if (!pipeline)
 		{
@@ -2889,92 +1791,23 @@ namespace Glory
 		m_LogicalDevice.destroyPipelineLayout(pipeline->m_VKLayout);
 		m_Pipelines.Erase(handle);
 
-		handle = 0;
-	}
-
-	void VulkanDevice::FreeDescriptorSetLayout(DescriptorSetLayoutHandle& handle)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::FreeDescriptorSetLayout" };
-		VK_DescriptorSetLayout* vkSetLayout = m_DescriptorSetLayouts.Find(handle);
-		if (!vkSetLayout)
-		{
-			Debug().LogError("VulkanDevice::FreeDescriptorSetLayout: Invalid descriptor set layout handle.");
-			return;
-		}
-
-		m_LogicalDevice.destroyDescriptorSetLayout(vkSetLayout->m_VKLayout);
-		m_DescriptorSetLayouts.Erase(handle);
-
-		handle = 0;
-	}
-
-	void VulkanDevice::FreeDescriptorSet(DescriptorSetHandle& handle)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::FreeDescriptorSet" };
-		VK_DescriptorSet* vkSet = m_DescriptorSets.Find(handle);
-		if (!vkSet)
-		{
-			Debug().LogError("VulkanDevice::FreeDescriptorSetLayout: Invalid descriptor set handle.");
-			return;
-		}
-		
-		m_LogicalDevice.freeDescriptorSets(vkSet->m_VKDescriptorPool, 1, &vkSet->m_VKDescriptorSet);
-		m_DescriptorSets.Erase(handle);
-
-		handle = 0;
-	}
-
-	void VulkanDevice::FreeSwapchain(SwapchainHandle& handle)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::FreeSwapchain" };
-		VK_Swapchain* vkSwapchain = m_Swapchains.Find(handle);
-		if (!vkSwapchain)
-		{
-			Debug().LogError("VulkanDevice::FreeSwapchain: Invalid swap chain handle.");
-			return;
-		}
-
-		m_LogicalDevice.destroySwapchainKHR(vkSwapchain->m_VKSwapchain);
-
-		for (TextureHandle texture : vkSwapchain->m_Textures)
-		{
-			VK_Texture* vkTexture = m_Textures.Find(texture);
-			if (!vkTexture) continue;
-			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-			if (!vkImage) continue;
-			m_LogicalDevice.destroyImageView(vkImage->m_VKImageView);
-		}
-		vkSwapchain->m_Textures.clear();
-
-		m_Swapchains.Erase(handle);
-
 		std::stringstream str;
-		str << "VulkanDevice: Swap chain " << handle << " was freed from device memory.";
+		str << "VulkanDevice: Pipeline " << handle << " was freed from device memory.";
 		Debug().LogInfo(str.str());
 
 		handle = 0;
 	}
 
-	void VulkanDevice::FreeSemaphore(SemaphoreHandle& handle)
+	void VulkanDevice::FreeDescriptorSetLayout(DescriptorSetLayoutHandle& handle)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::FreeSemaphore" };
-		VK_Semaphore* vkSemaphore = m_Semaphores.Find(handle);
-		if (!vkSemaphore)
-		{
-			Debug().LogError("VulkanDevice::FreeSemaphore: Invalid semaphore handle.");
-			return;
-		}
+	}
 
-		m_LogicalDevice.destroySemaphore(vkSemaphore->m_VKSemaphore);
-
-		m_Semaphores.Erase(handle);
-
-		handle = 0;
+	void VulkanDevice::FreeDescriptorSet(DescriptorSetHandle& handle)
+	{
 	}
 
 	vk::CommandBuffer VulkanDevice::BeginSingleTimeCommands()
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::BeginSingleTimeCommands" };
 		vk::CommandPool commandPool = GetGraphicsCommandPool();
 
 		vk::CommandBufferAllocateInfo allocInfo = vk::CommandBufferAllocateInfo();
@@ -2995,7 +1828,6 @@ namespace Glory
 
 	void VulkanDevice::EndSingleTimeCommands(vk::CommandBuffer commandBuffer)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::EndSingleTimeCommands" };
 		vk::CommandPool commandPool = GetGraphicsCommandPool();
 
 		commandBuffer.end();
@@ -3009,11 +1841,9 @@ namespace Glory
 		m_LogicalDevice.freeCommandBuffers(commandPool, 1, &commandBuffer);
 	}
 
-	void VulkanDevice::TransitionImageLayout(vk::CommandBuffer commandBuffer, vk::Image image, vk::Format format,
-		vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags,
-		uint32_t mipLevels, uint32_t layerCount)
+	void VulkanDevice::TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags, uint32_t mipLevels)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::TransitionImageLayout" };
+		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
 
 		vk::ImageMemoryBarrier barrier = vk::ImageMemoryBarrier();
 		barrier.oldLayout = oldLayout;
@@ -3025,20 +1855,12 @@ namespace Glory
 		barrier.subresourceRange.baseMipLevel = 0;
 		barrier.subresourceRange.levelCount = mipLevels;
 		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = layerCount;
+		barrier.subresourceRange.layerCount = 1;
 
 		vk::PipelineStageFlags sourceStage;
 		vk::PipelineStageFlags destinationStage;
 
 		if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eTransferDstOptimal)
-		{
-			barrier.srcAccessMask = (vk::AccessFlags)0;
-			barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
-
-			sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
-			destinationStage = vk::PipelineStageFlagBits::eTransfer;
-		}
-		else if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eTransferSrcOptimal)
 		{
 			barrier.srcAccessMask = (vk::AccessFlags)0;
 			barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
@@ -3054,24 +1876,7 @@ namespace Glory
 			sourceStage = vk::PipelineStageFlagBits::eTransfer;
 			destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
 		}
-		else if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
-		{
-			barrier.srcAccessMask = (vk::AccessFlags)0;
-			barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
-
-			sourceStage = vk::PipelineStageFlagBits::eTransfer;
-			destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
-		}
-		else if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eColorAttachmentOptimal)
-		{
-			barrier.srcAccessMask = (vk::AccessFlags)0;
-			barrier.dstAccessMask = vk::AccessFlagBits::eColorAttachmentRead;
-
-			sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
-			destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
-		}
-		else if (oldLayout == vk::ImageLayout::eUndefined && (newLayout == vk::ImageLayout::eDepthStencilAttachmentOptimal ||
-			newLayout == vk::ImageLayout::eDepthAttachmentOptimal || newLayout == vk::ImageLayout::eStencilAttachmentOptimal))
+		else if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eDepthStencilAttachmentOptimal)
 		{
 			barrier.srcAccessMask = (vk::AccessFlags)0;
 			barrier.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
@@ -3091,12 +1896,13 @@ namespace Glory
 			0, nullptr,
 			1, &barrier
 		);
+
+		EndSingleTimeCommands(commandBuffer);
 	}
 
-	void VulkanDevice::GenerateMipMaps(vk::CommandBuffer commandBuffer, vk::Image image,
-		int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
+	void VulkanDevice::GenerateMipMaps(vk::Image image, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::GenerateMipMaps" };
+		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
 
 		vk::ImageMemoryBarrier barrier{};
 		barrier.image = image;
@@ -3130,7 +1936,7 @@ namespace Glory
 			blit.srcSubresource.baseArrayLayer = 0;
 			blit.srcSubresource.layerCount = 1;
 			blit.dstOffsets[0] = vk::Offset3D{ 0, 0, 0 };
-			blit.dstOffsets[1] = vk::Offset3D{ mipWidth > 1 ? mipWidth/2 : 1, mipHeight > 1 ? mipHeight/2 : 1, 1 };
+			blit.dstOffsets[1] = vk::Offset3D{ mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1 };
 			blit.dstSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
 			blit.dstSubresource.mipLevel = i;
 			blit.dstSubresource.baseArrayLayer = 0;
@@ -3159,856 +1965,48 @@ namespace Glory
 
 		commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eFragmentShader,
 			(vk::DependencyFlags)0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+		EndSingleTimeCommands(commandBuffer);
 	}
 
-	void VulkanDevice::CopyFromBuffer(vk::CommandBuffer commandBuffer, vk::Buffer buffer,
-		vk::Image image, vk::ImageAspectFlags aspectFlags, uint32_t width, uint32_t height,
-		uint32_t layerCount, uint32_t layerSize)
+	void VulkanDevice::CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags, uint32_t width, uint32_t height)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CopyFromBuffer" };
-		CopyFromBuffer(commandBuffer, buffer, image, aspectFlags, 0, 0, 0, width, height, 1, layerCount, layerSize);
+		CopyFromBuffer(buffer, image, aspectFlags, 0, 0, 0, width, height, 1);
 	}
 
-	void VulkanDevice::CopyFromBuffer(vk::CommandBuffer commandBuffer, vk::Buffer buffer,
-		vk::Image image, vk::ImageAspectFlags aspectFlags, int32_t offsetX, int32_t offsetY,
-		int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth, uint32_t layerCount,
-		uint32_t layerSize)
+	void VulkanDevice::CopyFromBuffer(vk::Buffer buffer, vk::Image image, vk::ImageAspectFlags aspectFlags, int32_t offsetX, int32_t offsetY, int32_t offsetZ, uint32_t width, uint32_t height, uint32_t depth)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CopyFromBuffer(offset)" };
+		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
 
-		std::vector<vk::BufferImageCopy> bufferImageCopies(layerCount);
-		for (size_t i = 0; i < layerCount; ++i)
-		{
-			bufferImageCopies[i].bufferOffset = i*layerSize;
-			bufferImageCopies[i].bufferRowLength = 0;
-			bufferImageCopies[i].bufferImageHeight = 0;
+		vk::BufferImageCopy copyRegion = vk::BufferImageCopy();
+		copyRegion.bufferOffset = 0;
+		copyRegion.bufferRowLength = 0;
+		copyRegion.bufferImageHeight = 0;
 
-			bufferImageCopies[i].imageSubresource.aspectMask = aspectFlags;
-			bufferImageCopies[i].imageSubresource.mipLevel = 0;
-			bufferImageCopies[i].imageSubresource.baseArrayLayer = i;
-			bufferImageCopies[i].imageSubresource.layerCount = 1;
+		copyRegion.imageSubresource.aspectMask = aspectFlags;
+		copyRegion.imageSubresource.mipLevel = 0;
+		copyRegion.imageSubresource.baseArrayLayer = 0;
+		copyRegion.imageSubresource.layerCount = 1;
 
-			bufferImageCopies[i].imageOffset = vk::Offset3D(offsetX, offsetY, offsetZ);
-			bufferImageCopies[i].imageExtent = vk::Extent3D(width, height, depth);
-		}
+		copyRegion.imageOffset = vk::Offset3D(offsetX, offsetY, offsetZ);
+		copyRegion.imageExtent = vk::Extent3D(width, height, depth);
 
-		commandBuffer.copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal,
-			static_cast<uint32_t>(bufferImageCopies.size()), bufferImageCopies.data());
+		commandBuffer.copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal, 1, &copyRegion);
+
+		EndSingleTimeCommands(commandBuffer);
 	}
 
-	void VulkanDevice::CopyImage(vk::CommandBuffer commandBuffer, vk::Image src, vk::ImageLayout srcLayout, vk::Image dst,
-		vk::ImageLayout dstLayout, vk::ImageAspectFlags srcAspectFlags, vk::ImageAspectFlags dstAspectFlags, vk::Offset3D srcOffset,
-		vk::Offset3D dstOffset, vk::Extent3D extent, uint32_t layerCount)
+	vk::CommandBuffer VulkanDevice::GetNewCommandBuffer(CommandBufferHandle commandBufferHandle)
 	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CopyFromBuffer(offset)" };
-
-		std::vector<vk::ImageCopy> imageCopies(layerCount);
-		for (size_t i = 0; i < layerCount; ++i)
-		{
-			imageCopies[i].srcOffset = srcOffset;
-			imageCopies[i].dstOffset = dstOffset;
-			imageCopies[i].extent = extent;
-
-			imageCopies[i].srcSubresource.aspectMask = srcAspectFlags;
-			imageCopies[i].srcSubresource.mipLevel = 0;
-			imageCopies[i].srcSubresource.baseArrayLayer = i;
-			imageCopies[i].srcSubresource.layerCount = 1;
-
-			imageCopies[i].dstSubresource.aspectMask = dstAspectFlags;
-			imageCopies[i].dstSubresource.mipLevel = 0;
-			imageCopies[i].dstSubresource.baseArrayLayer = i;
-			imageCopies[i].dstSubresource.layerCount = 1;
-		}
-
-		commandBuffer.copyImage(src, srcLayout, dst, dstLayout,
-			static_cast<uint32_t>(imageCopies.size()), imageCopies.data());
-	}
-
-	void VulkanDevice::CopyFromBuffer(vk::CommandBuffer commandBuffer, vk::Buffer dst, vk::Buffer src,
-		int32_t dstOffset, int32_t srcOffset, uint32_t size)
-	{
-		vk::BufferCopy copyRegion = vk::BufferCopy();
-		copyRegion.dstOffset = dstOffset;
-		copyRegion.srcOffset = srcOffset;
-		copyRegion.size = size;
-		commandBuffer.copyBuffer(src, dst, 1, &copyRegion);
-	}
-
-	vk::CommandBuffer VulkanDevice::GetNewResetableCommandBuffer(CommandBufferHandle commandBufferHandle)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::GetNewResetableCommandBuffer" };
-		if (m_FreeCommandBuffers.empty())
-			AllocateFreeCommandBuffers(10);
-		if (m_FreeFences.empty())
-			AllocateFreeFences(10);
+		if (m_FreeCommandBuffers.empty() || m_FreeFences.empty())
+			AllocateCommandBuffers(10);
 
 		vk::CommandBuffer commandBuffer = m_FreeCommandBuffers.back();
-		VK_CommandBuffer& vkCommandBuffer = m_CommandBuffers.emplace(commandBufferHandle, VK_CommandBuffer()).first->second;
-		vkCommandBuffer.m_VKCommandBuffer = m_FreeCommandBuffers.back();
-		vkCommandBuffer.m_VKFence = m_FreeFences.back();
-		vkCommandBuffer.m_Resetable = true;
+		vk::Fence fence = m_FreeFences.back();
+		m_CommandBuffers.emplace(commandBufferHandle, commandBuffer);
+		m_CommandBufferFences.emplace(commandBufferHandle, fence);
 		m_FreeCommandBuffers.erase(--m_FreeCommandBuffers.end());
 		m_FreeFences.erase(--m_FreeFences.end());
 		return commandBuffer;
-	}
-
-	vk::PresentModeKHR VulkanDevice::SelectPresentMode(const std::vector<vk::PresentModeKHR>& presentModes, vk::SurfaceKHR surface)
-	{
-		std::vector<vk::PresentModeKHR> availablePresentModes;
-		uint32_t presentModesCount = 0;
-		m_VKDevice.getSurfacePresentModesKHR(surface, &presentModesCount, nullptr);
-		availablePresentModes.resize(presentModesCount);
-		m_VKDevice.getSurfacePresentModesKHR(surface, &presentModesCount, availablePresentModes.data());
-
-		for (vk::PresentModeKHR chosenPresentMode : presentModes)
-		{
-			if (std::find(availablePresentModes.begin(), availablePresentModes.end(), chosenPresentMode) == availablePresentModes.end())
-				continue;
-			return chosenPresentMode;
-		}
-		return vk::PresentModeKHR::eFifo;
-	}
-
-	vk::SurfaceFormatKHR VulkanDevice::SelectSurfaceFormat(vk::SurfaceKHR surface, const std::vector<vk::Format> requestFormats, vk::ColorSpaceKHR requestColorSpace)
-	{
-		uint32_t availableFormatCount;
-		std::vector<vk::SurfaceFormatKHR> availableFormats;
-		m_VKDevice.getSurfaceFormatsKHR(surface, &availableFormatCount, nullptr);
-		availableFormats.resize(availableFormatCount);
-		m_VKDevice.getSurfaceFormatsKHR(surface, &availableFormatCount, availableFormats.data());
-
-		// If only vk::Format::eUndefined is available then every format is allowed
-		if (availableFormatCount == 1)
-		{
-			if (availableFormats[0].format == vk::Format::eUndefined)
-			{
-				vk::SurfaceFormatKHR ret;
-				ret.format = requestFormats[0];
-				ret.colorSpace = requestColorSpace;
-				return ret;
-			}
-
-			// No point in searching another format
-			return availableFormats[0];
-		}
-
-		// Request several formats, the first found will be used
-		for (vk::Format chosenFormat : requestFormats)
-		{
-			auto iter = std::find_if(availableFormats.begin(), availableFormats.end(), [requestColorSpace, chosenFormat](vk::SurfaceFormatKHR& format) {
-				return format.colorSpace == requestColorSpace && format.format == chosenFormat;
-			});
-
-			if (iter == availableFormats.end())
-				continue;
-			return *iter;
-		}
-
-		// If none of the requested image formats could be found, use the first available
-		return availableFormats[0];
-	}
-
-	ImageHandle VulkanDevice::GetCachedImage(ImageData* pImage)
-	{
-		if (pImage == nullptr)
-			/* Return the default pink image */
-			return m_DefaultImage;
-
-		auto iter = m_ImageHandles.find(pImage->GetGPUUUID());
-		if (iter == m_ImageHandles.end())
-		{
-			TextureCreateInfo createInfo;
-			createInfo.m_Width = pImage->GetWidth();
-			createInfo.m_Height = pImage->GetHeight();
-			createInfo.m_ImageAspectFlags = IA_Color;
-			createInfo.m_ImageType = ImageType::IT_2D;
-			createInfo.m_InternalFormat = pImage->GetInternalFormat();
-			createInfo.m_PixelFormat = pImage->GetFormat();
-			createInfo.m_Type = pImage->GetDataType();
-			createInfo.m_Flags = IF_None;
-			createInfo.m_SamplingEnabled = true;
-
-			ImageHandle newImage = CreateImage(createInfo, pImage->GetPixels(), pImage->DataSize());
-			iter = m_ImageHandles.emplace(pImage->GetGPUUUID(), newImage).first;
-			pImage->SetDirty(false);
-
-			return newImage;
-		}
-
-		ImageHandle image = iter->second;
-
-		if (pImage->IsDirty())
-		{
-			UpdateImage(image, pImage);
-			pImage->SetDirty(false);
-		}
-
-		return image;
-	}
-
-	vk::ImageUsageFlags GetVKImageUsageFlags(ImageAspect imageAspect, ImageFlags imageFlags)
-	{
-		vk::ImageUsageFlags flags = vk::ImageUsageFlags();
-		if ((imageAspect & ImageAspect::IA_Color) > 0) flags |= vk::ImageUsageFlagBits::eColorAttachment;
-		if ((imageAspect & ImageAspect::IA_Depth) > 0) flags |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
-		if ((imageAspect & ImageAspect::IA_Stencil) > 0) flags |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
-		if ((imageFlags & ImageFlags::IF_CopyDst) > 0) flags |= vk::ImageUsageFlagBits::eTransferDst;
-		if ((imageFlags & ImageFlags::IF_CopySrc) > 0) flags |= vk::ImageUsageFlagBits::eTransferSrc;
-		return flags;
-	}
-
-	ImageHandle VulkanDevice::CreateImage(const TextureCreateInfo& textureInfo, const void* pixels, size_t dataSize)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateImage()" };
-		ImageHandle handle;
-		VK_Image& image = m_Images.Emplace(handle, VK_Image());
-
-		const uint32_t mipLevels = pixels ? static_cast<uint32_t>(
-			std::floor(std::log2(std::max(textureInfo.m_Width, textureInfo.m_Height)))) + 1 : 1;
-		const vk::Format format = VKConverter::GetVulkanFormat(textureInfo.m_InternalFormat);
-		const vk::ImageType imageType = VKConverter::GetVulkanImageType(textureInfo.m_ImageType);
-		const bool isCubemap = textureInfo.m_ImageType == ImageType::IT_Cube || textureInfo.m_ImageType == ImageType::IT_CubeArray;
-
-		vk::ImageCreateInfo imageInfo = vk::ImageCreateInfo();
-		imageInfo.imageType = imageType;
-		image.m_Width = imageInfo.extent.width = textureInfo.m_Width;
-		image.m_Height = imageInfo.extent.height = textureInfo.m_Height;
-		image.m_CPUVisible = textureInfo.m_Flags & IF_Read || textureInfo.m_Flags & IF_Write;
-		imageInfo.extent.depth = 1;
-		imageInfo.arrayLayers = isCubemap ? 6 : 1;
-		imageInfo.format = format;
-		imageInfo.tiling = vk::ImageTiling::eOptimal;
-		imageInfo.initialLayout = vk::ImageLayout::eUndefined;
-		imageInfo.usage = GetVKImageUsageFlags(textureInfo.m_ImageAspectFlags, textureInfo.m_Flags);
-		if (textureInfo.m_SamplingEnabled) imageInfo.usage |= vk::ImageUsageFlagBits::eSampled;
-		if (pixels) imageInfo.usage |= vk::ImageUsageFlagBits::eTransferDst;
-		imageInfo.sharingMode = vk::SharingMode::eExclusive;
-		imageInfo.samples = vk::SampleCountFlagBits::e1;
-		imageInfo.flags = isCubemap ? vk::ImageCreateFlagBits::eCubeCompatible : (vk::ImageCreateFlags)0;
-		imageInfo.mipLevels = mipLevels;
-		if (imageInfo.mipLevels > 1)
-			imageInfo.usage |= vk::ImageUsageFlagBits::eTransferSrc;
-
-		switch (format)
-		{
-		case vk::Format::eR32G32B32A32Sfloat:
-		case vk::Format::eR16G16B16A16Sfloat:
-		case vk::Format::eR8G8B8A8Srgb:
-		case vk::Format::eR8G8B8A8Snorm:
-		case vk::Format::eR8G8B8A8Unorm:
-			image.m_BlendingSupported = true;
-			break;
-		}
-
-		vk::ImageViewCreateInfo viewInfo = vk::ImageViewCreateInfo();
-		EnsureSupportedFormat(imageInfo.format, viewInfo);
-
-		image.m_VKAspect = VKConverter::GetVulkanImageAspectFlags(textureInfo.m_ImageAspectFlags);
-
-		if (m_LogicalDevice.createImage(&imageInfo, nullptr, &image.m_VKImage) != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::CreateImage: Could not create image.");
-			m_Images.Erase(handle);
-			return NULL;
-		}
-
-		vk::MemoryRequirements memRequirements;
-		m_LogicalDevice.getImageMemoryRequirements(image.m_VKImage, &memRequirements);
-
-		const uint32_t typeFilter = memRequirements.memoryTypeBits;
-
-		const vk::MemoryPropertyFlags properties = GetImageMemoryPropertyFlags(textureInfo.m_Flags);
-		const uint32_t memoryIndex = GetSupportedMemoryIndex(typeFilter, properties);
-
-		vk::MemoryAllocateInfo imageAllocInfo = vk::MemoryAllocateInfo();
-		imageAllocInfo.allocationSize = memRequirements.size;
-		imageAllocInfo.memoryTypeIndex = memoryIndex;
-
-		if (m_LogicalDevice.allocateMemory(&imageAllocInfo, nullptr, &image.m_VKMemory) != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::CreateImage: Could not create image.");
-			m_LogicalDevice.destroyImage(image.m_VKImage, nullptr);
-			m_Images.Erase(handle);
-			return NULL;
-		}
-		m_LogicalDevice.bindImageMemory(image.m_VKImage, image.m_VKMemory, 0);
-
-		/* Copy buffer to image */
-		/* Transition image layout */
-		if (pixels)
-		{
-			vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
-
-			TransitionImageLayout(commandBuffer, image.m_VKImage, format, vk::ImageLayout::eUndefined,
-				vk::ImageLayout::eTransferDstOptimal, image.m_VKAspect,
-				imageInfo.mipLevels, imageInfo.arrayLayers);
-			const vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
-			BufferHandle stagingBuffer = CreateBuffer(memRequirements.size, BufferType::BT_TransferRead, BufferFlags::BF_Write);
-			VK_Buffer* vkStagingBuffer = m_Buffers.Find(stagingBuffer);
-			AssignBuffer(stagingBuffer, pixels, uint32_t(dataSize));
-
-			const size_t layerSize = dataSize / imageInfo.arrayLayers;
-
-			CopyFromBuffer(commandBuffer, vkStagingBuffer->m_VKBuffer, image.m_VKImage, image.m_VKAspect,
-				textureInfo.m_Width, textureInfo.m_Height, imageInfo.arrayLayers, layerSize);
-
-			/* Transtion layout again so it can be sampled */
-			if (imageInfo.mipLevels > 1)
-				GenerateMipMaps(commandBuffer, image.m_VKImage, textureInfo.m_Width, textureInfo.m_Height, imageInfo.mipLevels);
-			else
-				TransitionImageLayout(commandBuffer, image.m_VKImage, format, vk::ImageLayout::eTransferDstOptimal,
-					vk::ImageLayout::eShaderReadOnlyOptimal, image.m_VKAspect, imageInfo.mipLevels, imageInfo.arrayLayers);
-
-			EndSingleTimeCommands(commandBuffer);
-
-			FreeBuffer(stagingBuffer);
-
-			image.m_VKFinalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-		}
-		else if (textureInfo.m_Flags & IF_CopySrc)
-		{
-			vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
-
-			TransitionImageLayout(commandBuffer, image.m_VKImage, format, vk::ImageLayout::eUndefined,
-				vk::ImageLayout::eTransferSrcOptimal, image.m_VKAspect,
-				imageInfo.mipLevels, imageInfo.arrayLayers);
-
-			EndSingleTimeCommands(commandBuffer);
-
-			image.m_VKFinalLayout = vk::ImageLayout::eTransferSrcOptimal;
-		}
-		else if(textureInfo.m_Flags & IF_CopyDst)
-		{
-			vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
-
-			TransitionImageLayout(commandBuffer, image.m_VKImage, format, vk::ImageLayout::eUndefined,
-				vk::ImageLayout::eTransferDstOptimal, image.m_VKAspect,
-				imageInfo.mipLevels, imageInfo.arrayLayers);
-
-			EndSingleTimeCommands(commandBuffer);
-
-			image.m_VKFinalLayout = vk::ImageLayout::eTransferDstOptimal;
-		}
-
-		/* Create texture image view */
-		viewInfo.image = image.m_VKImage;
-		viewInfo.viewType = VKConverter::GetVulkanImageViewType(textureInfo.m_ImageType);
-		viewInfo.format = format;
-		viewInfo.subresourceRange.aspectMask = image.m_VKAspect;
-		viewInfo.subresourceRange.baseMipLevel = 0;
-		viewInfo.subresourceRange.levelCount = imageInfo.mipLevels;
-		viewInfo.subresourceRange.baseArrayLayer = 0;
-		viewInfo.subresourceRange.layerCount = imageInfo.arrayLayers;
-
-		if (m_LogicalDevice.createImageView(&viewInfo, nullptr, &image.m_VKImageView) != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::CreateImage: Could not create image view.");
-			return NULL;
-		}
-
-		++image.m_ReferenceCounter;
-
-		return handle;
-	}
-
-	void VulkanDevice::UpdateImage(ImageHandle image, ImageData* pImage)
-	{
-		VK_Image* vkImage = m_Images.Find(image);
-		assert(vkImage != nullptr);
-
-		/* Have to wait */
-		WaitIdle();
-
-		const uint32_t mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(pImage->GetWidth(), pImage->GetHeight())))) + 1;
-		const vk::Format format = VKConverter::GetVulkanFormat(pImage->GetInternalFormat());
-
-		vk::MemoryRequirements memRequirements;
-		m_LogicalDevice.getImageMemoryRequirements(vkImage->m_VKImage, &memRequirements);
-
-		vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
-
-		TransitionImageLayout(commandBuffer, vkImage->m_VKImage, format, vkImage->m_VKFinalLayout,
-			vk::ImageLayout::eTransferDstOptimal, vkImage->m_VKAspect,
-			mipLevels, 1);
-		const vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
-		BufferHandle stagingBuffer = CreateBuffer(memRequirements.size, BufferType::BT_TransferRead, BufferFlags::BF_Write);
-		VK_Buffer* vkStagingBuffer = m_Buffers.Find(stagingBuffer);
-		AssignBuffer(stagingBuffer, pImage->GetPixels(), uint32_t(pImage->DataSize()));
-
-		const size_t layerSize = pImage->DataSize();
-
-		CopyFromBuffer(commandBuffer, vkStagingBuffer->m_VKBuffer, vkImage->m_VKImage, vkImage->m_VKAspect,
-			pImage->GetWidth(), pImage->GetHeight(), 1, layerSize);
-
-		/* Transtion layout again so it can be sampled */
-		if (mipLevels > 1)
-			GenerateMipMaps(commandBuffer, vkImage->m_VKImage, pImage->GetWidth(), pImage->GetHeight(), mipLevels);
-		else
-			TransitionImageLayout(commandBuffer, vkImage->m_VKImage, format, vk::ImageLayout::eTransferDstOptimal,
-				vk::ImageLayout::eShaderReadOnlyOptimal, vkImage->m_VKAspect, mipLevels, 1);
-
-		EndSingleTimeCommands(commandBuffer);
-
-		FreeBuffer(stagingBuffer);
-
-		vkImage->m_VKFinalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-	}
-
-	void VulkanDevice::CreateRenderTexture(vk::RenderPass vkRenderPass, VK_RenderTexture& renderTexture)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateRenderTexture" };
-		const size_t numAttachments = renderTexture.m_Info.Attachments.size() + (renderTexture.m_HasDepthOrStencil ? 1 : 0);
-		renderTexture.m_AttachmentNames.resize(numAttachments);
-		renderTexture.m_Textures.resize(numAttachments);
-
-		SamplerSettings sampler;
-		sampler.MipmapMode = Filter::F_None;
-		sampler.MinFilter = Filter::F_None;
-		sampler.MagFilter = Filter::F_None;
-
-		size_t textureCounter = 0;
-		for (size_t i = 0; i < renderTexture.m_Info.Attachments.size(); ++i)
-		{
-			const Attachment& attachment = renderTexture.m_Info.Attachments[i];
-			renderTexture.m_Textures[i] = attachment.Texture ? attachment.Texture :
-				CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, attachment.Format, attachment.InternalFormat, attachment.ImageType, attachment.m_Type, IF_None, attachment.ImageAspect, sampler, attachment.m_SamplingEnabled });
-			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[i]);
-			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-			if (!attachment.Texture)
-				vkImage->m_VKFinalLayout = attachment.m_SamplingEnabled ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eColorAttachmentOptimal;
-			renderTexture.m_AttachmentNames[i] = attachment.Name;
-			renderTexture.m_BlendingSupportedBits.Set(i, vkImage->m_BlendingSupported);
-			++textureCounter;
-		}
-
-		size_t depthStencilIndex = 0;
-
-		if (renderTexture.m_Info.HasDepth && renderTexture.m_Info.HasStencil)
-		{
-			depthStencilIndex = textureCounter;
-			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32SfloatS8Uint, ImageType::IT_2D, DataType::DT_UInt, IF_None, ImageAspect::IA_Depth, sampler });
-			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
-			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-			vkImage->m_VKFinalLayout = renderTexture.m_Info.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eStencilAttachmentOptimal;
-			renderTexture.m_AttachmentNames[depthStencilIndex] = "DepthStencil";
-			++textureCounter;
-		}
-		else if (renderTexture.m_Info.HasDepth)
-		{
-			depthStencilIndex = textureCounter;
-			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Depth, PixelFormat::PF_D32Sfloat, ImageType::IT_2D, DataType::DT_UInt, IF_None, ImageAspect::IA_Depth, sampler });
-			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
-			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-			vkImage->m_VKFinalLayout = renderTexture.m_Info.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthAttachmentOptimal;
-			renderTexture.m_AttachmentNames[depthStencilIndex] = "Depth";
-			++textureCounter;
-		}
-		else if (renderTexture.m_Info.HasStencil)
-		{
-			depthStencilIndex = textureCounter;
-			renderTexture.m_Textures[depthStencilIndex] = CreateTexture({ renderTexture.m_Info.Width, renderTexture.m_Info.Height, PixelFormat::PF_Stencil, PixelFormat::PF_D16UnormS8Uint, ImageType::IT_2D, DataType::DT_UInt, IF_None, ImageAspect::IA_Stencil, sampler });
-			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
-			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-			vkImage->m_VKFinalLayout = renderTexture.m_Info.EnableDepthStencilSampling ? vk::ImageLayout::eShaderReadOnlyOptimal : vk::ImageLayout::eDepthStencilAttachmentOptimal;
-			renderTexture.m_AttachmentNames[depthStencilIndex] = "Stencil";
-			++textureCounter;
-		}
-
-		std::vector<vk::ImageView> attachments(renderTexture.m_Textures.size());
-		for (size_t i = 0; i < renderTexture.m_Textures.size(); ++i)
-		{
-			TextureHandle textureHandle = renderTexture.m_Textures[i];
-			VK_Texture* vkTexture = m_Textures.Find(textureHandle);
-			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-			attachments[i] = vkImage->m_VKImageView;
-		}
-
-		if (renderTexture.m_Info.HasDepth || renderTexture.m_Info.HasStencil)
-		{
-			VK_Texture* vkTexture = m_Textures.Find(renderTexture.m_Textures[depthStencilIndex]);
-			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-			attachments[depthStencilIndex] = vkImage->m_VKImageView;
-		}
-
-		vk::FramebufferCreateInfo frameBufferCreateInfo = vk::FramebufferCreateInfo()
-			.setRenderPass(vkRenderPass)
-			.setAttachmentCount(attachments.size())
-			.setPAttachments(attachments.data())
-			.setWidth(renderTexture.m_Info.Width)
-			.setHeight(renderTexture.m_Info.Height)
-			.setLayers(1);
-
-		renderTexture.m_VKFramebuffer = m_LogicalDevice.createFramebuffer(frameBufferCreateInfo);
-		if (renderTexture.m_VKFramebuffer == nullptr)
-			Debug().LogError("VulkanDevice::CreateRenderTexture: There was an error when trying to create a frame buffer.");
-
-		for (size_t i = 0; i < renderTexture.m_Info.Attachments.size(); ++i)
-		{
-			renderTexture.m_Info.Attachments[i].Texture = renderTexture.m_Textures[i];
-		}
-		if (renderTexture.m_Info.HasDepth || renderTexture.m_Info.HasStencil)
-			renderTexture.m_Info.m_DepthStencilTexture = renderTexture.m_Textures.back();
-	}
-
-	bool VulkanDevice::CreateSwapchain(VK_Swapchain& swapchain, const vk::SurfaceCapabilitiesKHR& capabilities,
-		vk::SurfaceKHR surface, const glm::uvec2& resolution, bool vsync, uint32_t minImageCount)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreateSwapchain" };
-		/* Get shaw chain format */
-		const vk::SurfaceFormatKHR swapchainFormat = SelectSurfaceFormat(surface,
-			{ vk::Format::eR8G8B8A8Unorm, vk::Format::eB8G8R8A8Unorm, vk::Format::eR8G8B8Unorm, vk::Format::eB8G8R8Unorm },
-			vk::ColorSpaceKHR::eSrgbNonlinear);
-
-		/* Get shaw chain present mode */
-		const vk::PresentModeKHR swapchainPresentMode = SelectPresentMode(vsync ? VSyncPresentModes : InfiniteFPSPresentModes, surface);
-		if (minImageCount == 0)
-			minImageCount = GetMinImageCountFromPresentMode(swapchainPresentMode);
-
-		/* Get swap chain extend */
-		vk::Extent2D swapchainExtent = capabilities.currentExtent;
-		if (capabilities.currentExtent.width == std::numeric_limits<uint32_t>::max())
-		{
-			VkExtent2D actualExtent = {
-				resolution.x,
-				resolution.y
-			};
-
-			actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-			actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
-
-			swapchainExtent = actualExtent;
-		}
-
-		if (minImageCount < capabilities.minImageCount) {
-			minImageCount = capabilities.minImageCount;
-		}
-		if (capabilities.maxImageCount > 0 && minImageCount > capabilities.maxImageCount) {
-			minImageCount = capabilities.maxImageCount;
-		}
-
-		vk::SwapchainCreateInfoKHR createInfo{};
-		createInfo.surface = surface;
-		createInfo.minImageCount = minImageCount;
-		createInfo.imageFormat = swapchainFormat.format;
-		createInfo.imageColorSpace = swapchainFormat.colorSpace;
-		createInfo.imageExtent = swapchainExtent;
-		createInfo.imageArrayLayers = 1;
-		createInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
-
-		uint32_t queueFamilyIndices[] = { m_GraphicsAndComputeFamily.value(), m_PresentFamily.value() };
-
-		if (m_GraphicsAndComputeFamily.value() != m_PresentFamily.value())
-		{
-			createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
-			createInfo.queueFamilyIndexCount = 2;
-			createInfo.pQueueFamilyIndices = queueFamilyIndices;
-		}
-		else
-		{
-			createInfo.imageSharingMode = vk::SharingMode::eExclusive;
-			createInfo.queueFamilyIndexCount = 0; // Optional
-			createInfo.pQueueFamilyIndices = nullptr; // Optional
-		}
-
-		createInfo.preTransform = capabilities.currentTransform;
-		createInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
-		createInfo.presentMode = swapchainPresentMode;
-		createInfo.clipped = VK_TRUE;
-		createInfo.oldSwapchain = VK_NULL_HANDLE;
-
-		if (m_LogicalDevice.createSwapchainKHR(&createInfo, nullptr, &swapchain.m_VKSwapchain) != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::CreateSwapchain: Failed to create swapchain");
-			return false;
-		}
-
-		uint32_t imageCount;
-		if (m_LogicalDevice.getSwapchainImagesKHR(swapchain.m_VKSwapchain, &imageCount, nullptr) != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::CreateSwapchain: Failed to get swap chain images");
-			return false;
-		}
-		std::vector<vk::Image> swapchainImages(imageCount);
-		std::vector<vk::ImageView> swapchainImageViews(imageCount);
-		if (m_LogicalDevice.getSwapchainImagesKHR(swapchain.m_VKSwapchain, &imageCount, swapchainImages.data()) != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::CreateSwapchain: Failed to get swap chain images");
-			return false;
-		}
-
-		swapchain.m_Format = swapchainFormat;
-		swapchain.m_PresentMode = swapchainPresentMode;
-		swapchain.m_Extent = swapchainExtent;
-		swapchain.m_MinImageCount = imageCount;
-
-		for (size_t i = 0; i < imageCount; ++i)
-		{
-			vk::ImageViewCreateInfo imageViewInfo;
-			imageViewInfo.image = swapchainImages[i];
-			imageViewInfo.viewType = vk::ImageViewType::e2D;
-			imageViewInfo.format = swapchainFormat.format;
-			imageViewInfo.components.r = vk::ComponentSwizzle::eIdentity;
-			imageViewInfo.components.g = vk::ComponentSwizzle::eIdentity;
-			imageViewInfo.components.b = vk::ComponentSwizzle::eIdentity;
-			imageViewInfo.components.a = vk::ComponentSwizzle::eIdentity;
-			imageViewInfo.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
-			imageViewInfo.subresourceRange.baseMipLevel = 0;
-			imageViewInfo.subresourceRange.levelCount = 1;
-			imageViewInfo.subresourceRange.baseArrayLayer = 0;
-			imageViewInfo.subresourceRange.layerCount = 1;
-			if (m_LogicalDevice.createImageView(&imageViewInfo, nullptr, &swapchainImageViews[i]) != vk::Result::eSuccess)
-			{
-				Debug().LogError("VulkanDevice::CreateSwapchain: Failed to create image view");
-				return false;
-			}
-		}
-
-		swapchain.m_Textures.resize(imageCount);
-		for (size_t i = 0; i < imageCount; ++i)
-		{
-			VK_Texture* vkTexture = m_Textures.Find(swapchain.m_Textures[i]);
-			if (!vkTexture)
-			{
-				swapchain.m_Textures[i] = TextureHandle();
-				vkTexture = &m_Textures.Emplace(swapchain.m_Textures[i], VK_Texture());
-				vkTexture->m_Image = ImageHandle();
-				m_Images.Emplace(vkTexture->m_Image, VK_Image());
-			}
-			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-
-			vkImage->m_VKInitialLayout = vk::ImageLayout::eUndefined;
-			vkImage->m_VKFinalLayout = vk::ImageLayout::ePresentSrcKHR;
-			vkImage->m_VKImage = swapchainImages[i];
-			vkImage->m_VKImageView = swapchainImageViews[i];
-			vkImage->m_VKMemory = nullptr;
-			vkTexture->m_VKSampler = nullptr;
-			vkImage->m_VKFormat = swapchainFormat.format;
-			vkImage->m_IsSwapchainImage = true;
-		}
-
-		return true;
-	}
-
-	bool VulkanDevice::CreatePipeline(VK_Pipeline& pipeline, PipelineData* pPipeline)
-	{
-		ProfileSample s{ &Profiler(), "VulkanDevice::CreatePipeline" };
-		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
-
-		VK_RenderPass* vkRenderPass = m_RenderPasses.Find(pipeline.m_RenderPass);
-		VK_RenderTexture* vkRenderTexture = m_RenderTextures.Find(vkRenderPass->m_RenderTexture);
-
-		pipeline.m_Shaders.resize(pPipeline->ShaderCount());
-		for (size_t i = 0; i < pipeline.m_Shaders.size(); ++i)
-			pipeline.m_Shaders[i] = AcquireCachedShader(pPipeline->Shader(pipelines, i), pPipeline->GetShaderType(pipelines, i), "main");
-
-		std::vector<vk::PipelineShaderStageCreateInfo> shaderStages(pPipeline->ShaderCount());
-		for (size_t i = 0; i < shaderStages.size(); ++i)
-		{
-			VK_Shader* shader = m_Shaders.Find(pipeline.m_Shaders[i]);
-			shaderStages[i] = vk::PipelineShaderStageCreateInfo()
-				.setStage(shader->m_VKStage)
-				.setModule(shader->m_VKModule)
-				.setPName(shader->m_Function.data());
-		}
-
-		// Vertex input state
-		vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo()
-			.setVertexBindingDescriptionCount(1)
-			.setPVertexBindingDescriptions(&pipeline.m_VertexDescription)
-			.setVertexAttributeDescriptionCount(static_cast<uint32_t>(pipeline.m_AttributeDescriptions.size()))
-			.setPVertexAttributeDescriptions(pipeline.m_AttributeDescriptions.data());
-
-		// Input assembly
-		vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo()
-			.setTopology(pipeline.m_VKPrimitiveTopology)
-			.setPrimitiveRestartEnable(VK_FALSE);
-
-		// Viewport and scissor
-		vk::Viewport vkViewport = vk::Viewport()
-			.setX(0.0f)
-			.setY(0.0f)
-			.setWidth((float)vkRenderTexture->m_Info.Width)
-			.setHeight((float)vkRenderTexture->m_Info.Height)
-			.setMinDepth(0.0f)
-			.setMaxDepth(1.0f);
-
-		vk::Rect2D vkScissor = vk::Rect2D()
-			.setOffset({ 0, 0 })
-			.setExtent({ vkRenderTexture->m_Info.Width, vkRenderTexture->m_Info.Height });
-
-		vk::PipelineViewportStateCreateInfo viewportStateCreateInfo = vk::PipelineViewportStateCreateInfo()
-			.setViewportCount(1)
-			.setPViewports(&vkViewport)
-			.setScissorCount(1)
-			.setPScissors(&vkScissor);
-
-		// Rasterizer state
-		vk::PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = vk::PipelineRasterizationStateCreateInfo()
-			.setDepthClampEnable(VK_FALSE) // Requires a GPU feature
-			.setRasterizerDiscardEnable(VK_FALSE)
-			.setPolygonMode(vk::PolygonMode::eFill)
-			.setLineWidth(1.0f)
-			.setCullMode(pipeline.m_VKCullMode)
-			.setFrontFace(vk::FrontFace::eCounterClockwise)
-			.setDepthBiasEnable(VK_FALSE)
-			.setDepthBiasConstantFactor(0.0f)
-			.setDepthBiasClamp(0.0f)
-			.setDepthBiasSlopeFactor(0.0f);
-
-		// Multisampling state
-		vk::PipelineMultisampleStateCreateInfo multisampleStateCreateInfo = vk::PipelineMultisampleStateCreateInfo()
-			.setSampleShadingEnable(VK_FALSE)
-			.setRasterizationSamples(vk::SampleCountFlagBits::e1)
-			.setMinSampleShading(1.0f)
-			.setPSampleMask(nullptr)
-			.setAlphaToCoverageEnable(VK_FALSE)
-			.setAlphaToOneEnable(VK_FALSE);
-
-		// Blend state
-		const size_t attachmentCount = vkRenderTexture->m_Textures.size() - (vkRenderTexture->m_HasDepthOrStencil ? 1 : 0);
-		std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates(attachmentCount);
-		for (size_t i = 0; i < attachmentCount; ++i)
-		{
-			colorBlendAttachmentStates[i] = vk::PipelineColorBlendAttachmentState()
-				.setColorWriteMask(pipeline.m_VKColorWriteMasks[i])
-				.setBlendEnable(pipeline.m_VKBlendEnabled[i])
-				.setSrcColorBlendFactor(pipeline.m_VKBlendEquations[i].srcColorBlendFactor)
-				.setDstColorBlendFactor(pipeline.m_VKBlendEquations[i].dstColorBlendFactor)
-				.setColorBlendOp(pipeline.m_VKBlendEquations[i].colorBlendOp)
-				.setSrcAlphaBlendFactor(pipeline.m_VKBlendEquations[i].srcAlphaBlendFactor)
-				.setDstAlphaBlendFactor(pipeline.m_VKBlendEquations[i].dstColorBlendFactor)
-				.setAlphaBlendOp(pipeline.m_VKBlendEquations[i].alphaBlendOp);
-		}
-
-		vk::PipelineColorBlendStateCreateInfo colorBlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo()
-			.setLogicOpEnable(VK_FALSE)
-			.setLogicOp(vk::LogicOp::eCopy)
-			.setAttachmentCount(colorBlendAttachmentStates.size())
-			.setPAttachments(colorBlendAttachmentStates.data())
-			.setBlendConstants({ pipeline.m_BlendConstants.x, pipeline.m_BlendConstants.y,
-				pipeline.m_BlendConstants.z, pipeline.m_BlendConstants.w });
-
-		vk::PipelineDepthStencilStateCreateInfo depthStencil = vk::PipelineDepthStencilStateCreateInfo();
-		depthStencil.depthTestEnable = pipeline.m_SettingToggles.IsSet(PipelineData::DepthTestEnable);
-		depthStencil.depthWriteEnable = pipeline.m_SettingToggles.IsSet(PipelineData::DepthWriteEnable);
-		depthStencil.depthCompareOp = pipeline.m_VKDepthCompareOp;
-		depthStencil.depthBoundsTestEnable = VK_FALSE;
-		depthStencil.minDepthBounds = 0.0f; // Optional
-		depthStencil.maxDepthBounds = 1.0f; // Optional
-		depthStencil.stencilTestEnable = pipeline.m_SettingToggles.IsSet(PipelineData::StencilTestEnable);
-		//depthStencil.front = {}; // Optional
-		//depthStencil.back = {}; // Optional
-
-		// Dynamic state
-		vk::DynamicState dynamicStates[] = {
-			vk::DynamicState::eViewport,
-			vk::DynamicState::eScissor,
-			vk::DynamicState::eCullMode,
-			vk::DynamicState::ePrimitiveTopology,
-			vk::DynamicState::eDepthTestEnable,
-			vk::DynamicState::eDepthWriteEnable,
-			vk::DynamicState::eDepthCompareOp,
-			vk::DynamicState::eColorWriteMaskEXT,
-			vk::DynamicState::eStencilTestEnable,
-			vk::DynamicState::eStencilCompareMask,
-			vk::DynamicState::eStencilOp,
-			vk::DynamicState::eStencilWriteMask,
-			vk::DynamicState::eStencilReference,
-			vk::DynamicState::eColorBlendEnableEXT,
-			vk::DynamicState::eColorBlendEquationEXT,
-			vk::DynamicState::eBlendConstants,
-		};
-
-		vk::PipelineDynamicStateCreateInfo dynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo()
-			.setDynamicStateCount(16)
-			.setPDynamicStates(dynamicStates);
-
-		vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
-			.setSetLayoutCount(static_cast<uint32_t>(pipeline.m_VKDescriptorSetLayouts.size()))
-			.setPSetLayouts(pipeline.m_VKDescriptorSetLayouts.data())
-			.setPushConstantRangeCount(static_cast<uint32_t>(pipeline.m_VKPushConstantRanges.size()))
-			.setPPushConstantRanges(pipeline.m_VKPushConstantRanges.data());
-
-		pipeline.m_VKLayout = m_LogicalDevice.createPipelineLayout(pipelineLayoutCreateInfo);
-		if (pipeline.m_VKLayout == nullptr)
-		{
-			Debug().LogError("VulkanDevice::CreatePipeline: Failed to create pipeline layout.");
-			return false;
-		}
-
-		// Create the pipeline
-		vk::GraphicsPipelineCreateInfo pipelineCreateInfo = vk::GraphicsPipelineCreateInfo()
-			.setStageCount(static_cast<uint32_t>(shaderStages.size()))
-			.setPStages(shaderStages.data())
-			.setPVertexInputState(&vertexInputStateCreateInfo)
-			.setPInputAssemblyState(&inputAssemblyStateCreateInfo)
-			.setPViewportState(&viewportStateCreateInfo)
-			.setPRasterizationState(&rasterizationStateCreateInfo)
-			.setPMultisampleState(&multisampleStateCreateInfo)
-			.setPDepthStencilState(&depthStencil)
-			.setPColorBlendState(&colorBlendStateCreateInfo)
-			.setPDynamicState(&dynamicStateCreateInfo)
-			.setLayout(pipeline.m_VKLayout)
-			.setRenderPass(vkRenderPass->m_VKRenderPass)
-			.setSubpass(0)
-			.setBasePipelineHandle(VK_NULL_HANDLE)
-			.setBasePipelineIndex(-1);
-
-		if (m_LogicalDevice.createGraphicsPipelines(VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &pipeline.m_VKPipeline) != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::CreatePipeline: Failed to create graphics pipeline.");
-			return false;
-		}
-		return true;
-	}
-
-	void VulkanDevice::ResizeBuffer(VK_Buffer& buffer)
-	{
-		if (buffer.m_pMappedMemory)
-		{
-			m_LogicalDevice.unmapMemory(buffer.m_VKMemory);
-			buffer.m_pMappedMemory = nullptr;
-		}
-
-		vk::BufferCreateInfo bufferInfo = vk::BufferCreateInfo();
-		bufferInfo.size = (vk::DeviceSize)buffer.m_Size;
-		bufferInfo.sharingMode = vk::SharingMode::eExclusive;
-		bufferInfo.usage = buffer.m_VKUsage;
-
-		vk::Buffer newBuffer;
-		vk::Result result = m_LogicalDevice.createBuffer(&bufferInfo, nullptr, &newBuffer);
-		if (result != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::ResizeBuffer: Failed to create buffer.");
-			return;
-		}
-
-		vk::MemoryRequirements memRequirements;
-		m_LogicalDevice.getBufferMemoryRequirements(newBuffer, &memRequirements);
-
-		const uint32_t typeFilter = memRequirements.memoryTypeBits;
-		const vk::MemoryPropertyFlags properties = GetBufferMemoryPropertyFlags(buffer.m_Flags);
-		const uint32_t memoryIndex = GetSupportedMemoryIndex(typeFilter, properties);
-
-		/* Allocate device memory */
-		vk::MemoryAllocateInfo allocateInfo = vk::MemoryAllocateInfo();
-		allocateInfo.allocationSize = memRequirements.size;
-		allocateInfo.memoryTypeIndex = memoryIndex;
-
-		vk::DeviceMemory newMemory;
-		result = m_LogicalDevice.allocateMemory(&allocateInfo, nullptr, &newMemory);
-		if (result != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::ResizeBuffer: Failed to create buffer memory.");
-			m_LogicalDevice.destroyBuffer(newBuffer);
-			return;
-		}
-
-		m_LogicalDevice.destroyBuffer(buffer.m_VKBuffer);
-		m_LogicalDevice.freeMemory(buffer.m_VKMemory);
-
-		buffer.m_VKBuffer = newBuffer;
-		buffer.m_VKMemory = newMemory;
-		m_LogicalDevice.bindBufferMemory(buffer.m_VKBuffer, buffer.m_VKMemory, 0);
 	}
 }

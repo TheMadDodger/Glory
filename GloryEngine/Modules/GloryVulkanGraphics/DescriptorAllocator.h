@@ -14,7 +14,7 @@ namespace Glory
 		virtual ~DescriptorAllocator();
 
 		void ResetPools();
-		void Allocate(vk::DescriptorSet* set, vk::DescriptorPool* pool, vk::DescriptorSetLayout layout);
+		void Allocate(vk::DescriptorSet* set, vk::DescriptorSetLayout layout);
 
 	private:
 		void CreatePool(size_t count, vk::DescriptorPoolCreateFlags createFlags=vk::DescriptorPoolCreateFlags(0));
