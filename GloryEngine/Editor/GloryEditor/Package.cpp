@@ -255,6 +255,9 @@ namespace Glory::Editor
 			if (meta.Hash() == ShaderSourceHash)
 				continue;
 
+			Resource* pResource = pEngine->GetAssetManager().FindResource(GlobalAssets[i]);
+			if (!pResource) continue;
+
 			/* We need pipelines to figure out which shaders to package */
 			if (meta.Hash() == PipelineDataHash)
 			{
@@ -283,7 +286,9 @@ namespace Glory::Editor
 		for (auto itor = assetScenes.begin(); itor != assetScenes.end(); ++itor)
 		{
 			ResourceMeta meta;
-			EditorAssetDatabase::GetAssetMetadata(itor->first, meta);
+			/* Make sure asset still exists! */
+			if (!EditorAssetDatabase::GetAssetMetadata(itor->first, meta))
+				continue;
 
 			/* Ignore shaders */
 			if (meta.Hash() == ShaderSourceHash)

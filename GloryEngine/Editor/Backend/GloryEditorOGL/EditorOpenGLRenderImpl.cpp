@@ -3,8 +3,8 @@
 #include <Debug.h>
 #include <EditorApplication.h>
 #include <GL/glew.h>
-#include <GLTexture.h>
 
+#include <OpenGLDevice.h>
 #include <EditorShaderData.h>
 
 #include <shaderc/shaderc.hpp>
@@ -90,11 +90,13 @@ namespace Glory::Editor
 		m_pEditorPlatform->GetWindowImpl()->GetMainWindow()->GLSwapWindow();
 	}
 
-	void* EditorOpenGLRenderImpl::GetTextureID(Texture* pTexture)
+	void* EditorOpenGLRenderImpl::GetTextureID(TextureHandle texture)
 	{
-		if (pTexture == nullptr) return 0;
-		GLTexture* pGLTexture = (GLTexture*)pTexture;
-		return (void*)pGLTexture->GetID();
+		if (!texture) return 0;
+		GraphicsDevice* pDevice = EditorApplication::GetInstance()->GetEngine()->ActiveGraphicsDevice();
+		if (!pDevice) return 0;
+		OpenGLDevice* pGLDevice = static_cast<OpenGLDevice*>(pDevice);
+		return (void*)pGLDevice->GetGLTextureID(texture);
 	}
 
 	void EditorOpenGLRenderImpl::LogGLError(const unsigned int& err, bool bIncludeTimeStamp)

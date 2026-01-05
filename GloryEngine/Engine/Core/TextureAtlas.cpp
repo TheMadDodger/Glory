@@ -1,8 +1,7 @@
 #include "TextureAtlas.h"
-#include "Texture.h"
 #include "Engine.h"
 #include "Debug.h"
-#include "RenderTexture.h"
+#include "GraphicsEnums.h"
 
 namespace Glory
 {
@@ -75,45 +74,6 @@ namespace Glory
 			!= m_ReservedChunks.end();
 	}
 
-	bool TextureAtlas::AsignChunk(UUID id, Texture* pTexture)
-	{
-		auto& iter = std::find_if(m_ReservedChunks.begin(), m_ReservedChunks.end(), [id](const ReservedChunk& chunk) {
-			return chunk.ID == id;
-		});
-
-		if (iter == m_ReservedChunks.end())
-		{
-			m_pEngine->GetDebug().LogError("TextureAtlas::AsignChunk(Texture) > Chunk not found!");
-			return false;
-		}
-
-		const TextureCreateInfo& info = pTexture->Info();
-		const ReservedChunk& chunk = *iter;
-		if (info.m_Width != chunk.Width || info.m_Height != chunk.Height)
-		{
-			m_pEngine->GetDebug().LogError("TextureAtlas::AsignChunk(Texture) > Texture has incorrect size!");
-			return false;
-		}
-
-		return AssignChunk(pTexture, chunk);
-	}
-
-	bool TextureAtlas::BindChunk(UUID id)
-	{
-		auto& iter = std::find_if(m_ReservedChunks.begin(), m_ReservedChunks.end(), [id](const ReservedChunk& chunk) {
-			return chunk.ID == id;
-		});
-
-		if (iter == m_ReservedChunks.end())
-		{
-			m_pEngine->GetDebug().LogError("TextureAtlas::AsignChunk(Texture) > Chunk not found!");
-			return false;
-		}
-
-		const ReservedChunk& chunk = *iter;
-		return OnBindChunk(chunk);
-	}
-
 	glm::vec4 TextureAtlas::GetChunkCoords(UUID id) const
 	{
 		auto& iter = std::find_if(m_ReservedChunks.begin(), m_ReservedChunks.end(), [id](const ReservedChunk& chunk) {
@@ -132,6 +92,27 @@ namespace Glory
 		coords.y = float(chunk.YOffset)/m_Height;
 		coords.z = float(chunk.XOffset + chunk.Width)/m_Width;
 		coords.w = float(chunk.YOffset + chunk.Height)/m_Height;
+		return coords;
+	}
+
+	glm::vec4 TextureAtlas::GetChunkPositionAndSize(UUID id) const
+	{
+		auto& iter = std::find_if(m_ReservedChunks.begin(), m_ReservedChunks.end(), [id](const ReservedChunk& chunk) {
+			return chunk.ID == id;
+		});
+
+		if (iter == m_ReservedChunks.end())
+		{
+			m_pEngine->GetDebug().LogError("TextureAtlas::GetChunkPositionAndSize() > Chunk not found!");
+			return {};
+		}
+
+		const ReservedChunk& chunk = *iter;
+		glm::vec4 coords;
+		coords.x = chunk.XOffset;
+		coords.y = chunk.YOffset;
+		coords.z = chunk.Width;
+		coords.w = chunk.Height;
 		return coords;
 	}
 
@@ -166,8 +147,8 @@ namespace Glory
 		OnResize();
 	}
 
-	void TextureAtlas::Clear(const glm::vec4& clearColor, double depth)
+	glm::uvec2 TextureAtlas::Resolution() const
 	{
-		OnClear(clearColor, depth);
+		return { m_Width, m_Height };
 	}
 }

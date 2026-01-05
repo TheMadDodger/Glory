@@ -110,6 +110,11 @@ namespace Glory
 		return Value().RemoveMember(key.data());
 	}
 
+	bool JSONValueRef::Remove(const std::string_view key)
+	{
+		return Value().RemoveMember(key.data());
+	}
+
 	size_t JSONValueRef::Size()
 	{
 		return Value().Size();

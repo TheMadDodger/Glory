@@ -12,7 +12,8 @@ namespace Glory
         ShaderSourceData();
         ShaderSourceData(ShaderType shaderType, FileData* pCompiledSource);
         ShaderSourceData(ShaderType shaderType, std::vector<char>&& source,
-            std::vector<char>&& processed, std::vector<std::string>&& features);
+            std::vector<char>&& processed, std::vector<std::string>&& features,
+            std::vector<std::filesystem::path>&& includes);
         virtual ~ShaderSourceData();
 
         size_t Size() const;
@@ -25,8 +26,15 @@ namespace Glory
         uint64_t& TimeSinceLastWrite();
         const uint64_t& TimeSinceLastWrite() const;
 
+        size_t IncludeCount() const;
+        const std::filesystem::path& IncludePath(size_t includeIndex) const;
+        uint64_t& TimeSinceLastWrite(size_t includeIndex);
+        const uint64_t& TimeSinceLastWrite(size_t includeIndex) const;
+
         size_t FeatureCount() const;
         std::string_view Feature(size_t index) const;
+
+        bool IsOutdated(uint64_t cacheWriteTime) const;
 
     private:
         virtual void References(Engine*, std::vector<UUID>&) const override {}
@@ -36,6 +44,8 @@ namespace Glory
         std::vector<char> m_OriginalSource;
         std::vector<char> m_ProcessedSource;
         std::vector<std::string> m_Features;
+        std::vector<std::filesystem::path> m_Includes;
+        std::vector<uint64_t> m_IncludesLastWriteTimes;
         uint64_t m_TimeSinceLastWrite;
 	};
 }

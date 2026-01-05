@@ -1,9 +1,12 @@
 #include "EditorVulkanRenderImpl.h"
 
 #include <EditorApplication.h>
+#include <VulkanGraphicsModule.h>
 #include <EditorShaderData.h>
 
 #include <VulkanDevice.h>
+
+#define IMGUI_UNLIMITED_FRAME_RATE
 
 namespace Glory::Editor
 {
@@ -25,16 +28,15 @@ namespace Glory::Editor
 
 	EditorVulkanRenderImpl::~EditorVulkanRenderImpl() {}
 
-	void* EditorVulkanRenderImpl::GetTextureID(Texture* pTexture)
+	void* EditorVulkanRenderImpl::GetTextureID(TextureHandle texture)
 	{
-		VulkanTexture* pVKTexture = static_cast<VulkanTexture*>(pTexture);
-		auto iter = m_DesciptorSets.find(pTexture->ID());
-		if (iter == m_DesciptorSets.end())
-		{
-			vk::DescriptorSet ds = ImGui_ImplVulkan_AddTexture(pVKTexture->GetTextureSampler(), pVKTexture->GetTextureImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-			iter = m_DesciptorSets.emplace(pTexture->ID(), ds).first;
-		}
-		return (void*)iter->second;
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		m_pDevice = static_cast<VulkanDevice*>(pEngine->ActiveGraphicsDevice());
+		const bool hasImage = m_pDevice->TextureHasImage(texture);
+		if (!hasImage)
+			return GetTextureID_Internal(m_pDevice->GetDefaultTexture());
+
+		return GetTextureID_Internal(texture);
 	}
 
 	std::string EditorVulkanRenderImpl::ShadingLanguage()
@@ -61,9 +63,6 @@ namespace Glory::Editor
 		m_pDevice = static_cast<VulkanDevice*>(pEngine->ActiveGraphicsDevice());
 
 		m_MainWindow = ImGui_ImplVulkanH_Window();
-		//m_MainWindow.Swapchain = pGraphicsModule->GetSwapChain().GetSwapChain();
-		//m_MainWindow.RenderPass = pGraphicsModule->MainRenderPass().GetRenderPass();
-		//m_MainWindow.ImageCount = pGraphicsModule->ImageCount();
 		VkSurfaceKHR surface = pGraphicsModule->GetCSurface();
 		int width, height;
 
@@ -154,7 +153,7 @@ namespace Glory::Editor
 		wd->PresentMode = ImGui_ImplVulkanH_SelectPresentMode(physicalDevice, wd->Surface, &present_modes[0], IM_ARRAYSIZE(present_modes));
 		//printf("[vulkan] Selected PresentMode = %d\n", wd->PresentMode);
 
-		// Create SwapChain, RenderPass, Framebuffer, etc.
+		// Create Swapchain, RenderPass, Framebuffer, etc.
 		IM_ASSERT(MINIMAGECOUNT >= 2);
 		ImGui_ImplVulkanH_CreateOrResizeWindow(instance, physicalDevice, device, wd, graphicsFamilyIndex, VK_NULL_HANDLE, width, height, MINIMAGECOUNT);
 	}
@@ -236,7 +235,7 @@ namespace Glory::Editor
 		err = vkAcquireNextImageKHR(device, wd->Swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE, &wd->FrameIndex);
 		if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR)
 		{
-			m_SwapChainRebuild = true;
+			m_SwapchainRebuild = true;
 			return;
 		}
 		check_vk_result(err);
@@ -300,7 +299,7 @@ namespace Glory::Editor
 		VkDevice device = (VkDevice)m_pDevice->LogicalDevice();
 		uint32_t graphicsFamilyIndex = m_pDevice->GraphicsFamily();
 
-		if (m_SwapChainRebuild)
+		if (m_SwapchainRebuild)
 			return;
 
 		VkSemaphore render_complete_semaphore = wd->FrameSemaphores[wd->SemaphoreIndex].RenderCompleteSemaphore;
@@ -314,7 +313,7 @@ namespace Glory::Editor
 		VkResult err = vkQueuePresentKHR((VkQueue)m_pDevice->PresentQueue(), &info);
 		if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR)
 		{
-			m_SwapChainRebuild = true;
+			m_SwapchainRebuild = true;
 			return;
 		}
 		check_vk_result(err);
@@ -347,7 +346,7 @@ namespace Glory::Editor
 		uint32_t graphicsFamilyIndex = m_pDevice->GraphicsFamily();
 
 		// Resize swap chain?
-		if (m_SwapChainRebuild)
+		if (m_SwapchainRebuild)
 		{
 			int width, height;
 			m_pEditorPlatform->GetWindowImpl()->GetMainWindow()->GetWindowSize(&width, &height);
@@ -356,7 +355,7 @@ namespace Glory::Editor
 				ImGui_ImplVulkan_SetMinImageCount(MINIMAGECOUNT);
 				ImGui_ImplVulkanH_CreateOrResizeWindow(m_pDevice->GraphicsModule()->GetCInstance(), physicalDevice, device, &m_MainWindow, graphicsFamilyIndex, VK_NULL_HANDLE, width, height, MINIMAGECOUNT);
 				m_MainWindow.FrameIndex = 0;
-				m_SwapChainRebuild = false;
+				m_SwapchainRebuild = false;
 			}
 		}
 	}
@@ -382,5 +381,29 @@ namespace Glory::Editor
 	void EditorVulkanRenderImpl::FramePresent()
 	{
 		FramePresent(&m_MainWindow);
+	}
+
+	void* EditorVulkanRenderImpl::GetTextureID_Internal(TextureHandle texture)
+	{
+		const vk::ImageView imageView = m_pDevice->GetVKImageView(texture);
+
+		auto iter = m_DesciptorSets.find(texture);
+		if (iter == m_DesciptorSets.end())
+		{
+			vk::DescriptorSet ds = ImGui_ImplVulkan_AddTexture(m_pDevice->GetVKSampler(texture), imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			iter = m_DesciptorSets.emplace(texture, ds).first;
+			m_ImageViews.emplace(texture, imageView).first;
+		}
+
+		vk::ImageView& otherImageView = m_ImageViews.at(texture);
+		if (imageView != otherImageView)
+		{
+			/* Update image */
+			ImGui_ImplVulkan_RemoveTexture(iter->second);
+			iter->second = ImGui_ImplVulkan_AddTexture(m_pDevice->GetVKSampler(texture), imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			otherImageView = imageView;
+		}
+		
+		return (void*)iter->second;
 	}
 }

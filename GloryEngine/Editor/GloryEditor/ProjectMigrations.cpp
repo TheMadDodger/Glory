@@ -57,6 +57,8 @@ namespace Glory::Editor
         if (Version::Compare(version, { 0,6,0,0 }, true) < 0)
         {
             Migrate_0_6_0_MaterialInstances(pProject);
+            Migrate_0_6_0_MoveShaderAndPipelineAssets(pProject);
+            Migrate_0_6_0_RemoveShaderAndPipelineAssets(pProject);
         }
 
         /* Update version to current */
@@ -649,6 +651,82 @@ namespace Glory::Editor
 
             file["BaseMaterial"].Erase();
             file["Overrides"].Erase();
+        }
+    }
+
+    void Migrate_0_6_0_MoveShaderAndPipelineAssets(ProjectSpace* pProject)
+    {
+        EditorApplication* pApplication = EditorApplication::GetInstance();
+
+        pApplication->GetEngine()->GetDebug().LogInfo("0.6.0> Migrating renderer assets");
+
+        JSONFileRef& projectFile = pProject->ProjectFile();
+        JSONValueRef assets = projectFile["Assets"];
+        if (!assets.Exists() || !assets.IsObject()) return;
+
+        for (rapidjson::Value::ConstMemberIterator itor = assets.begin(); itor != assets.end(); ++itor)
+        {
+            JSONValueRef asset = assets[itor->name.GetString()];
+            const uint32_t hash = asset["Metadata/Hash"].AsUInt();
+            const std::string_view pathStr = asset["Location/Path"].AsString();
+            if (pathStr._Starts_with(".\\Modules\\GloryClusteredRenderer\\Assets\\"))
+            {
+                std::filesystem::path path = pathStr;
+                path = path.lexically_relative(".\\Modules\\GloryClusteredRenderer\\Assets\\");
+                std::filesystem::path newPath = ".\\Modules\\GloryRenderer\\Assets\\";
+
+                if (path.filename() == "Phong_vert.shader")
+                {
+                    path.replace_filename("Default_vert.shader");
+                    asset["Metadata/Name"].SetString("Default_vert");
+                }
+
+                newPath.append(path.string());
+                asset["Location/Path"].SetString(newPath.string());
+
+                std::stringstream str;
+                str << "0.6.0> Moved " << pathStr << " to " << newPath.string();
+                pApplication->GetEngine()->GetDebug().LogInfo(str.str());
+            }
+        }
+    }
+
+    void Migrate_0_6_0_RemoveShaderAndPipelineAssets(ProjectSpace* pProject)
+    {
+        static constexpr size_t removeAssetsCount = 8;
+        constexpr std::string_view toRemoveAssets[removeAssetsCount] = {
+            /* Phong textured fragment shader */
+            "3",
+            /* Phong textured vertex shader */
+            "4",
+            /* Clustered deferred fragment shader */
+            "14",
+            /* Clustered deferred pipeline */
+            "20",
+            /* PBR vertex shader */
+            "25",
+            /* Clustered deferred PBR pipeline */
+            "27",
+            /* Irradiance generator shader */
+            "34",
+            /* Irradiance generator pipeline */
+            "35",
+        };
+
+        EditorApplication* pApplication = EditorApplication::GetInstance();
+
+        pApplication->GetEngine()->GetDebug().LogInfo("0.6.0> Removing deleted shaders and pipelines");
+
+        JSONFileRef& projectFile = pProject->ProjectFile();
+        JSONValueRef assets = projectFile["Assets"];
+        if (!assets.Exists() || !assets.IsObject()) return;
+
+        for (size_t i = 0; i < removeAssetsCount; ++i)
+        {
+            assets.Remove(toRemoveAssets[i]);
+            std::stringstream str;
+            str << "0.6.0> Removed asset ID " << toRemoveAssets[i];
+            pApplication->GetEngine()->GetDebug().LogInfo(str.str());
         }
     }
 }

@@ -48,4 +48,14 @@ namespace Glory::Editor
 	 * @param pProject Project to migrate material instances in
 	 */
 	GLORY_EDITOR_API void Migrate_0_6_0_MaterialInstances(ProjectSpace* pProject);
+
+	/** @brief Updates the paths to shaders and pipelines from the old renderer to the new renderer
+	 * @param pProject Project to migrate assets in
+	 */
+	GLORY_EDITOR_API void Migrate_0_6_0_MoveShaderAndPipelineAssets(ProjectSpace* pProject);
+
+	/** @brief Remove the shaders and pipelines that no longer exist after the renderer rewrite from the project
+	 * @param pProject Project to remove shaders and pipelines in
+	 */
+	GLORY_EDITOR_API void Migrate_0_6_0_RemoveShaderAndPipelineAssets(ProjectSpace* pProject);
 }

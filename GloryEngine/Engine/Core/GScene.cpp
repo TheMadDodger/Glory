@@ -119,7 +119,6 @@ namespace Glory
 			return isActive;
 		});
 		m_Registry.InvokeAll(Utils::ECS::InvocationType::Stop, NULL);
-		m_Registry.InvokeAll(Utils::ECS::InvocationType::OnRemove, NULL);
 	}
 
 	void GScene::SetPrefab(Utils::ECS::EntityID entity, UUID prefabID)

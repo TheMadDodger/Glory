@@ -44,6 +44,7 @@ namespace Glory
 		pComponent.m_RenderDocumentID = data.m_ObjectID;
 		pComponent.m_IsDirty = true;
 		data.m_WorldDirty = pComponent.m_IsDirty;
+		data.m_ClearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 		glm::uvec2 resolution = pComponent.m_Resolution;
 

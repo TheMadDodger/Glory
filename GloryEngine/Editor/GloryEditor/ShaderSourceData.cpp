@@ -17,9 +17,11 @@ namespace Glory
     }
 
     ShaderSourceData::ShaderSourceData(ShaderType shaderType, std::vector<char>&& source,
-        std::vector<char>&& processed, std::vector<std::string>&& features)
+        std::vector<char>&& processed, std::vector<std::string>&& features,
+        std::vector<std::filesystem::path>&& includes)
         : m_ShaderType(shaderType), m_OriginalSource(std::move(source)),
         m_ProcessedSource(std::move(processed)), m_Features(std::move(features)),
+        m_Includes(std::move(includes)), m_IncludesLastWriteTimes(m_Includes.size(), 0ull),
         m_TimeSinceLastWrite(0)
     {
         APPEND_TYPE(ShaderSourceData);
@@ -29,6 +31,8 @@ namespace Glory
     {
         m_ProcessedSource.clear();
         m_OriginalSource.clear();
+        m_Includes.clear();
+        m_IncludesLastWriteTimes.clear();
     }
 
     size_t ShaderSourceData::Size() const
@@ -66,6 +70,26 @@ namespace Glory
         return m_TimeSinceLastWrite;
     }
 
+    size_t ShaderSourceData::IncludeCount() const
+    {
+        return m_Includes.size();
+    }
+
+    const std::filesystem::path& ShaderSourceData::IncludePath(size_t includeIndex) const
+    {
+        return m_Includes[includeIndex];
+    }
+
+    uint64_t& ShaderSourceData::TimeSinceLastWrite(size_t includeIndex)
+    {
+        return m_IncludesLastWriteTimes[includeIndex];
+    }
+
+    const uint64_t& ShaderSourceData::TimeSinceLastWrite(size_t includeIndex) const
+    {
+        return m_IncludesLastWriteTimes[includeIndex];
+    }
+
     size_t ShaderSourceData::FeatureCount() const
     {
         return m_Features.size();
@@ -74,5 +98,16 @@ namespace Glory
     std::string_view ShaderSourceData::Feature(size_t index) const
     {
         return m_Features[index];
+    }
+
+    bool ShaderSourceData::IsOutdated(uint64_t cacheWriteTime) const
+    {
+        if (cacheWriteTime < m_TimeSinceLastWrite) return true;
+        for (auto includeWriteTime : m_IncludesLastWriteTimes)
+        {
+            if (cacheWriteTime >= includeWriteTime) continue;
+            return true;
+        }
+        return false;
     }
 }

@@ -19,6 +19,8 @@
 #include <UIDocument.h>
 #include <UIDocumentData.h>
 #include <Shortcuts.h>
+#include <RendererModule.h>
+#include <UIRendererModule.h>
 
 namespace Glory::Editor
 {
@@ -52,8 +54,9 @@ namespace Glory::Editor
 		m_SelectedEntity = 0;
 		m_EditingDocument = documentID;
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
-		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		UIRendererModule* pUIRenderer = pEngine->GetOptionalModule<UIRendererModule>();
+		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
 		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(documentID);
 		YAMLResource<UIDocumentData>* pDocument = static_cast<YAMLResource<UIDocumentData>*>(pResource);
@@ -72,16 +75,7 @@ namespace Glory::Editor
 		document.SetResourceUUID(documentID);
 		m_EditingDocumentIndex = m_pDocuments.size();
 		m_pDocuments.push_back(new UIDocument(&document));
-
-		RenderTextureCreateInfo uiTextureInfo;
-		uiTextureInfo.HasDepth = false;
-		uiTextureInfo.HasStencil = true;
-		uiTextureInfo.Width = m_Resolution.x;
-		uiTextureInfo.Height = m_Resolution.y;
-		uiTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-
-		RenderTexture* pTexture = pResourceManager->CreateRenderTexture(uiTextureInfo);
-		m_pDocuments[m_EditingDocumentIndex]->SetRenderTexture(pTexture);
+		m_pDocuments[m_EditingDocumentIndex]->CreateRenderPasses(pDevice, pRenderer->GetNumFramesInFlight(), m_Resolution, pUIRenderer);
 	}
 
 	UUID UIMainWindow::CurrentDocumentID() const
@@ -118,10 +112,14 @@ namespace Glory::Editor
 	void UIMainWindow::SetResolution(const glm::uvec2& resolution)
 	{
 		m_Resolution = resolution;
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		UIRendererModule* pUIRenderer = pEngine->GetOptionalModule<UIRendererModule>();
+		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
 
 		for (size_t i = 0; i < m_pDocuments.size(); ++i)
 		{
-			m_pDocuments[i]->GetUITexture()->Resize(resolution.x, resolution.y);
+			m_pDocuments[i]->ResizeRenderTexture(pDevice, pRenderer->GetNumFramesInFlight(), resolution, pUIRenderer);
 			Utils::ECS::EntityRegistry& registry = m_pDocuments[i]->Registry();
 			for (size_t i = 0; i < registry.ChildCount(0); ++i)
 			{
@@ -285,6 +283,24 @@ namespace Glory::Editor
 			UIDocument* pDocument = CurrentDocument();
 			if (!pDocument) return;
 			pDocument->SetDrawDirty();
+		});
+
+		pEngine->GetMainModule<RendererModule>()->InjectPreRenderPass([this](GraphicsDevice* pDevice, CommandBufferHandle commandBuffer, uint32_t frameIndex) {
+			UIDocument* pDocument = CurrentDocument();
+			const UUID documentID = CurrentDocumentID();
+			const glm::uvec2 resolution = Resolution();
+			if (documentID == 0 || !pDocument) return;
+			Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+			UIRendererModule* pRenderer = pEngine->GetOptionalModule<UIRendererModule>();
+
+			UIRenderData data;
+			data.m_DocumentID = documentID;
+			data.m_ObjectID = 0;
+			data.m_TargetCamera = 0;
+			data.m_Resolution = glm::vec2(resolution.x, resolution.y);
+			data.m_ClearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+			pRenderer->DrawDocument(pDevice, commandBuffer, frameIndex, pDocument, data);
 		});
 	}
 

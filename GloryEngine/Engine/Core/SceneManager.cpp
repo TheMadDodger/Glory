@@ -90,42 +90,6 @@ namespace Glory
 		return m_pEngine;
 	}
 
-	GScene* SceneManager::GetHoveringEntityScene()
-	{
-		return m_HoveringObjectSceneID ? GetOpenScene(m_HoveringObjectSceneID) : nullptr;
-	}
-
-	UUID SceneManager::GetHoveringEntityUUID() const
-	{
-		return m_HoveringObjectID;
-	}
-
-	const glm::vec3& SceneManager::GetHoveringPosition() const
-	{
-		return m_HoveringPos;
-	}
-
-	const glm::vec3& SceneManager::GetHoveringNormal() const
-	{
-		return m_HoveringNormal;
-	}
-
-	void SceneManager::SetHoveringObject(UUID sceneID, UUID objectID)
-	{
-		m_HoveringObjectSceneID = sceneID;
-		m_HoveringObjectID = objectID;
-	}
-
-	void SceneManager::SetHoveringPosition(const glm::vec3& pos)
-	{
-		m_HoveringPos = pos;
-	}
-
-	void SceneManager::SetHoveringNormal(const glm::vec3& normal)
-	{
-		m_HoveringNormal = normal;
-	}
-
 	size_t SceneManager::OpenScenesCount()
 	{
 		return m_pOpenScenes.size();
@@ -192,6 +156,7 @@ namespace Glory
 
 		/* Register component types */
 		Reflect::RegisterEnum<CameraPerspective>();
+		Reflect::RegisterEnum<CameraOutputMode>();
 		Reflect::RegisterType<MeshMaterial>();
 		Reflect::RegisterType<ShadowSettings>();
 
@@ -225,10 +190,12 @@ namespace Glory
 		m_pComponentTypesInstance->RegisterInvokaction<Transform>(Glory::Utils::ECS::InvocationType::Update, TransformSystem::OnUpdate);
 
 		// Camera
+		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::OnValidate, CameraSystem::OnValidate);
 		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::OnAdd, CameraSystem::OnComponentAdded);
 		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::OnRemove, CameraSystem::OnComponentRemoved);
 		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::Update, CameraSystem::OnUpdate);
-		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::Draw, CameraSystem::OnDraw);
+		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::OnEnableDraw, CameraSystem::OnEnableDraw);
+		m_pComponentTypesInstance->RegisterInvokaction<CameraComponent>(Glory::Utils::ECS::InvocationType::OnDisableDraw, CameraSystem::OnDisableDraw);
 
 		// Light
 		m_pComponentTypesInstance->RegisterInvokaction<LightComponent>(Glory::Utils::ECS::InvocationType::Draw, LightSystem::OnDraw);

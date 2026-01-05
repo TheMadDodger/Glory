@@ -211,6 +211,11 @@ namespace Glory
 		}
 
 		container.Write(m_TotalPropertiesByteSize);
+
+		/* Write settings */
+		container.Write(m_CullFace).Write(m_PrimitiveType)
+			.Write(m_SettingsToggles).Write(m_DepthCompare).Write(m_StencilCompareOp)
+			.Write(m_StencilFailOp).Write(m_StencilDepthFailOp).Write(m_StencilPassOp);
 	}
 
 	void PipelineData::Deserialize(BinaryStream& container)
@@ -263,6 +268,11 @@ namespace Glory
 		}
 
 		container.Read(m_TotalPropertiesByteSize);
+
+		/* Read settings */
+		container.Read(m_CullFace).Read(m_PrimitiveType)
+			.Read(m_SettingsToggles).Read(m_DepthCompare).Read(m_StencilCompareOp)
+			.Read(m_StencilFailOp).Read(m_StencilDepthFailOp).Read(m_StencilPassOp);
 	}
 
 	void PipelineData::LoadIntoMaterial(MaterialData* pMaterial) const
@@ -316,7 +326,7 @@ namespace Glory
 		return m_Features[index];
 	}
 
-	bool PipelineData::FeatureEnabled(size_t index)
+	bool PipelineData::FeatureEnabled(size_t index) const
 	{
 		if (index >= m_Features.size()) return true;
 		return m_FeaturesEnabled.IsSet(index);
@@ -332,8 +342,111 @@ namespace Glory
 		m_Features.clear();
 		m_FeaturesEnabled.Clear();
 	}
+
 	size_t PipelineData::TotalPropertiesByteSize() const
 	{
 		return m_TotalPropertiesByteSize;
+	}
+
+	void PipelineData::SetDepthTestEnabled(bool enable)
+	{
+		m_SettingsToggles.Set(SettingBitsIndices::DepthTestEnable, enable);
+	}
+
+	const bool PipelineData::DepthTestEnabled() const
+	{
+		return m_SettingsToggles.IsSet(SettingBitsIndices::DepthTestEnable);
+	}
+
+	void PipelineData::SetDepthWriteEnabled(bool enable)
+	{
+		m_SettingsToggles.Set(SettingBitsIndices::DepthWriteEnable, enable);
+	}
+
+	const bool PipelineData::DepthWriteEnabled() const
+	{
+		return m_SettingsToggles.IsSet(SettingBitsIndices::DepthWriteEnable);
+	}
+
+	void PipelineData::SetColorWriteMask(bool r, bool g, bool b, bool a)
+	{
+		m_SettingsToggles.Set(SettingBitsIndices::ColorWriteRed, r);
+		m_SettingsToggles.Set(SettingBitsIndices::ColorWriteGreen, g);
+		m_SettingsToggles.Set(SettingBitsIndices::ColorWriteBlue, b);
+		m_SettingsToggles.Set(SettingBitsIndices::ColorWriteAlpha, a);
+	}
+
+	void PipelineData::SetColorWriteMask(uint8_t mask)
+	{
+		m_SettingsToggles.Set(SettingBitsIndices::ColorWriteRed, mask & 1);
+		m_SettingsToggles.Set(SettingBitsIndices::ColorWriteGreen, mask & 2);
+		m_SettingsToggles.Set(SettingBitsIndices::ColorWriteBlue, mask & 4);
+		m_SettingsToggles.Set(SettingBitsIndices::ColorWriteAlpha, mask & 8);
+	}
+
+	const void PipelineData::ColorWriteMask(bool& r, bool& g, bool& b, bool& a) const
+	{
+		r = m_SettingsToggles.IsSet(SettingBitsIndices::ColorWriteRed);
+		g = m_SettingsToggles.IsSet(SettingBitsIndices::ColorWriteGreen);
+		b = m_SettingsToggles.IsSet(SettingBitsIndices::ColorWriteBlue);
+		a = m_SettingsToggles.IsSet(SettingBitsIndices::ColorWriteAlpha);
+	}
+
+	const uint8_t PipelineData::ColorWriteMask() const
+	{
+		return static_cast<uint8_t>(*m_SettingsToggles.Data() << PipelineData::ColorWriteRed) & 0x0F;
+	}
+
+	void PipelineData::SetStencilTestEnabled(bool enable)
+	{
+		m_SettingsToggles.Set(SettingBitsIndices::StencilTestEnable, enable);
+	}
+
+	const bool PipelineData::StencilTestEnabled() const
+	{
+		return m_SettingsToggles.IsSet(SettingBitsIndices::StencilTestEnable);
+	}
+
+	void PipelineData::SetStencilWriteMask(uint8_t mask)
+	{
+		const uint32_t shiftedMask = mask >> PipelineData::StencilWriteMaskBegin;
+		(*m_SettingsToggles.Data()) |= shiftedMask;
+	}
+
+	const uint8_t PipelineData::StencilWriteMask() const
+	{
+		return static_cast<uint8_t>(*m_SettingsToggles.Data() << PipelineData::StencilWriteMaskBegin);
+	}
+
+	void PipelineData::SetStencilCompareMask(uint8_t mask)
+	{
+		const uint32_t shiftedMask = mask >> PipelineData::StencilCompareMaskBegin;
+		(*m_SettingsToggles.Data()) |= shiftedMask;
+	}
+
+	const uint8_t PipelineData::StencilCompareMask() const
+	{
+		return static_cast<uint8_t>(*m_SettingsToggles.Data() << PipelineData::StencilCompareMaskBegin);
+	}
+
+	void PipelineData::SetStencilReference(uint8_t ref)
+	{
+		const uint32_t shiftedMask = ref >> PipelineData::StencilReferenceBegin;
+		(*m_SettingsToggles.Data()) |= shiftedMask;
+	}
+
+	const uint8_t PipelineData::StencilReference() const
+	{
+		return static_cast<uint8_t>(*m_SettingsToggles.Data() << PipelineData::StencilReferenceBegin);
+	}
+
+	void PipelineData::SetBlendEnabled(bool enable)
+	{
+		m_SettingsToggles.Set(SettingBitsIndices::BlendEnable, enable);
+	}
+
+	const bool PipelineData::BlendEnabled() const
+	{
+		return m_SettingsToggles.IsSet(SettingBitsIndices::BlendEnable);
 	}
 }

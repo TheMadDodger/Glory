@@ -1,11 +1,8 @@
 #include "OpenGLGraphicsModule.h"
 #include "VertexHelpers.h"
 #include "FileLoaderModule.h"
-#include "GLShader.h"
-#include "OGLResourceManager.h"
 #include "GloryOGL.h"
 #include "GLConverter.h"
-#include "OGLRenderTexture.h"
 
 #include <Engine.h>
 #include <Window.h>
@@ -34,11 +31,9 @@ namespace Glory
 		m_pEngine->MainWindowInfo().WindowFlags |= W_OpenGL;
 	}
 
-	void OpenGLGraphicsModule::OnInitialize()
+	void OpenGLGraphicsModule::Initialize()
 	{
 		EngineInstance = m_pEngine;
-
-		m_pEngine->AddGraphicsDevice(&m_Device);
 
 		Window* pMainWindow = GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
 		pMainWindow->SetupForOpenGL();
@@ -57,16 +52,6 @@ namespace Glory
 		LogGLError(glGetError());
 
 		fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
-		LogGLError(glGetError());
-
-		// Should be done in the window itself, probably api independant
-		//if (SDL_GL_SetSwapInterval(1) < 0)
-		//{
-		//	std::cerr << "Could not set SDL GL Swap interval: " << SDL_GetError() << std::endl;
-		//	return;
-		//}
-		//SDL_GL_SetSwapInterval(0);
-
 		LogGLError(glGetError());
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -198,11 +183,13 @@ namespace Glory
 		glBindVertexArray(NULL);
 		LogGLError(glGetError());
 
-		m_pPassthroughMaterial = new MaterialData();
-		m_pPassthroughMaterial->SetPipeline(802);
+		//m_pPassthroughMaterial = new MaterialData();
+		//m_pPassthroughMaterial->SetPipeline(802);
+
+		m_pEngine->AddGraphicsDevice(&m_Device);
 	}
 
-	void OpenGLGraphicsModule::OnCleanup()
+	void OpenGLGraphicsModule::Cleanup()
 	{
 		glDeleteVertexArrays(1, &m_ScreenQuadVertexArrayID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
@@ -222,11 +209,6 @@ namespace Glory
 		LogGLError(glGetError());
 	}
 
-	GPUResourceManager* OpenGLGraphicsModule::CreateGPUResourceManager()
-	{
-		return new OGLResourceManager(m_pEngine);
-	}
-
 	void OpenGLGraphicsModule::LogGLError(const GLenum& err, bool bIncludeTimeStamp)
 	{
 		if (err != GL_NO_ERROR)
@@ -239,206 +221,5 @@ namespace Glory
 	const std::type_info& OpenGLGraphicsModule::GetModuleType()
 	{
 		return typeid(OpenGLGraphicsModule);
-	}
-
-	void OpenGLGraphicsModule::Clear(glm::vec4 color, double depth)
-	{
-		glClearColor(color.r, color.g, color.b, color.a);
-		LogGLError(glGetError());
-		glClearDepth(depth);
-		LogGLError(glGetError());
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		LogGLError(glGetError());
-	}
-
-	void OpenGLGraphicsModule::Swap()
-	{
-		Window* pMainWindow = GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
-		pMainWindow->GLSwapWindow();
-	}
-
-	Material* OpenGLGraphicsModule::UseMaterial(MaterialData* pMaterialData)
-	{
-		glUseProgram(NULL);
-		LogGLError(glGetError());
-		if (pMaterialData == nullptr) return nullptr;
-		Material* pMaterial = GetResourceManager()->CreateMaterial(pMaterialData);
-		if (!pMaterial) return nullptr;
-		pMaterial->Use();
-		return pMaterial;
-	}
-
-	void OpenGLGraphicsModule::OnDrawMesh(Mesh* pMesh, uint32_t vertexOffset, uint32_t vertexCount)
-	{
-		pMesh->BindForDraw();
-		const GLuint primitiveType = GLConverter::TO_GLPRIMITIVETYPE.at(pMesh->GetPrimitiveType());
-		const uint32_t indexCount = pMesh->GetIndexCount();
-		if (indexCount == 0) glDrawArrays(primitiveType, vertexOffset, vertexCount ? vertexCount : pMesh->GetVertexCount());
-		else glDrawElements(primitiveType, indexCount, GL_UNSIGNED_INT, NULL);
-		LogGLError(glGetError());
-		glBindVertexArray(NULL);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-	}
-
-	void OpenGLGraphicsModule::DrawScreenQuad()
-	{
-		glBindVertexArray(m_ScreenQuadVertexArrayID);
-		LogGLError(glGetError());
-
-		// Draw the triangles !
-		glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
-		LogGLError(glGetError());
-	}
-
-	void OpenGLGraphicsModule::DrawUnitCube()
-	{
-		glBindVertexArray(m_UnitCubeVertexArrayID);
-		LogGLError(glGetError());
-
-		// Draw the triangles !
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		LogGLError(glGetError());
-	}
-
-	void OpenGLGraphicsModule::DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z)
-	{
-		glDispatchCompute((GLuint)num_groups_x, (GLuint)num_groups_y, (GLuint)num_groups_z);
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-	}
-
-	void OpenGLGraphicsModule::EnableDepthTest(bool enable)
-	{
-		if (enable)
-			glEnable(GL_DEPTH_TEST);
-		else
-			glDisable(GL_DEPTH_TEST);
-	}
-
-	void OpenGLGraphicsModule::EnableDepthWrite(bool enable)
-	{
-		glDepthMask(enable);
-	}
-
-	void OpenGLGraphicsModule::EnableStencilTest(bool enable)
-	{
-		if (enable)
-			glEnable(GL_STENCIL_TEST);
-		else
-			glDisable(GL_STENCIL_TEST);
-	}
-
-	void OpenGLGraphicsModule::SetStencilMask(unsigned int mask)
-	{
-		glStencilMask(mask);
-	}
-
-	void OpenGLGraphicsModule::SetStencilFunc(CompareOp func, int ref, unsigned int mask)
-	{
-		const GLenum glFunc = GLConverter::TO_GLOP.at(func);
-		glStencilFunc(glFunc, ref, mask);
-	}
-
-	void OpenGLGraphicsModule::SetStencilOP(Func fail, Func dpfail, Func dppass)
-	{
-		const GLenum glFail = GLConverter::TO_GLFUNC.at(fail);
-		const GLenum gldpFail = GLConverter::TO_GLFUNC.at(dpfail);
-		const GLenum gldpPass = GLConverter::TO_GLFUNC.at(dppass);
-		glStencilOp(glFail, gldpFail, gldpPass);
-	}
-
-	void OpenGLGraphicsModule::SetColorMask(bool r, bool g, bool b, bool a)
-	{
-		glColorMask(r, g, b, a);
-	}
-
-	void OpenGLGraphicsModule::ClearStencil(int value)
-	{
-		glClearStencil(value);
-		glClear(GL_STENCIL_BUFFER_BIT);
-	}
-
-	void OpenGLGraphicsModule::SetViewport(int x, int y, uint32_t width, uint32_t height)
-	{
-		glViewport(x, y, width, height);
-	}
-
-	void OpenGLGraphicsModule::Scissor(int x, int y, uint32_t width, uint32_t height)
-	{
-		glEnable(GL_SCISSOR_TEST);
-		glScissor(x, y, width, height);
-	}
-
-	void OpenGLGraphicsModule::EndScissor()
-	{
-		glDisable(GL_SCISSOR_TEST);
-	}
-
-	void OpenGLGraphicsModule::Blit(RenderTexture* pTexture, glm::uvec4 src, glm::uvec4 dst, Filter filter)
-	{
-		GLenum glFilter = GLConverter::TO_GLFILTER.at(filter);
-
-		pTexture->BindRead();
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		uint32_t width, height;
-		pTexture->GetDimensions(width, height);
-
-		if (src.z == 0) src.z = width;
-		if (src.w == 0) src.w = height;
-		if (dst.z == 0) dst.z = width;
-		if (dst.w == 0) dst.w = height;
-
-		glBlitFramebuffer(src.x, src.y, src.z, src.w, dst.x, dst.y, dst.z, dst.w,
-			GL_COLOR_BUFFER_BIT, glFilter);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		pTexture->UnBindRead();
-	}
-
-	void OpenGLGraphicsModule::Blit(RenderTexture* pSource, RenderTexture* pDest, glm::uvec4 src, glm::uvec4 dst, Filter filter)
-	{
-		GLenum glFilter = GLConverter::TO_GLFILTER.at(filter);
-
-		uint32_t srcWidth, srcHeight, dstWidth, dstHeight;
-		pSource->GetDimensions(srcWidth, srcHeight);
-		pDest->GetDimensions(dstWidth, dstHeight);
-
-		if (src.z == 0) src.z = srcWidth;
-		if (src.w == 0) src.z = srcHeight;
-		if (dst.z == 0) dst.z = dstWidth;
-		if (dst.w == 0) dst.w = dstHeight;
-
-		const GLuint srcID = static_cast<OGLRenderTexture*>(pSource)->ID();
-		const GLuint dstID = static_cast<OGLRenderTexture*>(pDest)->ID();
-
-		glBlitNamedFramebuffer(srcID, dstID, src.x, src.y, src.z, src.w, dst.x, dst.y, dst.z, dst.w,
-			GL_COLOR_BUFFER_BIT, glFilter);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-	}
-
-	void OpenGLGraphicsModule::SetCullFace(CullFace cullFace)
-	{
-		switch (cullFace)
-		{
-		case Glory::CullFace::None:
-			glDisable(GL_CULL_FACE);
-			return;
-		case Glory::CullFace::Front:
-			glEnable(GL_CULL_FACE);
-			glCullFace(GL_FRONT);
-			return;
-		case Glory::CullFace::Back:
-			glEnable(GL_CULL_FACE);
-			glCullFace(GL_BACK);
-			return;
-		case Glory::CullFace::FrontAndBack:
-			glEnable(GL_CULL_FACE);
-			glCullFace(GL_FRONT_AND_BACK);
-			return;
-		}
-	}
-
-	Material* OpenGLGraphicsModule::UsePassthroughMaterial()
-	{
-		return UseMaterial(m_pPassthroughMaterial);
 	}
 }

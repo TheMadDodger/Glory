@@ -1,11 +1,6 @@
 #pragma once
 #include <EditorWindow.h>
 
-namespace Glory
-{
-	class RenderTexture;
-}
-
 namespace Glory::Editor
 {
 	class EnvironmentGenerator : public EditorWindowTemplate<EnvironmentGenerator>
@@ -21,12 +16,19 @@ namespace Glory::Editor
 
 		void EnvironmentPass();
 
+		void Initialize();
+
 		UUID m_CurrentCubemap;
 		bool m_Generate;
-		RenderTexture* m_pIrradianceResult;
+		RenderPassHandle m_IrradianceRenderPass;
+		PipelineHandle m_IrradiancePipeline;
+		DescriptorSetHandle m_CubemapSet;
+
+		TextureHandle m_CubemapFaces[6];
 
 		std::string m_OutputPath;
 		std::string m_Filename;
+		static bool m_Initialized;
 
 		float* m_pFaces[6];
 	};

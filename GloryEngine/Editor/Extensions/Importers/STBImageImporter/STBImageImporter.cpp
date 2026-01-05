@@ -46,21 +46,8 @@ namespace Glory::Editor
 		char* data = new char[dataSize];
 		std::memcpy(data, pixels, dataSize);
 
-		PixelFormat internalFormat;
-		PixelFormat format;
-		switch (numChannels)
-		{
-		case 3:
-			internalFormat = PixelFormat::PF_R16G16B16Sfloat;
-			format = PixelFormat::PF_RGB;
-			break;
-		case 4:
-			internalFormat = PixelFormat::PF_R16G16B16A16Sfloat;
-			format = PixelFormat::PF_RGBA;
-			break;
-		default:
-			break;
-		}
+		const PixelFormat internalFormat = PixelFormat::PF_R32G32B32A32Sfloat;
+		const PixelFormat format = PixelFormat::PF_RGBA;
 
 		ImageData* pImage = new ImageData(resolution, resolution, internalFormat, format, numChannels*sizeof(float), std::move(data), dataSize, false, DataType::DT_Float);
 		const UUID imageID = EditorAssetDatabase::ReserveAssetUUID(path.string(), subPath).first;
@@ -72,7 +59,7 @@ namespace Glory::Editor
 	{
 		/* Load HDRI */
 		int width, height, nrComponents;
-		float* imageData = stbi_loadf(path.string().data(), &width, &height, &nrComponents, 0);
+		float* imageData = stbi_loadf(path.string().data(), &width, &height, &nrComponents, 4);
 
 		if (!imageData)
 		{
@@ -83,16 +70,19 @@ namespace Glory::Editor
 			return nullptr;
 		}
 
-		const size_t dataSize = width * height * nrComponents * sizeof(float);
-		char* data = new char[dataSize];
-		std::memcpy(data, imageData, dataSize);
+		const size_t numPixels = width*height;
+		const size_t originalDataSize = numPixels*nrComponents*sizeof(float);
+		const size_t targetDataSize = numPixels*4*sizeof(float);
+		char* data = new char[targetDataSize];
+		std::memcpy(data, imageData, targetDataSize);
+
 		stbi_image_free(imageData);
 
 		if (width == height)
 		{
 			/* Cubemap face */
-			ImageData* pData = new ImageData(width, height, PixelFormat::PF_R16G16B16Sfloat,
-				PixelFormat::PF_RGB, 3*sizeof(float), std::move(data), dataSize, false, DataType::DT_Float);
+			ImageData* pData = new ImageData(width, height, PixelFormat::PF_R32G32B32A32Sfloat,
+				PixelFormat::PF_RGBA, 4*sizeof(float), std::move(data), targetDataSize, false, DataType::DT_Float);
 			const UUID imageID = EditorAssetDatabase::ReserveAssetUUID(path.string(), "").first;
 			pData->SetResourceUUID(imageID);
 			ImportedResource importedResource{ path, pData };
@@ -101,8 +91,8 @@ namespace Glory::Editor
 			return importedResource;
 		}
 
-		ImageData* pData = new ImageData(width, height, PixelFormat::PF_R16G16B16Sfloat, PixelFormat::PF_RGB,
-			12, std::move(data), dataSize, false, DataType::DT_Float);
+		ImageData* pData = new ImageData(width, height, PixelFormat::PF_R32G32B32A32Sfloat, PixelFormat::PF_RGBA,
+			4*sizeof(float), std::move(data), targetDataSize, false, DataType::DT_Float);
 		ImportedResource importedResource{ path, pData };
 
 		TextureData* pDefualtTexture = new TextureData(pData);
@@ -112,7 +102,7 @@ namespace Glory::Editor
 		const uint32_t cubemapResolution = 1024;
 		bool linearFilter = false;
 
-		HdriToCubemap<float> hdriToCube_hdr(path.string(), int(cubemapResolution), linearFilter);
+		HdriToCubemap<float> hdriToCube_hdr(path.string(), int(cubemapResolution), linearFilter, 4);
 		const uint32_t numChanels = uint32_t(hdriToCube_hdr.getNumChannels());
 		if (numChanels == 0) return importedResource;
 
@@ -155,7 +145,7 @@ namespace Glory::Editor
 
 	bool STBHDRImageImporter::SaveResource(const std::filesystem::path& path, ImageData* pImage) const
 	{
-		const int result = stbi_write_hdr(path.string().data(), pImage->GetWidth(), pImage->GetHeight(), 3, static_cast<const float*>(pImage->GetPixels()));
+		const int result = stbi_write_hdr(path.string().data(), pImage->GetWidth(), pImage->GetHeight(), 4, static_cast<const float*>(pImage->GetPixels()));
 		return result != 0;
 	}
 }

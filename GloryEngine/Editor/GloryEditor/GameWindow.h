@@ -17,6 +17,7 @@ namespace Glory::Editor
         void View();
 
     private:
-        size_t m_DisplayIndex;
+        int m_CurrentOutputCameraIndex;
+        int m_SelectedRenderTextureIndex;
     };
 }

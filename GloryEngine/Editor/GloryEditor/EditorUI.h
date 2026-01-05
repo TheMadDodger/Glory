@@ -55,6 +55,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool CheckBox(std::string_view label, bool* value);
 		static GLORY_EDITOR_API bool CheckBoxFlags(std::string_view label, uint32_t* value, const std::vector<std::string_view>& names, const std::vector<uint32_t>& values);
 		static GLORY_EDITOR_API bool CheckBox(Utils::YAMLFileRef& file, const std::filesystem::path& path);
+		static GLORY_EDITOR_API bool CheckBoxFlags(Utils::YAMLFileRef& file, const std::filesystem::path& path, const std::vector<std::string_view>& names, const std::vector<uint32_t>& values);
 
 		static GLORY_EDITOR_API bool InputColor(std::string_view label, glm::vec4* value, const bool hdr);
 		static GLORY_EDITOR_API bool InputColor(Utils::YAMLFileRef& file, const std::filesystem::path& path, const bool hdr);

@@ -33,8 +33,7 @@ namespace Glory::Editor
         virtual void Clear(const ImVec4& clearColor) override;
         virtual void FrameRender(ImDrawData* pDrawData) override;
         virtual void FramePresent() override;
-
-        virtual void* GetTextureID(Texture* pTexture) override;
+        virtual void* GetTextureID(TextureHandle texture) override;
 
         void LogGLError(const unsigned int& err, bool bIncludeTimeStamp);
 

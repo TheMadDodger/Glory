@@ -126,8 +126,8 @@ namespace Glory::Editor
 
 		bool openPopup = false;
 		const float start = popupStart, width = popupWidth;
-		Texture* pTumbnail = Tumbnail::GetTumbnail(*value);
-		if(*value && ImGui::ImageButton(pTumbnail ? pRenderImpl->GetTextureID(pTumbnail) : NULL, ImVec2(buttonWidth, buttonWidth)))
+		TextureHandle thumbnail = Tumbnail::GetTumbnail(*value);
+		if(*value && ImGui::ImageButton(thumbnail ? pRenderImpl->GetTextureID(thumbnail) : NULL, ImVec2(buttonWidth, buttonWidth)))
 		{
 			ForceFilter = true;
 			openPopup = true;
@@ -277,9 +277,9 @@ namespace Glory::Editor
 					change = true;
 				}
 
-				Texture* pThumbnail = Tumbnail::GetTumbnail(*it);
+				TextureHandle thumbnail = Tumbnail::GetTumbnail(*it);
 				ImGui::SameLine();
-				ImGui::Image(pThumbnail ? pRenderImpl->GetTextureID(pThumbnail) : NULL, { rowHeight, rowHeight });
+				ImGui::Image(thumbnail ? pRenderImpl->GetTextureID(thumbnail) : NULL, { rowHeight, rowHeight });
 				ImGui::SameLine();
 				ImGui::TextUnformatted(name.c_str());
 				ImGui::PopID();

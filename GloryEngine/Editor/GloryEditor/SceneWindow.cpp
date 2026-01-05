@@ -22,6 +22,7 @@
 #include <Dispatcher.h>
 #include <ImGuiHelpers.h>
 #include <Components.h>
+#include <GraphicsDevice.h>
 
 namespace Glory::Editor
 {
@@ -30,8 +31,7 @@ namespace Glory::Editor
 
 	SceneWindow::SceneWindow()
 		: EditorWindowTemplate("Scene", 1280.0f, 720.0f),
-		m_DrawGrid(true), m_SelectedRenderTextureIndex(-1), m_SelectedFrameBufferIndex(0),
-		m_ViewEventID(0)
+		m_DrawGrid(true), m_SelectedRenderTextureIndex(-1), m_ViewEventID(0)
 	{
 		m_WindowFlags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar;
 		m_pPreviewScene = new GScene("Preview");
@@ -45,8 +45,6 @@ namespace Glory::Editor
 
 	void SceneWindow::OnOpen()
 	{
-		m_SelectedFrameBufferIndex = 0;
-
 		ImGuiIO& io = ImGui::GetIO();
 
 		m_SceneCamera.Initialize();
@@ -61,10 +59,14 @@ namespace Glory::Editor
 
 		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
 		pScenes->AddExternalScene(m_pPreviewScene);
+
+		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->SubmitCamera(m_SceneCamera.m_Camera);
 	}
 
 	void SceneWindow::OnClose()
 	{
+		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->UnsubmitCamera(m_SceneCamera.m_Camera);
+
 		Gizmos::Clear();
 		m_SceneCamera.Cleanup();
 
@@ -82,9 +84,6 @@ namespace Glory::Editor
 
 	void SceneWindow::OnGUI()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		RenderTexture* pRenderTexture = pEngine->GetCameraManager().GetRenderTextureForCamera(m_SceneCamera.m_Camera, pEngine, 0, false);
-
 		MenuBar();
 		CameraUpdate();
 		DrawScene();
@@ -92,12 +91,17 @@ namespace Glory::Editor
 
 	void SceneWindow::Draw()
 	{
-		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->Submit(m_SceneCamera.m_Camera);
+		RendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>();
 		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->Submit(m_PickPos, m_SceneCamera.m_Camera.GetUUID());
 	}
 
 	void SceneWindow::MenuBar()
 	{
+		RendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>();
+
+		if (m_SelectedRenderTextureIndex == -1)
+			m_SelectedRenderTextureIndex = pRenderer->DefaultAttachmenmtIndex();
+
 		if (ImGui::BeginMenuBar())
 		{
 			if (ImGui::MenuItem("Grid", NULL, m_DrawGrid))
@@ -105,28 +109,29 @@ namespace Glory::Editor
 				m_DrawGrid = !m_DrawGrid;
 			}
 
-			if (ImGui::BeginMenu(m_SelectedRenderTextureIndex == -1 ? "Final" :
-				m_SceneCamera.m_Camera.GetRenderTexture(size_t(m_SelectedRenderTextureIndex))->AttachmentName(m_SelectedFrameBufferIndex).c_str()))
+			if (ImGui::BeginMenu(pRenderer->CameraAttachmentPreviewName(m_SelectedRenderTextureIndex).data()))
 			{
-				if (ImGui::MenuItem("Final", NULL, m_SelectedRenderTextureIndex == -1))
+				for (size_t i = 0; i < pRenderer->CameraAttachmentPreviewCount(); ++i)
 				{
-					m_SelectedRenderTextureIndex = -1;
-					m_SelectedFrameBufferIndex = 0;
-				}
-
-				for (size_t i = 0; i < m_SceneCamera.m_Camera.GetRenderTextureCount(); ++i)
-				{
-					RenderTexture* pRenderTexture = m_SceneCamera.m_Camera.GetRenderTexture(i);
-					for (size_t j = 0; j < pRenderTexture->AttachmentCount(); ++j)
+					if (ImGui::MenuItem(pRenderer->CameraAttachmentPreviewName(i).data(), NULL, m_SelectedRenderTextureIndex == i))
 					{
-						const std::string& name = pRenderTexture->AttachmentName(j);
-						if (ImGui::MenuItem(name.c_str(), NULL, m_SelectedRenderTextureIndex == i && m_SelectedFrameBufferIndex == j))
-						{
-							m_SelectedRenderTextureIndex = i;
-							m_SelectedFrameBufferIndex = j;
-						}
+						m_SelectedRenderTextureIndex = i;
+						pRenderer->VisualizeAttachment(m_SceneCamera.m_Camera, size_t(m_SelectedRenderTextureIndex));
 					}
 				}
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Debug Overlays"))
+			{
+				for (size_t i = 0; i < pRenderer->DebugOverlayCount(); ++i)
+				{
+					const bool enabled = pRenderer->DebugOverlayEnabled(m_SceneCamera.m_Camera, i);
+					if (ImGui::MenuItem(pRenderer->DebugOverlayName(i).data(), NULL, enabled))
+						pRenderer->SetDebugOverlayEnabled(m_SceneCamera.m_Camera, i, !enabled);
+				}
+						
 
 				ImGui::EndMenu();
 			}
@@ -137,11 +142,13 @@ namespace Glory::Editor
 				{
 					m_SceneCamera.m_IsOrthographic = false;
 					m_SceneCamera.UpdateCamera();
+					pRenderer->UpdateCamera(m_SceneCamera.m_Camera);
 				}
 				if (ImGui::MenuItem("Orthographic", Shortcuts::GetShortcutString(Shortcut_View_Orthographic).data(), m_SceneCamera.m_IsOrthographic))
 				{
 					m_SceneCamera.m_IsOrthographic = true;
 					m_SceneCamera.UpdateCamera();
+					pRenderer->UpdateCamera(m_SceneCamera.m_Camera);
 				}
 				ImGui::EndMenu();
 			}
@@ -157,7 +164,11 @@ namespace Glory::Editor
 				EditorUI::InputFloat("Fly Speed", &m_SceneCamera.m_MovementSpeed, 0.001f);
 				EditorUI::InputFloat("Sensitivity", &m_SceneCamera.m_FreeLookSensitivity, 0.001f);
 				EditorUI::InputFloat("Zoom Sensitivity", &m_SceneCamera.m_ZoomSensitivity, 0.001f);
-				if (change) m_SceneCamera.UpdateCamera();
+				if (change)
+				{
+					m_SceneCamera.UpdateCamera();
+					pRenderer->UpdateCamera(m_SceneCamera.m_Camera);
+				}
 				ImGui::EndMenu();
 			}
 
@@ -169,17 +180,16 @@ namespace Glory::Editor
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max)) m_SceneCamera.Update();
-		m_SceneCamera.m_Width = (uint32_t)m_WindowDimensions.x;
-		m_SceneCamera.m_Height = (uint32_t)m_WindowDimensions.x;
 		if (!m_SceneCamera.SetResolution((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y)) return;
 		m_SceneCamera.UpdateCamera();
+		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->UpdateCamera(m_SceneCamera.m_Camera);
 	}
 
 	void SceneWindow::DrawScene()
 	{
-		RenderTexture* pSceneTexture = m_SceneCamera.m_Camera.GetOutputTexture();
-		if (pSceneTexture == nullptr) return;
-
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 
 		ImVec2 screenPos = ImGui::GetCursorScreenPos();
@@ -203,11 +213,12 @@ namespace Glory::Editor
 			ImGui::EndDragDropTarget();
 		}
 
-		Texture* pTexture = m_SelectedRenderTextureIndex == -1 ? pSceneTexture->GetTextureAttachment(0) :
-			m_SceneCamera.m_Camera.GetRenderTexture(size_t(m_SelectedRenderTextureIndex))->GetTextureAttachment(m_SelectedFrameBufferIndex);
-
+		const float cursorPosYStart = ImGui::GetCursorPosY();
+		TextureHandle texture = pRenderer->CameraAttachmentPreview(m_SceneCamera.m_Camera, pRenderer->DefaultAttachmenmtIndex());
 		ImVec2 viewportSize = ImVec2(width, height);
-		ImGui::Image(pRenderImpl->GetTextureID(pTexture), viewportSize, ImVec2(0, 1), ImVec2(1, 0));
+
+		const bool flipY = pDevice->GetViewportOrigin() == ViewportOrigin::TopLeft;
+		ImGui::Image(pRenderImpl->GetTextureID(texture), viewportSize, ImVec2(0, flipY ? 0 : 1), ImVec2(1, flipY ? 1 : 0));
 
 		ImGuizmo::SetDrawlist();
 		ImGuizmo::SetRect(screenPos.x, screenPos.y, width, height);
@@ -243,8 +254,6 @@ namespace Glory::Editor
 		glm::mat4 identityMatrix = glm::identity<glm::mat4>();
 		if (m_DrawGrid) ImGuizmo::DrawGrid((float*)&cameraView, (float*)&cameraProjection, (float*)&identityMatrix, 100.f);
 
-		//ImGuizmo::DrawCubes((float*)&cameraView, (float*)&cameraProjection, (float*)&identityMatrix, 1);
-
 		Gizmos::DrawGizmos(cameraView, cameraProjection);
 
 		float camDistance = 8.f;
@@ -259,21 +268,29 @@ namespace Glory::Editor
 		viewportCoord = viewportCoord / glm::vec2(size.x, size.y);
 
 		glm::uvec2 resolution = m_SceneCamera.m_Camera.GetResolution();
-		glm::uvec2 textureCoord = viewportCoord * (glm::vec2)resolution;
+		glm::uvec2 textureCoord = viewportCoord*(glm::vec2)resolution;
 		textureCoord.y = resolution.y - textureCoord.y;
 		m_PickPos = textureCoord;
 
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		size_t pickIndex = 0;
+		m_CurrentPick.m_Object = SceneObjectRef();
+		if (!pRenderer->PickResultIndex(m_SceneCamera.m_Camera.GetUUID(), pickIndex)) return;
+		const PickResult& pickResult = pRenderer->GetPickResult(pickIndex);
+		m_CurrentPick.m_Object = pickResult.m_Object;
+		m_CurrentPick.m_Normal = pickResult.m_Normal;
+		m_CurrentPick.m_WorldPosition = pickResult.m_WorldPosition;
+
 		if (!m_BlockNextPick && !ImGuizmo::IsOver() && ImGui::IsWindowHovered() && ImGui::IsMouseReleased(0) && ImGui::IsMouseHoveringRect(min, viewportMax))
 		{
-			Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-			GScene* pScene = pEngine->GetSceneManager()->GetHoveringEntityScene();
+			GScene* pScene = pEngine->GetSceneManager()->GetOpenScene(pickResult.m_Object.SceneUUID());
 			if (!pScene)
 			{
 				Selection::SetActiveObject(nullptr);
 				return;
 			}
-			const UUID objectID = pEngine->GetSceneManager()->GetHoveringEntityUUID();
-			Entity entityHandle = pScene->GetEntityByUUID(objectID);
+			Entity entityHandle = pScene->GetEntityByUUID(pickResult.m_Object.ObjectUUID());
 			if (!entityHandle.IsValid())
 			{
 				Selection::SetActiveObject(nullptr);
@@ -365,9 +382,10 @@ namespace Glory::Editor
 	{
 		const float* snap = Gizmos::GetSnap(ImGuizmo::OPERATION::TRANSLATE);
 		SceneManager* scenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
-		glm::vec3 pos = scenes->GetHoveringPosition();
-		const UUID hoveringObject = scenes->GetHoveringEntityUUID();
-		const GScene* hoveringScene = scenes->GetHoveringEntityScene();
+		glm::vec3 pos = m_CurrentPick.m_WorldPosition;
+		const UUID hoveringObject = m_CurrentPick.m_Object.ObjectUUID();
+		const UUID hoveringSceneID = m_CurrentPick.m_Object.SceneUUID();
+		const GScene* hoveringScene = hoveringSceneID ? scenes->GetOpenScene(hoveringSceneID) : nullptr;
 		if (!hoveringScene || !hoveringObject)
 		{
 			const glm::uvec2 resolution = m_SceneCamera.m_Camera.GetResolution();
@@ -394,14 +412,15 @@ namespace Glory::Editor
 	const glm::quat SceneWindow::GetRotation() const
 	{
 		SceneManager* scenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
-		const UUID hoveringObject = scenes->GetHoveringEntityUUID();
-		const GScene* hoveringScene = scenes->GetHoveringEntityScene();
+		const UUID hoveringObject = m_CurrentPick.m_Object.ObjectUUID();
+		const UUID hoveringSceneID = m_CurrentPick.m_Object.SceneUUID();
+		const GScene* hoveringScene = hoveringSceneID ? scenes->GetOpenScene(hoveringSceneID) : nullptr;
 		if (!hoveringScene || !hoveringObject)
 		{
 			return glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 		}
 
-		const glm::vec3 normal = scenes->GetHoveringNormal();
+		const glm::vec3 normal = m_CurrentPick.m_Normal;
 		const glm::vec3 forward{ 0.0f, 0.0f, 1.0f };
 		const glm::vec3 right{ -1.0f, 0.0f, 0.0f };
 		const float forwardDot = std::abs(glm::dot(normal, forward));

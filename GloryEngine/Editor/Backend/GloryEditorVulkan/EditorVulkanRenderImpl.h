@@ -3,9 +3,10 @@
 #include "EditorPlatform.h"
 #include "imgui_impl_vulkan.h"
 
-#include <Device.h>
 #include <Glory.h>
 #include <EditorCreateInfo.h>
+
+#include <vulkan/vulkan.hpp>
 
 namespace Glory
 {
@@ -22,7 +23,7 @@ namespace Glory::Editor
         EditorVulkanRenderImpl();
         virtual ~EditorVulkanRenderImpl();
 
-        virtual void* GetTextureID(Texture* pTexture) override;
+        virtual void* GetTextureID(TextureHandle texture) override;
 
     private:
         virtual std::string ShadingLanguage() override;
@@ -48,12 +49,15 @@ namespace Glory::Editor
         virtual void FrameRender(ImDrawData* pDrawData) override;
         virtual void FramePresent() override;
 
+        void* GetTextureID_Internal(TextureHandle texture);
+
     private:
         VulkanDevice* m_pDevice;
         ImGui_ImplVulkanH_Window m_MainWindow;
         VkDescriptorPool m_DescriptorPool;
-        bool m_SwapChainRebuild;
+        bool m_SwapchainRebuild;
         std::map<UUID, vk::DescriptorSet> m_DesciptorSets;
+        std::map<UUID, vk::ImageView> m_ImageViews;
 
         const int MINIMAGECOUNT = 2;
     };

@@ -411,7 +411,7 @@ namespace Glory::Editor
 
         const ImVec2 cursorPos = ImGui::GetCursorPos();
         EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
-        Texture* pTexture = EditorAssets::GetTexture(CreatingItem.m_Icon.empty() ? "file" : CreatingItem.m_Icon);
+        TextureHandle texture = EditorAssets::GetTexture(CreatingItem.m_Icon.empty() ? "file" : CreatingItem.m_Icon);
         const UUID selectedID = Selection::GetActiveObject() ? Selection::GetActiveObject()->GetUUID() : 0;
 
         ImGui::PushStyleColor(ImGuiCol_Button, buttonColor);
@@ -420,7 +420,7 @@ namespace Glory::Editor
         ImGui::PopStyleColor();
         ImGui::SetItemAllowOverlap();
         ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
-        ImGui::Image(pTexture ? pRenderImpl->GetTextureID(pTexture) : NULL, ImVec2((float)m_IconSize, (float)m_IconSize));
+        ImGui::Image(texture ? pRenderImpl->GetTextureID(texture) : NULL, ImVec2((float)m_IconSize, (float)m_IconSize));
         DrawCreatingItemName(padding);
         ImGui::EndChild();
         ImGui::PopID();

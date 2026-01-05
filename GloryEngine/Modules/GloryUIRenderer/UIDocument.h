@@ -2,6 +2,8 @@
 #include <Glory.h>
 #include <EntityRegistry.h>
 #include <TypeData.h>
+#include <GraphicsHandles.h>
+#include <MeshData.h>
 
 #include <glm/matrix.hpp>
 
@@ -12,11 +14,41 @@ namespace Glory
 {
 	class UIDocumentData;
 	class UIRendererModule;
-	class RenderTexture;
 	class MeshData;
 	class FontData;
-	class GraphicsModule;
+	class GraphicsDevice;
 	struct TextData;
+
+	struct UIBatch
+	{
+		UIBatch() {};
+		virtual ~UIBatch()
+		{
+			m_TextMeshes.clear();
+			m_Worlds.clear();
+			m_TextureIDs.clear();
+			m_UniqueColors.clear();
+			m_ColorIndices.clear();
+		}
+
+		void Reset()
+		{
+			m_TextMeshes.clear();
+			m_Worlds.clear();
+			m_TextureIDs.clear();
+			m_UniqueColors.clear();
+			m_ColorIndices.clear();
+		}
+
+		std::vector<UUID> m_TextMeshes;
+		std::vector<glm::mat4> m_Worlds;
+		std::vector<UUID> m_TextureIDs;
+		Utils::BitSet m_MaskIncrements;
+		Utils::BitSet m_MaskDecrements;
+
+		std::vector<glm::vec4> m_UniqueColors;
+		std::vector<uint32_t> m_ColorIndices;
+	};
 
 	/** @brief Renderable copy of a UI document */
 	class UIDocument
@@ -24,10 +56,8 @@ namespace Glory
 	public:
 		GLORY_API UIDocument(UIDocumentData* pDocument);
 
-		GLORY_API RenderTexture* GetUITexture();
-
 		GLORY_API void Update();
-		GLORY_API void Draw(GraphicsModule* pGraphics, const glm::vec4& clearColor={0.0f, 0.0f, 0.0f, 0.0f});
+		GLORY_API void Draw();
 
 		GLORY_API UUID OriginalDocumentID() const;
 		GLORY_API UUID SceneID() const;
@@ -36,9 +66,10 @@ namespace Glory
 		GLORY_API glm::mat4& Projection();
 		GLORY_API const glm::mat4& Projection() const;
 
-		GLORY_API MeshData* GetTextMesh(UUID objectID, const TextData& data, FontData* pFont);
+		GLORY_API UUID GetTextMesh(UUID objectID, const TextData& data, FontData* pFont);
 
-		GLORY_API void SetRenderTexture(RenderTexture* pTexture);
+		GLORY_API const glm::uvec2& GetResolution() const;
+		GLORY_API void GetResolution(uint32_t& width, uint32_t& height) const;
 
 		GLORY_API Utils::ECS::EntityRegistry& Registry();
 		GLORY_API std::string_view Name() const;
@@ -68,6 +99,15 @@ namespace Glory
 		GLORY_API void Start();
 		GLORY_API void SetEntityDirty(Utils::ECS::EntityID entity, bool setChildrenDirty, bool setParentsDirty);
 
+		GLORY_API void AddRender(UUID textMeshID, UUID textureID, glm::mat4&& world, const glm::vec4& color);
+		GLORY_API void BeginMask(glm::mat4&& world);
+		GLORY_API void EndMask();
+		GLORY_API void CreateRenderPasses(GraphicsDevice* pDevice, size_t imageCount, const glm::uvec2& resolution, UIRendererModule* pUIRenderer);
+		GLORY_API void ResizeRenderTexture(GraphicsDevice* pDevice, size_t imageCount, const glm::uvec2& resolution, UIRendererModule* pUIRenderer);
+		GLORY_API void SetClearColor(const glm::vec4& color);
+
+		GLORY_API TextureHandle GetUITexture(GraphicsDevice* pDevice, uint32_t frameIndex);
+
 	private:
 		void CopyEntity(Utils::ECS::EntityRegistry& registry, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
 		UUID CopyEntity(UIDocumentData* pOtherDocument, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
@@ -80,21 +120,26 @@ namespace Glory
 		UUID m_ObjectID;
 		UUID m_OriginalDocumentID;
 		Utils::ECS::EntityRegistry m_Registry;
-		RenderTexture* m_pUITexture;
+		std::vector<RenderPassHandle> m_UIPasses;
+		std::vector<DescriptorSetHandle> m_UIOverlaySets;
+		glm::uvec2 m_Resolution;
 		UIRendererModule* m_pRenderer;
 		glm::mat4 m_Projection;
 		glm::vec2 m_CursorPos;
 		glm::vec2 m_CursorScrollDelta;
+		glm::vec4 m_ClearColor{ 0.0f, 0.0f, 0.0f, 0.0f };
 		bool m_CursorDown;
 		bool m_WasCursorDown;
 		bool m_InputEnabled;
 		size_t m_PanelCounter;
-		bool m_DrawIsDirty;
+		Utils::BitSet m_DrawIsDirty;
 
 		std::map<UUID, std::unique_ptr<MeshData>> m_pTextMeshes;
 		std::string m_Name;
 		std::map<UUID, Utils::ECS::EntityID> m_Ids;
 		std::map<Utils::ECS::EntityID, UUID> m_UUIds;
 		std::map<Utils::ECS::EntityID, std::string> m_Names;
+
+		UIBatch m_UIBatch;
 	};
 }

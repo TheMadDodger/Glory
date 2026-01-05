@@ -33,7 +33,6 @@ namespace Utils::Reflect
 	class Debug;
 	class Console;
 	class Serializers;
-	class DisplayManager;
 	class LayerManager;
 	class ObjectManager;
 	class CameraManager;
@@ -163,7 +162,6 @@ namespace Utils::Reflect
 		AssetManager& GetAssetManager();
 		ResourceTypes& GetResourceTypes();
 		Serializers& GetSerializers();
-		DisplayManager& GetDisplayManager();
 		LayerManager& GetLayerManager();
 		MaterialManager& GetMaterialManager();
 		PipelineManager& GetPipelineManager();
@@ -277,7 +275,6 @@ namespace Utils::Reflect
 		std::unique_ptr<AssetDatabase> m_AssetDatabase;
 		std::unique_ptr<ResourceTypes> m_ResourceTypes;
 		std::unique_ptr<Serializers> m_Serializers;
-		std::unique_ptr<DisplayManager> m_DisplayManager;
 		std::unique_ptr<LayerManager> m_LayerManager;
 		std::unique_ptr<Utils::Reflect::Reflect> m_Reflection;
 		std::unique_ptr<ObjectManager> m_ObjectManager;

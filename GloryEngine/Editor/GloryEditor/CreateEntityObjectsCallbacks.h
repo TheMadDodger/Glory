@@ -9,10 +9,17 @@
 {\
     Entity newEntity = CreateNewEmptyObject(pObject, STRINGIFY(name), currentMenu); \
 	Undo::StartRecord("Create Empty Object", newEntity.EntityUUID()); \
-	newEntity.AddComponent<component>(CTOR_ARGS ctor); \
+	component& comp = newEntity.AddComponent<component>(CTOR_ARGS ctor); \
 	Undo::AddAction<CreateObjectAction>(newEntity.GetScene()); \
 	Selection::SetActiveObject(GetEditableEntity(newEntity.GetEntityID(), newEntity.GetScene())); \
 	Undo::StopRecord(); \
+	auto registry = newEntity.GetRegistry(); \
+	auto pTypeView = newEntity.GetRegistry()->GetTypeView<component>(); \
+	if (newEntity.IsActive()) \
+	{ \
+		pTypeView->Invoke(Utils::ECS::InvocationType::OnEnable, registry, newEntity.GetEntityID(), &comp); \
+		pTypeView->Invoke(Utils::ECS::InvocationType::OnEnableDraw, registry, newEntity.GetEntityID(), &comp); \
+	} \
 }
 
 namespace Glory::Editor

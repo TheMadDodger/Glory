@@ -1,9 +1,5 @@
 #include "VulkanGraphicsModule.h"
 #include "VulkanExceptions.h"
-#include "Device.h"
-#include "VulkanBuffer.h"
-#include "VulkanShader.h"
-#include "VulkanResourceManager.h"
 #include "VulkanStructsConverter.h"
 
 #include "VulkanDevice.h"
@@ -53,11 +49,6 @@ namespace Glory
         return m_Instance;
     }
 
-    VulkanDeviceManager& VulkanGraphicsModule::GetDeviceManager()
-    {
-        return m_DeviceManager;
-    }
-
     const std::vector<const char*>& VulkanGraphicsModule::GetExtensions() const
     {
         return m_Extensions;
@@ -73,7 +64,7 @@ namespace Glory
         m_pEngine->MainWindowInfo().WindowFlags |= W_Vulkan;
     }
 
-    void VulkanGraphicsModule::OnInitialize()
+    void VulkanGraphicsModule::Initialize()
     {
         /* Get the required extensions from the window */
         m_pMainWindow = m_pEngine->GetMainModule<WindowModule>()->GetMainWindow();
@@ -112,7 +103,10 @@ namespace Glory
         m_Devices.reserve(deviceCount);
 
         const std::vector<const char*> deviceExtensions = {
-            VK_KHR_SWAPCHAIN_EXTENSION_NAME
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+            VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME,
+            VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
+            VK_EXT_COLOR_WRITE_ENABLE_EXTENSION_NAME,
         };
 
         int index = 0;
@@ -146,7 +140,7 @@ namespace Glory
         }
     }
 
-    void VulkanGraphicsModule::OnCleanup()
+    void VulkanGraphicsModule::Cleanup()
     {
 #if defined(_DEBUG)
         VkInstance instance = VkInstance(m_Instance);
@@ -156,11 +150,6 @@ namespace Glory
             func(instance, debugMessenger, nullptr);
         }
 #endif
-    }
-
-    GPUResourceManager* VulkanGraphicsModule::CreateGPUResourceManager()
-    {
-        return new VulkanResourceManager(m_pEngine);
     }
 
     void VulkanGraphicsModule::InitializeValidationLayers()
@@ -265,21 +254,6 @@ namespace Glory
         }
     }
 
-    void VulkanGraphicsModule::LoadPhysicalDevices()
-    {
-        m_DeviceManager.Initialize(this);
-
-        // Check for required device extensions
-        const std::vector<const char*> deviceExtensions = {
-            VK_KHR_SWAPCHAIN_EXTENSION_NAME
-        };
-
-        m_DeviceManager.CheckDeviceSupport(this, deviceExtensions);
-
-        // TEMPORARILY force the chosen device to the second index
-        m_DeviceManager.SelectDevice(1);
-    }
-
     VKAPI_ATTR VkBool32 VKAPI_CALL VulkanGraphicsModule::DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
     {
@@ -310,162 +284,6 @@ namespace Glory
         GraphicsModule::OnEndFrame();
     }
 
-    vk::CommandBuffer VulkanGraphicsModule::BeginSingleTimeCommands()
-    {
-        VulkanDevice* pDevice = static_cast<VulkanDevice*>(m_pEngine->ActiveGraphicsDevice());
-        vk::CommandPool commandPool = pDevice->GetGraphicsCommandPool();
-
-        vk::CommandBufferAllocateInfo allocInfo = vk::CommandBufferAllocateInfo();
-        allocInfo.level = vk::CommandBufferLevel::ePrimary;
-        allocInfo.commandPool = commandPool;
-        allocInfo.commandBufferCount = 1;
-
-        vk::CommandBuffer commandBuffer;
-        if (pDevice->LogicalDevice().allocateCommandBuffers(&allocInfo, &commandBuffer) != vk::Result::eSuccess)
-            throw std::runtime_error("Failed to allocate command buffer!");
-
-        vk::CommandBufferBeginInfo beginInfo = vk::CommandBufferBeginInfo();
-        beginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
-
-        commandBuffer.begin(beginInfo);
-        return commandBuffer;
-    }
-
-    void VulkanGraphicsModule::EndSingleTimeCommands(vk::CommandBuffer commandBuffer)
-    {
-        VulkanDevice* pDevice = static_cast<VulkanDevice*>(m_pEngine->ActiveGraphicsDevice());
-        vk::CommandPool commandPool = pDevice->GetGraphicsCommandPool();
-
-        commandBuffer.end();
-
-        vk::SubmitInfo submitInfo = vk::SubmitInfo();
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffer;
-
-        pDevice->GraphicsQueue().submit(1, &submitInfo, VK_NULL_HANDLE);
-        pDevice->GraphicsQueue().waitIdle();
-        pDevice->LogicalDevice().freeCommandBuffers(commandPool, 1, &commandBuffer);
-    }
-
-    void VulkanGraphicsModule::TransitionImageLayout(vk::Image image, vk::Format format, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::ImageAspectFlags aspectFlags)
-    {
-        vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
-
-        vk::ImageMemoryBarrier barrier = vk::ImageMemoryBarrier();
-        barrier.oldLayout = oldLayout;
-        barrier.newLayout = newLayout;
-        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        barrier.image = image;
-        barrier.subresourceRange.aspectMask = aspectFlags;//vk::ImageAspectFlagBits::eColor;
-        barrier.subresourceRange.baseMipLevel = 0;
-        barrier.subresourceRange.levelCount = 1;
-        barrier.subresourceRange.baseArrayLayer = 0;
-        barrier.subresourceRange.layerCount = 1;
-
-        vk::PipelineStageFlags sourceStage;
-        vk::PipelineStageFlags destinationStage;
-
-        if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eTransferDstOptimal)
-        {
-            barrier.srcAccessMask = (vk::AccessFlags)0;
-            barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
-
-            sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
-            destinationStage = vk::PipelineStageFlagBits::eTransfer;
-        }
-        else if (oldLayout == vk::ImageLayout::eTransferDstOptimal && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
-        {
-            barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
-            barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
-
-            sourceStage = vk::PipelineStageFlagBits::eTransfer;
-            destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
-        }
-        else if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eDepthStencilAttachmentOptimal)
-        {
-            barrier.srcAccessMask = (vk::AccessFlags)0;
-            barrier.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
-
-            sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
-            destinationStage = vk::PipelineStageFlagBits::eEarlyFragmentTests;
-        }
-        else
-        {
-            throw std::invalid_argument("Unsupported layout transition!");
-        }
-
-        commandBuffer.pipelineBarrier(
-            sourceStage, destinationStage,
-            (vk::DependencyFlags)0,
-            0, nullptr,
-            0, nullptr,
-            1, &barrier
-        );
-
-        EndSingleTimeCommands(commandBuffer);
-    }
-
-    void VulkanGraphicsModule::CreateImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties, vk::Image& image, vk::DeviceMemory& imageMemory)
-    {
-        vk::ImageCreateInfo imageInfo{};
-        imageInfo.imageType = vk::ImageType::e2D;
-        imageInfo.extent.width = width;
-        imageInfo.extent.height = height;
-        imageInfo.extent.depth = 1;
-        imageInfo.mipLevels = 1;
-        imageInfo.arrayLayers = 1;
-        imageInfo.format = format;
-        imageInfo.tiling = tiling;
-        imageInfo.initialLayout = vk::ImageLayout::eUndefined;
-        imageInfo.usage = usage;
-        imageInfo.samples = vk::SampleCountFlagBits::e1;
-        imageInfo.sharingMode = vk::SharingMode::eExclusive;
-
-        Device* pDevice = m_DeviceManager.GetSelectedDevice();
-        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
-
-        if (deviceData.LogicalDevice.createImage(&imageInfo, nullptr, &image) != vk::Result::eSuccess) {
-            throw std::runtime_error("failed to create image!");
-        }
-
-        vk::MemoryRequirements memRequirements;
-        deviceData.LogicalDevice.getImageMemoryRequirements(image, &memRequirements);
-
-        vk::MemoryAllocateInfo allocInfo{};
-        allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = pDevice->GetSupportedMemoryIndex(memRequirements.memoryTypeBits, properties);
-
-        if (deviceData.LogicalDevice.allocateMemory(&allocInfo, nullptr, &imageMemory) != vk::Result::eSuccess) {
-            throw std::runtime_error("failed to allocate image memory!");
-        }
-
-        deviceData.LogicalDevice.bindImageMemory(image, imageMemory, 0);
-    }
-
-    vk::ImageView VulkanGraphicsModule::CreateImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags)
-    {
-        Device* pDevice = m_DeviceManager.GetSelectedDevice();
-        LogicalDeviceData deviceData = pDevice->GetLogicalDeviceData();
-
-        vk::ImageViewCreateInfo viewInfo{};
-        viewInfo.image = image;
-        viewInfo.viewType = vk::ImageViewType::e2D;
-        viewInfo.format = format;
-        viewInfo.subresourceRange.aspectMask = aspectFlags;
-        viewInfo.subresourceRange.baseMipLevel = 0;
-        viewInfo.subresourceRange.levelCount = 1;
-        viewInfo.subresourceRange.baseArrayLayer = 0;
-        viewInfo.subresourceRange.layerCount = 1;
-
-        vk::ImageView imageView;
-        if (deviceData.LogicalDevice.createImageView(&viewInfo, nullptr, &imageView) != vk::Result::eSuccess) {
-            throw std::runtime_error("failed to create texture image view!");
-        }
-
-        return imageView;
-    }
-
     const std::type_info& VulkanGraphicsModule::GetModuleType()
     {
         return typeid(VulkanGraphicsModule);
@@ -481,115 +299,5 @@ namespace Glory
         }
 
         return CreateNewSampler(settings);
-    }
-
-    void VulkanGraphicsModule::Clear(glm::vec4 color, double depth)
-    {
-        throw new std::exception("VulkanGraphicsModule::Clear() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::Swap()
-    {
-        throw new std::exception("VulkanGraphicsModule::Swap() not yet implemented!");
-    }
-
-    Material* VulkanGraphicsModule::UseMaterial(MaterialData* pMaterialData)
-    {
-        throw new std::exception("VulkanGraphicsModule::UseMaterial() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::OnDrawMesh(Mesh* pMesh, uint32_t vertexOffset, uint32_t vertexCount)
-    {
-        throw new std::exception("VulkanGraphicsModule::OnDrawMesh() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::DrawScreenQuad()
-    {
-        throw new std::exception("VulkanGraphicsModule::DrawScreenQuad() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::DrawUnitCube()
-    {
-        throw new std::exception("VulkanGraphicsModule::DrawUnitCube() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::DispatchCompute(size_t num_groups_x, size_t num_groups_y, size_t num_groups_z)
-    {
-        throw new std::exception("VulkanGraphicsModule::DispatchCompute() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::EnableDepthTest(bool enable)
-    {
-        throw new std::exception("VulkanGraphicsModule::EnableDepthTest() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::EnableDepthWrite(bool enable)
-    {
-        throw new std::exception("VulkanGraphicsModule::EnableDepthWrite() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::EnableStencilTest(bool enable)
-    {
-        throw new std::exception("VulkanGraphicsModule::EnableStencilTest() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::SetStencilMask(unsigned int mask)
-    {
-        throw new std::exception("VulkanGraphicsModule::SetStencilMask() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::SetStencilFunc(CompareOp func, int ref, unsigned int mask)
-    {
-        throw new std::exception("VulkanGraphicsModule::SetStencilFunc() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::SetStencilOP(Func fail, Func dpfail, Func dppass)
-    {
-        throw new std::exception("VulkanGraphicsModule::SetStencilOP() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::SetColorMask(bool r, bool g, bool b, bool a)
-    {
-        throw new std::exception("VulkanGraphicsModule::SetColorMask() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::ClearStencil(int value)
-    {
-        throw new std::exception("VulkanGraphicsModule::ClearStencil() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::SetViewport(int x, int y, uint32_t width, uint32_t height)
-    {
-        throw new std::exception("VulkanGraphicsModule::SetViewport() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::Scissor(int x, int y, uint32_t width, uint32_t height)
-    {
-        throw new std::exception("VulkanGraphicsModule::Scissor() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::EndScissor()
-    {
-        throw new std::exception("VulkanGraphicsModule::EndScissor() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::Blit(RenderTexture* pTexture, glm::uvec4 src, glm::uvec4 dst, Filter filter)
-    {
-        throw new std::exception("VulkanGraphicsModule::Blit() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::Blit(RenderTexture* pSource, RenderTexture* pDest, glm::uvec4 src, glm::uvec4 dst, Filter filter)
-    {
-        throw new std::exception("VulkanGraphicsModule::Blit() not yet implemented!");
-    }
-
-    void VulkanGraphicsModule::SetCullFace(CullFace cullFace)
-    {
-        throw new std::exception("VulkanGraphicsModule::SetCullFace() not yet implemented!");
-    }
-
-    Material* VulkanGraphicsModule::UsePassthroughMaterial()
-    {
-        throw new std::exception("VulkanGraphicsModule::UsePassthroughMaterial() not yet implemented!");
     }
 }

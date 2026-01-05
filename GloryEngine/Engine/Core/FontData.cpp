@@ -2,6 +2,7 @@
 #include "BinaryStream.h"
 #include "AssetManager.h"
 #include "TextureData.h"
+#include "Engine.h"
 
 namespace Glory
 {
@@ -84,7 +85,17 @@ namespace Glory
 
 	void FontData::References(Engine* pEngine, std::vector<UUID>& references) const
 	{
-		if (m_Texture) references.push_back(m_Texture);
-		if (m_Material) references.push_back(m_Material);
+		if (m_Texture)
+		{
+			references.push_back(m_Texture);
+			Resource* pTextureResource = pEngine->GetAssetManager().FindResource(m_Texture);
+			if (pTextureResource) pTextureResource->References(pEngine, references);
+		}
+		if (m_Material)
+		{
+			references.push_back(m_Material);
+			Resource* pMaterialResource = pEngine->GetAssetManager().FindResource(m_Material);
+			if (pMaterialResource) pMaterialResource->References(pEngine, references);
+		}
 	}
 }

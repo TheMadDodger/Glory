@@ -5,6 +5,8 @@
 
 #include <BitSet.h>
 
+#include <glm/vec4.hpp>
+
 namespace Glory
 {
     class FileData;
@@ -14,6 +16,22 @@ namespace Glory
     /** @brief Pipeline data */
 	class PipelineData : public Resource
 	{
+    public:
+        enum SettingBitsIndices : uint8_t
+        {
+            DepthTestEnable = 0,
+            DepthWriteEnable = 1,
+            ColorWriteRed = 2,
+            ColorWriteGreen = 3,
+            ColorWriteBlue = 4,
+            ColorWriteAlpha = 5,
+            StencilTestEnable = 6,
+            StencilCompareMaskBegin = 7,
+            StencilWriteMaskBegin = 15,
+            StencilReferenceBegin = 23,
+            BlendEnable = 24,
+        };
+
     public:
         /** @brief Constructor */
         PipelineData();
@@ -129,7 +147,7 @@ namespace Glory
         std::string_view FeatureName(size_t index) const;
 
         /** @brief Check if a feature is enabled */
-        bool FeatureEnabled(size_t index);
+        bool FeatureEnabled(size_t index) const;
 
         /** @brief Enable a feature */
         void SetFeatureEnabled(size_t index, bool enabled);
@@ -138,6 +156,114 @@ namespace Glory
 
         /** @brief Get total size of properties buffer in bytes */
         size_t TotalPropertiesByteSize() const;
+
+        /** @brief Are settings dirty */
+        bool& SettingsDirty() { return m_SettingsDirty; }
+        /** @overload */
+        const bool& SettingsDirty() const { return m_SettingsDirty; }
+
+        /** @brief Face to cull */
+        CullFace& GetCullFace() { return m_CullFace; }
+        /** @overload */
+        const CullFace& GetCullFace() const { return m_CullFace; }
+
+        /** @brief Primitive type to render */
+        PrimitiveType& GetPrimitiveType() { return m_PrimitiveType; }
+        /** @overload */
+        const PrimitiveType& GetPrimitiveType() const { return m_PrimitiveType; }
+
+        /** @brief Enable/disable depth test */
+        void SetDepthTestEnabled(bool enable);
+        /** @brief Is depth test enabled */
+        const bool DepthTestEnabled() const;
+
+        /** @brief Enable/disable depth write */
+        void SetDepthWriteEnabled(bool enable);
+        /** @brief Is depth write enabled */
+        const bool DepthWriteEnabled() const;
+
+        /** @brief Set color write mask */
+        void SetColorWriteMask(bool r, bool g, bool b, bool a);
+        /** @overload */
+        void SetColorWriteMask(uint8_t mask);
+        /** @brief Get color write mask */
+        const void ColorWriteMask(bool& r, bool& g, bool& b, bool& a) const;
+        /** @overload */
+        const uint8_t ColorWriteMask() const;
+
+        /** @brief Depth compare operator */
+        CompareOp& GetDepthCompareOp() { return m_DepthCompare; }
+        /** @overload */
+        const CompareOp& GetDepthCompareOp() const { return m_DepthCompare; }
+
+        /** @brief Enable/disable depth test */
+        void SetStencilTestEnabled(bool enable);
+        /** @brief Is depth test enabled */
+        const bool StencilTestEnabled() const;
+
+        /** @brief Set stencil compare mask */
+        void SetStencilCompareMask(uint8_t mask);
+        /** @brief Get stencil compare mask */
+        const uint8_t StencilCompareMask() const;
+
+        /** @brief Set stencil write mask */
+        void SetStencilWriteMask(uint8_t mask);
+        /** @brief Get stencil write mask */
+        const uint8_t StencilWriteMask() const;
+
+        /** @brief Set stencil reference */
+        void SetStencilReference(uint8_t ref);
+        /** @brief Get stencil reference */
+        const uint8_t StencilReference() const;
+
+        /** @brief Stencil compare operator */
+        CompareOp& GetStencilCompareOp() { return m_StencilCompareOp; }
+        /** @overload */
+        const CompareOp& GetStencilCompareOp() const { return m_StencilCompareOp; }
+
+        /** @brief Stencil fail func */
+        Func& GetStencilFailOp() { return m_StencilFailOp; }
+        /** @overload */
+        const Func& GetStencilFailOp() const { return m_StencilFailOp; }
+
+        /** @brief Stencil depth fail func */
+        Func& GetStencilDepthFailOp() { return m_StencilDepthFailOp; }
+        /** @overload */
+        const Func& GetStencilDepthFailOp() const { return m_StencilDepthFailOp; }
+
+        /** @brief Stencil pass func */
+        Func& GetStencilPassOp() { return m_StencilPassOp; }
+        /** @overload */
+        const Func& GetStencilPassOp() const { return m_StencilPassOp; }
+
+        /** @brief Enable/disable color blending */
+        void SetBlendEnabled(bool enable);
+        /** @brief Is color blending enabled */
+        const bool BlendEnabled() const;
+
+        BlendFactor& SrcColorBlendFactor() { return m_SrcColorBlendFactor; }
+        const BlendFactor& SrcColorBlendFactor() const { return m_SrcColorBlendFactor; }
+
+        BlendFactor& DstColorBlendFactor() { return m_DstColorBlendFactor; }
+        const BlendFactor& DstColorBlendFactor() const { return m_DstColorBlendFactor; }
+
+        BlendOp& ColorBlendOp() { return m_ColorBlendOp; }
+        const BlendOp& ColorBlendOp() const { return m_ColorBlendOp; }
+
+        BlendFactor& SrcAlphaBlendFactor() { return m_SrcAlphaBlendFactor; }
+        const BlendFactor& SrcAlphaBlendFactor() const { return m_SrcAlphaBlendFactor; }
+
+        BlendFactor& DstAlphaBlendFactor() { return m_DstAlphaBlendFactor; }
+        const BlendFactor& DstAlphaBlendFactor() const { return m_DstAlphaBlendFactor; }
+
+        BlendOp& AlphaBlendOp() { return m_AlphaBlendOp; }
+        const BlendOp& AlphaBlendOp() const { return m_AlphaBlendOp; }
+
+        glm::vec4& BlendConstants() { return m_BlendConstants; }
+        const glm::vec4& BlendConstants() const { return m_BlendConstants; }
+
+        /** @brief BitSet containing state of toggelable settings */
+        const Utils::BitSet& SettingsTogglesBitSet() const { return m_SettingsToggles; }
 
     private:
         virtual void References(Engine*, std::vector<UUID>&) const override {}
@@ -158,5 +284,31 @@ namespace Glory
 
         size_t m_CurrentOffset = 0;
         size_t m_NumResources = 0;
+
+        bool m_SettingsDirty = false;
+
+        /* Render settings */
+        CullFace m_CullFace = CullFace::Back;
+        PrimitiveType m_PrimitiveType = PrimitiveType::Triangles;
+
+        /* Depth settings */
+        CompareOp m_DepthCompare = CompareOp::OP_Less;
+
+        /* Stencil settings */
+        CompareOp m_StencilCompareOp = CompareOp::OP_Always;
+        Func m_StencilFailOp = Func::OP_Zero;
+        Func m_StencilDepthFailOp = Func::OP_Zero;
+        Func m_StencilPassOp = Func::OP_Zero;
+
+        /* Blend settings */
+        BlendFactor m_SrcColorBlendFactor = BlendFactor::SrcAlpha;
+        BlendFactor m_DstColorBlendFactor = BlendFactor::OneMinusSrcAlpha;
+        BlendOp m_ColorBlendOp = BlendOp::Add;
+        BlendFactor m_SrcAlphaBlendFactor = BlendFactor::One;
+        BlendFactor m_DstAlphaBlendFactor = BlendFactor::OneMinusSrcAlpha;
+        BlendOp m_AlphaBlendOp = BlendOp::Add;
+        glm::vec4 m_BlendConstants = glm::vec4{};
+
+        Utils::BitSet m_SettingsToggles{ 32, true };
 	};
 }

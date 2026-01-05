@@ -39,14 +39,6 @@ namespace Glory
 		    Reflect::RegisterType<T>();
 		}
 
-		GScene* GetHoveringEntityScene();
-		UUID GetHoveringEntityUUID() const;
-		const glm::vec3& GetHoveringPosition() const;
-		const glm::vec3& GetHoveringNormal() const;
-		void SetHoveringObject(UUID sceneID, UUID objectID);
-		void SetHoveringPosition(const glm::vec3& pos);
-		void SetHoveringNormal(const glm::vec3& normal);
-
 		/** @brief Get the engine that owns this manager */
 		Engine* GetEngine();
 		GScene* GetActiveScene(bool force=false);

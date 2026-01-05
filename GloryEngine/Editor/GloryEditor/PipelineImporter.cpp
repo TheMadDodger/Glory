@@ -1,5 +1,7 @@
 #include "PipelineImporter.h"
 
+#include <YAML_GLM.h>
+
 namespace Glory::Editor
 {
 	PipelineImporter::PipelineImporter()
@@ -43,6 +45,31 @@ namespace Glory::Editor
 			}
 		}
 
+		auto settings = file["Settings"];
+		pPipeline->GetCullFace() = settings["CullFace"].AsEnum<CullFace>(CullFace::Back);
+		pPipeline->GetPrimitiveType() = settings["PrimitiveType"].AsEnum<PrimitiveType>(PrimitiveType::Triangles);
+		pPipeline->SetDepthTestEnabled(settings["DepthTestEnabled"].As<bool>(true));
+		pPipeline->SetDepthWriteEnabled(settings["DepthWriteEnabled"].As<bool>(true));
+		pPipeline->GetDepthCompareOp() = settings["DepthCompareOp"].AsEnum<CompareOp>(CompareOp::OP_Less);
+		pPipeline->SetColorWriteMask(settings["ColorWriteMask"].As<uint8_t>(15));
+		pPipeline->SetStencilTestEnabled(settings["StencilTestEnabled"].As<bool>(false));
+		pPipeline->GetStencilCompareOp() = settings["StencilCompareOp"].AsEnum<CompareOp>(CompareOp::OP_Always);
+		pPipeline->GetStencilFailOp() = settings["StencilFailOp"].AsEnum<Func>(Func::OP_Zero);
+		pPipeline->GetStencilDepthFailOp() = settings["StencilDepthFailOp"].AsEnum<Func>(Func::OP_Zero);
+		pPipeline->GetStencilPassOp() = settings["StencilPassOp"].AsEnum<Func>(Func::OP_Zero);
+		pPipeline->SetStencilCompareMask(settings["StencilCompareMask"].As<uint8_t>(0xFF));
+		pPipeline->SetStencilWriteMask(settings["StencilWriteMask"].As<uint8_t>(0x00));
+		pPipeline->SetStencilReference(settings["StencilReference"].As<uint8_t>(0x00));
+
+		pPipeline->SetBlendEnabled(settings["BlendEnabled"].As<bool>(true));
+		pPipeline->SrcColorBlendFactor() = settings["SrcColorBlendFactor"].AsEnum<BlendFactor>(BlendFactor::One);
+		pPipeline->DstColorBlendFactor() = settings["DrcColorBlendFactor"].AsEnum<BlendFactor>(BlendFactor::Zero);
+		pPipeline->ColorBlendOp() = settings["ColorBlendOp"].AsEnum<BlendOp>(BlendOp::Add);
+		pPipeline->SrcAlphaBlendFactor() = settings["SrcAlphaBlendFactor"].AsEnum<BlendFactor>(BlendFactor::One);
+		pPipeline->DstAlphaBlendFactor() = settings["DstAlphaBlendFactor"].AsEnum<BlendFactor>(BlendFactor::Zero);
+		pPipeline->AlphaBlendOp() = settings["AlphaBlendOp"].AsEnum<BlendOp>(BlendOp::Add);
+		pPipeline->BlendConstants() = settings["BlendConstants"].As<glm::vec4>(glm::vec4{});
+
 		return ImportedResource(path, pPipeline);
 	}
 
@@ -65,6 +92,33 @@ namespace Glory::Editor
 			const bool isOn = pResource->FeatureEnabled(i);
 			features[name].Set(isOn);
 		}
+
+		auto settings = file["Settings"];
+		if (!settings.Exists() || !settings.IsMap())
+			settings.SetMap();
+		settings["CullFace"].SetEnum<CullFace>(pResource->GetCullFace());
+		settings["PrimitiveType"].SetEnum<PrimitiveType>(pResource->GetPrimitiveType());
+		settings["DepthTestEnabled"].Set<bool>(pResource->DepthTestEnabled());
+		settings["DepthWriteEnabled"].Set<bool>(pResource->DepthWriteEnabled());
+		settings["DepthCompareOp"].SetEnum<CompareOp>(pResource->GetDepthCompareOp());
+		settings["ColorWriteMask"].Set<uint8_t>(pResource->ColorWriteMask());
+		settings["StencilTestEnabled"].Set<bool>(pResource->StencilTestEnabled());
+		settings["StencilCompareOp"].SetEnum<CompareOp>(pResource->GetStencilCompareOp());
+		settings["StencilFailOp"].SetEnum<Func>(pResource->GetStencilFailOp());
+		settings["StencilDepthFailOp"].SetEnum<Func>(pResource->GetStencilDepthFailOp());
+		settings["StencilPassOp"].SetEnum<Func>(pResource->GetStencilPassOp());
+		settings["StencilCompareMask"].Set<uint8_t>(pResource->StencilCompareMask());
+		settings["StencilWriteMask"].Set<uint8_t>(pResource->StencilWriteMask());
+		settings["StencilReference"].Set<uint8_t>(pResource->StencilReference());
+
+		settings["BlendEnabled"].Set<bool>(pResource->BlendEnabled());
+		settings["SrcColorBlendFactor"].SetEnum<BlendFactor>(pResource->SrcColorBlendFactor());
+		settings["DrcColorBlendFactor"].SetEnum<BlendFactor>(pResource->DstColorBlendFactor());
+		settings["ColorBlendOp"].SetEnum<BlendOp>(pResource->ColorBlendOp());
+		settings["SrcAlphaBlendFactor"].SetEnum<BlendFactor>(pResource->SrcAlphaBlendFactor());
+		settings["DstAlphaBlendFactor"].SetEnum<BlendFactor>(pResource->DstAlphaBlendFactor());
+		settings["AlphaBlendOp"].SetEnum<BlendOp>(pResource->AlphaBlendOp());
+		settings["BlendConstants"].As<glm::vec4>(pResource->BlendConstants());
 
 		file.Save();
 		return true;

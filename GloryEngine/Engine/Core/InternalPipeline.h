@@ -11,7 +11,11 @@ namespace Glory
     {
     public:
         /** @brief Constructor */
+        InternalPipeline();
         InternalPipeline(std::vector<FileData*>&& compiledShaders, std::vector<ShaderType>&& shaderTypes);
+        virtual ~InternalPipeline();
+
+        void SetShaders(std::vector<FileData*>&& compiledShaders, std::vector<ShaderType>&& shaderTypes);
 
         virtual size_t ShaderCount() const override;
         virtual UUID ShaderID(size_t index) const override;

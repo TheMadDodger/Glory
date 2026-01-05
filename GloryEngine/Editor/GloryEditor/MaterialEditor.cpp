@@ -59,6 +59,7 @@ namespace Glory::Editor
 		{
 			EditorAssetDatabase::SetAssetDirty(pMaterial);
 			pMaterial->SetDirty(true);
+			pMaterialData->SetDirty(true);
 		}
 		return change;
 	}
@@ -183,9 +184,9 @@ namespace Glory::Editor
 				const UUID oldValue = propTwo["Value"].As<uint64_t>();
 				UUID value = oldValue;
 				const bool textureChange = AssetPicker::ResourceTumbnailButton("value", 18.0f, start, totalWidth, textureDataHash, &value);
-				Texture* pTumbnail = Tumbnail::GetTumbnail(value);
-				if (pTumbnail)
-					ImGui::Image(pRenderImpl->GetTextureID(pTumbnail), { TumbnailSize, TumbnailSize });
+				TextureHandle tumbnail = Tumbnail::GetTumbnail(value);
+				if (tumbnail)
+					ImGui::Image(pRenderImpl->GetTextureID(tumbnail), { TumbnailSize, TumbnailSize });
 				ImGui::PopID();
 
 				/* Deserialize new value into resources array */
@@ -224,9 +225,9 @@ namespace Glory::Editor
 
 				ImGui::PushID(sampler.data());
 				const bool changed = pPropertyDrawer->Draw(file, propValue.Path(), pMaterialProperty->TypeHash(), pMaterialProperty->Flags());
-				Texture* pTumbnail = Tumbnail::GetTumbnail(propValue.As<uint64_t>());
-				if (pTumbnail)
-					ImGui::Image(pRenderImpl->GetTextureID(pTumbnail), { TumbnailSize, TumbnailSize });
+				TextureHandle tumbnail = Tumbnail::GetTumbnail(propValue.As<uint64_t>());
+				if (tumbnail)
+					ImGui::Image(pRenderImpl->GetTextureID(tumbnail), { TumbnailSize, TumbnailSize });
 				ImGui::PopID();
 
 				/* Deserialize new value into resources array */
@@ -257,12 +258,6 @@ namespace Glory::Editor
 					pMaterialProperty->TypeHash(), pMaterialProperty->Offset(), pMaterialProperty->Size(), propValue);
 				change = true;
 			}
-		}
-
-		if (change)
-		{
-			pMaterial->SetDirty(true);
-			EditorAssetDatabase::SetAssetDirty(pMaterial);
 		}
 		return change;
 	}
@@ -359,9 +354,9 @@ namespace Glory::Editor
 				ImGui::SameLine();
 				ImGui::PushID(sampler.data());
 				const bool textureChange = AssetPicker::ResourceTumbnailButton("value", 18.0f, start, totalWidth, textureDataHash, resourceId->AssetUUIDMember());
-				Texture* pTumbnail = Tumbnail::GetTumbnail(resourceId->AssetUUID());
-				if (pTumbnail)
-					ImGui::Image(pRenderImpl->GetTextureID(pTumbnail), { TumbnailSize, TumbnailSize });
+				TextureHandle tumbnail = Tumbnail::GetTumbnail(resourceId->AssetUUID());
+				if (tumbnail)
+					ImGui::Image(pRenderImpl->GetTextureID(tumbnail), { TumbnailSize, TumbnailSize });
 				ImGui::PopID();
 
 				continue;
@@ -384,9 +379,9 @@ namespace Glory::Editor
 
 				ImGui::PushID(sampler.data());
 				pPropertyDrawer->Draw(pMaterialProperty->DisplayName(), resourceId, pMaterialProperty->TypeHash(), pMaterialProperty->Flags());
-				Texture* pTumbnail = Tumbnail::GetTumbnail(resourceId->AssetUUID());
-				if (pTumbnail)
-					ImGui::Image(pRenderImpl->GetTextureID(pTumbnail), { TumbnailSize, TumbnailSize });
+				TextureHandle tumbnail = Tumbnail::GetTumbnail(resourceId->AssetUUID());
+				if (tumbnail)
+					ImGui::Image(pRenderImpl->GetTextureID(tumbnail), { TumbnailSize, TumbnailSize });
 				ImGui::PopID();
 				continue;
 			}

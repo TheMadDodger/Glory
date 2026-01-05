@@ -5,11 +5,14 @@
 #include "EditorUI.h"
 #include "Tumbnail.h"
 #include "EditorApplication.h"
+#include "TextureImporter.h"
 
 #include <Engine.h>
-#include <GraphicsModule.h>
 #include <imgui.h>
 #include <ResourceType.h>
+#include <ImageData.h>
+#include <TextureData.h>
+#include <AssetManager.h>
 
 namespace Glory::Editor
 {
@@ -43,12 +46,8 @@ namespace Glory::Editor
 
 		if (change)
 		{
-			EditorApplication* pApplication = EditorApplication::GetInstance();
-			pApplication->GetEngine()->GetMainModule<GraphicsModule>()->GetResourceManager()->SetDirty(pTextureData->GetGPUUUID());
 			EditorAssetDatabase::SetAssetDirty(pTextureData);
-			Tumbnail::SetDirty(pTextureData->GetUUID());
 			pTextureData->SetDirty(true);
-			
 		}
 		return change;
 	}

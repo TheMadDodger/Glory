@@ -6,9 +6,8 @@
 
 #include <Engine.h>
 #include <Window.h>
-#include <DisplayManager.h>
 #include <RendererModule.h>
-#include <GraphicsModule.h>
+#include <GraphicsDevice.h>
 #include <WindowModule.h>
 
 #include <Debug.h>
@@ -29,7 +28,7 @@ namespace Glory
 		m_SceneManager(new RuntimeSceneManager(this)),
 		m_PipelineManager(new RuntimePipelineManager(pEngine)),
 		m_MaterialManager(new RuntimeMaterialManager(pEngine)),
-		m_pRenderer(nullptr), m_pGraphics(nullptr), m_pWindows(nullptr),
+		m_pRenderer(nullptr), m_pWindows(nullptr),
 		m_LastRenderedFrame(std::chrono::system_clock::now())
 	{
 	}
@@ -84,8 +83,14 @@ namespace Glory
 		m_pEngine->Initialize();
 
 		m_pRenderer = m_pEngine->GetMainModule<RendererModule>();
-		m_pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
 		m_pWindows = m_pEngine->GetMainModule<WindowModule>();
+
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+		if (pDevice)
+		{
+			m_Swapchain = pDevice->CreateSwapchain(m_pWindows->GetMainWindow(), false, 3);
+			m_pRenderer->SetSwapchain(m_Swapchain);
+		}
 
 		/* Load splash screen */
 		std::filesystem::path splashPath = m_DataPath;
@@ -149,6 +154,9 @@ namespace Glory
 			m_pEngine->Update();
 			EndFrame();
 		}
+
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+		if (m_Swapchain) pDevice->FreeSwapchain(m_Swapchain);
 
 		m_IsRunning = false;
 		m_pEngine->GetSceneManager()->Stop();
@@ -252,9 +260,11 @@ namespace Glory
 
 	void GloryRuntime::EndFrame()
 	{
-		RenderTexture* pTexture = m_pEngine->GetDisplayManager().GetDisplayRenderTexture(0);
-		m_pRenderer->RenderOnBackBuffer(pTexture);
-		m_pGraphics->Swap();
+		//RenderTexture* pTexture = m_pEngine->GetDisplayManager().GetDisplayRenderTexture(0);
+		//m_pRenderer->RenderOnBackBuffer(pTexture);
+		//m_pGraphics->Swap();
+
+		m_pRenderer->PresentFrame();
 
 		if (m_MaxFramerate == 0.0f)
 		{
@@ -264,7 +274,7 @@ namespace Glory
 
 		/* Limit framerate */
 		std::chrono::time_point<std::chrono::system_clock> currentTime = std::chrono::system_clock::now();
-		const double frameIntervals = 1.0f / m_MaxFramerate;
+		const double frameIntervals = 1.0f/m_MaxFramerate;
 		double timeSinceRefresh = 0.0f;
 
 		while (timeSinceRefresh < frameIntervals)

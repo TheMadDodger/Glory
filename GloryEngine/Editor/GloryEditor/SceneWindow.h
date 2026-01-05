@@ -2,6 +2,8 @@
 #include "EditorWindow.h"
 #include "SceneViewCamera.h"
 
+#include <SceneObjectRef.h>
+
 #include <ImGuizmo.h>
 
 namespace Glory
@@ -46,12 +48,18 @@ namespace Glory::Editor
         SceneViewCamera m_SceneCamera;
         bool m_DrawGrid;
         int m_SelectedRenderTextureIndex;
-        size_t m_SelectedFrameBufferIndex;
         UUID m_ViewEventID;
         UUID m_PreviewPrefabID = 0;
         UUID m_PrefabInstance = 0;
         GScene* m_pPreviewScene;
         glm::uvec2 m_PickPos;
         bool m_BlockNextPick{ false };
+
+        struct
+        {
+            SceneObjectRef m_Object;
+            glm::vec3 m_WorldPosition;
+            glm::vec3 m_Normal;
+        } m_CurrentPick;
     };
 }

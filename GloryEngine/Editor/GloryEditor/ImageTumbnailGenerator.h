@@ -1,6 +1,8 @@
 #pragma once
 #include "TumbnailGenerator.h"
 
+#include <ImageData.h>
+
 namespace Glory::Editor
 {
 	class ImageTumbnailGenerator : public TumbnailGenerator<ImageData>

@@ -2,6 +2,11 @@
 #include "TumbnailGenerator.h"
 #include <GScene.h>
 
+namespace Glory
+{
+	class ImageData;
+}
+
 namespace Glory::Editor
 {
 	class SceneTumbnailGenerator : public TumbnailGenerator<GScene>

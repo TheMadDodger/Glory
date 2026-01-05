@@ -31,7 +31,7 @@ namespace Glory
 
 		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
 		uint32_t width, height;
-		pDocument->GetUITexture()->GetDimensions(width, height);
+		pDocument->GetResolution(width, height);
 		const glm::vec2 screenSize{ float(width), float(height) };
 
 		pComponent.m_ParentSize = screenSize;
@@ -100,40 +100,9 @@ namespace Glory
 	void UIImageSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIImage& pComponent)
 	{
 		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
-		UIRendererModule* pUIRenderer = pDocument->Renderer();
-		Engine* pEngine = pUIRenderer->GetEngine();
-		AssetManager& assets = pEngine->GetAssetManager();
-		MaterialManager& materials = pEngine->GetMaterialManager();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
-		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
-		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
-
-		TextureData* pTextureData = pComponent.m_Image.Get(&assets);
-		if (!pTextureData) return;
-
-		ImageData* pImage = pTextureData->GetImageData(&assets);
-		if (!pImage) return;
-
 		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
-
-		MeshData* pMeshData = pUIRenderer->GetImageMesh();
-		Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
-		ObjectData object;
-		object.Model = transform.m_Transform;
-		object.Projection = pDocument->Projection();
-
-		MaterialData* pPrepassMaterial = pUIRenderer->PrepassMaterial();
-		pPrepassMaterial->Set("Color", pComponent.m_Color);
-		pPrepassMaterial->Set("HasTexture", glm::vec4{ 1.0f });
-
-		Material* pMaterial = pGraphics->UseMaterial(pPrepassMaterial);
-		pMaterial->SetProperties(pEngine);
-		pMaterial->SetObjectData(object);
-
-		Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
-		if (pTexture) pMaterial->SetTexture("texSampler", pTexture);
-
-		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
+		glm::mat4 world = transform.m_Transform;
+		pDocument->AddRender(0ull, pComponent.m_Image.AssetUUID(), std::move(world), pComponent.m_Color);
 	}
 
 	void UIImageSystem::GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references)
@@ -175,9 +144,6 @@ namespace Glory
         UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
         UIRendererModule* pUIRenderer = pDocument->Renderer();
 		Engine* pEngine = pUIRenderer->GetEngine();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
-		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
-		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 		AssetManager& assets = pEngine->GetAssetManager();
 		const UUID objectID = pDocument->EntityUUID(entity);
 
@@ -185,7 +151,7 @@ namespace Glory
 		const glm::vec2 size{ transform.m_Width, transform.m_Height };
 
 		uint32_t screenWidth, screenHeight;
-		pDocument->GetUITexture()->GetDimensions(screenWidth, screenHeight);
+		pDocument->GetResolution(screenWidth, screenHeight);
 		const glm::vec2 screenSize{ float(screenWidth), float(screenHeight) };
 
 		Constraints::ProcessConstraint(pComponent.m_Scale, size, transform.m_ParentSize, screenSize);
@@ -201,8 +167,7 @@ namespace Glory
 
 		FontData* pFont = pComponent.m_Font.Get(&assets);
 		if (!pFont) return;
-		MeshData* pMeshData = pDocument->GetTextMesh(objectID, textData, pFont);
-		Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
+		const UUID meshID = pDocument->GetTextMesh(objectID, textData, pFont);
 
 		const uint32_t height = pFont->FontHeight();
 		glm::vec2 textOffset{ 0.0f, height*textData.m_Scale - size.y };
@@ -220,23 +185,9 @@ namespace Glory
 			break;
 		}
 
-		ObjectData object;
 		const glm::mat4 matTextOffset = glm::translate(glm::identity<glm::mat4>(), glm::vec3(textOffset, 0.0f));
-		object.Model = transform.m_TransformNoScale*glm::inverse(matTextOffset);
-		object.Projection = pDocument->Projection();
-
-		Material* pMaterial = pGraphics->UseMaterial(pUIRenderer->TextPrepassMaterial());
-
-		pMaterial->SetProperties(pEngine);
-		pMaterial->SetObjectData(object);
-
-		TextureData* pTextureData = pFont->GetGlyphTexture(assets);
-		if (!pTextureData) return;
-
-		Texture* pTexture = pResourceManager->CreateTexture((TextureData*)pTextureData);
-		if (pTexture) pMaterial->SetTexture("textSampler", pTexture);
-
-		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
+		glm::mat4 world = transform.m_TransformNoScale*glm::inverse(matTextOffset);
+		pDocument->AddRender(meshID, pFont->Texture(), std::move(world), textData.m_Color);
     }
 
 	void UITextSystem::OnDirty(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIText& pComponent)
@@ -257,31 +208,10 @@ namespace Glory
 	void UIBoxSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIBox& pComponent)
 	{
 		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
-		UIRendererModule* pUIRenderer = pDocument->Renderer();
-		Engine* pEngine = pUIRenderer->GetEngine();
-		AssetManager& assets = pEngine->GetAssetManager();
-		MaterialManager& materials = pEngine->GetMaterialManager();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
-		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
-		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
 		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
-
-		MeshData* pMeshData = pUIRenderer->GetImageMesh();
-		Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
-		ObjectData object;
-		object.Model = transform.m_Transform;
-		object.Projection = pDocument->Projection();
-
-		MaterialData* pPrepassMaterial = pUIRenderer->PrepassMaterial();
-		pPrepassMaterial->Set("Color", pComponent.m_Color);
-		pPrepassMaterial->Set("HasTexture", glm::vec4{ 0.0f });
-
-		Material* pMaterial = pGraphics->UseMaterial(pPrepassMaterial);
-		pMaterial->SetProperties(pEngine);
-		pMaterial->SetObjectData(object);
-
-		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
+		glm::mat4 world = transform.m_Transform;
+		pDocument->AddRender(0, 0ull, std::move(world), pComponent.m_Color);
 	}
 
 	void UIInteractionSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIInteraction& pComponent)
@@ -350,95 +280,18 @@ namespace Glory
 	{
 		if (!pComponent.m_Crop) return;
 		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
-		UIRendererModule* pUIRenderer = pDocument->Renderer();
-		Engine* pEngine = pUIRenderer->GetEngine();
-		AssetManager& assets = pEngine->GetAssetManager();
-		MaterialManager& materials = pEngine->GetMaterialManager();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
-		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
-		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
 
 		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
+		glm::mat4 world = transform.m_Transform;
 
-		MeshData* pMeshData = pUIRenderer->GetImageMesh();
-		Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
-		ObjectData object;
-		object.Model = transform.m_Transform;
-		object.Projection = pDocument->Projection();
-
-		MaterialData* pPrepassMaterial = pUIRenderer->PrepassStencilMaterial();
-		Material* pMaterial = pGraphics->UseMaterial(pPrepassMaterial);
-		pMaterial->SetProperties(pEngine);
-		pMaterial->SetObjectData(object);
-
-		size_t& counter = pDocument->PanelCounter();
-		pGraphics->SetColorMask(false, false, false, false);
-		pGraphics->EnableStencilTest(true);
-		pGraphics->SetStencilMask(0xFF);
-		if (counter == 0)
-			pGraphics->ClearStencil(0);
-
-		/* First stencil pass increases stencil value by 1 */
-		pGraphics->SetStencilOP(Func::OP_Keep, Func::OP_Keep, Func::OP_Increment);
-		pGraphics->SetStencilFunc(CompareOp::OP_Always, counter, 0xFF);
-		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
-
-		/* Second stencil pass compares stencil with the the expected addition, on fail it is reduced by 1 */
-		pGraphics->SetStencilOP(Func::OP_Decrement, Func::OP_Decrement, Func::OP_Replace);
-		pGraphics->SetStencilFunc(CompareOp::OP_Equal, counter + 1, 0xFF);
-		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
-		++counter;
-
-		/* Disable writing to the stencil buffer, value must be equal to counter */
-		pGraphics->SetColorMask(true, true, true, true);
-		pGraphics->SetStencilMask(0x00);
-		pGraphics->SetStencilOP(Func::OP_Keep, Func::OP_Keep, Func::OP_Keep);
-		pGraphics->SetStencilFunc(CompareOp::OP_LessOrEqual, counter, 0xFF);
+		pDocument->BeginMask(std::move(world));
 	}
 
 	void UIPanelSystem::OnPostDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIPanel& pComponent)
 	{
-		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
-		UIRendererModule* pUIRenderer = pDocument->Renderer();
-		Engine* pEngine = pUIRenderer->GetEngine();
-		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
-		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
-		size_t& counter = pDocument->PanelCounter();
-		--counter;
-		if (counter == 0)
-		{
-			pGraphics->SetStencilOP(Func::OP_Keep, Func::OP_Keep, Func::OP_Keep);
-			pGraphics->SetStencilFunc(CompareOp::OP_Always, 0, 0xFF);
-			pGraphics->SetStencilMask(0x00);
-			pGraphics->EnableStencilTest(false);
-			return;
-		}
-
 		if (!pComponent.m_Crop) return;
-		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
-		MeshData* pMeshData = pUIRenderer->GetImageMesh();
-		Mesh* pMesh = pResourceManager->CreateMesh(pMeshData);
-		ObjectData object;
-		object.Model = transform.m_Transform;
-		object.Projection = pDocument->Projection();
-
-		MaterialData* pPrepassMaterial = pUIRenderer->PrepassStencilMaterial();
-		Material* pMaterial = pGraphics->UseMaterial(pPrepassMaterial);
-		pMaterial->SetProperties(pEngine);
-		pMaterial->SetObjectData(object);
-
-		/* Remove the shape from the stencil */
-		pGraphics->SetColorMask(false, false, false, false);
-		pGraphics->SetStencilMask(0xFF);
-		pGraphics->SetStencilOP(Func::OP_Keep, Func::OP_Keep, Func::OP_Decrement);
-		pGraphics->SetStencilFunc(CompareOp::OP_Equal, counter + 1, 0xFF);
-		pGraphics->DrawMesh(pMesh, 0, pMesh->GetVertexCount());
-		pGraphics->SetColorMask(true, true, true, true);
-
-		/* Disable writing to the stencil buffer, value must be equal to counter */
-		pGraphics->SetStencilMask(0x00);
-		pGraphics->SetStencilOP(Func::OP_Keep, Func::OP_Keep, Func::OP_Keep);
-		pGraphics->SetStencilFunc(CompareOp::OP_LessOrEqual, counter, 0xFF);
+		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
+		pDocument->EndMask();
 	}
 
 	template<typename Comp>

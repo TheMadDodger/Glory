@@ -13,6 +13,7 @@ project "Glorious"
 	{
 		"*.h",
 		"*.cpp",
+		"EditorAssets/**.*",
 		"premake5.lua"
 	}
 
@@ -82,16 +83,16 @@ project "Glorious"
 	dependson
 	{
 		"GloryASSIMPModelLoader",
-		"GloryClusteredRenderer",
 		"GloryOpenGLGraphics",
-		--"GloryVulkanGraphics",
+		"GloryVulkanGraphics",
+		"GloryRenderer",
 		"GlorySDLWindow",
 		"GlorySDLInput",
 		"GloryEditorSDL",
 		"GloryEditorOGL",
 		"GloryJoltPhysics",
 		"GlorySteamAudio",
-		--"GloryEditorVulkan",
+		"GloryEditorVulkan",
 		"GloryMonoScripting",
 		"GloryUIRenderer",
 		"GloryFSM",

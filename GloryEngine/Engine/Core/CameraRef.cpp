@@ -1,6 +1,5 @@
 #include "CameraRef.h"
 #include "CameraManager.h"
-#include "RenderTexture.h"
 #include "Camera.h"
 
 namespace Glory
@@ -13,29 +12,62 @@ namespace Glory
 	{
 	}
 
+	bool CameraRef::operator==(const CameraRef& other) const
+	{
+		return m_CameraID == other.m_CameraID;
+	}
+
 	CameraRef::CameraRef(CameraManager* pManager, UUID uuid) : m_pManager(pManager), m_CameraID(uuid)
 	{
 	}
 
-	void CameraRef::SetResolution(uint32_t width, uint32_t height)
+	void CameraRef::SetBaseResolution(uint32_t width, uint32_t height)
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
 		if (pCamera == nullptr) return;
-		pCamera->SetResolution(width, height);
+		pCamera->SetBaseResolution(width, height);
 	}
 
-	void CameraRef::SetPerspectiveProjection(uint32_t width, uint32_t height, float halfFOV, float near, float far)
+	const glm::uvec2& CameraRef::GetBaseResolution() const
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return;
-		pCamera->SetPerspectiveProjection(width, height, halfFOV, near, far);
+		if (pCamera == nullptr) return {};
+		return pCamera->GetBaseResolution();
 	}
 
-	void CameraRef::SetOrthographicProjection(float width, float height, float near, float far)
+	void CameraRef::SetResolutionScale(float width, float height)
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
 		if (pCamera == nullptr) return;
-		pCamera->SetOrthographicProjection(width, height, near, far);
+		pCamera->SetResolutionScale(width, height);
+	}
+
+	void CameraRef::SetPerspectiveProjection(float halfFOV, float near, float far)
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		pCamera->SetPerspectiveProjection(halfFOV, near, far);
+	}
+
+	void CameraRef::SetOutput(bool output, int x, int y)
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		pCamera->SetOutput(output, x, y);
+	}
+
+	bool CameraRef::IsOutput() const
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return false;
+		return pCamera->IsOutput();
+	}
+
+	void CameraRef::SetOrthographicProjection(float near, float far)
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		pCamera->SetOrthographicProjection(near, far);
 	}
 
 	void CameraRef::SetView(const glm::mat4& view)
@@ -43,13 +75,6 @@ namespace Glory
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
 		if (pCamera == nullptr) return;
 		pCamera->SetView(view);
-	}
-
-	void CameraRef::SetDisplayIndex(int index)
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return;
-		pCamera->SetDisplayIndex(index);
 	}
 
 	void CameraRef::SetPriority(int priority)
@@ -73,32 +98,39 @@ namespace Glory
 		pCamera->SetClearColor(clearColor);
 	}
 
-	void CameraRef::SetOutputTexture(RenderTexture* pTexture)
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return;
-		pCamera->SetOutputTexture(pTexture);
-	}
-
-	void CameraRef::SetSecondaryOutputTexture(RenderTexture* pTexture)
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return;
-		pCamera->SetSecondaryOutputTexture(pTexture);
-	}
-
-	void CameraRef::Swap()
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return;
-		pCamera->Swap();
-	}
-
 	void CameraRef::SetUserData(const std::string& name, void* data)
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
 		if (pCamera == nullptr) return;
 		pCamera->SetUserData(name, data);
+	}
+
+	bool CameraRef::IsResolutionDirty()
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return false;
+		return pCamera->IsResolutionDirty();
+	}
+
+	bool CameraRef::IsPerspectiveDirty()
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return false;
+		return pCamera->IsPerspectiveDirty();
+	}
+
+	void CameraRef::SetResolutionDirty(bool dirty)
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		return pCamera->SetResolutionDirty(dirty);
+	}
+
+	void CameraRef::SetPerspectiveDirty(bool dirty)
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		return pCamera->SetPerspectiveDirty(dirty);
 	}
 
 	const glm::uvec2& CameraRef::GetResolution() const
@@ -157,13 +189,6 @@ namespace Glory
 		return pCamera->GetProjectionPointer();
 	}
 
-	int CameraRef::GetDisplayIndex() const
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return -1;
-		return pCamera->GetDisplayIndex();
-	}
-
 	int CameraRef::GetPriority() const
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
@@ -187,48 +212,11 @@ namespace Glory
 		return pCamera->GetLayerMask();
 	}
 
-	size_t CameraRef::GetRenderTextureCount() const
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return 0;
-		return pCamera->RenderTextureCount();
-	}
-
-	RenderTexture* CameraRef::GetRenderTexture(size_t index) const
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return nullptr;
-		return pCamera->GetRenderTexture(index);
-	}
-
-	RenderTexture* CameraRef::GetOutputTexture() const
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return nullptr;
-		return pCamera->GetOutputTexture();
-	}
-
-	RenderTexture* CameraRef::GetSecondaryOutputTexture() const
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return nullptr;
-		return pCamera->GetSecondaryOutputTexture();
-	}
-
 	void CameraRef::Free()
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
 		if (pCamera == nullptr) return;
 		m_pManager->SetUnused(pCamera);
-	}
-
-	void* CameraRef::GetUserDataVoid(const std::string& name)
-	{
-		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
-		if (pCamera == nullptr) return false;
-		void* data = nullptr;
-		if (!pCamera->GetUserData(name, data)) return nullptr;
-		return data;
 	}
 
 	uint64_t& CameraRef::GetUserHandle(const std::string& name)

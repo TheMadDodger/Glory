@@ -10,7 +10,6 @@
 namespace Glory
 {
 	class MaterialData;
-	class RenderTexture;
 	class UIDocumentData;
 	class FontData;
 	class UIDocument;
@@ -38,6 +37,9 @@ namespace Glory
 		UUID m_MaterialID;
 		bool m_WorldDirty;
 		bool m_InputEnabled;
+		std::string m_MaterialTextureName = "texSampler";
+
+		glm::vec4 m_ClearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 	};
 
 	class UIRendererModule : public Module
@@ -55,7 +57,8 @@ namespace Glory
 		GLORY_API void Submit(UIRenderData&& data);
 		GLORY_API void Create(const UIRenderData& data, UIDocumentData* pDocument);
 
-		GLORY_API void DrawDocument(UIDocument* pDocument, const UIRenderData& data);
+		GLORY_API void DrawDocument(GraphicsDevice* pDevice, CommandBufferHandle commandBuffer,
+			uint32_t frameIndex, UIDocument* pDocument, const UIRenderData& data);
 
 		GLORY_API MaterialData* PrepassStencilMaterial();
 		GLORY_API MaterialData* PrepassMaterial();
@@ -63,23 +66,27 @@ namespace Glory
 		GLORY_API MeshData* GetImageMesh();
 
 		GLORY_API UIDocument* FindDocument(UUID uuid);
+		GLORY_API const DescriptorSetLayoutHandle& UIOverlaySetLayout() const;
 
-		GLORY_MODULE_VERSION_H(0,2,0);
+		GLORY_MODULE_VERSION_H(0, 3, 0);
 
 	private:
 		virtual void Initialize() override;
 		virtual void PostInitialize() override;
 		virtual void Update() override;
 		virtual void Cleanup() override;
-		virtual void UIPrepass();
-		virtual void UIWorldSpaceQuadPass(uint32_t cameraIndex, RendererModule* pRenderer);
-		virtual void UIOverlayPass(uint32_t cameraIndex, RendererModule* pRenderer);
+		virtual void UIPrepass(GraphicsDevice* pDevice, CommandBufferHandle commandBuffer, uint32_t frameIndex);
+		virtual void UIDataPass(GraphicsDevice* pDevice, RendererModule* pRenderer);
+		virtual bool UIOverlayPass(GraphicsDevice* pDevice, CameraRef camera, CommandBufferHandle commandBuffer,
+			size_t frameIndex, RenderPassHandle renderPass, DescriptorSetHandle ds);
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
 
 		UIDocument& GetDocument(const UIRenderData& data, UIDocumentData* pDocument, bool forceCreate=false);
 
 		MeshData* GetDocumentQuadMesh(const UIRenderData& data);
+		std::vector<TextureData*>& GetDocumentTexture(GraphicsDevice* pDevice,
+			const UIRenderData& data, UIDocument& document, size_t imageCount);
 
 	private:
 		MaterialData* m_pUIPrepassStencilMaterial = nullptr;
@@ -93,6 +100,35 @@ namespace Glory
 
 		std::vector<UIRenderData> m_Frame;
 		std::unique_ptr<MeshData> m_pImageMesh;
-		std::map<UUID, std::unique_ptr<MeshData>> m_pDocumentQuads;
+		MeshHandle m_ImageMesh = 0;
+		std::map<UUID, MeshData*> m_pDocumentQuads;
+		std::map<UUID, std::vector<TextureData*>> m_pDocumentTextures;
+
+		struct UIBatchData
+		{
+			UIBatchData() {};
+			virtual ~UIBatchData() {};
+
+			CPUBuffer<glm::vec4> m_Colors;
+			CPUBuffer<glm::mat4> m_Worlds;
+
+			BufferHandle m_ColorsBuffers = 0;
+			BufferHandle m_WorldsBuffers = 0;
+			DescriptorSetHandle m_BuffersSet = 0;
+			std::vector<DescriptorSetHandle> m_TextureSets;
+			std::vector<UUID> m_LastTextureIDs;
+		};
+
+		std::map<UUID, UIBatchData> m_BatchDatas;
+
+		DescriptorSetLayoutHandle m_UIBuffersLayout = 0;
+		DescriptorSetLayoutHandle m_UISamplerLayout = 0;
+		DescriptorSetLayoutHandle m_UIOverlaySamplerLayout = 0;
+
+		RenderPassHandle m_DummyRenderPass = 0;
+
+		PipelineHandle m_UIPipeline = 0;
+		PipelineHandle m_UITextPipeline = 0;
+		PipelineHandle m_UIStencilPipeline = 0;
 	};
 }

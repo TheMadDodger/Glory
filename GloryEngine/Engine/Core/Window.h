@@ -34,6 +34,7 @@ namespace Glory
 		virtual void SetCursorPosition(int x, int y) = 0;
 		virtual void SetFullscreen(bool fullscreen, bool borderless) = 0;
 		virtual void Maximize() = 0;
+		virtual void SetGLSwapInterval(int interval) = 0;
 
 		virtual void SetWindowTitle(const char* title) = 0;
 

@@ -1,11 +1,12 @@
 #include "UIDocument.h"
 #include "UIDocumentData.h"
 #include "UIComponents.h"
+#include "UIRendererModule.h"
 
 #include <FontData.h>
 #include <MeshData.h>
 #include <RenderData.h>
-#include <GraphicsModule.h>
+#include <GraphicsDevice.h>
 #include <VertexHelpers.h>
 
 #include <queue>
@@ -60,11 +61,11 @@ namespace Glory
 	}
 
 	UIDocument::UIDocument(UIDocumentData* pDocument):
-		m_OriginalDocumentID(pDocument->GetUUID()), m_SceneID(0), m_ObjectID(0),
-		m_pUITexture(nullptr), m_pRenderer(nullptr), m_Projection(glm::identity<glm::mat4>()),
+		m_OriginalDocumentID(pDocument->GetUUID()), m_Resolution(1, 1), m_SceneID(0), m_ObjectID(0),
+		m_pRenderer(nullptr), m_Projection(glm::identity<glm::mat4>()),
 		m_CursorPos(0.0f, 0.0f), m_CursorScrollDelta(0.0f, 0.0f), m_CursorDown(false),
 		m_WasCursorDown(false), m_InputEnabled(true), m_PanelCounter(0), m_Name(pDocument->m_Name),
-		m_Ids(pDocument->m_Ids), m_UUIds(pDocument->m_UUIds), m_Names(pDocument->m_Names), m_DrawIsDirty(true)
+		m_Ids(pDocument->m_Ids), m_UUIds(pDocument->m_UUIds), m_Names(pDocument->m_Names), m_DrawIsDirty(32, true)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
 		for (size_t i = 0; i < registry.ChildCount(0); ++i)
@@ -72,11 +73,6 @@ namespace Glory
 			const Utils::ECS::EntityID child = registry.Child(0, i);
 			CopyEntity(registry, child, 0);
 		}
-	}
-
-	RenderTexture* UIDocument::GetUITexture()
-	{
-		return m_pUITexture;
 	}
 
 	static void UpdateEntity(Utils::ECS::EntityID entity, Utils::ECS::EntityRegistry& registry, Utils::ECS::InvocationType invocation)
@@ -124,21 +120,21 @@ namespace Glory
 		registry.InvokeAll(Utils::ECS::InvocationType::PostDraw, { entity });
 	}
 
-	void UIDocument::Draw(GraphicsModule* pGraphics, const glm::vec4& clearColor)
+	void UIDocument::Draw()
 	{
+		m_UIBatch.m_MaskIncrements.Clear();
+		m_UIBatch.m_MaskDecrements.Clear();
+
 		m_PanelCounter = 0;
 		m_Registry.SetUserData(this);
-		if (!m_DrawIsDirty) return;
-		m_pUITexture->BindForDraw();
-		pGraphics->Clear({ clearColor.x, clearColor.y, clearColor.z, clearColor.w });
-		pGraphics->ClearStencil(0);
+
+		m_UIBatch.Reset();
+
 		for (size_t i = 0; i < m_Registry.ChildCount(0); ++i)
 		{
 			const Utils::ECS::EntityID child = m_Registry.Child(0, i);
 			DrawEntity(child, m_Registry);
 		}
-		m_DrawIsDirty = false;
-		m_pUITexture->UnBindForDraw();
 	}
 
 	UUID UIDocument::OriginalDocumentID() const
@@ -171,7 +167,7 @@ namespace Glory
 		return m_Projection;
 	}
 
-	MeshData* UIDocument::GetTextMesh(UUID objectID, const TextData& data, FontData* pFont)
+	UUID UIDocument::GetTextMesh(UUID objectID, const TextData& data, FontData* pFont)
 	{
 		auto iter = m_pTextMeshes.find(objectID);
 		const bool exists = iter != m_pTextMeshes.end();
@@ -184,13 +180,18 @@ namespace Glory
 
 		if (data.m_TextDirty || !exists)
 			Utils::GenerateTextMesh(iter->second.get(), pFont, data);
-		return iter->second.get();
+		return iter->first;
 	}
 
-	void UIDocument::SetRenderTexture(RenderTexture* pTexture)
+	const glm::uvec2& UIDocument::GetResolution() const
 	{
-		m_pUITexture = pTexture;
-		m_DrawIsDirty = true;
+		return m_Resolution;
+	}
+
+	void UIDocument::GetResolution(uint32_t& width, uint32_t& height) const
+	{
+		width = m_Resolution.x;
+		height = m_Resolution.y;
 	}
 
 	Utils::ECS::EntityRegistry& UIDocument::Registry()
@@ -320,7 +321,7 @@ namespace Glory
 
 	void UIDocument::SetDrawDirty()
 	{
-		m_DrawIsDirty = true;
+		m_DrawIsDirty.SetAll();
 	}
 
 	UUID UIDocument::Instantiate(UIDocumentData* pOtherDocument, UUID parentID)
@@ -350,7 +351,7 @@ namespace Glory
 	{
 		m_Registry.GetEntityView(entity)->Active() = active;
 		UpdateEntityActiveHierarchy(entity);
-		m_DrawIsDirty = true;
+		m_DrawIsDirty.SetAll();
 	}
 
 	void UIDocument::Start()
@@ -368,5 +369,122 @@ namespace Glory
 			m_Registry.SetEntityDirty(parent, true, false);
 			parent = m_Registry.GetParent(parent);
 		}
+	}
+
+	void UIDocument::AddRender(UUID textMeshID, UUID textureID, glm::mat4&& world, const glm::vec4& color)
+	{
+		const size_t index = m_UIBatch.m_Worlds.size();
+		m_UIBatch.m_TextMeshes.emplace_back(textMeshID);
+		m_UIBatch.m_Worlds.emplace_back(std::move(world));
+		m_UIBatch.m_TextureIDs.emplace_back(textureID);
+
+		auto iter = std::find(m_UIBatch.m_UniqueColors.begin(), m_UIBatch.m_UniqueColors.end(), color);
+
+		if (iter == m_UIBatch.m_UniqueColors.end())
+		{
+			m_UIBatch.m_ColorIndices.emplace_back(static_cast<uint32_t>(m_UIBatch.m_UniqueColors.size()));
+			m_UIBatch.m_UniqueColors.emplace_back(color);
+			return;
+		}
+
+		const uint32_t materialIndex = static_cast<uint32_t>(iter - m_UIBatch.m_UniqueColors.begin());
+		m_UIBatch.m_ColorIndices.emplace_back(materialIndex);
+
+		m_UIBatch.m_MaskIncrements.Reserve(m_UIBatch.m_Worlds.size());
+		m_UIBatch.m_MaskDecrements.Reserve(m_UIBatch.m_Worlds.size());
+		m_UIBatch.m_MaskIncrements.Set(index, false);
+		m_UIBatch.m_MaskDecrements.Set(index, false);
+	}
+
+	void UIDocument::BeginMask(glm::mat4&& world)
+	{
+		const size_t index = m_UIBatch.m_Worlds.size();
+		m_UIBatch.m_TextMeshes.emplace_back(0);
+		m_UIBatch.m_Worlds.emplace_back(std::move(world));
+		m_UIBatch.m_TextureIDs.emplace_back(0);
+		m_UIBatch.m_ColorIndices.emplace_back(0);
+		m_UIBatch.m_MaskIncrements.Reserve(m_UIBatch.m_Worlds.size());
+		m_UIBatch.m_MaskDecrements.Reserve(m_UIBatch.m_Worlds.size());
+		m_UIBatch.m_MaskIncrements.Set(index, true);
+		m_UIBatch.m_MaskDecrements.Set(index, false);
+	}
+
+	void UIDocument::EndMask()
+	{
+		const size_t index = m_UIBatch.m_Worlds.size();
+		m_UIBatch.m_TextMeshes.emplace_back(0);
+		m_UIBatch.m_Worlds.emplace_back(glm::identity<glm::mat4>());
+		m_UIBatch.m_TextureIDs.emplace_back(0);
+		m_UIBatch.m_ColorIndices.emplace_back(0);
+		m_UIBatch.m_MaskIncrements.Reserve(m_UIBatch.m_Worlds.size());
+		m_UIBatch.m_MaskDecrements.Reserve(m_UIBatch.m_Worlds.size());
+		m_UIBatch.m_MaskIncrements.Set(index, false);
+		m_UIBatch.m_MaskDecrements.Set(index, true);
+	}
+
+	void UIDocument::CreateRenderPasses(GraphicsDevice* pDevice, size_t imageCount, const glm::uvec2& resolution, UIRendererModule* pUIRenderer)
+	{
+		m_Resolution = resolution;
+
+		m_UIPasses.resize(imageCount, nullptr);
+		m_UIOverlaySets.resize(imageCount, nullptr);
+		for (size_t i = 0; i < m_UIPasses.size(); ++i)
+		{
+			if (m_UIPasses[i]) continue;
+
+			RenderPassInfo renderPassInfo;
+			renderPassInfo.RenderTextureInfo.HasDepth = false;
+			renderPassInfo.RenderTextureInfo.HasStencil = true;
+			renderPassInfo.RenderTextureInfo.Width = m_Resolution.x;
+			renderPassInfo.RenderTextureInfo.Height = m_Resolution.y;
+			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA,
+				PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+
+			m_UIPasses[i] = pDevice->CreateRenderPass(std::move(renderPassInfo));
+			RenderTextureHandle uiRenderTexture = pDevice->GetRenderPassRenderTexture(m_UIPasses[i]);
+			TextureHandle uiTexture = pDevice->GetRenderTextureAttachment(uiRenderTexture, 0);
+
+			DescriptorSetInfo dsInfo;
+			dsInfo.m_Layout = pUIRenderer->UIOverlaySetLayout();
+			dsInfo.m_Samplers.resize(1);
+			dsInfo.m_Samplers[0].m_TextureHandle = uiTexture;
+			m_UIOverlaySets[i] = pDevice->CreateDescriptorSet(std::move(dsInfo));
+		}
+		m_DrawIsDirty.SetAll();
+	}
+
+	void UIDocument::ResizeRenderTexture(GraphicsDevice* pDevice, size_t imageCount, const glm::uvec2& resolution, UIRendererModule* pUIRenderer)
+	{
+		m_Resolution = resolution;
+
+		if (m_UIPasses.size() < imageCount)
+			CreateRenderPasses(pDevice, imageCount, resolution, pUIRenderer);
+
+		pDevice->WaitIdle();
+		
+		for (size_t i = 0; i < m_UIPasses.size(); ++i)
+		{
+			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_UIPasses[i]);
+			pDevice->ResizeRenderTexture(renderTexture, resolution.x, resolution.y);
+			TextureHandle uiTexture = pDevice->GetRenderTextureAttachment(renderTexture, 0);
+
+			DescriptorSetUpdateInfo dsWriteInfo;
+			dsWriteInfo.m_Samplers.resize(1);
+			dsWriteInfo.m_Samplers[0].m_TextureHandle = uiTexture;
+			dsWriteInfo.m_Samplers[0].m_DescriptorIndex = 0;
+			pDevice->UpdateDescriptorSet(m_UIOverlaySets[i], dsWriteInfo);
+		}
+		m_DrawIsDirty.SetAll();
+	}
+
+	void UIDocument::SetClearColor(const glm::vec4& color)
+	{
+		m_ClearColor = color;
+	}
+
+	TextureHandle UIDocument::GetUITexture(GraphicsDevice* pDevice, uint32_t frameIndex)
+	{
+		RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_UIPasses[frameIndex]);
+		return pDevice->GetRenderTextureAttachment(renderTexture, 0);
 	}
 }

@@ -398,9 +398,8 @@ namespace Glory::Editor
                 {
                     LightComponent& lightComp = entity.AddComponent<LightComponent>();
                     const glm::vec4 color = toColorAndIntensity(light->mColorDiffuse);
-                    lightComp.m_Intensity = color.a;
                     lightComp.m_Color = color;
-                    lightComp.m_Color.a = 1.0f;
+                    lightComp.m_Intensity = color.a;
                     lightComp.m_Range = 100.0f;
                     break;
                 }

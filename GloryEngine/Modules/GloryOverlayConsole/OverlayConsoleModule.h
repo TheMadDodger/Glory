@@ -3,6 +3,7 @@
 #include <Module.h>
 #include <Glory.h>
 #include <KeyEnums.h>
+#include <GraphicsHandles.h>
 #include <IWindowInputOverrideHandler.h>
 
 #include <glm/glm.hpp>
@@ -14,6 +15,7 @@ namespace Glory
 	class MeshData;
 	class Console;
 	class Window;
+	class GraphicsDevice;
 
 	/** @brief Overlay console module */
 	class OverlayConsoleModule : public Module, IConsole, IWindowInputOverrideHandler
@@ -41,7 +43,7 @@ namespace Glory
 		virtual void PostInitialize() override;
 		virtual void Update() override;
 		virtual void Cleanup() override;
-		virtual void OverlayPass();
+		virtual void OverlayPass(GraphicsDevice* pDevice, RenderPassHandle renderPass, CommandBufferHandle commandBuffer);
 
 		virtual void OnConsoleClose() override;
 		virtual void SetNextColor(const glm::vec4& color) override;
@@ -53,15 +55,19 @@ namespace Glory
 		void HandleKeyboardInput(Window* pWindow, Console& pConsole, KeyboardKey key);
 
 	private:
-		MaterialData* m_pConsoleBackgroundMaterial = nullptr;
-		MaterialData* m_pConsoleTextMaterial = nullptr;
-
 		std::unique_ptr<MeshData> m_pConsoleMesh;
+		MeshHandle m_ConsoleMesh = 0;
+		MeshHandle m_ConsoleTextMesh = 0;
+		MeshHandle m_InputTextBracketMesh = 0;
+		MeshHandle m_InputTextMesh = 0;
+		MeshHandle m_CursorTextMesh = 0;
 		bool m_ConsoleButtonDown;
 		bool m_ConsoleOpen;
 		bool m_ConsoleOpenedThisFrame;
+		bool m_CursorBlink;
 		float m_ConsoleAnimationTime;
 		float m_Scroll;
+		float m_InputTextWidth;
 
 		std::unique_ptr<MeshData> m_pConsoleLogTextMesh;
 		bool m_TextDirty;
@@ -74,5 +80,10 @@ namespace Glory
 		char m_ConsoleInput[MAX_CONSOLE_INPUT];
 		int m_HistoryRewindIndex;
 		std::string m_BackedUpInput;
+
+		DescriptorSetLayoutHandle m_RenderConstantsSetLayout = 0;
+		DescriptorSetLayoutHandle m_TextRenderSetLayout = 0;
+		DescriptorSetHandle m_TextRenderSet = 0;
+		UUID m_LastFontID = 0;
 	};
 }

@@ -76,9 +76,6 @@ namespace Glory::Editor
 
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 
-		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
-		Texture* pFolderTexture = EditorAssets::GetTexture("folder");
-
 		ImGui::Button("##elementItem", itemSize);
 		const std::string_view icon = ElementIcons.at(type->m_TypeHash).data();
 		UIElementType payload{ true, uint64_t(type->m_TypeHash) };

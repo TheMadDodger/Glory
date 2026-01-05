@@ -12,30 +12,30 @@ namespace Glory
 	{
 	}
 
-	void NullRendererModule::GetCameraRenderTextureInfos(std::vector<RenderTextureCreateInfo>& infos)
+	void NullRendererModule::OnCameraResize(CameraRef)
 	{
 	}
 
-	void NullRendererModule::OnCameraResize(CameraRef camera)
+	void NullRendererModule::OnCameraPerspectiveChanged(CameraRef)
 	{
 	}
 
-	void NullRendererModule::OnCameraPerspectiveChanged(CameraRef camera)
-	{
-	}
-
-	MaterialData* NullRendererModule::GetInternalMaterial(std::string_view name) const
+	MaterialData* NullRendererModule::GetInternalMaterial(std::string_view) const
 	{
 		return nullptr;
 	}
 
-	void NullRendererModule::CollectReferences(std::vector<UUID>& references)
+	void NullRendererModule::CollectReferences(std::vector<UUID>&)
 	{
 	}
 
 	UUID NullRendererModule::TextPipelineID() const
 	{
 		return 0;
+	}
+
+	void NullRendererModule::PresentFrame()
+	{
 	}
 
 	void NullRendererModule::Initialize()
@@ -51,31 +51,59 @@ namespace Glory
 	{
 	}
 
+	void NullRendererModule::Draw()
+	{
+	}
+
+	size_t NullRendererModule::DefaultAttachmenmtIndex() const
+	{
+		return 0;
+	}
+
+	size_t NullRendererModule::CameraAttachmentPreviewCount() const
+	{
+		return 0;
+	}
+
+	std::string_view NullRendererModule::CameraAttachmentPreviewName(size_t) const
+	{
+		return "";
+	}
+
+	TextureHandle NullRendererModule::CameraAttachmentPreview(CameraRef, size_t) const
+	{
+		return NULL;
+	}
+
+	TextureHandle NullRendererModule::FinalColor() const
+	{
+		return NULL;
+	}
+
+	void NullRendererModule::VisualizeAttachment(CameraRef, size_t)
+	{
+	}
+
+	size_t NullRendererModule::DebugOverlayCount() const
+	{
+		return 0;
+	}
+
+	std::string_view NullRendererModule::DebugOverlayName(size_t) const
+	{
+		return "";
+	}
+
+	void NullRendererModule::SetDebugOverlayEnabled(CameraRef, size_t, bool)
+	{
+	}
+
+	bool NullRendererModule::DebugOverlayEnabled(CameraRef, size_t) const
+	{
+		return false;
+	}
+
 	void NullRendererModule::Cleanup()
-	{
-	}
-
-	void NullRendererModule::OnRenderEffects(CameraRef camera, RenderTexture* pRenderTexture)
-	{
-	}
-
-	void NullRendererModule::OnDoCompositing(CameraRef camera, uint32_t width, uint32_t height, RenderTexture* pRenderTexture)
-	{
-	}
-
-	void NullRendererModule::OnDisplayCopy(RenderTexture* pRenderTexture, uint32_t width, uint32_t height)
-	{
-	}
-
-	void NullRendererModule::OnRenderSkybox(CameraRef camera, CubemapData* pCubemap)
-	{
-	}
-
-	void NullRendererModule::OnStartCameraRender(CameraRef camera, const FrameData<LightData>& lights)
-	{
-	}
-
-	void NullRendererModule::OnEndCameraRender(CameraRef camera, const FrameData<LightData>& lights)
 	{
 	}
 

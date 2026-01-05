@@ -4,6 +4,8 @@
 #include "EditorAssets.h"
 #include "EditorAssetDatabase.h"
 
+#include <TextureData.h>
+
 namespace Glory::Editor
 {
 	ImageTumbnailGenerator::ImageTumbnailGenerator()

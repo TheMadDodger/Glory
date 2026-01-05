@@ -7,16 +7,16 @@
 #include "Constraints.h"
 
 #include <AssetManager.h>
+#include <PipelineManager.h>
 #include <MaterialManager.h>
 #include <Engine.h>
-#include <GraphicsModule.h>
-#include <GPUResourceManager.h>
+#include <GraphicsDevice.h>
 #include <CameraManager.h>
 #include <InternalMaterial.h>
 #include <InternalPipeline.h>
 #include <FontData.h>
+#include <InternalTexture.h>
 #include <FontDataStructs.h>
-#include <Material.h>
 #include <MaterialData.h>
 #include <SceneManager.h>
 #include <LocalizeModuleBase.h>
@@ -33,6 +33,14 @@
 
 namespace Glory
 {
+	struct UIConstants
+	{
+		glm::mat4 Projection;
+		uint32_t ObjectIndex;
+		uint32_t ColorIndex;
+		uint32_t HasTexture;
+	};
+
 	GLORY_MODULE_VERSION_CPP(UIRendererModule);
 
 	UIRendererModule::UIRendererModule()
@@ -41,6 +49,10 @@ namespace Glory
 
 	UIRendererModule::~UIRendererModule()
 	{
+		m_Documents.clear();
+		m_Frame.clear();
+		m_pDocumentQuads.clear();
+		m_BatchDatas.clear();
 	}
 
 	void UIRendererModule::CollectReferences(std::vector<UUID>& references)
@@ -84,20 +96,221 @@ namespace Glory
 		GetDocument(data, pDocument, true);
 	}
 
-	void UIRendererModule::DrawDocument(UIDocument* pDocument, const UIRenderData& data)
+	void CalculateProjection(glm::mat4& projection, GraphicsDevice* pDevice, float x, float y, float width, float height)
+	{
+		projection = glm::ortho(x, width, y, height);
+	}
+
+	void UIRendererModule::DrawDocument(GraphicsDevice* pDevice, CommandBufferHandle commandBuffer,
+		uint32_t frameIndex, UIDocument* pDocument, const UIRenderData& data)
 	{
 		pDocument->m_Registry.SetUserData(pDocument);
 		pDocument->m_pRenderer = this;
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
-		RenderTexture* pRenderTexture = pDocument->m_pUITexture;
-		pDocument->m_Projection = glm::ortho(0.0f, float(data.m_Resolution.x), 0.0f, float(data.m_Resolution.y));
+		if (!pDevice) return;
+
+		CalculateProjection(pDocument->m_Projection, pDevice, 0.0f, 0.0f, float(data.m_Resolution.x), float(data.m_Resolution.y));
 		pDocument->m_InputEnabled = data.m_InputEnabled;
 		pDocument->Update();
 
-		pRenderTexture->BindForDraw();
-		pDocument->Draw(pGraphics, { 0.0f, 0.0f, 0.0f, 1.0f });
-		pRenderTexture->UnBindForDraw();
+		if (!pDocument->m_DrawIsDirty.IsSet(frameIndex)) return;
+		pDocument->Draw();
+		pDocument->m_DrawIsDirty.Set(frameIndex, false);
+
+		AssetManager& assets = m_pEngine->GetAssetManager();
+
+		/* Prepare data */
+		auto iter = m_BatchDatas.find(pDocument->m_ObjectID);
+		if (iter == m_BatchDatas.end())
+			iter = m_BatchDatas.emplace(pDocument->m_ObjectID, UIBatchData()).first;
+
+		UIBatchData& batchData = iter->second;
+		if (batchData.m_Worlds->size() < pDocument->m_UIBatch.m_Worlds.size())
+			batchData.m_Worlds.resize(pDocument->m_UIBatch.m_Worlds.size());
+		if (batchData.m_Colors->size() < pDocument->m_UIBatch.m_UniqueColors.size())
+			batchData.m_Colors.resize(pDocument->m_UIBatch.m_UniqueColors.size());
+
+		for (size_t i = 0; i < pDocument->m_UIBatch.m_Worlds.size(); ++i)
+		{
+			if (pDocument->m_UIBatch.m_Worlds[i] == batchData.m_Worlds.m_Data[i]) continue;
+			batchData.m_Worlds.m_Data[i] = pDocument->m_UIBatch.m_Worlds[i];
+			batchData.m_Worlds.SetDirty(i);
+		}
+
+		for (size_t i = 0; i < pDocument->m_UIBatch.m_UniqueColors.size(); ++i)
+		{
+			if (pDocument->m_UIBatch.m_UniqueColors[i] == batchData.m_Colors.m_Data[i]) continue;
+			batchData.m_Colors.m_Data[i] = pDocument->m_UIBatch.m_UniqueColors[i];
+			batchData.m_Colors.SetDirty(i);
+		}
+
+		if (!batchData.m_WorldsBuffers)
+		{
+			batchData.m_WorldsBuffers = pDevice->CreateBuffer(pDocument->m_UIBatch.m_Worlds.size()*sizeof(glm::mat4), BT_Storage, BF_Write);
+			batchData.m_Worlds.SetDirty();
+		}
+
+		if (!batchData.m_ColorsBuffers)
+		{
+			batchData.m_ColorsBuffers = pDevice->CreateBuffer(pDocument->m_UIBatch.m_UniqueColors.size()*sizeof(glm::vec4), BT_Storage, BF_Write);
+			batchData.m_Colors.SetDirty();
+		}
+
+		if (pDevice->BufferSize(batchData.m_WorldsBuffers) < batchData.m_Worlds.TotalByteSize())
+			pDevice->ResizeBuffer(batchData.m_WorldsBuffers, batchData.m_Worlds.TotalByteSize());
+		if (batchData.m_Worlds)
+		{
+			const size_t dirtySize = batchData.m_Worlds.DirtySize();
+			pDevice->AssignBuffer(batchData.m_WorldsBuffers, batchData.m_Worlds.DirtyStart(),
+				batchData.m_Worlds.m_DirtyRange.first*sizeof(glm::mat4), dirtySize*sizeof(glm::mat4));
+		}
+
+		if (pDevice->BufferSize(batchData.m_ColorsBuffers) < batchData.m_Colors.TotalByteSize())
+			pDevice->ResizeBuffer(batchData.m_ColorsBuffers, batchData.m_Colors.TotalByteSize());
+		if (batchData.m_Colors)
+		{
+			const size_t dirtySize = batchData.m_Colors.DirtySize();
+			pDevice->AssignBuffer(batchData.m_ColorsBuffers, batchData.m_Colors.DirtyStart(),
+				batchData.m_Colors.m_DirtyRange.first*sizeof(glm::vec4), dirtySize*sizeof(glm::vec4));
+		}
+
+		if (!batchData.m_BuffersSet)
+		{
+			DescriptorSetInfo setInfo;
+			setInfo.m_Layout = m_UIBuffersLayout;
+			setInfo.m_Buffers.resize(2);
+			setInfo.m_Buffers[0].m_BufferHandle = batchData.m_WorldsBuffers;
+			setInfo.m_Buffers[0].m_Offset = 0;
+			setInfo.m_Buffers[0].m_Size = batchData.m_Worlds.TotalByteSize();
+			setInfo.m_Buffers[1].m_BufferHandle = batchData.m_ColorsBuffers;
+			setInfo.m_Buffers[1].m_Offset = 0;
+			setInfo.m_Buffers[1].m_Size = batchData.m_Colors.TotalByteSize();
+			batchData.m_BuffersSet = pDevice->CreateDescriptorSet(std::move(setInfo));
+		}
+
+		if (batchData.m_Worlds.SizeDirty() || batchData.m_Colors.SizeDirty())
+		{
+			DescriptorSetUpdateInfo dsWrite;
+			dsWrite.m_Buffers.resize(2);
+			dsWrite.m_Buffers[0].m_BufferHandle = batchData.m_WorldsBuffers;
+			dsWrite.m_Buffers[0].m_DescriptorIndex = 0;
+			dsWrite.m_Buffers[0].m_Offset = 0;
+			dsWrite.m_Buffers[0].m_Size = batchData.m_Worlds.TotalByteSize();
+			dsWrite.m_Buffers[1].m_BufferHandle = batchData.m_ColorsBuffers;
+			dsWrite.m_Buffers[1].m_DescriptorIndex = 1;
+			dsWrite.m_Buffers[1].m_Offset = 0;
+			dsWrite.m_Buffers[1].m_Size = batchData.m_Colors.TotalByteSize();
+			pDevice->UpdateDescriptorSet(batchData.m_BuffersSet, dsWrite);
+		}
+
+		if (batchData.m_TextureSets.size() < pDocument->m_UIBatch.m_TextureIDs.size())
+		{
+			batchData.m_TextureSets.resize(pDocument->m_UIBatch.m_TextureIDs.size(), nullptr);
+			batchData.m_LastTextureIDs.resize(pDocument->m_UIBatch.m_TextureIDs.size(), 0ull);
+		}
+
+		for (size_t i = 0; i < pDocument->m_UIBatch.m_Worlds.size(); ++i)
+		{
+			UUID textureID = pDocument->m_UIBatch.m_TextureIDs[i];
+			Resource* pTextureResource = textureID ? assets.FindResource(textureID) : nullptr;
+			TextureData* pTexture = pTextureResource ? static_cast<TextureData*>(pTextureResource) : nullptr;
+			TextureHandle texture = pDevice->AcquireCachedTexture(pTexture);
+			if (!pTexture) textureID = 0;
+
+			if (!batchData.m_TextureSets[i])
+			{
+				DescriptorSetInfo setInfo;
+				setInfo.m_Layout = m_UISamplerLayout;
+				setInfo.m_Samplers.resize(1);
+				setInfo.m_Samplers[0].m_TextureHandle = texture;
+				batchData.m_TextureSets[i] = pDevice->CreateDescriptorSet(std::move(setInfo));
+				batchData.m_LastTextureIDs[i] = textureID;
+			}
+
+			if (batchData.m_LastTextureIDs[i] != textureID)
+			{
+				DescriptorSetUpdateInfo dsWrite;
+				dsWrite.m_Samplers.resize(1);
+				dsWrite.m_Samplers[0].m_DescriptorIndex = 0;
+				dsWrite.m_Samplers[0].m_TextureHandle = texture;
+				pDevice->UpdateDescriptorSet(batchData.m_TextureSets[i], dsWrite);
+				batchData.m_LastTextureIDs[i] = textureID;
+			}
+		}
+
+		m_ImageMesh = pDevice->AcquireCachedMesh(m_pImageMesh.get());
+
+		RenderPassHandle renderPass = pDocument->m_UIPasses[frameIndex];
+		pDevice->SetRenderPassClear(renderPass, data.m_ClearColor);
+		pDevice->BeginRenderPass(commandBuffer, renderPass);
+
+		uint8_t mask = 0;
+		UIConstants constants;
+		constants.Projection = pDocument->m_Projection;
+		for (size_t i = 0; i < pDocument->m_UIBatch.m_Worlds.size(); ++i)
+		{
+			/* Setup constants */
+			constants.ObjectIndex = i;
+			constants.ColorIndex = pDocument->m_UIBatch.m_ColorIndices[i];
+			constants.HasTexture = pDocument->m_UIBatch.m_TextureIDs[i] ? 1 : 0;
+
+			if (pDocument->m_UIBatch.m_MaskDecrements.IsSet(i))
+			{
+				/* Remove the shape from the stencil */
+				--mask;
+				pDevice->BeginPipeline(commandBuffer, m_UIStencilPipeline);
+				pDevice->SetStencilOp(commandBuffer, CompareOp::OP_Equal, Func::OP_Keep, Func::OP_Keep, Func::OP_Decrement, mask + 1, 255);
+				pDevice->PushConstants(commandBuffer, m_UIStencilPipeline, 0, sizeof(UIConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
+				pDevice->BindDescriptorSets(commandBuffer, m_UIStencilPipeline, { batchData.m_BuffersSet });
+				pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(pDocument->m_Resolution.x), float(pDocument->m_Resolution.y));
+				pDevice->SetScissor(commandBuffer, 0, 0, pDocument->m_Resolution.x, pDocument->m_Resolution.y);
+				pDevice->DrawMesh(commandBuffer, m_ImageMesh);
+				pDevice->EndPipeline(commandBuffer);
+				continue;
+			}
+
+			const bool isStencil = pDocument->m_UIBatch.m_MaskIncrements.IsSet(i);
+			if (isStencil)
+			{
+				/* Render the mask to the stencil buffer */
+				pDevice->BeginPipeline(commandBuffer, m_UIStencilPipeline);
+				/* First stencil pass increases stencil value by 1 */
+				pDevice->SetStencilOp(commandBuffer, CompareOp::OP_Always, Func::OP_Keep, Func::OP_Keep, Func::OP_Increment, mask, 255);
+				pDevice->PushConstants(commandBuffer, m_UIStencilPipeline, 0, sizeof(UIConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
+				pDevice->BindDescriptorSets(commandBuffer, m_UIStencilPipeline, { batchData.m_BuffersSet });
+				pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(pDocument->m_Resolution.x), float(pDocument->m_Resolution.y));
+				pDevice->SetScissor(commandBuffer, 0, 0, pDocument->m_Resolution.x, pDocument->m_Resolution.y);
+				pDevice->DrawMesh(commandBuffer, m_ImageMesh);
+				/* Second stencil pass compares stencil with the the expected addition, on fail it is reduced by 1 */
+				pDevice->SetStencilOp(commandBuffer, CompareOp::OP_Equal, Func::OP_Decrement, Func::OP_Decrement, Func::OP_Replace, mask + 1, 255);
+				pDevice->DrawMesh(commandBuffer, m_ImageMesh);
+				pDevice->EndPipeline(commandBuffer);
+
+				++mask;
+				continue;
+			}
+
+			const UUID meshID = pDocument->m_UIBatch.m_TextMeshes[i];
+
+			MeshData* pMesh = meshID ? pDocument->m_pTextMeshes.at(meshID).get() : nullptr;
+			MeshHandle mesh = pMesh ? pDevice->AcquireCachedMesh(pMesh, MU_Dynamic) : m_ImageMesh;
+
+			const PipelineHandle pipeline = meshID ? m_UITextPipeline : m_UIPipeline;
+			pDevice->BeginPipeline(commandBuffer, pipeline);
+
+			if (mask > 0)
+			{
+				pDevice->SetStencilTestEnabled(commandBuffer, true);
+				pDevice->SetStencilOp(commandBuffer, CompareOp::OP_LessOrEqual, Func::OP_Keep, Func::OP_Keep, Func::OP_Keep, mask, 255);
+			}
+
+			pDevice->PushConstants(commandBuffer, pipeline, 0, sizeof(UIConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
+			pDevice->BindDescriptorSets(commandBuffer, pipeline, { batchData.m_BuffersSet, batchData.m_TextureSets[i] });
+			pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(pDocument->m_Resolution.x), float(pDocument->m_Resolution.y));
+			pDevice->SetScissor(commandBuffer, 0, 0, pDocument->m_Resolution.x, pDocument->m_Resolution.y);
+			pDevice->DrawMesh(commandBuffer, mesh);
+			pDevice->EndPipeline(commandBuffer);
+		}
+		pDevice->EndRenderPass(commandBuffer);
 	}
 
 	MaterialData* UIRendererModule::PrepassStencilMaterial()
@@ -125,6 +338,11 @@ namespace Glory
 		auto& iter = m_Documents.find(uuid);
 		if (iter == m_Documents.end()) return nullptr;
 		return &iter->second;
+	}
+
+	const DescriptorSetLayoutHandle& UIRendererModule::UIOverlaySetLayout() const
+	{
+		return m_UIOverlaySamplerLayout;
 	}
 
 	void UIRendererModule::Initialize()
@@ -203,18 +421,9 @@ namespace Glory
 		m_pComponentTypes->RegisterInvokaction<UIScrollView>(Glory::Utils::ECS::InvocationType::PreUpdate, UIScrollViewSystem::OnPreUpdate);
 		m_pComponentTypes->RegisterInvokaction<UIScrollView>(Glory::Utils::ECS::InvocationType::Update, UIScrollViewSystem::OnUpdate);
 
-		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
-		pRenderer->AddRenderPass(RenderPassType::RP_Prepass, { "UI Prepass", [this](uint32_t, RendererModule*) {
-			UIPrepass();
-		} });
-
-		pRenderer->AddRenderPass(RenderPassType::RP_CameraCompositePass, { "UI Overlay Pass", [this](uint32_t cameraIndex, RendererModule* pRenderer) {
-			UIOverlayPass(cameraIndex, pRenderer);
-		} });
-
-		pRenderer->AddRenderPass(RenderPassType::RP_ObjectPass, { "UI Worldspace Quad Pass", [this](uint32_t cameraIndex, RendererModule* pRenderer) {
-			UIWorldSpaceQuadPass(cameraIndex, pRenderer);
-		} });
+		//pRenderer->AddRenderPass(RenderPassType::RP_ObjectPass, { "UI Worldspace Quad Pass", [this](uint32_t cameraIndex, RendererModule* pRenderer) {
+		//	UIWorldSpaceQuadPass(cameraIndex, pRenderer);
+		//} });
 
 		LocalizeModuleBase* pLocalize = m_pEngine->GetOptionalModule<LocalizeModuleBase>();
 		if (pLocalize)
@@ -250,6 +459,25 @@ namespace Glory
 		m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[2]));
 		m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[3]));
 		m_pImageMesh->AddFace(0, 1, 2, 3);
+
+		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
+		pRenderer->InjectPreRenderPass([this](GraphicsDevice* pDevice, CommandBufferHandle commandBuffer, uint32_t frameIndex) {
+			UIPrepass(pDevice, commandBuffer, frameIndex);
+		});
+
+		PostProcess uiOverlayPostProcess;
+		uiOverlayPostProcess.m_Priority = INT32_MIN;
+		uiOverlayPostProcess.m_Name = "UI Overlay";
+		uiOverlayPostProcess.m_Callback =
+		[this](GraphicsDevice* pDevice, CameraRef camera, size_t, CommandBufferHandle commandBuffer,
+			size_t frameIndex, RenderPassHandle renderPass, DescriptorSetHandle ds)
+		{
+			return UIOverlayPass(pDevice, camera, commandBuffer, frameIndex, renderPass, ds);
+		};
+		pRenderer->AddPostProcess(std::move(uiOverlayPostProcess));
+
+		pRenderer->InjectDatapass([this](GraphicsDevice* pDevice, RendererModule* pRenderer)
+			{ UIDataPass(pDevice, pRenderer); });
 	}
 
 	void UIRendererModule::PostInitialize()
@@ -270,6 +498,35 @@ namespace Glory
 		m_pUITextPrepassMaterial->SetPipeline(uiTextPrepassPipeline);
 		m_pUIOverlayMaterial = new MaterialData();
 		m_pUIOverlayMaterial->SetPipeline(uiOverlayPipeline);
+
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+
+		DescriptorSetLayoutInfo samplerSetLayoutInfo;
+		samplerSetLayoutInfo.m_SamplerNames = { "Color" };
+		samplerSetLayoutInfo.m_Samplers.resize(1);
+		samplerSetLayoutInfo.m_Samplers[0].m_BindingIndex = 0;
+		samplerSetLayoutInfo.m_Samplers[0].m_ShaderStages = STF_Fragment;
+		m_UISamplerLayout = pDevice->CreateDescriptorSetLayout(std::move(samplerSetLayoutInfo));
+
+		samplerSetLayoutInfo = DescriptorSetLayoutInfo();
+		samplerSetLayoutInfo.m_SamplerNames = { "UIColor" };
+		samplerSetLayoutInfo.m_Samplers.resize(1);
+		samplerSetLayoutInfo.m_Samplers[0].m_BindingIndex = 1;
+		samplerSetLayoutInfo.m_Samplers[0].m_ShaderStages = STF_Fragment;
+		m_UIOverlaySamplerLayout = pDevice->CreateDescriptorSetLayout(std::move(samplerSetLayoutInfo));
+
+		DescriptorSetLayoutInfo bufferSetLayoutInfo;
+		bufferSetLayoutInfo.m_PushConstantRange.m_Offset = 0;
+		bufferSetLayoutInfo.m_PushConstantRange.m_ShaderStages = ShaderTypeFlag(STF_Vertex | STF_Fragment);
+		bufferSetLayoutInfo.m_PushConstantRange.m_Size = sizeof(UIConstants);
+		bufferSetLayoutInfo.m_Buffers.resize(2);
+		bufferSetLayoutInfo.m_Buffers[0].m_BindingIndex = 1;
+		bufferSetLayoutInfo.m_Buffers[0].m_ShaderStages = STF_Vertex;
+		bufferSetLayoutInfo.m_Buffers[0].m_Type = BT_Storage;
+		bufferSetLayoutInfo.m_Buffers[1].m_BindingIndex = 2;
+		bufferSetLayoutInfo.m_Buffers[1].m_ShaderStages = STF_Vertex;
+		bufferSetLayoutInfo.m_Buffers[1].m_Type = BT_Storage;
+		m_UIBuffersLayout = pDevice->CreateDescriptorSetLayout(std::move(bufferSetLayoutInfo));
 	}
 
 	void UIRendererModule::Update()
@@ -294,11 +551,8 @@ namespace Glory
 		Utils::ECS::ComponentTypes::DestroyInstance();
 	}
 
-	void UIRendererModule::UIPrepass()
+	void UIRendererModule::UIPrepass(GraphicsDevice* pDevice, CommandBufferHandle commandBuffer, uint32_t frameIndex)
 	{
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
-
 		for (auto& data : m_Frame)
 		{
 			Resource* pResource = m_pEngine->GetAssetManager().FindResource(data.m_DocumentID);
@@ -306,106 +560,129 @@ namespace Glory
 			UIDocumentData* pDocument = static_cast<UIDocumentData*>(pResource);
 
 			UIDocument& document = GetDocument(data, pDocument);
-			RenderTexture* pRenderTexture = document.m_pUITexture;
-			document.m_Projection = glm::ortho(0.0f, float(data.m_Resolution.x), 0.0f, float(data.m_Resolution.y));
 			document.m_CursorPos = data.m_CursorPos;
 			document.m_CursorScrollDelta = data.m_CursorScrollDelta;
 			document.m_CursorDown = data.m_CursorDown;
 			document.m_InputEnabled = data.m_InputEnabled;
-			document.Update();
 
-			document.Draw(pGraphics);
+			DrawDocument(pDevice, commandBuffer, frameIndex, &document, data);
 		}
 	}
 
-	void UIRendererModule::UIWorldSpaceQuadPass(uint32_t cameraIndex, RendererModule* pRenderer)
+	void UIRendererModule::UIDataPass(GraphicsDevice* pDevice, RendererModule* pRenderer)
 	{
-		CameraRef camera = pRenderer->GetActiveCamera(cameraIndex);
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-
-		for (auto& data : m_Frame)
+		if (!m_DummyRenderPass)
 		{
+			RenderPassInfo renderPassInfo;
+			renderPassInfo.RenderTextureInfo.HasDepth = false;
+			renderPassInfo.RenderTextureInfo.HasStencil = true;
+			renderPassInfo.RenderTextureInfo.Width = 1;
+			renderPassInfo.RenderTextureInfo.Height = 1;
+			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA,
+				PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+			renderPassInfo.m_CreateRenderTexture = true;
+
+			m_DummyRenderPass = pDevice->CreateRenderPass(std::move(renderPassInfo));
+		}
+
+		/* Prepare pipelines */
+		const ModuleSettings& settings = Settings();
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
+		PipelineData* pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Prepass Pipeline"));
+		m_UIPipeline = pDevice->AcquireCachedPipeline(m_DummyRenderPass, pPipeline,
+			{ m_UIBuffersLayout, m_UISamplerLayout }, sizeof(VertexPosColorTex),
+			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+		pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Text Prepass Pipeline"));
+		m_UITextPipeline = pDevice->AcquireCachedPipeline(m_DummyRenderPass, pPipeline,
+			{ m_UIBuffersLayout, m_UISamplerLayout }, sizeof(VertexPosColorTex),
+			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+		pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Prepass Stencil Pipeline"));
+		m_UIStencilPipeline = pDevice->AcquireCachedPipeline(m_DummyRenderPass, pPipeline,
+			{ m_UIBuffersLayout }, sizeof(VertexPosColorTex),
+			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+
+		MaterialManager& materials = m_pEngine->GetMaterialManager();
+		AssetManager& assets = m_pEngine->GetAssetManager();
+
+		for (size_t i = 0; i < m_Frame.size(); ++i)
+		{
+			const auto& data = m_Frame[i];
 			if (data.m_Target != UITarget::WorldSpaceQuad) continue;
 
 			/* Get document */
 			auto& iter = m_Documents.find(data.m_ObjectID);
 			if (iter == m_Documents.end()) continue;
 			UIDocument& document = iter->second;
-			RenderTexture* pDocumentTexture = document.m_pUITexture;
 
-			MaterialData* pMaterialData = m_pEngine->GetMaterialManager().GetMaterial(data.m_MaterialID);
-			if (!pMaterialData) return;
-			Material* pMaterial = pGraphics->UseMaterial(pMaterialData);
-			if (!pMaterial) return;
+			/* Update material */
+			MaterialData* pMaterial = materials.GetMaterial(data.m_MaterialID);
+			if (!pMaterial) continue;
 
-			ObjectData object;
-			object.Model = data.m_WorldTransform;
-			object.View = camera.GetView();
-			object.Projection = camera.GetProjection();
-			object.ObjectID = data.m_ObjectID;
-			object.SceneID = data.m_SceneID;
+			TextureData* pOldTexture = nullptr;
+			if (!pMaterial->GetTexture(data.m_MaterialTextureName, &pOldTexture, &assets))
+				continue;
 
-			MeshData* pMeshData = GetDocumentQuadMesh(data);
-			pMaterial->SetSamplers(m_pEngine);
-			pMaterial->ResetTextureCounter();
-			pMaterial->SetTexture("texSampler", pDocumentTexture->GetTextureAttachment(0));
-			pMaterial->SetPropertiesBuffer(m_pEngine);
-			pMaterial->SetObjectData(object);
-			pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
+			auto textures = GetDocumentTexture(pDevice, data, document, pRenderer->GetNumFramesInFlight());
+			TextureData* pTexture = textures[pRenderer->GetCurrentFrameInFlight()];
+			if (pOldTexture != pTexture)
+			{
+				pMaterial->SetTexture(data.m_MaterialTextureName, pTexture);
+				pMaterial->SetDirty(true);
+			}
+			if (pTexture->IsDirty())
+			{
+				pTexture->SetDirty(false);
+				pMaterial->SetDirty(true);
+			}
+
+			/* Submit data to renderer */
+			MeshData* pMesh = GetDocumentQuadMesh(data);
+			RenderData renderData;
+			renderData.m_DepthWrite = true;
+			renderData.m_LayerMask = data.m_LayerMask;
+			renderData.m_MeshID = pMesh->GetUUID();
+			renderData.m_ObjectID = data.m_ObjectID;
+			renderData.m_SceneID = data.m_SceneID;
+			renderData.m_World = data.m_WorldTransform;
+			renderData.m_MaterialID = data.m_MaterialID;
+			pRenderer->SubmitDynamic(std::move(renderData));
 		}
 	}
 
-	void UIRendererModule::UIOverlayPass(uint32_t cameraIndex, RendererModule* pRenderer)
+	bool UIRendererModule::UIOverlayPass(GraphicsDevice* pDevice, CameraRef camera,
+		CommandBufferHandle commandBuffer, size_t frameIndex, RenderPassHandle renderPass, DescriptorSetHandle ds)
 	{
-		CameraRef camera = pRenderer->GetActiveCamera(cameraIndex);
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
+		const ModuleSettings& settings = Settings();
+		PipelineData* pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Overlay Pipeline"));
+		PipelineHandle uiOverlayPipeline = pDevice->AcquireCachedPipeline(renderPass, pPipeline,
+			{ m_UISamplerLayout, m_UIOverlaySamplerLayout }, sizeof(glm::vec3), { AttributeType::Float3 });
 
-		RenderTexture* pCameraTexture = camera.GetOutputTexture();
-		RenderTexture* pOutputTexture = camera.GetSecondaryOutputTexture();
-		uint32_t width, height;
-		pOutputTexture->GetDimensions(width, height);
-
-		pGraphics->EnableDepthTest(false);
-		pGraphics->SetViewport(0, 0, width, height);
+		const glm::uvec2& resolution = camera.GetResolution();
+		
+		bool rendered = false;
 
 		for (auto& data : m_Frame)
 		{
 			if (data.m_Target != UITarget::CameraOverlay || camera.GetUUID() != data.m_TargetCamera) continue;
-
+		
 			/* Get document */
 			auto& iter = m_Documents.find(data.m_ObjectID);
 			if (iter == m_Documents.end()) continue;
 			UIDocument& document = iter->second;
-			RenderTexture* pDocumentTexture = document.m_pUITexture;
 
-			pCameraTexture = camera.GetOutputTexture();
-			pOutputTexture = camera.GetSecondaryOutputTexture();
+			pDevice->BeginRenderPass(commandBuffer, renderPass);
+			pDevice->BeginPipeline(commandBuffer, uiOverlayPipeline);
+			pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));
+			pDevice->SetScissor(commandBuffer, 0, 0, resolution.x, resolution.y);
+			pDevice->BindDescriptorSets(commandBuffer, uiOverlayPipeline, { ds, document.m_UIOverlaySets[frameIndex] });
+			pDevice->DrawQuad(commandBuffer);
+			pDevice->EndPipeline(commandBuffer);
+			pDevice->EndRenderPass(commandBuffer);
 
-			/* Render to the output texture */
-			pOutputTexture->BindForDraw();
-
-			/* Use overlay material */
-			Material* pMaterial = pGraphics->UseMaterial(m_pUIOverlayMaterial);
-
-			/* Bind camera texture and document texture */
-			pCameraTexture->BindAll(pMaterial);
-			pDocumentTexture->BindAll(pMaterial);
-
-			/* Draw the screen quad */
-			pGraphics->DrawScreenQuad();
-
-			pOutputTexture->UnBindForDraw();
-
-			pGraphics->UseMaterial(nullptr);
-
-			/* Swap the cameras textures for the next pass */
-			camera.Swap();
+			rendered = true;
 		}
-
-		/* Reset render textures and materials */
-		pGraphics->UseMaterial(nullptr);
-		pGraphics->EnableDepthTest(true);
+		return rendered;
 	}
 
 	void UIRendererModule::LoadSettings(ModuleSettings& settings)
@@ -418,8 +695,8 @@ namespace Glory
 
 	UIDocument& UIRendererModule::GetDocument(const UIRenderData& data, UIDocumentData* pDocument, bool forceCreate)
 	{
-		GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-		GPUResourceManager* pResourceManager = pGraphics->GetResourceManager();
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
 
 		const UUID id = data.m_ObjectID;
 
@@ -428,39 +705,39 @@ namespace Glory
 		{
 			m_Documents.emplace(id, pDocument);
 			UIDocument& newDocument = m_Documents.at(id);
-
-			RenderTextureCreateInfo uiTextureInfo;
-			uiTextureInfo.HasDepth = false;
-			uiTextureInfo.HasStencil = true;
-			uiTextureInfo.Width = uint32_t(data.m_Resolution.x);
-			uiTextureInfo.Height = uint32_t(data.m_Resolution.y);
-			uiTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-
+			newDocument.CreateRenderPasses(pDevice, pRenderer->GetNumFramesInFlight(), glm::uvec2(uint32_t(data.m_Resolution.x), uint32_t(data.m_Resolution.y)), this);
 			newDocument.m_SceneID = data.m_SceneID;
 			newDocument.m_ObjectID = data.m_ObjectID;
-			newDocument.m_pUITexture = pResourceManager->CreateRenderTexture(uiTextureInfo);
 			newDocument.m_pRenderer = this;
+
 			return newDocument;
 		}
 
 		UIDocument& document = iter->second;
 		uint32_t width, height;
-		document.m_pUITexture->GetDimensions(width, height);
+		document.GetResolution(width, height);
 		if (width != data.m_Resolution.x || height != data.m_Resolution.y)
 		{
-			document.m_pUITexture->Resize(data.m_Resolution.x, data.m_Resolution.y);
+			document.ResizeRenderTexture(pDevice, pRenderer->GetNumFramesInFlight(),
+				glm::uvec2(uint32_t(data.m_Resolution.x), uint32_t(data.m_Resolution.y)), this);
 			document.m_DrawIsDirty = true;
 		}
 
 		if (document.m_OriginalDocumentID != pDocument->GetUUID() || forceCreate)
 		{
-			RenderTexture* pUITexture = document.m_pUITexture;
+			std::vector<RenderPassHandle> passes = std::move(document.m_UIPasses);
+			std::vector<DescriptorSetHandle> overlaySets = std::move(document.m_UIOverlaySets);
+			const glm::uvec2 resolution = document.m_Resolution;
 			m_Documents.erase(iter);
 			m_Documents.emplace(id, pDocument);
 			UIDocument& newDocument = m_Documents.at(id);
 			newDocument.m_SceneID = data.m_SceneID;
 			newDocument.m_ObjectID = data.m_ObjectID;
-			newDocument.m_pUITexture = pUITexture;
+			if (!passes.empty())
+				newDocument.m_UIPasses = std::move(passes);
+			if (!overlaySets.empty())
+				newDocument.m_UIOverlaySets = std::move(overlaySets);
+			newDocument.m_Resolution = resolution;
 			newDocument.m_pRenderer = this;
 			return newDocument;
 		}
@@ -478,6 +755,8 @@ namespace Glory
 				new MeshData(4, sizeof(DefaultVertex3D), {AttributeType::Float3, AttributeType::Float3,
 					AttributeType::Float3, AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 })
 			).first;
+
+			m_pEngine->GetAssetManager().AddLoadedResource(iter->second);
 
 			createMesh = true;
 		}
@@ -513,6 +792,48 @@ namespace Glory
 			iter->second->SetDirty(true);
 		}
 
-		return iter->second.get();
+		return iter->second;
+	}
+
+	std::vector<TextureData*>& UIRendererModule::GetDocumentTexture(GraphicsDevice* pDevice,
+		const UIRenderData& data, UIDocument& document, size_t imageCount)
+	{
+		auto iter = m_pDocumentTextures.find(data.m_ObjectID);
+		if (iter == m_pDocumentTextures.end())
+		{
+			iter = m_pDocumentTextures.emplace(data.m_ObjectID, std::vector<TextureData*>(imageCount, nullptr)).first;
+			for (size_t i = 0; i < imageCount; ++i)
+			{
+				ImageData* pImage = new ImageData();
+				pImage->SetDirty(false);
+				iter->second[i] = new InternalTexture(pImage);
+				iter->second[i]->GetSamplerSettings().MipmapMode = Filter::F_None;
+				m_pEngine->GetAssetManager().AddLoadedResource(iter->second[i]);
+			}
+		}
+
+		iter->second.resize(imageCount);
+		for (size_t i = 0; i < imageCount; ++i)
+		{
+			if (!iter->second[i])
+			{
+				ImageData* pImage = new ImageData();
+				pImage->SetDirty(false);
+				iter->second[i] = new InternalTexture(pImage);
+				iter->second[i]->GetSamplerSettings().MipmapMode = Filter::F_None;
+				m_pEngine->GetAssetManager().AddLoadedResource(iter->second[i]);
+			}
+			TextureHandle texture = pDevice->GetCachedTexture(iter->second[i]);
+			RenderPassHandle renderPass = document.m_UIPasses[i];
+			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(renderPass);
+			TextureHandle currentTexture = pDevice->GetRenderTextureAttachment(renderTexture, 0);
+			if (texture != currentTexture)
+			{
+				pDevice->SetCachedTexture(iter->second[i], currentTexture);
+				iter->second[i]->SetDirty(true);
+			}
+		}
+
+		return iter->second;
 	}
 }

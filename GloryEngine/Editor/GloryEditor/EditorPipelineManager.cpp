@@ -28,6 +28,7 @@ namespace Glory::Editor
 	std::mutex EditorPipelineManager::m_WaitMutex;
 	std::condition_variable EditorPipelineManager::m_WaitCondition;
 	ThreadedUMap<UUID, ShaderSourceData*> EditorPipelineManager::m_pLoadedShaderSources;
+	std::unordered_map<UUID, size_t> EditorPipelineManager::m_ShaderVersions;
 	std::vector<ShaderSourceData*> EditorPipelineManager::m_pOutdatedShaders;
 
 	std::map<ShaderType, shaderc_shader_kind> ShaderTypeToKindOne = {
@@ -281,6 +282,68 @@ namespace Glory::Editor
 		}
 	}
 
+	FileData* EditorPipelineManager::CompileShader(ShaderSourceData* pShaderSource)
+	{
+		if (!pShaderSource) return nullptr;
+
+		EditorRenderImpl* pEditorRenderer = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
+		Debug& debug = m_pEngine->GetDebug();
+
+		static const size_t featureLength = strlen("FEATURE_");
+
+		EditorShaderData editorShaderData;
+
+		const ShaderType shaderType = pShaderSource->GetShaderType();
+		if (ShaderTypeToKindOne.find(shaderType) == ShaderTypeToKindOne.end())
+		{
+			debug.LogError("Shader " + pShaderSource->Name() + " compilation failed due to unknown shader type.");
+			return nullptr;
+		}
+
+		shaderc::CompileOptions options{};
+		options.SetOptimizationLevel(shaderc_optimization_level_performance);
+		options.SetGenerateDebugInfo();
+
+		if (pEditorRenderer->PushConstantsSupported())
+			options.AddMacroDefinition("PUSH_CONSTANTS");
+
+		editorShaderData.m_ShaderType = shaderType;
+		shaderc::Compiler compiler;
+		shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(pShaderSource->Data(),
+			pShaderSource->Size(), ShaderTypeToKindOne.at(shaderType), pShaderSource->Name().data(),
+			options);
+
+		const size_t errors = result.GetNumErrors();
+		const size_t warnings = result.GetNumWarnings();
+
+		if (result.GetCompilationStatus() != shaderc_compilation_status::shaderc_compilation_status_success)
+		{
+			debug.LogError("Shader " + pShaderSource->Name() + " compilation failed with " + std::to_string(errors) + " errors and " + std::to_string(warnings) + " warnings.");
+			debug.LogError(result.GetErrorMessage());
+			return nullptr;
+		}
+		else
+			debug.LogInfo("Shader " + pShaderSource->Name() + " compilation succeeded with " + std::to_string(errors) + " errors and " + std::to_string(warnings) + " warnings.");
+
+		if (warnings > 0)
+			debug.LogWarning(result.GetErrorMessage());
+
+		editorShaderData.m_ShaderData.assign(result.begin(), result.end());
+
+		/* Cross compile for editor platform */
+		std::vector<char> compiledShader;
+		pEditorRenderer->CompileShaderForEditor(editorShaderData, compiledShader);
+
+		FileData* pCompiledShader = new FileData(std::move(compiledShader));
+
+		PipelineShaderMetaData metaData;
+		metaData.PipelineID = 0;
+		metaData.m_Hash = pShaderSource->GetUUID();
+		metaData.Type = shaderType;
+		pCompiledShader->SetMetaData(metaData);
+		return pCompiledShader;
+	}
+
 	void EditorPipelineManager::AssetAddedCallback(const AssetCallbackData& callback)
 	{
 		ResourceMeta meta;
@@ -347,6 +410,8 @@ namespace Glory::Editor
 		m_pLoadedShaderSources.DoErase(callback.m_UUID,
 			[this](ShaderSourceData** pShader) { m_pOutdatedShaders.push_back(*pShader); });
 
+		++m_ShaderVersions[callback.m_UUID];
+
 		/* Recompile pipelines that use this shader */
 		for (const UUID pipelineID : m_Pipelines)
 		{
@@ -367,6 +432,10 @@ namespace Glory::Editor
 
 		pPipeline->ClearProperties();
 		pPipeline->ClearFeatures();
+		EditorResourceManager& resourceManager = EditorApplication::GetInstance()->GetResourceManager();
+		YAMLResource<PipelineData>* pPipelineData = static_cast<YAMLResource<PipelineData>*>(
+			resourceManager.GetEditableResource(pPipeline->GetUUID()));
+		auto features = (**pPipelineData)["Features"];
 		for (size_t i = 0; i < pPipeline->ShaderCount(); ++i)
 		{
 			const UUID shaderID = pPipeline->ShaderID(i);
@@ -376,7 +445,8 @@ namespace Glory::Editor
 			for (size_t i = 0; i < shader.m_Features.size(); ++i)
 			{
 				const std::string_view feature = shader.m_Features[i];
-				pPipeline->AddFeature(feature, true);
+				const bool enabled = features[feature].As<bool>(true);
+				pPipeline->AddFeature(feature, enabled);
 			}
 		}
 
@@ -387,12 +457,27 @@ namespace Glory::Editor
 			m_ShaderTypes[i].clear();
 			m_CompiledShaders[i].reserve(pEditorPipeline->m_EditorPlatformShaders.size());
 			m_ShaderTypes[i].reserve(pEditorPipeline->m_EditorPlatformShaders.size());
+
 			for (size_t j = 0; j < pEditorPipeline->m_EditorPlatformShaders.size(); ++j)
 			{
+				const EditorShaderData& editorShader = pEditorPipeline->m_EditorShaderDatas[j];
+				size_t hash = std::hash<UUID>()(pPipeline->ShaderID(j));
+				std::CombineHash(hash, m_ShaderVersions[pPipeline->ShaderID(j)]);
+				for (size_t i = 0; i < editorShader.m_Features.size(); ++i)
+				{
+					const size_t featureIndex = pPipeline->FeatureIndex(editorShader.m_Features[i]);
+					if (!pPipeline->FeatureEnabled(featureIndex))
+					{
+						std::CombineHash(hash, "~" + editorShader.m_Features[i]);
+						continue;
+					}
+					std::CombineHash(hash, editorShader.m_Features[i]);
+				}
+
 				const size_t index = m_CompiledShaders[i].size();
 				m_CompiledShaders[i].push_back(FileData(pEditorPipeline->m_EditorPlatformShaders[j]));
-				m_ShaderTypes[i].push_back(pEditorPipeline->m_EditorShaderDatas[j].m_ShaderType);
-				m_CompiledShaders[i][index].SetMetaData(PipelineShaderMetaData{ m_Pipelines[i], m_ShaderTypes[i][index] });
+				m_ShaderTypes[i].push_back(editorShader.m_ShaderType);
+				m_CompiledShaders[i][index].SetMetaData(PipelineShaderMetaData{ m_Pipelines[i], m_ShaderTypes[i][index], hash });
 			}
 		}
 
@@ -417,7 +502,7 @@ namespace Glory::Editor
 		const auto time = std::filesystem::last_write_time(cachePath);
 		const uint64_t cacheWriteTime = std::chrono::duration_cast<std::chrono::seconds>(
 			time.time_since_epoch()).count();
-		return cacheWriteTime < shaderSource->TimeSinceLastWrite();
+		return shaderSource->IsOutdated(cacheWriteTime);
 	}
 
 	EditorPipeline* EditorPipelineManager::CompilePipelineForEditor(PipelineData* pPipeline)
@@ -472,6 +557,8 @@ namespace Glory::Editor
 			}
 
 			shaderc::CompileOptions options{};
+			options.SetOptimizationLevel(shaderc_optimization_level_performance);
+			options.SetGenerateDebugInfo();
 
 			for (size_t j = 0; j < pShaderSource->FeatureCount(); ++j)
 			{
@@ -574,6 +661,14 @@ namespace Glory::Editor
 		pShaderSource->TimeSinceLastWrite() = std::chrono::duration_cast<std::chrono::seconds>(
 			time.time_since_epoch()).count();
 
+		for (size_t i = 0; i < pShaderSource->IncludeCount(); ++i)
+		{
+			const auto& includePath = pShaderSource->IncludePath(i);
+			const auto time = std::filesystem::last_write_time(includePath);
+			pShaderSource->TimeSinceLastWrite(i) = std::chrono::duration_cast<std::chrono::seconds>(
+				time.time_since_epoch()).count();
+		}
+
 		m_pLoadedShaderSources.Set(pShaderSource->GetUUID(), pShaderSource);
 
 		return pShaderSource;
@@ -588,6 +683,8 @@ namespace Glory::Editor
 		for (size_t i = 0; i < resources.sampled_images.size(); ++i)
 		{
 			spirv_cross::Resource sampler = resources.sampled_images[i];
+			if (sampler.name == "ShadowAtlas") continue;
+
 			const spirv_cross::SPIRType& type = compiler.get_type(sampler.type_id);
 			ImageType imageType = ImageType::IT_UNDEFINED;
 			const bool isArray = type.image.arrayed;

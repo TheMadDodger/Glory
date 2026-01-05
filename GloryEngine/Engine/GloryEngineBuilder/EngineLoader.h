@@ -28,7 +28,7 @@ namespace Glory
 
 	private:
 		void LoadModules(YAML::Node& modules);
-		void LoadModule(const std::string& moduleName);
+		void LoadModule(std::string& moduleName);
 		void ReadModule(Module* pModule);
 		void LoadExtras();
 		void LoadExtra(const std::string& name, const std::filesystem::path& path, Module* pModule, Module* pRequiredModule);

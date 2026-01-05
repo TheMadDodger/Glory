@@ -9,7 +9,7 @@
 
 namespace Glory::Utils
 {
-	void GenerateTextMesh(MeshData* pMesh, FontData* pFontData, const TextData& textData, float textWrap)
+	glm::vec2 GenerateTextMesh(MeshData* pMesh, FontData* pFontData, const TextData& textData, float textWrap)
 	{
 		const std::string_view text = textData.m_Text;
 		const glm::vec4& color = textData.m_Color;
@@ -48,6 +48,7 @@ namespace Glory::Utils
 
 		float writeX = 0.0f;
 		float writeY = 0.0f;
+		float textHeight = 0.0f;
 		size_t letterCount = 0;
 		/* For generating the mesh one line at a time */
 		std::function<void(const std::string_view, float)> drawLine = [&](const std::string_view line, float lineWidth) {
@@ -96,12 +97,14 @@ namespace Glory::Utils
 				writeX += (glyph->Advance >> 6) * scale;
 			}
 
-			writeY -= pFontData->FontHeight() * scale;
+			writeY -= pFontData->FontHeight()*scale;
+			textHeight += pFontData->FontHeight()*scale;
 		};
 
 		/* Calculate lines and generate the mesh */
 		/* Process words into lines */
 		size_t currentLineLength = 0;
+		float textWidth = 0.0f;
 		float currentLineWidth = 0.0f;
 		size_t lineStart = 0;
 
@@ -149,6 +152,7 @@ namespace Glory::Utils
 				const std::string_view line = text.substr(lineStart, wordPosition.first - lineStart);
 				drawLine(line, currentLineWidth);
 				lineStart = wordPosition.first;
+				textWidth = std::max(currentLineWidth, textWidth);
 				currentLineWidth = 0.0f;
 				currentLineLength = 0;
 				--i;
@@ -164,6 +168,8 @@ namespace Glory::Utils
 		{
 			const std::string_view line = text.substr(lineStart);
 			drawLine(line, currentLineWidth);
+			textWidth = std::max(currentLineWidth, textWidth);
 		}
+		return { textWidth, textHeight };
 	}
 }

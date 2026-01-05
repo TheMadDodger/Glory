@@ -1,7 +1,8 @@
 #pragma once
-#include <imgui.h>
-#include <Texture.h>
 #include "GloryEditor.h"
+
+#include <imgui.h>
+#include <GraphicsHandles.h>
 
 namespace Glory::Editor
 {
@@ -15,7 +16,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API EditorRenderImpl();
 		GLORY_EDITOR_API virtual ~EditorRenderImpl();
 
-		virtual void* GetTextureID(Texture* pTexture) = 0;
+		virtual void* GetTextureID(TextureHandle texture) = 0;
 		/** @todo: Use a platform system to determine this */
 		virtual std::string ShadingLanguage() = 0;
 		/** @todo: Use a platform system to determine this */

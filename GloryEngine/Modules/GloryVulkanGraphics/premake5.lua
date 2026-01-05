@@ -17,9 +17,7 @@ project "GloryVulkanGraphics"
 
 	vpaths
 	{
-		["Device"] = { "Device.*", "QueueFamilyIndices.h", "VulkanDeviceManager.*" },
-		["Module"] = { "GloryVulkan.*", "VulkanExceptions.h", "VulkanGraphicsModule.*", "VulkanStructsConverter.*" },
-		["Resources"] = { "VulkanBuffer.*", "VulkanMesh.*", "VulkanResourceManager.*", "VulkanShader.*", "VulkanTexture.*" }
+		["Module"] = { "GloryVulkan.*", "VulkanExceptions.h", "VulkanGraphicsModule.*", "VulkanStructsConverter.*", "VulkanDevice.*", "DescriptorAllocator.*", "CommandBufferAllocator.*" },
 	}
 
 	includedirs
@@ -68,7 +66,9 @@ project "GloryVulkanGraphics"
 
 	defines
 	{
-		"GLORY_EXPORTS"
+		"GLORY_EXPORTS",
+		"GLM_FORCE_RADIANS",
+		"GLM_FORCE_DEPTH_ZERO_TO_ONE"
 	}
 
 	postbuildcommands

@@ -21,15 +21,12 @@ project "GloryCore"
 		["Console"] = { "Logs.*", "CommandLine.*", "Commands.*", "Console.*", "Debug.*", "DebugConsoleInput.*", "IConsole.*", "WindowsDebugConsole.*" },
 		["Core"] = { "ObjectManager.*", "TypeFlags.*", "GloryContext.*", "BuiltInModules.*", "Engine.*", "Object.*", "UUID.*", "Glory.*", "GameTime.*" },
 		["Modules/Base"] = { "Module.*", "ModuleMetaData.*", "IModuleLoopHandler.*", "ModuleSettings.*" },
-		["Modules/Graphics"] = { "GraphicsModule.*" },
-		["Modules/Graphics/Data"] = { "GraphicsEnums.*", "GraphicsMemoryManager.*" },
-		["Modules/Graphics/Geometry"] = { "VertexDefinitions.*", "VertexHelpers.*" },
-		["Modules/Graphics/Rendering"] = { "FrameState.*", "RenderFrame.*", "RenderQueue.*" },
-		["Modules/Graphics/Resources"] = { "Buffer.*", "GPUResource.*", "GPUResourceManager.*", "Material.*", "Mesh.*", "Shader.*", "Texture.*", "RenderTexture.*" },
-		["Modules/Renderer"] = { "RenderData.*", "RendererModule.*" },
-		["Modules/Renderer/Camera"] = { "Camera.*", "CameraManager.*", "DisplayManager.*", "CameraRef.*" },
+		["Modules/Graphics"] = { "GraphicsModule.*", "GraphicsEnums.*", "VertexDefinitions.*", "VertexHelpers.*", "RenderFrame.*" },
+		["Modules/Graphics/Data"] = { "GraphicsEnums.*", "VertexDefinitions.*", "VertexHelpers.*", "RenderFrame.*" },
+		["Modules/Renderer"] = { "RendererModule.*" },
+		["Modules/Renderer/Camera"] = { "Camera.*", "CameraManager.*", "CameraRef.*" },
 		["Modules/Renderer/Layers"] = { "Layer.*", "LayerManager.*", "LayerMask.*" },
-		["Modules/Renderer/Lighting"] = { "LightData.*" },
+		["Modules/Renderer/Data"] = { "LightData.*", "RenderData.*" },
 		["Modules/ResourceLoading"] = {  },
 		["Modules/ResourceLoading/Base"] = { "ImportSettings.*", "Resource.*", "ResourceLoaderModule.*" },
 		["Modules/ResourceLoading/File"] = { "FileLoaderModule.*" },
@@ -68,6 +65,8 @@ project "GloryCore"
 	{
 		"GLORY_EXPORTS",
 		"GLORY_CORE_EXPORTS",
+		"GLM_FORCE_RADIANS",
+		"GLM_FORCE_DEPTH_ZERO_TO_ONE"
 	}
 
 	filter "system:windows"

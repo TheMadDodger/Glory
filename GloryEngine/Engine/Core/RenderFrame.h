@@ -75,10 +75,10 @@ namespace Glory
 		void Reset();
 
 	public:
-		std::vector<CameraRef> ActiveCameras;
 		std::vector<std::pair<glm::ivec2, UUID>> Picking;
 		FrameData<LightData> ActiveLights;
-		FrameData<glm::mat4> LightSpaceTransforms;
+		FrameData<glm::mat4> LightViews;
+		FrameData<glm::mat4> LightProjections;
 		std::vector<UUID> ActiveLightIDs;
 	};
 

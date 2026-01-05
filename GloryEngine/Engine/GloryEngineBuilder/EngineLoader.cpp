@@ -216,12 +216,18 @@ namespace Glory
 		LoadExtras();
 	}
 
-	void EngineLoader::LoadModule(const std::string& moduleName)
+	void EngineLoader::LoadModule(std::string& moduleName)
 	{
 		if (moduleName == "GloryEntityScenes")
 		{
 			m_EngineInfo.m_pDebug->LogInfo("GloryEntityScenes has been removed and is now part of the core engine");
 			return;
+		}
+
+		if (moduleName == "GloryClusteredRenderer")
+		{
+			m_EngineInfo.m_pDebug->LogInfo("GloryClusteredRenderer has been replaced by GloryRenderer");
+			moduleName = "GloryRenderer";
 		}
 
 		std::stringstream debugStream;

@@ -43,7 +43,11 @@ project "RuntimeTestApplication"
 		debugdir "%{engineOutDir}"
 
 	filter "configurations:Release"
-		kind "None"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
+
+		debugargs { "-dataPath=\"%{demosDir}/Sponza/Build/Data\"" }
+		kind "ConsoleApp"
+		symbols "Off"
+		debugdir "%{engineOutDir}"

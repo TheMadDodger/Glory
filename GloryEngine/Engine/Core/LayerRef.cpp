@@ -22,7 +22,7 @@ namespace Glory
 
 	const Layer* LayerRef::Layer(LayerManager* pManager) const
 	{
-		return pManager->GetLayerAtIndex((int)m_LayerIndex);
+		return pManager->GetLayerAtIndex((int)(m_LayerIndex) - 1);
 	}
 
 	const TypeData* LayerRef::GetTypeData()

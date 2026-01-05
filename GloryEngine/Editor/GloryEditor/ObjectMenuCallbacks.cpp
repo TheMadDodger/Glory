@@ -20,6 +20,7 @@
 #include <SceneManager.h>
 #include <PipelineData.h>
 #include <MaterialData.h>
+#include <TextureData.h>
 #include <Debug.h>
 
 namespace Glory::Editor

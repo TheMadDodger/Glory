@@ -351,7 +351,7 @@ namespace Glory::Editor
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 		if (m_IsFolder)
 		{
-			Texture* pFolderTexture = EditorAssets::GetTexture("folder");
+			TextureHandle folderTexture = EditorAssets::GetTexture("folder");
 
 			ImGui::PushStyleColor(ImGuiCol_Button, m_HighlightedPath == m_CachedPath.string() ? buttonColor : buttonInactiveColor);
 			ImGui::Button("##fileItem", itemSize);
@@ -423,7 +423,7 @@ namespace Glory::Editor
 			}
 
 			ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
-			ImGui::Image(pRenderImpl->GetTextureID(pFolderTexture), ImVec2((float)iconSize, (float)iconSize));
+			ImGui::Image(pRenderImpl->GetTextureID(folderTexture), ImVec2((float)iconSize, (float)iconSize));
 
 			DrawName(padding);
 			ImGui::EndChild();
@@ -436,7 +436,7 @@ namespace Glory::Editor
 		if (relativePath == "") relativePath = m_CachedPath;
 		AssetDatabase& assetDatabase = EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase();
 		const UUID uuid = EditorAssetDatabase::FindAssetUUID(relativePath.string());
-		Texture* pTexture = Tumbnail::GetTumbnail(uuid);
+		TextureHandle texture = Tumbnail::GetTumbnail(uuid);
 
 		const UUID selectedID = Selection::GetActiveObject() ? Selection::GetActiveObject()->GetUUID() : 0;
 		const bool selected = (selectedID != 0 && selectedID == uuid) || m_HighlightedPath == m_CachedPath.string();
@@ -448,7 +448,7 @@ namespace Glory::Editor
 		{
 			std::string path = m_CachedPath.string();
 			DND::DragAndDropSource(STNames[ST_Path], path.data(), path.size() + 1, [&]() {
-				ImGui::Image(pTexture ? pRenderImpl->GetTextureID(pTexture) : NULL, { 64.0f, 64.0f });
+				ImGui::Image(texture ? pRenderImpl->GetTextureID(texture) : NULL, { 64.0f, 64.0f });
 				ImGui::SameLine();
 				ImGui::Text(m_CachedPath.string().data());
 			});
@@ -485,7 +485,7 @@ namespace Glory::Editor
 		}
 
 		ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
-		ImGui::Image(pTexture ? pRenderImpl->GetTextureID(pTexture) : NULL, ImVec2((float)iconSize, (float)iconSize));
+		ImGui::Image(texture ? pRenderImpl->GetTextureID(texture) : NULL, ImVec2((float)iconSize, (float)iconSize));
 		DrawName(padding);
 		ImGui::EndChild();
 	}

@@ -12,6 +12,8 @@ namespace Glory
 		H_Buffer,
 		/** @brief Mesh */
 		H_Mesh,
+		/** @brief Image */
+		H_Image,
 		/** @brief Texture */
 		H_Texture,
 		/** @brief RenderTexture */
@@ -28,6 +30,12 @@ namespace Glory
 		H_DescriptorSet,
 		/** @brief CommandBuffer */
 		H_CommandBuffer,
+		/** @brief Swapchain */
+		H_Swapchain,
+		/** @brief Semaphore */
+		H_Semaphore,
+		/** @brief Fence */
+		H_Fence,
 	};
 
 	/** @brief Base struct for graphics resource handles */
@@ -56,6 +64,16 @@ namespace Glory
 		GraphicsHandle& operator=(const GraphicsHandle& other) { m_ID = other.m_ID; return *this; }
 		/** @overload Move assignment */
 		GraphicsHandle& operator=(GraphicsHandle&& other) { m_ID = other.m_ID; return *this; }
+		/** @overload Comparator */
+		bool operator==(const GraphicsHandle& other) const { return m_ID == other.m_ID; }
+		/** @overload Comparator */
+		bool operator!=(const GraphicsHandle& other) const { return m_ID != other.m_ID; }
+		/** @overload Comparator */
+		bool operator==(std::nullptr_t) const { return m_ID == NULL; }
+		/** @overload Comparator */
+		bool operator!=(std::nullptr_t) const { return m_ID != NULL; }
+		/** @overload Comparator */
+		bool operator==(UUID id) const { return m_ID == id; }
 
 		UUID m_ID;
 	};
@@ -72,6 +90,8 @@ namespace Glory
 	typedef GraphicsHandle<H_Buffer> BufferHandle;
 	/** @brief Mesh handle */
 	typedef GraphicsHandle<H_Mesh> MeshHandle;
+	/** @brief Image handle */
+	typedef GraphicsHandle<H_Image> ImageHandle;
 	/** @brief Texture handle */
 	typedef GraphicsHandle<H_Texture> TextureHandle;
 	/** @brief RenderTexture handle */
@@ -88,6 +108,12 @@ namespace Glory
 	typedef GraphicsHandle<H_DescriptorSet> DescriptorSetHandle;
 	/** @brief CommandBuffer handle */
 	typedef GraphicsHandle<H_CommandBuffer> CommandBufferHandle;
+	/** @brief Swapchain handle */
+	typedef GraphicsHandle<H_Swapchain> SwapchainHandle;
+	/** @brief Semaphore handle */
+	typedef GraphicsHandle<H_Semaphore> SemaphoreHandle;
+	/** @brief Fence handle */
+	typedef GraphicsHandle<H_Fence> FenceHandle;
 }
 
 namespace std

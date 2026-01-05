@@ -247,18 +247,18 @@ namespace Glory
 
     const std::map<PrimitiveType, GLuint> GLConverter::TO_GLPRIMITIVETYPE =
     {
-        { PrimitiveType::PT_Point, GL_POINT  },
-        { PrimitiveType::PT_LineStrip, GL_LINE_STRIP  },
-        { PrimitiveType::PT_LineLoop, GL_LINE_LOOP  },
-        { PrimitiveType::PT_Lines, GL_LINES  },
-        { PrimitiveType::PT_LineStripAdjacency, GL_LINE_STRIP_ADJACENCY  },
-        { PrimitiveType::PT_LinesAdjacency, GL_LINES_ADJACENCY  },
-        { PrimitiveType::PT_TriangleStrip, GL_TRIANGLE_STRIP },
-        { PrimitiveType::PT_TriangleFan, GL_TRIANGLE_FAN },
-        { PrimitiveType::PT_Triangles, GL_TRIANGLES },
-        { PrimitiveType::PT_TriangleStripAdjacency, GL_TRIANGLE_STRIP_ADJACENCY },
-        { PrimitiveType::PT_TrianglesAdjacency, GL_TRIANGLES_ADJACENCY },
-        { PrimitiveType::PT_Patches, GL_PATCHES },
+        { PrimitiveType::Point, GL_POINT  },
+        { PrimitiveType::LineStrip, GL_LINE_STRIP  },
+        { PrimitiveType::LineLoop, GL_LINE_LOOP  },
+        { PrimitiveType::Lines, GL_LINES  },
+        { PrimitiveType::LineStripAdjacency, GL_LINE_STRIP_ADJACENCY  },
+        { PrimitiveType::LinesAdjacency, GL_LINES_ADJACENCY  },
+        { PrimitiveType::TriangleStrip, GL_TRIANGLE_STRIP },
+        { PrimitiveType::TriangleFan, GL_TRIANGLE_FAN },
+        { PrimitiveType::Triangles, GL_TRIANGLES },
+        { PrimitiveType::TriangleStripAdjacency, GL_TRIANGLE_STRIP_ADJACENCY },
+        { PrimitiveType::TrianglesAdjacency, GL_TRIANGLES_ADJACENCY },
+        { PrimitiveType::Patches, GL_PATCHES },
     };
 
     const std::map<Filter, GLint> GLConverter::TO_GLFILTER = {

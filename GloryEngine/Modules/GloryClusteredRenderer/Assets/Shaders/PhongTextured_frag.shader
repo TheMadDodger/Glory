@@ -14,9 +14,9 @@ struct Material
 
 #include "Internal/Material.glsl"
 
-layout(binding = 0) uniform sampler2D texSampler;
-layout(binding = 1) uniform sampler2D normalSampler;
-layout(binding = 2) uniform sampler2D shininessSampler;
+layout(set = 2, binding = 0) uniform sampler2D texSampler;
+layout(set = 2, binding = 1) uniform sampler2D normalSampler;
+layout(set = 2, binding = 2) uniform sampler2D shininessSampler;
 
 layout(location = 0) in vec2 fragTexCoord;
 layout(location = 1) in vec4 inColor;

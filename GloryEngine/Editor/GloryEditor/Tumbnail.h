@@ -1,8 +1,14 @@
 #pragma once
-#include <map>
-#include "ImageData.h"
-#include "Texture.h"
 #include "GloryEditor.h"
+
+#include <map>
+
+#include <GraphicsHandles.h>
+
+namespace Glory
+{
+	class TextureData;
+}
 
 namespace Glory::Editor
 {
@@ -11,7 +17,7 @@ namespace Glory::Editor
 	class Tumbnail
 	{
 	public:
-		static GLORY_EDITOR_API Texture* GetTumbnail(UUID uuid);
+		static GLORY_EDITOR_API TextureHandle GetTumbnail(UUID uuid);
 		static GLORY_EDITOR_API void SetDirty(UUID uuid);
 
 		template<class T>
