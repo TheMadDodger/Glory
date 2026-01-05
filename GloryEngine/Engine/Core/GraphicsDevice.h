@@ -317,6 +317,7 @@ namespace Glory
 		glm::vec4 m_ClearColor{ 0.0f, 0.0f, 0.0f, 0.0f };
 		float m_DepthClear{ 1.0f };
 		uint8_t m_StencilClear{ 0 };
+		bool m_CreateRenderTexture = true;
 	};
 
 	/** @brief Buffer descriptor info */
@@ -656,6 +657,9 @@ namespace Glory
 		 * @param function Main function to invoke in the shader
 		 */
 		ShaderHandle AcquireCachedShader(const FileData* pShaderFileData, const ShaderType& shaderType, const std::string& function);
+
+		void SetCachedTexture(TextureData* pTexture, TextureHandle texture);
+		TextureHandle GetCachedTexture(TextureData* pTexture) const;
 
 	public: /* Resource management */
 		

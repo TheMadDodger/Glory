@@ -153,6 +153,18 @@ namespace Glory
 		return iter->second;
 	}
 
+	void GraphicsDevice::SetCachedTexture(TextureData* pTexture, TextureHandle texture)
+	{
+		m_TextureHandles[pTexture->GetUUID()] = texture;
+	}
+
+	TextureHandle GraphicsDevice::GetCachedTexture(TextureData* pTexture) const
+	{
+		auto iter = m_TextureHandles.find(pTexture->GetGPUUUID());
+		if (iter == m_TextureHandles.end()) return nullptr;
+		return iter->second;
+	}
+
 	MeshHandle GraphicsDevice::CreateMesh(MeshData* pMeshData, MeshUsage usage)
 	{
 		BufferFlags bufferFlags = BF_None;

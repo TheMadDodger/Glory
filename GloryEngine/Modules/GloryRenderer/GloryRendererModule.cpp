@@ -810,6 +810,9 @@ namespace Glory
 			signalSemaphores.push_back(m_RenderingFinishedSemaphores[m_CurrentSemaphoreIndex]);
 		}
 
+		for (auto& injectedDataPass : m_InjectedDataPasses)
+			injectedDataPass(pDevice, this);
+
 		PrepareDataPass();
 
 		/* Make sure every camera has a render pass */

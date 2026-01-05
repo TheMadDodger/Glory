@@ -2059,10 +2059,10 @@ namespace Glory
 			return NULL;
 		}
 
-		renderPass.m_RenderTexture = renderTexture ? info.RenderTexture :
-			CreateRenderTexture(handle, std::move(info.RenderTextureInfo));
+		renderPass.m_RenderTexture = renderTexture ? info.RenderTexture : (info.m_CreateRenderTexture ?
+			CreateRenderTexture(handle, std::move(info.RenderTextureInfo)) : nullptr);
 
-		if (!renderPass.m_RenderTexture)
+		if (info.m_CreateRenderTexture && !renderPass.m_RenderTexture)
 		{
 			m_RenderPasses.Erase(handle);
 			Debug().LogError("VulkanDevice::CreateRenderPass: Failed to create RenderTexture for RenderPass.");

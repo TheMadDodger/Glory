@@ -15,6 +15,7 @@
 #include <InternalMaterial.h>
 #include <InternalPipeline.h>
 #include <FontData.h>
+#include <InternalTexture.h>
 #include <FontDataStructs.h>
 #include <MaterialData.h>
 #include <SceneManager.h>
@@ -48,6 +49,10 @@ namespace Glory
 
 	UIRendererModule::~UIRendererModule()
 	{
+		m_Documents.clear();
+		m_Frame.clear();
+		m_pDocumentQuads.clear();
+		m_BatchDatas.clear();
 	}
 
 	void UIRendererModule::CollectReferences(std::vector<UUID>& references)
@@ -111,23 +116,7 @@ namespace Glory
 		pDocument->Draw();
 		pDocument->m_DrawIsDirty.Set(frameIndex, false);
 
-		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
 		AssetManager& assets = m_pEngine->GetAssetManager();
-		const ModuleSettings& settings = Settings();
-
-		/* Prepare pipelines */
-		PipelineData* pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Prepass Pipeline"));
-		PipelineHandle uiPipeline = pDevice->AcquireCachedPipeline(pDocument->m_UIPasses[0], pPipeline,
-			{ m_UIBuffersLayout, m_UISamplerLayout }, sizeof(VertexPosColorTex),
-			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
-		pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Text Prepass Pipeline"));
-		PipelineHandle uiTextPipeline = pDevice->AcquireCachedPipeline(pDocument->m_UIPasses[0], pPipeline,
-			{ m_UIBuffersLayout, m_UISamplerLayout }, sizeof(VertexPosColorTex),
-			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
-		pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Prepass Stencil Pipeline"));
-		PipelineHandle uiStencilPipeline = pDevice->AcquireCachedPipeline(pDocument->m_UIPasses[0], pPipeline,
-			{ m_UIBuffersLayout }, sizeof(VertexPosColorTex),
-			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
 
 		/* Prepare data */
 		auto iter = m_BatchDatas.find(pDocument->m_ObjectID);
@@ -268,10 +257,10 @@ namespace Glory
 			{
 				/* Remove the shape from the stencil */
 				--mask;
-				pDevice->BeginPipeline(commandBuffer, uiStencilPipeline);
+				pDevice->BeginPipeline(commandBuffer, m_UIStencilPipeline);
 				pDevice->SetStencilOp(commandBuffer, CompareOp::OP_Equal, Func::OP_Keep, Func::OP_Keep, Func::OP_Decrement, mask + 1, 255);
-				pDevice->PushConstants(commandBuffer, uiStencilPipeline, 0, sizeof(UIConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
-				pDevice->BindDescriptorSets(commandBuffer, uiStencilPipeline, { batchData.m_BuffersSet });
+				pDevice->PushConstants(commandBuffer, m_UIStencilPipeline, 0, sizeof(UIConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
+				pDevice->BindDescriptorSets(commandBuffer, m_UIStencilPipeline, { batchData.m_BuffersSet });
 				pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(pDocument->m_Resolution.x), float(pDocument->m_Resolution.y));
 				pDevice->SetScissor(commandBuffer, 0, 0, pDocument->m_Resolution.x, pDocument->m_Resolution.y);
 				pDevice->DrawMesh(commandBuffer, m_ImageMesh);
@@ -283,11 +272,11 @@ namespace Glory
 			if (isStencil)
 			{
 				/* Render the mask to the stencil buffer */
-				pDevice->BeginPipeline(commandBuffer, uiStencilPipeline);
+				pDevice->BeginPipeline(commandBuffer, m_UIStencilPipeline);
 				/* First stencil pass increases stencil value by 1 */
 				pDevice->SetStencilOp(commandBuffer, CompareOp::OP_Always, Func::OP_Keep, Func::OP_Keep, Func::OP_Increment, mask, 255);
-				pDevice->PushConstants(commandBuffer, uiStencilPipeline, 0, sizeof(UIConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
-				pDevice->BindDescriptorSets(commandBuffer, uiStencilPipeline, { batchData.m_BuffersSet });
+				pDevice->PushConstants(commandBuffer, m_UIStencilPipeline, 0, sizeof(UIConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
+				pDevice->BindDescriptorSets(commandBuffer, m_UIStencilPipeline, { batchData.m_BuffersSet });
 				pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(pDocument->m_Resolution.x), float(pDocument->m_Resolution.y));
 				pDevice->SetScissor(commandBuffer, 0, 0, pDocument->m_Resolution.x, pDocument->m_Resolution.y);
 				pDevice->DrawMesh(commandBuffer, m_ImageMesh);
@@ -305,7 +294,7 @@ namespace Glory
 			MeshData* pMesh = meshID ? pDocument->m_pTextMeshes.at(meshID).get() : nullptr;
 			MeshHandle mesh = pMesh ? pDevice->AcquireCachedMesh(pMesh, MU_Dynamic) : m_ImageMesh;
 
-			const PipelineHandle pipeline = meshID ? uiTextPipeline : uiPipeline;
+			const PipelineHandle pipeline = meshID ? m_UITextPipeline : m_UIPipeline;
 			pDevice->BeginPipeline(commandBuffer, pipeline);
 
 			if (mask > 0)
@@ -486,6 +475,9 @@ namespace Glory
 			return UIOverlayPass(pDevice, camera, commandBuffer, frameIndex, renderPass, ds);
 		};
 		pRenderer->AddPostProcess(std::move(uiOverlayPostProcess));
+
+		pRenderer->InjectDatapass([this](GraphicsDevice* pDevice, RendererModule* pRenderer)
+			{ UIDataPass(pDevice, pRenderer); });
 	}
 
 	void UIRendererModule::PostInitialize()
@@ -577,41 +569,84 @@ namespace Glory
 		}
 	}
 
-	void UIRendererModule::UIWorldSpaceQuadPass(uint32_t cameraIndex, RendererModule* pRenderer)
+	void UIRendererModule::UIDataPass(GraphicsDevice* pDevice, RendererModule* pRenderer)
 	{
-		//CameraRef camera = pRenderer->GetActiveCamera(cameraIndex);
-		//GraphicsModule* pGraphics = m_pEngine->GetMainModule<GraphicsModule>();
-		//
-		//for (auto& data : m_Frame)
-		//{
-		//	if (data.m_Target != UITarget::WorldSpaceQuad) continue;
-		//
-		//	/* Get document */
-		//	auto& iter = m_Documents.find(data.m_ObjectID);
-		//	if (iter == m_Documents.end()) continue;
-		//	UIDocument& document = iter->second;
-		//	RenderTexture* pDocumentTexture = document.m_pUITexture;
-		//
-		//	MaterialData* pMaterialData = m_pEngine->GetMaterialManager().GetMaterial(data.m_MaterialID);
-		//	if (!pMaterialData) return;
-		//	Material* pMaterial = pGraphics->UseMaterial(pMaterialData);
-		//	if (!pMaterial) return;
-		//
-		//	ObjectData object;
-		//	object.Model = data.m_WorldTransform;
-		//	object.View = camera.GetView();
-		//	object.Projection = camera.GetProjection();
-		//	object.ObjectID = data.m_ObjectID;
-		//	object.SceneID = data.m_SceneID;
-		//
-		//	MeshData* pMeshData = GetDocumentQuadMesh(data);
-		//	pMaterial->SetSamplers(m_pEngine);
-		//	pMaterial->ResetTextureCounter();
-		//	pMaterial->SetTexture("texSampler", pDocumentTexture->GetTextureAttachment(0));
-		//	pMaterial->SetPropertiesBuffer(m_pEngine);
-		//	pMaterial->SetObjectData(object);
-		//	pGraphics->DrawMesh(pMeshData, 0, pMeshData->VertexCount());
-		//}
+		if (!m_DummyRenderPass)
+		{
+			RenderPassInfo renderPassInfo;
+			renderPassInfo.RenderTextureInfo.HasDepth = false;
+			renderPassInfo.RenderTextureInfo.HasStencil = true;
+			renderPassInfo.RenderTextureInfo.Width = 1;
+			renderPassInfo.RenderTextureInfo.Height = 1;
+			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA,
+				PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+			renderPassInfo.m_CreateRenderTexture = true;
+
+			m_DummyRenderPass = pDevice->CreateRenderPass(std::move(renderPassInfo));
+		}
+
+		/* Prepare pipelines */
+		const ModuleSettings& settings = Settings();
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
+		PipelineData* pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Prepass Pipeline"));
+		m_UIPipeline = pDevice->AcquireCachedPipeline(m_DummyRenderPass, pPipeline,
+			{ m_UIBuffersLayout, m_UISamplerLayout }, sizeof(VertexPosColorTex),
+			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+		pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Text Prepass Pipeline"));
+		m_UITextPipeline = pDevice->AcquireCachedPipeline(m_DummyRenderPass, pPipeline,
+			{ m_UIBuffersLayout, m_UISamplerLayout }, sizeof(VertexPosColorTex),
+			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+		pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Prepass Stencil Pipeline"));
+		m_UIStencilPipeline = pDevice->AcquireCachedPipeline(m_DummyRenderPass, pPipeline,
+			{ m_UIBuffersLayout }, sizeof(VertexPosColorTex),
+			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+
+		MaterialManager& materials = m_pEngine->GetMaterialManager();
+		AssetManager& assets = m_pEngine->GetAssetManager();
+
+		for (size_t i = 0; i < m_Frame.size(); ++i)
+		{
+			const auto& data = m_Frame[i];
+			if (data.m_Target != UITarget::WorldSpaceQuad) continue;
+
+			/* Get document */
+			auto& iter = m_Documents.find(data.m_ObjectID);
+			if (iter == m_Documents.end()) continue;
+			UIDocument& document = iter->second;
+
+			/* Update material */
+			MaterialData* pMaterial = materials.GetMaterial(data.m_MaterialID);
+			if (!pMaterial) continue;
+
+			TextureData* pOldTexture = nullptr;
+			if (!pMaterial->GetTexture(data.m_MaterialTextureName, &pOldTexture, &assets))
+				continue;
+
+			auto textures = GetDocumentTexture(pDevice, data, document, pRenderer->GetNumFramesInFlight());
+			TextureData* pTexture = textures[pRenderer->GetCurrentFrameInFlight()];
+			if (pOldTexture != pTexture)
+			{
+				pMaterial->SetTexture(data.m_MaterialTextureName, pTexture);
+				pMaterial->SetDirty(true);
+			}
+			if (pTexture->IsDirty())
+			{
+				pTexture->SetDirty(false);
+				pMaterial->SetDirty(true);
+			}
+
+			/* Submit data to renderer */
+			MeshData* pMesh = GetDocumentQuadMesh(data);
+			RenderData renderData;
+			renderData.m_DepthWrite = true;
+			renderData.m_LayerMask = data.m_LayerMask;
+			renderData.m_MeshID = pMesh->GetUUID();
+			renderData.m_ObjectID = data.m_ObjectID;
+			renderData.m_SceneID = data.m_SceneID;
+			renderData.m_World = data.m_WorldTransform;
+			renderData.m_MaterialID = data.m_MaterialID;
+			pRenderer->SubmitDynamic(std::move(renderData));
+		}
 	}
 
 	bool UIRendererModule::UIOverlayPass(GraphicsDevice* pDevice, CameraRef camera,
@@ -690,16 +725,19 @@ namespace Glory
 
 		if (document.m_OriginalDocumentID != pDocument->GetUUID() || forceCreate)
 		{
+			std::vector<RenderPassHandle> passes = std::move(document.m_UIPasses);
+			std::vector<DescriptorSetHandle> overlaySets = std::move(document.m_UIOverlaySets);
+			const glm::uvec2 resolution = document.m_Resolution;
 			m_Documents.erase(iter);
 			m_Documents.emplace(id, pDocument);
 			UIDocument& newDocument = m_Documents.at(id);
 			newDocument.m_SceneID = data.m_SceneID;
 			newDocument.m_ObjectID = data.m_ObjectID;
-			if (!document.m_UIPasses.empty())
-				newDocument.m_UIPasses = std::move(document.m_UIPasses);
-			if (!document.m_UIOverlaySets.empty())
-				newDocument.m_UIOverlaySets = std::move(document.m_UIOverlaySets);
-			newDocument.m_Resolution = document.m_Resolution;
+			if (!passes.empty())
+				newDocument.m_UIPasses = std::move(passes);
+			if (!overlaySets.empty())
+				newDocument.m_UIOverlaySets = std::move(overlaySets);
+			newDocument.m_Resolution = resolution;
 			newDocument.m_pRenderer = this;
 			return newDocument;
 		}
@@ -717,6 +755,8 @@ namespace Glory
 				new MeshData(4, sizeof(DefaultVertex3D), {AttributeType::Float3, AttributeType::Float3,
 					AttributeType::Float3, AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 })
 			).first;
+
+			m_pEngine->GetAssetManager().AddLoadedResource(iter->second);
 
 			createMesh = true;
 		}
@@ -752,6 +792,48 @@ namespace Glory
 			iter->second->SetDirty(true);
 		}
 
-		return iter->second.get();
+		return iter->second;
+	}
+
+	std::vector<TextureData*>& UIRendererModule::GetDocumentTexture(GraphicsDevice* pDevice,
+		const UIRenderData& data, UIDocument& document, size_t imageCount)
+	{
+		auto iter = m_pDocumentTextures.find(data.m_ObjectID);
+		if (iter == m_pDocumentTextures.end())
+		{
+			iter = m_pDocumentTextures.emplace(data.m_ObjectID, std::vector<TextureData*>(imageCount, nullptr)).first;
+			for (size_t i = 0; i < imageCount; ++i)
+			{
+				ImageData* pImage = new ImageData();
+				pImage->SetDirty(false);
+				iter->second[i] = new InternalTexture(pImage);
+				iter->second[i]->GetSamplerSettings().MipmapMode = Filter::F_None;
+				m_pEngine->GetAssetManager().AddLoadedResource(iter->second[i]);
+			}
+		}
+
+		iter->second.resize(imageCount);
+		for (size_t i = 0; i < imageCount; ++i)
+		{
+			if (!iter->second[i])
+			{
+				ImageData* pImage = new ImageData();
+				pImage->SetDirty(false);
+				iter->second[i] = new InternalTexture(pImage);
+				iter->second[i]->GetSamplerSettings().MipmapMode = Filter::F_None;
+				m_pEngine->GetAssetManager().AddLoadedResource(iter->second[i]);
+			}
+			TextureHandle texture = pDevice->GetCachedTexture(iter->second[i]);
+			RenderPassHandle renderPass = document.m_UIPasses[i];
+			RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(renderPass);
+			TextureHandle currentTexture = pDevice->GetRenderTextureAttachment(renderTexture, 0);
+			if (texture != currentTexture)
+			{
+				pDevice->SetCachedTexture(iter->second[i], currentTexture);
+				iter->second[i]->SetDirty(true);
+			}
+		}
+
+		return iter->second;
 	}
 }

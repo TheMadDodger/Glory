@@ -608,6 +608,11 @@ namespace Glory
 		m_Enabled = enabled;
 	}
 
+	void RendererModule::InjectDatapass(std::function<void(GraphicsDevice*, RendererModule*)> datapassFunc)
+	{
+		m_InjectedDataPasses.emplace_back(datapassFunc);
+	}
+
 	void RendererModule::InjectSwapchainSubpass(std::function<void(GraphicsDevice*, RenderPassHandle, CommandBufferHandle)> subpassFunc)
 	{
 		m_InjectedSwapchainSubpasses.push_back(subpassFunc);

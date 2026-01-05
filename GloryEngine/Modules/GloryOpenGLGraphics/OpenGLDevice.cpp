@@ -1491,14 +1491,14 @@ namespace Glory
 
 		RenderPassHandle handle;
 		GL_RenderPass& renderPass = m_RenderPasses.Emplace(handle, GL_RenderPass());
-		renderPass.m_RenderTexture = info.RenderTexture ? info.RenderTexture :
-			CreateRenderTexture(handle, std::move(info.RenderTextureInfo));
+		renderPass.m_RenderTexture = info.RenderTexture ? info.RenderTexture : (info.m_CreateRenderTexture ?
+			CreateRenderTexture(handle, std::move(info.RenderTextureInfo)) : nullptr);
 		renderPass.m_ClearColor = std::move(info.m_ClearColor);
 		renderPass.m_DepthClear = info.m_DepthClear;
 		renderPass.m_StencilClear = info.m_StencilClear;
 		renderPass.m_Clear = info.m_LoadOp == RenderPassLoadOp::OP_Clear;
 
-		if (!renderPass.m_RenderTexture)
+		if (info.m_CreateRenderTexture && !renderPass.m_RenderTexture)
 		{
 			m_RenderPasses.Erase(handle);
 			Debug().LogError("OpenGLDevice::CreateRenderPass: Failed to create RenderTexture for RenderPass.");

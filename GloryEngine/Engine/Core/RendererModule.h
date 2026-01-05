@@ -249,6 +249,7 @@ namespace Glory
 
 		void SetEnabled(bool enabled=true);
 
+		void InjectDatapass(std::function<void(GraphicsDevice*, RendererModule*)> datapassFunc);
 		void InjectSwapchainSubpass(std::function<void(GraphicsDevice*, RenderPassHandle, CommandBufferHandle)> subpassFunc);
 		void InjectPreRenderPass(std::function<void(GraphicsDevice*, CommandBufferHandle, uint32_t)> passFunc);
 
@@ -309,6 +310,7 @@ namespace Glory
 		SwapchainHandle m_Swapchain = 0;
 		bool m_Enabled = true;
 
+		std::vector<std::function<void(GraphicsDevice*, RendererModule*)>> m_InjectedDataPasses;
 		std::vector<std::function<void(GraphicsDevice*, RenderPassHandle, CommandBufferHandle)>> m_InjectedSwapchainSubpasses;
 		std::vector<std::function<void(GraphicsDevice*, CommandBufferHandle, uint32_t)>> m_InjectedPreRenderPasses;
 	};
