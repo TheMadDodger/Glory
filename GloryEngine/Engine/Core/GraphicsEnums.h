@@ -1,4 +1,6 @@
 #pragma once
+#include "GraphicsHandles.h"
+
 #include <Reflection.h>
 #include <glm/ext/vector_uint2.hpp>
 
@@ -44,6 +46,51 @@ REFLECTABLE_ENUM_NS(Glory, CullFace,
     Front,
     Back,
     FrontAndBack);
+
+REFLECTABLE_ENUM_NS(Glory, PrimitiveType,
+    Point,
+    LineStrip,
+    LineLoop,
+    Lines,
+    LineStripAdjacency,
+    LinesAdjacency,
+    TriangleStrip,
+    TriangleFan,
+    Triangles,
+    TriangleStripAdjacency,
+    TrianglesAdjacency,
+    Patches);
+
+
+REFLECTABLE_ENUM_NS(Glory, BlendFactor,
+    Zero,
+    One,
+    SrcColor,
+    OneMinusSrcColor,
+    DstColor,
+    OneMinusDstColor,
+    SrcAlpha,
+    OneMinusSrcAlpha,
+    DstAlpha,
+    OneMinusDstAlpha,
+    ConstantColor,
+    OneMinusConstantColor,
+    ConstantAlpha,
+    OneMinusConstantAlpha,
+    SrcAlphaSaturate,
+    Src1Color,
+    OneMinusSrc1Color,
+    Src1Alpha,
+    OneMinusSrc1Alpha
+);
+
+REFLECTABLE_ENUM_NS(Glory, BlendOp,
+    Add,
+    Subtract,
+    ReverseSubtract,
+    Min,
+    Max
+);
 
 namespace Glory
 {
@@ -513,6 +560,28 @@ namespace Glory
         ShaderTypeFlag::STF_Compute,
     };
 
+    enum PipelineStageFlagBits
+    {
+        PST_None = 0,
+        PST_TopOfPipe = 1 << 0,
+        PST_DrawIndirect = 1 << 1,
+        PST_VertexInput = 1 << 2,
+        PST_VertexShader = 1 << 3,
+        PST_TessellationControlShader = 1 << 4,
+        PST_TessellationEvaluationShader = 1 << 5,
+        PST_GeometryShader = 1 << 6,
+        PST_FragmentShader = 1 << 7,
+        PST_EarlyFragmentTests = 1 << 8,
+        PST_LateFragmentTests = 1 << 9,
+        PST_ColorAttachmentOutput = 1 << 10,
+        PST_ComputeShader = 1 << 11,
+        PST_Transfer = 1 << 12,
+        PST_BottomOfPipe = 1 << 13,
+        PST_Host = 1 << 14,
+        PST_AllGraphics = 1 << 15,
+        PST_AllCommands = 1 << 16,
+    };
+
     static_assert(ShaderTypeToFlagCount == (size_t)ShaderType::ST_Count);
 
     enum class BufferBindingTarget
@@ -579,22 +648,6 @@ namespace Glory
         //MU_DeviceCoherentAMD = 1 << 6,
         //MU_DeviceUncachedAMD = 1 << 7,
         //MU_RdmaCapableNV = 1 << 8,
-    };
-
-    enum class PrimitiveType
-    {
-        PT_Point,
-        PT_LineStrip,
-        PT_LineLoop,
-        PT_Lines,
-        PT_LineStripAdjacency,
-        PT_LinesAdjacency,
-        PT_TriangleStrip,
-        PT_TriangleFan,
-        PT_Triangles,
-        PT_TriangleStripAdjacency,
-        PT_TrianglesAdjacency,
-        PT_Patches
     };
 
     enum class DataType
@@ -927,54 +980,18 @@ namespace Glory
     {
         uint64_t PipelineID;
         ShaderType Type;
-    };
-
-    struct TextureCreateInfo
-    {
-        uint32_t m_Width;
-        uint32_t m_Height;
-        PixelFormat m_PixelFormat;
-        PixelFormat m_InternalFormat;
-        ImageType m_ImageType;
-        DataType m_Type;
-        uint32_t m_UsageFlags;
-        uint32_t m_SharingMode;
-        ImageAspect m_ImageAspectFlags;
-        SamplerSettings m_SamplerSettings = SamplerSettings();
-    };
-
-    struct Attachment
-    {
-        Attachment(const std::string& name, const PixelFormat& pixelFormat, const PixelFormat& internalFormat,
-            const ImageType& imageType, const ImageAspect& imageAspect, DataType type = DataType::DT_UByte, bool autoBind = true);
-        Attachment(const std::string& name, const TextureCreateInfo& textureInfo, bool autoBind = true);
-
-        //PixelFormat::PF_R8G8B8A8Srgb
-        std::string Name;
-        PixelFormat InternalFormat;
-        PixelFormat Format;
-        ImageType ImageType;
-        ImageAspect ImageAspect;
-        DataType m_Type;
-        bool m_AutoBind;
-    };
-
-    struct RenderTextureCreateInfo
-    {
-    public:
-        RenderTextureCreateInfo();
-        RenderTextureCreateInfo(uint32_t width, uint32_t height, bool hasDepth, bool hasStencil = false);
-
-        uint32_t Width;
-        uint32_t Height;
-        bool HasDepth;
-        bool HasStencil;
-        std::vector<Attachment> Attachments;
+        size_t m_Hash;
     };
 
     struct ShaderBufferInfo
     {
         std::string Name;
         ShaderTypeFlag ShaderFlags;
+    };
+
+    enum ViewportOrigin
+    {
+        TopLeft,
+        BottomLeft
     };
 }
