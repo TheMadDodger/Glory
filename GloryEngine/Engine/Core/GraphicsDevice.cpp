@@ -116,6 +116,7 @@ namespace Glory
 		{
 			UpdateTexture(texture, pTexture);
 			pTexture->SetDirty(false);
+			pImage->SetDirty(false);
 		}
 
 		return texture;
