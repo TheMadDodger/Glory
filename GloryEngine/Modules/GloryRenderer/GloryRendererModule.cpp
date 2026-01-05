@@ -1604,14 +1604,6 @@ namespace Glory
 
 		PrepareCameras();
 
-		for (size_t i = 0; i < m_FrameData.Picking.size(); ++i)
-		{
-			const glm::ivec2& pos = m_FrameData.Picking[i].first;
-			const UUID cameraID = m_FrameData.Picking[i].second;
-			UniqueCameraData& cameraData = m_UniqueCameraDatas.at(cameraID);
-			cameraData.m_Picks.emplace_back(pos);
-		}
-
 		for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
 		{
 			CameraRef camera = m_ActiveCameras[i];
@@ -1620,6 +1612,14 @@ namespace Glory
 				GenerateClusterSSBO(i, pDevice, camera, uniqueCameraData.m_ClusterSet);
 		}
 		m_DirtyCameraPerspectives.clear();
+
+		for (size_t i = 0; i < m_FrameData.Picking.size(); ++i)
+		{
+			const glm::ivec2& pos = m_FrameData.Picking[i].first;
+			const UUID cameraID = m_FrameData.Picking[i].second;
+			UniqueCameraData& cameraData = m_UniqueCameraDatas.at(cameraID);
+			cameraData.m_Picks.emplace_back(pos);
+		}
 
 		if (m_LightCameraDatas->size() < m_FrameData.LightViews.count())
 		{
@@ -1998,8 +1998,6 @@ namespace Glory
 
 	void GloryRendererModule::GenerateClusterSSBO(uint32_t cameraIndex, GraphicsDevice* pDevice, CameraRef camera, DescriptorSetHandle clusterSet)
 	{
-		PrepareCameras();
-
 		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::GenerateClusterSSBO" };
 		const glm::uvec2 resolution = camera.GetResolution();
 

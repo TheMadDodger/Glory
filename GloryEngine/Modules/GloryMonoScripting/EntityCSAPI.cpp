@@ -520,6 +520,7 @@ namespace Glory
 		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
 		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
 		CameraComponent& cameraComp = registry.GetComponent<CameraComponent>(entity.GetEntityID());
+		if (cameraComp.m_HalfFOV == halfFov) return;
 		cameraComp.m_HalfFOV = halfFov;
 		registry.GetTypeView<CameraComponent>()->Invoke(Utils::ECS::InvocationType::OnValidate, &registry, entity.GetEntityID(), &cameraComp);
 	}
@@ -537,6 +538,7 @@ namespace Glory
 		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
 		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
 		CameraComponent& cameraComp = registry.GetComponent<CameraComponent>(entity.GetEntityID());
+		if (cameraComp.m_Near == near) return;
 		cameraComp.m_Near = near;
 		registry.GetTypeView<CameraComponent>()->Invoke(Utils::ECS::InvocationType::OnValidate, &registry, entity.GetEntityID(), &cameraComp);
 	}
@@ -554,6 +556,7 @@ namespace Glory
 		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
 		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
 		CameraComponent& cameraComp = registry.GetComponent<CameraComponent>(entity.GetEntityID());
+		if (cameraComp.m_Far == far) return;
 		cameraComp.m_Far = far;
 		registry.GetTypeView<CameraComponent>()->Invoke(Utils::ECS::InvocationType::OnValidate, &registry, entity.GetEntityID(), &cameraComp);
 	}
@@ -571,6 +574,7 @@ namespace Glory
 		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
 		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
 		CameraComponent& cameraComp = registry.GetComponent<CameraComponent>(entity.GetEntityID());
+		if (cameraComp.m_Priority == priority) return;
 		cameraComp.m_Priority = priority;
 		registry.GetTypeView<CameraComponent>()->Invoke(Utils::ECS::InvocationType::OnValidate, &registry, entity.GetEntityID(), &cameraComp);
 	}
@@ -588,6 +592,7 @@ namespace Glory
 		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
 		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
 		CameraComponent& cameraComp = registry.GetComponent<CameraComponent>(entity.GetEntityID());
+		if (cameraComp.m_LayerMask.m_Mask == pLayerMask->m_Mask) return;
 		cameraComp.m_LayerMask.m_Mask = pLayerMask->m_Mask;
 		registry.GetTypeView<CameraComponent>()->Invoke(Utils::ECS::InvocationType::OnValidate, &registry, entity.GetEntityID(), &cameraComp);
 	}
@@ -605,6 +610,7 @@ namespace Glory
 		Utils::ECS::EntityView* pEntityView = entity.GetEntityView();
 		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
 		CameraComponent& cameraComp = registry.GetComponent<CameraComponent>(entity.GetEntityID());
+		if (cameraComp.m_ClearColor == *clearCol) return;
 		cameraComp.m_ClearColor = *clearCol;
 		registry.GetTypeView<CameraComponent>()->Invoke(Utils::ECS::InvocationType::OnValidate, &registry, entity.GetEntityID(), &cameraComp);
 	}

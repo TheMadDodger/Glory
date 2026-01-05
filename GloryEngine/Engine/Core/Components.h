@@ -150,7 +150,7 @@ namespace Glory
 
 	struct ShadowSettings
 	{
-		ShadowSettings() : m_Enable(true), m_Bias(0.0000005f)
+		ShadowSettings() : m_Enable(false), m_Bias(0.0000005f)
 		{}
 
 		REFLECTABLE(ShadowSettings,
