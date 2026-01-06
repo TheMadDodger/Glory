@@ -258,6 +258,9 @@ namespace Glory
 		virtual uint32_t GetNumFramesInFlight() const = 0;
 		virtual uint32_t GetCurrentFrameInFlight() const = 0;
 
+		virtual RenderPassHandle GetSwapchainPass() const { return NULL; };
+		virtual RenderPassHandle GetDummyPostProcessPass() const { return NULL; };
+
 	protected:
 		virtual void OnSubmitDynamic(const RenderData& renderData) {}
 		virtual void OnSubmitCamera(CameraRef camera) {}

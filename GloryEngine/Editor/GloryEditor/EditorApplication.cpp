@@ -186,6 +186,9 @@ namespace Glory::Editor
 		/* @fixme There is a better place for this */
 		m_pEngine->GetSceneManager()->ComponentTypesInstance();
 
+		/* Tell engine to preload common pipelines and other assets */
+		m_pEngine->Load();
+
 		m_Running = true;
 		if (m_Platform.m_Windowless)
 		{

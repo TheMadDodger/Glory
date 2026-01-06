@@ -98,6 +98,10 @@ namespace Glory
 
 		virtual void OnProcessData() {}
 
+		virtual void Preload() {};
+		virtual void Load() {};
+		virtual void Postload() {};
+
 	protected:
 		Engine* m_pEngine;
 		std::filesystem::path m_ModulePath;

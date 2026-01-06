@@ -114,6 +114,7 @@ namespace Glory
 		virtual void Update() override;
 		virtual void Draw() override;
 		virtual void LoadSettings(ModuleSettings& settings) override;
+		virtual void Preload() override;
 
 		virtual size_t DefaultAttachmenmtIndex() const override;
 		virtual size_t CameraAttachmentPreviewCount() const override;
@@ -129,6 +130,8 @@ namespace Glory
 
 		virtual void OnWindowResized() override;
 		virtual void OnSwapchainChanged() override;
+		virtual RenderPassHandle GetSwapchainPass() const override;
+		virtual RenderPassHandle GetDummyPostProcessPass() const override;
 
 	private:
 		size_t GetGCD(size_t a, size_t b); // TODO: Move this to somewhere it can be used from anywhere and make it take templates
@@ -162,6 +165,8 @@ namespace Glory
 		void GenerateShadowMapLODResolutions();
 		void ResizeShadowMapLODResolutions(uint32_t minSize, uint32_t maxSize);
 		void GenerateShadowLODDivisions(uint32_t maxLODs);
+
+		void CheckCachedPipelines(GraphicsDevice* pDevice);
 
 	private:
 		std::vector<PipelineBatchData> m_DynamicBatchData;
@@ -259,6 +264,8 @@ namespace Glory
 
 		std::vector<CameraRef> m_DirtyCameraPerspectives;
 
+		RenderPassHandle m_DummyRenderPass = NULL;
+		RenderPassHandle m_DummySSAORenderPass = NULL;
 		std::vector<RenderPassHandle> m_SwapchainPasses;
 		std::vector<SemaphoreHandle> m_ImageAvailableSemaphores;
 		std::vector<SemaphoreHandle> m_RenderingFinishedSemaphores;

@@ -75,6 +75,8 @@ namespace Glory
 		virtual void PostInitialize() override;
 		virtual void Update() override;
 		virtual void Cleanup() override;
+		virtual void Load() override;
+
 		virtual void UIPrepass(GraphicsDevice* pDevice, CommandBufferHandle commandBuffer, uint32_t frameIndex);
 		virtual void UIDataPass(GraphicsDevice* pDevice, RendererModule* pRenderer);
 		virtual bool UIOverlayPass(GraphicsDevice* pDevice, CameraRef camera, CommandBufferHandle commandBuffer,
@@ -87,6 +89,9 @@ namespace Glory
 		MeshData* GetDocumentQuadMesh(const UIRenderData& data);
 		std::vector<TextureData*>& GetDocumentTexture(GraphicsDevice* pDevice,
 			const UIRenderData& data, UIDocument& document, size_t imageCount);
+
+		void CheckCachedPipelines(GraphicsDevice* pDevice);
+		void CheckCachedOverlayPipeline(RenderPassHandle renderPass, GraphicsDevice* pDevice);
 
 	private:
 		MaterialData* m_pUIPrepassStencilMaterial = nullptr;
@@ -130,5 +135,6 @@ namespace Glory
 		PipelineHandle m_UIPipeline = 0;
 		PipelineHandle m_UITextPipeline = 0;
 		PipelineHandle m_UIStencilPipeline = 0;
+		PipelineHandle m_UIOverlayPipeline = 0;
 	};
 }

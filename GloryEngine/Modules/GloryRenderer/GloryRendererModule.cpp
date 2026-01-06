@@ -536,6 +536,25 @@ namespace Glory
 		m_LineBuffers.resize(m_ImageCount, 0ull);
 		m_LineMeshes.resize(m_ImageCount, 0ull);
 
+		/* Dummy render passes */
+		RenderPassInfo renderPassInfo;
+		renderPassInfo.RenderTextureInfo.Width = 1;
+		renderPassInfo.RenderTextureInfo.Height = 1;
+		renderPassInfo.RenderTextureInfo.HasDepth = true;
+		renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("object", PixelFormat::PF_RGBAI, PixelFormat::PF_R32G32B32A32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UInt, false));
+		renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+		renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Normal", PixelFormat::PF_RGBA, PixelFormat::PF_R16G16B16A16Sfloat, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+		renderPassInfo.m_Position = RenderPassPosition::RP_Start;
+		renderPassInfo.m_LoadOp = RenderPassLoadOp::OP_Clear;
+		m_DummyRenderPass = pDevice->CreateRenderPass(std::move(renderPassInfo));
+
+		RenderPassInfo ssaoRenderPassInfo;
+		ssaoRenderPassInfo.RenderTextureInfo.Width = 1;
+		ssaoRenderPassInfo.RenderTextureInfo.Height = 1;
+		ssaoRenderPassInfo.RenderTextureInfo.HasDepth = false;
+		ssaoRenderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("AO", PixelFormat::PF_R, PixelFormat::PF_R32Sfloat, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+		m_DummySSAORenderPass = pDevice->CreateRenderPass(std::move(ssaoRenderPassInfo));
+
 		PostProcess displayCopyPP;
 		displayCopyPP.m_Name = "Initial Display Copy";
 		displayCopyPP.m_Priority = INT32_MAX;
@@ -821,31 +840,6 @@ namespace Glory
 			CameraRef camera = m_ActiveCameras[i];
 			UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
 			const auto& resolution = camera.GetResolution();
-
-			if (!m_SSAOPipeline)
-			{
-				const UUID ssaoPipeline = settings.Value<uint64_t>("SSAO Prepass Pipeline");
-				PipelineData* pPipeline = pipelines.GetPipelineData(ssaoPipeline);
-				m_SSAOPipeline = pDevice->CreatePipeline(uniqueCameraData.m_SSAORenderPasses[0], pPipeline,
-					{ m_GlobalClusterSetLayout, m_GlobalSampleDomeSetLayout, m_SSAOSamplersSetLayout, m_NoiseSamplerSetLayout },
-					sizeof(glm::vec3), { AttributeType::Float3 });
-			}
-			if (!m_SkyboxPipeline)
-			{
-				const UUID skyboxPipeline = settings.Value<uint64_t>("Skybox Pipeline");
-				PipelineData* pPipeline = pipelines.GetPipelineData(skyboxPipeline);
-				m_SkyboxPipeline = pDevice->CreatePipeline(uniqueCameraData.m_RenderPasses[0], pPipeline,
-					{ m_GlobalSkyboxRenderSetLayout, m_GlobalSkyboxSamplerSetLayout },
-					sizeof(glm::vec3), { AttributeType::Float3 });
-			}
-			if (!m_LineRenderPipeline)
-			{
-				const UUID lineRenderPipeline = settings.Value<uint64_t>("Lines Pipeline");
-				PipelineData* pPipeline = pipelines.GetPipelineData(lineRenderPipeline);
-				m_LineRenderPipeline = pDevice->CreatePipeline(uniqueCameraData.m_RenderPasses[0], pPipeline,
-					{ m_GlobalLineRenderSetLayout }, sizeof(LineVertex),
-					{ AttributeType::Float3, AttributeType::Float4 });
-			}
 
 			BufferHandle& clusterSSBOHandle = uniqueCameraData.m_ClusterSSBO;
 			if (!uniqueCameraData.m_ClusterSSBO)
@@ -1183,6 +1177,13 @@ namespace Glory
 		settings.RegisterAssetReference<PipelineData>("Light Complexity Visualizer", 54);
 	}
 
+	void GloryRendererModule::Preload()
+	{
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+		if (!pDevice) return;
+		CheckCachedPipelines(pDevice);
+	}
+
 	size_t GloryRendererModule::DefaultAttachmenmtIndex() const
 	{
 		return 5;
@@ -1400,6 +1401,16 @@ namespace Glory
 		m_CurrentFrameIndex = 0;
 	}
 
+	RenderPassHandle GloryRendererModule::GetSwapchainPass() const
+	{
+		return !m_SwapchainPasses.empty() ? m_SwapchainPasses[0] : NULL;
+	}
+
+	RenderPassHandle GloryRendererModule::GetDummyPostProcessPass() const
+	{
+		return m_FinalFrameColorPasses[0];
+	}
+
 	size_t GloryRendererModule::GetGCD(size_t a, size_t b)
 	{
 		if (b == 0)
@@ -1491,116 +1502,10 @@ namespace Glory
 	void GloryRendererModule::PrepareDataPass()
 	{
 		ProfileSample s{ &m_pEngine->Profiler(), "GloryRendererModule::PrepareDataPass" };
-		const ModuleSettings& settings = Settings();
-		const UUID clusterGeneratorPipeline = settings.Value<uint64_t>("Cluster Generator");
-		const UUID clusterCullLightPipeline = settings.Value<uint64_t>("Cluster Cull Light");
-		const UUID pickingPipeline = settings.Value<uint64_t>("Picking");
-		const UUID displayPipeline = settings.Value<uint64_t>("Display Copy Pipeline");
-		const UUID ssaoPostPassPipeline = settings.Value<uint64_t>("SSAO Postpass");
-		const UUID visualizeSSAOPipeline = settings.Value<uint64_t>("SSAO Visualizer");
-		const UUID visualizeObjectIDPipeline = settings.Value<uint64_t>("ObjectID Visualizer");
-		const UUID visualizeDepthPipeline = settings.Value<uint64_t>("Depth Visualizer");
-		const UUID visualizeLightComplexityPipeline = settings.Value<uint64_t>("Light Complexity Visualizer");
-
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice) return;
 
-		static DescriptorSetLayoutHandle doubleFloatPushConstantsLayout = NULL;
-
-		if (!doubleFloatPushConstantsLayout)
-		{
-			DescriptorSetLayoutInfo ssaoConstantsInfo;
-			ssaoConstantsInfo.m_PushConstantRange.m_Offset = 0;
-			ssaoConstantsInfo.m_PushConstantRange.m_ShaderStages = STF_Fragment;
-			ssaoConstantsInfo.m_PushConstantRange.m_Size = sizeof(float)*2;
-			doubleFloatPushConstantsLayout = pDevice->CreateDescriptorSetLayout(std::move(ssaoConstantsInfo));
-		}
-
-		static DescriptorSetLayoutHandle lightComplexityPushConstantsLayout = NULL;
-
-		if (!lightComplexityPushConstantsLayout)
-		{
-			DescriptorSetLayoutInfo ssaoConstantsInfo;
-			ssaoConstantsInfo.m_PushConstantRange.m_Offset = 0;
-			ssaoConstantsInfo.m_PushConstantRange.m_ShaderStages = STF_Fragment;
-			ssaoConstantsInfo.m_PushConstantRange.m_Size = sizeof(LightComplexityConstants);
-			lightComplexityPushConstantsLayout = pDevice->CreateDescriptorSetLayout(std::move(ssaoConstantsInfo));
-		}
-
-		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
-		if (!m_ClusterGeneratorPipeline)
-		{
-			PipelineData* pPipeline = pipelines.GetPipelineData(clusterGeneratorPipeline);
-			m_ClusterGeneratorPipeline = pDevice->CreateComputePipeline(pPipeline, { m_GlobalClusterSetLayout, m_CameraClusterSetLayout });
-		}
-		if (!m_ClusterCullLightPipeline)
-		{
-			PipelineData* pPipeline = pipelines.GetPipelineData(clusterCullLightPipeline);
-			m_ClusterCullLightPipeline = pDevice->CreateComputePipeline(pPipeline,
-				{ m_GlobalClusterSetLayout, m_CameraClusterSetLayout, m_GlobalLightSetLayout, m_CameraLightSetLayout, m_LightDistancesSetLayout });
-		}
-		if (!m_PickingPipeline)
-		{
-			PipelineData* pPipeline = pipelines.GetPipelineData(pickingPipeline);
-			m_PickingPipeline = pDevice->CreateComputePipeline(pPipeline,
-				{ m_GlobalPickingSetLayout, m_PickingResultSetLayout, m_PickingSamplerSetLayout });
-		}
-		if (!m_DisplayCopyPipeline)
-		{
-			PipelineData* pPipeline = pipelines.GetPipelineData(displayPipeline);
-			m_DisplayCopyPipeline = pDevice->CreatePipeline(m_FinalFrameColorPasses[0], pPipeline, { m_DisplayCopySamplerSetLayout },
-				sizeof(glm::vec3), { AttributeType::Float3 });
-		}
-		if (!m_VisualizeSSAOPipeline)
-		{
-			PipelineData* pPipeline = pipelines.GetPipelineData(visualizeSSAOPipeline);
-			m_VisualizeSSAOPipeline = pDevice->CreatePipeline(m_FinalFrameColorPasses[0], pPipeline, { m_DisplayCopySamplerSetLayout },
-				sizeof(glm::vec3), { AttributeType::Float3 });
-		}
-		if (!m_VisualizeObjectIDPipeline)
-		{
-			PipelineData* pPipeline = pipelines.GetPipelineData(visualizeObjectIDPipeline);
-			m_VisualizeObjectIDPipeline = pDevice->CreatePipeline(m_FinalFrameColorPasses[0], pPipeline, { m_DisplayCopySamplerSetLayout },
-				sizeof(glm::vec3), { AttributeType::Float3 });
-		}
-		if (!m_VisualizeDepthPipeline)
-		{
-			PipelineData* pPipeline = pipelines.GetPipelineData(visualizeDepthPipeline);
-			m_VisualizeDepthPipeline = pDevice->CreatePipeline(m_FinalFrameColorPasses[0], pPipeline,
-				{ doubleFloatPushConstantsLayout, m_DisplayCopySamplerSetLayout },
-				sizeof(glm::vec3), { AttributeType::Float3 });
-		}
-		if (!m_VisualizeLightComplexityPipeline)
-		{
-			PipelineData* pPipeline = pipelines.GetPipelineData(visualizeLightComplexityPipeline);
-			m_VisualizeLightComplexityPipeline = pDevice->CreatePipeline(m_FinalFrameColorPasses[0], pPipeline,
-				{ lightComplexityPushConstantsLayout, m_DisplayCopySamplerSetLayout, m_LightGridSetLayout },
-				sizeof(glm::vec3), { AttributeType::Float3 });
-		}
-		if (!m_SSAOPostPassPipeline)
-		{
-			PipelineData* pPipeline = pipelines.GetPipelineData(ssaoPostPassPipeline);
-			m_SSAOPostPassPipeline = pDevice->CreatePipeline(m_FinalFrameColorPasses[0], pPipeline,
-				{ doubleFloatPushConstantsLayout, m_DisplayCopySamplerSetLayout, m_SSAOPostSamplerSetLayout },
-				sizeof(glm::vec3), { AttributeType::Float3 });
-		}
-		if (!m_ShadowRenderPipeline)
-		{
-			const UUID shadowsPipeline = settings.Value<uint64_t>("Shadows Pipeline");
-			PipelineData* pPipeline = pipelines.GetPipelineData(shadowsPipeline);
-			m_ShadowRenderPipeline = pDevice->CreatePipeline(m_ShadowsPasses[0], pPipeline,
-				{m_GlobalShadowRenderSetLayout, m_ObjectDataSetLayout }, sizeof(DefaultVertex3D),
-				{ AttributeType::Float3, AttributeType::Float3, AttributeType::Float3,
-				AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 });
-		}
-		/*if (!m_TransparentShadowRenderPipeline)
-		{
-			const UUID shadowsTransparentPipeline = settings.Value<uint64_t>("Shadows Transparent Textured Pipeline");
-			PipelineData* pPipeline = pipelines.GetPipelineData(shadowsTransparentPipeline);
-			m_TransparentShadowRenderPipeline = pDevice->CreatePipeline(m_ShadowsPasses[0], pPipeline, {}, sizeof(DefaultVertex3D),
-				{ AttributeType::Float3, AttributeType::Float3, AttributeType::Float3,
-				AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 });
-		}*/
+		CheckCachedPipelines(pDevice);
 
 		PrepareCameras();
 
@@ -2629,5 +2534,102 @@ namespace Glory
 			const uint32_t divider = uint32_t(pow(2, i));
 			m_ShadowLODDivisions.push_back(divider);
 		}
+	}
+
+	void GloryRendererModule::CheckCachedPipelines(GraphicsDevice* pDevice)
+	{
+		const ModuleSettings& settings = Settings();
+		const UUID clusterGeneratorPipeline = settings.Value<uint64_t>("Cluster Generator");
+		const UUID clusterCullLightPipeline = settings.Value<uint64_t>("Cluster Cull Light");
+		const UUID pickingPipeline = settings.Value<uint64_t>("Picking");
+		const UUID displayPipeline = settings.Value<uint64_t>("Display Copy Pipeline");
+		const UUID ssaoPostPassPipeline = settings.Value<uint64_t>("SSAO Postpass");
+		const UUID visualizeSSAOPipeline = settings.Value<uint64_t>("SSAO Visualizer");
+		const UUID visualizeObjectIDPipeline = settings.Value<uint64_t>("ObjectID Visualizer");
+		const UUID visualizeDepthPipeline = settings.Value<uint64_t>("Depth Visualizer");
+		const UUID visualizeLightComplexityPipeline = settings.Value<uint64_t>("Light Complexity Visualizer");
+
+		static DescriptorSetLayoutHandle doubleFloatPushConstantsLayout = NULL;
+
+		if (!doubleFloatPushConstantsLayout)
+		{
+			DescriptorSetLayoutInfo ssaoConstantsInfo;
+			ssaoConstantsInfo.m_PushConstantRange.m_Offset = 0;
+			ssaoConstantsInfo.m_PushConstantRange.m_ShaderStages = STF_Fragment;
+			ssaoConstantsInfo.m_PushConstantRange.m_Size = sizeof(float) * 2;
+			doubleFloatPushConstantsLayout = pDevice->CreateDescriptorSetLayout(std::move(ssaoConstantsInfo));
+		}
+
+		static DescriptorSetLayoutHandle lightComplexityPushConstantsLayout = NULL;
+
+		if (!lightComplexityPushConstantsLayout)
+		{
+			DescriptorSetLayoutInfo ssaoConstantsInfo;
+			ssaoConstantsInfo.m_PushConstantRange.m_Offset = 0;
+			ssaoConstantsInfo.m_PushConstantRange.m_ShaderStages = STF_Fragment;
+			ssaoConstantsInfo.m_PushConstantRange.m_Size = sizeof(LightComplexityConstants);
+			lightComplexityPushConstantsLayout = pDevice->CreateDescriptorSetLayout(std::move(ssaoConstantsInfo));
+		}
+
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
+		
+		/* Compute */
+		PipelineData* pPipeline = pipelines.GetPipelineData(clusterGeneratorPipeline);
+		m_ClusterGeneratorPipeline = pDevice->AcquireCachedComputePipeline(pPipeline, { m_GlobalClusterSetLayout, m_CameraClusterSetLayout });
+		pPipeline = pipelines.GetPipelineData(clusterCullLightPipeline);
+		m_ClusterCullLightPipeline = pDevice->AcquireCachedComputePipeline(pPipeline,
+			{ m_GlobalClusterSetLayout, m_CameraClusterSetLayout, m_GlobalLightSetLayout, m_CameraLightSetLayout, m_LightDistancesSetLayout });
+		pPipeline = pipelines.GetPipelineData(pickingPipeline);
+		m_PickingPipeline = pDevice->AcquireCachedComputePipeline(pPipeline,
+			{ m_GlobalPickingSetLayout, m_PickingResultSetLayout, m_PickingSamplerSetLayout });
+
+		/* Graphics */
+		pPipeline = pipelines.GetPipelineData(displayPipeline);
+		m_DisplayCopyPipeline = pDevice->AcquireCachedPipeline(m_FinalFrameColorPasses[0], pPipeline, { m_DisplayCopySamplerSetLayout },
+			sizeof(glm::vec3), { AttributeType::Float3 });
+		pPipeline = pipelines.GetPipelineData(visualizeSSAOPipeline);
+		m_VisualizeSSAOPipeline = pDevice->AcquireCachedPipeline(m_FinalFrameColorPasses[0], pPipeline, { m_DisplayCopySamplerSetLayout },
+			sizeof(glm::vec3), { AttributeType::Float3 });
+		pPipeline = pipelines.GetPipelineData(visualizeObjectIDPipeline);
+		m_VisualizeObjectIDPipeline = pDevice->AcquireCachedPipeline(m_FinalFrameColorPasses[0], pPipeline, { m_DisplayCopySamplerSetLayout },
+			sizeof(glm::vec3), { AttributeType::Float3 });
+		pPipeline = pipelines.GetPipelineData(visualizeDepthPipeline);
+		m_VisualizeDepthPipeline = pDevice->AcquireCachedPipeline(m_FinalFrameColorPasses[0], pPipeline,
+			{ doubleFloatPushConstantsLayout, m_DisplayCopySamplerSetLayout },
+			sizeof(glm::vec3), { AttributeType::Float3 });
+		pPipeline = pipelines.GetPipelineData(visualizeLightComplexityPipeline);
+		m_VisualizeLightComplexityPipeline = pDevice->AcquireCachedPipeline(m_FinalFrameColorPasses[0], pPipeline,
+			{ lightComplexityPushConstantsLayout, m_DisplayCopySamplerSetLayout, m_LightGridSetLayout },
+			sizeof(glm::vec3), { AttributeType::Float3 });
+		pPipeline = pipelines.GetPipelineData(ssaoPostPassPipeline);
+		m_SSAOPostPassPipeline = pDevice->AcquireCachedPipeline(m_FinalFrameColorPasses[0], pPipeline,
+			{ doubleFloatPushConstantsLayout, m_DisplayCopySamplerSetLayout, m_SSAOPostSamplerSetLayout },
+			sizeof(glm::vec3), { AttributeType::Float3 });
+		const UUID shadowsPipeline = settings.Value<uint64_t>("Shadows Pipeline");
+		pPipeline = pipelines.GetPipelineData(shadowsPipeline);
+		m_ShadowRenderPipeline = pDevice->AcquireCachedPipeline(m_ShadowsPasses[0], pPipeline,
+			{ m_GlobalShadowRenderSetLayout, m_ObjectDataSetLayout }, sizeof(DefaultVertex3D),
+			{ AttributeType::Float3, AttributeType::Float3, AttributeType::Float3,
+			AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 });
+		const UUID shadowsTransparentPipeline = settings.Value<uint64_t>("Shadows Transparent Textured Pipeline");
+		pPipeline = pipelines.GetPipelineData(shadowsTransparentPipeline);
+		//m_TransparentShadowRenderPipeline = pDevice->AcquireCachedPipeline(m_ShadowsPasses[0], pPipeline, {}, sizeof(DefaultVertex3D),
+		//	{ AttributeType::Float3, AttributeType::Float3, AttributeType::Float3,
+		//	AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 });
+		const UUID ssaoPipeline = settings.Value<uint64_t>("SSAO Prepass Pipeline");
+		pPipeline = pipelines.GetPipelineData(ssaoPipeline);
+		m_SSAOPipeline = pDevice->AcquireCachedPipeline(m_DummySSAORenderPass, pPipeline,
+			{ m_GlobalClusterSetLayout, m_GlobalSampleDomeSetLayout, m_SSAOSamplersSetLayout, m_NoiseSamplerSetLayout },
+			sizeof(glm::vec3), { AttributeType::Float3 });
+		const UUID skyboxPipeline = settings.Value<uint64_t>("Skybox Pipeline");
+		pPipeline = pipelines.GetPipelineData(skyboxPipeline);
+		m_SkyboxPipeline = pDevice->AcquireCachedPipeline(m_DummyRenderPass, pPipeline,
+			{ m_GlobalSkyboxRenderSetLayout, m_GlobalSkyboxSamplerSetLayout },
+			sizeof(glm::vec3), { AttributeType::Float3 });
+		const UUID lineRenderPipeline = settings.Value<uint64_t>("Lines Pipeline");
+		pPipeline = pipelines.GetPipelineData(lineRenderPipeline);
+		m_LineRenderPipeline = pDevice->AcquireCachedPipeline(m_DummyRenderPass, pPipeline,
+			{ m_GlobalLineRenderSetLayout }, sizeof(LineVertex),
+			{ AttributeType::Float3, AttributeType::Float4 });
 	}
 }

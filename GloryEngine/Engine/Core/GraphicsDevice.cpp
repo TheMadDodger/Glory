@@ -74,6 +74,27 @@ namespace Glory
 		return pipeline;
 	}
 
+	PipelineHandle GraphicsDevice::AcquireCachedComputePipeline(PipelineData* pPipeline,
+		std::vector<DescriptorSetLayoutHandle>&& descriptorSets)
+	{
+		auto iter = m_PipelineHandles.find(pPipeline->GetGPUUUID());
+		if (iter == m_PipelineHandles.end())
+		{
+			PipelineHandle newPipeline = CreateComputePipeline(pPipeline, std::move(descriptorSets));
+			m_PipelineHandles.emplace(pPipeline->GetGPUUUID(), newPipeline).first;
+
+			pPipeline->SetDirty(false);
+			pPipeline->SettingsDirty() = false;
+
+			return newPipeline;
+		}
+
+		pPipeline->SetDirty(false);
+		pPipeline->SettingsDirty() = false;
+
+		return iter->second;
+	}
+
 	MeshHandle GraphicsDevice::AcquireCachedMesh(MeshData* pMesh, MeshUsage usage)
 	{
 		auto iter = m_MeshHandles.find(pMesh->GetGPUUUID());

@@ -527,6 +527,17 @@ namespace Glory
 		bufferSetLayoutInfo.m_Buffers[1].m_ShaderStages = STF_Vertex;
 		bufferSetLayoutInfo.m_Buffers[1].m_Type = BT_Storage;
 		m_UIBuffersLayout = pDevice->CreateDescriptorSetLayout(std::move(bufferSetLayoutInfo));
+
+		RenderPassInfo renderPassInfo;
+		renderPassInfo.RenderTextureInfo.HasDepth = false;
+		renderPassInfo.RenderTextureInfo.HasStencil = true;
+		renderPassInfo.RenderTextureInfo.Width = 1;
+		renderPassInfo.RenderTextureInfo.Height = 1;
+		renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA,
+			PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+		renderPassInfo.m_CreateRenderTexture = true;
+
+		m_DummyRenderPass = pDevice->CreateRenderPass(std::move(renderPassInfo));
 	}
 
 	void UIRendererModule::Update()
@@ -551,6 +562,21 @@ namespace Glory
 		Utils::ECS::ComponentTypes::DestroyInstance();
 	}
 
+	void UIRendererModule::Load()
+	{
+		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
+		if (!pRenderer) return;
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+		if (!pDevice) return;
+
+		CheckCachedPipelines(pDevice);
+
+		RenderPassHandle renderPass = pRenderer->GetDummyPostProcessPass();
+		if (!renderPass) return;
+
+		CheckCachedOverlayPipeline(renderPass, pDevice);
+	}
+
 	void UIRendererModule::UIPrepass(GraphicsDevice* pDevice, CommandBufferHandle commandBuffer, uint32_t frameIndex)
 	{
 		for (auto& data : m_Frame)
@@ -571,35 +597,7 @@ namespace Glory
 
 	void UIRendererModule::UIDataPass(GraphicsDevice* pDevice, RendererModule* pRenderer)
 	{
-		if (!m_DummyRenderPass)
-		{
-			RenderPassInfo renderPassInfo;
-			renderPassInfo.RenderTextureInfo.HasDepth = false;
-			renderPassInfo.RenderTextureInfo.HasStencil = true;
-			renderPassInfo.RenderTextureInfo.Width = 1;
-			renderPassInfo.RenderTextureInfo.Height = 1;
-			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA,
-				PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-			renderPassInfo.m_CreateRenderTexture = true;
-
-			m_DummyRenderPass = pDevice->CreateRenderPass(std::move(renderPassInfo));
-		}
-
-		/* Prepare pipelines */
-		const ModuleSettings& settings = Settings();
-		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
-		PipelineData* pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Prepass Pipeline"));
-		m_UIPipeline = pDevice->AcquireCachedPipeline(m_DummyRenderPass, pPipeline,
-			{ m_UIBuffersLayout, m_UISamplerLayout }, sizeof(VertexPosColorTex),
-			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
-		pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Text Prepass Pipeline"));
-		m_UITextPipeline = pDevice->AcquireCachedPipeline(m_DummyRenderPass, pPipeline,
-			{ m_UIBuffersLayout, m_UISamplerLayout }, sizeof(VertexPosColorTex),
-			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
-		pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Prepass Stencil Pipeline"));
-		m_UIStencilPipeline = pDevice->AcquireCachedPipeline(m_DummyRenderPass, pPipeline,
-			{ m_UIBuffersLayout }, sizeof(VertexPosColorTex),
-			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+		CheckCachedPipelines(pDevice);
 
 		MaterialManager& materials = m_pEngine->GetMaterialManager();
 		AssetManager& assets = m_pEngine->GetAssetManager();
@@ -652,11 +650,7 @@ namespace Glory
 	bool UIRendererModule::UIOverlayPass(GraphicsDevice* pDevice, CameraRef camera,
 		CommandBufferHandle commandBuffer, size_t frameIndex, RenderPassHandle renderPass, DescriptorSetHandle ds)
 	{
-		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
-		const ModuleSettings& settings = Settings();
-		PipelineData* pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Overlay Pipeline"));
-		PipelineHandle uiOverlayPipeline = pDevice->AcquireCachedPipeline(renderPass, pPipeline,
-			{ m_UISamplerLayout, m_UIOverlaySamplerLayout }, sizeof(glm::vec3), { AttributeType::Float3 });
+		CheckCachedOverlayPipeline(renderPass, pDevice);
 
 		const glm::uvec2& resolution = camera.GetResolution();
 		
@@ -672,10 +666,10 @@ namespace Glory
 			UIDocument& document = iter->second;
 
 			pDevice->BeginRenderPass(commandBuffer, renderPass);
-			pDevice->BeginPipeline(commandBuffer, uiOverlayPipeline);
+			pDevice->BeginPipeline(commandBuffer, m_UIOverlayPipeline);
 			pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(resolution.x), float(resolution.y));
 			pDevice->SetScissor(commandBuffer, 0, 0, resolution.x, resolution.y);
-			pDevice->BindDescriptorSets(commandBuffer, uiOverlayPipeline, { ds, document.m_UIOverlaySets[frameIndex] });
+			pDevice->BindDescriptorSets(commandBuffer, m_UIOverlayPipeline, { ds, document.m_UIOverlaySets[frameIndex] });
 			pDevice->DrawQuad(commandBuffer);
 			pDevice->EndPipeline(commandBuffer);
 			pDevice->EndRenderPass(commandBuffer);
@@ -835,5 +829,33 @@ namespace Glory
 		}
 
 		return iter->second;
+	}
+
+	void UIRendererModule::CheckCachedPipelines(GraphicsDevice* pDevice)
+	{
+		/* Prepare pipelines */
+		const ModuleSettings& settings = Settings();
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
+		PipelineData* pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Prepass Pipeline"));
+		m_UIPipeline = pDevice->AcquireCachedPipeline(m_DummyRenderPass, pPipeline,
+			{ m_UIBuffersLayout, m_UISamplerLayout }, sizeof(VertexPosColorTex),
+			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+		pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Text Prepass Pipeline"));
+		m_UITextPipeline = pDevice->AcquireCachedPipeline(m_DummyRenderPass, pPipeline,
+			{ m_UIBuffersLayout, m_UISamplerLayout }, sizeof(VertexPosColorTex),
+			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+		pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Prepass Stencil Pipeline"));
+		m_UIStencilPipeline = pDevice->AcquireCachedPipeline(m_DummyRenderPass, pPipeline,
+			{ m_UIBuffersLayout }, sizeof(VertexPosColorTex),
+			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+	}
+
+	void UIRendererModule::CheckCachedOverlayPipeline(RenderPassHandle renderPass, GraphicsDevice* pDevice)
+	{
+		const ModuleSettings& settings = Settings();
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
+		PipelineData* pPipeline = pipelines.GetPipelineData(settings.Value<uint64_t>("UI Overlay Pipeline"));
+		m_UIOverlayPipeline = pDevice->AcquireCachedPipeline(renderPass, pPipeline,
+			{ m_UISamplerLayout, m_UIOverlaySamplerLayout }, sizeof(glm::vec3), { AttributeType::Float3 });
 	}
 }

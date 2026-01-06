@@ -12,6 +12,7 @@ namespace Glory
 {
 	class MaterialData;
 	class RenderTexture;
+	class RendererModule;
 	class MeshData;
 	class Console;
 	class Window;
@@ -44,6 +45,7 @@ namespace Glory
 		virtual void Update() override;
 		virtual void Cleanup() override;
 		virtual void OverlayPass(GraphicsDevice* pDevice, RenderPassHandle renderPass, CommandBufferHandle commandBuffer);
+		virtual void Load() override;
 
 		virtual void OnConsoleClose() override;
 		virtual void SetNextColor(const glm::vec4& color) override;
@@ -53,6 +55,8 @@ namespace Glory
 		virtual void LoadSettings(ModuleSettings& settings) override;
 
 		void HandleKeyboardInput(Window* pWindow, Console& pConsole, KeyboardKey key);
+
+		void CheckCachedPipelines(RenderPassHandle swapchainPass, GraphicsDevice* pDevice);
 
 	private:
 		std::unique_ptr<MeshData> m_pConsoleMesh;
@@ -80,6 +84,9 @@ namespace Glory
 		char m_ConsoleInput[MAX_CONSOLE_INPUT];
 		int m_HistoryRewindIndex;
 		std::string m_BackedUpInput;
+
+		PipelineHandle m_ConsoleBackgroundPipeline = NULL;
+		PipelineHandle m_ConsoleTextPipeline = NULL;
 
 		DescriptorSetLayoutHandle m_RenderConstantsSetLayout = 0;
 		DescriptorSetLayoutHandle m_TextRenderSetLayout = 0;
