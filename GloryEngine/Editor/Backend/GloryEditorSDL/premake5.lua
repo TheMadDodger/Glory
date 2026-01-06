@@ -83,7 +83,7 @@ project "GloryEditorSDL"
 	}
 
 	filter "system:windows"
-		systemversion "10.0.19041.0"
+		systemversion "latest"
 		toolset "v143"
 
 		defines
