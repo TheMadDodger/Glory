@@ -142,6 +142,9 @@ namespace Glory
 
 		/* Process data files */
 		m_pEngine->ProcessData();
+
+		/* Tell engine to preload common pipelines and other assets */
+		m_pEngine->Load();
 	}
 
 	void GloryRuntime::Run()

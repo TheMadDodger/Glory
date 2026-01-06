@@ -588,6 +588,16 @@ namespace Glory
 			nullptr : m_pGraphicsDevices[m_ActiveGraphicsDevice];
 	}
 
+	void Engine::Load()
+	{
+		for (Module* pModule : m_pAllModules)
+			pModule->Preload();
+		for (Module* pModule : m_pAllModules)
+			pModule->Load();
+		for (Module* pModule : m_pAllModules)
+			pModule->Postload();
+	}
+
 	void Engine::RegisterStandardSerializers()
 	{
 		// Standard

@@ -218,6 +218,8 @@ namespace Utils::Reflect
 		void AddGraphicsDevice(GraphicsDevice* pGraphicsDevice);
 		GraphicsDevice* ActiveGraphicsDevice();
 
+		void Load();
+
 	private:
 		void RegisterStandardSerializers();
 		void RegisterBasicTypes();

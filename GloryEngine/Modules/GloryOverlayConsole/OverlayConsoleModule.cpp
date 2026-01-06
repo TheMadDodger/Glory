@@ -9,6 +9,7 @@
 #include <AssetManager.h>
 #include <GraphicsModule.h>
 #include <CameraManager.h>
+#include <PipelineManager.h>
 #include <PipelineData.h>
 #include <FontData.h>
 #include <FontDataStructs.h>
@@ -197,6 +198,16 @@ namespace Glory
 		WindowModule* pWindows = m_pEngine->GetMainModule<WindowModule>();
 		Window* pMainWindow = pWindows->GetMainWindow();
 		pMainWindow->AddInputOverrideHandler(this);
+
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+		if (!pDevice) return;
+
+		DescriptorSetLayoutInfo backgroundSetInfo;
+		backgroundSetInfo.m_PushConstantRange.m_Offset = 0;
+		backgroundSetInfo.m_PushConstantRange.m_ShaderStages = STF_Vertex;
+		backgroundSetInfo.m_PushConstantRange.m_Size = sizeof(ConsoleRenderConstants);
+		m_RenderConstantsSetLayout = pDevice->CreateDescriptorSetLayout(std::move(backgroundSetInfo));
+		m_TextRenderSetLayout = CreateSamplerDescriptorLayout(pDevice, 1, { 0 }, { STF_Fragment }, { "Color" });
 	}
 
 	void OverlayConsoleModule::Update()
@@ -231,36 +242,19 @@ namespace Glory
 		if (!m_ConsoleOpen && m_ConsoleAnimationTime == 0.0f || console.LineCount() == 0) return;
 
 		const ModuleSettings& settings = Settings();
-		const UUID consoleBackgroundPipelineID = settings.Value<uint64_t>("Console Background Pipeline");
-		const UUID consoleTextPipelineID = settings.Value<uint64_t>("Console Text Pipeline");
 		const UUID consoleFontID = settings.Value<uint64_t>("Console Font");
+
 		Resource* pResource = m_pEngine->GetAssetManager().FindResource(consoleFontID);
 		if (!pResource) return;
 		FontData* pFont = static_cast<FontData*>(pResource);
-		pResource = m_pEngine->GetAssetManager().FindResource(consoleBackgroundPipelineID);
-		if (!pResource) return;
-		PipelineData* pConsoleBackgroundPipeline = static_cast<PipelineData*>(pResource);
-		pResource = m_pEngine->GetAssetManager().FindResource(consoleTextPipelineID);
-		if (!pResource) return;
-		PipelineData* pConsoleTextPipeline = static_cast<PipelineData*>(pResource);
 		WindowModule* pWindows = m_pEngine->GetMainModule<WindowModule>();
 		if (!pWindows) return;
 		TextureData* pTextureData = pFont->GetGlyphTexture(m_pEngine->GetAssetManager());
 		if (!pTextureData) return;
 
-		if (!m_RenderConstantsSetLayout)
-		{
-			DescriptorSetLayoutInfo backgroundSetInfo;
-			backgroundSetInfo.m_PushConstantRange.m_Offset = 0;
-			backgroundSetInfo.m_PushConstantRange.m_ShaderStages = STF_Vertex;
-			backgroundSetInfo.m_PushConstantRange.m_Size = sizeof(ConsoleRenderConstants);
-			m_RenderConstantsSetLayout = pDevice->CreateDescriptorSetLayout(std::move(backgroundSetInfo));
-		}
-
-		if (!m_TextRenderSetLayout)
+		if (!m_TextRenderSet)
 		{
 			TextureHandle texture = pDevice->AcquireCachedTexture(pTextureData);
-			m_TextRenderSetLayout = CreateSamplerDescriptorLayout(pDevice, 1, { 0 }, { STF_Fragment }, { "Color" });
 			m_TextRenderSet = CreateSamplerDescriptorSet(pDevice, 1, { texture }, m_TextRenderSetLayout);
 			m_LastFontID = consoleFontID;
 		}
@@ -271,16 +265,12 @@ namespace Glory
 			DescriptorSetUpdateInfo updateInfo;
 			updateInfo.m_Samplers = { { texture, 0 } };
 			m_LastFontID = consoleFontID;
+			pDevice->UpdateDescriptorSet(m_TextRenderSet, updateInfo);
 		}
 
-		PipelineHandle consoleBackgroundPipeline = pDevice->AcquireCachedPipeline(renderPass, pConsoleBackgroundPipeline,
-			{ m_RenderConstantsSetLayout }, sizeof(VertexPosColorTex),
-			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
-		PipelineHandle consoleTextPipeline = pDevice->AcquireCachedPipeline(renderPass, pConsoleTextPipeline,
-			{ m_RenderConstantsSetLayout, m_TextRenderSetLayout },
-			sizeof(VertexPosColorTex), { AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+		CheckCachedPipelines(renderPass, pDevice);
 
-		if (!consoleBackgroundPipeline || !consoleTextPipeline) return;
+		if (!m_ConsoleBackgroundPipeline || !m_ConsoleTextPipeline) return;
 
 		int windowWidth, windowHeight;
 		pWindows->GetMainWindow()->GetWindowSize(&windowWidth, &windowHeight);
@@ -384,23 +374,23 @@ namespace Glory
 		constants.Projection = glm::ortho(0.0f, float(windowWidth), 0.0f, float(windowHeight));
 
 		///* Draw background */
-		pDevice->BeginPipeline(commandBuffer, consoleBackgroundPipeline);
-		pDevice->PushConstants(commandBuffer, consoleBackgroundPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
+		pDevice->BeginPipeline(commandBuffer, m_ConsoleBackgroundPipeline);
+		pDevice->PushConstants(commandBuffer, m_ConsoleBackgroundPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
 		pDevice->DrawMesh(commandBuffer, m_ConsoleMesh);
 		pDevice->EndPipeline(commandBuffer);
 
 		///* Draw text */
 		constants.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, windowHeight + animatedConsoleHeight - textStart, 0.0f));
-		pDevice->BeginPipeline(commandBuffer, consoleTextPipeline);
-		pDevice->BindDescriptorSets(commandBuffer, consoleTextPipeline, { m_TextRenderSet });
-		pDevice->PushConstants(commandBuffer, consoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
+		pDevice->BeginPipeline(commandBuffer, m_ConsoleTextPipeline);
+		pDevice->BindDescriptorSets(commandBuffer, m_ConsoleTextPipeline, { m_TextRenderSet });
+		pDevice->PushConstants(commandBuffer, m_ConsoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
 		pDevice->DrawMesh(commandBuffer, m_ConsoleTextMesh);
 
 		/* Draw input text bracket */
 		const float inputTextHeight = windowHeight + animatedConsoleHeight - consoleHeight + textLineHeight + consolePadding;
 		constants.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, inputTextHeight, 0.0f));
 
-		pDevice->PushConstants(commandBuffer, consoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
+		pDevice->PushConstants(commandBuffer, m_ConsoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
 		pDevice->DrawMesh(commandBuffer, m_InputTextBracketMesh);
 
 		/* Draw input text */
@@ -411,7 +401,7 @@ namespace Glory
 		{
 			m_InputTextMesh = pDevice->AcquireCachedMesh(m_pInputTextMesh.get(), MU_Dynamic);
 			constants.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(inputTextXOffset, inputTextHeight, 0.0f));
-			pDevice->PushConstants(commandBuffer, consoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
+			pDevice->PushConstants(commandBuffer, m_ConsoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
 			pDevice->DrawMesh(commandBuffer, m_InputTextMesh);
 		}
 
@@ -419,10 +409,32 @@ namespace Glory
 		if (m_CursorBlink)
 		{
 			constants.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(inputTextXOffset + m_InputTextWidth, inputTextHeight, 0.0f));
-			pDevice->PushConstants(commandBuffer, consoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
+			pDevice->PushConstants(commandBuffer, m_ConsoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
 			pDevice->DrawMesh(commandBuffer, m_CursorTextMesh);
 		}
 		pDevice->EndPipeline(commandBuffer);
+	}
+
+	void OverlayConsoleModule::Load()
+	{
+		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
+		if (!pRenderer) return;
+		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
+		if (!pDevice) return;
+
+		RenderPassHandle swapchainPass = pRenderer->GetSwapchainPass();
+		if (!swapchainPass) return;
+
+		CheckCachedPipelines(swapchainPass, pDevice);
+
+		const ModuleSettings& settings = Settings();
+		const UUID consoleFontID = settings.Value<uint64_t>("Console Font");
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(consoleFontID);
+		if (!pResource) return;
+		FontData* pFont = static_cast<FontData*>(pResource);
+		TextureData* pTextureData = pFont->GetGlyphTexture(m_pEngine->GetAssetManager());
+		if (!pTextureData) return;
+		pDevice->AcquireCachedTexture(pTextureData);
 	}
 
 	void OverlayConsoleModule::OnConsoleClose()
@@ -588,5 +600,23 @@ namespace Glory
 			/* @todo: Shift cursor to end */
 			return;
 		}
+	}
+
+	void OverlayConsoleModule::CheckCachedPipelines(RenderPassHandle swapchainPass, GraphicsDevice* pDevice)
+	{
+		const ModuleSettings& settings = Settings();
+		const UUID consoleBackgroundPipelineID = settings.Value<uint64_t>("Console Background Pipeline");
+		const UUID consoleTextPipelineID = settings.Value<uint64_t>("Console Text Pipeline");
+
+		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
+		PipelineData* pConsoleBackgroundPipeline = pipelines.GetPipelineData(consoleBackgroundPipelineID);
+		PipelineData* pConsoleTextPipeline = pipelines.GetPipelineData(consoleTextPipelineID);
+
+		m_ConsoleBackgroundPipeline = pDevice->AcquireCachedPipeline(swapchainPass, pConsoleBackgroundPipeline,
+			{ m_RenderConstantsSetLayout }, sizeof(VertexPosColorTex),
+			{ AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
+		m_ConsoleTextPipeline = pDevice->AcquireCachedPipeline(swapchainPass, pConsoleTextPipeline,
+			{ m_RenderConstantsSetLayout, m_TextRenderSetLayout },
+			sizeof(VertexPosColorTex), { AttributeType::Float2, AttributeType::Float3, AttributeType::Float2 });
 	}
 }

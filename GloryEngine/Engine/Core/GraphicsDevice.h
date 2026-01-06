@@ -629,6 +629,9 @@ namespace Glory
 		PipelineHandle AcquireCachedPipeline(RenderPassHandle renderPass, PipelineData* pPipeline,
 			std::vector<DescriptorSetLayoutHandle>&& descriptorSets, size_t stride,
 			const std::vector<AttributeType>& attributeTypes);
+
+		PipelineHandle AcquireCachedComputePipeline(PipelineData* pPipeline,
+			std::vector<DescriptorSetLayoutHandle>&& descriptorSets);
 		/**
 		 * @brief Acquire a cached mesh or create a new one
 		 * @param pMesh The mesh data to create a mesh from
