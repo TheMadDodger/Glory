@@ -631,8 +631,6 @@ namespace Glory::Editor
             auto properties = file["Properties"];
             properties.SetMap();
 
-            std::vector<uint64_t> ids;
-
             for (auto iter = baseProperties.Begin(); iter != baseProperties.End(); ++iter)
             {
                 const std::string key = *iter;
@@ -667,6 +665,7 @@ namespace Glory::Editor
         for (rapidjson::Value::ConstMemberIterator itor = assets.begin(); itor != assets.end(); ++itor)
         {
             JSONValueRef asset = assets[itor->name.GetString()];
+            const UUID uuid = asset["Metadata/UUID"].AsUInt64();
             const uint32_t hash = asset["Metadata/Hash"].AsUInt();
             const std::string_view pathStr = asset["Location/Path"].AsString();
             if (pathStr._Starts_with(".\\Modules\\GloryClusteredRenderer\\Assets\\"))
@@ -687,6 +686,7 @@ namespace Glory::Editor
                 std::stringstream str;
                 str << "0.6.0> Moved " << pathStr << " to " << newPath.string();
                 pApplication->GetEngine()->GetDebug().LogInfo(str.str());
+                EditorAssetDatabase::SetAssetDirty(uuid);
             }
         }
     }
@@ -727,6 +727,7 @@ namespace Glory::Editor
             std::stringstream str;
             str << "0.6.0> Removed asset ID " << toRemoveAssets[i];
             pApplication->GetEngine()->GetDebug().LogInfo(str.str());
+            EditorAssetDatabase::SetDirty(true);
         }
     }
 }
