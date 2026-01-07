@@ -13,6 +13,7 @@
 #include <sstream>
 #include <SceneManager.h>
 #include <PipelineData.h>
+#include <VertexHelpers.h>
 
 #include <EntityRegistry.h>
 
@@ -99,6 +100,24 @@ namespace Glory::Editor
 	{
 	}
 
+    void ASSIMPImporter::EnsureUniqueAssetName(Context& context, Resource* pResource) const
+    {
+        size_t counter = 0;
+
+        auto iter = context.NameToResource.find(pResource->Name());
+        while (iter != context.NameToResource.end())
+        {
+            ++counter;
+            std::stringstream str;
+            str << pResource->Name() << " " << counter;
+            iter = context.NameToResource.find(str.str());
+            if (iter != context.NameToResource.end()) continue;
+            pResource->SetName(str.str());
+            break;
+        }
+        context.NameToResource.emplace(pResource->Name(), pResource);
+    }
+
     bool ASSIMPImporter::SupportsExtension(const std::filesystem::path& extension) const
     {
         for (size_t i = 0; i < NumSupportedExtensions; ++i)
@@ -109,23 +128,47 @@ namespace Glory::Editor
         return false;
     }
 
-    ImportedResource ASSIMPImporter::LoadResource(const std::filesystem::path& path, void*) const
+    bool CheckError(Assimp::Importer& importer, const aiScene* pScene, Debug& debug, const std::filesystem::path& path)
     {
-        Assimp::Importer importer;
-
-        const aiScene* pScene = importer.ReadFile(path.string(), aiProcess_CalcTangentSpace |
-            aiProcess_Triangulate |
-            aiProcess_JoinIdenticalVertices |
-            aiProcess_SortByPType);
-
-        Debug& debug = EditorApplication::GetInstance()->GetEngine()->GetDebug();
-
         if (!pScene || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !pScene->mRootNode)
         {
             std::stringstream str;
             str << "ASSIMP: Could not import file: " << path << " Error: " << importer.GetErrorString();
             debug.LogError(str.str());
-            return nullptr;
+            return true;
+        }
+        return false;
+    }
+
+    ImportedResource ASSIMPImporter::LoadResource(const std::filesystem::path& path, void*) const
+    {
+        Assimp::Importer importer;
+
+        const aiScene* pScene = importer.ReadFile(path.string(),
+            aiProcess_CalcTangentSpace |
+            aiProcess_Triangulate |
+            aiProcess_JoinIdenticalVertices |
+            aiProcess_SortByPType
+        );
+
+        Debug& debug = EditorApplication::GetInstance()->GetEngine()->GetDebug();
+
+        if (CheckError(importer, pScene, debug, path)) return nullptr;
+
+        for (size_t i = 0; i < pScene->mNumMeshes; i++)
+        {
+            if (pScene->mMeshes[i]->HasNormals()) continue;
+            pScene = importer.ApplyPostProcessing(aiProcess_GenNormals);
+            if (CheckError(importer, pScene, debug, path)) return nullptr;
+            break;
+        }
+
+        for (size_t i = 0; i < pScene->mNumMeshes; i++)
+        {
+            if (pScene->mMeshes[i]->HasTangentsAndBitangents()) continue;
+            pScene = importer.ApplyPostProcessing(aiProcess_CalcTangentSpace);
+            if (CheckError(importer, pScene, debug, path)) return nullptr;
+            break;
         }
 
         ModelData* pModel = new ModelData();
@@ -165,7 +208,9 @@ namespace Glory::Editor
                 {
                     /* Uncompressed texture */
                     ImageData* pImage = new ImageData(texture->mWidth, texture->mHeight, PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb,
-                        sizeof(aiTexel), std::move((char*)texture->pcData), sizeof(aiTexel) * texture->mWidth * texture->mHeight);
+                        sizeof(aiTexel), std::move((char*)texture->pcData), sizeof(aiTexel)*texture->mWidth*texture->mHeight);
+                    pImage->SetName(name);
+                    EnsureUniqueAssetName(context, pImage);
                     auto& child = resource.AddChild(pImage, name);
                     TextureData* pDefualtTexture = new TextureData(pImage);
                     pDefualtTexture->Image().SetUUID(pImage->GetUUID());
@@ -189,6 +234,8 @@ namespace Glory::Editor
                 }
 
                 Resource* pImage = *imageResource;
+                pImage->SetName(name);
+                EnsureUniqueAssetName(context, pImage);
                 auto& child = resource.AddChild(pImage, name);
                 TextureData* pTexture = (TextureData*)*imageResource.Child(0);
                 pTexture->Image().SetUUID(pImage->GetUUID());
@@ -309,10 +356,17 @@ namespace Glory::Editor
             }
         }
 
+        const std::string fileName = path.filename().replace_extension().string();
+
         context.Prefab = new PrefabData();
         ProcessNode(context, 0, pScene->mRootNode, pScene, resource);
+        for (size_t i = 0; i < context.Prefab->ChildCount(0); ++i)
+        {
+            Utils::ECS::EntityID root = context.Prefab->Child(0, i);
+            context.Prefab->SetEntityName(root, fileName);
+        }
 
-        resource.AddChild(context.Prefab, path.filename().replace_extension().string() + "_Prefab");
+        resource.AddChild(context.Prefab, fileName + "_Prefab");
         importer.FreeScene();
         return resource;
     }
@@ -429,6 +483,10 @@ namespace Glory::Editor
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
             MeshData* pMeshData = ProcessMesh(context, mesh);
             if (!pMeshData) continue;
+
+            if (pMeshData->Name().empty())
+                pMeshData->SetName(std::string_view(node->mName.C_Str()));
+            EnsureUniqueAssetName(context, pMeshData);
             MaterialData* pMaterial = mesh->mMaterialIndex >= 0 ? context.Materials[mesh->mMaterialIndex] : nullptr;
             resource.AddChild(pMeshData, pMeshData->Name());
             meshChild.AddComponent<MeshRenderer>(pMeshData, pMaterial);
@@ -449,11 +507,13 @@ namespace Glory::Editor
         uint32_t vertexSize = 0;
         size_t arraySize = 0;
 
-        if (mesh->mNormals == nullptr)
-        {
-            EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("Mesh has no normals");
-            return nullptr;
-        }
+        Debug& debug = EditorApplication::GetInstance()->GetEngine()->GetDebug();
+
+        const bool hasPositions = mesh->HasPositions();
+        const bool hasNormals = mesh->HasNormals();
+        const bool hasTangentsBitangents = mesh->HasTangentsAndBitangents();
+        const bool hasUVCoords = mesh->HasTextureCoords(0);
+        const bool hasColors = mesh->HasVertexColors(0);
 
         attributes.push_back(AttributeType::Float3);
         attributes.push_back(AttributeType::Float3);
@@ -461,16 +521,18 @@ namespace Glory::Editor
         attributes.push_back(AttributeType::Float3);
         attributes.push_back(AttributeType::Float2);
         attributes.push_back(AttributeType::Float4);
-        vertexSize = sizeof(float) * 18;
+        vertexSize = sizeof(DefaultVertex3D);
+        arraySize = mesh->mNumVertices*(vertexSize/sizeof(float));
+        vertices = new float[arraySize];
 
         for (unsigned int i = 0; i < mesh->mNumVertices; i++)
         {
             std::vector<float> vertexData;
-            // process vertex positions, normals and texture coordinates
-            glm::vec3 pos = glm::vec3{ mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z }*context.UnitScaleFactor;
-            glm::vec3 normal = glm::vec3{ mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z }*context.UnitScaleFactor;
-            glm::vec3 tangent = glm::vec3{ mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z }*context.UnitScaleFactor;
-            glm::vec3 biTangent = glm::vec3{ mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z }*context.UnitScaleFactor;
+            /* Process vertex positions, normals and texture coordinates */
+            glm::vec3 pos = hasPositions ? glm::vec3{ mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z }*context.UnitScaleFactor : glm::vec3{};
+            glm::vec3 normal = hasNormals ? glm::vec3{ mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z }*context.UnitScaleFactor : glm::vec3{};
+            glm::vec3 tangent = hasTangentsBitangents ? glm::vec3{ mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z }*context.UnitScaleFactor : glm::vec3{};
+            glm::vec3 biTangent = hasTangentsBitangents ? glm::vec3{ mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z }*context.UnitScaleFactor: glm::vec3{};
 
             /* Axes conversions */
             float temp;
@@ -529,7 +591,7 @@ namespace Glory::Editor
             vertexData.push_back(normal.y*context.UpAxisSign);
             vertexData.push_back(normal.z*context.FrontAxisSign);
 
-            // Tangents and Bitangents
+            /* Tangents and Bitangents */
             vertexData.push_back(tangent.x);
             vertexData.push_back(tangent.y*context.UpAxisSign);
             vertexData.push_back(tangent.z*context.FrontAxisSign);
@@ -537,16 +599,10 @@ namespace Glory::Editor
             vertexData.push_back(biTangent.y*context.UpAxisSign);
             vertexData.push_back(biTangent.z*context.FrontAxisSign);
 
-            if (mesh->mTextureCoords[0])
+            if (hasUVCoords)
             {
                 vertexData.push_back(mesh->mTextureCoords[0][i].x);
                 vertexData.push_back(1.0f - mesh->mTextureCoords[0][i].y);
-
-                //if (i == 0)
-                //{
-                //    attributes.push_back(AttributeType::Float2);
-                //    vertexSize += sizeof(float) * 2;
-                //}
             }
             else
             {
@@ -554,7 +610,7 @@ namespace Glory::Editor
                 vertexData.push_back(0.0f);
             }
 
-            if (mesh->mColors[0])
+            if (hasColors)
             {
                 vertexData.push_back(mesh->mColors[0][i].r);
                 vertexData.push_back(mesh->mColors[0][i].g);
@@ -568,21 +624,15 @@ namespace Glory::Editor
                 vertexData.push_back(1.0f);
                 vertexData.push_back(1.0f);
             }
-            if (i == 0)
-            {
-                arraySize = mesh->mNumVertices * (vertexSize / sizeof(float));
-                vertices = new float[arraySize];
-            }
 
-            //vertices[i] = RawVertex(vertexData);
-            memcpy(&vertices[i * (vertexSize / sizeof(float))], &vertexData[0], vertexSize);
+            memcpy(&vertices[i*(vertexSize/sizeof(float))], &vertexData[0], vertexSize);
         }
 
-        // process indices
-        for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+        /* Process indices */
+        for (unsigned int i = 0; i < mesh->mNumFaces; ++i)
         {
             aiFace face = mesh->mFaces[i];
-            for (unsigned int j = 0; j < face.mNumIndices; j++)
+            for (unsigned int j = 0; j < face.mNumIndices; ++j)
                 indices.push_back(face.mIndices[j]);
         }
 
@@ -591,10 +641,14 @@ namespace Glory::Editor
 
         std::vector<float> verticesVector;
         verticesVector.assign(&vertices[0], &vertices[arraySize]);
-        std::stringstream stream;
-        stream << mesh->mName.C_Str() << " Material " << mesh->mMaterialIndex;
         MeshData* pMesh = new MeshData(mesh->mNumVertices, vertexSize, verticesVector, (uint32_t)indices.size(), indices, attributes);
-        pMesh->SetName(stream.str());
+        pMesh->SetName(std::string_view(""));
+        if (mesh->mName.length)
+        {
+            std::stringstream stream;
+            stream << mesh->mName.C_Str() << " Material " << mesh->mMaterialIndex;
+            pMesh->SetName(stream.str());
+        }
         delete[] vertices;
         return pMesh;
     }

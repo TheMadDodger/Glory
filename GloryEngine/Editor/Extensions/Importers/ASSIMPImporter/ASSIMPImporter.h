@@ -42,12 +42,15 @@ namespace Glory::Editor
             PrefabData* Prefab;
             std::vector<TextureData*> Textures;
             std::vector<MaterialData*> Materials;
+            std::map<std::string, Resource*> NameToResource;
             AxisConversion UpAxis{ AxisConversion::Y };
             int UpAxisSign{ 1 };
             AxisConversion FrontAxis{ AxisConversion::Z };
             int FrontAxisSign{ 1 };
             float UnitScaleFactor{ 1.0f };
         };
+
+        void EnsureUniqueAssetName(Context& context, Resource* pResource) const;
 
         bool SupportsExtension(const std::filesystem::path& extension) const override;
         ImportedResource LoadResource(const std::filesystem::path& path, void*) const override;
