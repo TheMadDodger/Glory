@@ -48,6 +48,24 @@ namespace Glory
 	{
 	}
 
+	void CalculateProjection(GraphicsDevice* pDevice, glm::mat4& projection, float windowWidth, float windowHeight)
+	{
+		const ViewportOrigin origin = pDevice->GetViewportOrigin();
+		switch (origin)
+		{
+		case Glory::TopLeft:
+			/* Flip Y coordinates */
+			projection = glm::ortho(0.0f, windowWidth, windowHeight, 0.0f);
+			break;
+		case Glory::BottomLeft:
+			/* Normal projection */
+			projection = glm::ortho(0.0f, windowWidth, 0.0f, windowHeight);
+			break;
+		default:
+			break;
+		}
+	}
+
 	void OverlayConsoleModule::CollectReferences(std::vector<UUID>& references)
 	{
 		ModuleSettings& settings = Settings();
@@ -371,7 +389,7 @@ namespace Glory
 		const glm::mat4 translation = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, windowHeight - consoleHeight + animatedConsoleHeight, 0.0f));
 		const glm::mat4 scale = glm::scale(glm::identity<glm::mat4>(), glm::vec3(float(windowWidth), float(consoleHeight), 1.0f));
 		constants.Model = translation*scale;
-		constants.Projection = glm::ortho(0.0f, float(windowWidth), 0.0f, float(windowHeight));
+		CalculateProjection(pDevice, constants.Projection, float(windowWidth), float(windowHeight));
 
 		///* Draw background */
 		pDevice->BeginPipeline(commandBuffer, m_ConsoleBackgroundPipeline);
