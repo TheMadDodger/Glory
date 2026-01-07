@@ -32,9 +32,9 @@ namespace Glory::Editor
 	{
 		/* New scene is always additive in the editor */
 		GScene* pNewScene = new GScene();
-		m_pOpenScenes.push_back(pNewScene);
-		m_OpenedSceneIDs.push_back(pNewScene->GetUUID());
-		m_SceneFiles.push_back(YAMLResource<GScene>{});
+		m_pOpenScenes.emplace_back(pNewScene);
+		m_OpenedSceneIDs.emplace_back(pNewScene->GetUUID());
+		m_SceneFiles.emplace_back(YAMLResource<GScene>{}).SetPath("NewScene.gscene");
 		pNewScene->SetManager(this);
 		SetSceneDirty(pNewScene);
 		SetupCallbacks(pNewScene);
@@ -48,15 +48,15 @@ namespace Glory::Editor
 		const std::string path = std::string{ EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath() } + "\\" + location.Path;
 
 		const size_t index = m_SceneFiles.size();
-		m_SceneFiles.push_back(YAMLResource<GScene>{path});
+		m_SceneFiles.emplace_back(YAMLResource<GScene>{path});
 		YAMLResource<GScene>& yamlFile = m_SceneFiles[index];
 
 		std::filesystem::path filePath = path;
 		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), (*yamlFile).RootNodeRef().ValueRef(), uuid, filePath.filename().replace_extension().string());
 		if (pScene == nullptr) return;
 		pScene->SetResourceUUID(uuid);
-		m_pOpenScenes.push_back(pScene);
-		m_OpenedSceneIDs.push_back(uuid);
+		m_pOpenScenes.emplace_back(pScene);
+		m_OpenedSceneIDs.emplace_back(uuid);
 
 		if (m_pApplication->IsInPlayMode())
 		{
@@ -115,8 +115,8 @@ namespace Glory::Editor
 		SetupCallbacks(pScene);
 
 		pScene->SetResourceUUID(uuid);
-		m_pOpenScenes.push_back(pScene);
-		m_OpenedSceneIDs.push_back(uuid);
+		m_pOpenScenes.emplace_back(pScene);
+		m_OpenedSceneIDs.emplace_back(uuid);
 
 		if (m_pApplication->IsInPlayMode())
 		{
@@ -136,11 +136,11 @@ namespace Glory::Editor
 		if (EditorAssetDatabase::GetAssetLocation(uuid, location))
 		{
 			const std::string path = std::string{ EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath() } + "\\" + location.Path;
-			m_SceneFiles.push_back(YAMLResource<GScene>{path});
+			m_SceneFiles.emplace_back(YAMLResource<GScene>{path});
 		}
 		else
 		{
-			m_SceneFiles.push_back(YAMLResource<GScene>{});
+			m_SceneFiles.emplace_back(YAMLResource<GScene>{}).SetPath("NewScene.gscene");;
 		}
 
 		GScene* pActiveScene = SceneManager::GetActiveScene();
@@ -163,7 +163,7 @@ namespace Glory::Editor
 		const std::string path = std::string{ EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath() } + "\\" + location.Path;
 
 		const size_t index = m_SceneFiles.size();
-		m_SceneFiles.push_back(YAMLResource<GScene>{path});
+		m_SceneFiles.emplace_back(YAMLResource<GScene>{path});
 		YAMLResource<GScene>& yamlFile = m_SceneFiles[index];
 
 		std::filesystem::path filePath = path;
@@ -171,8 +171,8 @@ namespace Glory::Editor
 
 		if (pScene == nullptr) return;
 		pScene->SetResourceUUID(uuid);
-		m_pOpenScenes.push_back(pScene);
-		m_OpenedSceneIDs.push_back(uuid);
+		m_pOpenScenes.emplace_back(pScene);
+		m_OpenedSceneIDs.emplace_back(uuid);
 
 		pScene->GetRegistry().InvokeAll(Utils::ECS::InvocationType::OnEnableDraw,
 		[](Utils::ECS::BaseTypeView* pTypeView, Utils::ECS::EntityView* pEntity, size_t componentIndex) {
@@ -319,7 +319,7 @@ namespace Glory::Editor
 		if (dirty)
 		{
 			if (itor != m_DirtySceneIDs.end()) return; // Already dirty
-			m_DirtySceneIDs.push_back(pScene->GetUUID());
+			m_DirtySceneIDs.emplace_back(pScene->GetUUID());
 			TitleBar::SetText("SceneChanges", "*");
 			return;
 		}
