@@ -8,6 +8,7 @@
 #include "TitleBar.h"
 #include "ProjectMigrations.h"
 #include "PopupManager.h"
+#include "RemovedAssetsPopup.h"
 
 #include <Debug.h>
 #include <filesystem>
@@ -170,6 +171,55 @@ namespace Glory::Editor
 	{
 	}
 
+	void RemoveDeletedAssets(ProjectSpace* pProject)
+	{
+		EditorApplication* pApplication = EditorApplication::GetInstance();
+		pApplication->GetEngine()->GetDebug().LogInfo("Checking for missing assets...");
+
+		JSONFileRef& projectFile = pProject->ProjectFile();
+		JSONValueRef assets = projectFile["Assets"];
+		if (!assets.Exists() || !assets.IsObject()) return;
+
+		std::vector<std::string_view> toRemoveAssets;
+		std::vector<AssetLocation> removedLocations{};
+		for (rapidjson::Value::ConstMemberIterator itor = assets.begin(); itor != assets.end(); ++itor)
+		{
+			const std::string_view assetID = itor->name.GetString();
+
+			JSONValueRef asset = assets[assetID];
+			const UUID uuid = asset["Metadata/UUID"].AsUInt64();
+			const std::filesystem::path path = asset["Location/Path"].AsString();
+			if (std::filesystem::exists(path)) continue;
+			/* Create absolute path and check again */
+			std::filesystem::path absolutePath = pProject->RootPath();
+			absolutePath.append("Assets").append(path.string());
+			if (std::filesystem::exists(absolutePath)) continue;
+
+			std::stringstream str;
+			str << "Missing asset file: " << path << " for asset: " << assetID;
+			pApplication->GetEngine()->GetDebug().LogWarning(str.str());
+			toRemoveAssets.emplace_back(assetID);
+
+			AssetLocation location;
+			if (!EditorAssetDatabase::GetAssetLocation(uuid, location)) continue;
+			removedLocations.emplace_back(std::move(location));
+		}
+
+		for (auto toRemoveAsset : toRemoveAssets)
+		{
+			assets.Remove(toRemoveAsset);
+			std::stringstream str;
+			str << "Missing asset " << toRemoveAsset << " removed.";
+			pApplication->GetEngine()->GetDebug().LogInfo(str.str());
+		}
+
+		if (!toRemoveAssets.empty())
+		{
+			EditorAssetDatabase::SetDirty(true);
+			RemovedAssetsPopup::AddRemovedAssets(std::move(removedLocations));
+		}
+	}
+
 	void ProjectSpace::Open()
 	{
 		std::filesystem::path path = RootPath();
@@ -194,7 +244,10 @@ namespace Glory::Editor
 		m_ProjectFile = JSONFileRef(m_ProjectFilePath);
 		m_ProjectFile.Load();
 		Migrate(m_pCurrentProject);
-		if (HasUnsavedChanges())
+		const bool migrationChanges = HasUnsavedChanges();
+		RemoveDeletedAssets(m_pCurrentProject);
+
+		if (migrationChanges)
 		{
 			std::stringstream str;
 			str << "Your project has been migrated to " << GloryEditorVersion << std::endl
@@ -203,6 +256,7 @@ namespace Glory::Editor
 			PopupManager::OpenModal("Migration", str.str(), { "Save Now", "OK" },
 				{ []() { Save(); PopupManager::CloseCurrentPopup(); } , PopupManager::CloseCurrentPopup });
 		}
+
 		m_ProjectName = m_ProjectFile["ProjectName"].AsString();
 
 		ProjectCallbacks[ProjectCallback::OnOpen].Dispatch(this);
