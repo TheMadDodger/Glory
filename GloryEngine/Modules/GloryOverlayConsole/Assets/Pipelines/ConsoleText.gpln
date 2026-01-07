@@ -15,7 +15,7 @@ Settings:
   StencilCompareMask: 255
   StencilWriteMask: 0
   StencilReference: 0
-  BlendEnabled: false
+  BlendEnabled: true
   SrcColorBlendFactor: SrcAlpha
   DrcColorBlendFactor: OneMinusSrcAlpha
   ColorBlendOp: Add
