@@ -191,7 +191,7 @@ namespace Glory::Utils
 	}
 
 	InMemoryYAML::InMemoryYAML()
-		: m_RootNode(), m_ParsingFailed(false)
+		: m_RootNode(YAML::Node(YAML::NodeType::Map)), m_ParsingFailed(false)
 	{}
 
 	InMemoryYAML::InMemoryYAML(const char* data)
