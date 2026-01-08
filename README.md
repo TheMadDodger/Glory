@@ -2,14 +2,14 @@
 ## A modular game engine and editor.
 
 Glory is an under development, modular game engine and editor, written in C++.
-It has a detailed [profiler](https://github.com/TheMadDodger/Glory/wiki/Profiling), comes with a clustered renderer supporting 3000+ dynamic lights, is fully customizable and is platform independant thanks to its modularity.
+It has a detailed [profiler](https://github.com/TheMadDodger/Glory/wiki/Profiling), comes with a clustered renderer supporting 3000+ dynamic lights, is fully customizable and is platform independent thanks to its modularity.
 
 ![Glory Editor](https://glory-engine.com/static/media/Editor.192132f3ded68e7992eb.png)
 
 ## Features
 - Extremely expandable due to modular design
 - Customizable editor made using ImGui
-- Scripting in any language your hearth desires
+- Scripting in any language your heart desires
 - Write custom modules
 - Built-in asset management
 - Use any graphics API
@@ -103,6 +103,8 @@ Run the editor by running Glorious.
 Run the luncher/hub by running GloriousLauncher.
 
 Run the runtime by running RuntimeTestApplication, make sure to package the Sponza demo through the editor before running this.
+
+Glory currently only builds on Windows, I am working on a cross platform build system for Linux.
 
 ## License
 
