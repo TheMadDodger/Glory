@@ -5,10 +5,11 @@
 #include <sstream>
 #include <Debug.h>
 #include <TextureData.h>
+#include <bitset>
 
 namespace Glory::Editor
 {
-	constexpr size_t NumSupportedExtensions = 10;
+	constexpr size_t NumSupportedExtensions = 11;
 	constexpr std::string_view SupportedExtensions[NumSupportedExtensions] = {
 		".jpg",
 		".jpeg",
@@ -20,6 +21,7 @@ namespace Glory::Editor
 		".TIF",
 		".webp",
 		".WEBP",
+		".TGA"
 	};
 
 	SDLImageImporter::SDLImageImporter() : m_InitializedFlags(0)
@@ -99,46 +101,81 @@ namespace Glory::Editor
 		const uint32_t width = static_cast<uint32_t>(pSDLImage->w);
 		const uint32_t height = static_cast<uint32_t>(pSDLImage->h);
 
-		const size_t numPixels = width * height;
+		const size_t numPixels = width*height;
 
 		PixelFormat pixelFormat = Glory::PixelFormat::PF_R8G8B8Unorm;
 		PixelFormat internalFormat = Glory::PixelFormat::PF_RGB;
-		uint8_t bytesPerPixel = pSDLImage->format->BytesPerPixel;
 
-		switch (bytesPerPixel)
+		const uint8_t bytesPerPixel = pSDLImage->format->BytesPerPixel;
+
+		const size_t redBits = std::bitset<32>(pSDLImage->format->Rmask).count();
+		const size_t greenBits = std::bitset<32>(pSDLImage->format->Bmask).count();
+		const size_t blueBits = std::bitset<32>(pSDLImage->format->Gmask).count();
+		const size_t alphaBits = std::bitset<32>(pSDLImage->format->Amask).count();
+
+		Debug& debug = EditorApplication::GetInstance()->GetEngine()->GetDebug();
+		if (redBits > 8 || greenBits > 8 || blueBits > 8 || alphaBits > 8)
 		{
-		case 3:
-		case 4:
-			if (pSDLImage->format->Rmask == 0x000000ff)
-			{
-				pixelFormat = PixelFormat::PF_RGBA;
-				internalFormat = PixelFormat::PF_R8G8B8A8Unorm;
-			}
-			else
-			{
-				pixelFormat = PixelFormat::PF_RGBA;
-				internalFormat = PixelFormat::PF_B8G8R8A8Unorm;
-			}
-			break;
-		default:
-			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogError("SDLImageImporter::LoadResource > unknow pixel format, BytesPerPixel: " + std::to_string(pSDLImage->format->BytesPerPixel) + " Use 32 bit or 24 bit images.\n");
+			debug.LogError("SDLImageImporter::LoadResource > Failed to import image, each channel of a pixel can't have more than 8 bits!");
 			SDL_FreeSurface(pSDLImage);
 			return nullptr;
 		}
 
-		/* Copy pixels into a 4 bytes per pixel buffer regardless of channel count */
-		char* data = new char[4*numPixels];
+		const size_t numChannels = size_t(redBits > 0) + size_t(greenBits > 0) +
+			size_t(blueBits > 0) + size_t(alphaBits > 0);
+
+		const size_t finalChannelCount = numChannels > 2 ? 4 : numChannels;
+		const size_t finalBytesPerPixel = finalChannelCount*sizeof(char);
+
+		switch (finalChannelCount)
+		{
+		case 1:
+			pixelFormat = PixelFormat::PF_R;
+			internalFormat = PixelFormat::PF_R8Unorm;
+			break;
+		case 2:
+			pixelFormat = PixelFormat::PF_RG;
+			internalFormat = PixelFormat::PF_R8G8Unorm;
+			break;
+		case 4:
+			pixelFormat = PixelFormat::PF_RGBA;
+			internalFormat = PixelFormat::PF_R8G8B8A8Unorm;
+			break;
+		default:
+			debug.LogError("SDLImageImporter::LoadResource > Failed to import image, format not supported!");
+			SDL_FreeSurface(pSDLImage);
+			return nullptr;
+		}
+
+		std::function<void(char*, char*, size_t, size_t, size_t)> readChannel =
+		[](char* inPixel, char* outPixel, size_t startingOffset, size_t bits, size_t defaultValue) {
+			if (!bits)
+			{
+				if (defaultValue) *outPixel = defaultValue;
+				return;
+			}
+			const size_t offset = startingOffset/8;
+			char* channelStart = inPixel + offset;
+			const size_t bitOffset = startingOffset - offset*8;
+			const size_t mask = ((1 << bits) - 1) << bitOffset;
+			*outPixel = (*channelStart) & mask;
+		};
+
 		char* pixels = (char*)pSDLImage->pixels;
+		char* convertedPixels = new char[finalBytesPerPixel*numPixels];
 		for (size_t i = 0; i < numPixels; ++i)
 		{
-			char* currentPixel = pixels + bytesPerPixel*i;
-			std::memcpy(&data[4*i], currentPixel, bytesPerPixel);
-			if (bytesPerPixel == 3)
-				data[4*i + 3] = 255;
+			char* pixelStart = pixels + bytesPerPixel*i;
+			char* convertedPixel = convertedPixels + finalBytesPerPixel*i;
+			readChannel(pixelStart, convertedPixel, pSDLImage->format->Rshift, redBits, 0);
+			readChannel(pixelStart, convertedPixel + sizeof(char), pSDLImage->format->Gshift, greenBits, 0);
+			readChannel(pixelStart, convertedPixel + sizeof(char)*2, pSDLImage->format->Bshift, blueBits, 0);
+			if (finalChannelCount == 4)
+				readChannel(pixelStart, convertedPixel + sizeof(char)*3, pSDLImage->format->Ashift, alphaBits, 255);
 		}
-		bytesPerPixel = 4;
 
-		ImageData* pData = new ImageData(width, height, internalFormat, pixelFormat, bytesPerPixel, std::move(data), bytesPerPixel*numPixels);
+		ImageData* pData = new ImageData(width, height, internalFormat, pixelFormat, finalBytesPerPixel,
+			std::move(convertedPixels), finalBytesPerPixel*numPixels);
 		ImportedResource importedResource{ path, pData };
 
 		TextureData* pDefualtTexture = new TextureData(pData);

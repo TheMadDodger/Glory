@@ -345,7 +345,7 @@ namespace Glory::Editor
                         }
 
                         std::filesystem::path texturePath = path.parent_path();
-                        texturePath.append(texPath.C_Str());
+                        texturePath = std::filesystem::canonical(texturePath.append(texPath.C_Str()));
                         const UUID texID = EditorAssetDatabase::ReserveAssetUUID(texturePath.string(), "Default").first;
                         pMaterial->SetTexture(textureType, j, texID);
                     }
