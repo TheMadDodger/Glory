@@ -4,7 +4,22 @@
 Glory is an under development, modular game engine and editor, written in C++.
 It has a detailed [profiler](https://github.com/TheMadDodger/Glory/wiki/Profiling), comes with a clustered renderer supporting 3000+ dynamic lights, is fully customizable and is platform independent thanks to its modularity.
 
+## Screenshots
+
+### Scene Editor
 ![Glory Editor](https://glory-engine.com/static/media/Editor.192132f3ded68e7992eb.png)
+
+### UI Editor
+![UI Editor](https://github.com/TheMadDodger/Glory/blob/a1b48320b0d8af1d13c57b83749f6ce5250abc82/Screenshots/UIEditor.png)
+
+### Finite State Machine Editor
+![FSM Editor](https://github.com/TheMadDodger/Glory/blob/a1b48320b0d8af1d13c57b83749f6ce5250abc82/Screenshots/FSMEditor.png)
+
+### Input Editor
+![Input Editor](https://github.com/TheMadDodger/Glory/blob/a1b48320b0d8af1d13c57b83749f6ce5250abc82/Screenshots/InputEditor.png)
+
+### String Tables
+![String Tables](https://github.com/TheMadDodger/Glory/blob/a1b48320b0d8af1d13c57b83749f6ce5250abc82/Screenshots/StringTables.png)
 
 ## Features
 - Extremely expandable due to modular design
@@ -19,6 +34,8 @@ It has a detailed [profiler](https://github.com/TheMadDodger/Glory/wiki/Profilin
 - [Launcher/Hub](https://github.com/TheMadDodger/Glory/wiki/Editor-Launcher-Hub) with support for multiple editor installations (similar to Unity)
 - Built-in version checking
 - Entity Component System
+- Localization with string tables
+- Finite State Machines
 
 ## Built-in Modules
 - Clustered Renderer
