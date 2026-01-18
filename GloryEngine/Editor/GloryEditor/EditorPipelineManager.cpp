@@ -197,6 +197,61 @@ namespace Glory::Editor
 		return 0;
 	}
 
+	UUID EditorPipelineManager::FindPipeline(PipelineType type, const std::set<TextureType>& textureTypes) const
+	{
+		int bestMatchScore = INT_MIN;
+		UUID bestMatch = 0;
+
+		for (auto pipelineID : m_Pipelines)
+		{
+			Resource* pResource = m_pEngine->GetAssetManager().FindResource(pipelineID);
+			if (!pResource) continue;
+			PipelineData* pPipeline = static_cast<PipelineData*>(pResource);
+			if (pPipeline->Type() != type) continue;
+
+			int currentScore = 0;
+			for (size_t i = 0; i < pPipeline->ResourcePropertyCount(); ++i)
+			{
+				 const MaterialPropertyInfo* pResourceProperty = pPipeline->ResourcePropertyInfo(i);
+				 const TextureType texType = pResourceProperty->GetTextureType();
+				 currentScore += textureTypes.count(texType) ? 1 : -1;
+			}
+
+			if (bestMatch == NULL && currentScore <= bestMatchScore) continue;
+			bestMatchScore = currentScore;
+			bestMatch = pipelineID;
+		}
+
+		return bestMatch;
+	}
+
+	UUID EditorPipelineManager::FindPipeline(const std::set<TextureType>& textureTypes) const
+	{
+		int bestMatchScore = INT_MIN;
+		UUID bestMatch = 0;
+
+		for (auto pipelineID : m_Pipelines)
+		{
+			Resource* pResource = m_pEngine->GetAssetManager().FindResource(pipelineID);
+			if (!pResource) continue;
+			PipelineData* pPipeline = static_cast<PipelineData*>(pResource);
+
+			int currentScore = 0;
+			for (size_t i = 0; i < pPipeline->ResourcePropertyCount(); ++i)
+			{
+				const MaterialPropertyInfo* pResourceProperty = pPipeline->ResourcePropertyInfo(i);
+				const TextureType texType = pResourceProperty->GetTextureType();
+				currentScore += textureTypes.count(texType) ? 1 : -1;
+			}
+
+			if (bestMatch == NULL && currentScore <= bestMatchScore) continue;
+			bestMatchScore = currentScore;
+			bestMatch = pipelineID;
+		}
+
+		return bestMatch;
+	}
+
 	EditorPipelineManager::PipelineUpdateDispatcher& EditorPipelineManager::PipelineUpdateEvents()
 	{
 		static EditorPipelineManager::PipelineUpdateDispatcher dispatcher;

@@ -5,6 +5,7 @@
 #include <ThreadedVar.h>
 
 #include <map>
+#include <set>
 #include <filesystem>
 #include <GloryEditor.h>
 
@@ -80,6 +81,14 @@ namespace Glory::Editor
 		virtual void AddShader(FileData* pShader) override;
 
 		GLORY_EDITOR_API UUID FindPipeline(PipelineType type, bool useTextures) const;
+
+		/** @brief Finds a pipeline by type and closest match with provided texture types
+		 * @param type The type of the pipeline
+		 * @param textureTypes The texture types that are used
+		 */
+		GLORY_EDITOR_API UUID FindPipeline(PipelineType type, const std::set<TextureType>& textureTypes) const;
+		/** @overload Does the same as the method above but only matches texture types, which is slower */
+		GLORY_EDITOR_API UUID FindPipeline(const std::set<TextureType>& textureTypes) const;
 
 		using PipelineUpdateDispatcher = Dispatcher<PipelineUpdateEvent>;
 

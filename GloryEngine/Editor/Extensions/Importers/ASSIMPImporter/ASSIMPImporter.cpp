@@ -253,15 +253,69 @@ namespace Glory::Editor
                 const std::string_view name{ material->GetName().C_Str(), material->GetName().length };
                 giveName(resource, pMaterial, name);
 
-                aiShadingMode shadingMode;
-                material->Get(AI_MATKEY_SHADING_MODEL, shadingMode);
-                const bool usesTextures = material->GetTextureCount(aiTextureType_BASE_COLOR) ||
-                    material->GetTextureCount(aiTextureType_NORMALS) || material->GetTextureCount(aiTextureType_DIFFUSE);
+                std::set<TextureType> textureTypes;
+                std::map<TextureType, std::vector<UUID>> textures;
+
+                /* Get all used textures */
+                for (size_t textureTypeI = 0; textureTypeI < TT_Count; ++textureTypeI)
+                {
+                    const TextureType textureType = TextureType(textureTypeI);
+                    const aiTextureType aiTexType = aiTextureType(textureType);
+                    const size_t texCount = material->GetTextureCount(aiTexType);
+                    if (texCount <= 0) continue;
+                    for (size_t j = 0; j < texCount; ++j)
+                    {
+                        aiString texPath;
+                        if (material->GetTexture(aiTexType, j, &texPath) != aiReturn_SUCCESS)
+                            continue;
+
+                        const TextureType actualTextureType = textureType == TT_Diffuse ? TT_BaseColor : textureType;
+                        textureTypes.emplace(actualTextureType);
+
+                        const char* texPathRaw = texPath.C_Str();
+
+                        if (texPathRaw[0] == '*')
+                        {
+                            const std::string_view indexStr{ &texPathRaw[1], texPath.length - 1 };
+                            try
+                            {
+                                const uint32_t index = (uint32_t)std::atoi(indexStr.data());
+                                if (index >= context.Textures.size())
+                                {
+                                    debug.LogWarning("Invalid texture index when importing material from model");
+                                    continue;
+                                }
+                                TextureData* pTexture = context.Textures[index];
+                                textures[actualTextureType].emplace_back(pTexture ? pTexture->GetUUID() : 0ull);
+                            }
+                            catch (const std::exception&)
+                            {
+                                debug.LogWarning("Invalid texture index when importing material from model");
+                            }
+                            continue;
+                        }
+
+                        std::filesystem::path texturePath = path.parent_path();
+                        texturePath = std::filesystem::weakly_canonical(texturePath.append(texPath.C_Str()));
+                        if (!std::filesystem::exists(texturePath))
+                        {
+                            std::stringstream str;
+                            str << "ASSIMPImporter::LoadResource > Material references an external texture that does not exist! "
+                                << texPath.C_Str();
+                            debug.LogWarning(str.str());
+                        }
+
+                        const UUID texID = EditorAssetDatabase::ReserveAssetUUID(texturePath.string(), "Default").first;
+                        textures[actualTextureType].emplace_back(texID);
+                    }
+                }
 
                 MaterialManager& materials = EditorApplication::GetInstance()->GetMaterialManager();
-                UUID pipelineID = pipelines.FindPipeline(PipelineType(shadingMode), usesTextures);
-                if (!pipelineID)
-                    pipelineID = pipelines.FindPipeline(PT_Phong, usesTextures);
+                aiShadingMode shadingMode;
+                const aiReturn aiResult = material->Get(AI_MATKEY_SHADING_MODEL, shadingMode);
+                const UUID pipelineID = aiResult == aiReturn::aiReturn_SUCCESS ? pipelines.FindPipeline(PipelineType(shadingMode), textureTypes) :
+                    (textureTypes.size() > 0 ? pipelines.FindPipeline(textureTypes) : pipelines.FindPipeline(PT_Phong, false));
+
                 if (pipelineID)
                 {
                     pMaterial->SetPipeline(pipelineID);
@@ -308,46 +362,12 @@ namespace Glory::Editor
                         }
                         }
                     }
-                }
 
-                for (size_t textureTypeI = 0; textureTypeI < TT_Count; ++textureTypeI)
-                {
-                    const TextureType textureType = TextureType(textureTypeI);
-                    const aiTextureType aiTexType = aiTextureType(textureType);
-                    const size_t texCount = std::min<size_t>(material->GetTextureCount(aiTexType),
-                        pMaterial->TextureCount(textureType));
-                    for (size_t j = 0; j < texCount; ++j)
+                    for (auto texType : textureTypes)
                     {
-                        aiString texPath;
-                        if (material->GetTexture(aiTexType, j, &texPath) != aiReturn_SUCCESS)
-                            continue;
-
-                        const char* texPathRaw = texPath.C_Str();
-                        if (texPathRaw[0] == '*')
-                        {
-                            const std::string_view indexStr{ &texPathRaw[1], texPath.length - 1};
-                            try
-                            {
-                                const uint32_t index = (uint32_t)std::atoi(indexStr.data());
-                                if (index >= context.Textures.size())
-                                {
-                                    debug.LogWarning("Invalid texture index when importing material from model");
-                                    continue;
-                                }
-                                TextureData* pTexture = context.Textures[index];
-                                pMaterial->SetTexture(textureType, j, pTexture ? pTexture->GetUUID() : 0);
-                            }
-                            catch (const std::exception&)
-                            {
-                                debug.LogWarning("Invalid texture index when importing material from model");
-                            }
-                            continue;
-                        }
-
-                        std::filesystem::path texturePath = path.parent_path();
-                        texturePath = std::filesystem::canonical(texturePath.append(texPath.C_Str()));
-                        const UUID texID = EditorAssetDatabase::ReserveAssetUUID(texturePath.string(), "Default").first;
-                        pMaterial->SetTexture(textureType, j, texID);
+                        const size_t texCount = std::min<size_t>(pMaterial->TextureCount(texType), textures.at(texType).size());
+                        for (size_t i = 0; i < texCount; ++i)
+                            pMaterial->SetTexture(texType, i, textures.at(texType)[i]);
                     }
                 }
 
