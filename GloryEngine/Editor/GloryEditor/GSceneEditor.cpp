@@ -20,8 +20,9 @@ namespace Glory::Editor
         auto sceneFile = sceneManager.GetSceneFile(sceneID);
         if (!sceneFile) return false;
 
-        auto yamlFile = **sceneFile;
-        auto settings = yamlFile["Settings"];
+        auto& yamlFile = sceneFile->File();
+        auto rootNode = **sceneFile;
+        auto settings = rootNode["Settings"];
         if (!settings.Exists() || !settings.IsMap())
             settings.SetMap();
 

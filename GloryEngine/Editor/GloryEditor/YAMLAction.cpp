@@ -43,7 +43,7 @@ namespace Glory::Editor
 		YAMLResourceBase* pYAMLResource = GetResource(actionRecord.ObjectID, skipAction);
 		if (skipAction) return;
 
-		Utils::NodeValueRef node = pYAMLResource ? (**pYAMLResource)[m_PropertyPath] : m_File[m_PropertyPath];
+		Utils::NodeValueRef node = pYAMLResource ? pYAMLResource->File()[m_PropertyPath] : m_File[m_PropertyPath];
 		if (m_OldValue.IsNull())
 		{
 			node.Erase();
@@ -57,7 +57,7 @@ namespace Glory::Editor
 			return;
 		}
 		node.Set(m_OldValue);
-		Undo::TriggerChangeHandler(pYAMLResource ? (**pYAMLResource) : m_File, m_PropertyPath);
+		Undo::TriggerChangeHandler(pYAMLResource ? (pYAMLResource->File()) : m_File, m_PropertyPath);
 	}
 
 	void YAMLAction::OnRedo(const ActionRecord& actionRecord)
@@ -80,7 +80,7 @@ namespace Glory::Editor
 			return;
 		}
 		node.Set(m_NewValue);
-		Undo::TriggerChangeHandler(pYAMLResource ? (**pYAMLResource) : m_File, m_PropertyPath);
+		Undo::TriggerChangeHandler(pYAMLResource ? pYAMLResource->File() : m_File, m_PropertyPath);
 	}
 
 	bool YAMLAction::Combine(IAction* pOther)

@@ -35,8 +35,8 @@ namespace Glory::Editor
 		YAMLResource<MaterialData>* pMaterial = (YAMLResource<MaterialData>*)m_pTarget;
 		MaterialData* pMaterialData = EditorApplication::GetInstance()->GetMaterialManager().GetMaterial(pMaterial->GetUUID());
 
-		Utils::YAMLFileRef file = **pMaterial;
-		auto pipeline = file["Pipeline"];
+		Utils::NodeValueRef node = **pMaterial;
+		auto pipeline = node["Pipeline"];
 		UUID pipelineID = pipeline.Exists() ? pipeline.As<uint64_t>() : 0;
 
 		bool change = false;
@@ -102,8 +102,9 @@ namespace Glory::Editor
 
 		bool change = false;
 
-		Utils::YAMLFileRef& file = **pMaterial;
-		auto pipeline = file["Pipeline"];
+		Utils::YAMLFileRef& file = pMaterial->File();
+		Utils::NodeValueRef node = **pMaterial;
+		auto pipeline = node["Pipeline"];
 		const UUID pipelineID = pipeline.As<uint64_t>();
 		if (pipelineID == 0)
 			return false;
@@ -118,7 +119,7 @@ namespace Glory::Editor
 		std::vector<std::pair<size_t, size_t>> propertyPairs;
 		GeneratePropertyPairs(pPipeline, propertyPairs);
 
-		auto properties = file["Properties"];
+		auto properties = node["Properties"];
 		static const uint32_t textureDataHash = ResourceTypes::GetHash<TextureData>();
 
 		for (size_t i = 0; i < pPipeline->PropertyInfoCount(); ++i)

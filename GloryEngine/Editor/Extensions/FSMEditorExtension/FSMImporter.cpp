@@ -17,10 +17,8 @@ namespace Glory::Editor
         return "FSM Importer";
     }
 
-    void FSMImporter::LoadInto(FSMData* pData, Utils::InMemoryYAML& yamlData)
+    void FSMImporter::LoadInto(FSMData* pData, Utils::NodeValueRef node)
     {
-        auto node = yamlData.RootNodeRef().ValueRef();
-
         Utils::NodeValueRef startNode = node["StartNode"];
         Utils::NodeValueRef nodes = node["Nodes"];
         Utils::NodeValueRef transitions = node["Transitions"];

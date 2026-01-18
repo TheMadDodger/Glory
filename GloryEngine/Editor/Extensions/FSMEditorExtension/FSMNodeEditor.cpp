@@ -43,7 +43,8 @@ namespace Glory::Editor
 		EditableResource* pResource = resources.GetEditableResource(fsmID);
 		if (!pResource) return;
 		YAMLResource<FSMData>* pDocument = static_cast<YAMLResource<FSMData>*>(pResource);
-		Utils::YAMLFileRef& file = **pDocument;
+		Utils::YAMLFileRef& file = pDocument->File();
+		Utils::NodeValueRef rootNode = **pDocument;
 
 		const bool allowViewInput = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
 
@@ -63,9 +64,9 @@ namespace Glory::Editor
 		const glm::mat4 matScaling = glm::scale(glm::identity<glm::mat4>(), m_Zoom);
 		const glm::mat4 matFinal = matOffset*matScaling*matPanning;
 
-		auto entryNode = file["StartNode"];
-		auto nodes = file["Nodes"];
-		auto transitions = file["Transitions"];
+		auto entryNode = rootNode["StartNode"];
+		auto nodes = rootNode["Nodes"];
+		auto transitions = rootNode["Transitions"];
 
 		const UUID entryNodeID = entryNode.As<uint64_t>();
 

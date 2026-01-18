@@ -150,6 +150,9 @@ namespace Glory::Utils
 		NodeRef RootNodeRef();
 		NodeValueRef operator[](const std::filesystem::path& path);
 
+		operator NodeRef();
+		operator NodeValueRef();
+
 		std::string ToString();
 
 		bool ParsingFailed() const;

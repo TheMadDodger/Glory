@@ -23,11 +23,13 @@ namespace Glory::Editor
 	bool TextureDataEditor::OnGUI()
 	{
 		YAMLResource<TextureData>* pTextureData = (YAMLResource<TextureData>*)m_pTarget;
-		Utils::YAMLFileRef& file = **pTextureData;
+		Utils::YAMLFileRef& file = pTextureData->File();
+		Utils::NodeValueRef node = **pTextureData;
 
 		bool change = false;
 
-		auto image = file["Image"];
+		auto image = node["Image"];
+		auto sampler = node["Sampler"];
 
 		const uint64_t oldValue = image.As<uint64_t>();
 		AssetReference<ImageData> imageRef = oldValue;
@@ -37,12 +39,12 @@ namespace Glory::Editor
 			change = true;
 		}
 
-		change |= EditorUI::InputEnum<Filter>(file, "Sampler/MinFilter");
-		change |= EditorUI::InputEnum<Filter>(file, "Sampler/MagFilter");
-		change |= EditorUI::InputEnum<SamplerAddressMode>(file, "Sampler/AddressModeU");
-		change |= EditorUI::InputEnum<SamplerAddressMode>(file, "Sampler/AddressModeV");
-		change |= EditorUI::InputEnum<SamplerAddressMode>(file, "Sampler/AddressModeW");
-		change |= EditorUI::InputEnum<Filter>(file, "Sampler/MipmapMode");
+		change |= EditorUI::InputEnum<Filter>(file, sampler["MinFilter"].Path());
+		change |= EditorUI::InputEnum<Filter>(file, sampler["MagFilter"].Path());
+		change |= EditorUI::InputEnum<SamplerAddressMode>(file, sampler["AddressModeU"].Path());
+		change |= EditorUI::InputEnum<SamplerAddressMode>(file, sampler["AddressModeV"].Path());
+		change |= EditorUI::InputEnum<SamplerAddressMode>(file, sampler["AddressModeW"].Path());
+		change |= EditorUI::InputEnum<Filter>(file, sampler["MipmapMode"].Path());
 
 		if (change)
 		{

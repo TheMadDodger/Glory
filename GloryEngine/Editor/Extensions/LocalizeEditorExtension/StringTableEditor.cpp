@@ -422,17 +422,17 @@ namespace Glory::Editor
 
 		YAMLResourceBase* pYAMLResource = static_cast<YAMLResourceBase*>(pResource);
 		YAMLResourceBase* pBaseTableYAMLResource = pYAMLResource;
-		Utils::YAMLFileRef& file = **pYAMLResource;
+		Utils::YAMLFileRef& file = pYAMLResource->File();
+		Utils::NodeValueRef rootNode = **pYAMLResource;
 		const bool isOverrideTable = meta.Hash() == ResourceTypes::GetHash<StringsOverrideTable>();
 
-		auto rootNode = file.RootNodeRef().ValueRef();
 		if (!rootNode.Exists() || !rootNode.IsMap()) rootNode.SetMap();
 		auto rootFolder = isOverrideTable ? rootNode["Overrides"] : rootNode;
 		if (!rootFolder.Exists() || !rootFolder.IsMap()) rootFolder.SetMap();
 
 		if (isOverrideTable)
 		{
-			const UUID baseTableID = file["BaseTable"].As<uint64_t>();
+			const UUID baseTableID = rootNode["BaseTable"].As<uint64_t>();
 			if (!baseTableID)
 			{
 				ImGui::TextUnformatted("Override table has no base table.");
@@ -449,8 +449,8 @@ namespace Glory::Editor
 			pBaseTableYAMLResource = static_cast<YAMLResourceBase*>(pResource);
 		}
 
-		Utils::YAMLFileRef& baseFile = **pBaseTableYAMLResource;
-		auto baseRootNode = baseFile.RootNodeRef().ValueRef();
+		Utils::YAMLFileRef& baseFile = pBaseTableYAMLResource->File();
+		auto baseRootNode = **pBaseTableYAMLResource;
 
 		static const ImGuiTableFlags flags =
 			ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg
@@ -529,10 +529,10 @@ namespace Glory::Editor
 
 		if (!MoveFrom.empty() && !MoveTo.empty())
 		{
-			if (!file[MoveTo].Exists())
+			if (!rootNode[MoveTo].Exists())
 			{
-				auto oldNode = file[MoveFrom];
-				auto newNode = file[MoveTo];
+				auto oldNode = rootNode[MoveFrom];
+				auto newNode = rootNode[MoveTo];
 				Undo::StartRecord("Edit Value", m_TableID);
 				Undo::YAMLEdit(file, newNode.Path(), YAML::Node(YAML::NodeType::Null), oldNode.Node());
 				Undo::YAMLEdit(file, EditingKeyPath, oldNode.Node(), YAML::Node(YAML::NodeType::Null));

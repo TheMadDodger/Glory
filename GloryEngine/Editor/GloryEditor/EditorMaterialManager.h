@@ -35,10 +35,10 @@ namespace Editor
 		void Cleanup();
 
 		/** @brief Load editor property data from YAML into material
-		 * @param file The YAML file to read from
+		 * @param node The YAML node to read from
 		 * @param pMaterial Material to load the properties into
 		 */
-		void LoadIntoMaterial(Utils::YAMLFileRef& file, MaterialData* pMaterial) const;
+		void LoadIntoMaterial(Utils::NodeValueRef node, MaterialData* pMaterial) const;
 
 		/** @brief Set a materials pipeline and update its properties
 		 * @param materialID ID of the material

@@ -118,11 +118,6 @@ namespace Glory::Editor
 			pRenderImpl->GetTextureID(texture), topLeft,
 			bottomRight, ImVec2(0, 1), ImVec2(1, 0));
 
-		EditorResourceManager& resources = pApp->GetResourceManager();
-		EditableResource* pResource = resources.GetEditableResource(pDocument->OriginalDocumentID());
-		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-		Utils::YAMLFileRef& file = **pDocumentData;
-
 		/* Selection box */
 		const UUID selected = pMainWindow->SelectedEntity();
 		if (!selected || !pDocument->EntityExists(selected)) return;

@@ -60,12 +60,10 @@ namespace Glory::Editor
 		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(documentID);
 		YAMLResource<UIDocumentData>* pDocument = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-		Utils::YAMLFileRef& file = **pDocument;
+		Utils::NodeValueRef rootNode = **pDocument;
 
 		UIDocumentData document;
-		auto node = file.RootNodeRef().ValueRef();
-
-		Utils::NodeValueRef entities = node["Entities"];
+		Utils::NodeValueRef entities = rootNode["Entities"];
 		for (auto iter = entities.Begin(); iter != entities.End(); ++iter)
 		{
 			Utils::NodeValueRef entity = entities[*iter];
@@ -256,8 +254,7 @@ namespace Glory::Editor
 
 			EditableResource* pResource = resources.GetEditableResource(m_EditingDocument);
 			YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-			Utils::YAMLFileRef& file = **pDocumentData;
-			DeleteUIElementAction::DeleteElement(pEngine, pDocument, file, m_SelectedEntity);
+			DeleteUIElementAction::DeleteElement(pEngine, pDocument, pDocumentData->File(), m_SelectedEntity);
 		});
 
 		Shortcuts::AddMainWindowAction("Duplicate", m_MainWindowIndex, [this, pEngine, &resources]() {
@@ -266,8 +263,7 @@ namespace Glory::Editor
 
 			EditableResource* pResource = resources.GetEditableResource(m_EditingDocument);
 			YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-			Utils::YAMLFileRef& file = **pDocumentData;
-			m_SelectedEntity = AddUIElementAction::DuplicateElement(pEngine, pDocument, file, m_SelectedEntity);
+			m_SelectedEntity = AddUIElementAction::DuplicateElement(pEngine, pDocument, pDocumentData->File(), m_SelectedEntity);
 		});
 
 		Shortcuts::AddMainWindowAction("Save Scene", m_MainWindowIndex, [this, pApp, &resources]() {
@@ -323,12 +319,10 @@ namespace Glory::Editor
 				UIDocumentData* pUIDcoumentData = static_cast<UIDocumentData*>(pDocumentResource);
 
 				YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-				Utils::YAMLFileRef& file = **pDocumentData;
-
-				auto node = file.RootNodeRef().ValueRef();
 				pUIDcoumentData->Reset();
 
-				Utils::NodeValueRef entities = node["Entities"];
+				Utils::NodeValueRef rootNode = **pDocumentData;
+				Utils::NodeValueRef entities = rootNode["Entities"];
 				for (auto iter = entities.Begin(); iter != entities.End(); ++iter)
 				{
 					Utils::NodeValueRef entity = entities[*iter];

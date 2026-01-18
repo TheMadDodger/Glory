@@ -54,11 +54,11 @@ namespace Glory::Editor
 		EditorApplication::GetInstance()->GetPipelineManager().PipelineUpdateEvents().RemoveListener(m_PipelineUpdatedCallback);
 	}
 
-	void EditorMaterialManager::LoadIntoMaterial(Utils::YAMLFileRef& file, MaterialData* pMaterial) const
+	void EditorMaterialManager::LoadIntoMaterial(Utils::NodeValueRef node, MaterialData* pMaterial) const
 	{
-		const UUID pipelineID = file["Pipeline"].As<uint64_t>();
+		const UUID pipelineID = node["Pipeline"].As<uint64_t>();
 		pMaterial->SetPipeline(pipelineID);
-		auto properties = file["Properties"];
+		auto properties = node["Properties"];
 		ReadPropertiesInto(properties, pMaterial);
 	}
 
@@ -71,8 +71,8 @@ namespace Glory::Editor
 		pMaterial->SetDirty(true);
 		YAMLResource<MaterialData>* pMaterialData = static_cast<YAMLResource<MaterialData>*>(
 			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(materialID));
-		Utils::YAMLFileRef& file = **pMaterialData;
-		file["Pipeline"].Set(uint64_t(pipelineID));
+		Utils::NodeValueRef node = **pMaterialData;
+		node["Pipeline"].Set(uint64_t(pipelineID));
 		UpdateMaterial(pMaterial);
 	}
 
@@ -247,10 +247,10 @@ namespace Glory::Editor
 		EditableResource* pResource = pApplication->GetResourceManager().GetEditableResource(pMaterial->GetUUID());
 		if (!pResource || !pResource->IsEditable()) return;
 		YAMLResource<MaterialData>* pEditorMaterialData = static_cast<YAMLResource<MaterialData>*>(pResource);
-		Utils::YAMLFileRef& file = **pEditorMaterialData;
+		Utils::NodeValueRef node = **pEditorMaterialData;
 
-		ReadPropertiesInto(file["Properties"], pMaterial, false);
+		ReadPropertiesInto(node["Properties"], pMaterial, false);
 		/* Update properties in YAML */
-		WritePropertiesTo(file["Properties"], pMaterial);
+		WritePropertiesTo(node["Properties"], pMaterial);
 	}
 }

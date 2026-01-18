@@ -52,7 +52,7 @@ namespace Glory::Editor
 		YAMLResource<GScene>& yamlFile = m_SceneFiles[index];
 
 		std::filesystem::path filePath = path;
-		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), (*yamlFile).RootNodeRef().ValueRef(), uuid, filePath.filename().replace_extension().string());
+		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), *yamlFile, uuid, filePath.filename().replace_extension().string());
 		if (pScene == nullptr) return;
 		pScene->SetResourceUUID(uuid);
 		m_pOpenScenes.emplace_back(pScene);
@@ -167,7 +167,7 @@ namespace Glory::Editor
 		YAMLResource<GScene>& yamlFile = m_SceneFiles[index];
 
 		std::filesystem::path filePath = path;
-		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), (*yamlFile).RootNodeRef().ValueRef(), uuid, filePath.filename().replace_extension().string());
+		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), *yamlFile, uuid, filePath.filename().replace_extension().string());
 
 		if (pScene == nullptr) return;
 		pScene->SetResourceUUID(uuid);
@@ -442,8 +442,7 @@ namespace Glory::Editor
 	{
 		auto yamlResource = GetSceneFile(uuid);
 		yamlResource->SetPath(path);
-		auto& file = **yamlResource;
-		auto root = file.RootNodeRef().ValueRef();
+		auto root = **yamlResource;
 
 		GScene* pScene = GetOpenScene(uuid);
 		EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance()->GetEngine(), pScene, root);

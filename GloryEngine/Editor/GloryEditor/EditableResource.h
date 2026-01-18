@@ -84,7 +84,12 @@ namespace Glory::Editor
 		}
 
 		/** @brief Get the undelying YAML file fo editing */
-		Utils::YAMLFileRef& operator*()
+		virtual Utils::NodeValueRef& operator*()
+		{
+			return Utils::NodeValueRef(m_File);
+		}
+
+		Utils::YAMLFileRef& File()
 		{
 			return m_File;
 		}

@@ -42,11 +42,12 @@ namespace Glory::Editor
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(pDocument->OriginalDocumentID());
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-		Utils::YAMLFileRef& file = **pDocumentData;
+		Utils::YAMLFileRef& file = pDocumentData->File();
+		Utils::NodeValueRef rootNode = **pDocumentData;
 
 		const std::string uuidString = std::to_string(selected);
 
-		auto entities = file["Entities"];
+		auto entities = rootNode["Entities"];
 		auto selectedEntity = entities[uuidString];
 
 		ImGui::PushID(uuidString.c_str());
@@ -156,10 +157,11 @@ namespace Glory::Editor
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(pDocument->OriginalDocumentID());
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-		Utils::YAMLFileRef& file = **pDocumentData;
+		Utils::YAMLFileRef& file = pDocumentData->File();
+		Utils::NodeValueRef rootNode = **pDocumentData;
 		const UUID& selected = pMainWindow->SelectedEntity();
 		const std::string uuidString = std::to_string(selected);
-		auto entities = file["Entities"];
+		auto entities = rootNode["Entities"];
 		auto selectedEntity = entities[uuidString];
 		auto name = selectedEntity["Name"];
 

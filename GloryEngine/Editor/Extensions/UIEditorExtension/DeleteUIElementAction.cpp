@@ -39,7 +39,7 @@ namespace Glory::Editor
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(actionRecord.ObjectID);
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-		Utils::YAMLFileRef& file = **pDocumentData;
+		Utils::NodeValueRef rootNode = **pDocumentData;
 
 		Utils::NodeValueRef entities = m_SerializedObject.RootNodeRef().ValueRef();
 		for (auto iter = entities.Begin(); iter != entities.End(); ++iter)
@@ -49,7 +49,7 @@ namespace Glory::Editor
 		}
 		const Utils::ECS::EntityID entity = pDocument->EntityID(m_ID);
 		pDocument->Registry().SetSiblingIndex(entity, m_SiblingIndex);
-		SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
+		SetUIParentAction::StoreDocumentState(pEngine, pDocument, rootNode["Entities"]);
 	}
 
 	void DeleteUIElementAction::OnRedo(const ActionRecord& actionRecord)
@@ -61,9 +61,9 @@ namespace Glory::Editor
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(actionRecord.ObjectID);
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-		Utils::YAMLFileRef& file = **pDocumentData;
+		Utils::NodeValueRef rootNode = **pDocumentData;
 
 		pDocument->DestroyEntity(m_ID);
-		SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
+		SetUIParentAction::StoreDocumentState(pEngine, pDocument, rootNode["Entities"]);
 	}
 }

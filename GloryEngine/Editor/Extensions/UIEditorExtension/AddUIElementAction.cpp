@@ -101,10 +101,10 @@ namespace Glory::Editor
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(actionRecord.ObjectID);
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-		Utils::YAMLFileRef& file = **pDocumentData;
+		Utils::NodeValueRef node = **pDocumentData;
 
 		pDocument->DestroyEntity(m_ID);
-		SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
+		SetUIParentAction::StoreDocumentState(pEngine, pDocument, node["Entities"]);
 	}
 
 	void AddUIElementAction::OnRedo(const ActionRecord& actionRecord)
@@ -116,7 +116,7 @@ namespace Glory::Editor
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(actionRecord.ObjectID);
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-		Utils::YAMLFileRef& file = **pDocumentData;
+		Utils::NodeValueRef node = **pDocumentData;
 
 		Utils::ECS::EntityRegistry& registry = pDocument->Registry();
 		const Utils::Reflect::TypeData* pType = Reflect::GetTyeData(m_Type);
@@ -126,6 +126,6 @@ namespace Glory::Editor
 		registry.AddComponent<UIInteraction>(entity, UUID());
 		registry.SetParent(entity, parent);
 		registry.SetSiblingIndex(entity, m_SiblingIndex);
-		SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
+		SetUIParentAction::StoreDocumentState(pEngine, pDocument, node["Entities"]);
 	}
 }
