@@ -1,5 +1,6 @@
 #pragma once
 #include <ImporterTemplate.h>
+#include <EditorAssetDatabase.h>
 #include <ModelData.h>
 
 #include <EntityID.h>
@@ -28,6 +29,9 @@ namespace Glory::Editor
         virtual std::string_view Name() const override;
         void Initialize() override;
         void Cleanup() override;
+
+        virtual EditableResource* GetEditableResource(const std::filesystem::path& path) const override;
+        virtual EditableResource* GetSectionedEditableResource(EditableResource* pFullResource, const UUID subresourceID) const override;
 
     private:
         enum AxisConversion

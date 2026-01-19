@@ -5,6 +5,7 @@
 #include <Debug.h>
 #include <sstream>
 #include <Resource.h>
+#include <EditableResource.h>
 
 namespace Glory::Editor
 {
@@ -85,6 +86,23 @@ namespace Glory::Editor
 		}
 
 		return (*itor)->GetEditableResource(path);
+	}
+
+	EditableResource* Importer::CreateSectionedEditableResource(const std::filesystem::path& path, EditableResource* pFullResource, const UUID subresourceID)
+	{
+		auto itor = std::find_if(m_pImporters.begin(), m_pImporters.end(), [&](const Importer* pImporter) {
+			return pImporter->SupportsExtension(path.extension());
+			});
+
+		if (itor == m_pImporters.end())
+		{
+			std::stringstream str;
+			str << "Could not find importer for extension: " << path.extension() << " for file: " << path;
+			EditorApplication::GetInstance()->GetEngine()->GetDebug().LogWarning(str.str());
+			return nullptr;
+		}
+
+		return (*itor)->GetSectionedEditableResource(pFullResource, subresourceID);
 	}
 
 	void Importer::RegisterOwned(Importer* pImporter)

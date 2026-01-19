@@ -34,7 +34,7 @@ namespace Glory::Editor
 		GScene* pNewScene = new GScene();
 		m_pOpenScenes.emplace_back(pNewScene);
 		m_OpenedSceneIDs.emplace_back(pNewScene->GetUUID());
-		m_SceneFiles.emplace_back(YAMLResource<GScene>{}).SetPath("NewScene.gscene");
+		m_SceneFiles.emplace_back(FullYAMLResource<GScene>{}).SetPath("NewScene.gscene");
 		pNewScene->SetManager(this);
 		SetSceneDirty(pNewScene);
 		SetupCallbacks(pNewScene);
@@ -48,7 +48,7 @@ namespace Glory::Editor
 		const std::string path = std::string{ EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath() } + "\\" + location.Path;
 
 		const size_t index = m_SceneFiles.size();
-		m_SceneFiles.emplace_back(YAMLResource<GScene>{path});
+		m_SceneFiles.emplace_back(FullYAMLResource<GScene>{path});
 		YAMLResource<GScene>& yamlFile = m_SceneFiles[index];
 
 		std::filesystem::path filePath = path;
@@ -136,11 +136,11 @@ namespace Glory::Editor
 		if (EditorAssetDatabase::GetAssetLocation(uuid, location))
 		{
 			const std::string path = std::string{ EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath() } + "\\" + location.Path;
-			m_SceneFiles.emplace_back(YAMLResource<GScene>{path});
+			m_SceneFiles.emplace_back(FullYAMLResource<GScene>{path});
 		}
 		else
 		{
-			m_SceneFiles.emplace_back(YAMLResource<GScene>{}).SetPath("NewScene.gscene");;
+			m_SceneFiles.emplace_back(FullYAMLResource<GScene>{}).SetPath("NewScene.gscene");;
 		}
 
 		GScene* pActiveScene = SceneManager::GetActiveScene();
@@ -163,8 +163,8 @@ namespace Glory::Editor
 		const std::string path = std::string{ EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath() } + "\\" + location.Path;
 
 		const size_t index = m_SceneFiles.size();
-		m_SceneFiles.emplace_back(YAMLResource<GScene>{path});
-		YAMLResource<GScene>& yamlFile = m_SceneFiles[index];
+		m_SceneFiles.emplace_back(FullYAMLResource<GScene>{path});
+		FullYAMLResource<GScene>& yamlFile = m_SceneFiles[index];
 
 		std::filesystem::path filePath = path;
 		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), *yamlFile, uuid, filePath.filename().replace_extension().string());

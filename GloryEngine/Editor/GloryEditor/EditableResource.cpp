@@ -9,6 +9,8 @@ namespace Glory::Editor
 
 	void EditableResource::Save()
 	{
+		if (!m_Dirty) return;
+
 		OnSave();
 		m_Dirty = false;
 		m_WasSaved = true;

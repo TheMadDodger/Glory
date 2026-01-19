@@ -4,6 +4,8 @@
 #include "EditorApplication.h"
 #include "EditorAssetManager.h"
 #include "Selection.h"
+#include "EditorResourceManager.h"
+#include "EditableResource.h"
 
 #include <EditorUI.h>
 #include <StringUtils.h>
@@ -181,7 +183,8 @@ namespace Glory::Editor
 
 					if (ImGui::Selectable("##selectable", false, selectableFlags, ImVec2(0, rowHeight)))
 					{
-						Resource* pResource = EditorApplication::GetInstance()->GetAssetManager().FindResource(uuid);
+						Resource* pResource = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(uuid);
+						if (!pResource) pResource = EditorApplication::GetInstance()->GetAssetManager().FindResource(uuid);
 						Selection::SetActiveObject(pResource);
 					}
 

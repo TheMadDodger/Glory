@@ -100,6 +100,48 @@ namespace Glory::Editor
 	{
 	}
 
+    EditableResource* ASSIMPImporter::GetEditableResource(const std::filesystem::path& path) const
+    {
+        std::filesystem::path overrideFilePath = path;
+        const std::string newExtension = path.extension().string() + ".imports";
+        overrideFilePath.replace_extension(newExtension);
+
+        YAMLResource<ModelData>* pEditableResource = new FullYAMLResource<ModelData>(overrideFilePath);
+        if (!std::filesystem::exists(overrideFilePath))
+        {
+            Utils::NodeValueRef rootNode = **pEditableResource;
+            pEditableResource->SetDirty(true);
+        }
+        return pEditableResource;
+    }
+
+    EditableResource* ASSIMPImporter::GetSectionedEditableResource(EditableResource* pFullResource, const UUID subresourceID) const
+    {
+        ResourceMeta meta;
+        if (!EditorAssetDatabase::GetAssetMetadata(subresourceID, meta))
+            return nullptr;
+
+        static uint32_t materialHash = ResourceTypes::GetHash<MaterialData>();
+
+        EditableResource* pResource = nullptr;
+
+        if (meta.Hash() == materialHash)
+            pResource = new YAMLResourceSection<MaterialData, ModelData>(static_cast<YAMLResource<ModelData>*>(pFullResource), std::to_string(subresourceID));
+
+        if (pResource)
+        {
+            YAMLResourceBase* pYAMLResource = static_cast<YAMLResourceBase*>(pResource);
+            Utils::NodeValueRef node = **pYAMLResource;
+            if (!node.Exists() || !node.IsMap())
+            {
+                node.SetMap();
+                pResource->SetDirty(true);
+            }
+        }
+
+        return pResource ? pResource : nullptr;
+    }
+
     void ASSIMPImporter::EnsureUniqueAssetName(Context& context, Resource* pResource) const
     {
         size_t counter = 0;

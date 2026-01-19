@@ -37,7 +37,7 @@ namespace Glory::Editor
 
 		Utils::NodeValueRef node = **pMaterial;
 		auto pipeline = node["Pipeline"];
-		UUID pipelineID = pipeline.Exists() ? pipeline.As<uint64_t>() : 0;
+		UUID pipelineID = pipeline.As<uint64_t>(pMaterialData->GetPipelineID());
 
 		bool change = false;
 		if (AssetPicker::ResourceDropdown("Pipeline", ResourceTypes::GetHash<PipelineData>(), &pipelineID))
@@ -105,7 +105,7 @@ namespace Glory::Editor
 		Utils::YAMLFileRef& file = pMaterial->File();
 		Utils::NodeValueRef node = **pMaterial;
 		auto pipeline = node["Pipeline"];
-		const UUID pipelineID = pipeline.As<uint64_t>();
+		const UUID pipelineID = pipeline.As<uint64_t>(pMaterialData->GetPipelineID());
 		if (pipelineID == 0)
 			return false;
 		PipelineData* pPipeline = pipelineManager.GetPipelineData(pipelineID);
@@ -145,11 +145,6 @@ namespace Glory::Editor
 				MaterialPropertyInfo* pMaterialPropertyTwo = pMaterialData->GetPropertyInfoAt(materialPropertyIndexTwo);
 
 				auto propOne = properties[propInfoOne->ShaderName()];
-				if (!propOne.Exists()) {
-					propOne["ShaderName"].Set(propInfoOne->ShaderName());
-					propOne["TypeHash"].Set(propInfoOne->TypeHash());
-				}
-
 				const float start = ImGui::GetCursorPosX();
 				const float totalWidth = ImGui::GetContentRegionAvail().x;
 
@@ -157,32 +152,50 @@ namespace Glory::Editor
 				auto propValueOne = propOne["Value"];
 				EditorUI::PushFlag(EditorUI::Flag::HasSmallButton);
 				EditorUI::RemoveButtonPadding = 34.0f;
-				const bool propertyChange = PropertyDrawer::DrawProperty(file, propValueOne.Path(), propInfoOne->TypeHash(), propInfoOne->TypeHash(), pMaterialPropertyOne->Flags() | PropertyFlags::Color);
+
+				void* pAddress = pMaterialData->Address(materialPropertyIndexOne);
+				if (!properties.Exists() || !propOne.Exists())
+				{
+					const bool propertyChange = PropertyDrawer::DrawProperty(propInfoOne->DisplayName(), pAddress, propInfoOne->TypeHash(), pMaterialPropertyOne->Flags() | PropertyFlags::Color);
+					if (propertyChange)
+					{
+						if (!properties.Exists() || !properties.IsMap())
+							properties.SetMap();
+
+						propOne["ShaderName"].Set(propInfoOne->ShaderName());
+						propOne["TypeHash"].Set(propInfoOne->TypeHash());
+
+						/* Deserialize value into YAML */
+						serializers.SerializeProperty(pMaterialData->GetBufferReference(),
+							pMaterialPropertyOne->TypeHash(), pMaterialPropertyOne->Offset(), pMaterialPropertyOne->Size(), propValueOne);
+						change = true;
+					}
+				}
+				else
+				{
+					const bool propertyChange = PropertyDrawer::DrawProperty(file, propValueOne.Path(), propInfoOne->TypeHash(), propInfoOne->TypeHash(), pMaterialPropertyOne->Flags() | PropertyFlags::Color);
+					if (propertyChange)
+					{
+						/* Deserialize new value into buffer */
+						serializers.DeserializeProperty(pMaterialData->GetBufferReference(),
+							pMaterialPropertyOne->TypeHash(), pMaterialPropertyOne->Offset(), pMaterialPropertyOne->Size(), propValueOne);
+						change = true;
+					}
+				}
+
 				EditorUI::RemoveButtonPadding = 24.0f;
 				EditorUI::PopFlag();
 				ImGui::PopID();
 
-				/* Deserialize new value into buffer */
-				if (propertyChange)
-				{
-					serializers.DeserializeProperty(pMaterialData->GetBufferReference(),
-						pMaterialPropertyOne->TypeHash(), pMaterialPropertyOne->Offset(), pMaterialPropertyOne->Size(), propValueOne);
-					change = true;
-				}
-
 				const std::string& sampler = propInfoTwo->ShaderName();
 
 				auto propTwo = properties[sampler];
-				if (!propTwo.Exists()) {
-					propTwo["DisplayName"].Set(sampler);
-					propTwo["TypeHash"].Set(textureDataHash);
-					propTwo["Value"].Set(0);
-				}
-
 				auto propValueTwo = propTwo["Value"];
 				ImGui::SameLine();
 				ImGui::PushID(sampler.data());
-				const UUID oldValue = propTwo["Value"].As<uint64_t>();
+				UUID texID = 0;
+				pMaterialData->GetTexture(sampler, &texID);
+				const UUID oldValue = propTwo["Value"].As<uint64_t>(texID);
 				UUID value = oldValue;
 				const bool textureChange = AssetPicker::ResourceTumbnailButton("value", 18.0f, start, totalWidth, textureDataHash, &value);
 				TextureHandle tumbnail = Tumbnail::GetTumbnail(value);
@@ -193,6 +206,16 @@ namespace Glory::Editor
 				/* Deserialize new value into resources array */
 				if (textureChange)
 				{
+					if (!properties.Exists() || !properties.IsMap())
+						properties.SetMap();
+
+					if (!propTwo.Exists())
+					{
+						propTwo["DisplayName"].Set(sampler);
+						propTwo["TypeHash"].Set(textureDataHash);
+						propTwo["Value"].Set(0);
+					}
+
 					Undo::ApplyYAMLEdit(file, propTwo["Value"].Path(), uint64_t(oldValue), uint64_t(value));
 					const UUID newUUID = propValueTwo.As<uint64_t>();
 					pMaterialData->SetTexture(sampler, newUUID);
@@ -201,6 +224,8 @@ namespace Glory::Editor
 				continue;
 			}
 			
+			return change;
+
 			/* Draw as normal */
 			const MaterialPropertyInfo* propInfo = pPipeline->GetPropertyInfoAt(i);
 
@@ -223,6 +248,9 @@ namespace Glory::Editor
 
 				auto propValue = prop["Value"];
 				PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(ST_Asset);
+
+				UUID texID = 0;
+				pMaterialData->GetTexture(sampler, &texID);
 
 				ImGui::PushID(sampler.data());
 				const bool changed = pPropertyDrawer->Draw(file, propValue.Path(), pMaterialProperty->TypeHash(), pMaterialProperty->Flags());

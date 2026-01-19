@@ -85,7 +85,7 @@ namespace Glory::Editor
 	private:
 		std::vector<UUID> m_OpenedSceneIDs;
 		std::vector<UUID> m_DirtySceneIDs;
-		std::vector<YAMLResource<GScene>> m_SceneFiles;
+		std::vector<FullYAMLResource<GScene>> m_SceneFiles;
 		UUID m_CurrentlySavingScene = 0;
 
 		EditorApplication* m_pApplication;
