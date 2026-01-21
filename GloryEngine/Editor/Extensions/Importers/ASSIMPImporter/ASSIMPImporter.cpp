@@ -111,7 +111,12 @@ namespace Glory::Editor
         if (!std::filesystem::exists(overrideFilePath))
         {
             Utils::NodeValueRef rootNode = **pEditableResource;
-            pEditableResource->SetDirty(true);
+            Utils::NodeValueRef imports = rootNode["ImportSettings"];
+            Utils::NodeValueRef overrides = rootNode["Overrides"];
+            if (!imports.Exists() || !imports.IsMap())
+                imports.SetMap();
+            if (!overrides.Exists() || !overrides.IsMap())
+                overrides.SetMap();
         }
         return pEditableResource;
     }
@@ -127,17 +132,15 @@ namespace Glory::Editor
         EditableResource* pResource = nullptr;
 
         if (meta.Hash() == materialHash)
-            pResource = new YAMLResourceSection<MaterialData, ModelData>(static_cast<YAMLResource<ModelData>*>(pFullResource), std::to_string(subresourceID));
+            pResource = new YAMLResourceSection<MaterialData, ModelData>(static_cast<YAMLResource<ModelData>*>(pFullResource),
+                "Overrides/" + std::to_string(subresourceID));
 
         if (pResource)
         {
             YAMLResourceBase* pYAMLResource = static_cast<YAMLResourceBase*>(pResource);
             Utils::NodeValueRef node = **pYAMLResource;
             if (!node.Exists() || !node.IsMap())
-            {
                 node.SetMap();
-                pResource->SetDirty(true);
-            }
         }
 
         return pResource ? pResource : nullptr;
