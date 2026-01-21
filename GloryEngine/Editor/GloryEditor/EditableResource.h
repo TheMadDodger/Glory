@@ -87,6 +87,8 @@ namespace Glory::Editor
 
 		/** @brief Path of the underlying YAML file */
 		virtual const std::filesystem::path& Path() const = 0;
+
+		virtual bool IsSectionedResource() const = 0;
 	};
 
 	/** @brief A YAML based editor asset for a specific type */
@@ -165,6 +167,11 @@ namespace Glory::Editor
 			return m_File.Path();
 		}
 
+		virtual bool IsSectionedResource() const override
+		{
+			return false;
+		}
+
 	private:
 		Utils::YAMLFileRef m_File;
 	};
@@ -233,6 +240,11 @@ namespace Glory::Editor
 		virtual const std::filesystem::path& Path() const
 		{
 			return m_pFullResource->Path();
+		}
+
+		virtual bool IsSectionedResource() const override
+		{
+			return true;
 		}
 
 	private:

@@ -54,12 +54,12 @@ namespace Glory::Editor
 		EditorApplication::GetInstance()->GetPipelineManager().PipelineUpdateEvents().RemoveListener(m_PipelineUpdatedCallback);
 	}
 
-	void EditorMaterialManager::LoadIntoMaterial(Utils::NodeValueRef node, MaterialData* pMaterial) const
+	void EditorMaterialManager::LoadIntoMaterial(Utils::NodeValueRef node, MaterialData* pMaterial, bool clearProperties) const
 	{
-		const UUID pipelineID = node["Pipeline"].As<uint64_t>();
+		const UUID pipelineID = node["Pipeline"].As<uint64_t>(pMaterial->GetPipelineID());
 		pMaterial->SetPipeline(pipelineID);
 		auto properties = node["Properties"];
-		ReadPropertiesInto(properties, pMaterial);
+		ReadPropertiesInto(properties, pMaterial, clearProperties);
 	}
 
 	void EditorMaterialManager::SetMaterialPipeline(UUID materialID, UUID pipelineID)
@@ -173,7 +173,7 @@ namespace Glory::Editor
 
 	void EditorMaterialManager::ReadPropertiesInto(Utils::NodeValueRef& properties, MaterialData* pMaterial, bool clearProperties) const
 	{
-		if (!properties.IsMap()) return;
+		if (!properties.Exists() || !properties.IsMap()) return;
 		if (clearProperties) pMaterial->ClearProperties();
 
 		for (auto itor = properties.Begin(); itor != properties.End(); ++itor)
