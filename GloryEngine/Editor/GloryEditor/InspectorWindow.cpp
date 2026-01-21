@@ -3,6 +3,8 @@
 #include "EditorAssetDatabase.h"
 #include "Editor.h"
 
+#include <Reflection.h>
+
 #include <imgui.h>
 
 #include <IconsFontAwesome6.h>
@@ -49,12 +51,23 @@ namespace Glory::Editor
 		else
 			ImGui::TextUnformatted(icon.data());
 
+		ImGui::SameLine();
+		if(!pSelectedObject)
+			ImGui::TextUnformatted("No object selected");
+		else
+		{
+			ResourceMeta meta;
+			EditorAssetDatabase::GetAssetMetadata(pSelectedObject->GetUUID(), meta);
+			ResourceType* pType = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().GetResourceType(meta.Hash());
+			if (pType)
+				ImGui::Text("%s : %s", pType->Name().c_str(), pSelectedObject->Name().c_str());
+		}
+
 		ImGui::Spacing();
 
 		if (m_pEditor)
-		{
-			if (m_pEditor->OnGUI()) EditorAssetDatabase::SetAssetDirty(pSelectedObject);
-		}
+			if (m_pEditor->OnGUI())
+				EditorAssetDatabase::SetAssetDirty(pSelectedObject);
 	}
 
 	void InspectorWindow::CreateEditor()

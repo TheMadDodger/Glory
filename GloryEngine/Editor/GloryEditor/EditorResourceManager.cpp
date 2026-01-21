@@ -113,6 +113,7 @@ namespace Glory::Editor
 
 		if (!pResource) return nullptr;
 		pResource->SetResourceUUID(uuid);
+		pResource->SetName(EditorAssetDatabase::GetAssetName(uuid));
 		m_pEditableResources.emplace(uuid, pResource);
 		return pResource;
 	}
