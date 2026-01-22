@@ -257,7 +257,7 @@ namespace Glory::Editor
         MainEditor& editor = EditorApplication::GetInstance()->GetMainEditor();
         FileBrowser* pWindow = editor.GetWindow<FileBrowser>();
 
-        std::filesystem::path absolutePath = EditorAssetDatabase::GetAbsoluteAssetPath(path.string());
+        const std::filesystem::path absolutePath = EditorAssetDatabase::GetAbsoluteAssetPath(path.string());
 
         pWindow->m_pRootItems[0]->SetSelectedFolder(absolutePath.parent_path());
 
