@@ -3,6 +3,7 @@
 #include "DND.h"
 #include "Tumbnail.h"
 #include "EditorApplication.h"
+#include "FileBrowser.h"
 
 #include <imgui.h>
 #include <algorithm>
@@ -275,6 +276,12 @@ namespace Glory::Editor
 				{
 					*value = *it;
 					change = true;
+				}
+				if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+				{
+					AssetLocation location;
+					if (EditorAssetDatabase::GetAssetLocation(*it, location))
+						FileBrowser::NavigateToAndHighlight(location.Path);
 				}
 
 				TextureHandle thumbnail = Tumbnail::GetTumbnail(*it);

@@ -16,6 +16,7 @@
 #include <imgui.h>
 
 #include <AssetDatabase.h>
+#include <GameTime.h>
 #include <AssetManager.h>
 #include <StringUtils.h>
 #include <DND.h>
@@ -43,13 +44,17 @@ namespace Glory::Editor
 	}
 
 	FileBrowserItem::FileBrowserItem()
-		: m_Name(""), m_pParent(nullptr), m_IsFolder(false), m_SetOpen(false), m_NameBuffer(""), m_EditingName(false), m_StartEditingName(false), m_pChildren(std::vector<FileBrowserItem*>()), m_Editable(true)
+		: m_Name(""), m_pParent(nullptr), m_IsFolder(false), m_SetOpen(false), m_NameBuffer(""),
+		m_EditingName(false), m_StartEditingName(false), m_pChildren(std::vector<FileBrowserItem*>()),
+		m_Editable(true), m_AutoScrollHere(false), m_HighlightTimer(0.0f), m_HighlightFade(0.0f)
 	{
 	}
 
 	FileBrowserItem::FileBrowserItem(const std::string& name, bool isFolder, FileBrowserItem* pParent, bool isEditable, const std::string& directoryFilter, std::function<std::filesystem::path()> rootPathFunc)
-		: m_Name(name), m_pParent(pParent), m_IsFolder(isFolder), m_SetOpen(false), m_NameBuffer(""), m_EditingName(false), m_StartEditingName(false),
-		m_pChildren(std::vector<FileBrowserItem*>()), m_Editable(isEditable), m_RootPathFunc(rootPathFunc), m_DirectoryFilter(directoryFilter)
+		: m_Name(name), m_pParent(pParent), m_IsFolder(isFolder), m_SetOpen(false), m_NameBuffer(""),
+		m_EditingName(false), m_StartEditingName(false), m_pChildren(std::vector<FileBrowserItem*>()),
+		m_Editable(isEditable), m_RootPathFunc(rootPathFunc), m_DirectoryFilter(directoryFilter),
+		m_AutoScrollHere(false), m_HighlightTimer(0.0f), m_HighlightFade(0.0f)
 	{}
 
 	FileBrowserItem::~FileBrowserItem()
@@ -341,10 +346,17 @@ namespace Glory::Editor
 		const float textHeight = ImGui::CalcTextSize("LABEL").y;
 		const ImVec2 itemSize = { iconSize + padding * 2.0F, iconSize + padding * 3.0f + textHeight };
 
+		if (m_AutoScrollHere)
+			ImGui::SetScrollHereY();
+
+		m_AutoScrollHere = false;
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		ImGui::BeginChild("##file", itemSize, false, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		ImGui::PushStyleColor(ImGuiCol_Border, {1.0f, 1.0f, 0.0f, m_HighlightFade });
+		ImGui::BeginChild("##file", itemSize, m_HighlightFade > 0.0f, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 		ImGui::PopStyleVar(2);
+		ImGui::PopStyleColor();
 
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 
@@ -646,6 +658,18 @@ namespace Glory::Editor
 			ImGui::TextWrapped(text.data());
 			ImGui::PopTextWrapPos();
 		}
+	}
+
+	void FileBrowserItem::Update()
+	{
+		GameTime& time = EditorApplication::GetInstance()->GetEngine()->Time();
+		if (m_HighlightTimer > 0.0f)
+			m_HighlightTimer -= time.GetUnscaledDeltaTime();
+		else if (m_HighlightFade > 0.0f)
+			m_HighlightFade -= time.GetUnscaledDeltaTime();
+
+		for (auto child : m_pChildren)
+			child->Update();
 	}
 
 	std::filesystem::path FileBrowserItem::DefaultRootPathFunc()

@@ -70,6 +70,8 @@ namespace Glory::Editor
 
 		void DrawName(float padding);
 
+		void Update();
+
 	private:
 		friend class FileBrowser;
 		std::string m_Name;
@@ -86,6 +88,9 @@ namespace Glory::Editor
 		bool m_EditingName;
 		char m_NameBuffer[1000];
 		bool m_Editable;
+		bool m_AutoScrollHere;
+		float m_HighlightTimer;
+		float m_HighlightFade;
 
 		static std::hash<std::string> m_PathHasher;
 		static FileBrowserItem* m_pSelectedFolder;

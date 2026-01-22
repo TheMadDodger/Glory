@@ -88,6 +88,12 @@ namespace Glory::Editor
         }
 	}
 
+    void FileBrowser::Update()
+    {
+        for (auto rootItem : m_pRootItems)
+            rootItem->Update();
+    }
+
     void FileBrowser::OnOpen()
     {
         EditorAssetDatabase::RegisterAsyncImportCallback(OnAsyncImport);
@@ -244,6 +250,30 @@ namespace Glory::Editor
             else
                 EditorAssetDatabase::ImportAssetAsync(copiedFile.string());
         }
+    }
+
+    void FileBrowser::NavigateToAndHighlight(const std::filesystem::path& path)
+    {
+        MainEditor& editor = EditorApplication::GetInstance()->GetMainEditor();
+        FileBrowser* pWindow = editor.GetWindow<FileBrowser>();
+
+        const std::filesystem::path absolutePath = EditorAssetDatabase::GetAbsoluteAssetPath(path.string());
+
+        pWindow->m_pRootItems[0]->SetSelectedFolder(absolutePath.parent_path());
+
+        FileBrowserItem* pSelectedItem = FileBrowserItem::GetSelectedFolder();
+        if (pSelectedItem)
+        {
+            FileBrowserItem* pHighlighted = pSelectedItem->GetChildByName(path.filename().string(), false);
+            if (pHighlighted)
+            {
+                pHighlighted->m_AutoScrollHere = true;
+                pHighlighted->m_HighlightTimer = 2.5f;
+                pHighlighted->m_HighlightFade = 1.0f;
+            }
+        }
+        else
+            FileBrowserItem::SetSelectedFolder(pWindow->m_pRootItems[0]);
     }
 
     void FileBrowser::DirectoryBrowser()
