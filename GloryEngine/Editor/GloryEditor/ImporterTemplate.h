@@ -44,6 +44,11 @@ namespace Glory::Editor
 			return new NonEditableResource<T>();
 		}
 
+		virtual EditableResource* GetSectionedEditableResource(EditableResource* pFullResource, const UUID subresourceID) const override
+		{
+			return new NonEditableResource<T>();
+		}
+
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const = 0;
 		virtual ImportedResource LoadResource(const std::filesystem::path& path, void* userData) const = 0;
 		virtual ImportedResource LoadResource(void* data, size_t dataSize, void* userData) const { return ImportedResource{}; }
@@ -60,7 +65,7 @@ namespace Glory::Editor
 	protected:
 		virtual EditableResource* GetEditableResource(const std::filesystem::path& path) const override
 		{
-			return new YAMLResource<T>(path);
+			return new FullYAMLResource<T>(path);
 		}
 	};
 }

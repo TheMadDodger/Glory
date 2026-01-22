@@ -9,7 +9,7 @@
 
 namespace Glory::Editor
 {
-	constexpr size_t NumSupportedExtensions = 11;
+	constexpr size_t NumSupportedExtensions = 12;
 	constexpr std::string_view SupportedExtensions[NumSupportedExtensions] = {
 		".jpg",
 		".jpeg",
@@ -21,6 +21,7 @@ namespace Glory::Editor
 		".TIF",
 		".webp",
 		".WEBP",
+		".tga",
 		".TGA"
 	};
 

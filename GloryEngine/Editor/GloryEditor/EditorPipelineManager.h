@@ -3,22 +3,18 @@
 #include <UUID.h>
 #include <GraphicsEnums.h>
 #include <ThreadedVar.h>
+#include <NodeRef.h>
+#include <GloryEditor.h>
 
 #include <map>
 #include <set>
 #include <filesystem>
-#include <GloryEditor.h>
 
 namespace Glory
 {
 	class Engine;
 	class BinaryStream;
 	class ShaderSourceData;
-
-	namespace Utils
-	{
-		struct YAMLFileRef;
-	}
 
 	namespace Jobs
 	{
@@ -121,10 +117,10 @@ namespace Glory::Editor
 		void UpdatePipeline(PipelineData* pPipeline, EditorPipeline* pEditorPipeline);
 
 		/** @brief Load YAML data into a pipeline
-		 * @param file YAML file to load from
+		 * @param node YAML node to load from
 		 * @param pPipeline pipeline to load the data into
 		 */
-		void LoadIntoPipeline(Utils::YAMLFileRef& file, PipelineData* pPipeline) const;
+		void LoadIntoPipeline(Utils::NodeValueRef node, PipelineData* pPipeline) const;
 
 		/** @brief Check whether compiled shader cache is outdated
 		 * @param cachePath Path to shader cache file

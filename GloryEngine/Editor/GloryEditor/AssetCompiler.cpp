@@ -162,10 +162,10 @@ namespace Glory::Editor
 		GScene* pScene = sceneManager.GetOpenScene(uuid);
 		if (!pScene) return false;
 		auto sceneFile = sceneManager.GetSceneFile(uuid);
-		return CompileSceneSettings(pScene, (**sceneFile).RootNodeRef().ValueRef());
+		return CompileSceneSettings(pScene, **sceneFile);
 	}
 
-	bool AssetCompiler::CompileSceneSettings(GScene* pScene, Utils::NodeValueRef& root)
+	bool AssetCompiler::CompileSceneSettings(GScene* pScene, Utils::NodeValueRef root)
 	{
 		if (!pScene) return false;
 

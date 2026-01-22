@@ -2,6 +2,8 @@
 #include "GloryEditor.h"
 #include "ImportedResource.h"
 
+#include <UUID.h>
+
 #include <filesystem>
 #include <vector>
 
@@ -30,6 +32,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API static bool Export(const std::filesystem::path& path, Resource* pResource);
 		GLORY_EDITOR_API static void Register(Importer* pImporter);
 		GLORY_EDITOR_API static EditableResource* CreateEditableResource(const std::filesystem::path& path);
+		GLORY_EDITOR_API static EditableResource* CreateSectionedEditableResource(const std::filesystem::path& path, EditableResource* pFullResource, const UUID subresourceID);
 
 		template<typename T>
 		static void Register()
@@ -49,6 +52,7 @@ namespace Glory::Editor
 		virtual uint32_t ResourceTypeHash() const = 0;
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const = 0;
 		virtual EditableResource* GetEditableResource(const std::filesystem::path& path) const = 0;
+		virtual EditableResource* GetSectionedEditableResource(EditableResource* pFullResource, const UUID subresourceID) const = 0;
 
 		GLORY_EDITOR_API static void RegisterOwned(Importer* pImporter);
 

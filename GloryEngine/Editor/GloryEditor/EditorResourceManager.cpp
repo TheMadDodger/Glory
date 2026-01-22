@@ -102,9 +102,18 @@ namespace Glory::Editor
 			path.append("Assets").append(location.Path);
 		}
 
-		EditableResource* pResource = Importer::CreateEditableResource(path);
+		EditableResource* pResource = nullptr;
+		if (!location.SubresourcePath.empty())
+		{
+			const UUID rootAssetID = EditorAssetDatabase::FindAssetUUID(path.string());
+			EditableResource* pRootEditableResource = GetEditableResource(rootAssetID);
+			pResource = Importer::CreateSectionedEditableResource(path, pRootEditableResource, uuid);
+		}
+		else pResource = Importer::CreateEditableResource(path);
+
 		if (!pResource) return nullptr;
 		pResource->SetResourceUUID(uuid);
+		pResource->SetName(EditorAssetDatabase::GetAssetName(uuid));
 		m_pEditableResources.emplace(uuid, pResource);
 		return pResource;
 	}

@@ -194,8 +194,8 @@ namespace Glory::Editor
 				YAMLResourceBase* pYAMLResource = dynamic_cast<YAMLResourceBase*>(pResource);
 				if (!pYAMLResource) return;
 
-				Utils::YAMLFileRef& assetFile = **pYAMLResource;
-				ScanSceneFileForAssets(pEngine, assetFile, assets);
+				Utils::NodeValueRef node = **pYAMLResource;
+				ScanForAssets(pEngine, node, assets);
 			}
 			catch (const std::exception&)
 			{

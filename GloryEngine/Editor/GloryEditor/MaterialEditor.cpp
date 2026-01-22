@@ -35,9 +35,15 @@ namespace Glory::Editor
 		YAMLResource<MaterialData>* pMaterial = (YAMLResource<MaterialData>*)m_pTarget;
 		MaterialData* pMaterialData = EditorApplication::GetInstance()->GetMaterialManager().GetMaterial(pMaterial->GetUUID());
 
-		Utils::YAMLFileRef file = **pMaterial;
-		auto pipeline = file["Pipeline"];
-		UUID pipelineID = pipeline.Exists() ? pipeline.As<uint64_t>() : 0;
+		if (pMaterial->IsSectionedResource() && !pMaterialData)
+		{
+			ImGui::TextUnformatted("Waiting for material to get imported...");
+			return false;
+		}
+
+		Utils::NodeValueRef node = **pMaterial;
+		auto pipeline = node["Pipeline"];
+		UUID pipelineID = pipeline.As<uint64_t>(pMaterialData ? pMaterialData->GetPipelineID() : 0);
 
 		bool change = false;
 		if (AssetPicker::ResourceDropdown("Pipeline", ResourceTypes::GetHash<PipelineData>(), &pipelineID))
@@ -51,9 +57,7 @@ namespace Glory::Editor
 		ImGui::Spacing();
 
 		if (EditorUI::Header("Properties"))
-		{
 			change |= PropertiesGUI(pMaterial, pMaterialData);
-		}
 
 		if (change)
 		{
@@ -93,6 +97,98 @@ namespace Glory::Editor
 		}
 	}
 
+	bool DrawMaterialProperty(Utils::NodeValueRef properties, Utils::NodeValueRef prop, size_t propIndex,
+		const MaterialPropertyInfo* propInfo, Serializers& serializers, MaterialData* pMaterialData, Utils::YAMLFileRef& file)
+	{
+		Utils::NodeValueRef propValue = prop["Value"];
+		if (!pMaterialData)
+		{
+			if (!properties.Exists() || !properties.IsMap())
+				properties.SetMap();
+			if (!prop.Exists())
+			{
+				prop["ShaderName"].Set(propInfo->ShaderName());
+				prop["TypeHash"].Set(propInfo->TypeHash());
+			}
+		}
+
+		if (!properties.Exists() || !prop.Exists())
+		{
+			const bool propertyChange = PropertyDrawer::DrawProperty(propInfo->DisplayName(),
+				pMaterialData->Address(propIndex), propInfo->TypeHash(), propInfo->Flags() | PropertyFlags::Color);
+			if (propertyChange)
+			{
+				if (!properties.Exists() || !properties.IsMap())
+					properties.SetMap();
+
+				prop["ShaderName"].Set(propInfo->ShaderName());
+				prop["TypeHash"].Set(propInfo->TypeHash());
+
+				/* Deserialize value into YAML */
+				serializers.SerializeProperty(pMaterialData->GetBufferReference(),
+					propInfo->TypeHash(), propInfo->Offset(), propInfo->Size(), propValue);
+			}
+			return propertyChange;
+		}
+
+		const bool propertyChange = PropertyDrawer::DrawProperty(file, propValue.Path(), propInfo->TypeHash(),
+			propInfo->TypeHash(), propInfo->Flags() | PropertyFlags::Color);
+		if (propertyChange)
+		{
+			/* Deserialize new value into buffer if the material is loaded */
+			if (pMaterialData)
+			{
+				serializers.DeserializeProperty(pMaterialData->GetBufferReference(),
+					propInfo->TypeHash(), propInfo->Offset(), propInfo->Size(), propValue);
+			}
+		}
+		return propertyChange;
+	}
+
+	bool DrawResourceProperty(Utils::NodeValueRef properties, Utils::NodeValueRef prop, MaterialData* pMaterialData,
+		const std::string& name, Utils::YAMLFileRef& file, EditorRenderImpl* pRenderImpl, std::function<bool(UUID*)> picker)
+	{
+		static const uint32_t textureDataHash = ResourceTypes::GetHash<TextureData>();
+
+		Utils::NodeValueRef propValue = prop["Value"];
+
+		UUID texID = 0;
+		if (pMaterialData)
+			pMaterialData->GetTexture(name, &texID);
+		const UUID oldValue = propValue.As<uint64_t>(texID);
+		UUID value = oldValue;
+		const bool textureChange = picker(&value);
+		TextureHandle tumbnail = Tumbnail::GetTumbnail(value);
+		if (tumbnail)
+		{
+			constexpr float namePadding = 34.0f;
+			ImGui::Image(pRenderImpl->GetTextureID(tumbnail), { TumbnailSize, TumbnailSize });
+			const std::string name = EditorAssetDatabase::GetAssetName(value);
+			ImGui::SameLine(TumbnailSize + namePadding);
+			ImGui::TextUnformatted(name.c_str());
+		}
+
+		/* Deserialize new value into resources array */
+		if (textureChange)
+		{
+			if (!properties.Exists() || !properties.IsMap())
+				properties.SetMap();
+
+			if (!prop.Exists())
+			{
+				prop["DisplayName"].Set(name);
+				prop["TypeHash"].Set(textureDataHash);
+				propValue.Set(0);
+			}
+
+			Undo::ApplyYAMLEdit(file, propValue.Path(), uint64_t(oldValue), uint64_t(value));
+			const UUID newUUID = propValue.As<uint64_t>();
+			if (pMaterialData)
+				pMaterialData->SetTexture(name, newUUID);
+		}
+		return textureChange;
+	}
+
 	bool MaterialEditor::PropertiesGUI(YAMLResource<MaterialData>* pMaterial, MaterialData* pMaterialData)
 	{
 		EditorMaterialManager& materialManager = EditorApplication::GetInstance()->GetMaterialManager();
@@ -102,9 +198,10 @@ namespace Glory::Editor
 
 		bool change = false;
 
-		Utils::YAMLFileRef& file = **pMaterial;
-		auto pipeline = file["Pipeline"];
-		const UUID pipelineID = pipeline.As<uint64_t>();
+		Utils::YAMLFileRef& file = pMaterial->File();
+		Utils::NodeValueRef node = **pMaterial;
+		auto pipeline = node["Pipeline"];
+		const UUID pipelineID = pipeline.As<uint64_t>(pMaterialData ? pMaterialData->GetPipelineID() : 0);
 		if (pipelineID == 0)
 			return false;
 		PipelineData* pPipeline = pipelineManager.GetPipelineData(pipelineID);
@@ -118,7 +215,7 @@ namespace Glory::Editor
 		std::vector<std::pair<size_t, size_t>> propertyPairs;
 		GeneratePropertyPairs(pPipeline, propertyPairs);
 
-		auto properties = file["Properties"];
+		auto properties = node["Properties"];
 		static const uint32_t textureDataHash = ResourceTypes::GetHash<TextureData>();
 
 		for (size_t i = 0; i < pPipeline->PropertyInfoCount(); ++i)
@@ -133,131 +230,50 @@ namespace Glory::Editor
 				const MaterialPropertyInfo* propInfoOne = pPipeline->GetPropertyInfoAt(pair.first);
 				const MaterialPropertyInfo* propInfoTwo = pPipeline->GetPropertyInfoAt(pair.second);
 
-				size_t materialPropertyIndexOne = 0;
-				size_t materialPropertyIndexTwo = 0;
-				if (!pMaterialData->GetPropertyInfoIndex(propInfoOne->ShaderName(), materialPropertyIndexOne))
-					continue;
-				if (!pMaterialData->GetPropertyInfoIndex(propInfoTwo->ShaderName(), materialPropertyIndexTwo))
-					continue;
-
-				MaterialPropertyInfo* pMaterialPropertyOne = pMaterialData->GetPropertyInfoAt(materialPropertyIndexOne);
-				MaterialPropertyInfo* pMaterialPropertyTwo = pMaterialData->GetPropertyInfoAt(materialPropertyIndexTwo);
-
 				auto propOne = properties[propInfoOne->ShaderName()];
-				if (!propOne.Exists()) {
-					propOne["ShaderName"].Set(propInfoOne->ShaderName());
-					propOne["TypeHash"].Set(propInfoOne->TypeHash());
-				}
-
 				const float start = ImGui::GetCursorPosX();
 				const float totalWidth = ImGui::GetContentRegionAvail().x;
 
-				ImGui::PushID(pMaterialPropertyOne->ShaderName().data());
-				auto propValueOne = propOne["Value"];
+				ImGui::PushID(propInfoOne->ShaderName().data());
 				EditorUI::PushFlag(EditorUI::Flag::HasSmallButton);
 				EditorUI::RemoveButtonPadding = 34.0f;
-				const bool propertyChange = PropertyDrawer::DrawProperty(file, propValueOne.Path(), propInfoOne->TypeHash(), propInfoOne->TypeHash(), pMaterialPropertyOne->Flags() | PropertyFlags::Color);
+				change |= DrawMaterialProperty(properties, propOne, pair.first, propInfoOne, serializers, pMaterialData, file);
 				EditorUI::RemoveButtonPadding = 24.0f;
 				EditorUI::PopFlag();
 				ImGui::PopID();
 
-				/* Deserialize new value into buffer */
-				if (propertyChange)
-				{
-					serializers.DeserializeProperty(pMaterialData->GetBufferReference(),
-						pMaterialPropertyOne->TypeHash(), pMaterialPropertyOne->Offset(), pMaterialPropertyOne->Size(), propValueOne);
-					change = true;
-				}
-
 				const std::string& sampler = propInfoTwo->ShaderName();
-
 				auto propTwo = properties[sampler];
-				if (!propTwo.Exists()) {
-					propTwo["DisplayName"].Set(sampler);
-					propTwo["TypeHash"].Set(textureDataHash);
-					propTwo["Value"].Set(0);
-				}
 
 				auto propValueTwo = propTwo["Value"];
 				ImGui::SameLine();
 				ImGui::PushID(sampler.data());
-				const UUID oldValue = propTwo["Value"].As<uint64_t>();
-				UUID value = oldValue;
-				const bool textureChange = AssetPicker::ResourceTumbnailButton("value", 18.0f, start, totalWidth, textureDataHash, &value);
-				TextureHandle tumbnail = Tumbnail::GetTumbnail(value);
-				if (tumbnail)
-					ImGui::Image(pRenderImpl->GetTextureID(tumbnail), { TumbnailSize, TumbnailSize });
+				change |= DrawResourceProperty(properties, propTwo, pMaterialData, sampler, file, pRenderImpl, [&sampler, start, totalWidth](UUID* value) {
+					return AssetPicker::ResourceTumbnailButton(sampler, 18.0f, start, totalWidth, textureDataHash, value);
+				});
 				ImGui::PopID();
-
-				/* Deserialize new value into resources array */
-				if (textureChange)
-				{
-					Undo::ApplyYAMLEdit(file, propTwo["Value"].Path(), uint64_t(oldValue), uint64_t(value));
-					const UUID newUUID = propValueTwo.As<uint64_t>();
-					pMaterialData->SetTexture(sampler, newUUID);
-					change = true;
-				}
 				continue;
 			}
 			
 			/* Draw as normal */
 			const MaterialPropertyInfo* propInfo = pPipeline->GetPropertyInfoAt(i);
 
-			size_t materialPropertyIndex = 0;
-			if (!pMaterialData->GetPropertyInfoIndex(propInfo->ShaderName(), materialPropertyIndex))
-				continue;
-
-			MaterialPropertyInfo* pMaterialProperty = pMaterialData->GetPropertyInfoAt(materialPropertyIndex);
-
 			if (propInfo->IsResource())
 			{
 				const std::string& sampler = propInfo->ShaderName();
-
 				auto prop = properties[sampler];
-				if (!prop.Exists()) {
-					prop["DisplayName"].Set(sampler);
-					prop["TypeHash"].Set(textureDataHash);
-					prop["Value"].Set(0);
-				}
-
-				auto propValue = prop["Value"];
-				PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(ST_Asset);
-
 				ImGui::PushID(sampler.data());
-				const bool changed = pPropertyDrawer->Draw(file, propValue.Path(), pMaterialProperty->TypeHash(), pMaterialProperty->Flags());
-				TextureHandle tumbnail = Tumbnail::GetTumbnail(propValue.As<uint64_t>());
-				if (tumbnail)
-					ImGui::Image(pRenderImpl->GetTextureID(tumbnail), { TumbnailSize, TumbnailSize });
+				change |= DrawResourceProperty(properties, prop, pMaterialData, sampler, file, pRenderImpl, [&sampler](UUID* value) {
+					return AssetPicker::ResourceDropdown(sampler, textureDataHash, value);
+				});
 				ImGui::PopID();
-
-				/* Deserialize new value into resources array */
-				if (changed)
-				{
-					const UUID newUUID = propValue.As<uint64_t>();
-					pMaterialData->SetTexture(sampler, newUUID);
-					change = true;
-				}
 				continue;
 			}
 
-			auto prop = properties[propInfo->ShaderName()];
-			if (!prop.Exists()) {
-				prop["ShaderName"].Set(propInfo->ShaderName());
-				prop["TypeHash"].Set(propInfo->TypeHash());
-			}
-
 			ImGui::PushID(propInfo->ShaderName().data());
-			auto propValue = prop["Value"];
-			const bool changed = PropertyDrawer::DrawProperty(file, propValue.Path(), propInfo->TypeHash(), propInfo->TypeHash(), pMaterialProperty->Flags() | PropertyFlags::Color);
+			auto prop = properties[propInfo->ShaderName()];
+			change |= DrawMaterialProperty(properties, prop, i, propInfo, serializers, pMaterialData, file);
 			ImGui::PopID();
-
-			/* Deserialize new value into buffer */
-			if (changed)
-			{
-				serializers.DeserializeProperty(pMaterialData->GetBufferReference(),
-					pMaterialProperty->TypeHash(), pMaterialProperty->Offset(), pMaterialProperty->Size(), propValue);
-				change = true;
-			}
 		}
 		return change;
 	}

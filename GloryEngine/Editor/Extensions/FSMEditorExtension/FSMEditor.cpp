@@ -62,11 +62,12 @@ namespace Glory::Editor
 		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(m_EditingFSM);
 		YAMLResource<FSMData>* pDocument = static_cast<YAMLResource<FSMData>*>(pResource);
-		Utils::YAMLFileRef& file = **pDocument;
+		Utils::YAMLFileRef& file = pDocument->File();
+		Utils::NodeValueRef rootNode = **pDocument;
 
-		auto entryNode = file["StartNode"];
-		auto nodes = file["Nodes"];
-		auto transitions = file["Transitions"];
+		auto entryNode = rootNode["StartNode"];
+		auto nodes = rootNode["Nodes"];
+		auto transitions = rootNode["Transitions"];
 
 		const UUID entryNodeID = entryNode.As<uint64_t>();
 

@@ -117,8 +117,8 @@ namespace Glory::Editor
 		pPipeline->AddShader(shaderID);
 		YAMLResource<PipelineData>* pPipelineData = static_cast<YAMLResource<PipelineData>*>(
 			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(pipelineID));
-		Utils::YAMLFileRef& file = **pPipelineData;
-		auto shaders = file["Shaders"];
+		Utils::NodeValueRef node = **pPipelineData;
+		auto shaders = node["Shaders"];
 		shaders[shaders.Size()].Set(uint64_t(shaderID));
 		DeletePipelineCache(pipelineID);
 		QueueCompileJob(pipelineID);
@@ -132,8 +132,8 @@ namespace Glory::Editor
 		pPipeline->RemoveShaderAt(index);
 		YAMLResource<PipelineData>* pMaterialData = static_cast<YAMLResource<PipelineData>*>(
 			EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(pipelineID));
-		Utils::YAMLFileRef& file = **pMaterialData;
-		auto shaders = file["Shaders"];
+		Utils::NodeValueRef node = **pMaterialData;
+		auto shaders = node["Shaders"];
 		shaders.Remove(index);
 		DeletePipelineCache(pipelineID);
 		QueueCompileJob(pipelineID);
@@ -490,7 +490,8 @@ namespace Glory::Editor
 		EditorResourceManager& resourceManager = EditorApplication::GetInstance()->GetResourceManager();
 		YAMLResource<PipelineData>* pPipelineData = static_cast<YAMLResource<PipelineData>*>(
 			resourceManager.GetEditableResource(pPipeline->GetUUID()));
-		auto features = (**pPipelineData)["Features"];
+		Utils::NodeValueRef rootNode = **pPipelineData;
+		auto features = rootNode["Features"];
 		for (size_t i = 0; i < pPipeline->ShaderCount(); ++i)
 		{
 			const UUID shaderID = pPipeline->ShaderID(i);
@@ -540,13 +541,13 @@ namespace Glory::Editor
 		PipelineUpdateEvents().Dispatch({ pPipeline });
 	}
 
-	void EditorPipelineManager::LoadIntoPipeline(Utils::YAMLFileRef& file, PipelineData* pPipeline) const
+	void EditorPipelineManager::LoadIntoPipeline(Utils::NodeValueRef node, PipelineData* pPipeline) const
 	{
-		pPipeline->SetPipelineType(file["Type"].AsEnum<PipelineType>());
+		pPipeline->SetPipelineType(node["Type"].AsEnum<PipelineType>());
 		pPipeline->RemoveAllShaders();
-		for (size_t i = 0; i < file["Shaders"].IsSequence() && file["Shaders"].Size(); ++i)
+		for (size_t i = 0; i < node["Shaders"].IsSequence() && node["Shaders"].Size(); ++i)
 		{
-			auto shader = file["Shaders"][i];
+			auto shader = node["Shaders"][i];
 			const UUID shaderID = shader.As<uint64_t>();
 			pPipeline->AddShader(shaderID);
 		}

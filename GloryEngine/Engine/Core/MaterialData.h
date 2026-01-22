@@ -82,6 +82,7 @@ namespace Glory
         GLORY_API void SetTexture(const std::string& name, UUID uuid);
         GLORY_API void SetTexture(TextureType textureType, size_t texIndex, UUID uuid);
         GLORY_API bool GetTexture(const std::string& name, TextureData** value, AssetManager* pManager);
+        GLORY_API bool GetTexture(const std::string& name, UUID* texID);
 
     protected:
         friend class PipelineData;

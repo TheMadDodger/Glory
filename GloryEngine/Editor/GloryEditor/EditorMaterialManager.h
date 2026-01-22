@@ -1,5 +1,6 @@
 #pragma once
 #include <UUID.h>
+#include <GloryEditor.h>
 #include <MaterialManager.h>
 
 #include <map>
@@ -35,23 +36,23 @@ namespace Editor
 		void Cleanup();
 
 		/** @brief Load editor property data from YAML into material
-		 * @param file The YAML file to read from
+		 * @param node The YAML node to read from
 		 * @param pMaterial Material to load the properties into
 		 */
-		void LoadIntoMaterial(Utils::YAMLFileRef& file, MaterialData* pMaterial) const;
+		GLORY_EDITOR_API void LoadIntoMaterial(Utils::NodeValueRef node, MaterialData* pMaterial, bool clearProperties=true) const;
 
 		/** @brief Set a materials pipeline and update its properties
 		 * @param materialID ID of the material
 		 * @param pipelineID ID of the pipeline
 		 */
-		void SetMaterialPipeline(UUID materialID, UUID pipelineID);
+		GLORY_EDITOR_API void SetMaterialPipeline(UUID materialID, UUID pipelineID);
 
 		/** @brief Get a material or material instance by ID */
-		virtual MaterialData* GetMaterial(UUID materialID) const override;
+		GLORY_EDITOR_API virtual MaterialData* GetMaterial(UUID materialID) const override;
 
-		virtual MaterialData* CreateRuntimeMaterial(UUID baseMaterial) override;
+		GLORY_EDITOR_API virtual MaterialData* CreateRuntimeMaterial(UUID baseMaterial) override;
 
-		virtual void DestroyRuntimeMaterials() override;
+		GLORY_EDITOR_API virtual void DestroyRuntimeMaterials() override;
 
 	private:
 		/** @brief Handler for @ref AssetCallbackType::CT_AssetRegistered events */

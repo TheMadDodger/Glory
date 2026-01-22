@@ -25,8 +25,9 @@ namespace Glory::Editor
 	bool StringsOverrideTableEditor::OnGUI()
 	{
 		YAMLResource<StringsOverrideTable>* pTableData = (YAMLResource<StringsOverrideTable>*)m_pTarget;
-		Utils::YAMLFileRef& file = **pTableData;
-		auto baseTable = file["BaseTable"];
+		Utils::YAMLFileRef& file = pTableData->File();
+		Utils::NodeValueRef rootNode = **pTableData;
+		auto baseTable = rootNode["BaseTable"];
 		const UUID baseTableID = baseTable.As<uint64_t>(0);
 		UUID newBaseTableID = baseTableID;
 		bool change = false;
@@ -38,7 +39,7 @@ namespace Glory::Editor
 			Undo::StopRecord();
 			change = true;
 		}
-		auto language = file["Language"];
+		auto language = rootNode["Language"];
 		ProjectSettings* pLanguageSettings = ProjectSettings::Get("Languages");
 		Utils::YAMLFileRef& languagesFile = **pLanguageSettings;
 		auto defaultLang = languagesFile["DefaultLanguage"];

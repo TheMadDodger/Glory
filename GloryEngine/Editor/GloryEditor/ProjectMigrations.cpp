@@ -254,25 +254,25 @@ namespace Glory::Editor
                 continue;
             }
             YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(pResource);
-            Utils::YAMLFileRef& file = **pMaterial;
-            if (file["Properties"].IsMap()) continue;
+            Utils::NodeValueRef rootNode = **pMaterial;
+            if (rootNode["Properties"].IsMap()) continue;
 
-            YAML::Node propertiesNode = file["Properties"].Node();
-            file["OldProperties"].Set(propertiesNode);
-            file.RootNodeRef().ValueRef().Remove("Properties");
+            YAML::Node propertiesNode = rootNode["Properties"].Node();
+            rootNode["OldProperties"].Set(propertiesNode);
+            rootNode.Remove("Properties");
 
-            for (size_t i = 0; i < file["OldProperties"].Size(); ++i)
+            for (size_t i = 0; i < rootNode["OldProperties"].Size(); ++i)
             {
-                const std::string propId = file["OldProperties"][i]["ShaderName"].As<std::string>();
-                const uint32_t hash = file["OldProperties"][i]["TypeHash"].As<uint32_t>();
-                YAML::Node value = file["OldProperties"][i]["Value"].Node();
+                const std::string propId = rootNode["OldProperties"][i]["ShaderName"].As<std::string>();
+                const uint32_t hash = rootNode["OldProperties"][i]["TypeHash"].As<uint32_t>();
+                YAML::Node value = rootNode["OldProperties"][i]["Value"].Node();
 
-                auto newProp = file["Properties"][propId];
+                auto newProp = rootNode["Properties"][propId];
                 newProp["DisplayName"].Set(propId);
                 newProp["TypeHash"].Set(hash);
                 newProp["Value"].Set(value);
             }
-            file.RootNodeRef().ValueRef().Remove("OldProperties");
+            rootNode.Remove("OldProperties");
             EditorAssetDatabase::SetAssetDirty(uuid);
             pMaterial->SetDirty(true);
             pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Migrated material properties for " + std::to_string(uuid));
@@ -289,23 +289,23 @@ namespace Glory::Editor
                 continue;
             }
             YAMLResource<MaterialInstanceData>* pMaterial = static_cast<YAMLResource<MaterialInstanceData>*>(pResource);
-            Utils::YAMLFileRef& file = **pMaterial;
-            if (file["Overrides"].IsMap()) continue;
+            Utils::NodeValueRef rootNode = **pMaterial;
+            if (rootNode["Overrides"].IsMap()) continue;
 
-            YAML::Node overridesNode = file["Overrides"].Node();
-            file["OldOverrides"].Set(overridesNode);
-            file.RootNodeRef().ValueRef().Remove("Overrides");
+            YAML::Node overridesNode = rootNode["Overrides"].Node();
+            rootNode["OldOverrides"].Set(overridesNode);
+            rootNode.Remove("Overrides");
 
-            for (size_t i = 0; i < file["OldOverrides"].Size(); ++i)
+            for (size_t i = 0; i < rootNode["OldOverrides"].Size(); ++i)
             {
-                const std::string propId = file["OldOverrides"][i]["DisplayName"].As<std::string>();
-                YAML::Node value = file["OldOverrides"][i]["Value"].Node();
+                const std::string propId = rootNode["OldOverrides"][i]["DisplayName"].As<std::string>();
+                YAML::Node value = rootNode["OldOverrides"][i]["Value"].Node();
 
-                auto newProp = file["Overrides"][propId];
+                auto newProp = rootNode["Overrides"][propId];
                 newProp["Enable"].Set(true);
                 newProp["Value"].Set(value);
             }
-            file.RootNodeRef().ValueRef().Remove("OldOverrides");
+            rootNode.Remove("OldOverrides");
             EditorAssetDatabase::SetAssetDirty(uuid);
             pMaterial->SetDirty(true);
             pApplication->GetEngine()->GetDebug().LogInfo("0.3.0> Migrated material instance overrides for " + std::to_string(uuid));
@@ -417,9 +417,9 @@ namespace Glory::Editor
             }
 
             YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(pResource);
-            Utils::YAMLFileRef& file = **pMaterial;
+            Utils::NodeValueRef rootNode = **pMaterial;
 
-            auto shaders = file["Shaders"];
+            auto shaders = rootNode["Shaders"];
             for (size_t i = 0; i < shaders.Size(); ++i)
             {
                 const UUID oldUUID = shaders[i]["UUID"].As<uint64_t>();
@@ -464,10 +464,10 @@ namespace Glory::Editor
             }
 
             YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(pResource);
-            Utils::YAMLFileRef& file = **pMaterial;
+            Utils::NodeValueRef rootNode = **pMaterial;
 
-            auto shaders = file["Shaders"];
-            auto pipeline = file["Pipeline"];
+            auto shaders = rootNode["Shaders"];
+            auto pipeline = rootNode["Pipeline"];
             std::string shadersStr;
             for (size_t i = 0; i < shaders.Size(); ++i)
             {
@@ -491,7 +491,7 @@ namespace Glory::Editor
                 pipeline.Set(uint64_t(9));
             }
 
-            file.RootNodeRef().ValueRef().Remove("Shaders");
+            rootNode.Remove("Shaders");
             EditorAssetDatabase::SetAssetDirty(uuid);
         }
     }
@@ -531,11 +531,10 @@ namespace Glory::Editor
             }
 
             YAMLResource<PrefabData>* pPrefab = static_cast<YAMLResource<PrefabData>*>(pResource);
-            Utils::YAMLFileRef& file = **pPrefab;
-            auto entities = file["Entities"];
+            Utils::NodeValueRef rootNode = **pPrefab;
+            auto entities = rootNode["Entities"];
             entities.Set(YAML::Node(YAML::NodeType::Sequence));
 
-            auto root = file.RootNodeRef().ValueRef();
             std::function<void(Utils::NodeValueRef, UUID)> recursiveReadMove =
             [&entities, &recursiveReadMove](Utils::NodeValueRef child, UUID parent) {
                 const UUID entityUUID = child["OriginalUUID"].As<uint64_t>();
@@ -557,14 +556,14 @@ namespace Glory::Editor
                     recursiveReadMove(children[i], entityUUID);
             };
 
-            recursiveReadMove(root, 0);
+            recursiveReadMove(rootNode, 0);
 
-            root.Remove("OriginalUUID");
-            root.Remove("TransformUUID");
-            root.Remove("ActiveSelf");
-            root.Remove("Name");
-            root.Remove("Components");
-            root.Remove("Children");
+            rootNode.Remove("OriginalUUID");
+            rootNode.Remove("TransformUUID");
+            rootNode.Remove("ActiveSelf");
+            rootNode.Remove("Name");
+            rootNode.Remove("Components");
+            rootNode.Remove("Children");
             EditorAssetDatabase::SetAssetDirty(uuid);
         }
     }
@@ -601,34 +600,34 @@ namespace Glory::Editor
             }
 
             YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(pResource);
-            Utils::YAMLFileRef& file = **pMaterial;
+            Utils::NodeValueRef rootNode = **pMaterial;
 
-            const UUID baseMaterialID = file["BaseMaterial"].As<uint64_t>();
+            const UUID baseMaterialID = rootNode["BaseMaterial"].As<uint64_t>();
             if (!baseMaterialID)
             {
-                file.RootNodeRef().ValueRef().SetMap();
-                file["Properties"].SetMap();
-                file["Pipeline"].Set(0ull);
+                rootNode.SetMap();
+                rootNode["Properties"].SetMap();
+                rootNode["Pipeline"].Set(0ull);
                 continue;
             }
 
             pResource = pApplication->GetResourceManager().GetEditableResource(baseMaterialID);
             if (!pResource)
             {
-                file.RootNodeRef().ValueRef().SetMap();
-                file["Properties"].SetMap();
-                file["Pipeline"].Set(0ull);
+                rootNode.SetMap();
+                rootNode["Properties"].SetMap();
+                rootNode["Pipeline"].Set(0ull);
                 continue;
             }
 
             YAMLResource<MaterialData>* pBaseMaterial = static_cast<YAMLResource<MaterialData>*>(pResource);
-            Utils::YAMLFileRef& baseFile = **pBaseMaterial;
+            Utils::NodeValueRef baseRootNode = **pBaseMaterial;
 
-            auto basePipeline = baseFile["Pipeline"];
-            file["Pipeline"].Set(basePipeline.Exists() ? basePipeline.As<uint64_t>() : 0ull);
+            auto basePipeline = baseRootNode["Pipeline"];
+            rootNode["Pipeline"].Set(basePipeline.Exists() ? basePipeline.As<uint64_t>() : 0ull);
 
-            auto baseProperties = baseFile["Properties"];
-            auto properties = file["Properties"];
+            auto baseProperties = baseRootNode["Properties"];
+            auto properties = rootNode["Properties"];
             properties.SetMap();
 
             for (auto iter = baseProperties.Begin(); iter != baseProperties.End(); ++iter)
@@ -636,7 +635,7 @@ namespace Glory::Editor
                 const std::string key = *iter;
                 auto baseProperty = baseProperties[key];
                 auto property = properties[key];
-                auto override = file["Overrides"][key];
+                auto override = rootNode["Overrides"][key];
 
                 property["DisplayName"].Set(baseProperty["DisplayName"].As<std::string>());
                 auto type = property["TypeHash"];
@@ -647,8 +646,8 @@ namespace Glory::Editor
                     property["Value"].Set(baseProperty["Value"].Node());
             }
 
-            file["BaseMaterial"].Erase();
-            file["Overrides"].Erase();
+            rootNode["BaseMaterial"].Erase();
+            rootNode["Overrides"].Erase();
         }
     }
 

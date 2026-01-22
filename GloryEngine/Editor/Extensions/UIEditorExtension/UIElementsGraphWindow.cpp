@@ -63,7 +63,8 @@ namespace Glory::Editor
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(pDocument->OriginalDocumentID());
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-		Utils::YAMLFileRef& file = **pDocumentData;
+		Utils::YAMLFileRef& file = pDocumentData->File();
+		Utils::NodeValueRef node = **pDocumentData;
 
 		Utils::ECS::EntityRegistry& registry = pDocument->Registry();
 		DragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
@@ -92,7 +93,7 @@ namespace Glory::Editor
 
 			registry.SetParent(draggingEntity, newParentID);
 			registry.SetSiblingIndex(draggingEntity, newSiblingIndex);
-			SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
+			SetUIParentAction::StoreDocumentState(pEngine, pDocument, node["Entities"]);
 			pDocument->SetDrawDirty();
 		});
 
@@ -142,7 +143,7 @@ namespace Glory::Editor
 			
 			registry.SetParent(draggingEntity, newParentID);
 			registry.SetSiblingIndex(draggingEntity, newSiblingIndex);
-			SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
+			SetUIParentAction::StoreDocumentState(pEngine, pDocument, node["Entities"]);
 			pDocument->SetDrawDirty();
 		});
 
@@ -198,7 +199,8 @@ namespace Glory::Editor
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(pDocument->OriginalDocumentID());
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-		Utils::YAMLFileRef& file = **pDocumentData;
+		Utils::YAMLFileRef& file = pDocumentData->File();
+		Utils::NodeValueRef node = **pDocumentData;
 
 		if (first)
 		{
@@ -246,7 +248,7 @@ namespace Glory::Editor
 
 					registry.SetParent(draggingEntity, parent);
 					registry.SetSiblingIndex(draggingEntity, newSiblingIndex);
-					SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
+					SetUIParentAction::StoreDocumentState(pEngine, pDocument, node["Entities"]);
 					pDocument->SetDrawDirty();
 				}
 			});
@@ -299,7 +301,7 @@ namespace Glory::Editor
 				Undo::StopRecord();
 
 				registry.SetParent(draggingEntity, entity);
-				SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
+				SetUIParentAction::StoreDocumentState(pEngine, pDocument, node["Entities"]);
 				pDocument->SetDrawDirty();
 			}
 		});
@@ -379,7 +381,7 @@ namespace Glory::Editor
 
 				registry.SetParent(draggingEntity, parent);
 				registry.SetSiblingIndex(draggingEntity, newSiblingIndex);
-				SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
+				SetUIParentAction::StoreDocumentState(pEngine, pDocument, node["Entities"]);
 				pDocument->SetDrawDirty();
 			}
 		});

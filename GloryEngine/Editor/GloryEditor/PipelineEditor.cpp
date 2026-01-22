@@ -26,8 +26,8 @@ namespace Glory::Editor
 
 	const char* GetPipelineError(YAMLResource<PipelineData>* pPipeline)
 	{
-		Utils::YAMLFileRef& file = **pPipeline;
-		auto shaders = file["Shaders"];
+		Utils::NodeValueRef node = **pPipeline;
+		auto shaders = node["Shaders"];
 
 		if (shaders.Size() == 0)
 			return "The pipeline is empty";
@@ -81,8 +81,8 @@ namespace Glory::Editor
 		static ImGuiTableFlags flags =
 			ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_NoBordersInBody;
 
-		Utils::YAMLFileRef& file = **pPipeline;
-		auto shaders = file["Shaders"];
+		Utils::NodeValueRef node = **pPipeline;
+		auto shaders = node["Shaders"];
 
 		const size_t shaderCount = shaders.Size();
 
@@ -181,10 +181,11 @@ namespace Glory::Editor
 	bool PipelineEditor::OnGUI()
 	{
 		YAMLResource<PipelineData>* pPipeline = (YAMLResource<PipelineData>*)m_pTarget;
-		Utils::YAMLFileRef& file = **pPipeline;
+		Utils::YAMLFileRef& yamlFile = pPipeline->File();
+		Utils::NodeValueRef node = **pPipeline;
 
-		bool change = EditorUI::InputEnum<PipelineType>(file, "Type", { PipelineType::PT_Unknown, PipelineType::PT_Count });
-		const PipelineType pipelineType = file["Type"].AsEnum<PipelineType>(PipelineType::PT_Phong);
+		bool change = EditorUI::InputEnum<PipelineType>(yamlFile, node["Type"].Path(), {PipelineType::PT_Unknown, PipelineType::PT_Count});
+		const PipelineType pipelineType = node["Type"].AsEnum<PipelineType>(PipelineType::PT_Phong);
 
 		ImGui::PushID("Shaders");
 		if (EditorUI::Header("Shaders"))
@@ -200,7 +201,7 @@ namespace Glory::Editor
 		ImGui::PushID("Features");
 		if (EditorUI::Header("Features"))
 		{
-			auto features = file["Features"];
+			auto features = node["Features"];
 			if (!features.Exists() || !features.IsMap())
 				features.SetMap();
 
@@ -210,7 +211,7 @@ namespace Glory::Editor
 				auto feature = features[featureName];
 				if (!feature.Exists() || !feature.IsScalar())
 					feature.Set(pPipelineData->FeatureEnabled(i));
-				if (EditorUI::CheckBox(file, feature.Path()))
+				if (EditorUI::CheckBox(yamlFile, feature.Path()))
 				{
 					change = true;
 					EditorApplication::GetInstance()->GetPipelineManager().
@@ -232,53 +233,53 @@ namespace Glory::Editor
 			ImGui::PushID("Settings");
 			if (EditorUI::Header("Settings"))
 			{
-				auto settings = file["Settings"];
+				auto settings = node["Settings"];
 				if (!settings.Exists() || !settings.IsMap())
 					settings.SetMap();
 
 				ImGui::PushID("General");
 				if (EditorUI::HeaderLight("General"))
 				{
-					settingsChanged |= EditorUI::InputEnum<CullFace>(file, settings["CullFace"].Path());
-					settingsChanged |= EditorUI::InputEnum<PrimitiveType>(file, settings["PrimitiveType"].Path());
-					settingsChanged |= EditorUI::CheckBoxFlags(file, settings["ColorWriteMask"].Path(), { "r", "g", "b", "a" }, { 1, 2, 4, 8 });
+					settingsChanged |= EditorUI::InputEnum<CullFace>(yamlFile, settings["CullFace"].Path());
+					settingsChanged |= EditorUI::InputEnum<PrimitiveType>(yamlFile, settings["PrimitiveType"].Path());
+					settingsChanged |= EditorUI::CheckBoxFlags(yamlFile, settings["ColorWriteMask"].Path(), { "r", "g", "b", "a" }, { 1, 2, 4, 8 });
 				}
 				ImGui::PopID();
 
 				ImGui::PushID("Depth");
 				if (EditorUI::HeaderLight("Depth"))
 				{
-					settingsChanged |= EditorUI::CheckBox(file, settings["DepthTestEnabled"].Path());
-					settingsChanged |= EditorUI::CheckBox(file, settings["DepthWriteEnabled"].Path());
-					settingsChanged |= EditorUI::InputEnum<CompareOp>(file, settings["DepthCompareOp"].Path());
+					settingsChanged |= EditorUI::CheckBox(yamlFile, settings["DepthTestEnabled"].Path());
+					settingsChanged |= EditorUI::CheckBox(yamlFile, settings["DepthWriteEnabled"].Path());
+					settingsChanged |= EditorUI::InputEnum<CompareOp>(yamlFile, settings["DepthCompareOp"].Path());
 				}
 				ImGui::PopID();
 
 				ImGui::PushID("Blending");
 				if (EditorUI::HeaderLight("Blending"))
 				{
-					settingsChanged |= EditorUI::CheckBox(file, settings["BlendEnabled"].Path());
-					settingsChanged |= EditorUI::InputEnum<BlendFactor>(file, settings["SrcColorBlendFactor"].Path());
-					settingsChanged |= EditorUI::InputEnum<BlendFactor>(file, settings["DrcColorBlendFactor"].Path());
-					settingsChanged |= EditorUI::InputEnum<BlendOp>(file, settings["ColorBlendOp"].Path());
-					settingsChanged |= EditorUI::InputEnum<BlendFactor>(file, settings["SrcAlphaBlendFactor"].Path());
-					settingsChanged |= EditorUI::InputEnum<BlendFactor>(file, settings["DstAlphaBlendFactor"].Path());
-					settingsChanged |= EditorUI::InputEnum<BlendOp>(file, settings["AlphaBlendOp"].Path());
-					settingsChanged |= EditorUI::InputColor(file, settings["BlendConstants"].Path(), false);
+					settingsChanged |= EditorUI::CheckBox(yamlFile, settings["BlendEnabled"].Path());
+					settingsChanged |= EditorUI::InputEnum<BlendFactor>(yamlFile, settings["SrcColorBlendFactor"].Path());
+					settingsChanged |= EditorUI::InputEnum<BlendFactor>(yamlFile, settings["DrcColorBlendFactor"].Path());
+					settingsChanged |= EditorUI::InputEnum<BlendOp>(yamlFile, settings["ColorBlendOp"].Path());
+					settingsChanged |= EditorUI::InputEnum<BlendFactor>(yamlFile, settings["SrcAlphaBlendFactor"].Path());
+					settingsChanged |= EditorUI::InputEnum<BlendFactor>(yamlFile, settings["DstAlphaBlendFactor"].Path());
+					settingsChanged |= EditorUI::InputEnum<BlendOp>(yamlFile, settings["AlphaBlendOp"].Path());
+					settingsChanged |= EditorUI::InputColor(yamlFile, settings["BlendConstants"].Path(), false);
 				}
 				ImGui::PopID();
 
 				ImGui::PushID("Stencil");
 				if (EditorUI::HeaderLight("Stencil"))
 				{
-					settingsChanged |= EditorUI::CheckBox(file, settings["StencilTestEnabled"].Path());
-					settingsChanged |= EditorUI::InputEnum<CompareOp>(file, settings["StencilCompareOp"].Path());
-					settingsChanged |= EditorUI::InputEnum<Func>(file, settings["StencilFailOp"].Path());
-					settingsChanged |= EditorUI::InputEnum<Func>(file, settings["StencilDepthFailOp"].Path());
-					settingsChanged |= EditorUI::InputEnum<Func>(file, settings["StencilPassOp"].Path());
-					settingsChanged |= EditorUI::InputUInt(file, settings["StencilCompareMask"].Path(), 0, 255, 1);
-					settingsChanged |= EditorUI::InputUInt(file, settings["StencilWriteMask"].Path(), 0, 255, 1);
-					settingsChanged |= EditorUI::InputUInt(file, settings["StencilReference"].Path(), 0, 255, 1);
+					settingsChanged |= EditorUI::CheckBox(yamlFile, settings["StencilTestEnabled"].Path());
+					settingsChanged |= EditorUI::InputEnum<CompareOp>(yamlFile, settings["StencilCompareOp"].Path());
+					settingsChanged |= EditorUI::InputEnum<Func>(yamlFile, settings["StencilFailOp"].Path());
+					settingsChanged |= EditorUI::InputEnum<Func>(yamlFile, settings["StencilDepthFailOp"].Path());
+					settingsChanged |= EditorUI::InputEnum<Func>(yamlFile, settings["StencilPassOp"].Path());
+					settingsChanged |= EditorUI::InputUInt(yamlFile, settings["StencilCompareMask"].Path(), 0, 255, 1);
+					settingsChanged |= EditorUI::InputUInt(yamlFile, settings["StencilWriteMask"].Path(), 0, 255, 1);
+					settingsChanged |= EditorUI::InputUInt(yamlFile, settings["StencilReference"].Path(), 0, 255, 1);
 				}
 				ImGui::PopID();
 			}
@@ -287,7 +288,7 @@ namespace Glory::Editor
 		change |= settingsChanged;
 		if (settingsChanged && pPipelineData)
 		{
-			auto settings = file["Settings"];
+			auto settings = node["Settings"];
 			pPipelineData->GetCullFace() = settings["CullFace"].AsEnum<CullFace>(CullFace::Back);
 			pPipelineData->GetPrimitiveType() = settings["PrimitiveType"].AsEnum<PrimitiveType>(PrimitiveType::Triangles);
 			pPipelineData->SetDepthTestEnabled(settings["DepthTestEnabled"].As<bool>(true));

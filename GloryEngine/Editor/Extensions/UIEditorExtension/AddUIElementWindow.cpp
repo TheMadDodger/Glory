@@ -99,7 +99,7 @@ namespace Glory::Editor
 			EditorResourceManager& resources = pApp->GetResourceManager();
 			EditableResource* pResource = resources.GetEditableResource(documentID);
 			YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-			Utils::YAMLFileRef& file = **pDocumentData;
+			Utils::YAMLFileRef& file = pDocumentData->File();
 
 			const size_t siblingIndex = pDocument->Registry().ChildCount(0);
 			pMainWindow->SelectedEntity() =

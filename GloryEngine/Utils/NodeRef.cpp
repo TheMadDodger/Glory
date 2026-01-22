@@ -217,6 +217,16 @@ namespace Glory::Utils
 		return RootNodeRef()[path];
 	}
 
+	InMemoryYAML::operator NodeRef()
+	{
+		return NodeRef(m_RootNode);
+	}
+
+	InMemoryYAML::operator NodeValueRef()
+	{
+		return NodeRef(m_RootNode).ValueRef();
+	}
+
 	std::string InMemoryYAML::ToString()
 	{
 		YAML::Emitter out;
@@ -243,6 +253,11 @@ namespace Glory::Utils
 
 	void YAMLFileRef::Load()
 	{
+		if (!std::filesystem::exists(m_FilePath))
+		{
+			m_RootNode = YAML::Node(YAML::NodeType::Map);
+			return;
+		}
 		m_RootNode = YAML::LoadFile(m_FilePath.string());
 	}
 

@@ -42,7 +42,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API static bool IsBusy();
 		GLORY_EDITOR_API static bool IsCompilingAsset(UUID uuid);
 		GLORY_EDITOR_API static bool CompileSceneSettings(UUID uuid);
-		GLORY_EDITOR_API static bool CompileSceneSettings(GScene* pScene, Utils::NodeValueRef& root);
+		GLORY_EDITOR_API static bool CompileSceneSettings(GScene* pScene, Utils::NodeValueRef root);
 		GLORY_EDITOR_API static void RemoveDeletedAssets();
 		GLORY_EDITOR_API static void Update();
 		GLORY_EDITOR_API static AssetCompilerEventDispatcher& GetAssetCompilerEventDispatcher();

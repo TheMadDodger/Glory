@@ -38,10 +38,11 @@ namespace Glory::Editor
 		EditableResource* pResource = resources.GetEditableResource(fsmID);
 		if (!pResource) return;
 		YAMLResource<FSMData>* pDocument = static_cast<YAMLResource<FSMData>*>(pResource);
-		Utils::YAMLFileRef& file = **pDocument;
+		Utils::YAMLFileRef& file = pDocument->File();
+		Utils::NodeValueRef rootNode = **pDocument;
 
-		auto properties = file["Properties"];
-		auto transitions = file["Transitions"];
+		auto properties = rootNode["Properties"];
+		auto transitions = rootNode["Transitions"];
 
 		bool change = false;
 		bool needsFilter = m_LastFrameFSMID != fsmID || ForceFilter;

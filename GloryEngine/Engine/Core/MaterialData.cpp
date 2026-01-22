@@ -363,4 +363,15 @@ namespace Glory
 		*value = m_Resources[resourceIndex].Get(pManager);
 		return true;
 	}
+
+	bool MaterialData::GetTexture(const std::string& name, UUID* texID)
+	{
+		size_t index;
+		if (!GetPropertyInfoIndex(name, index)) return false;
+		const MaterialPropertyInfo* pPropertyInfo = GetPropertyInfoAt(index);
+		if (!pPropertyInfo->IsResource()) return false;
+		const size_t resourceIndex = pPropertyInfo->Offset();
+		*texID = m_Resources[resourceIndex].AssetUUID();
+		return true;
+	}
 }

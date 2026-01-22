@@ -41,7 +41,7 @@ namespace Glory::Editor
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(actionRecord.ObjectID);
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-		Utils::YAMLFileRef& file = **pDocumentData;
+		Utils::NodeValueRef rootNode = **pDocumentData;
 
 		Utils::ECS::EntityRegistry& registry = pDocument->Registry();
 		const Utils::ECS::EntityID toReParent = pDocument->EntityID(m_ToReparent);
@@ -49,7 +49,7 @@ namespace Glory::Editor
 		registry.SetParent(toReParent, parent);
 		registry.SetSiblingIndex(toReParent, m_OldSiblingIndex);
 
-		StoreDocumentState(pEngine, pDocument, file["Entities"]);
+		StoreDocumentState(pEngine, pDocument, rootNode["Entities"]);
 	}
 
 	void SetUIParentAction::OnRedo(const ActionRecord& actionRecord)
@@ -61,7 +61,7 @@ namespace Glory::Editor
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(actionRecord.ObjectID);
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-		Utils::YAMLFileRef& file = **pDocumentData;
+		Utils::NodeValueRef rootNode = **pDocumentData;
 
 		Utils::ECS::EntityRegistry& registry = pDocument->Registry();
 		const Utils::ECS::EntityID toReParent = pDocument->EntityID(m_ToReparent);
@@ -69,6 +69,6 @@ namespace Glory::Editor
 		registry.SetParent(toReParent, parent);
 		registry.SetSiblingIndex(toReParent, m_NewSiblingIndex);
 
-		StoreDocumentState(pEngine, pDocument, file["Entities"]);
+		StoreDocumentState(pEngine, pDocument, rootNode["Entities"]);
 	}
 }

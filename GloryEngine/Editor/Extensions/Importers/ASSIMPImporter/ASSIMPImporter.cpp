@@ -20,6 +20,7 @@
 #include <EditorPipelineManager.h>
 #include <EditorMaterialManager.h>
 #include <EditorAssetDatabase.h>
+#include <EditorResourceManager.h>
 
 #define _FIRST(x, y, z) x
 #define UNPACK(x) x
@@ -100,6 +101,51 @@ namespace Glory::Editor
 	{
 	}
 
+    EditableResource* ASSIMPImporter::GetEditableResource(const std::filesystem::path& path) const
+    {
+        std::filesystem::path overrideFilePath = path;
+        const std::string newExtension = path.extension().string() + ".imports";
+        overrideFilePath.replace_extension(newExtension);
+
+        YAMLResource<ModelData>* pEditableResource = new FullYAMLResource<ModelData>(overrideFilePath);
+        if (!std::filesystem::exists(overrideFilePath))
+        {
+            Utils::NodeValueRef rootNode = **pEditableResource;
+            Utils::NodeValueRef imports = rootNode["ImportSettings"];
+            Utils::NodeValueRef overrides = rootNode["Overrides"];
+            if (!imports.Exists() || !imports.IsMap())
+                imports.SetMap();
+            if (!overrides.Exists() || !overrides.IsMap())
+                overrides.SetMap();
+        }
+        return pEditableResource;
+    }
+
+    EditableResource* ASSIMPImporter::GetSectionedEditableResource(EditableResource* pFullResource, const UUID subresourceID) const
+    {
+        ResourceMeta meta;
+        if (!EditorAssetDatabase::GetAssetMetadata(subresourceID, meta))
+            return nullptr;
+
+        static uint32_t materialHash = ResourceTypes::GetHash<MaterialData>();
+
+        EditableResource* pResource = nullptr;
+
+        if (meta.Hash() == materialHash)
+            pResource = new YAMLResourceSection<MaterialData, ModelData>(static_cast<YAMLResource<ModelData>*>(pFullResource),
+                "Overrides/" + std::to_string(subresourceID));
+
+        if (pResource)
+        {
+            YAMLResourceBase* pYAMLResource = static_cast<YAMLResourceBase*>(pResource);
+            Utils::NodeValueRef node = **pYAMLResource;
+            if (!node.Exists() || !node.IsMap())
+                node.SetMap();
+        }
+
+        return pResource ? pResource : nullptr;
+    }
+
     void ASSIMPImporter::EnsureUniqueAssetName(Context& context, Resource* pResource) const
     {
         size_t counter = 0;
@@ -142,6 +188,10 @@ namespace Glory::Editor
 
     ImportedResource ASSIMPImporter::LoadResource(const std::filesystem::path& path, void*) const
     {
+        EditorApplication* pEditorApp = EditorApplication::GetInstance();
+        EditorMaterialManager& materials = pEditorApp->GetMaterialManager();
+        EditorPipelineManager& pipelines = EditorApplication::GetInstance()->GetPipelineManager();
+
         Assimp::Importer importer;
 
         const aiScene* pScene = importer.ReadFile(path.string(),
@@ -181,8 +231,6 @@ namespace Glory::Editor
         ReadMetaData("FrontAxisSign", context.FrontAxisSign);
         ReadMetaData("UnitScaleFactor", context.UnitScaleFactor);
 
-        EditorPipelineManager& pipelines = EditorApplication::GetInstance()->GetPipelineManager();
-        MaterialManager& materials = EditorApplication::GetInstance()->GetMaterialManager();
         const std::filesystem::path assetsPath = ProjectSpace::GetOpenProject()->RootPath();
 
         std::function<void(ImportedResource&, Resource*, const std::string_view)> giveName =
@@ -253,6 +301,25 @@ namespace Glory::Editor
                 const std::string_view name{ material->GetName().C_Str(), material->GetName().length };
                 giveName(resource, pMaterial, name);
 
+                const UUID materialID = EditorAssetDatabase::ReserveAssetUUID(path.string(), pMaterial->Name()).first;
+
+                EditableResource* pEditorResource = pEditorApp->GetResourceManager().GetEditableResource(materialID);
+                YAMLResourceBase* pYAMLResource = pEditorResource ? static_cast<YAMLResourceBase*>(pEditorResource) : nullptr;
+
+                /* Load overriden pipeline first if it was set to setup the material */
+                if (pYAMLResource)
+                {
+                    Utils::NodeValueRef rootNode = **pYAMLResource;
+                    auto pipeline = rootNode["Pipeline"];
+                    if (pipeline.Exists())
+                    {
+                        const UUID pipelineID = pipeline.As<uint64_t>();
+                        pMaterial->SetPipeline(pipelineID);
+                        PipelineData* pPipeline = pipelines.GetPipelineData(pipelineID);
+                        pPipeline->LoadIntoMaterial(pMaterial);
+                    }
+                }
+
                 std::set<TextureType> textureTypes;
                 std::map<TextureType, std::vector<UUID>> textures;
 
@@ -310,18 +377,25 @@ namespace Glory::Editor
                     }
                 }
 
-                MaterialManager& materials = EditorApplication::GetInstance()->GetMaterialManager();
-                aiShadingMode shadingMode;
-                const aiReturn aiResult = material->Get(AI_MATKEY_SHADING_MODEL, shadingMode);
-                const UUID pipelineID = aiResult == aiReturn::aiReturn_SUCCESS ? pipelines.FindPipeline(PipelineType(shadingMode), textureTypes) :
-                    (textureTypes.size() > 0 ? pipelines.FindPipeline(textureTypes) : pipelines.FindPipeline(PT_Phong, false));
-
-                if (pipelineID)
+                /* If no pipeline override is set find one from the imported material */
+                if (!pMaterial->GetPipelineID())
                 {
-                    pMaterial->SetPipeline(pipelineID);
-                    PipelineData* pPipeline = pipelines.GetPipelineData(pipelineID);
-                    pPipeline->LoadIntoMaterial(pMaterial);
+                    aiShadingMode shadingMode;
+                    const aiReturn aiResult = material->Get(AI_MATKEY_SHADING_MODEL, shadingMode);
+                    const UUID pipelineID = aiResult == aiReturn::aiReturn_SUCCESS ? pipelines.FindPipeline(PipelineType(shadingMode), textureTypes) :
+                        (textureTypes.size() > 0 ? pipelines.FindPipeline(textureTypes) : pipelines.FindPipeline(PT_Phong, false));
 
+                    if (pipelineID)
+                    {
+                        pMaterial->SetPipeline(pipelineID);
+                        PipelineData* pPipeline = pipelines.GetPipelineData(pipelineID);
+                        pPipeline->LoadIntoMaterial(pMaterial);
+                    }
+                }
+
+                /* Load properties from import */
+                if (pMaterial->GetPipelineID())
+                {
                     for (size_t i = 0; i < pMaterial->PropertyInfoCount(); ++i)
                     {
                         MaterialPropertyInfo* info = pMaterial->GetPropertyInfoAt(i);
@@ -369,6 +443,15 @@ namespace Glory::Editor
                         for (size_t i = 0; i < texCount; ++i)
                             pMaterial->SetTexture(texType, i, textures.at(texType)[i]);
                     }
+                }
+
+                /* Override properties */
+                if (pYAMLResource)
+                {
+                    Utils::NodeValueRef rootNode = **pYAMLResource;
+                    auto properties = rootNode["Properties"];
+                    if (properties.Exists())
+                        materials.LoadIntoMaterial(**pYAMLResource, pMaterial, false);
                 }
 
                 resource.AddChild(pMaterial, pMaterial->Name());
