@@ -19,10 +19,13 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API void OnFileDragAndDrop(const std::vector<std::string_view>& paths);
 
+		static GLORY_EDITOR_API void NavigateToAndHighlight(const std::filesystem::path& path);
+
 	private:
 		virtual void OnOpen() override;
 		virtual void OnClose() override;
 		virtual void OnGUI() override;
+		virtual void Update() override;
 
 	private:
 		static void OnAsyncImport();

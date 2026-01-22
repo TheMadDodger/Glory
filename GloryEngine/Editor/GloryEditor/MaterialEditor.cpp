@@ -7,6 +7,7 @@
 #include "EditorShaderData.h"
 #include "EditorMaterialManager.h"
 #include "EditorPipelineManager.h"
+#include "EditorResourceManager.h"
 
 #include <imgui.h>
 #include <ResourceType.h>
@@ -21,6 +22,7 @@
 #include <IconsFontAwesome6.h>
 #include <PropertyFlags.h>
 #include <Tumbnail.h>
+#include <FileBrowser.h>
 
 namespace Glory::Editor
 {
@@ -145,8 +147,8 @@ namespace Glory::Editor
 		return propertyChange;
 	}
 
-	bool DrawResourceProperty(Utils::NodeValueRef properties, Utils::NodeValueRef prop, MaterialData* pMaterialData,
-		const std::string& name, Utils::YAMLFileRef& file, EditorRenderImpl* pRenderImpl, std::function<bool(UUID*)> picker)
+	bool DrawResourceProperty(Utils::NodeValueRef properties, Utils::NodeValueRef prop, MaterialData* pMaterialData, const std::string& name,
+		Utils::YAMLFileRef& file, EditorRenderImpl* pRenderImpl, std::function<bool(UUID*)> picker, EditorResourceManager& resourceManager)
 	{
 		static const uint32_t textureDataHash = ResourceTypes::GetHash<TextureData>();
 
@@ -163,6 +165,22 @@ namespace Glory::Editor
 		{
 			constexpr float namePadding = 34.0f;
 			ImGui::Image(pRenderImpl->GetTextureID(tumbnail), { TumbnailSize, TumbnailSize });
+			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Right))
+			{
+				EditableResource* pResource = resourceManager.GetEditableResource(value);
+				if (pResource)
+					Selection::SetActiveObject(pResource);
+			}
+			if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+			{
+				AssetLocation location;
+				if (EditorAssetDatabase::GetAssetLocation(value, location))
+				{
+					/* Navigate to it in the filebrowser */
+					FileBrowser::NavigateToAndHighlight(location.Path);
+				}
+			}
+
 			const std::string name = EditorAssetDatabase::GetAssetName(value);
 			ImGui::SameLine(TumbnailSize + namePadding);
 			ImGui::TextUnformatted(name.c_str());
@@ -191,6 +209,7 @@ namespace Glory::Editor
 
 	bool MaterialEditor::PropertiesGUI(YAMLResource<MaterialData>* pMaterial, MaterialData* pMaterialData)
 	{
+		EditorResourceManager& resourceManager = EditorApplication::GetInstance()->GetResourceManager();
 		EditorMaterialManager& materialManager = EditorApplication::GetInstance()->GetMaterialManager();
 		EditorPipelineManager& pipelineManager = EditorApplication::GetInstance()->GetPipelineManager();
 		Serializers& serializers = EditorApplication::GetInstance()->GetEngine()->GetSerializers();
@@ -250,7 +269,7 @@ namespace Glory::Editor
 				ImGui::PushID(sampler.data());
 				change |= DrawResourceProperty(properties, propTwo, pMaterialData, sampler, file, pRenderImpl, [&sampler, start, totalWidth](UUID* value) {
 					return AssetPicker::ResourceTumbnailButton(sampler, 18.0f, start, totalWidth, textureDataHash, value);
-				});
+				}, resourceManager);
 				ImGui::PopID();
 				continue;
 			}
@@ -265,7 +284,7 @@ namespace Glory::Editor
 				ImGui::PushID(sampler.data());
 				change |= DrawResourceProperty(properties, prop, pMaterialData, sampler, file, pRenderImpl, [&sampler](UUID* value) {
 					return AssetPicker::ResourceDropdown(sampler, textureDataHash, value);
-				});
+				}, resourceManager);
 				ImGui::PopID();
 				continue;
 			}
