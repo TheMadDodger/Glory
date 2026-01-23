@@ -148,6 +148,7 @@ namespace Glory::Editor
 
 				/* Begin an ImGui frame */
 				m_Platform.BeginFrame();
+
 				/* Paint the editor(imgui calls) */
 				RenderEditor();
 
@@ -273,8 +274,13 @@ namespace Glory::Editor
 
 			/* Begin an ImGui frame */
 			m_Platform.BeginFrame();
+			
 			/* Paint the editor(imgui calls) */
 			RenderEditor();
+
+			/* Draw popups */
+			m_MainEditor.DrawPopups();
+
 			/* Render the ImGui frame */
 			m_Platform.EndFrame();
 		}
