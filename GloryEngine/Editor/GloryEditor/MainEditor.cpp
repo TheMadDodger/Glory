@@ -254,8 +254,6 @@ namespace Glory::Editor
 		ImGui::End();
 
 		m_pMainWindows[TabIndex]->DrawGui(WORKTABS_SIZE - MENUBAR_SIZE);
-
-		DrawPopups();
 	}
 
 	void MainEditor::DrawPopups()
