@@ -20,6 +20,7 @@ namespace Glory::Editor
 	LayerSettings Layer;
 	InputSettings Input;
 	PackageSettings Packaging;
+	RenderSettings Renderer;
 
 	std::vector<ProjectSettings*> Settings = {
 		&General,
@@ -27,6 +28,7 @@ namespace Glory::Editor
 		&Layer,
 		&Input,
 		&Packaging,
+		&Renderer,
 	};
 
 	void ProjectSettings::Load(ProjectSpace* pProject)
@@ -57,6 +59,11 @@ namespace Glory::Editor
 		{
 			ProjectSpace::SetAssetDirty(Settings[index]->m_Name);
 		}
+	}
+
+	void ProjectSettings::Open(size_t index)
+	{
+		Settings[index]->OnOpen();
 	}
 
 	void ProjectSettings::OnStartPlay()
@@ -196,6 +203,10 @@ namespace Glory::Editor
 	}
 
 	PackageSettings::PackageSettings() : ProjectSettings("Packaging")
+	{
+	}
+
+	RenderSettings::RenderSettings() : ProjectSettings("Renderer")
 	{
 	}
 }

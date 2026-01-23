@@ -70,7 +70,7 @@ namespace Glory::Editor
 	bool EditorUI::InputFloat(Utils::YAMLFileRef& file, const std::filesystem::path& path, const float min, const float max, const float steps)
 	{
 		Scope s{ path };
-		const float oldValue = file[path].As<float>();
+		const float oldValue = file[path].As<float>(0.0f);
 		float newValue = oldValue;
 		auto end = path.end();
 		--end;
@@ -113,7 +113,7 @@ namespace Glory::Editor
 	bool EditorUI::InputFloat2(Utils::YAMLFileRef& file, const std::filesystem::path& path, const float min, const float max, const float steps)
 	{
 		Scope s{ path };
-		const glm::vec2 oldValue = file[path].As<glm::vec2>();
+		const glm::vec2 oldValue = file[path].As<glm::vec2>({});
 		glm::vec2 newValue = oldValue;
 		auto end = path.end();
 		--end;
@@ -156,7 +156,7 @@ namespace Glory::Editor
 	bool EditorUI::InputFloat3(Utils::YAMLFileRef& file, const std::filesystem::path& path, const float min, const float max, const float steps)
 	{
 		Scope s{ path };
-		const glm::vec3 oldValue = file[path].As<glm::vec3>();
+		const glm::vec3 oldValue = file[path].As<glm::vec3>({});
 		glm::vec3 newValue = oldValue;
 		auto end = path.end();
 		--end;
@@ -199,7 +199,7 @@ namespace Glory::Editor
 	bool EditorUI::InputFloat4(Utils::YAMLFileRef& file, const std::filesystem::path& path, const float min, const float max, const float steps)
 	{
 		Scope s{ path };
-		const glm::vec4 oldValue = file[path].As<glm::vec4>();
+		const glm::vec4 oldValue = file[path].As<glm::vec4>({});
 		glm::vec4 newValue = oldValue;
 		auto end = path.end();
 		--end;
@@ -242,7 +242,7 @@ namespace Glory::Editor
 	bool EditorUI::InputInt(Utils::YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
 	{
 		Scope s{ path };
-		const int oldValue = file[path].As<int>();
+		const int oldValue = file[path].As<int>({});
 		int newValue = oldValue;
 		auto end = path.end();
 		--end;
@@ -285,7 +285,7 @@ namespace Glory::Editor
 	bool EditorUI::InputInt2(Utils::YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
 	{
 		Scope s{ path };
-		const glm::ivec2 oldValue = file[path].As<glm::ivec2>();
+		const glm::ivec2 oldValue = file[path].As<glm::ivec2>({});
 		glm::ivec2 newValue = oldValue;
 		auto end = path.end();
 		--end;
@@ -328,7 +328,7 @@ namespace Glory::Editor
 	bool EditorUI::InputInt3(Utils::YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
 	{
 		Scope s{ path };
-		const glm::ivec3 oldValue = file[path].As<glm::ivec3>();
+		const glm::ivec3 oldValue = file[path].As<glm::ivec3>({});
 		glm::ivec3 newValue = oldValue;
 		auto end = path.end();
 		--end;
@@ -371,7 +371,7 @@ namespace Glory::Editor
 	bool EditorUI::InputInt4(Utils::YAMLFileRef& file, const std::filesystem::path& path, const int min, const int max, const int steps)
 	{
 		Scope s{ path };
-		const glm::ivec4 oldValue = file[path].As<glm::ivec4>();
+		const glm::ivec4 oldValue = file[path].As<glm::ivec4>({});
 		glm::ivec4 newValue = oldValue;
 		auto end = path.end();
 		--end;
@@ -414,7 +414,7 @@ namespace Glory::Editor
 	bool EditorUI::InputUInt(Utils::YAMLFileRef& file, const std::filesystem::path& path, const uint32_t min, const uint32_t max, const uint32_t steps)
 	{
 		Scope s{ path };
-		const uint32_t oldValue = file[path].As<uint32_t>();
+		const uint32_t oldValue = file[path].As<uint32_t>(0u);
 		uint32_t newValue = oldValue;
 		auto end = path.end();
 		--end;
@@ -457,7 +457,7 @@ namespace Glory::Editor
 	bool EditorUI::InputDouble(Utils::YAMLFileRef& file, const std::filesystem::path& path, const double slowSteps, const double fastSteps)
 	{
 		Scope s{ path };
-		const double oldValue = file[path].As<double>();
+		const double oldValue = file[path].As<double>(0.0);
 		double newValue = oldValue;
 		auto end = path.end();
 		--end;
@@ -532,7 +532,7 @@ namespace Glory::Editor
 	bool EditorUI::CheckBox(Utils::YAMLFileRef& file, const std::filesystem::path& path)
 	{
 		Scope s{ path };
-		const bool oldValue = file[path].As<bool>();
+		const bool oldValue = file[path].As<bool>(false);
 		bool newValue = oldValue;
 		auto end = path.end();
 		--end;
@@ -550,7 +550,7 @@ namespace Glory::Editor
 	bool EditorUI::CheckBoxFlags(Utils::YAMLFileRef& file, const std::filesystem::path& path, const std::vector<std::string_view>& names, const std::vector<uint32_t>& values)
 	{
 		Scope s{ path };
-		const uint32_t oldValue = file[path].As<uint32_t>();
+		const uint32_t oldValue = file[path].As<uint32_t>(0u);
 		uint32_t newValue = oldValue;
 		auto end = path.end();
 		--end;
@@ -658,7 +658,7 @@ namespace Glory::Editor
 	bool EditorUI::InputColor(Utils::YAMLFileRef& file, const std::filesystem::path& path, const bool hdr)
 	{
 		Scope s{ path };
-		const glm::vec4 oldValue = file[path].As<glm::vec4>();
+		const glm::vec4 oldValue = file[path].As<glm::vec4>({});
 		glm::vec4 newValue = oldValue;
 		auto end = path.end();
 		--end;
@@ -753,7 +753,7 @@ namespace Glory::Editor
 	bool EditorUI::InputText(Utils::YAMLFileRef& file, const std::filesystem::path& path, ImGuiInputTextFlags flags)
 	{
 		Scope s{ path };
-		const std::string oldValue = file[path].As<std::string>();
+		const std::string oldValue = file[path].As<std::string>("");
 		strcpy(m_TextBuffer, oldValue.c_str());
 		auto end = path.end();
 		--end;
@@ -905,7 +905,7 @@ namespace Glory::Editor
 	bool EditorUI::InputEnum(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, const std::vector<uint32_t>& excludeValues)
 	{
 		Scope s{ path };
-		const std::string strValue = file[path].As<std::string>();
+		const std::string strValue = file[path].As<std::string>("");
 		EnumType* pEnumType = Reflect::GetEnumType(typeHash);
 		uint32_t oldValue = 0;
 		pEnumType->FromString(strValue, &oldValue);

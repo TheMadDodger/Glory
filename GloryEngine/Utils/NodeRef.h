@@ -16,20 +16,20 @@ namespace Glory::Utils
 		NodeValueRef operator[](const size_t index);
 
 		template<typename T>
-		T As()
+		T As_Unsafe()
 		{
 			return Node().as<T>();
 		}
 
 		template<typename T>
-		T As(const T& defaultValue)
+		T As(const T& defaultValue=T())
 		{
 			if (!Exists()) return defaultValue;
-			return As<T>();
+			return As_Unsafe<T>();
 		}
 
 		template<typename T>
-		T AsEnum()
+		T AsEnum_Unsafe()
 		{
 			const std::string& valueStr = Node().as<std::string>();
 			T value;
@@ -38,10 +38,10 @@ namespace Glory::Utils
 		}
 
 		template<typename T>
-		T AsEnum(const T& defaultValue)
+		T AsEnum(const T& defaultValue=T(0))
 		{
 			if (!Exists()) return defaultValue;
-			return AsEnum<T>();
+			return AsEnum_Unsafe<T>();
 		}
 
 		template<typename T>
@@ -102,6 +102,8 @@ namespace Glory::Utils
 
 			// Postfix increment
 			Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+
+			Iterator operator+(int num) { for (size_t i = 0; i < num; ++i) { ++(*this); } return *this; }
 
 			friend bool operator== (const Iterator& a, const Iterator& b) { return a.m_Iter == b.m_Iter; };
 			friend bool operator!= (const Iterator& a, const Iterator& b) { return a.m_Iter != b.m_Iter; };

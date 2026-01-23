@@ -19,6 +19,7 @@ namespace Glory::Editor
 		GLORY_EDITOR_API static void Save(ProjectSpace* pProject);
 
 		GLORY_EDITOR_API static void Paint(size_t index);
+		GLORY_EDITOR_API static void Open(size_t index);
 
 		GLORY_EDITOR_API static void OnStartPlay();
 		GLORY_EDITOR_API static void OnStopPlay();
@@ -39,6 +40,7 @@ namespace Glory::Editor
 
 	protected:
         virtual bool OnGui() = 0;
+		virtual void OnOpen() {};
 		virtual void OnSettingsLoaded() {}
 		virtual void OnSave(ProjectSpace* pProject) {}
 		virtual void OnCompile(const std::filesystem::path& path) {}
@@ -117,5 +119,19 @@ namespace Glory::Editor
 	private:
 		virtual bool OnGui() override;
 		virtual void OnSettingsLoaded() override;
+	};
+
+	class RenderSettings : public ProjectSettings
+	{
+	public:
+		RenderSettings();
+		void VerifySettings();
+
+	private:
+		virtual bool OnGui() override;
+		virtual void OnOpen() override;
+		virtual void OnSettingsLoaded() override;
+
+		void AddNewPipelines();
 	};
 }
