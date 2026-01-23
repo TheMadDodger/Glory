@@ -1,6 +1,9 @@
 #pragma once
 #include "ProjectSpace.h"
+#include "Undo.h"
+
 #include <string_view>
+
 #include <yaml-cpp/yaml.h>
 #include <NodeRef.h>
 
@@ -12,6 +15,8 @@ if (!node.Exists() || !node.Is##nodeType()) \
 
 namespace Glory::Editor
 {
+	struct ActionRecord;
+
     class ProjectSettings
     {
 	public:
@@ -131,7 +136,28 @@ namespace Glory::Editor
 		virtual bool OnGui() override;
 		virtual void OnOpen() override;
 		virtual void OnSettingsLoaded() override;
+		virtual void OnCompile(const std::filesystem::path& path) override;
+		virtual void OnStartPlay_Impl() override;
+
+		void SendToRenderer();
 
 		void AddNewPipelines();
+
+		class PipelineReorderAction : public IAction
+		{
+		public:
+			PipelineReorderAction(RenderSettings* pRenderSettings, UUID movedPipeline, size_t oldIndex, size_t newIndex);
+			virtual ~PipelineReorderAction() = default;
+
+		private:
+			void OnUndo(const ActionRecord& actionRecord) override;
+			void OnRedo(const ActionRecord& actionRecord) override;
+
+		private:
+			RenderSettings* m_pRenderSettings;
+			const UUID m_MovedPipeline;
+			const size_t m_OldIndex;
+			const size_t m_NewIndex;
+		};
 	};
 }

@@ -9,9 +9,10 @@
 
 namespace Glory::Editor
 {
-    void DND::DragAndDropSource(const std::string_view name, void* payload, size_t payloadSize, std::function<void()> previewCallback, ImGuiDragDropFlags flags)
+    void DND::DragAndDropSource(const std::string_view name, void* payload, size_t payloadSize,
+        std::function<void()> previewCallback, ImGuiDragDropFlags flags)
     {
-        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+        if (ImGui::BeginDragDropSource(flags))
         {
             ImGui::SetDragDropPayload(name.data(), payload, payloadSize);
             previewCallback();
@@ -19,19 +20,20 @@ namespace Glory::Editor
         }
     }
 
-    bool DND::HandleDragAndDropTarget(std::function<void(uint32_t, const ImGuiPayload*)> callback)
+    bool DND::HandleDragAndDropTarget(std::function<void(uint32_t, const ImGuiPayload*)> callback, std::function<void()> drawCallback)
     {
         if (!IsEnabled()) return true;
         if (ImGui::BeginDragDropTarget())
         {
             const bool claimed = HandleTargetInternal(callback);
+            if (drawCallback) drawCallback();
             ImGui::EndDragDropTarget();
             return claimed;
         }
         return false;
     }
 
-    bool DND::HandleDragAndDropWindowTarget(std::function<void(uint32_t, const ImGuiPayload*)> callback)
+    bool DND::HandleDragAndDropWindowTarget(std::function<void(uint32_t, const ImGuiPayload*)> callback, std::function<void()> drawCallback)
     {
         const ImVec2 windowPos = ImGui::GetWindowPos();
         const ImVec2 min = windowPos + ImGui::GetWindowContentRegionMin();
@@ -40,6 +42,7 @@ namespace Glory::Editor
         if (ImGui::BeginDragDropTargetCustom(rect, ImGui::GetCurrentWindow()->ID))
         {
             const bool claimed = HandleTargetInternal(callback);
+            if (drawCallback) drawCallback();
             ImGui::EndDragDropTarget();
             return claimed;
         }

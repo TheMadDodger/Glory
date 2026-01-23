@@ -261,6 +261,8 @@ namespace Glory
 		virtual RenderPassHandle GetSwapchainPass() const { return NULL; };
 		virtual RenderPassHandle GetDummyPostProcessPass() const { return NULL; };
 
+		void SetPipelineOrder(std::vector<UUID>&& pipelineOrder);
+
 	protected:
 		virtual void OnSubmitDynamic(const RenderData& renderData) {}
 		virtual void OnSubmitCamera(CameraRef camera) {}
@@ -316,5 +318,7 @@ namespace Glory
 		std::vector<std::function<void(GraphicsDevice*, RendererModule*)>> m_InjectedDataPasses;
 		std::vector<std::function<void(GraphicsDevice*, RenderPassHandle, CommandBufferHandle)>> m_InjectedSwapchainSubpasses;
 		std::vector<std::function<void(GraphicsDevice*, CommandBufferHandle, uint32_t)>> m_InjectedPreRenderPasses;
+
+		std::vector<UUID> m_PipelineOrder;
 	};
 }

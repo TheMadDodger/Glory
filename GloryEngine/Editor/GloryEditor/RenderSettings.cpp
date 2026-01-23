@@ -11,17 +11,70 @@
 #include "AssetCompiler.h"
 #include "Selection.h"
 
+#include <DND.h>
+#include <Undo.h>
+
 #include <PipelineData.h>
 
 #include <imgui.h>
 #include <IconsFontAwesome6.h>
+#include <BinaryStream.h>
+#include <RendererModule.h>
 
 namespace Glory::Editor
 {
-	std::vector<UUID> IncludedPipelines;
+	std::vector<UUID> PipelineOrder;
+
+	DND ReorderDragAndDrop{ { ResourceTypes::GetHash<PipelineData>() } };
+
+	RenderSettings::PipelineReorderAction::PipelineReorderAction(RenderSettings* pRenderSettings, UUID movedPipeline, size_t oldIndex, size_t newIndex):
+		m_pRenderSettings(pRenderSettings), m_MovedPipeline(movedPipeline), m_OldIndex(oldIndex), m_NewIndex(newIndex)
+	{
+	}
+
+	void RenderSettings::PipelineReorderAction::OnUndo(const ActionRecord&)
+	{
+		PipelineOrder.erase(PipelineOrder.begin() + m_NewIndex);
+		if (m_OldIndex >= PipelineOrder.size())
+			PipelineOrder.emplace_back(m_MovedPipeline);
+		else
+			PipelineOrder.insert(PipelineOrder.begin() + m_OldIndex, m_MovedPipeline);
+
+		auto pipelineOrder = m_pRenderSettings->RootValue()["PipelineOrder"];
+		for (size_t i = 0; i < PipelineOrder.size(); ++i)
+			pipelineOrder[i].Set(uint64_t(PipelineOrder[i]));
+
+		m_pRenderSettings->SendToRenderer();
+	}
+
+	void RenderSettings::PipelineReorderAction::OnRedo(const ActionRecord&)
+	{
+		PipelineOrder.erase(PipelineOrder.begin() + m_OldIndex);
+		if (m_NewIndex >= PipelineOrder.size())
+			PipelineOrder.emplace_back(m_MovedPipeline);
+		else
+			PipelineOrder.insert(PipelineOrder.begin() + m_NewIndex, m_MovedPipeline);
+
+		auto pipelineOrder = m_pRenderSettings->RootValue()["PipelineOrder"];
+		for (size_t i = 0; i < PipelineOrder.size(); ++i)
+			pipelineOrder[i].Set(uint64_t(PipelineOrder[i]));
+
+		m_pRenderSettings->SendToRenderer();
+	}
 
 	bool RenderSettings::OnGui()
 	{
+		ReorderDragAndDrop.m_DNDFlags = ImGuiDragDropFlags_SourceAllowNullID | ImGuiDragDropFlags_AcceptNoDrawDefaultRect;
+
+		static const uint32_t pipelineHash = ResourceTypes::GetHash<PipelineData>();
+
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		EditorAssetManager& assetManager = EditorApplication::GetInstance()->GetAssetManager();
+		ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
+		const ResourceType* pPipelineType = resourceTypes.GetResourceType(pipelineHash);
+
+		const ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
+
 		ImGui::BeginChild("Render Settings");
 		bool change = false;
 
@@ -51,10 +104,7 @@ namespace Glory::Editor
 
 			ImGuiListClipper clipper(pipelineOrder.Size(), rowHeight + 2 * ImGui::GetCurrentTable()->CellPaddingY);
 
-			Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-			EditorAssetManager& assetManager = EditorApplication::GetInstance()->GetAssetManager();
-			ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
-
+			static std::pair<UUID, size_t> toMovePipeline{0ull, 0ull};
 			while (clipper.Step())
 			{
 				for (size_t i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
@@ -65,9 +115,6 @@ namespace Glory::Editor
 					//const size_t index = m_SearchResultIndexCache.empty()
 						//? searchResultIndex : m_SearchResultIndexCache[searchResultIndex];
 
-					ImGui::PushID(uuid);
-					ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
-
 					ResourceMeta meta;
 					EditorAssetDatabase::GetAssetMetadata(uuid, meta);
 					const std::string name = EditorAssetDatabase::GetAssetName(uuid);
@@ -75,54 +122,96 @@ namespace Glory::Editor
 					AssetLocation location;
 					EditorAssetDatabase::GetAssetLocation(uuid, location);
 
-					if (ImGui::TableNextColumn())
+					ImGui::PushID(uuid);
+					ImGui::TableNextRow();
+
+					ImGui::TableNextColumn();
+
+					if (ImGui::Selectable("##selectable", false, selectableFlags, ImVec2(0, rowHeight)))
 					{
-						ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
-
-						if (ImGui::Selectable("##selectable", false, selectableFlags, ImVec2(0, rowHeight)))
-						{
-							Resource* pResource = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(uuid);
-							if (!pResource) pResource = EditorApplication::GetInstance()->GetPipelineManager().GetPipelineData(uuid);
-							Selection::SetActiveObject(pResource);
-						}
-
-						//AssetPayload payload{ uuid };
-						//const uint32_t subTypeHash = pType->Hash();//resourceTypes.GetSubTypeHash(pType, 1);
-						//const ResourceType* pPayloadType = pType;
-						//if (subTypeHash != ResourceTypes::GetHash<Resource>() &&
-						//	subTypeHash != ResourceTypes::GetHash<GScene>())
-						//{
-						//	pPayloadType = resourceTypes.GetResourceType(subTypeHash);
-						//	if (pPayloadType == nullptr) pPayloadType = pType;
-						//}
-
-						//DND::DragAndDropSource(pPayloadType->Name(), &payload, sizeof(AssetPayload), [&]() {
-						//	ImGui::Image(thumbnail ? pRenderImpl->GetTextureID(thumbnail) : NULL, { 64.0f, 64.0f });
-						//	ImGui::SameLine();
-						//	ImGui::Text(name.data());
-						//});
-
-						ImGui::SameLine();
-						ImGui::Text("%i", i);
+						Resource* pResource = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(uuid);
+						if (!pResource) pResource = EditorApplication::GetInstance()->GetPipelineManager().GetPipelineData(uuid);
+						Selection::SetActiveObject(pResource);
 					}
 
-					if (ImGui::TableNextColumn())
-					{
-						ImGui::Text("%s", std::to_string(uuid).data());
-					}
+					AssetPayload payload{ uuid };
+					DND::DragAndDropSource(pPipelineType->Name(), &payload, sizeof(AssetPayload), [&]() {
+						ImGui::Text(name.data());
+					}, ImGuiDragDropFlags_SourceAllowNullID | ImGuiDragDropFlags_AcceptNoDrawDefaultRect);
 
-					if (ImGui::TableNextColumn())
-					{
-						ImGui::Text("%s", name.data());
+					ReorderDragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
+						const AssetPayload payload = *(const AssetPayload*)pPayload->Data;
+						toMovePipeline.first = payload.ResourceID;
+						toMovePipeline.second = i;
+					},
+					[&]() {
+						auto table = ImGui::GetCurrentTable();
+						ImGui::GetCurrentWindow()->DrawList->AddLine(
+							ImVec2(table->BorderX1, table->RowPosY1),
+							ImVec2(table->BorderX2, table->RowPosY1),
+							ImGui::GetColorU32(ImGui::GetStyle().Colors[ImGuiCol_SeparatorHovered]),
+							3.0);
 					}
+					);
 
-					if (ImGui::TableNextColumn())
-					{
-						ImGui::Text("%s", location.Path.data());
-					}
+					ImGui::SameLine();
+					ImGui::Text("%i", i);
+
+					ImGui::TableNextColumn();
+					ImGui::Text("%s", std::to_string(uuid).data());
+
+					ImGui::TableNextColumn();
+					ImGui::Text("%s", name.data());
+					
+					ImGui::TableNextColumn();
+					ImGui::Text("%s", location.Path.data());
 
 					ImGui::PopID();
 				}
+			}
+
+			ImGui::TableNextRow();
+			ImGui::TableNextColumn();
+			ImGui::Selectable("##reorderend", false, selectableFlags, ImVec2(0, 2.0f));
+			ReorderDragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
+				const AssetPayload payload = *(const AssetPayload*)pPayload->Data;
+				toMovePipeline.first = payload.ResourceID;
+				toMovePipeline.second = PipelineOrder.size();
+			},
+			[&]() {
+				auto table = ImGui::GetCurrentTable();
+				ImGui::GetCurrentWindow()->DrawList->AddLine(
+					ImVec2(table->BorderX1, table->RowPosY1),
+					ImVec2(table->BorderX2, table->RowPosY1),
+					ImGui::GetColorU32(ImGui::GetStyle().Colors[ImGuiCol_SeparatorHovered]),
+					3.0);
+			}
+			);
+
+			if (toMovePipeline.first)
+			{
+				auto iter = std::find(PipelineOrder.begin(), PipelineOrder.end(), toMovePipeline.first);
+				const size_t index = iter - PipelineOrder.begin();
+				const size_t insertIndex = toMovePipeline.second > index ? toMovePipeline.second - 1 : toMovePipeline.second;
+				PipelineOrder.erase(iter);
+				if (insertIndex >= PipelineOrder.size())
+					PipelineOrder.emplace_back(toMovePipeline.first);
+				else
+					PipelineOrder.insert(PipelineOrder.begin() + insertIndex, toMovePipeline.first);
+
+				for (size_t i = 0; i < PipelineOrder.size(); ++i)
+					pipelineOrder[i].Set(uint64_t(PipelineOrder[i]));
+
+				Undo::StartRecord("Reorder Pipelines");
+				Undo::AddAction(new PipelineReorderAction(this, toMovePipeline.first, index, insertIndex));
+				Undo::StopRecord();
+
+				toMovePipeline.first = 0ull;
+				toMovePipeline.second = 0ull;
+
+				change = true;
+
+				SendToRenderer();
 			}
 
 			ImGui::EndTable();
@@ -131,7 +220,7 @@ namespace Glory::Editor
 
 		ImGui::EndChild();
 
-		return false;
+		return change;
 	}
 
 	void RenderSettings::OnOpen()
@@ -144,6 +233,39 @@ namespace Glory::Editor
 		VerifySettings();
 	}
 
+	void RenderSettings::OnCompile(const std::filesystem::path& path)
+	{
+		std::filesystem::path finalPath = path;
+		finalPath.replace_filename("Renderer.dat");
+		BinaryFileStream file{ finalPath };
+		BinaryStream* stream = &file;
+		stream->Write(CoreVersion);
+
+		auto pipelineOrder = RootValue()["PipelineOrder"];
+		const size_t count = pipelineOrder.Size();
+		stream->Write(count);
+		for (size_t i = 0; i < count; ++i)
+		{
+			const UUID pipelineID = pipelineOrder[i].As<uint64_t>();
+			stream->Write(pipelineID);
+		}
+	}
+
+	void RenderSettings::OnStartPlay_Impl()
+	{
+		SendToRenderer();
+	}
+
+	void RenderSettings::SendToRenderer()
+	{
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		if (!pRenderer) return;
+
+		std::vector<UUID> pipelineOrder(PipelineOrder);
+		pRenderer->SetPipelineOrder(std::move(pipelineOrder));
+	}
+
 	void RenderSettings::AddNewPipelines()
 	{
 		auto pipelineOrder = RootValue()["PipelineOrder"];
@@ -154,11 +276,13 @@ namespace Glory::Editor
 		EditorAssetDatabase::GetAllAssetsOfType(pipelineHash, allPipelines);
 		for (auto pipelineID : allPipelines)
 		{
-			auto iter = std::find(IncludedPipelines.begin(), IncludedPipelines.end(), pipelineID);
-			if (iter != IncludedPipelines.end()) continue;
+			auto iter = std::find(PipelineOrder.begin(), PipelineOrder.end(), pipelineID);
+			if (iter != PipelineOrder.end()) continue;
 			pipelineOrder.PushBack(uint64_t(pipelineID));
-			IncludedPipelines.emplace_back(pipelineID);
+			PipelineOrder.emplace_back(pipelineID);
 		}
+
+		SendToRenderer();
 	}
 
 	void RenderSettings::VerifySettings()
@@ -167,11 +291,11 @@ namespace Glory::Editor
 		if (!pipelineOrder.Exists())
 			pipelineOrder.Set(YAML::Node(YAML::NodeType::Sequence));
 
-		IncludedPipelines.clear();
-		IncludedPipelines.resize(pipelineOrder.Size());
+		PipelineOrder.clear();
+		PipelineOrder.resize(pipelineOrder.Size());
 
 		for (size_t i = 0; i < pipelineOrder.Size(); ++i)
-			IncludedPipelines[i] = pipelineOrder[i].As<uint64_t>();
+			PipelineOrder[i] = pipelineOrder[i].As<uint64_t>();
 
 		AddNewPipelines();
 	}
