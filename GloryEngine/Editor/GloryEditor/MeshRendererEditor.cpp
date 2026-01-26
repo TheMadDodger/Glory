@@ -23,14 +23,19 @@ namespace Glory::Editor
 
 	bool MeshRendererEditor::OnGUI()
 	{
+		EditorApplication* pApp = EditorApplication::GetInstance();
+
 		Transform& transform = m_pComponentObject->GetRegistry()->GetComponent<Transform>(m_pComponentObject->EntityID());
 		MeshRenderer& meshRenderer = GetTargetComponent();
 		const UUID meshID = meshRenderer.m_Mesh.AssetUUID();
-		Resource* pMeshResource = EditorApplication::GetInstance()->GetAssetManager().FindResource(meshID);
-		if (!pMeshResource) return false;
-		MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
-		const BoundingBox& boundingBox = pMeshData->GetBoundingBox();
-		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->DrawLineBox(transform.MatTransform, boundingBox.m_Center, boundingBox.m_HalfExtends, {1, 1, 0, 1});
+		Resource* pMeshResource = pApp->GetAssetManager().FindResource(meshID);
+		if (pMeshResource)
+		{
+			MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+			const BoundingBox& boundingBox = pMeshData->GetBoundingBox();
+			pApp->GetEngine()->GetMainModule<RendererModule>()
+				->DrawLineBox(transform.MatTransform, boundingBox.m_Center, boundingBox.m_HalfExtends, { 1, 1, 0, 1 });
+		}
 		return EntityComponentEditor::OnGUI();
 	}
 
