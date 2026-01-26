@@ -1,10 +1,25 @@
 #pragma once
-#include <vector>
 #include "VertexDefinitions.h"
 #include "Resource.h"
 
+#include <glm/glm.hpp>
+
+#include <vector>
+
 namespace Glory
 {
+	struct BoundingBox
+	{
+		BoundingBox() :
+			m_Center(), m_HalfExtends() {}
+
+		BoundingBox(const glm::vec4& center, const glm::vec4 halfExtends) :
+			m_Center(center), m_HalfExtends(halfExtends) {}
+
+		glm::vec4 m_Center;
+		glm::vec4 m_HalfExtends;
+	};
+
 	class MeshData : public Resource
 	{
 	public:
@@ -37,6 +52,11 @@ namespace Glory
 		bool IsDirty() const;
 		void SetDirty(bool dirty);
 
+		void Merge(MeshData* pOther);
+
+		void AddBoundingBox(const glm::vec3& min, const glm::vec3& max);
+		const BoundingBox& GetBoundingBox() const;
+
 	private:
 		virtual void References(Engine*, std::vector<UUID>&) const override {}
 
@@ -48,6 +68,7 @@ namespace Glory
 		uint32_t m_VertexCount;
 		uint32_t m_IndexCount;
 		uint32_t m_VertexSize;
+		BoundingBox m_BoundingBox;
 		bool m_IsDirty;
 	};
 }
