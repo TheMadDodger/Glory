@@ -281,6 +281,8 @@ namespace Glory
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
 
+		virtual void OnProcessData() override;
+
 	protected:
 		static const uint32_t MAX_LIGHTS = 3000;
 		static const uint32_t MAX_CAMERAS = 100;

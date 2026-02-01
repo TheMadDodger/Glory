@@ -446,6 +446,7 @@ namespace Glory::Editor
 
 		GScene* pScene = GetOpenScene(uuid);
 		EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance()->GetEngine(), pScene, root);
+		yamlResource->SetDirty(true);
 		yamlResource->Save();
 
 		if (newScene) EditorAssetDatabase::ImportNewScene(path, pScene);

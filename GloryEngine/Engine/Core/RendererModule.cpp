@@ -9,6 +9,7 @@
 #include "AssetManager.h"
 #include "GPUTextureAtlas.h"
 #include "GraphicsEnums.h"
+#include "BinaryStream.h"
 
 #include <glm/glm.hpp>
 #include <glm/ext/scalar_constants.hpp>
@@ -566,6 +567,26 @@ namespace Glory
 	void RendererModule::LoadSettings(ModuleSettings& settings)
 	{
 		settings.RegisterAssetReference<PipelineData>("Lines Pipeline", 19);
+	}
+
+	void RendererModule::OnProcessData()
+	{
+		if (!m_pEngine->HasData("Renderer")) return;
+		m_PipelineOrder.clear();
+
+		std::vector<char> buffer = m_pEngine->GetData("Renderer");
+
+		BinaryMemoryStream memoryStream{ buffer };
+		BinaryStream* stream = &memoryStream;
+
+		size_t pipelineCount;
+		stream->Read(pipelineCount);
+		for (size_t i = 0; i < pipelineCount; ++i)
+		{
+			UUID pipelineID;
+			stream->Read(pipelineID);
+			m_PipelineOrder.emplace_back(pipelineID);
+		}
 	}
 
 	PipelineBatch::PipelineBatch(UUID pipeline) : m_PipelineID(pipeline),
