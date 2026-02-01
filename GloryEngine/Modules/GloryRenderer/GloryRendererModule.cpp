@@ -1535,7 +1535,7 @@ namespace Glory
 
 					for (size_t meshObjectIndex = 0; meshObjectIndex < meshBatch.m_Worlds.size(); ++meshObjectIndex)
 					{
-						auto& world = meshBatch.m_Worlds[meshObjectIndex];
+						const auto& world = meshBatch.m_Worlds[meshObjectIndex];
 
 						const uint32_t currentObject = objectIndex;
 						++objectIndex;

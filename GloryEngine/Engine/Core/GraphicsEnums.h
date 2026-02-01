@@ -770,6 +770,7 @@ namespace Glory
         "PBR_BRDF",
         "Text",
         "Screen",
+        "UI",
         "Other",
         "Skybox",
         "Shadow",

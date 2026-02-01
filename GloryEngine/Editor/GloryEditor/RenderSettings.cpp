@@ -70,6 +70,7 @@ namespace Glory::Editor
 
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		EditorAssetManager& assetManager = EditorApplication::GetInstance()->GetAssetManager();
+		EditorPipelineManager& pipelines = EditorApplication::GetInstance()->GetPipelineManager();
 		ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
 		const ResourceType* pPipelineType = resourceTypes.GetResourceType(pipelineHash);
 
@@ -87,16 +88,17 @@ namespace Glory::Editor
 			static const ImGuiTableFlags flags =
 				ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg
 				| ImGuiTableFlags_Borders | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit;
-			if (!ImGui::BeginChild("ResourcesChild") || !ImGui::BeginTable("ResourcesTable", 4, flags))
+			if (!ImGui::BeginChild("PipelinesChild") || !ImGui::BeginTable("PipelinesTable", 5, flags))
 			{
 				ImGui::EndChild();
 				return false;
 			}
 
 			ImGui::TableSetupColumn("#", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 40.0f, 0);
-			ImGui::TableSetupColumn("UUID", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 100.0f, 1);
-			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 0.2f, 2);
-			ImGui::TableSetupColumn("Source", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 500.0f, 3);
+			ImGui::TableSetupColumn("UUID", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 120.0f, 1);
+			ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 80.0f, 2);
+			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch | ImGuiTableColumnFlags_NoHide, 0.2f, 3);
+			ImGui::TableSetupColumn("Source", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoHide, 500.0f, 4);
 			ImGui::TableSetupScrollFreeze(0, 1);
 			ImGui::TableHeadersRow();
 
@@ -110,6 +112,8 @@ namespace Glory::Editor
 				for (size_t i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
 				{
 					const UUID uuid = pipelineOrder[i].As<uint64_t>();
+					PipelineData* pPipeline = pipelines.GetPipelineData(uuid);
+
 					//const size_t searchResultIndex = m_SearchResultCache.size() - (m_SearchResultCache.end() - it);
 
 					//const size_t index = m_SearchResultIndexCache.empty()
@@ -117,7 +121,6 @@ namespace Glory::Editor
 
 					ResourceMeta meta;
 					EditorAssetDatabase::GetAssetMetadata(uuid, meta);
-					const std::string name = EditorAssetDatabase::GetAssetName(uuid);
 
 					AssetLocation location;
 					EditorAssetDatabase::GetAssetLocation(uuid, location);
@@ -130,13 +133,13 @@ namespace Glory::Editor
 					if (ImGui::Selectable("##selectable", false, selectableFlags, ImVec2(0, rowHeight)))
 					{
 						Resource* pResource = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(uuid);
-						if (!pResource) pResource = EditorApplication::GetInstance()->GetPipelineManager().GetPipelineData(uuid);
+						if (!pResource) pResource = pPipeline;
 						Selection::SetActiveObject(pResource);
 					}
 
 					AssetPayload payload{ uuid };
 					DND::DragAndDropSource(pPipelineType->Name(), &payload, sizeof(AssetPayload), [&]() {
-						ImGui::Text(name.data());
+						ImGui::Text(meta.Name().data());
 					}, ImGuiDragDropFlags_SourceAllowNullID | ImGuiDragDropFlags_AcceptNoDrawDefaultRect);
 
 					ReorderDragAndDrop.HandleDragAndDropTarget([&](uint32_t dndHash, const ImGuiPayload* pPayload) {
@@ -160,8 +163,15 @@ namespace Glory::Editor
 					ImGui::TableNextColumn();
 					ImGui::Text("%s", std::to_string(uuid).data());
 
+					std::string type = "Unknown";
+					if (pPipeline)
+						Enum<PipelineType>().ToString(pPipeline->Type(), type);
+
 					ImGui::TableNextColumn();
-					ImGui::Text("%s", name.data());
+					ImGui::Text("%s", type.data());
+
+					ImGui::TableNextColumn();
+					ImGui::Text("%s", meta.Name().data());
 					
 					ImGui::TableNextColumn();
 					ImGui::Text("%s", location.Path.data());
@@ -225,12 +235,16 @@ namespace Glory::Editor
 
 	void RenderSettings::OnOpen()
 	{
-		AddNewPipelines();
+		CheckPipelines();
 	}
 
 	void RenderSettings::OnSettingsLoaded()
 	{
 		VerifySettings();
+
+		Undo::RegisterChangeHandler(".gpln", "Type", [this](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+			VerifySettings();
+		});
 	}
 
 	void RenderSettings::OnCompile(const std::filesystem::path& path)
@@ -266,8 +280,41 @@ namespace Glory::Editor
 		pRenderer->SetPipelineOrder(std::move(pipelineOrder));
 	}
 
-	void RenderSettings::AddNewPipelines()
+	bool CheckType(PipelineType type)
 	{
+		switch (type)
+		{
+		case Glory::PT_Flat:
+		case Glory::PT_Gouraud:
+		case Glory::PT_Phong:
+		case Glory::PT_Blinn:
+		case Glory::PT_Toon:
+		case Glory::PT_OrenNayar:
+		case Glory::PT_Minnaert:
+		case Glory::PT_CookTorrance:
+		case Glory::PT_Unlit:
+		case Glory::PT_Fresnel:
+		case Glory::PT_PBR_BRDF:
+		case Glory::PT_Text:
+			return true;
+
+		case Glory::PT_Unknown:
+		case Glory::PT_Screen:
+		case Glory::PT_UI:
+		case Glory::PT_Other:
+		case Glory::PT_Skybox:
+		case Glory::PT_Shadow:
+		case Glory::PT_Compute:
+		case Glory::PT_Count:
+		default:
+			return false;
+		}
+	}
+
+	void RenderSettings::CheckPipelines()
+	{
+		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
+
 		auto pipelineOrder = RootValue()["PipelineOrder"];
 
 		static const uint32_t pipelineHash = ResourceTypes::GetHash<PipelineData>();
@@ -277,7 +324,22 @@ namespace Glory::Editor
 		for (auto pipelineID : allPipelines)
 		{
 			auto iter = std::find(PipelineOrder.begin(), PipelineOrder.end(), pipelineID);
+
+			EditableResource* pPipeline = resources.GetEditableResource(pipelineID);
+			if (!pPipeline || !CheckType((**static_cast<YAMLResourceBase*>(pPipeline))["Type"].AsEnum<PipelineType>(PT_Unknown)))
+			{
+				if (iter != PipelineOrder.end())
+				{
+					/* Remove it */
+					const size_t index = iter - PipelineOrder.begin();
+					PipelineOrder.erase(iter);
+					pipelineOrder.Remove(index);
+				}
+				continue;
+			}
+
 			if (iter != PipelineOrder.end()) continue;
+
 			pipelineOrder.PushBack(uint64_t(pipelineID));
 			PipelineOrder.emplace_back(pipelineID);
 		}
@@ -297,6 +359,6 @@ namespace Glory::Editor
 		for (size_t i = 0; i < pipelineOrder.Size(); ++i)
 			PipelineOrder[i] = pipelineOrder[i].As<uint64_t>();
 
-		AddNewPipelines();
+		CheckPipelines();
 	}
 }

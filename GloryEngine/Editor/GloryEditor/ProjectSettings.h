@@ -141,7 +141,7 @@ namespace Glory::Editor
 
 		void SendToRenderer();
 
-		void AddNewPipelines();
+		void CheckPipelines();
 
 		class PipelineReorderAction : public IAction
 		{
