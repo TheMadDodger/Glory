@@ -101,15 +101,15 @@ namespace Glory::Editor
 		settings["DepthTestEnabled"].Set<bool>(pResource->DepthTestEnabled());
 		settings["DepthWriteEnabled"].Set<bool>(pResource->DepthWriteEnabled());
 		settings["DepthCompareOp"].SetEnum<CompareOp>(pResource->GetDepthCompareOp());
-		settings["ColorWriteMask"].Set<uint8_t>(pResource->ColorWriteMask());
+		settings["ColorWriteMask"].Set<uint32_t>(uint32_t(pResource->ColorWriteMask()));
 		settings["StencilTestEnabled"].Set<bool>(pResource->StencilTestEnabled());
 		settings["StencilCompareOp"].SetEnum<CompareOp>(pResource->GetStencilCompareOp());
 		settings["StencilFailOp"].SetEnum<Func>(pResource->GetStencilFailOp());
 		settings["StencilDepthFailOp"].SetEnum<Func>(pResource->GetStencilDepthFailOp());
 		settings["StencilPassOp"].SetEnum<Func>(pResource->GetStencilPassOp());
-		settings["StencilCompareMask"].Set<uint8_t>(pResource->StencilCompareMask());
-		settings["StencilWriteMask"].Set<uint8_t>(pResource->StencilWriteMask());
-		settings["StencilReference"].Set<uint8_t>(pResource->StencilReference());
+		settings["StencilCompareMask"].Set<uint32_t>(uint32_t(pResource->StencilCompareMask()));
+		settings["StencilWriteMask"].Set<uint32_t>(uint32_t(pResource->StencilWriteMask()));
+		settings["StencilReference"].Set<uint32_t>(uint32_t(pResource->StencilReference()));
 
 		settings["BlendEnabled"].Set<bool>(pResource->BlendEnabled());
 		settings["SrcColorBlendFactor"].SetEnum<BlendFactor>(pResource->SrcColorBlendFactor());
