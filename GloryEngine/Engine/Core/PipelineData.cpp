@@ -8,6 +8,17 @@ namespace Glory
 	PipelineData::PipelineData() : m_TotalPropertiesByteSize(0)
 	{
 		APPEND_TYPE(PipelineData);
+
+		/* Set defaults */
+		SetColorWriteMask(15);
+		SetDepthTestEnabled(true);
+		SetDepthWriteEnabled(true);
+		SetColorWriteMask(true, true, true, true);
+		SetStencilTestEnabled(false);
+		SetStencilWriteMask(0);
+		SetStencilCompareMask(0);
+		SetStencilReference(0);
+		SetBlendEnabled(false);
 	}
 
 	PipelineData::~PipelineData()
@@ -394,7 +405,7 @@ namespace Glory
 
 	const uint8_t PipelineData::ColorWriteMask() const
 	{
-		return static_cast<uint8_t>(*m_SettingsToggles.Data() << PipelineData::ColorWriteRed) & 0x0F;
+		return static_cast<uint8_t>(*m_SettingsToggles.Data() >> PipelineData::ColorWriteRed) & 0x0F;
 	}
 
 	void PipelineData::SetStencilTestEnabled(bool enable)
@@ -409,35 +420,41 @@ namespace Glory
 
 	void PipelineData::SetStencilWriteMask(uint8_t mask)
 	{
-		const uint32_t shiftedMask = mask >> PipelineData::StencilWriteMaskBegin;
+		const uint32_t shiftedMask = mask << PipelineData::StencilWriteMaskBegin;
+		constexpr uint32_t clearMask = ~(255 << PipelineData::StencilWriteMaskBegin);
+		(*m_SettingsToggles.Data()) &= clearMask;
 		(*m_SettingsToggles.Data()) |= shiftedMask;
 	}
 
 	const uint8_t PipelineData::StencilWriteMask() const
 	{
-		return static_cast<uint8_t>(*m_SettingsToggles.Data() << PipelineData::StencilWriteMaskBegin);
+		return static_cast<uint8_t>(*m_SettingsToggles.Data() >> PipelineData::StencilWriteMaskBegin);
 	}
 
 	void PipelineData::SetStencilCompareMask(uint8_t mask)
 	{
-		const uint32_t shiftedMask = mask >> PipelineData::StencilCompareMaskBegin;
+		const uint32_t shiftedMask = mask << PipelineData::StencilCompareMaskBegin;
+		constexpr uint32_t clearMask = ~(255 << PipelineData::StencilCompareMaskBegin);
+		(*m_SettingsToggles.Data()) &= clearMask;
 		(*m_SettingsToggles.Data()) |= shiftedMask;
 	}
 
 	const uint8_t PipelineData::StencilCompareMask() const
 	{
-		return static_cast<uint8_t>(*m_SettingsToggles.Data() << PipelineData::StencilCompareMaskBegin);
+		return static_cast<uint8_t>(*m_SettingsToggles.Data() >> PipelineData::StencilCompareMaskBegin);
 	}
 
 	void PipelineData::SetStencilReference(uint8_t ref)
 	{
-		const uint32_t shiftedMask = ref >> PipelineData::StencilReferenceBegin;
+		const uint32_t shiftedMask = ref << PipelineData::StencilReferenceBegin;
+		constexpr uint32_t clearMask = ~(255 << PipelineData::StencilReferenceBegin);
+		(*m_SettingsToggles.Data()) &= clearMask;
 		(*m_SettingsToggles.Data()) |= shiftedMask;
 	}
 
 	const uint8_t PipelineData::StencilReference() const
 	{
-		return static_cast<uint8_t>(*m_SettingsToggles.Data() << PipelineData::StencilReferenceBegin);
+		return static_cast<uint8_t>(*m_SettingsToggles.Data() >> PipelineData::StencilReferenceBegin);
 	}
 
 	void PipelineData::SetBlendEnabled(bool enable)
