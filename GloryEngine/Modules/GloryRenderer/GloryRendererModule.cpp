@@ -91,6 +91,44 @@ namespace Glory
 		float zFar;
 	};
 
+	struct OrderedObject
+	{
+		float minDistance;
+		UUID meshID;
+		uint32_t meshObjectIndex;
+		uint32_t objectIndex;
+
+		bool operator>(const OrderedObject& other) const
+		{
+			return minDistance < other.minDistance;
+		}
+
+		bool operator<(const OrderedObject& other) const
+		{
+			return minDistance > other.minDistance;
+		}
+
+		bool operator==(const OrderedObject& other) const
+		{
+			return minDistance == other.minDistance;
+		}
+
+		bool operator!=(const OrderedObject& other) const
+		{
+			return minDistance != other.minDistance;
+		}
+
+		bool operator>=(const OrderedObject& other) const
+		{
+			return minDistance <= other.minDistance;
+		}
+
+		bool operator<=(const OrderedObject& other) const
+		{
+			return minDistance >= other.minDistance;
+		}
+	};
+
 	GloryRendererModule::GloryRendererModule(): m_MinShadowResolution(256), m_MaxShadowResolution(2048),
 		m_ShadowAtlasResolution(8192), m_ShadowMapResolutions{}, m_MaxShadowLODs(6)
 	{
@@ -1442,12 +1480,19 @@ namespace Glory
 		const DescriptorSetHandle lightSet = uniqueCameraData.m_LightSets[m_CurrentFrameIndex];
 		const LayerMask& cameraMask = camera.GetLayerMask();
 
-		size_t batchIndex = 0;
-		for (const PipelineBatch& pipelineRenderData : batches)
+		for (auto pipelineID : m_PipelineOrder)
 		{
-			if (batchIndex >= batchDatas.size()) break;
+			auto iter = std::find_if(batches.begin(), batches.end(),
+				[pipelineID](const PipelineBatch& batch) {
+					return batch.m_PipelineID == pipelineID;
+				});
+
+			if (iter == batches.end()) continue;
+			const size_t batchIndex = iter - batches.begin();
+
+			if (batchIndex >= batchDatas.size()) continue;
+			const PipelineBatch& pipelineRenderData = *iter;
 			const PipelineBatchData& batchData = batchDatas.at(batchIndex);
-			++batchIndex;
 
 			PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineRenderData.m_PipelineID);
 			if (!pPipelineData) continue;
@@ -1463,6 +1508,77 @@ namespace Glory
 
 			if (shadowsSet)
 				pDevice->BindDescriptorSets(commandBuffer, batchData.m_Pipeline, { shadowsSet }, 5);
+
+			if (pPipelineData->BlendEnabled())
+			{
+				/* Sort objects based on distance from camera */
+				std::set<OrderedObject> renderOrder;
+				uint32_t objectIndex = 0;
+				for (UUID uniqueMeshID : pipelineRenderData.m_UniqueMeshOrder)
+				{
+					const PipelineMeshBatch& meshBatch = pipelineRenderData.m_Meshes.at(uniqueMeshID);
+					Resource* pMeshResource = assets.FindResource(meshBatch.m_Mesh);
+					if (!pMeshResource) continue;
+					MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+
+					const BoundingBox& bounds = pMeshData->GetBoundingBox();
+					std::vector<glm::vec4> points(8);
+
+					points[0] = bounds.m_Center + glm::vec4(-bounds.m_HalfExtends.x, bounds.m_HalfExtends.y, -bounds.m_HalfExtends.z, 1.0f);
+					points[1] = bounds.m_Center + glm::vec4(bounds.m_HalfExtends.x, bounds.m_HalfExtends.y, -bounds.m_HalfExtends.z, 1.0f);
+					points[2] = bounds.m_Center + glm::vec4(bounds.m_HalfExtends.x, bounds.m_HalfExtends.y, bounds.m_HalfExtends.z, 1.0f);
+					points[3] = bounds.m_Center + glm::vec4(-bounds.m_HalfExtends.x, bounds.m_HalfExtends.y, bounds.m_HalfExtends.z, 1.0f);
+					points[4] = bounds.m_Center + glm::vec4(-bounds.m_HalfExtends.x, -bounds.m_HalfExtends.y, -bounds.m_HalfExtends.z, 1.0f);
+					points[5] = bounds.m_Center + glm::vec4(bounds.m_HalfExtends.x, -bounds.m_HalfExtends.y, -bounds.m_HalfExtends.z, 1.0f);
+					points[6] = bounds.m_Center + glm::vec4(bounds.m_HalfExtends.x, -bounds.m_HalfExtends.y, bounds.m_HalfExtends.z, 1.0f);
+					points[7] = bounds.m_Center + glm::vec4(-bounds.m_HalfExtends.x, -bounds.m_HalfExtends.y, bounds.m_HalfExtends.z, 1.0f);
+
+					for (size_t meshObjectIndex = 0; meshObjectIndex < meshBatch.m_Worlds.size(); ++meshObjectIndex)
+					{
+						const auto& world = meshBatch.m_Worlds[meshObjectIndex];
+
+						const uint32_t currentObject = objectIndex;
+						++objectIndex;
+
+						float minDistance = FLT_MAX;
+						for (size_t pointIndex = 0; pointIndex < points.size(); ++pointIndex)
+						{
+							const glm::vec4 point = world*points[pointIndex];
+							const glm::vec4 cameraPos = camera.GetViewInverse()[3];
+							const float distance = glm::distance(glm::vec3(point), glm::vec3(cameraPos));
+							if (distance > minDistance) continue;
+							minDistance = distance;
+						}
+						renderOrder.insert(OrderedObject{ minDistance, uniqueMeshID, uint32_t(meshObjectIndex), currentObject });
+					}
+				}
+
+				for (auto& orderedObject : renderOrder)
+				{
+					const PipelineMeshBatch& meshBatch = pipelineRenderData.m_Meshes.at(orderedObject.meshID);
+					Resource* pMeshResource = assets.FindResource(meshBatch.m_Mesh);
+					if (!pMeshResource) continue;
+					MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+					MeshHandle mesh = pDevice->AcquireCachedMesh(pMeshData);
+					if (!mesh) continue;
+
+					if (cameraMask != 0 && meshBatch.m_LayerMasks[orderedObject.meshObjectIndex] != 0 &&
+						(cameraMask & meshBatch.m_LayerMasks[orderedObject.meshObjectIndex]) == 0) continue;
+
+					const auto& ids = meshBatch.m_ObjectIDs[orderedObject.meshObjectIndex];
+					constants.m_ObjectID = ids.second;
+					constants.m_SceneID = ids.first;
+					constants.m_ObjectDataIndex = orderedObject.objectIndex;
+					constants.m_MaterialIndex = meshBatch.m_MaterialIndices[orderedObject.meshObjectIndex];
+
+					pDevice->PushConstants(commandBuffer, batchData.m_Pipeline, 0, sizeof(RenderConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
+					if (!batchData.m_TextureSets.empty())
+						pDevice->BindDescriptorSets(commandBuffer, batchData.m_Pipeline, { batchData.m_TextureSets[constants.m_MaterialIndex] }, 6);
+					pDevice->DrawMesh(commandBuffer, mesh);
+				}
+				pDevice->EndPipeline(commandBuffer);
+				return;
+			}
 
 			uint32_t objectIndex = 0;
 			for (UUID uniqueMeshID : pipelineRenderData.m_UniqueMeshOrder)

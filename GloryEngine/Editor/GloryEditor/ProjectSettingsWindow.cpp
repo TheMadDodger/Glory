@@ -22,6 +22,7 @@ namespace Glory::Editor
 					if (m_CurrentTab != i)
 					{
 						m_CurrentTab = i;
+						ProjectSettings::Open(m_CurrentTab);
 					}
 					ImGui::EndTabItem();
 				}
@@ -34,5 +35,6 @@ namespace Glory::Editor
 
 	void ProjectSettingsWindow::OnOpen()
 	{
+		ProjectSettings::Open(m_CurrentTab);
 	}
 }

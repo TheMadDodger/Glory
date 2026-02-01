@@ -39,7 +39,7 @@ project "GloryEditor"
 		["Undo/Actions/Entity"] = { "AddComponentAction.*", "RemoveComponentAction.*" },
 		["Toolbar"] = { "Toolbar.*", "IToolChain.*", "GizmosToolChain.*", "GridToolchain.*" },
 		["UI"] = { "EditorUI.*", "ListView.*" },
-		["ProjectSettings"] = { "ProjectSettings.*", "ProjectSettings.*", "InputSettings.cpp", "EngineSettings.cpp", "LayerSettings.cpp", "PhysicsSettings.cpp", "GeneralSettings.cpp" },
+		["ProjectSettings"] = { "ProjectSettings.*", "ProjectSettings.*", "InputSettings.cpp", "EngineSettings.cpp", "LayerSettings.cpp", "PhysicsSettings.cpp", "GeneralSettings.cpp", "RenderSettings.cpp" },
 		["Asset Management"] = { "EditorSceneSerializer*", "EditorAssetsWatcher.*", "JSONRef.*", "AssetCompiler.*", "EditorAssetDatabase.*", "EditorAssetLoader.*", "EditorSceneManager.*", "EditorAssetCallbacks.*" },
 		["Asset Management/Importer"] = { "Importer.*", "ImporterTemplate.*", "ImportedResource.*" },
 		["Asset Management/Importer/Internal"] = { "MaterialImporter.*", "TextureImporter.*", "EntityPrefabImporter.*" },
