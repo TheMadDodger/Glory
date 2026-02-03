@@ -126,6 +126,8 @@ namespace Glory
 
 	void GloryRendererModule::Cleanup()
 	{
+		for (auto& renderer : m_SecondaryRenderer)
+			renderer.Cleanup();
 	}
 
 	void GloryRendererModule::LoadSettings(ModuleSettings& settings)
@@ -291,5 +293,18 @@ namespace Glory
 	const std::type_info& GloryRendererModule::GetModuleType()
 	{
 		return typeid(GloryRendererModule);
+	}
+
+	GloryRenderer* GloryRendererModule::CreateSecondaryRenderer(size_t imageCount)
+	{
+		GloryRenderer& renderer = m_SecondaryRenderer.emplace_back(this);
+		//renderer.m_MinShadowResolution = 0;
+		//renderer.m_MaxShadowResolution = 0;
+		//renderer.m_ShadowAtlasResolution = 0;
+		//renderer.m_MaxShadowLODs = 0;
+		renderer.m_GlobalSSAOSetting.m_Enabled = 0;
+		renderer.m_ImageCount = imageCount;
+		renderer.Initialize();
+		return &renderer;
 	}
 }

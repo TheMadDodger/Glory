@@ -68,7 +68,9 @@ namespace Glory
 	class GloryRenderer : public Renderer
 	{
 	public:
+		GloryRenderer();
 		GloryRenderer(GloryRendererModule* pModule);
+		GloryRenderer(const GloryRenderer& other);
 		virtual ~GloryRenderer();
 
 		virtual void OnCameraResize(CameraRef camera) override;
@@ -85,12 +87,18 @@ namespace Glory
 		virtual void InitializeAsMainRenderer() override;
 		virtual void Draw() override;
 
+		virtual Renderer* CreateSecondaryRenderer(size_t imageCount) override;
+
+		virtual uint32_t NextFrameIndex() override;
+		virtual bool FrameBusy(uint32_t frameIndex) override;
+
 	private:
 		virtual size_t DefaultAttachmenmtIndex() const override;
 		virtual size_t CameraAttachmentPreviewCount() const override;
 		virtual std::string_view CameraAttachmentPreviewName(size_t index) const override;
 		virtual TextureHandle CameraAttachmentPreview(CameraRef camera, size_t index) const override;
 		virtual TextureHandle FinalColor() const override;
+		virtual TextureHandle FinalColor(uint32_t frameIndex) const override;
 		virtual void VisualizeAttachment(CameraRef camera, size_t index) override;
 
 		virtual size_t DebugOverlayCount() const override;
@@ -171,13 +179,6 @@ namespace Glory
 		/* Individual */
 		DescriptorSetHandle m_SSAOCameraSet;
 		DescriptorSetHandle m_NoiseSamplerSet;
-
-		static const size_t m_GridSizeX = 16;
-		static const size_t m_GridSizeY = 9;
-		static const size_t NUM_DEPTH_SLICES = 24;
-		static const size_t NUM_CLUSTERS = m_GridSizeX * m_GridSizeY * NUM_DEPTH_SLICES;
-		static const size_t MAX_LIGHTS_PER_TILE = 50;
-		static const size_t MAX_KERNEL_SIZE = 1024;
 
 		/* Textures */
 		TextureHandle m_SampleNoiseTexture = 0;

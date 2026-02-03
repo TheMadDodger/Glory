@@ -250,6 +250,7 @@ namespace Glory
             const std::vector<ImageBarrier>& images, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage) override;
 
         virtual void CopyImage(CommandBufferHandle commandBuffer, TextureHandle src, TextureHandle dst) override;
+        virtual void CopyImageToBuffer(CommandBufferHandle commandBuffer, TextureHandle src, BufferHandle dst) override;
 
         virtual SwapchainResult AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex,
             SemaphoreHandle signalSemaphore=NULL) override;
@@ -336,6 +337,10 @@ namespace Glory
 
         void CopyFromBuffer(vk::CommandBuffer commandBuffer, vk::Buffer dst, vk::Buffer src,
             int32_t dstOffset, int32_t srcOffset, uint32_t size);
+
+        void CopyToBuffer(vk::CommandBuffer commandBuffer, vk::Image image, vk::ImageLayout layout,
+            vk::Buffer buffer, vk::ImageAspectFlags aspectFlags, vk::Offset3D imageOffset,
+            uint32_t bufferOffset, vk::Extent3D extent, uint32_t layerCount);
 
         vk::CommandBuffer GetNewResetableCommandBuffer(CommandBufferHandle commandBufferHandle);
 

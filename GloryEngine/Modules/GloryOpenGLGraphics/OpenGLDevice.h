@@ -169,6 +169,7 @@ namespace Glory
         virtual void PipelineBarrier(CommandBufferHandle, const std::vector<BufferBarrier>& buffers,
             const std::vector<ImageBarrier>& images, PipelineStageFlagBits, PipelineStageFlagBits) override;
         virtual void CopyImage(CommandBufferHandle commandBuffer, TextureHandle src, TextureHandle dst) override;
+        virtual void CopyImageToBuffer(CommandBufferHandle commandBuffer, TextureHandle src, BufferHandle dst) override;
 
         virtual SwapchainResult AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle) override;
         virtual SwapchainResult Present(SwapchainHandle swapchain, uint32_t imageIndex, const std::vector<SemaphoreHandle>& waitSemaphores={}) override;

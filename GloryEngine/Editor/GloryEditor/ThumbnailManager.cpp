@@ -2,14 +2,17 @@
 #include "EditorAssets.h"
 #include "ThumbnailManager.h"
 #include "ThumbnailGenerator.h"
+#include "ThumbnailRenderer.h"
 #include "EditorApplication.h"
+#include "ThumbnailSceneSetup.h"
 
 #include <Engine.h>
 #include <GraphicsDevice.h>
+#include <MaterialData.h>
 
 namespace Glory::Editor
 {
-	ThumbnailManager::ThumbnailManager(EditorApplication* pApp): m_pApplication(pApp) {}
+	ThumbnailManager::ThumbnailManager(EditorApplication* pApp): m_pApplication(pApp), m_ThumbnailRenderer(new ThumbnailRenderer(pApp->GetEngine())) {}
 
 	ThumbnailManager::~ThumbnailManager()
 	{
@@ -36,11 +39,22 @@ namespace Glory::Editor
 		ResourceMeta meta;
 		EditorAssetDatabase::GetAssetMetadata(uuid, meta);
 
-		BaseThumbnailGenerator* pGenerator = GetGenerator(meta.Hash());
-		if (pGenerator == nullptr)
-			return EditorAssets::GetTexture("file");
+		/* Find thumbnail in cache */
+		TextureData* pImage = nullptr;
 
-		TextureData* pImage = pGenerator->GetThumbnail(&meta);
+		if (m_ThumbnailRenderer->CanRenderThumbnail(meta.Hash()))
+		{
+			/* Request the thumbnail be renderer */
+			pImage = m_ThumbnailRenderer->QueueThumbnailForRendering(meta.Hash(), uuid);
+		}
+		else
+		{
+			BaseThumbnailGenerator* pGenerator = GetGenerator(meta.Hash());
+			if (pGenerator == nullptr)
+				return EditorAssets::GetTexture("file");
+
+			pImage = pGenerator->GetThumbnail(&meta);
+		}
 
 		if (pImage == nullptr)
 			return EditorAssets::GetTexture("file");
@@ -57,14 +71,14 @@ namespace Glory::Editor
 		m_pThumbnails.erase(uuid);
 	}
 
-	void ThumbnailManager::AddGenerator(BaseThumbnailGenerator* pGenerator)
+	void ThumbnailManager::SetupInternalRenderableThumbnails()
 	{
-		m_pGenerators.push_back(pGenerator);
+		RegisterRenderableThumbnail<MaterialData>(SetupMaterialScene);
 	}
 
 	BaseThumbnailGenerator* ThumbnailManager::GetGenerator(uint32_t hashCode)
 	{
-		for (size_t i = 0; i < m_pGenerators.size(); i++)
+		for (size_t i = 0; i < m_pGenerators.size(); ++i)
 		{
 			const std::type_info& type = m_pGenerators[i]->GetAssetType();
 			uint32_t hash = ResourceTypes::GetHash(type);
@@ -73,5 +87,25 @@ namespace Glory::Editor
 		}
 
 		return nullptr;
+	}
+
+	void ThumbnailManager::Initialize()
+	{
+		m_ThumbnailRenderer->LoadResources();
+	}
+
+	void ThumbnailManager::Update()
+	{
+		m_ThumbnailRenderer->CheckRenders();
+	}
+
+	void ThumbnailManager::AddGenerator(BaseThumbnailGenerator* pGenerator)
+	{
+		m_pGenerators.push_back(pGenerator);
+	}
+
+	void ThumbnailManager::RegisterRenderableThumbnail(uint32_t hashCode, std::function<void(Entity, UUID)> sceneSetup)
+	{
+		m_ThumbnailRenderer->RegisterRenderableThumbnail(hashCode, sceneSetup);
 	}
 }

@@ -86,7 +86,9 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::InsertAsset(AssetLocation& location, const ResourceMeta& meta, bool setDirty)
 	{
-		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return;
+		JSONFileRef& projectFile = pProject->ProjectFile();
 
 		std::replace(location.Path.begin(), location.Path.end(), '/', '\\');
 		uint64_t uuid = meta.ID();
@@ -114,7 +116,9 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::UpdateAssetPath(UUID uuid, const std::string& newPath)
 	{
-		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return;
+		JSONFileRef& projectFile = pProject->ProjectFile();
 		JSONValueRef assetNode = projectFile["Assets"][std::to_string(uuid)];
 
 		if (!assetNode.Exists() || !assetNode.IsObject()) return;
@@ -157,7 +161,9 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::UpdateAssetPaths(const std::string& oldPath, const std::string& newPath)
 	{
-		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return;
+		JSONFileRef& projectFile = pProject->ProjectFile();
 		JSONValueRef assetsNode = projectFile["Assets"];
 
 		std::string fixedNewPath = newPath;
@@ -189,7 +195,9 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::DeleteAsset(UUID uuid, bool compile)
 	{
-		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return;
+		JSONFileRef& projectFile = pProject->ProjectFile();
 		JSONValueRef assetsNode = projectFile["Assets"];
 
 		const std::string key = std::to_string(uuid);
@@ -210,7 +218,9 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::DeleteAsset(const std::string& path)
 	{
-		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return;
+		JSONFileRef& projectFile = pProject->ProjectFile();
 		JSONValueRef assetsNode = projectFile["Assets"];
 
 		std::string fixedPath = path;
@@ -244,7 +254,9 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::DeleteAssets(const std::string& path)
 	{
-		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return;
+		JSONFileRef& projectFile = pProject->ProjectFile();
 		JSONValueRef assetsNode = projectFile["Assets"];
 
 		std::string fixedPath = path;
@@ -277,7 +289,9 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::IncrementAssetVersion(UUID uuid)
 	{
-		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return;
+		JSONFileRef& projectFile = pProject->ProjectFile();
 		JSONValueRef assetsNode = projectFile["Assets"];
 
 		JSONValueRef assetNode = assetsNode[std::to_string(uuid)];
@@ -487,7 +501,9 @@ namespace Glory::Editor
 	{
 		if (!pResource) return;
 
-		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return;
+		JSONFileRef& projectFile = pProject->ProjectFile();
 		JSONValueRef assetsNode = projectFile["Assets"];
 
 		const UUID uuid = pResource->GetUUID();
@@ -516,7 +532,9 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::RemoveAsset(UUID uuid, bool compile)
 	{
-		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return;
+		JSONFileRef& projectFile = pProject->ProjectFile();
 		JSONValueRef assetsNode = projectFile["Assets"];
 
 		const std::string key = std::to_string(uuid);
@@ -567,14 +585,18 @@ namespace Glory::Editor
 
 	std::vector<UUID> EditorAssetDatabase::UUIDs()
 	{
-		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return {};
+		JSONFileRef& projectFile = pProject->ProjectFile();
 		JSONValueRef assetsNode = projectFile["Assets"];
 		return assetsNode.IDKeys();
 	}
 
 	bool EditorAssetDatabase::GetAssetLocation(UUID uuid, AssetLocation& location)
 	{
-		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return false;
+		JSONFileRef& projectFile = pProject->ProjectFile();
 		JSONValueRef assetsNode = projectFile["Assets"];
 
 		const std::string key = std::to_string(uuid);
@@ -589,7 +611,9 @@ namespace Glory::Editor
 
 	bool EditorAssetDatabase::GetAssetMetadata(UUID uuid, ResourceMeta& meta)
 	{
-		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return false;
+		JSONFileRef& projectFile = pProject->ProjectFile();
 		JSONValueRef assetsNode = projectFile["Assets"];
 
 		const std::string key = std::to_string(uuid);
@@ -672,7 +696,9 @@ namespace Glory::Editor
 		if (!m_PathToUUIDCache.Contains(absolutePath.string())) return 0;
 		if (subPath.empty()) return m_PathToUUIDCache[absolutePath.string()];
 
-		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return 0;
+		JSONFileRef& projectFile = pProject->ProjectFile();
 		JSONValueRef assetsNode = projectFile["Assets"];
 
 		for (const auto& f : assetsNode)
@@ -700,7 +726,9 @@ namespace Glory::Editor
 
 	std::string EditorAssetDatabase::GetAssetName(UUID uuid)
 	{
-		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return "";
+		JSONFileRef& projectFile = pProject->ProjectFile();
 		JSONValueRef assetsNode = projectFile["Assets"];
 
 		const std::string key = std::to_string(uuid);
@@ -717,7 +745,9 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::GetAllAssetsOfType(uint32_t typeHash, std::vector<UUID>& result)
 	{
-		JSONFileRef& projectFile = ProjectSpace::GetOpenProject()->ProjectFile();
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return;
+		JSONFileRef& projectFile = pProject->ProjectFile();
 		JSONValueRef assetsNode = projectFile["Assets"];
 
 		for (const auto& f : assetsNode)

@@ -232,8 +232,6 @@ namespace Glory::Editor
         ReadMetaData("FrontAxisSign", context.FrontAxisSign);
         ReadMetaData("UnitScaleFactor", context.UnitScaleFactor);
 
-        const std::filesystem::path assetsPath = ProjectSpace::GetOpenProject()->RootPath();
-
         std::function<void(ImportedResource&, Resource*, const std::string_view)> giveName =
         [](ImportedResource& resource, Resource* pResource, const std::string_view name) {
             std::string uniqueName{ name };

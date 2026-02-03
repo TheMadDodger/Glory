@@ -584,6 +584,7 @@ namespace Glory
 			const std::vector<ImageBarrier>& images, PipelineStageFlagBits srcStage, PipelineStageFlagBits dstStage) = 0;
 
 		virtual void CopyImage(CommandBufferHandle commandBuffer, TextureHandle src, TextureHandle dst) = 0;
+		virtual void CopyImageToBuffer(CommandBufferHandle commandBuffer, TextureHandle src, BufferHandle dst) = 0;
 
 		enum SwapchainResult
 		{

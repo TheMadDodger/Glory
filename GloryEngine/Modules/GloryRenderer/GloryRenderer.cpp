@@ -25,7 +25,22 @@
 
 namespace Glory
 {
+	static const size_t GridSizeX = 16;
+	static const size_t GridSizeY = 9;
+	static const size_t NUM_DEPTH_SLICES = 24;
+	static const size_t NUM_CLUSTERS = GridSizeX*GridSizeY*NUM_DEPTH_SLICES;
+	static const size_t MAX_LIGHTS_PER_TILE = 50;
+	static const size_t MAX_KERNEL_SIZE = 1024;
+
+	GloryRenderer::GloryRenderer(): m_pModule(nullptr), Renderer(nullptr)
+	{
+	}
+
 	GloryRenderer::GloryRenderer(GloryRendererModule* pModule) : m_pModule(pModule), Renderer(pModule)
+	{
+	}
+
+	GloryRenderer::GloryRenderer(const GloryRenderer& other) : m_pModule(other.m_pModule), Renderer(other.m_pModule)
 	{
 	}
 
@@ -496,7 +511,7 @@ namespace Glory
 					constants.zNear = camera.GetNear();
 					constants.zFar = camera.GetFar();
 					constants.Resolution = camera.GetResolution();
-					constants.GridSize = glm::uvec4(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES, 0.0f);
+					constants.GridSize = glm::uvec4(GridSizeX, GridSizeY, NUM_DEPTH_SLICES, 0.0f);
 	
 					pDevice->PushConstants(commandBuffer, RendererPipelines::m_VisualizeLightComplexityPipeline, 0, sizeof(LightComplexityConstants), &constants, STF_Fragment);
 					pDevice->BindDescriptorSets(commandBuffer, RendererPipelines::m_VisualizeLightComplexityPipeline,
@@ -1014,6 +1029,41 @@ namespace Glory
 		}
 		pDevice->End(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 		pDevice->Commit(m_FrameCommandBuffers[m_CurrentFrameIndex], waitSemaphores, signalSemaphores);
+
+		if (!m_Swapchain)
+		{
+			++m_CurrentFrameIndex;
+			m_CurrentFrameIndex = m_CurrentFrameIndex % m_ImageCount;
+		}
+	}
+
+	Renderer* GloryRenderer::CreateSecondaryRenderer(size_t imageCount)
+	{
+		return m_pModule->CreateSecondaryRenderer(imageCount);
+	}
+
+	uint32_t GloryRenderer::NextFrameIndex()
+	{
+		return m_CurrentFrameIndex;
+	}
+
+	bool GloryRenderer::FrameBusy(uint32_t frameIndex)
+	{
+		GraphicsDevice* pDevice = m_pModule->GetEngine()->ActiveGraphicsDevice();
+		if (!pDevice) return false;
+
+		if (!m_FrameCommandBuffers[frameIndex]) return false;
+		const GraphicsDevice::WaitResult result = pDevice->Wait(m_FrameCommandBuffers[frameIndex], 1);
+		switch (result)
+		{
+		case GraphicsDevice::WR_Timeout:
+			return true;
+		case GraphicsDevice::WR_Success:
+			return false;
+		}
+
+		m_pModule->GetEngine()->GetDebug().LogError("Failed to wait for render finished!");
+		return false;
 	}
 
 	void GloryRenderer::Cleanup()
@@ -1062,6 +1112,13 @@ namespace Glory
 	{
 		GraphicsDevice* pDevice = m_pModule->GetEngine()->ActiveGraphicsDevice();
 		RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_FinalFrameColorPasses[m_CurrentFrameIndex]);
+		return pDevice->GetRenderTextureAttachment(renderTexture, 0);
+	}
+
+	TextureHandle GloryRenderer::FinalColor(uint32_t frameIndex) const
+	{
+		GraphicsDevice* pDevice = m_pModule->GetEngine()->ActiveGraphicsDevice();
+		RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_FinalFrameColorPasses[frameIndex]);
 		return pDevice->GetRenderTextureAttachment(renderTexture, 0);
 	}
 
@@ -1272,7 +1329,7 @@ namespace Glory
 		RenderConstants constants;
 		constants.m_CameraIndex = static_cast<uint32_t>(cameraIndex);
 		constants.m_LightCount = m_FrameData.ActiveLights.count();
-		constants.m_GridSize = glm::uvec4(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES, 0.0f);
+		constants.m_GridSize = glm::uvec4(GridSizeX, GridSizeY, NUM_DEPTH_SLICES, 0.0f);
 		CameraRef camera = m_ActiveCameras[cameraIndex];
 		const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
 		const DescriptorSetHandle lightSet = uniqueCameraData.m_LightSets[m_CurrentFrameIndex];
@@ -1823,7 +1880,7 @@ namespace Glory
 		ClusterConstants constants;
 		constants.CameraIndex = cameraIndex;
 		constants.LightCount = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
-		constants.GridSize = glm::vec4(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES, 0.0f);
+		constants.GridSize = glm::vec4(GridSizeX, GridSizeY, NUM_DEPTH_SLICES, 0.0f);
 
 		CommandBufferHandle commandBuffer = pDevice->Begin();
 		pDevice->BeginPipeline(commandBuffer, RendererPipelines::m_ClusterGeneratorPipeline);
@@ -1920,7 +1977,7 @@ namespace Glory
 		ClusterConstants constants;
 		constants.CameraIndex = cameraIndex;
 		constants.LightCount = (uint32_t)std::fmin(m_FrameData.ActiveLights.count(), MAX_LIGHTS);
-		constants.GridSize = glm::vec4(m_GridSizeX, m_GridSizeY, NUM_DEPTH_SLICES, 0.0f);
+		constants.GridSize = glm::vec4(GridSizeX, GridSizeY, NUM_DEPTH_SLICES, 0.0f);
 
 		pDevice->BeginPipeline(commandBuffer, RendererPipelines::m_ClusterCullLightPipeline);
 		pDevice->BindDescriptorSets(commandBuffer, RendererPipelines::m_ClusterCullLightPipeline, { m_GlobalClusterSet, clusterSet, m_GlobalLightSet, lightSet, lightDistancesSet });
@@ -2442,6 +2499,7 @@ namespace Glory
 	{
 		m_MaxShadowLODs = std::min(RendererCVARs::MAX_SHADOW_LODS, maxLODs);
 		m_ShadowLODDivisions.clear();
+
 		m_ShadowLODDivisions.reserve(m_MaxShadowLODs);
 		for (size_t i = 0; i < m_MaxShadowLODs; ++i)
 		{

@@ -754,6 +754,11 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
 
+	void OpenGLDevice::CopyImageToBuffer(CommandBufferHandle commandBuffer, TextureHandle src, BufferHandle dst)
+	{
+
+	}
+
 	GraphicsDevice::SwapchainResult OpenGLDevice::AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle)
 	{
 		GL_Swapchain* glSwapchain = m_Swapchains.Find(swapchain);

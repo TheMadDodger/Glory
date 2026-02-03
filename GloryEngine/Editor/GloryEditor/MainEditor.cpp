@@ -164,6 +164,7 @@ namespace Glory::Editor
 		thumbnails.AddGenerator<ImageThumbnailGenerator>();
 		thumbnails.AddGenerator<TextureThumbnailGenerator>();
 		thumbnails.AddGenerator<SceneThumbnailGenerator>();
+		thumbnails.SetupInternalRenderableThumbnails();
 
 		Gizmos::Initialize();
 

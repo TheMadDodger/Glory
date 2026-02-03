@@ -285,6 +285,9 @@ namespace Glory::Editor
 			/* Draw */
 			m_pEngine->Draw();
 
+			/* Update thumbnail manager */
+			m_ThumbnailManager->Update();
+
 			/* End the current frame */
 			m_pEngine->EndFrame();
 
@@ -434,6 +437,7 @@ namespace Glory::Editor
 		m_MainEditor.Initialize();
 
 		InitializeExtensions();
+		m_ThumbnailManager->Initialize();
 
 		m_pEngine->GetDebug().LogInfo("Initialized editor platform");
 	}

@@ -27,6 +27,8 @@ namespace Glory
 
 		const std::type_info& GetModuleType() override;
 
+		GloryRenderer* CreateSecondaryRenderer(size_t imageCount);
+
 		GLORY_MODULE_VERSION_H(0, 1, 0);
 
 	private:
@@ -42,6 +44,7 @@ namespace Glory
 
 	private:
 		GloryRenderer m_Renderer;
+		std::vector<GloryRenderer> m_SecondaryRenderer;
 
 		std::vector<UUID> m_PipelineOrder;
 	};
