@@ -265,8 +265,11 @@ namespace Glory::Editor
 			/* Tick the player */
 			m_Player.Tick(m_pEngine);
 
-			// Update engine (this also does the render loop)
+			/* Update engine */
 			m_pEngine->ModulesLoop(&m_Player);
+
+			/* Draw */
+			m_pEngine->Draw();
 
 			/* End the current frame */
 			m_pEngine->EndFrame();

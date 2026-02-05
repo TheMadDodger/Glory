@@ -3,7 +3,7 @@
 #include "WindowModule.h"
 
 #include <Input.h>
-#include <RendererModule.h>
+#include <Renderer.h>
 #include <Engine.h>
 #include <Debug.h>
 #include <SDL2/SDL_syswm.h>
@@ -561,7 +561,7 @@ namespace Glory
 	void SDLWindow::HandleWindowSizeEvents(SDL_WindowEvent& event)
 	{
 		Engine* pEngine = m_pWindowManager->GetEngine();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = pEngine->ActiveRenderer();
 		if (!pRenderer) return;
 		switch (event.event)
 		{

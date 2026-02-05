@@ -26,10 +26,12 @@
 #include <EntityRegistry.h>
 #include <GloryECS/ComponentTypes.h>
 #include <Reflection.h>
+#include <PropertyFlags.h>
+#include <VertexHelpers.h>
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
-#include <PropertyFlags.h>
+#include <Renderer.h>
 
 namespace Glory
 {
@@ -460,7 +462,7 @@ namespace Glory
 		m_pImageMesh->AddVertex(reinterpret_cast<float*>(&vertices[3]));
 		m_pImageMesh->AddFace(0, 1, 2, 3);
 
-		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = m_pEngine->ActiveRenderer();
 		pRenderer->InjectPreRenderPass([this](GraphicsDevice* pDevice, CommandBufferHandle commandBuffer, uint32_t frameIndex) {
 			UIPrepass(pDevice, commandBuffer, frameIndex);
 		});
@@ -476,7 +478,7 @@ namespace Glory
 		};
 		pRenderer->AddPostProcess(std::move(uiOverlayPostProcess));
 
-		pRenderer->InjectDatapass([this](GraphicsDevice* pDevice, RendererModule* pRenderer)
+		pRenderer->InjectDatapass([this](GraphicsDevice* pDevice, Renderer* pRenderer)
 			{ UIDataPass(pDevice, pRenderer); });
 	}
 
@@ -564,7 +566,7 @@ namespace Glory
 
 	void UIRendererModule::Load()
 	{
-		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = m_pEngine->ActiveRenderer();
 		if (!pRenderer) return;
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice) return;
@@ -595,7 +597,7 @@ namespace Glory
 		}
 	}
 
-	void UIRendererModule::UIDataPass(GraphicsDevice* pDevice, RendererModule* pRenderer)
+	void UIRendererModule::UIDataPass(GraphicsDevice* pDevice, Renderer* pRenderer)
 	{
 		CheckCachedPipelines(pDevice);
 
@@ -690,7 +692,7 @@ namespace Glory
 	UIDocument& UIRendererModule::GetDocument(const UIRenderData& data, UIDocumentData* pDocument, bool forceCreate)
 	{
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
-		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = m_pEngine->ActiveRenderer();
 
 		const UUID id = data.m_ObjectID;
 

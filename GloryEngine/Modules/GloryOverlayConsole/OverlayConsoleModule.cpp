@@ -1,7 +1,7 @@
 #include "OverlayConsoleModule.h"
 
 #include <WindowModule.h>
-#include <RendererModule.h>
+#include <Renderer.h>
 #include <Console.h>
 #include <MaterialManager.h>
 #include <Engine.h>
@@ -171,7 +171,7 @@ namespace Glory
 
 	void OverlayConsoleModule::PostInitialize()
 	{
-		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = m_pEngine->ActiveRenderer();
 		if (!pRenderer)
 		{
 			m_pEngine->GetDebug().LogError("OverlayConsole does not work without a renderer");
@@ -435,7 +435,7 @@ namespace Glory
 
 	void OverlayConsoleModule::Load()
 	{
-		RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = m_pEngine->ActiveRenderer();
 		if (!pRenderer) return;
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice) return;

@@ -13,7 +13,7 @@
 
 namespace Glory
 {
-	class RendererModule;
+	class Renderer;
 	class Console;
 	class GameTime;
 	class WindowModule;
@@ -80,7 +80,7 @@ namespace Glory
 
 #ifndef GLORY_NO_DEBUG_LINES
 
-		void SubmitLines(RendererModule* pRenderer, GameTime* pTime);
+		void SubmitLines(Renderer* pRenderer, GameTime* pTime);
 
 #endif
 

@@ -2,7 +2,7 @@
 
 #include "Engine.h"
 #include "WindowModule.h"
-#include "RendererModule.h"
+#include "Renderer.h"
 #include "Window.h"
 #include "CameraManager.h"
 #include "SceneManager.h"
@@ -24,7 +24,7 @@ namespace Glory
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = pScene->Manager()->GetRenderer();
 		if (!pRenderer) return;
 
 		const glm::uvec2& resolution = pRenderer->Resolution();
@@ -76,7 +76,7 @@ namespace Glory
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		pComponent.m_Camera.SetView(glm::inverse(transform.MatTransform));
 
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = pScene->Manager()->GetRenderer();
 		if (!pRenderer || !pRenderer->ResolutionChanged()) return;
 		OnValidate(pRegistry, entity, pComponent);
 	}
@@ -85,7 +85,7 @@ namespace Glory
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = pScene->Manager()->GetRenderer();
 		if (!pRenderer) return;
 		pRenderer->SubmitCamera(pComponent.m_Camera);
 	}
@@ -94,7 +94,7 @@ namespace Glory
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
 		Engine* pEngine = pScene->Manager()->GetEngine();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = pScene->Manager()->GetRenderer();
 		if (!pRenderer) return;
 		pRenderer->UnsubmitCamera(pComponent.m_Camera);
 	}

@@ -1,11 +1,11 @@
 #include "TextSystem.h"
-#include "Components.h"
 
+#include "Components.h"
 #include "GScene.h"
-#include "RendererModule.h"
+#include "Renderer.h"
 #include "SceneManager.h"
 #include "Engine.h"
-#include "Components.h"
+#include "VertexHelpers.h"
 #include "RenderData.h"
 #include "AssetManager.h"
 
@@ -27,6 +27,9 @@ namespace Glory
 		if (!pComponent.m_Font || pComponent.m_Text.empty()) return;
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
+		Renderer* pRenderer = pScene->Manager()->GetRenderer();
+		if (!pRenderer) return;
+
 		Engine* pEngine = pScene->Manager()->GetEngine();
 		LayerManager* pLayers = &pEngine->GetLayerManager();
 
@@ -78,7 +81,7 @@ namespace Glory
 			Utils::GenerateTextMesh(pMeshData, pFont, textData, textWrap);
 		}
 
-		REQUIRE_MODULE_CALL(pEngine, RendererModule, SubmitDynamic(std::move(renderData)), );
+		pRenderer->SubmitDynamic(std::move(renderData));
 	}
 
 	void TextSystem::GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references)

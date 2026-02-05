@@ -29,6 +29,7 @@ namespace Utils::Reflect
 	class MaterialManager;
 	class PipelineManager;
 	class GraphicsDevice;
+	class Renderer;
 
 	class Debug;
 	class Console;
@@ -153,6 +154,7 @@ namespace Utils::Reflect
 		void Update();
 		void Initialize();
 		void Cleanup();
+		void Draw();
 
 		ThreadManager& Threads();
 		Jobs::JobManager& Jobs();
@@ -219,6 +221,9 @@ namespace Utils::Reflect
 		void AddGraphicsDevice(GraphicsDevice* pGraphicsDevice);
 		GraphicsDevice* ActiveGraphicsDevice();
 
+		void AddMainRenderer(Renderer* pRenderer);
+		Renderer* ActiveRenderer();
+
 		void Load();
 
 	private:
@@ -257,6 +262,9 @@ namespace Utils::Reflect
 
 		size_t m_ActiveGraphicsDevice;
 		std::vector<GraphicsDevice*> m_pGraphicsDevices;
+		size_t m_ActiveRenderer;
+		std::vector<Renderer*> m_pRenderers;
+		std::vector<Renderer*> m_pSecondaryRenderers;
 
 		/* Threading */
 		std::unique_ptr<ThreadManager> m_ThreadManager;

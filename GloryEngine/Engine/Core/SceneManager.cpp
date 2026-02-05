@@ -12,7 +12,7 @@
 
 namespace Glory
 {
-	SceneManager::SceneManager(Engine* pEngine) : m_pEngine(pEngine), m_ActiveSceneIndex(0),
+	SceneManager::SceneManager(Engine* pEngine) : m_pEngine(pEngine), m_pRenderer(nullptr), m_ActiveSceneIndex(0),
 		m_HoveringObjectSceneID(0), m_HoveringObjectID(0), m_HoveringPos(),
 		m_HoveringNormal(), m_pComponentTypesInstance(nullptr), m_NextFrameLoadIsAdditive(false)
 	{
@@ -24,6 +24,18 @@ namespace Glory
 		m_pOpenScenes.clear();
 		m_pExternalScenes.clear();
 		m_ActiveSceneIndex = 0;
+
+		m_pRenderer = nullptr;
+	}
+
+	void SceneManager::SetRenderer(Renderer* pRenderer)
+	{
+		m_pRenderer = pRenderer;
+	}
+
+	Renderer* SceneManager::GetRenderer() const
+	{
+		return m_pRenderer;
 	}
 
 	void SceneManager::LoadScene(UUID uuid, bool additive)

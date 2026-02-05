@@ -19,7 +19,7 @@
 #include <UIDocument.h>
 #include <UIDocumentData.h>
 #include <Shortcuts.h>
-#include <RendererModule.h>
+#include <Renderer.h>
 #include <UIRendererModule.h>
 
 namespace Glory::Editor
@@ -54,7 +54,7 @@ namespace Glory::Editor
 		m_SelectedEntity = 0;
 		m_EditingDocument = documentID;
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = pEngine->ActiveRenderer();
 		UIRendererModule* pUIRenderer = pEngine->GetOptionalModule<UIRendererModule>();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
 		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
@@ -111,7 +111,7 @@ namespace Glory::Editor
 	{
 		m_Resolution = resolution;
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = pEngine->ActiveRenderer();
 		UIRendererModule* pUIRenderer = pEngine->GetOptionalModule<UIRendererModule>();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
 
@@ -281,7 +281,7 @@ namespace Glory::Editor
 			pDocument->SetDrawDirty();
 		});
 
-		pEngine->GetMainModule<RendererModule>()->InjectPreRenderPass([this](GraphicsDevice* pDevice, CommandBufferHandle commandBuffer, uint32_t frameIndex) {
+		pEngine->ActiveRenderer()->InjectPreRenderPass([this](GraphicsDevice* pDevice, CommandBufferHandle commandBuffer, uint32_t frameIndex) {
 			UIDocument* pDocument = CurrentDocument();
 			const UUID documentID = CurrentDocumentID();
 			const glm::uvec2 resolution = Resolution();

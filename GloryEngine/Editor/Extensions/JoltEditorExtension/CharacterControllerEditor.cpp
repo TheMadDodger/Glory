@@ -4,7 +4,7 @@
 
 #include <EditorApplication.h>
 #include <Engine.h>
-#include <RendererModule.h>
+#include <Renderer.h>
 #include <glm/gtx/quaternion.hpp>
 #include <TypeData.h>
 #include <glm/gtx/matrix_decompose.hpp>
@@ -29,7 +29,7 @@ namespace Glory::Editor
 	{
 		Transform& transform = m_pComponentObject->GetRegistry()->GetComponent<Transform>(m_pComponentObject->EntityID());
 		CharacterController& body = GetTargetComponent();
-		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->DrawLineShape(transform.MatTransform, {}, body.m_Shape, {1, 0, 0, 1});
+		EditorApplication::GetInstance()->GetEngine()->ActiveRenderer()->DrawLineShape(transform.MatTransform, {}, body.m_Shape, {1, 0, 0, 1});
 		return EntityComponentEditor::OnGUI();
 	}
 

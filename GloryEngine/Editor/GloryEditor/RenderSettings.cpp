@@ -17,9 +17,10 @@
 #include <PipelineData.h>
 
 #include <imgui.h>
-#include <IconsFontAwesome6.h>
 #include <BinaryStream.h>
-#include <RendererModule.h>
+#include <Renderer.h>
+
+#include <IconsFontAwesome6.h>
 
 namespace Glory::Editor
 {
@@ -273,7 +274,7 @@ namespace Glory::Editor
 	void RenderSettings::SendToRenderer()
 	{
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = pEngine->ActiveRenderer();
 		if (!pRenderer) return;
 
 		std::vector<UUID> pipelineOrder(PipelineOrder);

@@ -5,7 +5,7 @@
 
 #include <imgui.h>
 #include <InputModule.h>
-#include <RendererModule.h>
+#include <Renderer.h>
 #include <GraphicsDevice.h>
 
 namespace Glory::Editor
@@ -34,13 +34,13 @@ namespace Glory::Editor
 	void GameWindow::OnOpen()
 	{
 		const glm::uvec2& resolution = Resolutions[SelectedAspect][SelectedResolution];
-		RendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>();
+		Renderer* pRenderer = EditorApplication::GetInstance()->GetEngine()->ActiveRenderer();
 		pRenderer->OnWindowResize(resolution);
 	}
 
 	void GameWindow::MenuBar()
 	{
-		RendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>();
+		Renderer* pRenderer = EditorApplication::GetInstance()->GetEngine()->ActiveRenderer();
 
 		if (m_SelectedRenderTextureIndex == -1)
 			m_SelectedRenderTextureIndex = pRenderer->DefaultAttachmenmtIndex();
@@ -129,7 +129,7 @@ namespace Glory::Editor
 	{
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = EditorApplication::GetInstance()->GetEngine()->ActiveRenderer();
 
 		const size_t outputCameraCount = pRenderer->GetOutputCameraCount();
 		if (m_CurrentOutputCameraIndex != -1 && m_CurrentOutputCameraIndex > outputCameraCount)

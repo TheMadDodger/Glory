@@ -2,7 +2,7 @@
 #include "EditorApplication.h"
 
 #include <Engine.h>
-#include <RendererModule.h>
+#include <Renderer.h>
 
 namespace Glory::Editor
 {
@@ -24,7 +24,7 @@ namespace Glory::Editor
 		const bool change = EntityComponentEditor::OnGUI();
 		Transform& transform = m_pComponentObject->GetRegistry()->GetComponent<Transform>(m_pComponentObject->EntityID());
 		LightComponent& light = GetTargetComponent();
-		RendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>();
+		Renderer* pRenderer = EditorApplication::GetInstance()->GetEngine()->ActiveRenderer();
 
 		const glm::vec3 dir = transform.MatTransform[2];
 		const glm::vec3 pos = transform.MatTransform[3];
@@ -38,7 +38,7 @@ namespace Glory::Editor
 			const glm::vec3 endPoint = startPoint - glm::vec3{ 0.0f, 0.0f, radius*10.0f };
 			const glm::vec3 circlePoint = endPoint + glm::vec3{ 0.0f, 0.0f, radius*2.0f };
 			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint, glm::vec4(1.0f, 0.894f, 0.518f, 1.0f));
-			pRenderer->DrawLineCircle(transform.MatTransform, circlePoint, radius, RendererModule::CircleUp::z, glm::vec4(1.0f, 0.894f, 0.518f, 1.0f));
+			pRenderer->DrawLineCircle(transform.MatTransform, circlePoint, radius, Renderer::CircleUp::z, glm::vec4(1.0f, 0.894f, 0.518f, 1.0f));
 			pRenderer->DrawLine(transform.MatTransform, endPoint, circlePoint + glm::vec3(0.0f, 0.0f, 0.0f), glm::vec4(1.0f, 0.894f, 0.518f, 1.0f));
 			pRenderer->DrawLine(transform.MatTransform, endPoint, circlePoint + glm::vec3(radius, 0.0f, 0.0f), glm::vec4(1.0f, 0.894f, 0.518f, 1.0f));
 			pRenderer->DrawLine(transform.MatTransform, endPoint, circlePoint + glm::vec3(-radius, 0.0f, 0.0f), glm::vec4(1.0f, 0.894f, 0.518f, 1.0f));
@@ -57,14 +57,14 @@ namespace Glory::Editor
 			const float innerRadius = light.m_Range*std::tan(glm::radians(light.m_Inner/2.0f));
 			const float outerRadius = light.m_Range*std::tan(glm::radians(light.m_Outer/2.0f));
 
-			pRenderer->DrawLineCircle(transform.MatTransform, endPoint, innerRadius, RendererModule::CircleUp::z, glm::vec4(light.m_Color, 1.0f));
+			pRenderer->DrawLineCircle(transform.MatTransform, endPoint, innerRadius, Renderer::CircleUp::z, glm::vec4(light.m_Color, 1.0f));
 			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, 0.0f, 0.0f), glm::vec4(light.m_Color, 1.0f));
 			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(innerRadius, 0.0f, 0.0f), glm::vec4(light.m_Color, 1.0f));
 			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(-innerRadius, 0.0f, 0.0f), glm::vec4(light.m_Color, 1.0f));
 			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, innerRadius, 0.0f), glm::vec4(light.m_Color, 1.0f));
 			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, -innerRadius, 0.0f), glm::vec4(light.m_Color, 1.0f));
 
-			pRenderer->DrawLineCircle(transform.MatTransform, endPoint, outerRadius, RendererModule::CircleUp::z, glm::vec4(light.m_Color*0.5f, 1.0f));
+			pRenderer->DrawLineCircle(transform.MatTransform, endPoint, outerRadius, Renderer::CircleUp::z, glm::vec4(light.m_Color*0.5f, 1.0f));
 			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(0.0f, 0.0f, 0.0f), glm::vec4(light.m_Color*0.5f, 1.0f));
 			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(outerRadius, 0.0f, 0.0f), glm::vec4(light.m_Color*0.5f, 1.0f));
 			pRenderer->DrawLine(transform.MatTransform, startPoint, endPoint + glm::vec3(-outerRadius, 0.0f, 0.0f), glm::vec4(light.m_Color*0.5f, 1.0f));

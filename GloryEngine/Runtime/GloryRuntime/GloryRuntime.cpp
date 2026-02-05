@@ -6,7 +6,7 @@
 
 #include <Engine.h>
 #include <Window.h>
-#include <RendererModule.h>
+#include <Renderer.h>
 #include <GraphicsDevice.h>
 #include <WindowModule.h>
 
@@ -82,7 +82,7 @@ namespace Glory
 		m_pEngine->SetPipelineManager(m_PipelineManager.get());
 		m_pEngine->Initialize();
 
-		m_pRenderer = m_pEngine->GetMainModule<RendererModule>();
+		m_pRenderer = m_pEngine->ActiveRenderer();
 		m_pWindows = m_pEngine->GetMainModule<WindowModule>();
 
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
