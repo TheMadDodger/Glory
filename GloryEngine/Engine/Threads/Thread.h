@@ -5,14 +5,19 @@
 
 namespace Glory
 {
+	/** @brief Thread */
 	class Thread
 	{
 	public:
+		/** @brief Unique thread ID */
 		const size_t& GetThreadIndex();
+		/** @brief Check whether this thread is idle */
 		bool IsIdle() const;
 
 	private:
+		/** @brief Constructor */
 		Thread(size_t index, std::function<void(Thread*)> idleCallback);
+		/** @brief Destructor */
 		virtual ~Thread();
 
 	private:

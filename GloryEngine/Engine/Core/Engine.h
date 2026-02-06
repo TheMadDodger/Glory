@@ -154,6 +154,8 @@ namespace Utils::Reflect
 		void Initialize();
 		void Cleanup();
 
+		ThreadManager& Threads();
+		Jobs::JobManager& Jobs();
 		Console& GetConsole();
 		Debug& GetDebug();
 		GameTime& Time();
@@ -168,7 +170,6 @@ namespace Utils::Reflect
 		Utils::Reflect::Reflect& Reflection();
 		ObjectManager& GetObjectManager();
 		EngineProfiler& Profiler();
-		Jobs::JobManager& Jobs();
 
 		void SetAssetManager(AssetManager* pManager);
 		void SetSceneManager(SceneManager* pManager);
@@ -258,8 +259,8 @@ namespace Utils::Reflect
 		std::vector<GraphicsDevice*> m_pGraphicsDevices;
 
 		/* Threading */
-		ThreadManager* m_pThreadManager;
-		Jobs::JobManager* m_pJobManager;
+		std::unique_ptr<ThreadManager> m_ThreadManager;
+		std::unique_ptr<Jobs::JobManager> m_JobManager;
 
 		/* External objects */
 		Console* m_Console;

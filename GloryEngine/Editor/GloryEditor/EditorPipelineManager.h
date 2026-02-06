@@ -19,7 +19,7 @@ namespace Glory
 	namespace Jobs
 	{
 		template<typename ret, typename ...args>
-		class JobPool;
+		class JobWorkerPool;
 	}
 }
 
@@ -167,7 +167,7 @@ namespace Glory::Editor
 		UUID m_AssetRegisteredCallback;
 		UUID m_AssetUpdatedCallback;
 
-		Jobs::JobPool<bool, UUID>* m_pPipelineJobsPool;
+		Jobs::JobWorkerPool<bool, UUID>* m_pPipelineJobsPool;
 		static ThreadedVector<UUID> m_QueuedPipelines;
 		static ThreadedVector<EditorPipeline*> m_FinishedPipelines;
 		static std::mutex m_WaitMutex;

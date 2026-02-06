@@ -34,7 +34,7 @@ namespace Glory::Editor
 	std::function<void()> EditorAssetDatabase::m_AsyncImportCallback;
 	bool EditorAssetDatabase::m_IsDirty;
 
-	Jobs::JobPool<bool, std::filesystem::path>* m_pImportPool;
+	Jobs::JobWorkerPool<bool, std::filesystem::path>* m_pImportPool;
 
 	void EditorAssetDatabase::Load(JSONFileRef& projectFile)
 	{
@@ -773,7 +773,7 @@ namespace Glory::Editor
 	{
 		DB_EngineInstance = EditorApplication::GetInstance()->GetEngine();
 
-		m_pImportPool = Jobs::JobManager::Run<bool, std::filesystem::path>();
+		m_pImportPool = DB_EngineInstance->Jobs().Run<bool, std::filesystem::path>();
 
 		YAML::Node m_LastSavedNode;
 		DB_EngineInstance->GetDebug().LogInfo("Initialized EditorAssetDatabase");

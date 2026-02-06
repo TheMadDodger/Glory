@@ -2,11 +2,8 @@
 
 namespace Glory::Jobs
 {
-	JobManager* JobManager::m_pInstance = nullptr;
-
-	JobManager::JobManager()
+	JobManager::JobManager(ThreadManager* pThreads): m_pThreads(pThreads)
 	{
-		m_pInstance = this;
 	}
 
 	JobManager::~JobManager()
@@ -16,13 +13,8 @@ namespace Glory::Jobs
 			delete m_pJobPools[i];
 		}
 		m_pJobPools.clear();
-	}
 
-	JobManager* JobManager::GetInstance()
-	{
-		if (m_pInstance != nullptr) return m_pInstance;
-		m_pInstance = new JobManager();
-		return m_pInstance;
+		m_pThreads = nullptr;
 	}
 	
 	void JobManager::Kill()
@@ -31,5 +23,10 @@ namespace Glory::Jobs
 		{
 			m_pJobPools[i]->Kill();
 		}
+	}
+
+	ThreadManager* JobManager::Threads() const
+	{
+		return m_pThreads;
 	}
 }

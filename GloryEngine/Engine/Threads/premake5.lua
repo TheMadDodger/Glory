@@ -21,12 +21,6 @@ project "GloryThreads"
 
 	includedirs
 	{
-		"%{DepsIncludeDir}",
-
-		"%{IncludeDir.glm}",
-		"%{IncludeDir.yaml_cpp}",
-
-		"%{IncludeDir.Reflect}",
 	}
 
 	defines
