@@ -3,20 +3,25 @@
 
 namespace Glory
 {
-	ThreadManager* ThreadManager::m_pInstance = nullptr;
+	size_t ThreadManager::m_HardwareThreads = std::thread::hardware_concurrency();
+
+	ThreadManager::~ThreadManager()
+	{
+		Kill();
+	}
 
 	Thread* ThreadManager::Run(std::function<void()> func)
 	{
-		return GetInstance()->CreateThread(func);
+		return CreateThread(func);
 	}
 
 	size_t ThreadManager::NumHardwareThread()
 	{
-		if (GetInstance()->m_HardwareThreads == 0) return 4;
-		return GetInstance()->m_HardwareThreads;
+		if (m_HardwareThreads == 0) return 4;
+		return m_HardwareThreads;
 	}
 
-	void ThreadManager::Destroy()
+	void ThreadManager::Kill()
 	{
 		for (size_t i = 0; i < m_pThreads.size(); i++)
 		{
@@ -24,9 +29,6 @@ namespace Glory
 			delete m_pThreads[i];
 		}
 		m_pThreads.clear();
-		
-		delete m_pInstance;
-		m_pInstance = nullptr;
 	}
 
 	Thread* ThreadManager::CreateThread(std::function<void()> func)
@@ -41,9 +43,7 @@ namespace Glory
 
 	bool ThreadManager::NewThread()
 	{
-		//if (m_pThreads.size() >= m_MaxThreads) return false;
-
-		size_t index = m_pThreads.size();
+		const size_t index = m_pThreads.size();
 
 		std::function<void(Thread*)> func = std::bind(&ThreadManager::OnThreadIdle, this, std::placeholders::_1);
 		Thread* newThread = new Thread(index, func);
@@ -58,7 +58,7 @@ namespace Glory
 	Thread* ThreadManager::PopIdleThread()
 	{
 		if (m_IdleThreads.empty()) return nullptr;
-		size_t index = m_IdleThreads.front();
+		const size_t index = m_IdleThreads.front();
 		m_IdleThreads.pop();
 		return m_pThreads[index];
 	}
@@ -68,22 +68,5 @@ namespace Glory
 		std::unique_lock<std::mutex> lock(m_IdleQueueMutex);
 		m_IdleThreads.push(pThread->THREAD_INDEX);
 		lock.unlock();
-	}
-
-	ThreadManager* ThreadManager::GetInstance()
-	{
-		if (m_pInstance != nullptr) return m_pInstance;
-		m_pInstance = new ThreadManager();
-		return m_pInstance;
-	}
-
-	ThreadManager::ThreadManager() : m_HardwareThreads(0)
-	{
-		m_pInstance = this;
-		m_HardwareThreads = std::thread::hardware_concurrency();
-	}
-
-	ThreadManager::~ThreadManager()
-	{
 	}
 }

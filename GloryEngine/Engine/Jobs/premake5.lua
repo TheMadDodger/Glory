@@ -16,19 +16,12 @@ project "GloryJobs"
 
 	vpaths
 	{
-		["Job System"] = { "Job.*", "JobManager.*", "JobPool.*", "JobQueue.*" },
+		["Job System"] = { "JobWorker.*", "JobManager.*", "JobWorkerPool.*", "JobQueue.*" },
 	}
 
 	includedirs
 	{
 		"%{GloryIncludeDir.threads}",
-
-		"%{DepsIncludeDir}",
-
-		"%{IncludeDir.glm}",
-		"%{IncludeDir.yaml_cpp}",
-
-		"%{IncludeDir.Reflect}",
 	}
 
 	defines

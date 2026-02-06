@@ -1,30 +1,46 @@
 #pragma once
-#include "JobPool.h"
+#include "JobWorkerPool.h"
+
 #include <vector>
+
+namespace Glory
+{
+	class ThreadManager;
+}
 
 namespace Glory::Jobs
 {
+	/** @brief Job manager */
 	class JobManager
 	{
 	public:
-		template<typename ret, typename ...args>
-		static JobPool<ret, args...>* Run(size_t numJobsPerThread = 1)
-		{
-			return GetInstance()->CreateJobPool<ret, args...>();
-		}
-
-	private:
-		JobManager();
+		/** @brief Constructor
+		 * @param pThreads Thread manager to run jobs on
+		 */
+		JobManager(ThreadManager* pThreads);
+		/** @brief Destructor */
 		virtual ~JobManager();
 
-		static JobManager* GetInstance();
-
+		/** @brief Kill all job pools and wait for exit */
 		void Kill();
+		/** @brief Get the thread manager the jobs run on */
+		ThreadManager* Threads() const;
 
+		/** @brief Create a new job worker pool
+		 * @param numJobsPerThread Number of workers per CPU thread
+		 */
 		template<typename ret, typename ...args>
-		JobPool<ret, args...>* CreateJobPool(size_t numJobsPerThread = 1)
+		JobWorkerPool<ret, args...>* Run(size_t numJobsPerThread = 1)
 		{
-			JobPool<ret, args...>* newPool = new JobPool<ret, args...>(m_pJobPools.size(), numJobsPerThread);
+			return CreateJobPool<ret, args...>();
+		}
+
+
+	private:
+		template<typename ret, typename ...args>
+		JobWorkerPool<ret, args...>* CreateJobPool(size_t numJobsPerThread = 1)
+		{
+			JobWorkerPool<ret, args...>* newPool = new JobWorkerPool<ret, args...>(this, m_pJobPools.size(), numJobsPerThread);
 			m_pJobPools.push_back(newPool);
 			newPool->Initialize();
 			return newPool;
@@ -32,7 +48,7 @@ namespace Glory::Jobs
 
 	private:
 		friend class Engine;
-		std::vector<JobPoolBase*> m_pJobPools;
-		static JobManager* m_pInstance;
+		std::vector<JobWorkerPoolBase*> m_pJobPools;
+		ThreadManager* m_pThreads;
 	};
 }

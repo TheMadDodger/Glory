@@ -156,7 +156,7 @@ namespace Glory::Editor
 
 	void EditorAssetManager::Initialize()
 	{
-		m_pResourceLoadingPool = Jobs::JobManager::Run<bool, UUID>();
+		m_pResourceLoadingPool = m_pEngine->Jobs().Run<bool, UUID>();
 
 		Undo::RegisterChangeHandler(".gtex", "", [this](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
 			const UUID uuid = EditorAssetDatabase::FindAssetUUID(file.Path().string());

@@ -7,14 +7,26 @@
 
 namespace Glory
 {
+	/** @brief Thread manager */
 	class ThreadManager
 	{
 	public:
-		static Thread* Run(std::function<void()> func);
+		/** @brief Constructor */
+		ThreadManager() {};
+		/** @brief Destructor */
+		virtual ~ThreadManager();
+
+		/** @brief Create a new thread and run a method on it
+		 * @param func The method to run
+		 */
+		Thread* Run(std::function<void()> func);
+		/** @brief Get the number of hardware threads available */
 		static size_t NumHardwareThread();
 
+		/** @brief Kill all running threads and wait for exit */
+		void Kill();
+
 	private:
-		void Destroy();
 
 		Thread* CreateThread(std::function<void()> func);
 
@@ -24,17 +36,11 @@ namespace Glory
 
 		void OnThreadIdle(Thread* pThread);
 
-		static ThreadManager* GetInstance();
-
-		ThreadManager();
-		virtual ~ThreadManager();
-
 	private:
 		friend class Engine;
-		size_t m_HardwareThreads;
+		static size_t m_HardwareThreads;
 		std::mutex m_IdleQueueMutex;
 		std::queue<size_t> m_IdleThreads;
 		std::vector<Thread*> m_pThreads;
-		static ThreadManager* m_pInstance;
 	};
 }

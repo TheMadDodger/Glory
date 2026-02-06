@@ -121,7 +121,7 @@ namespace Glory::Editor
 		ProjectSpace::OpenProject(projectPath);
 
 		m_IsStarting = true;
-		ThreadManager::Run([this] {
+		m_pEngine->Threads().Run([this] {
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			RunStartup();
 		});
@@ -178,6 +178,8 @@ namespace Glory::Editor
 		AssetsWatcher = nullptr;
 
 		DestroyAllEditableEntities();
+
+		m_pEngine->Cleanup();
 	}
 
 	void EditorApplication::Run()

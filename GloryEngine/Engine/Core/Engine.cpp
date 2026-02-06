@@ -205,7 +205,7 @@ namespace Glory
 
 	Engine::Engine(const EngineCreateInfo& createInfo)
 		: m_ActiveGraphicsDevice(0), m_pSceneManager(createInfo.pSceneManager),
-		m_pThreadManager(ThreadManager::GetInstance()), m_pJobManager(Jobs::JobManager::GetInstance()),
+		m_ThreadManager(new ThreadManager()), m_JobManager(new Jobs::JobManager(m_ThreadManager.get())),
 		m_Reflection(new Reflect), m_CreateInfo(createInfo), m_ResourceTypes(new ResourceTypes),
 		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
 		m_pAssetsManager(createInfo.pAssetManager), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
@@ -332,8 +332,8 @@ namespace Glory
 
 		m_Console->Cleanup();
 		m_AssetDatabase->Destroy();
-		m_pJobManager->Kill();
-		m_pThreadManager->Destroy();
+		m_JobManager->Kill();
+		m_ThreadManager->Kill();
 
 		// We need to cleanup in reverse
 		// This makes sure things like graphics get cleaned up before we close the window
@@ -344,9 +344,6 @@ namespace Glory
 		}
 
 		m_pSceneManager = nullptr;
-
-		delete m_pJobManager;
-		m_pJobManager = nullptr;
 
 		m_pAllModules.clear();
 		m_pOptionalModules.clear();
@@ -423,9 +420,14 @@ namespace Glory
 		return *m_Profiler;
 	}
 
+	ThreadManager& Engine::Threads()
+	{
+		return *m_ThreadManager;
+	}
+
 	Jobs::JobManager& Engine::Jobs()
 	{
-		return *m_pJobManager;
+		return *m_JobManager;
 	}
 
 	void Engine::SetAssetManager(AssetManager* pManager)

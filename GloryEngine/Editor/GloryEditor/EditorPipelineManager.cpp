@@ -100,7 +100,7 @@ namespace Glory::Editor
 		m_AssetUpdatedCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetUpdated,
 			[this](const AssetCallbackData& callback) { AssetUpdatedCallback(callback); });
 
-		m_pPipelineJobsPool = Jobs::JobManager::Run<bool, UUID>();
+		m_pPipelineJobsPool = m_pEngine->Jobs().Run<bool, UUID>();
 	}
 
 	void EditorPipelineManager::Cleanup()

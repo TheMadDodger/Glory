@@ -26,7 +26,7 @@ namespace Glory::Editor
 	ThreadedUMap<std::filesystem::path, ImportedResource> ImportedResources;
 	ThreadedVector<UUID> AssetCompiler::m_CompletedAssets;
 
-	Jobs::JobPool<bool, const AssetCompiler::AssetData>* CompilationJobPool = nullptr;
+	Jobs::JobWorkerPool<bool, const AssetCompiler::AssetData>* CompilationJobPool = nullptr;
 
 	void AssetCompiler::CompilePipelines()
 	{
@@ -100,10 +100,11 @@ namespace Glory::Editor
 
 	void AssetCompiler::CompileAssets(const std::vector<UUID>& ids)
 	{
-		if (!CompilationJobPool)
-			CompilationJobPool = Jobs::JobManager::Run<bool, const AssetData>();
-
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+
+		if (!CompilationJobPool)
+			CompilationJobPool = pEngine->Jobs().Run<bool, const AssetData>();
+
 		AssetDatabase& assetDatabase = pEngine->GetAssetDatabase();
 
 		CompilationJobPool->StartQueue();

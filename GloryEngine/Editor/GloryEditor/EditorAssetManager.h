@@ -136,6 +136,6 @@ namespace Glory::Editor
 		ThreadedVector<UUID> m_pLoadingAssets;
 		ThreadedQueue<CallbackData> m_ResourceLoadedCallbacks;
 		ThreadedUMap<UUID, std::vector<std::function<void(Resource*)>>> m_AssetLoadedCallbacks;
-		Jobs::JobPool<bool, UUID>* m_pResourceLoadingPool;
+		Jobs::JobWorkerPool<bool, UUID>* m_pResourceLoadingPool;
 	};
 }
