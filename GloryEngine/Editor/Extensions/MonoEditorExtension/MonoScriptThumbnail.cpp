@@ -1,4 +1,4 @@
-#include "MonoScriptTumbnail.h"
+#include "MonoScriptThumbnail.h"
 #include "MonoEditorExtension.h"
 #include "EditorAssets.h"
 
@@ -10,31 +10,31 @@
 
 namespace Glory::Editor
 {
-	MonoScriptTumbnail::MonoScriptTumbnail() : m_pScriptTumbnail(nullptr)
+	MonoScriptThumbnail::MonoScriptThumbnail() : m_pScriptThumbnail(nullptr)
 	{
 	}
 
-	MonoScriptTumbnail::~MonoScriptTumbnail()
+	MonoScriptThumbnail::~MonoScriptThumbnail()
 	{
-		if (!m_pScriptTumbnail) return;
-		delete m_pScriptTumbnail;
-		m_pScriptTumbnail = nullptr;
+		if (!m_pScriptThumbnail) return;
+		delete m_pScriptThumbnail;
+		m_pScriptThumbnail = nullptr;
 	}
 
-	TextureData* MonoScriptTumbnail::GetTumbnail(const ResourceMeta* pResourceType)
+	TextureData* MonoScriptThumbnail::GetThumbnail(const ResourceMeta* pResourceType)
 	{
-		if (!m_pScriptTumbnail)
+		if (!m_pScriptThumbnail)
 		{
 			ImportedResource resource = Importer::Import("./EditorAssets/Mono/Code.png");
 			ImageData* pImageData = (ImageData*)*resource;
 			resource.Cleanup();
-			m_pScriptTumbnail = new EditorTextureData(pImageData);
+			m_pScriptThumbnail = new EditorTextureData(pImageData);
 		}
 
-		return m_pScriptTumbnail;
+		return m_pScriptThumbnail;
 	}
 
-	void MonoScriptTumbnail::OnFileDoubleClick(UUID uuid)
+	void MonoScriptThumbnail::OnFileDoubleClick(UUID uuid)
 	{
 		AssetLocation location;
 		if (!EditorAssetDatabase::GetAssetLocation(uuid, location)) return;

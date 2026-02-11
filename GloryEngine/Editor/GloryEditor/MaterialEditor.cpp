@@ -21,7 +21,7 @@
 
 #include <IconsFontAwesome6.h>
 #include <PropertyFlags.h>
-#include <Tumbnail.h>
+#include <ThumbnailManager.h>
 #include <FileBrowser.h>
 
 namespace Glory::Editor
@@ -30,7 +30,7 @@ namespace Glory::Editor
 
 	MaterialEditor::~MaterialEditor() {}
 
-	static constexpr float TumbnailSize = 128.0f;
+	static constexpr float ThumbnailSize = 128.0f;
 
 	bool MaterialEditor::OnGUI()
 	{
@@ -160,11 +160,11 @@ namespace Glory::Editor
 		const UUID oldValue = propValue.As<uint64_t>(texID);
 		UUID value = oldValue;
 		const bool textureChange = picker(&value);
-		TextureHandle tumbnail = Tumbnail::GetTumbnail(value);
-		if (tumbnail)
+		TextureHandle Thumbnail = ThumbnailManager::GetThumbnail(value);
+		if (Thumbnail)
 		{
 			constexpr float namePadding = 34.0f;
-			ImGui::Image(pRenderImpl->GetTextureID(tumbnail), { TumbnailSize, TumbnailSize });
+			ImGui::Image(pRenderImpl->GetTextureID(Thumbnail), { ThumbnailSize, ThumbnailSize });
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Right))
 			{
 				EditableResource* pResource = resourceManager.GetEditableResource(value);
@@ -182,7 +182,7 @@ namespace Glory::Editor
 			}
 
 			const std::string name = EditorAssetDatabase::GetAssetName(value);
-			ImGui::SameLine(TumbnailSize + namePadding);
+			ImGui::SameLine(ThumbnailSize + namePadding);
 			ImGui::TextUnformatted(name.c_str());
 		}
 
@@ -268,7 +268,7 @@ namespace Glory::Editor
 				ImGui::SameLine();
 				ImGui::PushID(sampler.data());
 				change |= DrawResourceProperty(properties, propTwo, pMaterialData, sampler, file, pRenderImpl, [&sampler, start, totalWidth](UUID* value) {
-					return AssetPicker::ResourceTumbnailButton(sampler, 18.0f, start, totalWidth, textureDataHash, value);
+					return AssetPicker::ResourceThumbnailButton(sampler, 18.0f, start, totalWidth, textureDataHash, value);
 				}, resourceManager);
 				ImGui::PopID();
 				continue;
@@ -388,10 +388,10 @@ namespace Glory::Editor
 				auto resourceId = pMaterialData->GetResourceUUIDPointer(pMaterialPropertyTwo->Offset());
 				ImGui::SameLine();
 				ImGui::PushID(sampler.data());
-				const bool textureChange = AssetPicker::ResourceTumbnailButton("value", 18.0f, start, totalWidth, textureDataHash, resourceId->AssetUUIDMember());
-				TextureHandle tumbnail = Tumbnail::GetTumbnail(resourceId->AssetUUID());
-				if (tumbnail)
-					ImGui::Image(pRenderImpl->GetTextureID(tumbnail), { TumbnailSize, TumbnailSize });
+				const bool textureChange = AssetPicker::ResourceThumbnailButton("value", 18.0f, start, totalWidth, textureDataHash, resourceId->AssetUUIDMember());
+				TextureHandle Thumbnail = ThumbnailManager::GetThumbnail(resourceId->AssetUUID());
+				if (Thumbnail)
+					ImGui::Image(pRenderImpl->GetTextureID(Thumbnail), { ThumbnailSize, ThumbnailSize });
 				ImGui::PopID();
 
 				continue;
@@ -414,9 +414,9 @@ namespace Glory::Editor
 
 				ImGui::PushID(sampler.data());
 				pPropertyDrawer->Draw(pMaterialProperty->DisplayName(), resourceId, pMaterialProperty->TypeHash(), pMaterialProperty->Flags());
-				TextureHandle tumbnail = Tumbnail::GetTumbnail(resourceId->AssetUUID());
-				if (tumbnail)
-					ImGui::Image(pRenderImpl->GetTextureID(tumbnail), { TumbnailSize, TumbnailSize });
+				TextureHandle Thumbnail = ThumbnailManager::GetThumbnail(resourceId->AssetUUID());
+				if (Thumbnail)
+					ImGui::Image(pRenderImpl->GetTextureID(Thumbnail), { ThumbnailSize, ThumbnailSize });
 				ImGui::PopID();
 				continue;
 			}

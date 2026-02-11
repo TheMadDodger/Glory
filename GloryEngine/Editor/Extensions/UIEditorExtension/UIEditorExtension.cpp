@@ -1,7 +1,7 @@
 #include "UIEditorExtension.h"
 #include "UIEditor.h"
 #include "UIDocumentImporter.h"
-#include "UIDocumentTumbnailGenerator.h"
+#include "UIDocumentThumbnailGenerator.h"
 #include "UIMainWindow.h"
 #include "UIElementInspector.h"
 #include "UIElementsGraphWindow.h"
@@ -24,7 +24,7 @@
 #include <CreateEntityObjectsCallbacks.h>
 #include <CreateObjectAction.h>
 #include <EntityEditor.h>
-#include <Tumbnail.h>
+#include <ThumbnailManager.h>
 
 #include <IconsFontAwesome6.h>
 #include <PropertyDrawer.h>
@@ -97,7 +97,7 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("Window/UI Editor/Inspector", [&editor]() { editor.GetWindow<UIMainWindow, UIElementInspector>(); }, NULL, Shortcut_Window_UIInspector);
 		MenuBar::AddMenuItem("Window/UI Editor/Graph", [&editor]() { editor.GetWindow<UIMainWindow, UIElementsGraphWindow>(); }, NULL, Shortcut_Window_UIGraph);
 		MenuBar::AddMenuItem("Window/UI Editor/Library", [&editor]() { editor.GetWindow<UIMainWindow, AddUIElementWindow>(); }, NULL, Shortcut_Window_UILibrary);
-		Tumbnail::AddGenerator<UIDocumentTumbnailGenerator>();
+		ThumbnailManager::AddGenerator<UIDocumentThumbnailGenerator>();
 
 		UIMainWindow* pMainWindow = editor.FindMainWindow<UIMainWindow>();
 		pMainWindow->GetWindow<UIEditor>();

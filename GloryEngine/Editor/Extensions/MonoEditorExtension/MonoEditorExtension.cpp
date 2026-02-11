@@ -1,5 +1,5 @@
 #include "MonoEditorExtension.h"
-#include "MonoScriptTumbnail.h"
+#include "MonoScriptThumbnail.h"
 #include "MonoScriptImporter.h"
 #include "MonoScriptComponentEditor.h"
 #include "EditorAssetManager.h"
@@ -21,7 +21,7 @@
 #include <ObjectMenuCallbacks.h>
 #include <FileBrowser.h>
 #include <AssetCompiler.h>
-#include <Tumbnail.h>
+#include <ThumbnailManager.h>
 #include <EntitySceneObjectEditor.h>
 #include <ScriptingExtender.h>
 #include <MainEditor.h>
@@ -186,7 +186,7 @@ namespace Glory::Editor
 
 		MenuBar::AddMenuItem("File/Compile C# Project", []() { CompileProject(ProjectSpace::GetOpenProject()); });
 
-		Tumbnail::AddGenerator<MonoScriptTumbnail>();
+		ThumbnailManager::AddGenerator<MonoScriptThumbnail>();
 
 		EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetUpdated, AssetCallback);
 		EditorPreferencesWindow::AddPreferencesTab({ "Mono", [this]() { Preferences(); } });

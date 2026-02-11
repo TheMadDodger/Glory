@@ -1,6 +1,6 @@
 #include "FileBrowser.h"
 #include "Selection.h"
-#include "Tumbnail.h"
+#include "ThumbnailManager.h"
 #include "EditorAssets.h"
 #include "EditorApplication.h"
 #include "EditorRenderImpl.h"

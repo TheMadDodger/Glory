@@ -1,6 +1,6 @@
 #include "FSMEditorExtension.h"
 #include "FSMImporter.h"
-#include "FSMTumbnailGenerator.h"
+#include "FSMThumbnailGenerator.h"
 #include "FSMEditor.h"
 #include "FSMPropertiesWindow.h"
 #include "FSMNodeEditor.h"
@@ -14,7 +14,7 @@
 #include <FileBrowser.h>
 #include <EditorAssetDatabase.h>
 #include <ObjectMenuCallbacks.h>
-#include <Tumbnail.h>
+#include <ThumbnailManager.h>
 #include <MenuBar.h>
 
 #include <IconsFontAwesome6.h>
@@ -62,7 +62,7 @@ namespace Glory::Editor
 		pApp->GetMainEditor().RegisterMainWindow(&Editor);
 
 		Importer::Register(&Importer);
-		Tumbnail::AddGenerator<FSMTumbnailGenerator>();
+		ThumbnailManager::AddGenerator<FSMThumbnailGenerator>();
 		ObjectMenu::AddMenuItem("Create/Finite State Machine", OnCreateFSM, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 		MenuBar::AddMenuItem("Window/FSM Editor/Properties", [&editor]() { editor.GetWindow<FSMEditor, FSMPropertiesWindow>(); }, NULL, Shortcut_Window_FSMProperties);
 		MenuBar::AddMenuItem("Window/FSM Editor/Nodes", [&editor]() { editor.GetWindow<FSMEditor, FSMNodeEditor>(); }, NULL, Shortcut_Window_FSMNodes);

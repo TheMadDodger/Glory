@@ -1,7 +1,7 @@
 #include "AssetPicker.h"
 #include "EditorUI.h"
 #include "DND.h"
-#include "Tumbnail.h"
+#include "ThumbnailManager.h"
 #include "EditorApplication.h"
 #include "FileBrowser.h"
 
@@ -114,7 +114,7 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool AssetPicker::ResourceTumbnailButton(const std::string& label, float buttonWidth, float popupStart, float popupWidth, uint32_t resourceType, UUID* value, bool includeSubAssets)
+	bool AssetPicker::ResourceThumbnailButton(const std::string& label, float buttonWidth, float popupStart, float popupWidth, uint32_t resourceType, UUID* value, bool includeSubAssets)
 	{
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 
@@ -127,7 +127,7 @@ namespace Glory::Editor
 
 		bool openPopup = false;
 		const float start = popupStart, width = popupWidth;
-		TextureHandle thumbnail = Tumbnail::GetTumbnail(*value);
+		TextureHandle thumbnail = ThumbnailManager::GetThumbnail(*value);
 		if(*value && ImGui::ImageButton(thumbnail ? pRenderImpl->GetTextureID(thumbnail) : NULL, ImVec2(buttonWidth, buttonWidth)))
 		{
 			ForceFilter = true;
@@ -284,7 +284,7 @@ namespace Glory::Editor
 						FileBrowser::NavigateToAndHighlight(location.Path);
 				}
 
-				TextureHandle thumbnail = Tumbnail::GetTumbnail(*it);
+				TextureHandle thumbnail = ThumbnailManager::GetThumbnail(*it);
 				ImGui::SameLine();
 				ImGui::Image(thumbnail ? pRenderImpl->GetTextureID(thumbnail) : NULL, { rowHeight, rowHeight });
 				ImGui::SameLine();
