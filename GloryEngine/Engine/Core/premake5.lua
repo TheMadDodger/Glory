@@ -23,7 +23,6 @@ project "GloryCore"
 		["Modules/Base"] = { "Module.*", "ModuleMetaData.*", "IModuleLoopHandler.*", "ModuleSettings.*" },
 		["Modules/Graphics"] = { "GraphicsModule.*", "GraphicsEnums.*", "VertexDefinitions.*", "VertexHelpers.*", "RenderFrame.*" },
 		["Modules/Graphics/Data"] = { "GraphicsEnums.*", "VertexDefinitions.*", "VertexHelpers.*", "RenderFrame.*" },
-		["Modules/Renderer"] = { "RendererModule.*" },
 		["Modules/Renderer/Camera"] = { "Camera.*", "CameraManager.*", "CameraRef.*" },
 		["Modules/Renderer/Layers"] = { "Layer.*", "LayerManager.*", "LayerMask.*" },
 		["Modules/Renderer/Data"] = { "LightData.*", "RenderData.*" },

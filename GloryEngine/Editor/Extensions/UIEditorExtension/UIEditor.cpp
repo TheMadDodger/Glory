@@ -7,7 +7,6 @@
 #include <UIRendererModule.h>
 #include <Renderer.h>
 #include <Debug.h>
-#include <GraphicsModule.h>
 #include <UIComponents.h>
 #include <YAML_GLM.h>
 
