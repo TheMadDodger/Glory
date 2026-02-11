@@ -1,4 +1,4 @@
-#include "FSMTumbnailGenerator.h"
+#include "FSMThumbnailGenerator.h"
 #include "FSMEditor.h"
 #include "FSMPropertiesWindow.h"
 #include "FSMNodeEditor.h"
@@ -12,31 +12,31 @@
 
 namespace Glory::Editor
 {
-    FSMTumbnailGenerator::FSMTumbnailGenerator(): m_pFSMTumbnail(nullptr)
+    FSMThumbnailGenerator::FSMThumbnailGenerator(): m_pFSMThumbnail(nullptr)
     {
     }
 
-    FSMTumbnailGenerator::~FSMTumbnailGenerator()
+    FSMThumbnailGenerator::~FSMThumbnailGenerator()
     {
-        if (!m_pFSMTumbnail) return;
-        delete m_pFSMTumbnail;
-        m_pFSMTumbnail = nullptr;
+        if (!m_pFSMThumbnail) return;
+        delete m_pFSMThumbnail;
+        m_pFSMThumbnail = nullptr;
     }
 
-    TextureData* FSMTumbnailGenerator::GetTumbnail(const ResourceMeta* pResourceType)
+    TextureData* FSMThumbnailGenerator::GetThumbnail(const ResourceMeta* pResourceType)
     {
-        if (!m_pFSMTumbnail)
+        if (!m_pFSMThumbnail)
         {
             ImportedResource resource = Importer::Import("./EditorAssets/Mono/file.png");
             ImageData* pImageData = (ImageData*)*resource;
             resource.Cleanup();
-            m_pFSMTumbnail = new EditorTextureData(pImageData);
+            m_pFSMThumbnail = new EditorTextureData(pImageData);
         }
 
-        return m_pFSMTumbnail;
+        return m_pFSMThumbnail;
     }
 
-    void FSMTumbnailGenerator::OnFileDoubleClick(UUID uuid)
+    void FSMThumbnailGenerator::OnFileDoubleClick(UUID uuid)
     {
         MainEditor& editor = EditorApplication::GetInstance()->GetMainEditor();
         FSMEditor* pMainWindow = editor.GetMainWindow<FSMEditor>();

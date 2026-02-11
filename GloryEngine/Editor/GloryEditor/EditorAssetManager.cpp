@@ -4,7 +4,7 @@
 #include "AssetCompiler.h"
 #include "EditorAssetDatabase.h"
 #include "TextureImporter.h"
-#include "Tumbnail.h"
+#include "ThumbnailManager.h"
 
 #include <Engine.h>
 #include <AssetDatabase.h>
@@ -165,7 +165,7 @@ namespace Glory::Editor
 			if (!pResource) return;
 			TextureData* pTexture = static_cast<TextureData*>(pResource);
 			TextureImporter::LoadIntoTexture(file, pTexture);
-			Tumbnail::SetDirty(uuid);
+			ThumbnailManager::SetDirty(uuid);
 		});
 	}
 

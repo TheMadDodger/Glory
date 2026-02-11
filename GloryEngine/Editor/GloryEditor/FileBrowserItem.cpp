@@ -3,8 +3,8 @@
 #include "EditorApplication.h"
 #include "FileBrowserItem.h"
 #include "EditorAssets.h"
-#include "Tumbnail.h"
-#include "TumbnailGenerator.h"
+#include "ThumbnailManager.h"
+#include "ThumbnailGenerator.h"
 #include "Selection.h"
 #include "ObjectMenu.h"
 #include "EntityEditor.h"
@@ -448,7 +448,7 @@ namespace Glory::Editor
 		if (relativePath == "") relativePath = m_CachedPath;
 		AssetDatabase& assetDatabase = EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase();
 		const UUID uuid = EditorAssetDatabase::FindAssetUUID(relativePath.string());
-		TextureHandle texture = Tumbnail::GetTumbnail(uuid);
+		TextureHandle texture = ThumbnailManager::GetThumbnail(uuid);
 
 		const UUID selectedID = Selection::GetActiveObject() ? Selection::GetActiveObject()->GetUUID() : 0;
 		const bool selected = (selectedID != 0 && selectedID == uuid) || m_HighlightedPath == m_CachedPath.string();
@@ -473,7 +473,7 @@ namespace Glory::Editor
 		{
 			ResourceMeta meta;
 			EditorAssetDatabase::GetAssetMetadata(uuid, meta);
-			BaseTumbnailGenerator* pGenerator = Tumbnail::GetGenerator(meta.Hash());
+			BaseThumbnailGenerator* pGenerator = ThumbnailManager::GetGenerator(meta.Hash());
 			if (!pGenerator)
 			{
 				ImGui::EndChild();

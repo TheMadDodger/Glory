@@ -1,8 +1,7 @@
 #include "EditorAssetDatabase.h"
 #include "EditorAssets.h"
-#include "EditorAssets.h"
-#include "Tumbnail.h"
-#include "TumbnailGenerator.h"
+#include "ThumbnailManager.h"
+#include "ThumbnailGenerator.h"
 #include "EditorApplication.h"
 
 #include <Engine.h>
@@ -10,17 +9,17 @@
 
 namespace Glory::Editor
 {
-	std::vector<BaseTumbnailGenerator*> Tumbnail::m_pGenerators;
-	std::map<UUID, TextureData*> Tumbnail::m_pTumbnails;
+	std::vector<BaseThumbnailGenerator*> ThumbnailManager::m_pGenerators;
+	std::map<UUID, TextureData*> ThumbnailManager::m_pThumbnails;
 
-	TextureHandle Tumbnail::GetTumbnail(UUID uuid)
+	TextureHandle ThumbnailManager::GetThumbnail(UUID uuid)
 	{
 		GraphicsDevice* pDevice = EditorApplication::GetInstance()->GetEngine()->ActiveGraphicsDevice();
 
-		auto it = m_pTumbnails.find(uuid);
-		if (it != m_pTumbnails.end())
+		auto it = m_pThumbnails.find(uuid);
+		if (it != m_pThumbnails.end())
 		{
-			TextureData* pTextureData = m_pTumbnails.at(uuid);
+			TextureData* pTextureData = m_pThumbnails.at(uuid);
 			if (pDevice->CachedTextureExists(pTextureData))
 				return pDevice->AcquireCachedTexture(pTextureData);
 			return EditorAssets::GetTexture("file");
@@ -29,33 +28,33 @@ namespace Glory::Editor
 		ResourceMeta meta;
 		EditorAssetDatabase::GetAssetMetadata(uuid, meta);
 
-		BaseTumbnailGenerator* pGenerator = GetGenerator(meta.Hash());
+		BaseThumbnailGenerator* pGenerator = GetGenerator(meta.Hash());
 		if (pGenerator == nullptr)
 			return EditorAssets::GetTexture("file");
 
-		TextureData* pImage = pGenerator->GetTumbnail(&meta);
+		TextureData* pImage = pGenerator->GetThumbnail(&meta);
 
 		if (pImage == nullptr)
 			return EditorAssets::GetTexture("file");
 
-		m_pTumbnails.emplace(uuid, pImage);
+		m_pThumbnails.emplace(uuid, pImage);
 		EditorAssets::EnqueueTextureCreation(pImage);
 		return EditorAssets::GetTexture("file");
 	}
 
-	void Tumbnail::SetDirty(UUID uuid)
+	void ThumbnailManager::SetDirty(UUID uuid)
 	{
-		auto it = m_pTumbnails.find(uuid);
-		if (it == m_pTumbnails.end()) return;
-		m_pTumbnails.erase(uuid);
+		auto it = m_pThumbnails.find(uuid);
+		if (it == m_pThumbnails.end()) return;
+		m_pThumbnails.erase(uuid);
 	}
 
-	void Tumbnail::AddGenerator(BaseTumbnailGenerator* pGenerator)
+	void ThumbnailManager::AddGenerator(BaseThumbnailGenerator* pGenerator)
 	{
 		m_pGenerators.push_back(pGenerator);
 	}
 
-	void Tumbnail::Destroy()
+	void ThumbnailManager::Destroy()
 	{
 		for (size_t i = 0; i < m_pGenerators.size(); i++)
 		{
@@ -64,7 +63,7 @@ namespace Glory::Editor
 		m_pGenerators.clear();
 	}
 
-	BaseTumbnailGenerator* Tumbnail::GetGenerator(uint32_t hashCode)
+	BaseThumbnailGenerator* ThumbnailManager::GetGenerator(uint32_t hashCode)
 	{
 		for (size_t i = 0; i < m_pGenerators.size(); i++)
 		{
@@ -77,6 +76,6 @@ namespace Glory::Editor
 		return nullptr;
 	}
 
-	Tumbnail::Tumbnail() {}
-	Tumbnail::~Tumbnail() {}
+	ThumbnailManager::ThumbnailManager() {}
+	ThumbnailManager::~ThumbnailManager() {}
 }

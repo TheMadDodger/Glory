@@ -23,7 +23,7 @@ project "GloryEditor"
 		["Editor/ObjectMenu"] = { "ObjectMenu.*", "ObjectMenuCallbacks.*", "CreateEntityObjectsCallbacks.*" },
 		["Editor/Pipeline"] = { "EditorShaderData.*" },
 		["Editor/Playmode"] = { "EditorPlayer.*", "IPlayModeHandler.*" },
-		["Editor/Tumbnails"] = { "ImageTumbnailGenerator.*", "HDRTumbnailGenerator.*", "AudioTumbnailGenerator.*", "FontTumbnailGenerator.*", "TextureTumbnailGenerator.*", "Tumbnail.*", "TumbnailGenerator.*", "SceneTumbnailGenerator.*" },
+		["Editor/Thumbnails"] = { "ImageThumbnailGenerator.*", "HDRThumbnailGenerator.*", "AudioThumbnailGenerator.*", "FontThumbnailGenerator.*", "TextureThumbnailGenerator.*", "ThumbnailManager.*", "ThumbnailGenerator.*", "SceneThumbnailGenerator.*" },
 		["Editor/PropertyDrawers"] = { "MeshMaterialPropertyDrawer.*", "SceneObjectPropertyDrawer.*", "StructPropertyDrawer.*", "EnumPropertyDrawer.*", "ArrayPropertyDrawer.*", "AssetReferencePropertyDrawer.*", "PropertyDrawer.*", "StandardPropertyDrawers.*", "ShapePropertyDrawer.*" },
 		["Editor/Editors"] = { "TextureDataEditor.*", "GloryEditor.*", "GloryEditorVersion.*", "FileDialog.*", "EditorSettings.*", "BehaviorTreeEditor.*", "ComponentEditor.*", "Editor.*", "SceneObjectEditor.*", "ScriptableObjectEditor.*", "MaterialEditor.*" },
 		["Editor/Editors/Component"] = { "TransformEditor.*", "DefaultComponentEditor.*", "EntityComponentEditor.*", "EntityComponentPopup.*", "EntitySceneObjectEditor.*", "LightComponentEditor.*" },

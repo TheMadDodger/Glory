@@ -5,7 +5,7 @@
 #include "EditorPipelineManager.h"
 #include "EditorAssetManager.h"
 #include "RemovedAssetsPopup.h"
-#include "Tumbnail.h"
+#include "ThumbnailManager.h"
 #include "Dispatcher.h"
 
 #include <Debug.h>
@@ -236,7 +236,7 @@ namespace Glory::Editor
 	void AssetCompiler::Update()
 	{
 		m_CompletedAssets.ForEachClear([](UUID& uuid) {
-			Tumbnail::SetDirty(uuid);
+			ThumbnailManager::SetDirty(uuid);
 			GetAssetCompilerEventDispatcher().Dispatch({ uuid });
 		});
 	}

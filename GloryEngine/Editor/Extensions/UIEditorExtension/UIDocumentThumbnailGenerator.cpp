@@ -1,4 +1,4 @@
-#include "UIDocumentTumbnailGenerator.h"
+#include "UIDocumentThumbnailGenerator.h"
 #include "UIMainWindow.h"
 #include "UIEditor.h"
 #include "UIElementsGraphWindow.h"
@@ -10,31 +10,31 @@
 
 namespace Glory::Editor
 {
-    UIDocumentTumbnailGenerator::UIDocumentTumbnailGenerator(): m_pUIDocTumbnail(nullptr)
+    UIDocumentThumbnailGenerator::UIDocumentThumbnailGenerator(): m_pUIDocThumbnail(nullptr)
     {
     }
 
-    UIDocumentTumbnailGenerator::~UIDocumentTumbnailGenerator()
+    UIDocumentThumbnailGenerator::~UIDocumentThumbnailGenerator()
     {
-        if (!m_pUIDocTumbnail) return;
-        delete m_pUIDocTumbnail;
-        m_pUIDocTumbnail = nullptr;
+        if (!m_pUIDocThumbnail) return;
+        delete m_pUIDocThumbnail;
+        m_pUIDocThumbnail = nullptr;
     }
 
-    TextureData* UIDocumentTumbnailGenerator::GetTumbnail(const ResourceMeta* pResourceType)
+    TextureData* UIDocumentThumbnailGenerator::GetThumbnail(const ResourceMeta* pResourceType)
     {
-        if (!m_pUIDocTumbnail)
+        if (!m_pUIDocThumbnail)
         {
             ImportedResource resource = Importer::Import("./EditorAssets/Mono/file.png");
             ImageData* pImageData = (ImageData*)*resource;
             resource.Cleanup();
-            m_pUIDocTumbnail = new EditorTextureData(pImageData);
+            m_pUIDocThumbnail = new EditorTextureData(pImageData);
         }
 
-        return m_pUIDocTumbnail;
+        return m_pUIDocThumbnail;
     }
 
-    void UIDocumentTumbnailGenerator::OnFileDoubleClick(UUID uuid)
+    void UIDocumentThumbnailGenerator::OnFileDoubleClick(UUID uuid)
     {
         MainEditor& editor = EditorApplication::GetInstance()->GetMainEditor();
         UIMainWindow* pMainWindow = editor.GetMainWindow<UIMainWindow>();

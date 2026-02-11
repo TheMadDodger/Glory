@@ -19,10 +19,10 @@
 #include "PopupManager.h"
 #include "EditorAssets.h"
 #include "ProjectSpace.h"
-#include "Tumbnail.h"
-#include "ImageTumbnailGenerator.h"
-#include "TextureTumbnailGenerator.h"
-#include "SceneTumbnailGenerator.h"
+#include "ThumbnailManager.h"
+#include "ImageThumbnailGenerator.h"
+#include "TextureThumbnailGenerator.h"
+#include "SceneThumbnailGenerator.h"
 #include "Editor.h"
 #include "ProfilerWindow.h"
 #include "EditorSceneManager.h"
@@ -159,9 +159,9 @@ namespace Glory::Editor
 		//if (ProjectSpace::GetOpenProject() == nullptr)
 		//	m_pProjectPopup->Open();
 
-		Tumbnail::AddGenerator<ImageTumbnailGenerator>();
-		Tumbnail::AddGenerator<TextureTumbnailGenerator>();
-		Tumbnail::AddGenerator<SceneTumbnailGenerator>();
+		ThumbnailManager::AddGenerator<ImageThumbnailGenerator>();
+		ThumbnailManager::AddGenerator<TextureThumbnailGenerator>();
+		ThumbnailManager::AddGenerator<SceneThumbnailGenerator>();
 
 		Gizmos::Initialize();
 
