@@ -160,7 +160,7 @@ namespace Glory::Editor
 		const UUID oldValue = propValue.As<uint64_t>(texID);
 		UUID value = oldValue;
 		const bool textureChange = picker(&value);
-		TextureHandle Thumbnail = ThumbnailManager::GetThumbnail(value);
+		TextureHandle Thumbnail = EditorApplication::GetInstance()->GetThumbnailManager().GetThumbnail(value);
 		if (Thumbnail)
 		{
 			constexpr float namePadding = 34.0f;
@@ -330,10 +330,11 @@ namespace Glory::Editor
 
 	void StaticMaterialEditor::PropertiesGUI(MaterialData* pMaterialData)
 	{
-		EditorMaterialManager& materialManager = EditorApplication::GetInstance()->GetMaterialManager();
-		EditorPipelineManager& pipelineManager = EditorApplication::GetInstance()->GetPipelineManager();
-		Serializers& serializers = EditorApplication::GetInstance()->GetEngine()->GetSerializers();
-		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
+		EditorApplication* pApp = EditorApplication::GetInstance();
+		EditorMaterialManager& materialManager = pApp->GetMaterialManager();
+		EditorPipelineManager& pipelineManager = pApp->GetPipelineManager();
+		Serializers& serializers = pApp->GetEngine()->GetSerializers();
+		EditorRenderImpl* pRenderImpl = pApp->GetEditorPlatform().GetRenderImpl();
 
 		const UUID pipelineID = pMaterialData->GetPipelineID();
 		if (pipelineID == 0)
@@ -389,7 +390,7 @@ namespace Glory::Editor
 				ImGui::SameLine();
 				ImGui::PushID(sampler.data());
 				const bool textureChange = AssetPicker::ResourceThumbnailButton("value", 18.0f, start, totalWidth, textureDataHash, resourceId->AssetUUIDMember());
-				TextureHandle Thumbnail = ThumbnailManager::GetThumbnail(resourceId->AssetUUID());
+				TextureHandle Thumbnail = pApp->GetThumbnailManager().GetThumbnail(resourceId->AssetUUID());
 				if (Thumbnail)
 					ImGui::Image(pRenderImpl->GetTextureID(Thumbnail), { ThumbnailSize, ThumbnailSize });
 				ImGui::PopID();
@@ -414,7 +415,7 @@ namespace Glory::Editor
 
 				ImGui::PushID(sampler.data());
 				pPropertyDrawer->Draw(pMaterialProperty->DisplayName(), resourceId, pMaterialProperty->TypeHash(), pMaterialProperty->Flags());
-				TextureHandle Thumbnail = ThumbnailManager::GetThumbnail(resourceId->AssetUUID());
+				TextureHandle Thumbnail = pApp->GetThumbnailManager().GetThumbnail(resourceId->AssetUUID());
 				if (Thumbnail)
 					ImGui::Image(pRenderImpl->GetTextureID(Thumbnail), { ThumbnailSize, ThumbnailSize });
 				ImGui::PopID();

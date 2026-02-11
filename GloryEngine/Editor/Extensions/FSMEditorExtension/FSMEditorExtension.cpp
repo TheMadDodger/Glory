@@ -62,7 +62,7 @@ namespace Glory::Editor
 		pApp->GetMainEditor().RegisterMainWindow(&Editor);
 
 		Importer::Register(&Importer);
-		ThumbnailManager::AddGenerator<FSMThumbnailGenerator>();
+		pApp->GetThumbnailManager().AddGenerator<FSMThumbnailGenerator>();
 		ObjectMenu::AddMenuItem("Create/Finite State Machine", OnCreateFSM, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 		MenuBar::AddMenuItem("Window/FSM Editor/Properties", [&editor]() { editor.GetWindow<FSMEditor, FSMPropertiesWindow>(); }, NULL, Shortcut_Window_FSMProperties);
 		MenuBar::AddMenuItem("Window/FSM Editor/Nodes", [&editor]() { editor.GetWindow<FSMEditor, FSMNodeEditor>(); }, NULL, Shortcut_Window_FSMNodes);

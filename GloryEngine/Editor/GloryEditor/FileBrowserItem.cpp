@@ -339,6 +339,8 @@ namespace Glory::Editor
 
 	void FileBrowserItem::DrawFileItem(int iconSize)
 	{
+		EditorApplication* pApplication = EditorApplication::GetInstance();
+
 		const ImVec4 buttonColor = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 		const ImVec4 buttonInactiveColor = { buttonColor.x, buttonColor.y, buttonColor.z, 0.0f };
 
@@ -360,7 +362,7 @@ namespace Glory::Editor
 
 		const ImVec2 cursorPos = ImGui::GetCursorPos();
 
-		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
+		EditorRenderImpl* pRenderImpl = pApplication->GetEditorPlatform().GetRenderImpl();
 		if (m_IsFolder)
 		{
 			TextureHandle folderTexture = EditorAssets::GetTexture("folder");
@@ -446,9 +448,9 @@ namespace Glory::Editor
 		assetPath.append("Assets");
 		std::filesystem::path relativePath = m_CachedPath.lexically_relative(assetPath);
 		if (relativePath == "") relativePath = m_CachedPath;
-		AssetDatabase& assetDatabase = EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase();
+		AssetDatabase& assetDatabase = pApplication->GetEngine()->GetAssetDatabase();
 		const UUID uuid = EditorAssetDatabase::FindAssetUUID(relativePath.string());
-		TextureHandle texture = ThumbnailManager::GetThumbnail(uuid);
+		TextureHandle texture = pApplication->GetThumbnailManager().GetThumbnail(uuid);
 
 		const UUID selectedID = Selection::GetActiveObject() ? Selection::GetActiveObject()->GetUUID() : 0;
 		const bool selected = (selectedID != 0 && selectedID == uuid) || m_HighlightedPath == m_CachedPath.string();
@@ -473,7 +475,7 @@ namespace Glory::Editor
 		{
 			ResourceMeta meta;
 			EditorAssetDatabase::GetAssetMetadata(uuid, meta);
-			BaseThumbnailGenerator* pGenerator = ThumbnailManager::GetGenerator(meta.Hash());
+			BaseThumbnailGenerator* pGenerator = pApplication->GetThumbnailManager().GetGenerator(meta.Hash());
 			if (!pGenerator)
 			{
 				ImGui::EndChild();

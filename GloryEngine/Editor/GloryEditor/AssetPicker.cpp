@@ -116,18 +116,19 @@ namespace Glory::Editor
 
 	bool AssetPicker::ResourceThumbnailButton(const std::string& label, float buttonWidth, float popupStart, float popupWidth, uint32_t resourceType, UUID* value, bool includeSubAssets)
 	{
-		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
+		EditorApplication* pApp = EditorApplication::GetInstance();
+		EditorRenderImpl* pRenderImpl = pApp->GetEditorPlatform().GetRenderImpl();
 
 		ImGui::PushID(label.c_str());
 		std::string assetName = "";
 		assetName = EditorAssetDatabase::GetAssetName(*value);
 		if (assetName == "") assetName = "Noone";
 
-		ResourceTypes& resourceTypes = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes();
+		ResourceTypes& resourceTypes = pApp->GetEngine()->GetResourceTypes();
 
 		bool openPopup = false;
 		const float start = popupStart, width = popupWidth;
-		TextureHandle thumbnail = ThumbnailManager::GetThumbnail(*value);
+		TextureHandle thumbnail = pApp->GetThumbnailManager().GetThumbnail(*value);
 		if(*value && ImGui::ImageButton(thumbnail ? pRenderImpl->GetTextureID(thumbnail) : NULL, ImVec2(buttonWidth, buttonWidth)))
 		{
 			ForceFilter = true;
@@ -250,7 +251,8 @@ namespace Glory::Editor
 
 	bool AssetPicker::DrawItems(const std::vector<UUID>& items, UUID* value)
 	{
-		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
+		EditorApplication* pApp = EditorApplication::GetInstance();
+		EditorRenderImpl* pRenderImpl = pApp->GetEditorPlatform().GetRenderImpl();
 
 		bool change = false;
 		if (ImGui::Selectable("None", *value == 0))
@@ -284,7 +286,7 @@ namespace Glory::Editor
 						FileBrowser::NavigateToAndHighlight(location.Path);
 				}
 
-				TextureHandle thumbnail = ThumbnailManager::GetThumbnail(*it);
+				TextureHandle thumbnail = pApp->GetThumbnailManager().GetThumbnail(*it);
 				ImGui::SameLine();
 				ImGui::Image(thumbnail ? pRenderImpl->GetTextureID(thumbnail) : NULL, { rowHeight, rowHeight });
 				ImGui::SameLine();

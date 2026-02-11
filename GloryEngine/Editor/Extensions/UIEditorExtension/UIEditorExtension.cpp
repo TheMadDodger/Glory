@@ -97,7 +97,7 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("Window/UI Editor/Inspector", [&editor]() { editor.GetWindow<UIMainWindow, UIElementInspector>(); }, NULL, Shortcut_Window_UIInspector);
 		MenuBar::AddMenuItem("Window/UI Editor/Graph", [&editor]() { editor.GetWindow<UIMainWindow, UIElementsGraphWindow>(); }, NULL, Shortcut_Window_UIGraph);
 		MenuBar::AddMenuItem("Window/UI Editor/Library", [&editor]() { editor.GetWindow<UIMainWindow, AddUIElementWindow>(); }, NULL, Shortcut_Window_UILibrary);
-		ThumbnailManager::AddGenerator<UIDocumentThumbnailGenerator>();
+		pApp->GetThumbnailManager().AddGenerator<UIDocumentThumbnailGenerator>();
 
 		UIMainWindow* pMainWindow = editor.FindMainWindow<UIMainWindow>();
 		pMainWindow->GetWindow<UIEditor>();

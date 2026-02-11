@@ -58,6 +58,8 @@ namespace Glory::Editor
 
 	void ResourcesWindow::OnGUI()
 	{
+		EditorApplication* pApp = EditorApplication::GetInstance();
+
 		if (ImGui::BeginTabBar("ResourcesTabs"))
 		{
 			if (ImGui::BeginTabItem("Loading"))
@@ -99,7 +101,7 @@ namespace Glory::Editor
 			ImGui::EndTabBar();
 		}
 
-		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
+		EditorRenderImpl* pRenderImpl = pApp->GetEditorPlatform().GetRenderImpl();
 
 		static const ImGuiTableFlags flags =
 			ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg
@@ -149,8 +151,8 @@ namespace Glory::Editor
 
 		ImGuiListClipper clipper(m_SearchResultCache.size(), rowHeight + 2*ImGui::GetCurrentTable()->CellPaddingY);
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		EditorAssetManager& assetManager = EditorApplication::GetInstance()->GetAssetManager();
+		Engine* pEngine = pApp->GetEngine();
+		EditorAssetManager& assetManager = pApp->GetAssetManager();
 		ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
 
 		auto itorStart = m_SearchResultCache.begin();
@@ -171,7 +173,7 @@ namespace Glory::Editor
 				ResourceMeta meta;
 				EditorAssetDatabase::GetAssetMetadata(uuid, meta);
 				const ResourceType* pType = resourceTypes.GetResourceType(meta.Hash());
-				TextureHandle thumbnail = ThumbnailManager::GetThumbnail(uuid);
+				TextureHandle thumbnail = pApp->GetThumbnailManager().GetThumbnail(uuid);
 				const std::string name = EditorAssetDatabase::GetAssetName(uuid);
 
 				AssetLocation location;
@@ -183,8 +185,8 @@ namespace Glory::Editor
 
 					if (ImGui::Selectable("##selectable", false, selectableFlags, ImVec2(0, rowHeight)))
 					{
-						Resource* pResource = EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(uuid);
-						if (!pResource) pResource = EditorApplication::GetInstance()->GetAssetManager().FindResource(uuid);
+						Resource* pResource = pApp->GetResourceManager().GetEditableResource(uuid);
+						if (!pResource) pResource = pApp->GetAssetManager().FindResource(uuid);
 						Selection::SetActiveObject(pResource);
 					}
 

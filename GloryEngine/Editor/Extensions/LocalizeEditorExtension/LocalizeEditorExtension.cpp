@@ -203,8 +203,8 @@ namespace Glory::Editor
 		Importer::Register(&TableImporter);
 		Importer::Register(&OverrideTableImporter);
 		Editor::RegisterEditor(&OverrideTableEditor);
-		ThumbnailManager::AddGenerator<StringTableThumbnailGenerator>();
-		ThumbnailManager::AddGenerator<StringsOverrideTableThumbnailGenerator>();
+		pApp->GetThumbnailManager().AddGenerator<StringTableThumbnailGenerator>();
+		pApp->GetThumbnailManager().AddGenerator<StringsOverrideTableThumbnailGenerator>();
 		ObjectMenu::AddMenuItem("Create/Localize/String Table", OnCreateStringTable, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 		ObjectMenu::AddMenuItem("Create/Localize/String Override Table", OnCreateStringOverrideTable, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 		MenuBar::AddMenuItem("Window/Localize/String Table Editor", [&editor]() { editor.GetWindow<StringTableEditor>(); }, NULL, Shortcut_Window_StringTableEditor);

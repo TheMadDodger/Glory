@@ -13,7 +13,7 @@
 namespace Glory::Editor
 {
 	EditorAssetManager::EditorAssetManager(EditorApplication* pApplication):
-		AssetManager(pApplication->GetEngine()), m_pResourceLoadingPool(nullptr)
+		AssetManager(pApplication->GetEngine()), m_pApplication(pApplication), m_pResourceLoadingPool(nullptr)
 	{
 	}
 
@@ -165,7 +165,7 @@ namespace Glory::Editor
 			if (!pResource) return;
 			TextureData* pTexture = static_cast<TextureData*>(pResource);
 			TextureImporter::LoadIntoTexture(file, pTexture);
-			ThumbnailManager::SetDirty(uuid);
+			m_pApplication->GetThumbnailManager().SetDirty(uuid);
 		});
 	}
 

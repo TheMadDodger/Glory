@@ -236,7 +236,7 @@ namespace Glory::Editor
 	void AssetCompiler::Update()
 	{
 		m_CompletedAssets.ForEachClear([](UUID& uuid) {
-			ThumbnailManager::SetDirty(uuid);
+			EditorApplication::GetInstance()->GetThumbnailManager().SetDirty(uuid);
 			GetAssetCompilerEventDispatcher().Dispatch({ uuid });
 		});
 	}

@@ -13,32 +13,33 @@ namespace Glory
 namespace Glory::Editor
 {
 	class BaseThumbnailGenerator;
+	class EditorApplication;
 
 	class ThumbnailManager
 	{
 	public:
-		static GLORY_EDITOR_API TextureHandle GetThumbnail(UUID uuid);
-		static GLORY_EDITOR_API void SetDirty(UUID uuid);
+		ThumbnailManager(EditorApplication* pApp);
+		virtual ~ThumbnailManager();
+
+		GLORY_EDITOR_API TextureHandle GetThumbnail(UUID uuid);
+		GLORY_EDITOR_API void SetDirty(UUID uuid);
 
 		template<class T>
-		static void AddGenerator()
+		void AddGenerator()
 		{
 			BaseThumbnailGenerator* pGenerator = new T();
 			AddGenerator(pGenerator);
 		}
 
-		static GLORY_EDITOR_API void Destroy();
-		static GLORY_EDITOR_API BaseThumbnailGenerator* GetGenerator(uint32_t hashCode);
+		GLORY_EDITOR_API BaseThumbnailGenerator* GetGenerator(uint32_t hashCode);
 
 	private:
-		static GLORY_EDITOR_API void AddGenerator(BaseThumbnailGenerator* pGenerator);
+		GLORY_EDITOR_API void AddGenerator(BaseThumbnailGenerator* pGenerator);
 
 	private:
-		static std::vector<BaseThumbnailGenerator*> m_pGenerators;
-		static std::map<UUID, TextureData*> m_pThumbnails;
+		EditorApplication* m_pApplication;
 
-	private:
-		ThumbnailManager();
-		virtual ~ThumbnailManager();
+		std::vector<BaseThumbnailGenerator*> m_pGenerators;
+		std::map<UUID, TextureData*> m_pThumbnails;
 	};
 }
