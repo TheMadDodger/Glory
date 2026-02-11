@@ -13,7 +13,6 @@
 #include <Dispatcher.h>
 
 #include <Engine.h>
-#include <GraphicsModule.h>
 #include <Serializers.h>
 
 #include <UIDocument.h>

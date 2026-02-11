@@ -22,7 +22,6 @@ namespace Glory
 	class RuntimePipelineManager;
 	class RuntimeMaterialManager;
 	class Renderer;
-	class GraphicsModule;
 	class WindowModule;
 
 	/** @brief Glory runtime */
