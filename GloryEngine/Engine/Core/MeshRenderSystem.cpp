@@ -3,7 +3,7 @@
 #include "TransformSystem.h"
 
 #include "Engine.h"
-#include "RendererModule.h"
+#include "Renderer.h"
 #include "Debug.h"
 #include "AssetManager.h"
 #include "AssetDatabase.h"
@@ -19,6 +19,8 @@ namespace Glory
     {
         if (!pComponent.m_RenderStatic) return;
         GScene* pScene = pRegistry->GetUserData<GScene*>();
+        Renderer* pRenderer = pScene->Manager()->GetRenderer();
+        if (!pRenderer) return;
         Engine* pEngine = pScene->Manager()->GetEngine();
 
         MaterialManager* pMaterials = &pEngine->GetMaterialManager();
@@ -28,7 +30,7 @@ namespace Glory
         const UUID pipelineID = pMaterial->GetPipelineID();
 
         Transform& transform = pRegistry->GetComponent<Transform>(entity);
-        REQUIRE_MODULE_CALL(pEngine, RendererModule, UpdateStatic(pipelineID, pComponent.m_Mesh.AssetUUID(), pScene->GetEntityUUID(entity), transform.MatTransform), );
+        pRenderer->UpdateStatic(pipelineID, pComponent.m_Mesh.AssetUUID(), pScene->GetEntityUUID(entity), transform.MatTransform);
     }
 
     void MeshRenderSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MeshRenderer& pComponent)
@@ -38,6 +40,8 @@ namespace Glory
         //ubo.proj = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 10.0f);
         //ubo.proj[1][1] *= -1; // In OpenGL the Y coordinate of the clip coordinates is inverted, so we must flip it for use in Vulkan
         GScene* pScene = pRegistry->GetUserData<GScene*>();
+        Renderer* pRenderer = pScene->Manager()->GetRenderer();
+        if (!pRenderer) return;
         Engine* pEngine = pScene->Manager()->GetEngine();
         AssetManager* pAssets = &pEngine->GetAssetManager();
         MaterialManager* pMaterials = &pEngine->GetMaterialManager();
@@ -82,13 +86,9 @@ namespace Glory
         renderData.m_DepthWrite = pScene->Settings().m_DepthWrite;
 
         if (pScene->Settings().m_RenderLate)
-        {
-            REQUIRE_MODULE_CALL(pEngine, RendererModule, SubmitLate(std::move(renderData)), );
-        }
+            pRenderer->SubmitLate(std::move(renderData));
         else
-        {
-            REQUIRE_MODULE_CALL(pEngine, RendererModule, SubmitDynamic(std::move(renderData)), );
-        }
+            pRenderer->SubmitDynamic(std::move(renderData));
     }
 
     void MeshRenderSystem::OnEnable(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MeshRenderer& pComponent)
@@ -98,6 +98,8 @@ namespace Glory
         //ubo.proj = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 10.0f);
         //ubo.proj[1][1] *= -1; // In OpenGL the Y coordinate of the clip coordinates is inverted, so we must flip it for use in Vulkan
         GScene* pScene = pRegistry->GetUserData<GScene*>();
+        Renderer* pRenderer = pScene->Manager()->GetRenderer();
+        if (!pRenderer) return;
         Engine* pEngine = pScene->Manager()->GetEngine();
         AssetManager* pAssets = &pEngine->GetAssetManager();
         MaterialManager* pMaterials = &pEngine->GetMaterialManager();
@@ -138,7 +140,7 @@ namespace Glory
         renderData.m_ObjectID = pScene->GetEntityUUID(entity);
         renderData.m_SceneID = pScene->GetUUID();
         renderData.m_DepthWrite = pScene->Settings().m_DepthWrite;
-        REQUIRE_MODULE_CALL(pEngine, RendererModule, SubmitStatic(std::move(renderData)), );
+        pRenderer->SubmitStatic(std::move(renderData));
         pComponent.m_WasSubmittedForStatic = true;
     }
 
@@ -147,6 +149,8 @@ namespace Glory
         if (!pComponent.m_RenderStatic && !pComponent.m_WasSubmittedForStatic) return;
 
         GScene* pScene = pRegistry->GetUserData<GScene*>();
+        Renderer* pRenderer = pScene->Manager()->GetRenderer();
+        if (!pRenderer) return;
         Engine* pEngine = pScene->Manager()->GetEngine();
 
         MaterialManager* pMaterials = &pEngine->GetMaterialManager();
@@ -155,7 +159,7 @@ namespace Glory
 
         const UUID pipelineID = pMaterial->GetPipelineID();
         const UUID id = pScene->GetEntityUUID(entity);
-        REQUIRE_MODULE_CALL(pEngine, RendererModule, UnsubmitStatic(pipelineID, pComponent.m_Mesh.AssetUUID(), id), );
+        pRenderer->UnsubmitStatic(pipelineID, pComponent.m_Mesh.AssetUUID(), id);
         pComponent.m_WasSubmittedForStatic = false;
     }
 

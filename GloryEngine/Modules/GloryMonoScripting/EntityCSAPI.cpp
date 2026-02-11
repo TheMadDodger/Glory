@@ -13,7 +13,7 @@
 #include <Components.h>
 #include <AudioComponents.h>
 #include <AudioModule.h>
-#include <RendererModule.h>
+#include <Renderer.h>
 #include <AudioSourceSystem.h>
 #include <LayerManager.h>
 #include <ComponentHelpers.h>
@@ -624,7 +624,7 @@ namespace Glory
 	void CameraComponent_PrepareNextPick(uint64_t sceneID, uint64_t objectID, uint64_t componentID, glm::vec2* position)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
-		RendererModule* pRenderer = Entity_EngineInstance->GetMainModule<RendererModule>();
+		Renderer* pRenderer = Entity_EngineInstance->ActiveRenderer();
 		if (!cameraComp.m_Camera.GetUUID()) return;
 		pRenderer->Submit(glm::ivec2(*position), cameraComp.m_Camera.GetUUID());
 	}
@@ -640,7 +640,7 @@ namespace Glory
 	PickResultWrapper CameraComponent_GetPickResult(uint64_t sceneID, uint64_t objectID, uint64_t componentID)
 	{
 		CameraComponent& cameraComp = GetComponent<CameraComponent>(sceneID, objectID, componentID);
-		RendererModule* pRenderer = Entity_EngineInstance->GetMainModule<RendererModule>();
+		Renderer* pRenderer = Entity_EngineInstance->ActiveRenderer();
 		PickResultWrapper result{ 0, 0, Vec3Wrapper{{}}, Vec3Wrapper{{}} };
 
 		pRenderer->GetPickResult(cameraComp.m_Camera.GetUUID(), [&result](const PickResult& pickResult) {

@@ -1,7 +1,7 @@
 #include "WindowModule.h"
 #include "Engine.h"
 #include "Window.h"
-#include "RendererModule.h"
+#include "Renderer.h"
 
 namespace Glory
 {
@@ -40,7 +40,7 @@ namespace Glory
 
         int width, height;
         m_pMainWindow->GetDrawableSize(&width, &height);
-        RendererModule* pRenderer = m_pEngine->GetMainModule<RendererModule>();
+        Renderer* pRenderer = m_pEngine->ActiveRenderer();
         if (!pRenderer) return;
         pRenderer->OnWindowResize({ uint32_t(width), uint32_t(height) });
     }

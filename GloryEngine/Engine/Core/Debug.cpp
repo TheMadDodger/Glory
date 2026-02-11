@@ -2,7 +2,7 @@
 #include "Console.h"
 #include "GameTime.h"
 #include "WindowModule.h"
-#include "RendererModule.h"
+#include "Renderer.h"
 
 #include <ThreadedVar.h>
 
@@ -145,7 +145,7 @@ namespace Glory
 	}
 
 
-	void Debug::SubmitLines(RendererModule* pRenderer, GameTime* pTime)
+	void Debug::SubmitLines(Renderer* pRenderer, GameTime* pTime)
 	{
 		for (size_t i = m_DebugLines.size(); i > 0; --i)
 		{

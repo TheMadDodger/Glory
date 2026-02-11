@@ -5,8 +5,7 @@
 #include <imgui.h>
 #include <Engine.h>
 #include <GraphicsModule.h>
-#include <RendererModule.h>
-#include <GameTime.h>
+#include <Renderer.h>
 
 namespace Glory::Editor
 {
@@ -33,7 +32,7 @@ namespace Glory::Editor
 		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
 		ImGui::Text("Draw Calls: %d - Vertices: %d - Triangles: %d", pGraphics->GetLastDrawCalls(), pGraphics->GetLastVertexCount(), pGraphics->GetLastTriangleCount());
 
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = pEngine->ActiveRenderer();
 		ImGui::Text("Active Objects: %d - Active Cameras: %d", pRenderer->LastSubmittedObjectCount(), pRenderer->LastSubmittedCameraCount());
 	}
 

@@ -1,11 +1,13 @@
 #pragma once
 #include "UIComponents.h"
 
-#include <RendererModule.h>
+#include <Module.h>
+#include <Renderer.h>
 #include <Glory.h>
 #include <FileData.h>
 
 #include <glm/glm.hpp>
+#include <CameraRef.h>
 
 namespace Glory
 {
@@ -78,7 +80,7 @@ namespace Glory
 		virtual void Load() override;
 
 		virtual void UIPrepass(GraphicsDevice* pDevice, CommandBufferHandle commandBuffer, uint32_t frameIndex);
-		virtual void UIDataPass(GraphicsDevice* pDevice, RendererModule* pRenderer);
+		virtual void UIDataPass(GraphicsDevice* pDevice, Renderer* pRenderer);
 		virtual bool UIOverlayPass(GraphicsDevice* pDevice, CameraRef camera, CommandBufferHandle commandBuffer,
 			size_t frameIndex, RenderPassHandle renderPass, DescriptorSetHandle ds);
 

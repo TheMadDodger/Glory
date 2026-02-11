@@ -11,6 +11,7 @@ namespace Glory
 {
 	class Engine;
 	class GScene;
+	class Renderer;
 	struct UUIDRemapper;
 
 	class SceneManager
@@ -18,6 +19,9 @@ namespace Glory
 	public:
 		SceneManager(Engine* pEngine);
 		virtual ~SceneManager();
+
+		void SetRenderer(Renderer* pRenderer);
+		Renderer* GetRenderer() const;
 
 		virtual GScene* NewScene(const std::string& name="Empty Scene", bool additive=false) = 0;
 		void LoadScene(UUID uuid, bool additive);
@@ -93,6 +97,7 @@ namespace Glory
 		
 	protected:
 		Engine* m_pEngine;
+		Renderer* m_pRenderer;
 		std::vector<GScene*> m_pOpenScenes;
 		std::vector<GScene*> m_pExternalScenes;
 		std::vector<GScene*> m_pRemovedScenes;

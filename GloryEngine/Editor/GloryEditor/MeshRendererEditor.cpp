@@ -3,7 +3,7 @@
 #include "EditorAssetManager.h"
 
 #include <Engine.h>
-#include <RendererModule.h>
+#include <Renderer.h>
 #include <Components.h>
 
 namespace Glory::Editor
@@ -33,7 +33,7 @@ namespace Glory::Editor
 		{
 			MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
 			const BoundingBox& boundingBox = pMeshData->GetBoundingBox();
-			pApp->GetEngine()->GetMainModule<RendererModule>()
+			pApp->GetEngine()->ActiveRenderer()
 				->DrawLineBox(transform.MatTransform, boundingBox.m_Center, boundingBox.m_HalfExtends, { 1, 1, 0, 1 });
 		}
 		return EntityComponentEditor::OnGUI();

@@ -14,7 +14,7 @@
 #include <AssetManager.h>
 #include <PrefabData.h>
 #include <Engine.h>
-#include <RendererModule.h>
+#include <Renderer.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <imgui_internal.h>
 #include <EditorUI.h>
@@ -60,12 +60,12 @@ namespace Glory::Editor
 		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
 		pScenes->AddExternalScene(m_pPreviewScene);
 
-		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->SubmitCamera(m_SceneCamera.m_Camera);
+		EditorApplication::GetInstance()->GetEngine()->ActiveRenderer()->SubmitCamera(m_SceneCamera.m_Camera);
 	}
 
 	void SceneWindow::OnClose()
 	{
-		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->UnsubmitCamera(m_SceneCamera.m_Camera);
+		EditorApplication::GetInstance()->GetEngine()->ActiveRenderer()->UnsubmitCamera(m_SceneCamera.m_Camera);
 
 		Gizmos::Clear();
 		m_SceneCamera.Cleanup();
@@ -91,13 +91,13 @@ namespace Glory::Editor
 
 	void SceneWindow::Draw()
 	{
-		RendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>();
-		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->Submit(m_PickPos, m_SceneCamera.m_Camera.GetUUID());
+		Renderer* pRenderer = EditorApplication::GetInstance()->GetEngine()->ActiveRenderer();
+		EditorApplication::GetInstance()->GetEngine()->ActiveRenderer()->Submit(m_PickPos, m_SceneCamera.m_Camera.GetUUID());
 	}
 
 	void SceneWindow::MenuBar()
 	{
-		RendererModule* pRenderer = EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>();
+		Renderer* pRenderer = EditorApplication::GetInstance()->GetEngine()->ActiveRenderer();
 
 		if (m_SelectedRenderTextureIndex == -1)
 			m_SelectedRenderTextureIndex = pRenderer->DefaultAttachmenmtIndex();
@@ -182,14 +182,14 @@ namespace Glory::Editor
 		if (ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max)) m_SceneCamera.Update();
 		if (!m_SceneCamera.SetResolution((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y)) return;
 		m_SceneCamera.UpdateCamera();
-		EditorApplication::GetInstance()->GetEngine()->GetMainModule<RendererModule>()->UpdateCamera(m_SceneCamera.m_Camera);
+		EditorApplication::GetInstance()->GetEngine()->ActiveRenderer()->UpdateCamera(m_SceneCamera.m_Camera);
 	}
 
 	void SceneWindow::DrawScene()
 	{
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = pEngine->ActiveRenderer();
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 
 		ImVec2 screenPos = ImGui::GetCursorScreenPos();
@@ -273,7 +273,7 @@ namespace Glory::Editor
 		m_PickPos = textureCoord;
 
 		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = pEngine->ActiveRenderer();
 		size_t pickIndex = 0;
 		m_CurrentPick.m_Object = SceneObjectRef();
 		if (!pRenderer->PickResultIndex(m_SceneCamera.m_Camera.GetUUID(), pickIndex)) return;

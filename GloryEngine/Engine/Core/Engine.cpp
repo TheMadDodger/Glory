@@ -37,6 +37,7 @@
 #include "BinaryStream.h"
 #include "RenderData.h"
 #include "GraphicsDevice.h"
+#include "Renderer.h"
 
 #include "IModuleLoopHandler.h"
 #include "ResourceLoaderModule.h"
@@ -200,11 +201,12 @@ namespace Glory
 
 	void Engine::DrawSceneManager()
 	{
+		m_pSceneManager->SetRenderer(ActiveRenderer());
 		m_pSceneManager->Draw();
 	}
 
 	Engine::Engine(const EngineCreateInfo& createInfo)
-		: m_ActiveGraphicsDevice(0), m_pSceneManager(createInfo.pSceneManager),
+		: m_ActiveGraphicsDevice(0), m_ActiveRenderer(0), m_pSceneManager(createInfo.pSceneManager),
 		m_ThreadManager(new ThreadManager()), m_JobManager(new Jobs::JobManager(m_ThreadManager.get())),
 		m_Reflection(new Reflect), m_CreateInfo(createInfo), m_ResourceTypes(new ResourceTypes),
 		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
@@ -304,6 +306,14 @@ namespace Glory
 			m_pAllModules[i]->PostInitialize();
 		}
 
+		/* Initialize renderers */
+		for (size_t i = 0; i < m_pRenderers.size(); ++i)
+		{
+			m_pRenderers[i]->Initialize();
+		}
+
+		m_pSceneManager->SetRenderer(ActiveRenderer());
+
 		m_Console->RegisterCommand(new ConsoleCommand1<size_t>("type", [this](size_t hash) {
 			const Utils::Reflect::TypeData* pType = m_Reflection->GetTyeData(hash);
 			if (!pType) return false;
@@ -330,6 +340,11 @@ namespace Glory
 	{
 		if (!m_Initialized) return;
 
+		for (Renderer* pRenderer : m_pRenderers)
+			pRenderer->Cleanup();
+		for (Renderer* pRenderer : m_pSecondaryRenderers)
+			pRenderer->Cleanup();
+
 		m_Console->Cleanup();
 		m_AssetDatabase->Destroy();
 		m_JobManager->Kill();
@@ -351,8 +366,19 @@ namespace Glory
 		m_TypeToLoader.clear();
 		m_TypeHashToLoader.clear();
 		m_pLoaderModules.clear();
+		m_pRenderers.clear();
+		m_pSecondaryRenderers.clear();
 
 		m_Initialized = false;
+	}
+
+	void Engine::Draw()
+	{
+		if (!m_pRenderers.empty())
+			m_pRenderers[m_ActiveRenderer]->Draw();
+
+		for (Renderer* pRenderer : m_pSecondaryRenderers)
+			pRenderer->Draw();
 	}
 
 	GameTime& Engine::Time()
@@ -508,6 +534,25 @@ namespace Glory
 			stream->Read(m_Organization).Read(m_AppName);
 		}
 
+		if (HasData("Renderer"))
+		{
+			//m_PipelineOrder.clear();
+			//
+			//std::vector<char> buffer = m_pEngine->GetData("Renderer");
+			//
+			//BinaryMemoryStream memoryStream{ buffer };
+			//BinaryStream* stream = &memoryStream;
+			//
+			//size_t pipelineCount;
+			//stream->Read(pipelineCount);
+			//for (size_t i = 0; i < pipelineCount; ++i)
+			//{
+			//	UUID pipelineID;
+			//	stream->Read(pipelineID);
+			//	m_PipelineOrder.emplace_back(pipelineID);
+			//}
+		}
+
 		for (size_t i = 0; i < m_pAllModules.size(); ++i)
 		{
 			m_pAllModules[i]->OnProcessData();
@@ -580,7 +625,7 @@ namespace Glory
 
 	void Engine::AddGraphicsDevice(GraphicsDevice* pGraphicsDevice)
 	{
-		m_pGraphicsDevices.push_back(pGraphicsDevice);
+		m_pGraphicsDevices.emplace_back(pGraphicsDevice);
 		pGraphicsDevice->Initialize();
 	}
 
@@ -588,6 +633,17 @@ namespace Glory
 	{
 		return m_ActiveGraphicsDevice >= m_pGraphicsDevices.size() ?
 			nullptr : m_pGraphicsDevices[m_ActiveGraphicsDevice];
+	}
+
+	void Engine::AddMainRenderer(Renderer* pRenderer)
+	{
+		m_pRenderers.emplace_back(pRenderer);
+		pRenderer->InitializeAsMainRenderer();
+	}
+
+	Renderer* Engine::ActiveRenderer()
+	{
+		return m_pRenderers.empty() ? nullptr : m_pRenderers[m_ActiveRenderer];
 	}
 
 	void Engine::Load()
@@ -701,9 +757,11 @@ namespace Glory
 		m_Console->Update();
 		WindowModule* pWindows = GetMainModule<WindowModule>();
 		if (pWindows) pWindows->PollEvents();
+		m_pSceneManager->SetRenderer(ActiveRenderer());
 		m_pSceneManager->Update();
 		m_pSceneManager->Draw();
 		ModulesLoop();
+		Draw();
 		EndFrame();
 	}
 
@@ -727,6 +785,12 @@ namespace Glory
 		{
 			m_pAllModules[i]->OnBeginFrame();
 		}
+
+		if (!m_pRenderers.empty())
+			m_pRenderers[m_ActiveRenderer]->BeginFrame();
+
+		for (Renderer* pRenderer : m_pSecondaryRenderers)
+			pRenderer->BeginFrame();
 	}
 
 	void Engine::EndFrame()
@@ -735,6 +799,13 @@ namespace Glory
 		{
 			m_pAllModules[i]->OnEndFrame();
 		}
+
+		if (!m_pRenderers.empty())
+			m_pRenderers[m_ActiveRenderer]->EndFrame();
+
+		for (Renderer* pRenderer : m_pSecondaryRenderers)
+			pRenderer->EndFrame();
+
 		m_Time->EndFrame();
 	}
 

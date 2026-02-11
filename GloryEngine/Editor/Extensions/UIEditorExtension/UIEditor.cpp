@@ -5,6 +5,7 @@
 #include <UIDocument.h>
 #include <UIDocumentData.h>
 #include <UIRendererModule.h>
+#include <Renderer.h>
 #include <Debug.h>
 #include <GraphicsModule.h>
 #include <UIComponents.h>
@@ -13,7 +14,6 @@
 #include <EditorApplication.h>
 #include <EditableResource.h>
 #include <EditorResourceManager.h>
-#include <UIDocument.h>
 #include <MeshData.h>
 #include <NodeRef.h>
 #include <ImGuiHelpers.h>
@@ -68,7 +68,7 @@ namespace Glory::Editor
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		Engine* pEngine = pApp->GetEngine();
 		UIRendererModule* pUIRenderer = pEngine->GetOptionalModule<UIRendererModule>();
-		RendererModule* pRenderer = pEngine->GetMainModule<RendererModule>();
+		Renderer* pRenderer = pEngine->ActiveRenderer();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
 
 		UIMainWindow* pMainWindow = GetMainWindow();

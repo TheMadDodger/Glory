@@ -3,7 +3,7 @@
 #include "Engine.h"
 #include "GScene.h"
 #include "SceneManager.h"
-#include "RendererModule.h"
+#include "Renderer.h"
 #include "PropertyFlags.h"
 
 #include <EntityRegistry.h>
@@ -13,7 +13,8 @@ namespace Glory
 	void LightSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, LightComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		Renderer* pRenderer = pScene->Manager()->GetRenderer();
+		if (!pRenderer) return;
 
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		LightData light;
@@ -50,7 +51,7 @@ namespace Glory
 		default:
 			break;
 		}
-		pEngine->GetMainModule<RendererModule>()->Submit(std::move(light), std::move(lightView),
+		pRenderer->Submit(std::move(light), std::move(lightView),
 			std::move(lightProjection), pScene->GetEntityUUID(entity));
 	}
 
