@@ -2,7 +2,7 @@
 #include "GloryRenderer.h"
 #include "GloryRendererData.h"
 
-#include <RendererModule.h>
+#include <Module.h>
 
 #include <glm/glm.hpp>
 
@@ -12,7 +12,7 @@ namespace Glory
 {
 	class GraphicsDevive;
 
-	class GloryRendererModule : public RendererModule
+	class GloryRendererModule : public Module
 	{
 	public:
 		GloryRendererModule();
@@ -25,12 +25,14 @@ namespace Glory
 		const std::vector<UUID>& PipelineOrder() const;
 		void SetPipelineOrder(std::vector<UUID>&& pipelineOrder);
 
+		const std::type_info& GetModuleType() override;
+
 		GLORY_MODULE_VERSION_H(0, 1, 0);
 
 	private:
 		virtual void Cleanup() override;
 		virtual void Initialize() override;
-		virtual void OnPostInitialize() override;
+		virtual void PostInitialize() override;
 		virtual void Update() override;
 		virtual void Draw() override;
 		virtual void LoadSettings(ModuleSettings& settings) override;

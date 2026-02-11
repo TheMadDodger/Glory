@@ -66,11 +66,10 @@ namespace Glory
 
 	void GloryRendererModule::Initialize()
 	{
-		RendererModule::Initialize();
 		m_pEngine->AddMainRenderer(&m_Renderer);
 	}
 
-	void GloryRendererModule::OnPostInitialize()
+	void GloryRendererModule::PostInitialize()
 	{
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 
@@ -131,7 +130,6 @@ namespace Glory
 
 	void GloryRendererModule::LoadSettings(ModuleSettings& settings)
 	{
-		RendererModule::LoadSettings(settings);
 		settings.RegisterAssetReference<PipelineData>("Lines Pipeline", 19);
 		settings.RegisterAssetReference<PipelineData>("Screen Pipeline", 20);
 		settings.RegisterAssetReference<PipelineData>("SSAO Prepass Pipeline", 21);
@@ -288,5 +286,10 @@ namespace Glory
 	void GloryRendererModule::SetPipelineOrder(std::vector<UUID>&& pipelineOrder)
 	{
 		m_PipelineOrder = std::move(pipelineOrder);
+	}
+
+	const std::type_info& GloryRendererModule::GetModuleType()
+	{
+		return typeid(GloryRendererModule);
 	}
 }

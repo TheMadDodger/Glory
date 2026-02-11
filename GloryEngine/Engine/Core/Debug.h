@@ -72,7 +72,6 @@ namespace Glory
 
 	private:
 		friend class Engine;
-		friend class RendererModule;
 
 		std::mutex m_Lock;
 		Console* m_pConsole;

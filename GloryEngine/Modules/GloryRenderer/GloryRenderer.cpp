@@ -636,8 +636,6 @@ namespace Glory
 		const ModuleSettings& settings = m_pModule->Settings();
 		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
 
-		//m_pModule->GetEngine()->GetDebug().SubmitLines(this, &m_pModule->GetEngine()->Time());
-
 		GraphicsDevice* pDevice = m_pModule->GetEngine()->ActiveGraphicsDevice();
 		if (!pDevice) return;
 

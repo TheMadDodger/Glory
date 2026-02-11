@@ -375,7 +375,10 @@ namespace Glory
 	void Engine::Draw()
 	{
 		if (!m_pRenderers.empty())
+		{
+			GetDebug().SubmitLines(m_pRenderers[m_ActiveRenderer], &Time());
 			m_pRenderers[m_ActiveRenderer]->Draw();
+		}
 
 		for (Renderer* pRenderer : m_pSecondaryRenderers)
 			pRenderer->Draw();
