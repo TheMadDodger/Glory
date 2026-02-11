@@ -96,11 +96,4 @@ namespace Glory
 		RP_Postblit,
 		RP_Count
 	};
-
-	class RendererModule;
-	struct RenderPass
-	{
-		std::string m_Name;
-		std::function<void(uint32_t, RendererModule*)> m_Callback;
-	};
 }

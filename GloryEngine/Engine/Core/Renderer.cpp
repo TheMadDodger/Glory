@@ -603,9 +603,4 @@ namespace Glory
 			};
 		std::sort(m_PostProcesses.begin(), m_PostProcesses.end(), comparer);
 	}
-
-	void Renderer::SetPipelineOrder(std::vector<UUID>&& pipelineOrder)
-	{
-		m_PipelineOrder = std::move(pipelineOrder);
-	}
 }

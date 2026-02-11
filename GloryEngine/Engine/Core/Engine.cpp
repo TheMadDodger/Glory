@@ -312,6 +312,8 @@ namespace Glory
 			m_pRenderers[i]->Initialize();
 		}
 
+		m_pSceneManager->SetRenderer(ActiveRenderer());
+
 		m_Console->RegisterCommand(new ConsoleCommand1<size_t>("type", [this](size_t hash) {
 			const Utils::Reflect::TypeData* pType = m_Reflection->GetTyeData(hash);
 			if (!pType) return false;
@@ -755,6 +757,7 @@ namespace Glory
 		m_Console->Update();
 		WindowModule* pWindows = GetMainModule<WindowModule>();
 		if (pWindows) pWindows->PollEvents();
+		m_pSceneManager->SetRenderer(ActiveRenderer());
 		m_pSceneManager->Update();
 		m_pSceneManager->Draw();
 		ModulesLoop();

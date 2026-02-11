@@ -136,6 +136,8 @@ namespace Glory
 		void ResizeShadowMapLODResolutions(uint32_t minSize, uint32_t maxSize);
 		void GenerateShadowLODDivisions(uint32_t maxLODs);
 
+		virtual void SetPipelineOrder(std::vector<UUID>&& pipelineOrder) override;
+
 	private:
 		friend class GloryRendererModule;
 		GloryRendererModule* m_pModule;

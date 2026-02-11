@@ -1280,7 +1280,7 @@ namespace Glory
 		const DescriptorSetHandle lightSet = uniqueCameraData.m_LightSets[m_CurrentFrameIndex];
 		const LayerMask& cameraMask = camera.GetLayerMask();
 
-		for (auto pipelineID : m_PipelineOrder)
+		for (auto pipelineID : m_pModule->PipelineOrder())
 		{
 			auto iter = std::find_if(batches.begin(), batches.end(),
 				[pipelineID](const PipelineBatch& batch) {
@@ -2450,5 +2450,10 @@ namespace Glory
 			const uint32_t divider = uint32_t(pow(2, i));
 			m_ShadowLODDivisions.push_back(divider);
 		}
+	}
+
+	void GloryRenderer::SetPipelineOrder(std::vector<UUID>&& pipelineOrder)
+	{
+		m_pModule->SetPipelineOrder(std::move(pipelineOrder));
 	}
 }

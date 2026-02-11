@@ -22,6 +22,9 @@ namespace Glory
 
 		void CheckCachedPipelines(GraphicsDevice* pDevice);
 
+		const std::vector<UUID>& PipelineOrder() const;
+		void SetPipelineOrder(std::vector<UUID>&& pipelineOrder);
+
 		GLORY_MODULE_VERSION_H(0, 1, 0);
 
 	private:
@@ -33,7 +36,11 @@ namespace Glory
 		virtual void LoadSettings(ModuleSettings& settings) override;
 		virtual void Preload() override;
 
+		virtual void OnProcessData() override;
+
 	private:
 		GloryRenderer m_Renderer;
+
+		std::vector<UUID> m_PipelineOrder;
 	};
 }

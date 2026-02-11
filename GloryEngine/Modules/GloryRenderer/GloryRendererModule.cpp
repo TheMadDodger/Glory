@@ -4,28 +4,12 @@
 #include <Engine.h>
 #include <Console.h>
 #include <GraphicsDevice.h>
-#include <DescriptorHelpers.h>
-#include <GPUTextureAtlas.h>
-#include <MaterialData.h>
-#include <FileData.h>
+#include <BinaryStream.h>
 
 #include <PipelineManager.h>
-#include <MaterialManager.h>
 #include <AssetManager.h>
-#include <SceneManager.h>
-#include <GScene.h>
 
 #include <PipelineData.h>
-#include <MeshData.h>
-#include <TextureData.h>
-#include <CubemapData.h>
-
-#include <EngineProfiler.h>
-#include <RenderHelpers.h>
-#include <random>
-
-#include <glm/glm.hpp>
-#include <glm/ext/matrix_transform.hpp>
 
 GLORY_MODULE_CPP(GloryRendererModule);
 
@@ -175,6 +159,26 @@ namespace Glory
 		CheckCachedPipelines(pDevice);
 	}
 
+	void GloryRendererModule::OnProcessData()
+	{
+		if (!m_pEngine->HasData("Renderer")) return;
+		m_PipelineOrder.clear();
+
+		std::vector<char> buffer = m_pEngine->GetData("Renderer");
+
+		BinaryMemoryStream memoryStream{ buffer };
+		BinaryStream* stream = &memoryStream;
+
+		size_t pipelineCount;
+		stream->Read(pipelineCount);
+		for (size_t i = 0; i < pipelineCount; ++i)
+		{
+			UUID pipelineID;
+			stream->Read(pipelineID);
+			m_PipelineOrder.emplace_back(pipelineID);
+		}
+	}
+
 	void GloryRendererModule::CheckCachedPipelines(GraphicsDevice* pDevice)
 	{
 		const ModuleSettings& settings = Settings();
@@ -274,5 +278,15 @@ namespace Glory
 		RendererPipelines::m_LineRenderPipeline = pDevice->AcquireCachedPipeline(DummyRenderPasses::m_DummyRenderPass, pPipeline,
 			{ RendererDSLayouts::m_GlobalLineRenderSetLayout }, sizeof(LineVertex),
 			{ AttributeType::Float3, AttributeType::Float4 });
+	}
+
+	const std::vector<UUID>& GloryRendererModule::PipelineOrder() const
+	{
+		return m_PipelineOrder;
+	}
+
+	void GloryRendererModule::SetPipelineOrder(std::vector<UUID>&& pipelineOrder)
+	{
+		m_PipelineOrder = std::move(pipelineOrder);
 	}
 }

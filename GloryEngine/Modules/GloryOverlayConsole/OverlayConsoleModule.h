@@ -12,7 +12,6 @@ namespace Glory
 {
 	class MaterialData;
 	class RenderTexture;
-	class RendererModule;
 	class MeshData;
 	class Console;
 	class Window;

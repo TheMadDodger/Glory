@@ -22,7 +22,5 @@ namespace Glory
 		virtual void OnPostInitialize() {};
 
 		virtual void LoadSettings(ModuleSettings& settings) override;
-
-		virtual void OnProcessData() override;
 	};
 }

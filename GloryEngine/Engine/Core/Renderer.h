@@ -258,7 +258,7 @@ namespace Glory
 		virtual RenderPassHandle GetSwapchainPass() const { return NULL; };
 		virtual RenderPassHandle GetDummyPostProcessPass() const { return NULL; };
 
-		void SetPipelineOrder(std::vector<UUID>&& pipelineOrder);
+		virtual void SetPipelineOrder(std::vector<UUID>&& pipelineOrder) = 0;
 
 		virtual void Initialize() = 0;
 		virtual void Cleanup() = 0;
@@ -316,7 +316,5 @@ namespace Glory
 		std::vector<std::function<void(GraphicsDevice*, Renderer*)>> m_InjectedDataPasses;
 		std::vector<std::function<void(GraphicsDevice*, RenderPassHandle, CommandBufferHandle)>> m_InjectedSwapchainSubpasses;
 		std::vector<std::function<void(GraphicsDevice*, CommandBufferHandle, uint32_t)>> m_InjectedPreRenderPasses;
-
-		std::vector<UUID> m_PipelineOrder;
 	};
 }

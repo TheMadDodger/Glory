@@ -37,8 +37,4 @@ namespace Glory
 	{
 		settings.RegisterAssetReference<PipelineData>("Lines Pipeline", 19);
 	}
-
-	void RendererModule::OnProcessData()
-	{
-	}
 }
