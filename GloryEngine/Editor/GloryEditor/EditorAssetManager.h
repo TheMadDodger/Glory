@@ -132,6 +132,7 @@ namespace Glory::Editor
 			UUID m_UUID;
 		};
 
+		EditorApplication* m_pApplication;
 		ThreadedUMap<UUID, Resource*> m_pLoadedAssets;
 		ThreadedVector<UUID> m_pLoadingAssets;
 		ThreadedQueue<CallbackData> m_ResourceLoadedCallbacks;

@@ -9,8 +9,16 @@
 
 namespace Glory::Editor
 {
-	std::vector<BaseThumbnailGenerator*> ThumbnailManager::m_pGenerators;
-	std::map<UUID, TextureData*> ThumbnailManager::m_pThumbnails;
+	ThumbnailManager::ThumbnailManager(EditorApplication* pApp): m_pApplication(pApp) {}
+
+	ThumbnailManager::~ThumbnailManager()
+	{
+		for (size_t i = 0; i < m_pGenerators.size(); i++)
+		{
+			delete m_pGenerators[i];
+		}
+		m_pGenerators.clear();
+	}
 
 	TextureHandle ThumbnailManager::GetThumbnail(UUID uuid)
 	{
@@ -54,15 +62,6 @@ namespace Glory::Editor
 		m_pGenerators.push_back(pGenerator);
 	}
 
-	void ThumbnailManager::Destroy()
-	{
-		for (size_t i = 0; i < m_pGenerators.size(); i++)
-		{
-			delete m_pGenerators[i];
-		}
-		m_pGenerators.clear();
-	}
-
 	BaseThumbnailGenerator* ThumbnailManager::GetGenerator(uint32_t hashCode)
 	{
 		for (size_t i = 0; i < m_pGenerators.size(); i++)
@@ -75,7 +74,4 @@ namespace Glory::Editor
 
 		return nullptr;
 	}
-
-	ThumbnailManager::ThumbnailManager() {}
-	ThumbnailManager::~ThumbnailManager() {}
 }

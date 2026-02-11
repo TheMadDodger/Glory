@@ -9,6 +9,7 @@
 #include "EditorAssetManager.h"
 #include "EditorPipelineManager.h"
 #include "EditorMaterialManager.h"
+#include "ThumbnailManager.h"
 #include "AssetCompiler.h"
 #include "FileBrowser.h"
 #include "ProjectSettings.h"
@@ -43,6 +44,7 @@ namespace Glory::Editor
 		m_ResourceManager(new EditorResourceManager(createInfo.pEngine)),
 		m_PipelineManager(new EditorPipelineManager(createInfo.pEngine)),
 		m_MaterialManager(new EditorMaterialManager(createInfo.pEngine)),
+		m_ThumbnailManager(new ThumbnailManager(this)),
 		m_pFileWatcher(new efsw::FileWatcher())
 	{
 		// Copy the optional modules into the optional modules vector
@@ -488,6 +490,11 @@ namespace Glory::Editor
 	EditorMaterialManager& EditorApplication::GetMaterialManager()
 	{
 		return *m_MaterialManager;
+	}
+
+	ThumbnailManager& EditorApplication::GetThumbnailManager()
+	{
+		return *m_ThumbnailManager;
 	}
 
 	void EditorApplication::TryToQuit()

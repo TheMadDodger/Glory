@@ -159,9 +159,10 @@ namespace Glory::Editor
 		//if (ProjectSpace::GetOpenProject() == nullptr)
 		//	m_pProjectPopup->Open();
 
-		ThumbnailManager::AddGenerator<ImageThumbnailGenerator>();
-		ThumbnailManager::AddGenerator<TextureThumbnailGenerator>();
-		ThumbnailManager::AddGenerator<SceneThumbnailGenerator>();
+		ThumbnailManager& thumbnails = EditorApplication::GetInstance()->GetThumbnailManager();
+		thumbnails.AddGenerator<ImageThumbnailGenerator>();
+		thumbnails.AddGenerator<TextureThumbnailGenerator>();
+		thumbnails.AddGenerator<SceneThumbnailGenerator>();
 
 		Gizmos::Initialize();
 

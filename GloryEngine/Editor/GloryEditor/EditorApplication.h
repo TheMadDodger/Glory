@@ -33,6 +33,7 @@ namespace Editor
 	class EditorResourceManager;
 	class EditorPipelineManager;
 	class EditorMaterialManager;
+	class ThumbnailManager;
 
 	class EditorApplication
 	{
@@ -65,6 +66,7 @@ namespace Editor
 		GLORY_EDITOR_API EditorResourceManager& GetResourceManager();
 		GLORY_EDITOR_API EditorPipelineManager& GetPipelineManager();
 		GLORY_EDITOR_API EditorMaterialManager& GetMaterialManager();
+		GLORY_EDITOR_API ThumbnailManager& GetThumbnailManager();
 
 		GLORY_EDITOR_API void OnFileDragAndDrop(std::vector<std::string_view>& paths);
 		GLORY_EDITOR_API static EditorApplication* GetInstance();
@@ -98,6 +100,7 @@ namespace Editor
 		std::unique_ptr<EditorResourceManager> m_ResourceManager;
 		std::unique_ptr<EditorPipelineManager> m_PipelineManager;
 		std::unique_ptr<EditorMaterialManager> m_MaterialManager;
+		std::unique_ptr<ThumbnailManager> m_ThumbnailManager;
 		efsw::FileWatcher* m_pFileWatcher;
 
 		std::vector<BaseEditorExtension*> m_pExtensions;

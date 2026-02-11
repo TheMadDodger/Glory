@@ -186,7 +186,7 @@ namespace Glory::Editor
 
 		MenuBar::AddMenuItem("File/Compile C# Project", []() { CompileProject(ProjectSpace::GetOpenProject()); });
 
-		ThumbnailManager::AddGenerator<MonoScriptThumbnail>();
+		pEditorApp->GetThumbnailManager().AddGenerator<MonoScriptThumbnail>();
 
 		EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetUpdated, AssetCallback);
 		EditorPreferencesWindow::AddPreferencesTab({ "Mono", [this]() { Preferences(); } });
