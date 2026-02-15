@@ -3,6 +3,7 @@
 #include "GameTime.h"
 #include "WindowModule.h"
 #include "Renderer.h"
+#include "ICaptureHandler.h"
 
 #include <ThreadedVar.h>
 
@@ -103,6 +104,31 @@ namespace Glory
 	void Debug::SetWindowModule(WindowModule* pWindows)
 	{
 		m_pWindowModule = pWindows;
+	}
+
+	void Debug::SetCaptureHandler(ICaptureHandler* pHandler)
+	{
+		m_pCaptureHandler = pHandler;
+	}
+
+	void Debug::StartCapture()
+	{
+		if (!m_pCaptureHandler)
+		{
+			LogWarning("Debug::StartCapture > No capture capture handler was set.");
+			return;
+		}
+		m_pCaptureHandler->StartCapture();
+	}
+
+	void Debug::EndCapture()
+	{
+		if (!m_pCaptureHandler)
+		{
+			LogWarning("Debug::EndCapture > No capture capture handler was set.");
+			return;
+		}
+		m_pCaptureHandler->EndCapture();
 	}
 
 #ifndef GLORY_NO_DEBUG_LINES

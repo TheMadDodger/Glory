@@ -95,6 +95,7 @@ namespace Glory::Editor
 	static constexpr char* Shortcut_Play_Stop				= "Stop Playmode";
 	static constexpr char* Shortcut_Play_Pauze				= "Toggle Pauze Playmode";
 	static constexpr char* Shortcut_Play_NextFrame			= "Playmode Next Frame";
+	static constexpr char* Shortcut_CaptureFrame			= "Capture Frame";
 	static constexpr char* Shortcut_About					= "Open About";
 	static constexpr char* Shortcut_Window_Scene			= "Open Scene View";
 	static constexpr char* Shortcut_Window_Game				= "Open Game View";
@@ -377,6 +378,7 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("Window/Project Settings", [this]() { GetWindow<ProjectSettingsWindow>(); }, NULL, Shortcut_Window_ProjectSettings);
 		MenuBar::AddMenuItem("Window/Resources", [this]() { GetWindow<ResourcesWindow>(); }, NULL, Shortcut_Window_Resources);
 		MenuBar::AddMenuItem("Window/Environment Generator", [this]() { GetWindow<EnvironmentGenerator>(); }, NULL, Shortcut_Window_Environment);
+		MenuBar::AddMenuItem("Window/Capture Frame", [app]() { app->CaptureFrame(); }, NULL, Shortcut_CaptureFrame);
 
 		MenuBar::AddMenuItem("Play/Start", [app]() { app->StartPlay(); }, NULL, Shortcut_Play_Start);
 		MenuBar::AddMenuItem("Play/Stop", [app]() { app->StopPlay(); }, NULL, Shortcut_Play_Stop);
@@ -405,6 +407,7 @@ namespace Glory::Editor
 		Shortcuts::SetShortcut(Shortcut_Play_Stop, ImGuiKey_F6, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_Play_Pauze, ImGuiKey_F7, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_Play_NextFrame, ImGuiKey_F8, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_CaptureFrame, ImGuiKey_F11, ImGuiMod_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_Window_Scene, ImGuiKey_1, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_Window_Game, ImGuiKey_2, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_Window_SceneGraph, ImGuiKey_3, ImGuiMod_None);

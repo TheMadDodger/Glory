@@ -63,6 +63,7 @@ GloryIncludeDir["runtimeApp"]			= "%{runtimeDir}/Application"
 GloryIncludeDir["runtimeTestApp"]		= "%{runtimeDir}/RuntimeTestApplication"
 GloryIncludeDir["jobs"]					= "%{engineDir}/Jobs"
 GloryIncludeDir["threads"]				= "%{engineDir}/Threads"
+GloryIncludeDir["RenderDoc"]			= "%{engineDir}/RenderDocAPI"
 
 BaseIncludeDir = {}
 BaseIncludeDir["audio"]					= "%{modulesDir}/Base/GloryAudioModule"
@@ -92,6 +93,7 @@ IncludeDir["Utils"]						= "%{rootDir}/Utils"
 IncludeDir["ECS"]						= "%{IncludeDir.Utils}/GloryECS"
 IncludeDir["Reflect"]					= "%{IncludeDir.Utils}/GloryReflect"
 IncludeDir["Version"]					= "%{IncludeDir.Utils}/Version"
+IncludeDir["RenderDoc"]					= "%{rootDir}/third-party/RenderDoc"
 
 IncludeDir["FA"]						= "%{rootDir}/third-party/FontAwesome"
 
@@ -132,6 +134,7 @@ group "Engine"
 	include "Engine/Core"
 	include "Engine/Threads"
 	include "Engine/Jobs"
+	include "Engine/RenderDocAPI"
 group ""
 
 group "Modules"

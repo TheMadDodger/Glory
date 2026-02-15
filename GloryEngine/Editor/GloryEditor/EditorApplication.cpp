@@ -18,6 +18,7 @@
 #include <Console.h>
 #include <implot.h>
 #include <Version.h>
+#include <RenderDocAPI.h>
 
 #include <GloryAPI.h>
 
@@ -91,6 +92,13 @@ namespace Glory::Editor
 
 		m_Running = false;
 		m_IsStarting = false;
+
+		if (!RenderDocAPI::InitializeRenderDoc())
+			m_pEngine->GetDebug().LogInfo("RenderDoc not running, captures disabled.");
+		else
+			m_pEngine->GetDebug().LogInfo("RenderDoc loaded.");
+
+		m_pEngine->GetDebug().SetCaptureHandler(this);
 	}
 
 	void EditorApplication::InitializeExtensions()
@@ -235,6 +243,10 @@ namespace Glory::Editor
 
 		while (m_Running)
 		{
+			const bool wasCapture = m_MakeCapture;
+			m_MakeCapture = false;
+			if (wasCapture) StartCapture();
+
 			/* Ensure filewatch is still watching */
 			m_pFileWatcher->watch();
 
@@ -290,6 +302,8 @@ namespace Glory::Editor
 
 			/* Render the ImGui frame */
 			m_Platform.EndFrame();
+
+			if (wasCapture) EndCapture();
 		}
 	}
 
@@ -519,5 +533,32 @@ namespace Glory::Editor
 	void EditorApplication::OnFileDragAndDrop(std::vector<std::string_view>& paths)
 	{
 		m_MainEditor.OnFileDragAndDrop(paths);
+	}
+
+	void EditorApplication::CaptureFrame()
+	{
+		m_MakeCapture = true;
+	}
+
+	void EditorApplication::StartCapture()
+	{
+		if (!RenderDocAPI::IsInitialized())
+		{
+			m_pEngine->GetDebug().LogWarning("EditorApplication::StartCapture() : RenderDoc is not initialized! No capture was taken.");
+			return;
+		}
+
+		RenderDocAPI::StartCapture();
+	}
+
+	void EditorApplication::EndCapture()
+	{
+		if (!RenderDocAPI::IsInitialized())
+		{
+			m_pEngine->GetDebug().LogWarning("EditorApplication::StartCapture() : RenderDoc is not initialized! No capture was taken.");
+			return;
+		}
+
+		RenderDocAPI::EndCapture();
 	}
 }

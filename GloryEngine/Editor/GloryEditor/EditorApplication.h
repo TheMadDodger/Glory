@@ -4,6 +4,7 @@
 #include "ProjectSpace.h"
 #include "EditorCreateInfo.h"
 #include "EditorPlayer.h"
+#include "ICaptureHandler.h"
 
 #include <Version.h>
 #include <memory>
@@ -35,7 +36,7 @@ namespace Editor
 	class EditorMaterialManager;
 	class ThumbnailManager;
 
-	class EditorApplication
+	class EditorApplication : public ICaptureHandler
 	{
 	public:
 		GLORY_EDITOR_API EditorApplication(const EditorCreateInfo& createInfo);
@@ -76,6 +77,7 @@ namespace Editor
 		GLORY_EDITOR_API void OnEndPackage(const std::filesystem::path& path);
 		GLORY_EDITOR_API void UpdateExtensions();
 		GLORY_EDITOR_API bool IsInPlayMode();
+		GLORY_EDITOR_API void CaptureFrame();
 
 		static const Version Version;
 
@@ -88,6 +90,9 @@ namespace Editor
 		static void VersionCheck(const Glory::Version& latestVersion);
 
 		void RunStartup();
+
+		virtual void StartCapture() override;
+		virtual void EndCapture() override;
 
 	private:
 		Glory::Engine* m_pEngine;
@@ -107,6 +112,8 @@ namespace Editor
 		EditorMode m_Mode = EditorMode::M_Edit;
 		bool m_Running = false;
 		std::atomic_bool m_IsStarting = false;
+
+		bool m_MakeCapture = false;
 	};
 }
 }
