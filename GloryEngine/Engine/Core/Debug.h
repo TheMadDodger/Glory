@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <mutex>
+#include <functional>
 
 #ifndef GLORY_NO_DEBUG_LINES
 
@@ -17,11 +18,12 @@ namespace Glory
 	class Console;
 	class GameTime;
 	class WindowModule;
+	class ICaptureHandler;
 
 	class Debug
 	{
 	public:
-		Debug(Console* pConsole) : m_pConsole(pConsole), m_pWindowModule(nullptr) {}
+		Debug(Console* pConsole) : m_pConsole(pConsole), m_pWindowModule(nullptr), m_pCaptureHandler(nullptr) {}
 		~Debug() = default;
 
 	public:
@@ -61,6 +63,11 @@ namespace Glory
 
 		void SetWindowModule(WindowModule* pWindows);
 
+		void SetCaptureHandler(ICaptureHandler* pHandler);
+
+		void StartCapture();
+		void EndCapture();
+
 #ifndef GLORY_NO_DEBUG_LINES
 
 		void DrawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color, float time = 0.1f);
@@ -76,6 +83,8 @@ namespace Glory
 		std::mutex m_Lock;
 		Console* m_pConsole;
 		WindowModule* m_pWindowModule;
+
+		ICaptureHandler* m_pCaptureHandler;
 
 #ifndef GLORY_NO_DEBUG_LINES
 

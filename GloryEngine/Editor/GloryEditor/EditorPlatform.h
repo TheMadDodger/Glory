@@ -1,6 +1,8 @@
 #pragma once
 #include "GloryEditor.h"
 
+#include <ICaptureHandler.h>
+
 #include <imgui.h>
 #include <mutex>
 

@@ -62,6 +62,7 @@ project "GloryEditor"
 		"%{GloryIncludeDir.jobs}",
 		"%{GloryIncludeDir.ImGui}",
 		"%{GloryIncludeDir.api}",
+		"%{GloryIncludeDir.RenderDoc}",
 
 		"%{IncludeDir.FA}",
 
@@ -99,6 +100,8 @@ project "GloryEditor"
 		"ImGui",
 		"ImGuizmo",
 		"implot",
+
+		"RenderDocAPI",
 
 		"GloryReflect",
 		"GloryUtils",
