@@ -20,21 +20,31 @@ namespace Glory::Editor
 	ThumbnailRenderer::~ThumbnailRenderer()
 	{
 		m_ThumbnailRenderSetupCallbacks.clear();
+		m_CanRenderThumbnailCallbacks.clear();
 	}
 
-	void ThumbnailRenderer::RegisterRenderableThumbnail(uint32_t hashCode, std::function<void(Entity, UUID)> sceneSetup)
+	void ThumbnailRenderer::RegisterRenderableThumbnail(uint32_t hashCode,
+		std::function<void(Entity, UUID)> sceneSetup, std::function<bool(UUID)> canRender)
 	{
 		m_ThumbnailRenderSetupCallbacks.emplace(hashCode, sceneSetup);
+		m_CanRenderThumbnailCallbacks.emplace(hashCode, canRender);
 	}
 
-	bool ThumbnailRenderer::CanRenderThumbnail(uint32_t hashCode)
+	bool ThumbnailRenderer::IsResourceRenderable(uint32_t hashCode)
 	{
 		auto itor = m_ThumbnailRenderSetupCallbacks.find(hashCode);
 		return itor != m_ThumbnailRenderSetupCallbacks.end();
 	}
 
+	bool ThumbnailRenderer::CanRenderThumbnail(uint32_t hashCode, UUID id)
+	{
+		return m_CanRenderThumbnailCallbacks.at(hashCode)(id);
+	}
+
 	TextureData* ThumbnailRenderer::QueueThumbnailForRendering(uint32_t hashCode, UUID id)
 	{
+		if (!m_CanRenderThumbnailCallbacks.at(hashCode)(id)) return nullptr;
+
 		auto alreadyRendererItor = m_RenderResultTextures.find(id);
 		if (alreadyRendererItor != m_RenderResultTextures.end())
 			return alreadyRendererItor->second;
@@ -70,10 +80,24 @@ namespace Glory::Editor
 		Entity cameraEntity = pScene->CreateEmptyObject("Camera");
 		CameraComponent& camera = cameraEntity.AddComponent<CameraComponent>();
 		cameraEntity.GetComponent<Transform>().Position = glm::vec3(0.0f, 0.0f, 3.5f);
-		Entity lightEntity = pScene->CreateEmptyObject("Sun");
+
+		Entity lights = pScene->CreateEmptyObject("Lights");
+
+		Entity lightEntity = pScene->CreateEmptyObject("Light1");
+		pScene->SetParent(lightEntity.GetEntityID(), lights.GetEntityID());
 		LightComponent& light = lightEntity.AddComponent<LightComponent>();
-		light.m_Type = LightType::Sun;
+		light.m_Type = LightType::Point;
 		light.m_Shadows.m_Enable = false;
+		light.m_Intensity = 1.0f;
+		lightEntity.GetComponent<Transform>().Position = glm::vec3(-5.0f, 2.5f, 5.0f);
+
+		Entity lightEntity2 = pScene->CreateEmptyObject("Light2");
+		pScene->SetParent(lightEntity2.GetEntityID(), lights.GetEntityID());
+		LightComponent& light2 = lightEntity2.AddComponent<LightComponent>();
+		light2.m_Type = LightType::Point;
+		light2.m_Shadows.m_Enable = false;
+		light2.m_Intensity = 1.0f;
+		lightEntity2.GetComponent<Transform>().Position = glm::vec3(4.0f, 4.f, -5.0f);
 
 		pScene->GetRegistry().InvokeAll<CameraComponent>(Utils::ECS::InvocationType::OnEnableDraw);
 
@@ -140,7 +164,6 @@ namespace Glory::Editor
 	void ThumbnailRenderer::SetupRenders()
 	{
 		if (m_QueuedThumbnails.empty()) return;
-
 		for (size_t i = 0; i < MaxThumbnailsInFlight; ++i)
 		{
 			if (m_QueuedThumbnails.empty()) return;
@@ -162,11 +185,13 @@ namespace Glory::Editor
 			/* ... */
 
 			/* Update and draw */
+			m_pRenderer->BeginFrame();
 			UpdateScene(pScene);
 			DrawScene(pScene);
-
+			
 			/* Render */
 			m_pRenderer->Draw();
+			m_pRenderer->EndFrame();
 
 			/* Set scene in use and pop the queue */
 			m_RenderingIDs[i] = pair.second;

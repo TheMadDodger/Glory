@@ -11,4 +11,5 @@ namespace Glory
 namespace Glory::Editor
 {
 	void SetupMaterialScene(Entity root, UUID materialID);
+	bool CanRenderMaterial(UUID materialID);
 }

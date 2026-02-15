@@ -29,8 +29,10 @@ namespace Glory
 			ThumbnailRenderer(Engine* pEngine);
 			virtual ~ThumbnailRenderer();
 
-			GLORY_EDITOR_API void RegisterRenderableThumbnail(uint32_t hashCode, std::function<void(Entity, UUID)> sceneSetup);
-			GLORY_EDITOR_API bool CanRenderThumbnail(uint32_t hashCode);
+			GLORY_EDITOR_API void RegisterRenderableThumbnail(uint32_t hashCode,
+				std::function<void(Entity, UUID)> sceneSetup, std::function<bool(UUID)> canRender);
+			GLORY_EDITOR_API bool IsResourceRenderable(uint32_t hashCode);
+			GLORY_EDITOR_API bool CanRenderThumbnail(uint32_t hashCode, UUID id);
 			GLORY_EDITOR_API TextureData* QueueThumbnailForRendering(uint32_t hashCode, UUID id);
 
 			void LoadResources();
@@ -51,6 +53,7 @@ namespace Glory
 
 		private:
 			std::map<uint32_t, std::function<void(Entity, UUID)>> m_ThumbnailRenderSetupCallbacks;
+			std::map<uint32_t, std::function<bool(UUID)>> m_CanRenderThumbnailCallbacks;
 
 			struct QueuedThumbnail
 			{

@@ -35,10 +35,10 @@ namespace Glory::Editor
 		}
 
 		template<class T>
-		void RegisterRenderableThumbnail(std::function<void(Entity, UUID)> sceneSetup)
+		void RegisterRenderableThumbnail(std::function<void(Entity, UUID)> sceneSetup, std::function<bool(UUID)> canRender)
 		{
 			const uint32_t hash = ResourceTypes::GetHash<T>();
-			RegisterRenderableThumbnail(hash, sceneSetup);
+			RegisterRenderableThumbnail(hash, sceneSetup, canRender);
 		}
 
 		GLORY_EDITOR_API BaseThumbnailGenerator* GetGenerator(uint32_t hashCode);
@@ -47,7 +47,8 @@ namespace Glory::Editor
 
 	private:
 		GLORY_EDITOR_API void AddGenerator(BaseThumbnailGenerator* pGenerator);
-		GLORY_EDITOR_API void RegisterRenderableThumbnail(uint32_t hashCode, std::function<void(Entity, UUID)> sceneSetup);
+		GLORY_EDITOR_API void RegisterRenderableThumbnail(uint32_t hashCode,
+			std::function<void(Entity, UUID)> sceneSetup, std::function<bool(UUID)> canRender);
 
 	private:
 		EditorApplication* m_pApplication;

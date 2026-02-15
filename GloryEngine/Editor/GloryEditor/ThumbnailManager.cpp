@@ -42,9 +42,9 @@ namespace Glory::Editor
 		/* Find thumbnail in cache */
 		TextureData* pImage = nullptr;
 
-		if (m_ThumbnailRenderer->CanRenderThumbnail(meta.Hash()))
+		if (m_ThumbnailRenderer->IsResourceRenderable(meta.Hash()))
 		{
-			/* Request the thumbnail be renderer */
+			/* Request the thumbnail to be renderer */
 			pImage = m_ThumbnailRenderer->QueueThumbnailForRendering(meta.Hash(), uuid);
 		}
 		else
@@ -73,7 +73,7 @@ namespace Glory::Editor
 
 	void ThumbnailManager::SetupInternalRenderableThumbnails()
 	{
-		RegisterRenderableThumbnail<MaterialData>(SetupMaterialScene);
+		RegisterRenderableThumbnail<MaterialData>(SetupMaterialScene, CanRenderMaterial);
 	}
 
 	BaseThumbnailGenerator* ThumbnailManager::GetGenerator(uint32_t hashCode)
@@ -104,8 +104,9 @@ namespace Glory::Editor
 		m_pGenerators.push_back(pGenerator);
 	}
 
-	void ThumbnailManager::RegisterRenderableThumbnail(uint32_t hashCode, std::function<void(Entity, UUID)> sceneSetup)
+	void ThumbnailManager::RegisterRenderableThumbnail(uint32_t hashCode,
+		std::function<void(Entity, UUID)> sceneSetup, std::function<bool(UUID)> canRender)
 	{
-		m_ThumbnailRenderer->RegisterRenderableThumbnail(hashCode, sceneSetup);
+		m_ThumbnailRenderer->RegisterRenderableThumbnail(hashCode, sceneSetup, canRender);
 	}
 }
