@@ -6,13 +6,22 @@
 #include <GraphicsDevice.h>
 #include <Components.h>
 #include <AssetManager.h>
+#include <EditorMaterialManager.h>
+#include <EditorPipelineManager.h>
 #include <GScene.h>
 #include <TextureData.h>
 #include <MeshData.h>
+#include <MaterialData.h>
+#include <PipelineData.h>
 #include <Renderer.h>
+#include <EditorApplication.h>
+#include <EditorAssetDatabase.h>
 
 namespace Glory::Editor
 {
+	static constexpr glm::uvec2 ThumbnailResolution{ 256, 256 };
+	const size_t ThumbnailDataSize = ThumbnailResolution.x*ThumbnailResolution.y*4;
+
 	ThumbnailRenderer::ThumbnailRenderer(Engine* pEngine) : SceneManager(pEngine), m_RenderingIDs{ 0ull }
 	{
 	}
@@ -21,6 +30,14 @@ namespace Glory::Editor
 	{
 		m_ThumbnailRenderSetupCallbacks.clear();
 		m_CanRenderThumbnailCallbacks.clear();
+
+		for (ImageData* pImage : m_RenderResults)
+		{
+			delete m_RenderResultTextures.at(pImage->GetUUID());
+			delete pImage;
+		}
+		m_RenderResults.clear();
+		m_RenderResultTextures.clear();
 	}
 
 	void ThumbnailRenderer::RegisterRenderableThumbnail(uint32_t hashCode,
@@ -67,14 +84,15 @@ namespace Glory::Editor
 		ImportedResource materialSphere = Importer::Import("./EditorAssets/Models/MaterialSphere.obj");
 		ImportedResource* sphereMesh = materialSphere.Child("Sphere Material 0");
 
+		AssetManager& assets = m_pEngine->GetAssetManager();
 		MaterialSphereMesh = static_cast<MeshData*>(**sphereMesh);
-		m_pEngine->GetAssetManager().AddLoadedResource(MaterialSphereMesh);
+		assets.AddLoadedResource(MaterialSphereMesh);
 
 		Renderer* pRenderer = m_pEngine->ActiveRenderer();
 		if (!pRenderer) return;
 		pRenderer = pRenderer->CreateSecondaryRenderer(MaxThumbnailsInFlight);
 		SetRenderer(pRenderer);
-		pRenderer->OnWindowResize({ 256, 256 });
+		pRenderer->OnWindowResize({ ThumbnailResolution.x, ThumbnailResolution.y });
 
 		GScene* pScene = NewScene("ThumbnailScene");
 		Entity cameraEntity = pScene->CreateEmptyObject("Camera");
@@ -101,7 +119,7 @@ namespace Glory::Editor
 
 		pScene->GetRegistry().InvokeAll<CameraComponent>(Utils::ECS::InvocationType::OnEnableDraw);
 
-		m_PixelCopyBuffer = pDevice->CreateBuffer(256*256*4, BufferType::BT_TransferWrite, BufferFlags::BF_Read);
+		m_PixelCopyBuffer = pDevice->CreateBuffer(ThumbnailResolution.x*ThumbnailResolution.y*4, BufferType::BT_TransferWrite, BufferFlags::BF_Read);
 	}
 
 	void ThumbnailRenderer::CheckRenders()
@@ -125,9 +143,19 @@ namespace Glory::Editor
 			pDevice->Commit(commands);
 			pDevice->Wait(commands);
 
-			char* pixels = new char[256*256*4];
-			pDevice->ReadBuffer(m_PixelCopyBuffer, pixels, 0, 256*256*4);
-			ImageData* pImage = new ImageData(256, 256, PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, 4, std::move(pixels), 256*256*4);
+			char* pixels = new char[ThumbnailDataSize];
+			pDevice->ReadBuffer(m_PixelCopyBuffer, pixels, 0, ThumbnailDataSize);
+			auto iter = m_RenderResultTextures.find(m_RenderingIDs[i]);
+			if (iter != m_RenderResultTextures.end())
+			{
+				ImageData* pImage = iter->second->GetImageData(&assets);
+				pImage->SetPixels(std::move(pixels), ThumbnailDataSize);
+				iter->second->SetDirty(true);
+				m_RenderingIDs[i] = 0ull;
+				continue;
+			}
+
+			ImageData* pImage = new ImageData(ThumbnailResolution.x, ThumbnailResolution.y, PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, 4, std::move(pixels), ThumbnailDataSize);
 			pImage->SetResourceUUID(m_RenderingIDs[i]);
 			m_RenderResults.emplace_back(pImage);
 			InternalTexture* pTexture = new InternalTexture(pImage);
@@ -136,6 +164,16 @@ namespace Glory::Editor
 
 			m_RenderingIDs[i] = 0ull;
 		}
+	}
+
+	void ThumbnailRenderer::RerenderThumbnail(UUID uuid)
+	{
+		auto iter = m_RenderResultTextures.find(uuid);
+		if (iter == m_RenderResultTextures.end()) return;
+		m_PreviouslyRequestedThumbnails.insert(uuid);
+		ResourceMeta meta;
+		EditorAssetDatabase::GetAssetMetadata(uuid, meta);
+		m_QueuedThumbnails.push({ meta.Hash(), uuid });
 	}
 
 	GScene* ThumbnailRenderer::NewScene(const std::string& name, bool additive)

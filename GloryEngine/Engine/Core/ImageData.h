@@ -35,6 +35,8 @@ namespace Glory
         virtual size_t DataSize() const;
         virtual DataType GetDataType() const;
 
+        void SetPixels(char*&& pPixels, size_t dataSize);
+
         void Serialize(BinaryStream& container) const override;
         void Deserialize(BinaryStream& container) override;
 

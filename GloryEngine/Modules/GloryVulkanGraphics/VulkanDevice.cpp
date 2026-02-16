@@ -3108,6 +3108,14 @@ namespace Glory
 			sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
 			destinationStage = vk::PipelineStageFlagBits::eEarlyFragmentTests;
 		}
+		else if (oldLayout == vk::ImageLayout::eShaderReadOnlyOptimal && newLayout == vk::ImageLayout::eTransferDstOptimal)
+		{
+			barrier.srcAccessMask = (vk::AccessFlags)0;
+			barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+
+			sourceStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+			destinationStage = vk::PipelineStageFlagBits::eTransfer;
+		}
 		else
 		{
 			throw std::invalid_argument("Unsupported layout transition!");

@@ -35,7 +35,8 @@ namespace Glory::Editor
 	bool MaterialEditor::OnGUI()
 	{
 		YAMLResource<MaterialData>* pMaterial = (YAMLResource<MaterialData>*)m_pTarget;
-		MaterialData* pMaterialData = EditorApplication::GetInstance()->GetMaterialManager().GetMaterial(pMaterial->GetUUID());
+		EditorApplication* pApplication = EditorApplication::GetInstance();
+		MaterialData* pMaterialData = pApplication->GetMaterialManager().GetMaterial(pMaterial->GetUUID());
 
 		if (pMaterial->IsSectionedResource() && !pMaterialData)
 		{
@@ -50,7 +51,7 @@ namespace Glory::Editor
 		bool change = false;
 		if (AssetPicker::ResourceDropdown("Pipeline", ResourceTypes::GetHash<PipelineData>(), &pipelineID))
 		{
-			EditorApplication::GetInstance()->GetMaterialManager().SetMaterialPipeline(pMaterial->GetUUID(), pipelineID);
+			pApplication->GetMaterialManager().SetMaterialPipeline(pMaterial->GetUUID(), pipelineID);
 			change = true;
 		}
 
@@ -66,6 +67,7 @@ namespace Glory::Editor
 			EditorAssetDatabase::SetAssetDirty(pMaterial);
 			pMaterial->SetDirty(true);
 			pMaterialData->SetDirty(true);
+			pApplication->GetThumbnailManager().SetDirty(pMaterial->GetUUID());
 		}
 		return change;
 	}

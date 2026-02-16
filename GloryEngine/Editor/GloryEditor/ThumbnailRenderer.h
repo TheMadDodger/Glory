@@ -38,6 +38,8 @@ namespace Glory
 			void LoadResources();
 			void CheckRenders();
 
+			void RerenderThumbnail(UUID uuid);
+
 		private:
 			GScene* NewScene(const std::string& name = "Empty Scene", bool additive = false);
 			void OnLoadScene(UUID uuid) override;

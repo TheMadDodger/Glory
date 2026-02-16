@@ -69,11 +69,13 @@ namespace Glory::Editor
 		auto it = m_pThumbnails.find(uuid);
 		if (it == m_pThumbnails.end()) return;
 		m_pThumbnails.erase(uuid);
+		m_ThumbnailRenderer->RerenderThumbnail(uuid);
 	}
 
 	void ThumbnailManager::SetupInternalRenderableThumbnails()
 	{
 		RegisterRenderableThumbnail<MaterialData>(SetupMaterialScene, CanRenderMaterial);
+		RegisterRenderableThumbnail<MeshData>(SetupMeshScene, CanRenderMesh);
 	}
 
 	BaseThumbnailGenerator* ThumbnailManager::GetGenerator(uint32_t hashCode)
