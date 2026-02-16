@@ -144,6 +144,8 @@ namespace Glory
 		void ResizeShadowMapLODResolutions(uint32_t minSize, uint32_t maxSize);
 		void GenerateShadowLODDivisions(uint32_t maxLODs);
 
+		void InitializeShadowRendering(GraphicsDevice* pDevice);
+
 		virtual void SetPipelineOrder(std::vector<UUID>&& pipelineOrder) override;
 
 	private:
@@ -184,11 +186,15 @@ namespace Glory
 		TextureHandle m_SampleNoiseTexture = 0;
 		TextureHandle m_SkyboxCubemap = 0;
 
+		bool m_SkyboxEnabled = true;
+		bool m_LinesEnabled = true;
+
 		/* SSAO */
 		SSAOSettings m_GlobalSSAOSetting;
 		uint32_t m_SSAOKernelSize = 0;
 
 		/* Shadows */
+		bool m_ShadowsEnabled = true;
 		std::vector<RenderPassHandle> m_ShadowsPasses;
 		std::vector<size_t> m_ShadowAtlasses;
 

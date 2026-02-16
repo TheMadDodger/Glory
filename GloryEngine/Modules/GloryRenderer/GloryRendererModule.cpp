@@ -298,11 +298,10 @@ namespace Glory
 	GloryRenderer* GloryRendererModule::CreateSecondaryRenderer(size_t imageCount)
 	{
 		GloryRenderer& renderer = m_SecondaryRenderer.emplace_back(this);
-		//renderer.m_MinShadowResolution = 0;
-		//renderer.m_MaxShadowResolution = 0;
-		//renderer.m_ShadowAtlasResolution = 0;
-		//renderer.m_MaxShadowLODs = 0;
 		renderer.m_GlobalSSAOSetting.m_Enabled = 0;
+		renderer.m_ShadowsEnabled = false;
+		renderer.m_SkyboxEnabled = false;
+		renderer.m_LinesEnabled = false;
 		renderer.m_ImageCount = imageCount;
 		renderer.Initialize();
 		return &renderer;
