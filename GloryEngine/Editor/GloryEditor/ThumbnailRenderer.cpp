@@ -125,6 +125,22 @@ namespace Glory::Editor
 	void ThumbnailRenderer::CheckRenders()
 	{
 		AssetManager& assets = m_pEngine->GetAssetManager();
+		if (!GreyMaterial)
+		{
+			EditorMaterialManager& materials = EditorApplication::GetInstance()->GetMaterialManager();
+			EditorPipelineManager& pipelines = EditorApplication::GetInstance()->GetPipelineManager();
+
+			const UUID phongPipeline = pipelines.FindPipeline(PipelineType::PT_Phong, false);
+
+			GreyMaterial = new MaterialData();
+			assets.AddLoadedResource(GreyMaterial);
+			PipelineData* pPipeline = pipelines.GetPipelineData(phongPipeline);
+			GreyMaterial->SetPipeline(phongPipeline);
+			pPipeline->LoadIntoMaterial(GreyMaterial);
+			materials.LoadMaterial(GreyMaterial->GetUUID());
+			GreyMaterial->Set<glm::vec4>("Color", glm::vec4(0.75f, 0.75f, 0.75f, 1.0f));
+			GreyMaterial->Set<float>("Shininess", 0.5f);
+		}
 
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice) return;

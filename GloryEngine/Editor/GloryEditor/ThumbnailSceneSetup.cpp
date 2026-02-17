@@ -17,6 +17,8 @@ namespace Glory::Editor
 		MeshRenderer& mesh = sphere.AddComponent<MeshRenderer>();
 		mesh.m_Mesh.SetUUID(MaterialSphereMesh->GetUUID());
 		mesh.m_Material.SetUUID(materialID);
+		sphere.GetComponent<Transform>().Rotation =
+			glm::rotate(glm::identity<glm::quat>(), glm::radians(90.0f), glm::vec3{ 0.0f, 1.0f, 0.0f });
 	}
 
 	bool CanRenderMaterial(UUID materialID)
@@ -35,5 +37,22 @@ namespace Glory::Editor
 		}
 
 		return true;
+	}
+
+	void SetupMeshScene(Entity root, UUID meshID)
+	{
+		Entity meshEntity = root.GetScene()->CreateEmptyObject("MaterialSphere");
+		root.GetScene()->SetParent(meshEntity.GetEntityID(), root.GetEntityID());
+		MeshRenderer& mesh = meshEntity.AddComponent<MeshRenderer>();
+		mesh.m_Mesh.SetUUID(meshID);
+		mesh.m_Material.SetUUID(GreyMaterial->GetUUID());
+	}
+
+	bool CanRenderMesh(UUID meshID)
+	{
+		if (!GreyMaterial) return false;
+
+		EditorAssetManager& assets = EditorApplication::GetInstance()->GetAssetManager();
+		return assets.FindResource(meshID);
 	}
 }

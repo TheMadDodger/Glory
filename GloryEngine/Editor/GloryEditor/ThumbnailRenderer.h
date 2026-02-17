@@ -18,10 +18,12 @@ namespace Glory
 	class ImageData;
 	class InternalTexture;
 	class TextureData;
+	class MaterialData;
 
 	namespace Editor
 	{
 		inline MeshData* MaterialSphereMesh = nullptr;
+		inline MaterialData* GreyMaterial = nullptr;
 
 		class ThumbnailRenderer : public SceneManager
 		{
