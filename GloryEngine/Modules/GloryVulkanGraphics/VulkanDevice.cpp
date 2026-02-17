@@ -1089,6 +1089,35 @@ namespace Glory
 			{}, {}, { vkSrcImage->m_Width, vkSrcImage->m_Height, 1 }, 1);
 	}
 
+	void VulkanDevice::CopyImageToBuffer(CommandBufferHandle commandBuffer, TextureHandle src, BufferHandle dst)
+	{
+		ProfileSample s{ &Profiler(), "VulkanDevice::CopyImage" };
+		auto iter = m_CommandBuffers.find(commandBuffer);
+		if (iter == m_CommandBuffers.end())
+		{
+			Debug().LogError("VulkanDevice::CopyImage: Invalid command buffer handle.");
+			return;
+		}
+
+		VK_Texture* vkSrcTexture = m_Textures.Find(src);
+		VK_Buffer* vkDstBuffer = m_Buffers.Find(dst);
+		if (!vkSrcTexture)
+		{
+			Debug().LogError("VulkanDevice::CopyImageToBuffer: Invalid src texture handle.");
+			return;
+		}
+		if (!vkDstBuffer)
+		{
+			Debug().LogError("VulkanDevice::CopyImageToBuffer: Invalid dst buffer handle.");
+			return;
+		}
+
+		VK_Image* vkSrcImage = m_Images.Find(vkSrcTexture->m_Image);
+
+		CopyToBuffer(*iter->second, vkSrcImage->m_VKImage, vkSrcImage->m_VKFinalLayout, vkDstBuffer->m_VKBuffer,
+			vkSrcImage->m_VKAspect, {}, 0, { vkSrcImage->m_Width, vkSrcImage->m_Height, 1 }, 1);
+	}
+
 	GraphicsDevice::SwapchainResult VulkanDevice::AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex,
 		SemaphoreHandle signalSemaphore)
 	{
@@ -3079,6 +3108,14 @@ namespace Glory
 			sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
 			destinationStage = vk::PipelineStageFlagBits::eEarlyFragmentTests;
 		}
+		else if (oldLayout == vk::ImageLayout::eShaderReadOnlyOptimal && newLayout == vk::ImageLayout::eTransferDstOptimal)
+		{
+			barrier.srcAccessMask = (vk::AccessFlags)0;
+			barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+
+			sourceStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+			destinationStage = vk::PipelineStageFlagBits::eTransfer;
+		}
 		else
 		{
 			throw std::invalid_argument("Unsupported layout transition!");
@@ -3232,6 +3269,27 @@ namespace Glory
 		copyRegion.srcOffset = srcOffset;
 		copyRegion.size = size;
 		commandBuffer.copyBuffer(src, dst, 1, &copyRegion);
+	}
+
+	void VulkanDevice::CopyToBuffer(vk::CommandBuffer commandBuffer, vk::Image image, vk::ImageLayout layout,
+		vk::Buffer buffer, vk::ImageAspectFlags aspectFlags, vk::Offset3D imageOffset,
+		uint32_t bufferOffset, vk::Extent3D extent, uint32_t layerCount)
+	{
+		std::vector<vk::BufferImageCopy> imageCopies(layerCount);
+		for (size_t i = 0; i < layerCount; ++i)
+		{
+			imageCopies[i].imageOffset = imageOffset;
+			imageCopies[i].imageExtent = extent;
+			imageCopies[i].bufferOffset = bufferOffset;
+			imageCopies[i].bufferRowLength = 0;
+			imageCopies[i].bufferImageHeight = 0;
+
+			imageCopies[i].imageSubresource.aspectMask = aspectFlags;
+			imageCopies[i].imageSubresource.mipLevel = 0;
+			imageCopies[i].imageSubresource.baseArrayLayer = i;
+			imageCopies[i].imageSubresource.layerCount = 1;
+		}
+		commandBuffer.copyImageToBuffer(image, layout, buffer, imageCopies.size(), imageCopies.data());
 	}
 
 	vk::CommandBuffer VulkanDevice::GetNewResetableCommandBuffer(CommandBufferHandle commandBufferHandle)

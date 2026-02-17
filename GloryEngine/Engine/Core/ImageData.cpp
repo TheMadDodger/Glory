@@ -60,6 +60,14 @@ namespace Glory
 		return m_Header.m_DataType;
 	}
 
+	void ImageData::SetPixels(char*&& pPixels, size_t dataSize)
+	{
+		delete[] m_pPixels;
+		m_pPixels = std::move(pPixels);
+		m_Header.m_DataSize = dataSize;
+		SetDirty(true);
+	}
+
 	void ImageData::Serialize(BinaryStream& container) const
 	{
 		const int channels = m_Header.m_InternalFormat == PixelFormat::PF_RGBA ? 4 : 3;

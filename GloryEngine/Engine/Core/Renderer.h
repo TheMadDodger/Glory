@@ -230,6 +230,7 @@ namespace Glory
 		virtual std::string_view CameraAttachmentPreviewName(size_t index) const = 0;
 		virtual TextureHandle CameraAttachmentPreview(CameraRef camera, size_t index) const = 0;
 		virtual TextureHandle FinalColor() const = 0;
+		virtual TextureHandle FinalColor(uint32_t frameIndex) const = 0;
 		virtual void VisualizeAttachment(CameraRef camera, size_t index) = 0;
 
 		virtual size_t DebugOverlayCount() const = 0;
@@ -267,6 +268,11 @@ namespace Glory
 
 		void BeginFrame();
 		void EndFrame();
+
+		virtual Renderer* CreateSecondaryRenderer(size_t imageCount) = 0;
+
+		virtual uint32_t NextFrameIndex() = 0;
+		virtual bool FrameBusy(uint32_t frameIndex) = 0;
 
 	protected:
 		virtual void OnSubmitDynamic(const RenderData& renderData) {}
