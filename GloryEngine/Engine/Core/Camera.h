@@ -1,9 +1,9 @@
 #pragma once
-#include <glm/glm.hpp>
-#include <unordered_map>
-
 #include "CameraRef.h"
 #include "LayerMask.h"
+
+#include <glm/glm.hpp>
+#include <unordered_map>
 
 namespace Glory
 {
@@ -25,7 +25,8 @@ namespace Glory
 		bool IsResolutionDirty();
 		bool IsPerspectiveDirty();
 		void SetResolutionDirty(bool dirty=true);
-		void SetPerspectiveDirty(bool dirty = true);
+		void SetPerspectiveDirty(bool dirty=true);
+		void Focus(const BoundingSphere& boundingSphere);
 
 		const glm::uvec2& GetResolution() const;
 		const glm::mat4& GetView() const;

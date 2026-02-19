@@ -7,6 +7,7 @@ namespace Glory::Editor
 {
 	std::map<std::string_view, Shortcut> Shortcuts::m_Shortcuts;
 	std::vector<ImGuiKey> Shortcuts::m_CurrentBlockedKeys;
+	std::vector<std::string_view> Shortcuts::m_TriggeredThisFame;
 
 	Shortcut::Shortcut() :
 		m_Name("INVALID"), m_Action(NULL), m_Key(ImGuiKey_None), m_Mods(ImGuiModFlags_None), m_Blocked(false)
@@ -139,6 +140,11 @@ namespace Glory::Editor
 		m_CurrentBlockedKeys.push_back(key);
 	}
 
+	bool Shortcuts::IsActionTriggered(std::string_view action)
+	{
+		return std::find(m_TriggeredThisFame.begin(), m_TriggeredThisFame.end(), action) != m_TriggeredThisFame.end();
+	}
+
 	void Shortcuts::Clear()
 	{
 		m_Shortcuts.clear();
@@ -147,6 +153,8 @@ namespace Glory::Editor
 
 	void Shortcuts::Update(size_t currentMainWindowIndex)
 	{
+		m_TriggeredThisFame.clear();
+
 		/* If any ImGui item is active we want to ignore all shortcuts */
 		if (ImGui::IsAnyItemActive())
 			return;
@@ -184,6 +192,7 @@ namespace Glory::Editor
 				}
 			}
 			if (itor->second.m_Action) itor->second.m_Action();
+			m_TriggeredThisFame.emplace_back(itor->second.m_Name);
 		}
 
 		m_CurrentBlockedKeys.clear();

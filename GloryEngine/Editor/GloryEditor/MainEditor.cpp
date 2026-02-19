@@ -110,6 +110,7 @@ namespace Glory::Editor
 	static constexpr char* Shortcut_Window_Environment		= "Open Environment Generator";
 	static constexpr char* Shortcut_View_Perspective		= "Switch To Perspective";
 	static constexpr char* Shortcut_View_Orthographic		= "Switch To Orthographic";
+	static constexpr char* Shortcut_View_Focus				= "Focus Object";
 	static constexpr char* Shortcut_Edit_Undo				= "Undo";
 	static constexpr char* Shortcut_Edit_Redo				= "Redo";
 	static constexpr char* Shortcut_Edit_History			= "Edit History";
@@ -394,8 +395,9 @@ namespace Glory::Editor
 		GIZMO_MODE_MENU("Gizmos/Mode/Local", Gizmos::m_DefaultMode, ImGuizmo::LOCAL, Gizmos::Shortcut_Gizmos_Local);
 		GIZMO_MODE_MENU("Gizmos/Mode/World", Gizmos::m_DefaultMode, ImGuizmo::WORLD, Gizmos::Shortcut_Gizmos_World);
 
-		Shortcuts::AddAction(Shortcut_View_Perspective, [&]() {SceneWindow::GetViewEventDispatcher().Dispatch({ false }); });
-		Shortcuts::AddAction(Shortcut_View_Orthographic, [&]() {SceneWindow::GetViewEventDispatcher().Dispatch({ true }); });
+		Shortcuts::AddAction(Shortcut_View_Perspective, NULL);
+		Shortcuts::AddAction(Shortcut_View_Orthographic, NULL);
+		Shortcuts::AddAction(Shortcut_View_Focus, NULL);
 
 		Shortcuts::SetShortcut(Shortcut_File_NewScene, ImGuiKey_N, ImGuiMod_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_File_SaveScene, ImGuiKey_S, ImGuiMod_Ctrl);
@@ -420,6 +422,7 @@ namespace Glory::Editor
 		Shortcuts::SetShortcut(Shortcut_Window_ProjectSettings, ImGuiKey_9, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_View_Perspective, ImGuiKey_P, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_View_Orthographic, ImGuiKey_O, ImGuiMod_None);
+		Shortcuts::SetShortcut(Shortcut_View_Focus, ImGuiKey_F, ImGuiMod_None);
 		Shortcuts::SetShortcut(Shortcut_Edit_Undo, ImGuiKey_Z, ImGuiMod_Ctrl);
 		Shortcuts::SetShortcut(Shortcut_Edit_Redo, ImGuiKey_Z, ImGuiMod_Ctrl | ImGuiMod_Shift);
 		Shortcuts::SetShortcut(Shortcut_Edit_History, ImGuiKey_H, ImGuiMod_Ctrl | ImGuiMod_Shift);

@@ -75,7 +75,6 @@ namespace Glory::Editor
 	void ThumbnailManager::SetupInternalRenderableThumbnails()
 	{
 		RegisterRenderableThumbnail<MaterialData>(SetupMaterialScene, CanRenderMaterial);
-		RegisterRenderableThumbnail<MeshData>(SetupMeshScene, CanRenderMesh);
 	}
 
 	BaseThumbnailGenerator* ThumbnailManager::GetGenerator(uint32_t hashCode)
