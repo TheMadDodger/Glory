@@ -124,6 +124,8 @@ namespace Glory::Editor
 
 	void ThumbnailRenderer::CheckRenders()
 	{
+		AssetManager& assets = m_pEngine->GetAssetManager();
+
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 		if (!pDevice) return;
 

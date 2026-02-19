@@ -1,6 +1,7 @@
 #pragma once
 #include "UUID.h"
 #include "LayerMask.h"
+#include "BoundingBox.h"
 
 #include <glm/glm.hpp>
 
@@ -33,6 +34,7 @@ namespace Glory
 		bool IsPerspectiveDirty();
 		void SetResolutionDirty(bool dirty=true);
 		void SetPerspectiveDirty(bool dirty=true);
+		void Focus(const BoundingSphere& boundingSphere);
 
 		const glm::uvec2& GetResolution() const;
 		const glm::mat4& GetView() const;

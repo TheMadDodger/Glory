@@ -627,7 +627,56 @@ namespace Glory::Editor
         arraySize = mesh->mNumVertices*(vertexSize/sizeof(float));
         vertices = new float[arraySize];
 
-        for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+        /* Bounding box */
+        aiAABB boundingBoxAABB = mesh->mAABB;
+        /* Axes conversion */
+        float temp;
+        switch (context.UpAxis)
+        {
+        case AxisConversion::X:
+            SWAP(boundingBoxAABB.mMin, x, y);
+            SWAP(boundingBoxAABB.mMax, x, y);
+            break;
+        case AxisConversion::Z:
+            SWAP(boundingBoxAABB.mMin, z, y);
+            SWAP(boundingBoxAABB.mMax, z, y);
+            break;
+        default:
+            break;
+        }
+        switch (context.FrontAxis)
+        {
+        case AxisConversion::X: {
+            switch (context.UpAxis)
+            {
+            case AxisConversion::Z:
+                /* Z was already swapped with Y */
+                SWAP(boundingBoxAABB.mMin, x, y);
+                SWAP(boundingBoxAABB.mMax, x, y);
+                break;
+            default:
+                SWAP(boundingBoxAABB.mMin, x, z);
+                SWAP(boundingBoxAABB.mMax, x, z);
+                break;
+            }
+            break;
+        }
+        case AxisConversion::Y:
+            SWAP(boundingBoxAABB.mMin, y, z);
+            SWAP(boundingBoxAABB.mMax, y, z);
+            break;
+        default:
+            break;
+        }
+
+        /* Use bounding box to get center of bounding sphere */
+        const glm::vec3 min = *reinterpret_cast<glm::vec3*>(&boundingBoxAABB.mMin);
+        const glm::vec3 max = *reinterpret_cast<glm::vec3*>(&boundingBoxAABB.mMax);
+        const glm::vec3 halfExtends = (max - min)/2.0f;
+        const glm::vec3 center = glm::vec3(min + halfExtends);
+        float radius = 0.0f;
+
+        for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
         {
             std::vector<float> vertexData;
             /* Process vertex positions, normals and texture coordinates */
@@ -728,6 +777,9 @@ namespace Glory::Editor
             }
 
             memcpy(&vertices[i*(vertexSize/sizeof(float))], &vertexData[0], vertexSize);
+
+            const glm::vec3 toCenter = center - pos;
+            radius = std::max(radius, glm::length(toCenter));
         }
 
         /* Process indices */
@@ -752,49 +804,8 @@ namespace Glory::Editor
             pMesh->SetName(stream.str());
         }
 
-        /* Bounding box */
-        aiAABB boundingBoxAABB = mesh->mAABB;
-        /* Axes conversion */
-        float temp;
-        switch (context.UpAxis)
-        {
-        case AxisConversion::X:
-            SWAP(boundingBoxAABB.mMin, x, y);
-            SWAP(boundingBoxAABB.mMax, x, y);
-            break;
-        case AxisConversion::Z:
-            SWAP(boundingBoxAABB.mMin, z, y);
-            SWAP(boundingBoxAABB.mMax, z, y);
-            break;
-        default:
-            break;
-        }
-        switch (context.FrontAxis)
-        {
-        case AxisConversion::X: {
-            switch (context.UpAxis)
-            {
-            case AxisConversion::Z:
-                /* Z was already swapped with Y */
-                SWAP(boundingBoxAABB.mMin, x, y);
-                SWAP(boundingBoxAABB.mMax, x, y);
-                break;
-            default:
-                SWAP(boundingBoxAABB.mMin, x, z);
-                SWAP(boundingBoxAABB.mMax, x, z);
-                break;
-            }
-            break;
-        }
-        case AxisConversion::Y:
-            SWAP(boundingBoxAABB.mMin, y, z);
-            SWAP(boundingBoxAABB.mMax, y, z);
-            break;
-        default:
-            break;
-        }
-
-        pMesh->AddBoundingBox(*reinterpret_cast<glm::vec3*>(&boundingBoxAABB.mMin), *reinterpret_cast<glm::vec3*>(&boundingBoxAABB.mMax));
+        pMesh->AddBoundingBox(min, max);
+        pMesh->AddBoundingSphere(center, radius);
 
         delete[] vertices;
         return pMesh;

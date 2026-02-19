@@ -33,8 +33,11 @@ namespace Glory::Editor
 		{
 			MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
 			const BoundingBox& boundingBox = pMeshData->GetBoundingBox();
+			const BoundingSphere& boundingSphere = pMeshData->GetBoundingSphere();
 			pApp->GetEngine()->ActiveRenderer()
 				->DrawLineBox(transform.MatTransform, boundingBox.m_Center, boundingBox.m_HalfExtends, { 1, 1, 0, 1 });
+			pApp->GetEngine()->ActiveRenderer()
+				->DrawLineSphere(transform.MatTransform, boundingSphere.m_Center, boundingSphere.m_Radius, { 1, 1, 0, 1 });
 		}
 		return EntityComponentEditor::OnGUI();
 	}

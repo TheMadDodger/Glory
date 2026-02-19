@@ -107,6 +107,8 @@ namespace Glory
 
 	void MeshData::Serialize(BinaryStream& container) const
 	{
+		container.Write(m_BoundingBox);
+		container.Write(m_BoundingSphere);
 		container.Write(m_VertexCount);
 		container.Write(m_IndexCount);
 		container.Write(m_VertexSize);
@@ -118,6 +120,8 @@ namespace Glory
 
 	void MeshData::Deserialize(BinaryStream& container)
 	{
+		container.Read(m_BoundingBox);
+		container.Read(m_BoundingSphere);
 		container.Read(m_VertexCount);
 		container.Read(m_IndexCount);
 		container.Read(m_VertexSize);
@@ -202,8 +206,20 @@ namespace Glory
 		m_IsDirty = true;
 	}
 
+	void MeshData::AddBoundingSphere(const glm::vec3& center, float radius)
+	{
+		m_BoundingSphere.m_Center = center;
+		m_BoundingSphere.m_Radius = radius;
+		m_IsDirty = true;
+	}
+
 	const BoundingBox& MeshData::GetBoundingBox() const
 	{
 		return m_BoundingBox;
+	}
+
+	const BoundingSphere& MeshData::GetBoundingSphere() const
+	{
+		return m_BoundingSphere;
 	}
 }

@@ -414,6 +414,25 @@ namespace Glory
 		DrawLineQuad(transform, topBottomRight, topTopRight, bottomTopRight, bottomBottomRight, color);
 	}
 
+	void Renderer::DrawLineAABB(const glm::mat4& transform, const glm::vec3& min, const glm::vec3& max, const glm::vec4& color)
+	{
+		const glm::vec3 topTopLeft = { min.x, max.y, max.z };
+		const glm::vec3 topTopRight = max;
+		const glm::vec3 topBottomRight = { max.x, max.y, min.z };
+		const glm::vec3 topBottomLeft = { min.x, max.y, min.z };
+
+		const glm::vec3 bottomTopLeft = { min.x, min.y, max.z };
+		const glm::vec3 bottomTopRight = { max.x, min.y, max.z };
+		const glm::vec3 bottomBottomRight = { max.x, min.y, min.z };
+		const glm::vec3 bottomBottomLeft = min;
+
+		DrawLineQuad(transform, topTopLeft, topTopRight, topBottomRight, topBottomLeft, color);
+		DrawLineQuad(transform, bottomTopLeft, bottomTopRight, bottomBottomRight, bottomBottomLeft, color);
+
+		DrawLineQuad(transform, topBottomLeft, topTopLeft, bottomTopLeft, bottomBottomLeft, color);
+		DrawLineQuad(transform, topBottomRight, topTopRight, bottomTopRight, bottomBottomRight, color);
+	}
+
 	void Renderer::DrawLineSphere(const glm::mat4& transform, const glm::vec3& position, float radius, const glm::vec4& color)
 	{
 		ProfileSample s{ &m_pModule->GetEngine()->Profiler(), "Renderer::DrawLineSphere" };

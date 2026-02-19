@@ -29,8 +29,6 @@ namespace Glory::Editor
         virtual void OnOpen() override;
         virtual void OnClose() override;
 
-        static Dispatcher<ViewEvent>& GetViewEventDispatcher();
-
     private:
         virtual void OnGUI() override;
         virtual void Draw() override;
@@ -39,6 +37,8 @@ namespace Glory::Editor
         void CameraUpdate();
         void DrawScene();
         void Picking(const ImVec2& min, const ImVec2& size);
+
+        void FocusSelected();
 
         void HandleDragAndDrop(std::string& path);
         const glm::vec3 GetPosition() const;

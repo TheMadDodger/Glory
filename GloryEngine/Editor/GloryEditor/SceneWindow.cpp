@@ -28,6 +28,7 @@ namespace Glory::Editor
 {
 	static const char* Shortcut_View_Perspective = "Switch To Perspective";
 	static const char* Shortcut_View_Orthographic = "Switch To Orthographic";
+	static const char* Shortcut_View_Focus = "Focus Object";
 
 	SceneWindow::SceneWindow()
 		: EditorWindowTemplate("Scene", 1280.0f, 720.0f),
@@ -52,11 +53,6 @@ namespace Glory::Editor
 		m_SceneCamera.m_Height = (uint32_t)m_WindowDimensions.x;
 		m_SceneCamera.SetPerspective((uint32_t)m_WindowDimensions.x, (uint32_t)m_WindowDimensions.y, 60.0f, 0.1f, 3000.0f);
 
-		m_ViewEventID = GetViewEventDispatcher().AddListener([&](const ViewEvent& e) {
-			m_SceneCamera.m_IsOrthographic = e.Ortho;
-			m_SceneCamera.UpdateCamera();
-		});
-
 		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
 		pScenes->AddExternalScene(m_pPreviewScene);
 
@@ -70,16 +66,8 @@ namespace Glory::Editor
 		Gizmos::Clear();
 		m_SceneCamera.Cleanup();
 
-		GetViewEventDispatcher().RemoveListener(m_ViewEventID);
-
 		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
 		pScenes->RemoveExternalScene(m_pPreviewScene);
-	}
-
-	Dispatcher<ViewEvent>& SceneWindow::GetViewEventDispatcher()
-	{
-		static Dispatcher<ViewEvent> dispatcher;
-		return dispatcher;
 	}
 
 	void SceneWindow::OnGUI()
@@ -101,6 +89,10 @@ namespace Glory::Editor
 
 		if (m_SelectedRenderTextureIndex == -1)
 			m_SelectedRenderTextureIndex = pRenderer->DefaultAttachmenmtIndex();
+
+		bool perspective = Shortcuts::IsActionTriggered(Shortcut_View_Perspective);
+		bool ortho = Shortcuts::IsActionTriggered(Shortcut_View_Orthographic);
+		bool focus = Shortcuts::IsActionTriggered(Shortcut_View_Focus);
 
 		if (ImGui::BeginMenuBar())
 		{
@@ -131,25 +123,17 @@ namespace Glory::Editor
 					if (ImGui::MenuItem(pRenderer->DebugOverlayName(i).data(), NULL, enabled))
 						pRenderer->SetDebugOverlayEnabled(m_SceneCamera.m_Camera, i, !enabled);
 				}
-						
 
 				ImGui::EndMenu();
 			}
 
 			if (ImGui::BeginMenu("View"))
 			{
-				if (ImGui::MenuItem("Perspective", Shortcuts::GetShortcutString(Shortcut_View_Perspective).data(), !m_SceneCamera.m_IsOrthographic))
-				{
-					m_SceneCamera.m_IsOrthographic = false;
-					m_SceneCamera.UpdateCamera();
-					pRenderer->UpdateCamera(m_SceneCamera.m_Camera);
-				}
-				if (ImGui::MenuItem("Orthographic", Shortcuts::GetShortcutString(Shortcut_View_Orthographic).data(), m_SceneCamera.m_IsOrthographic))
-				{
-					m_SceneCamera.m_IsOrthographic = true;
-					m_SceneCamera.UpdateCamera();
-					pRenderer->UpdateCamera(m_SceneCamera.m_Camera);
-				}
+				perspective |= ImGui::MenuItem("Perspective", Shortcuts::GetShortcutString(Shortcut_View_Perspective).data(),
+					!m_SceneCamera.m_IsOrthographic);
+				ortho |= ImGui::MenuItem("Orthographic", Shortcuts::GetShortcutString(Shortcut_View_Orthographic).data(),
+					m_SceneCamera.m_IsOrthographic);
+				focus |= ImGui::MenuItem("Focus", Shortcuts::GetShortcutString(Shortcut_View_Focus).data());
 				ImGui::EndMenu();
 			}
 
@@ -174,6 +158,18 @@ namespace Glory::Editor
 
 			ImGui::EndMenuBar();
 		}
+
+		if (perspective)
+			m_SceneCamera.m_IsOrthographic = false;
+		if (ortho)
+			m_SceneCamera.m_IsOrthographic = true;
+		if (perspective || ortho)
+		{
+			m_SceneCamera.UpdateCamera();
+			pRenderer->UpdateCamera(m_SceneCamera.m_Camera);
+		}
+		if (focus)
+			FocusSelected();
 	}
 
 	void SceneWindow::CameraUpdate()
@@ -299,6 +295,20 @@ namespace Glory::Editor
 			Selection::SetActiveObject(GetEditableEntity(entityHandle.GetEntityID(), pScene));
 		}
 		m_BlockNextPick = false;
+	}
+
+	void SceneWindow::FocusSelected()
+	{
+		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		Object* pSelected = Selection::GetActiveObject();
+		if (!pSelected) return;
+		EditableEntity* pEntity = dynamic_cast<EditableEntity*>(pSelected);
+		if (!pEntity) return;
+		GScene* pScene = pEngine->GetSceneManager()->GetOpenScene(pEntity->SceneID());
+		if (!pScene) return;
+		Entity entity = pScene->GetEntityByEntityID(pEntity->EntityID());
+		const BoundingSphere sphere = GenerateBoundingSphere(entity, pEngine, entity.GetComponent<Transform>().Position);
+		m_SceneCamera.m_Camera.Focus(sphere);
 	}
 
 	void SceneWindow::HandleDragAndDrop(std::string& path)

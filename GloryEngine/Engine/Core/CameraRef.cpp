@@ -133,6 +133,13 @@ namespace Glory
 		return pCamera->SetPerspectiveDirty(dirty);
 	}
 
+	void CameraRef::Focus(const BoundingSphere& boundingSphere)
+	{
+		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
+		if (pCamera == nullptr) return;
+		return pCamera->Focus(boundingSphere);
+	}
+
 	const glm::uvec2& CameraRef::GetResolution() const
 	{
 		Camera* pCamera = m_pManager->GetCamera(m_CameraID);
