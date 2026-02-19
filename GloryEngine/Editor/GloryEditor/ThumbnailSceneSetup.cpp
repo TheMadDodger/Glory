@@ -41,11 +41,15 @@ namespace Glory::Editor
 
 	void SetupMeshScene(Entity root, UUID meshID)
 	{
-		Entity meshEntity = root.GetScene()->CreateEmptyObject("MaterialSphere");
+		Entity meshEntity = root.GetScene()->CreateEmptyObject("Mesh");
 		root.GetScene()->SetParent(meshEntity.GetEntityID(), root.GetEntityID());
 		MeshRenderer& mesh = meshEntity.AddComponent<MeshRenderer>();
 		mesh.m_Mesh.SetUUID(meshID);
 		mesh.m_Material.SetUUID(GreyMaterial->GetUUID());
+
+		const glm::quat rotation1 = glm::rotate(glm::identity<glm::quat>(), glm::radians(45.0f), glm::vec3{ 0.0f, 1.0f, 0.0f });
+		const glm::quat rotation2 = glm::rotate(glm::identity<glm::quat>(), glm::radians(45.0f), glm::vec3{ -1.0f, 0.0f, 0.0f });
+		root.GetComponent<Transform>().Rotation = rotation1*rotation2;
 	}
 
 	bool CanRenderMesh(UUID meshID)

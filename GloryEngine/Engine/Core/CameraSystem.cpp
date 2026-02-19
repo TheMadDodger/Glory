@@ -99,6 +99,18 @@ namespace Glory
 		pRenderer->UnsubmitCamera(pComponent.m_Camera);
 	}
 
+	void CameraSystem::Focus(Transform& transform, CameraComponent& pComponent, const BoundingSphere& boundingSphere)
+	{
+		const glm::uvec2& resolution = pComponent.m_Camera.GetResolution();
+		const float aspect = float(resolution.x)/float(resolution.y);
+		const glm::mat4 viewInverse = pComponent.m_Camera.GetViewInverse();
+		const glm::vec3 forward(viewInverse[2][0], viewInverse[2][1], viewInverse[2][2]);
+		const float horizontalFOVRadians = glm::radians(pComponent.m_HalfFOV);
+		const float verticalFOV = glm::atan(glm::tan(horizontalFOVRadians)/aspect)/2.0f;
+		const float desiredDistance = boundingSphere.m_Radius/glm::sin(verticalFOV);
+		transform.Position = boundingSphere.m_Center + forward*desiredDistance;
+	}
+
 	std::string CameraSystem::Name()
 	{
 		return "Camera";

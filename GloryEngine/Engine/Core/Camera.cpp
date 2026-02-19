@@ -133,7 +133,7 @@ namespace Glory
 		m_PerspectiveDirty = dirty;
 	}
 
-	void Camera::Focus(const BoundingSphere& boundingSphere)
+	glm::vec3 Camera::GetFocusPosition(const BoundingSphere& boundingSphere) const
 	{
 		const glm::uvec2& resolution = GetResolution();
 		const float aspect = float(resolution.x) / float(resolution.y);
@@ -142,7 +142,14 @@ namespace Glory
 		const float horizontalFOVRadians = glm::radians(m_HalfFOV);
 		const float verticalFOV = glm::atan(glm::tan(horizontalFOVRadians) / aspect) / 2.0f;
 		const float desiredDistance = boundingSphere.m_Radius / glm::sin(glm::min(verticalFOV, horizontalFOVRadians));
-		const glm::vec3 position = boundingSphere.m_Center + forward*desiredDistance;
+		return boundingSphere.m_Center + forward * desiredDistance;
+	}
+
+	void Camera::Focus(const BoundingSphere& boundingSphere)
+	{
+		const glm::mat4 viewInverse = glm::inverse(m_View);
+		const glm::vec3 forward(viewInverse[2][0], viewInverse[2][1], viewInverse[2][2]);
+		const glm::vec3 position = GetFocusPosition(boundingSphere);
 		SetView(glm::lookAt(position, position - forward, glm::vec3{ 0.0f, 1.0f, 0.0f }));
 	}
 

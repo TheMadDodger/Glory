@@ -16,6 +16,7 @@
 #include <Renderer.h>
 #include <EditorApplication.h>
 #include <EditorAssetDatabase.h>
+#include <CameraSystem.h>
 
 namespace Glory::Editor
 {
@@ -97,7 +98,10 @@ namespace Glory::Editor
 		GScene* pScene = NewScene("ThumbnailScene");
 		Entity cameraEntity = pScene->CreateEmptyObject("Camera");
 		CameraComponent& camera = cameraEntity.AddComponent<CameraComponent>();
-		cameraEntity.GetComponent<Transform>().Position = glm::vec3(0.0f, 0.0f, 3.5f);
+		cameraEntity.GetComponent<Transform>().Position = glm::vec3(0.0f, 0.0f, 100.0f);
+		camera.m_Far = 500.0f;
+		camera.m_Near = 0.01f;
+		camera.m_HalfFOV = 60.0f;
 
 		Entity lights = pScene->CreateEmptyObject("Lights");
 
@@ -116,6 +120,11 @@ namespace Glory::Editor
 		light2.m_Shadows.m_Enable = false;
 		light2.m_Intensity = 1.0f;
 		lightEntity2.GetComponent<Transform>().Position = glm::vec3(4.0f, 4.f, -5.0f);
+
+		Entity sunEntity = pScene->CreateEmptyObject("Light1");
+		pScene->SetParent(sunEntity.GetEntityID(), lights.GetEntityID());
+		LightComponent& sun = sunEntity.AddComponent<LightComponent>();
+		sun.m_Type = LightType::Sun;
 
 		pScene->GetRegistry().InvokeAll<CameraComponent>(Utils::ECS::InvocationType::OnEnableDraw);
 
@@ -238,16 +247,20 @@ namespace Glory::Editor
 			m_ThumbnailRenderSetupCallbacks.at(pair.first)(root, pair.second);
 
 			/* Move camera to focus object */
-			/* ... */
+			Entity camera = Entity{ pScene->Child(0, 0), pScene };
+			const BoundingSphere sphere = GenerateBoundingSphere(root, m_pEngine, root.GetComponent<Transform>().Position);
 
 			/* Update and draw */
+			//m_pEngine->GetDebug().StartCapture();
 			m_pRenderer->BeginFrame();
 			UpdateScene(pScene);
+			camera.GetComponent<CameraComponent>().m_Camera.Focus(sphere);
 			DrawScene(pScene);
 			
 			/* Render */
 			m_pRenderer->Draw();
 			m_pRenderer->EndFrame();
+			//m_pEngine->GetDebug().EndCapture();
 
 			/* Set scene in use and pop the queue */
 			m_RenderingIDs[i] = pair.second;
