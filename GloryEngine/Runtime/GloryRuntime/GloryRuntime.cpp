@@ -263,10 +263,6 @@ namespace Glory
 
 	void GloryRuntime::EndFrame()
 	{
-		//RenderTexture* pTexture = m_pEngine->GetDisplayManager().GetDisplayRenderTexture(0);
-		//m_pRenderer->RenderOnBackBuffer(pTexture);
-		//m_pGraphics->Swap();
-
 		m_pRenderer->PresentFrame();
 
 		if (m_MaxFramerate == 0.0f)
