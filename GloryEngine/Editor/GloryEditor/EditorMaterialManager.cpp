@@ -105,6 +105,13 @@ namespace Glory::Editor
 		m_RuntimeMaterials.clear();
 	}
 
+	void EditorMaterialManager::LoadMaterial(UUID materialID)
+	{
+		AssetCallbackData data;
+		data.m_UUID = materialID;
+		AssetAddedCallback(data);
+	}
+
 	void EditorMaterialManager::AssetAddedCallback(const AssetCallbackData& callback)
 	{
 		ResourceMeta meta;

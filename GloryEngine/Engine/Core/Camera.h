@@ -26,6 +26,7 @@ namespace Glory
 		bool IsPerspectiveDirty();
 		void SetResolutionDirty(bool dirty=true);
 		void SetPerspectiveDirty(bool dirty=true);
+		glm::vec3 GetFocusPosition(const BoundingSphere& boundingSphere) const;
 		void Focus(const BoundingSphere& boundingSphere);
 
 		const glm::uvec2& GetResolution() const;

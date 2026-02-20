@@ -12,4 +12,7 @@ namespace Glory::Editor
 {
 	void SetupMaterialScene(Entity root, UUID materialID);
 	bool CanRenderMaterial(UUID materialID);
+
+	void SetupMeshScene(Entity root, UUID meshID);
+	bool CanRenderMesh(UUID meshID);
 }

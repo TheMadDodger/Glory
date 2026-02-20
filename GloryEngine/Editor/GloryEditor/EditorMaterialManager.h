@@ -54,6 +54,8 @@ namespace Editor
 
 		GLORY_EDITOR_API virtual void DestroyRuntimeMaterials() override;
 
+		GLORY_EDITOR_API void LoadMaterial(UUID materialID);
+
 	private:
 		/** @brief Handler for @ref AssetCallbackType::CT_AssetRegistered events */
 		void AssetAddedCallback(const AssetCallbackData& callback);

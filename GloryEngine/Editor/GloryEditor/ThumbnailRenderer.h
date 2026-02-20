@@ -18,10 +18,12 @@ namespace Glory
 	class ImageData;
 	class InternalTexture;
 	class TextureData;
+	class MaterialData;
 
 	namespace Editor
 	{
 		inline MeshData* MaterialSphereMesh = nullptr;
+		inline MaterialData* GreyMaterial = nullptr;
 
 		class ThumbnailRenderer : public SceneManager
 		{
@@ -66,7 +68,7 @@ namespace Glory
 			std::set<UUID> m_PreviouslyRequestedThumbnails;
 			std::queue<std::pair<uint32_t, UUID>> m_QueuedThumbnails;
 
-			static const size_t MaxThumbnailsInFlight = 5;
+			static const size_t MaxThumbnailsInFlight = 1;
 			UUID m_RenderingIDs[MaxThumbnailsInFlight];
 
 			std::vector<ImageData*> m_RenderResults;

@@ -21,6 +21,8 @@ namespace Glory
         static void OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent);
         static void OnEnableDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent);
         static void OnDisableDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent);
+        static void Focus(Transform& transform, CameraComponent& pComponent, const BoundingSphere& boundingSphere);
+
         static std::string Name();
     };
 }
