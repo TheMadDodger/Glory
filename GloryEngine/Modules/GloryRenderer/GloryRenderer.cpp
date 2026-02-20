@@ -1382,7 +1382,7 @@ namespace Glory
 			if (pPipelineData->BlendEnabled())
 			{
 				/* Sort objects based on distance from camera */
-				std::set<OrderedObject> renderOrder;
+				std::set<OrderedObjects> renderOrder;
 				uint32_t objectIndex = 0;
 				for (UUID uniqueMeshID : pipelineRenderData.m_UniqueMeshOrder)
 				{
@@ -1394,14 +1394,14 @@ namespace Glory
 					const BoundingBox& bounds = pMeshData->GetBoundingBox();
 					std::vector<glm::vec4> points(8);
 
-					points[0] = bounds.m_Center + glm::vec4(-bounds.m_HalfExtends.x, bounds.m_HalfExtends.y, -bounds.m_HalfExtends.z, 1.0f);
-					points[1] = bounds.m_Center + glm::vec4(bounds.m_HalfExtends.x, bounds.m_HalfExtends.y, -bounds.m_HalfExtends.z, 1.0f);
-					points[2] = bounds.m_Center + glm::vec4(bounds.m_HalfExtends.x, bounds.m_HalfExtends.y, bounds.m_HalfExtends.z, 1.0f);
-					points[3] = bounds.m_Center + glm::vec4(-bounds.m_HalfExtends.x, bounds.m_HalfExtends.y, bounds.m_HalfExtends.z, 1.0f);
-					points[4] = bounds.m_Center + glm::vec4(-bounds.m_HalfExtends.x, -bounds.m_HalfExtends.y, -bounds.m_HalfExtends.z, 1.0f);
-					points[5] = bounds.m_Center + glm::vec4(bounds.m_HalfExtends.x, -bounds.m_HalfExtends.y, -bounds.m_HalfExtends.z, 1.0f);
-					points[6] = bounds.m_Center + glm::vec4(bounds.m_HalfExtends.x, -bounds.m_HalfExtends.y, bounds.m_HalfExtends.z, 1.0f);
-					points[7] = bounds.m_Center + glm::vec4(-bounds.m_HalfExtends.x, -bounds.m_HalfExtends.y, bounds.m_HalfExtends.z, 1.0f);
+					points[0] = bounds.m_Center + glm::vec4(-bounds.m_HalfExtends.x, bounds.m_HalfExtends.y, -bounds.m_HalfExtends.z, 0.0f);
+					points[1] = bounds.m_Center + glm::vec4(bounds.m_HalfExtends.x, bounds.m_HalfExtends.y, -bounds.m_HalfExtends.z, 0.0f);
+					points[2] = bounds.m_Center + glm::vec4(bounds.m_HalfExtends.x, bounds.m_HalfExtends.y, bounds.m_HalfExtends.z, 0.0f);
+					points[3] = bounds.m_Center + glm::vec4(-bounds.m_HalfExtends.x, bounds.m_HalfExtends.y, bounds.m_HalfExtends.z, 0.0f);
+					points[4] = bounds.m_Center + glm::vec4(-bounds.m_HalfExtends.x, -bounds.m_HalfExtends.y, -bounds.m_HalfExtends.z, 0.0f);
+					points[5] = bounds.m_Center + glm::vec4(bounds.m_HalfExtends.x, -bounds.m_HalfExtends.y, -bounds.m_HalfExtends.z, 0.0f);
+					points[6] = bounds.m_Center + glm::vec4(bounds.m_HalfExtends.x, -bounds.m_HalfExtends.y, bounds.m_HalfExtends.z, 0.0f);
+					points[7] = bounds.m_Center + glm::vec4(-bounds.m_HalfExtends.x, -bounds.m_HalfExtends.y, bounds.m_HalfExtends.z, 0.0f);
 
 					for (size_t meshObjectIndex = 0; meshObjectIndex < meshBatch.m_Worlds.size(); ++meshObjectIndex)
 					{
@@ -1419,32 +1419,38 @@ namespace Glory
 							if (distance > minDistance) continue;
 							minDistance = distance;
 						}
-						renderOrder.insert(OrderedObject{ minDistance, uniqueMeshID, uint32_t(meshObjectIndex), currentObject });
+						const OrderedObjects& objects = *renderOrder.insert(OrderedObjects{ minDistance }).first;
+						objects.MeshIDs.emplace_back(uniqueMeshID);
+						objects.MeshObjectIndices.emplace_back(uint32_t(meshObjectIndex));
+						objects.ObjectIndices.emplace_back(currentObject);
 					}
 				}
 
 				for (auto& orderedObject : renderOrder)
 				{
-					const PipelineMeshBatch& meshBatch = pipelineRenderData.m_Meshes.at(orderedObject.meshID);
-					Resource* pMeshResource = assets.FindResource(meshBatch.m_Mesh);
-					if (!pMeshResource) continue;
-					MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
-					MeshHandle mesh = pDevice->AcquireCachedMesh(pMeshData);
-					if (!mesh) continue;
+					for (size_t i = 0; i < orderedObject.MeshIDs.size(); ++i)
+					{
+						const PipelineMeshBatch& meshBatch = pipelineRenderData.m_Meshes.at(orderedObject.MeshIDs[i]);
+						Resource* pMeshResource = assets.FindResource(meshBatch.m_Mesh);
+						if (!pMeshResource) continue;
+						MeshData* pMeshData = static_cast<MeshData*>(pMeshResource);
+						MeshHandle mesh = pDevice->AcquireCachedMesh(pMeshData);
+						if (!mesh) continue;
 
-					if (cameraMask != 0 && meshBatch.m_LayerMasks[orderedObject.meshObjectIndex] != 0 &&
-						(cameraMask & meshBatch.m_LayerMasks[orderedObject.meshObjectIndex]) == 0) continue;
+						if (cameraMask != 0 && meshBatch.m_LayerMasks[orderedObject.MeshObjectIndices[i]] != 0 &&
+							(cameraMask & meshBatch.m_LayerMasks[orderedObject.MeshObjectIndices[i]]) == 0) continue;
 
-					const auto& ids = meshBatch.m_ObjectIDs[orderedObject.meshObjectIndex];
-					constants.m_ObjectID = ids.second;
-					constants.m_SceneID = ids.first;
-					constants.m_ObjectDataIndex = orderedObject.objectIndex;
-					constants.m_MaterialIndex = meshBatch.m_MaterialIndices[orderedObject.meshObjectIndex];
+						const auto& ids = meshBatch.m_ObjectIDs[orderedObject.MeshObjectIndices[i]];
+						constants.m_ObjectID = ids.second;
+						constants.m_SceneID = ids.first;
+						constants.m_ObjectDataIndex = orderedObject.ObjectIndices[i];
+						constants.m_MaterialIndex = meshBatch.m_MaterialIndices[orderedObject.MeshObjectIndices[i]];
 
-					pDevice->PushConstants(commandBuffer, batchData.m_Pipeline, 0, sizeof(RenderConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
-					if (!batchData.m_TextureSets.empty())
-						pDevice->BindDescriptorSets(commandBuffer, batchData.m_Pipeline, { batchData.m_TextureSets[constants.m_MaterialIndex] }, 6);
-					pDevice->DrawMesh(commandBuffer, mesh);
+						pDevice->PushConstants(commandBuffer, batchData.m_Pipeline, 0, sizeof(RenderConstants), &constants, ShaderTypeFlag(STF_Vertex | STF_Fragment));
+						if (!batchData.m_TextureSets.empty())
+							pDevice->BindDescriptorSets(commandBuffer, batchData.m_Pipeline, { batchData.m_TextureSets[constants.m_MaterialIndex] }, 6);
+						pDevice->DrawMesh(commandBuffer, mesh);
+					}
 				}
 				pDevice->EndPipeline(commandBuffer);
 				return;
