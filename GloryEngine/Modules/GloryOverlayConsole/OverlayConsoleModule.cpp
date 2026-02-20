@@ -7,7 +7,6 @@
 #include <Engine.h>
 #include <Window.h>
 #include <AssetManager.h>
-#include <GraphicsModule.h>
 #include <CameraManager.h>
 #include <PipelineManager.h>
 #include <PipelineData.h>

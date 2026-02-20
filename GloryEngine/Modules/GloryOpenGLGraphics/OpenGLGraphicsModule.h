@@ -1,12 +1,12 @@
 #pragma once
 #include "OpenGLDevice.h"
 
-#include <GraphicsModule.h>
+#include <Module.h>
 #include <GL/glew.h>
 
 namespace Glory
 {
-	class OpenGLGraphicsModule : public GraphicsModule
+	class OpenGLGraphicsModule : public Module
 	{
 	public:
 		OpenGLGraphicsModule();
@@ -24,13 +24,6 @@ namespace Glory
 		virtual void Cleanup() override;
 
 	private:
-		GLuint m_ScreenQuadVertexArrayID;
-		GLuint m_ScreenQuadVertexbufferID;
-		GLuint m_UnitCubeVertexArrayID;
-		GLuint m_UnitCubeVertexbufferID;
-
-		MaterialData* m_pPassthroughMaterial = nullptr;
-
 		/* OpenGL can only have 1 device */
 		OpenGLDevice m_Device;
 	};

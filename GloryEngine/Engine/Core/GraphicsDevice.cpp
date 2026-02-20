@@ -25,7 +25,9 @@ void GraphicsDevice::Free<type##Handle>(type##Handle& handle)\
 
 namespace Glory
 {
-	GraphicsDevice::GraphicsDevice(Module* pModule): m_pModule(pModule), m_APIFeatures(APIFeatures::None)
+	GraphicsDevice::GraphicsDevice(Module* pModule):
+		m_pModule(pModule), m_APIFeatures(APIFeatures::None), m_CurrentDrawCalls(0), m_LastDrawCalls(0),
+		m_LastVertices(0), m_CurrentVertices(0), m_LastTriangles(0), m_CurrentTriangles(0)
 	{
 	}
 
@@ -303,6 +305,35 @@ namespace Glory
 		m_DefaultTexture = CreateTexture(defaultTextureInfo, defaultTexturePixels, sizeof(defaultTexturePixels));
 
 		OnInitialize();
+	}
+
+	void GraphicsDevice::BeginFrame()
+	{
+		m_CurrentDrawCalls = 0;
+		m_CurrentVertices = 0;
+		m_CurrentTriangles = 0;
+	}
+
+	void GraphicsDevice::EndFrame()
+	{
+		m_LastDrawCalls = m_CurrentDrawCalls;
+		m_LastVertices = m_CurrentVertices;
+		m_LastTriangles = m_CurrentTriangles;
+	}
+
+	int GraphicsDevice::GetLastDrawCalls() const
+	{
+		return m_LastDrawCalls;
+	}
+
+	int GraphicsDevice::GetLastVertexCount() const
+	{
+		return m_LastVertices;
+	}
+
+	int GraphicsDevice::GetLastTriangleCount() const
+	{
+		return m_LastTriangles;
 	}
 
 	CommandBufferHandle GraphicsDevice::Begin()

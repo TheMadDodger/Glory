@@ -429,6 +429,12 @@ namespace Glory
 		virtual ViewportOrigin GetViewportOrigin() const { return ViewportOrigin::BottomLeft; }
 
 		void Initialize();
+		void BeginFrame();
+		void EndFrame();
+
+		int GetLastDrawCalls() const;
+		int GetLastVertexCount() const;
+		int GetLastTriangleCount() const;
 
 		TextureHandle GetDefaultTexture() const { return m_DefaultTexture; }
 
@@ -920,6 +926,14 @@ namespace Glory
 		MeshHandle m_ScreenMesh;
 		MeshHandle m_UnitCubeMesh;
 		TextureHandle m_DefaultTexture;
+
+		/* Metrics */
+		int m_CurrentDrawCalls;
+		int m_LastDrawCalls;
+		int m_LastVertices;
+		int m_CurrentVertices;
+		int m_LastTriangles;
+		int m_CurrentTriangles;
 
 	private:
 		/* Cached handles */

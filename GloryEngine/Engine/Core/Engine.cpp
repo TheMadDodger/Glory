@@ -784,6 +784,10 @@ namespace Glory
 	void Engine::BeginFrame()
 	{
 		m_Time->BeginFrame();
+
+		GraphicsDevice* pDevice = ActiveGraphicsDevice();
+		if (pDevice) pDevice->BeginFrame();
+
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
 			m_pAllModules[i]->OnBeginFrame();
@@ -808,6 +812,9 @@ namespace Glory
 
 		for (Renderer* pRenderer : m_pSecondaryRenderers)
 			pRenderer->EndFrame();
+
+		GraphicsDevice* pDevice = ActiveGraphicsDevice();
+		if (pDevice) pDevice->EndFrame();
 
 		m_Time->EndFrame();
 	}

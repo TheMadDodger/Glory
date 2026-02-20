@@ -1,5 +1,5 @@
 #pragma once
-#include <GraphicsModule.h>
+#include <Module.h>
 #include <WindowModule.h>
 #include <GraphicsEnums.h>
 
@@ -11,7 +11,7 @@ namespace Glory
 {
 	class VulkanDevice;
 
-	class VulkanGraphicsModule : public GraphicsModule
+	class VulkanGraphicsModule : public Module
 	{
 	public:
 		VulkanGraphicsModule();
@@ -47,9 +47,6 @@ namespace Glory
 			VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
 
 		vk::Sampler& CreateNewSampler(const SamplerSettings& settings);
-
-		virtual void OnBeginFrame() override;
-		virtual void OnEndFrame() override;
 
 	private:
 		std::vector<const char*> m_Extensions;

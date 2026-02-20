@@ -636,8 +636,14 @@ namespace Glory
 		glBindVertexArray(mesh->m_GLVertexArrayID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
+		++m_CurrentDrawCalls;
+		m_CurrentVertices += mesh->m_VertexCount;
 		if (mesh->m_IndexCount == 0) glDrawArrays(m_GLCurrentPrimitives, 0, mesh->m_VertexCount);
-		else glDrawElements(m_GLCurrentPrimitives, mesh->m_IndexCount, GL_UNSIGNED_INT, NULL);
+		else
+		{
+			glDrawElements(m_GLCurrentPrimitives, mesh->m_IndexCount, GL_UNSIGNED_INT, NULL);
+			m_CurrentTriangles += mesh->m_IndexCount/3;
+		}
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindVertexArray(NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());

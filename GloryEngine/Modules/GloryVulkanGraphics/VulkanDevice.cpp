@@ -732,13 +732,18 @@ namespace Glory
 			offsets[i] = 0;
 		}
 
+		++m_CurrentDrawCalls;
+		m_CurrentVertices += mesh->m_VertexCount;
 		VK_Buffer* indexBuffer = mesh->m_IndexCount > 0 ? m_Buffers.Find(mesh->m_Buffers.back()) : nullptr;
 		vkCommandBuffer->bindVertexBuffers(0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 		if (indexBuffer)
 			vkCommandBuffer->bindIndexBuffer(indexBuffer->m_VKBuffer, 0, vk::IndexType::eUint32);
 
 		if (hasIndexBuffer)
+		{
 			vkCommandBuffer->drawIndexed(mesh->m_IndexCount, 1, 0, 0, 0);
+			m_CurrentTriangles += mesh->m_IndexCount/3;
+		}
 		else
 			vkCommandBuffer->draw(mesh->m_VertexCount, 1, 0, 0);
 	}
