@@ -31,7 +31,7 @@ namespace Glory
         m_Console.reset(new Console());
         m_Debug.reset(new Debug(m_Console.get()));
 
-        CommandLine commandLine{ argc, argv };
+        Utils::CommandLine commandLine{ argc, argv };
         std::string cmd = "";
         std::string dataPath = "./Data";
         commandLine.GetValue("command", cmd);

@@ -18,7 +18,7 @@ project "GloryCore"
 	{
 		["Asset Management"] = { "BinaryStream.*", "AssetArchive.*", "AssetDatabase.*", "AssetLocation.*", "AssetManager.*", "ResourceMeta.*", "ResourceType.*" },
 		["Resources"] = { "PrefabData.*", "MaterialData.*", "MaterialPropertyInfo.*", "TextureData.*", "MeshData.*", "ModelData.*", "ImageData.*", "FileData.*", "CubemapData.*", "FontData.*", "FontDataStructs.*", "PipelineData.*" },
-		["Console"] = { "Logs.*", "CommandLine.*", "Commands.*", "Console.*", "Debug.*", "DebugConsoleInput.*", "IConsole.*", "WindowsDebugConsole.*" },
+		["Console"] = { "Logs.*", "Commands.*", "Console.*", "Debug.*", "DebugConsoleInput.*", "IConsole.*", "WindowsDebugConsole.*" },
 		["Core"] = { "ObjectManager.*", "TypeFlags.*", "GloryContext.*", "BuiltInModules.*", "Engine.*", "Object.*", "UUID.*", "Glory.*", "GameTime.*" },
 		["Graphics"] = { "GraphicsDevice.*", "GraphicsEnums.*", "VertexDefinitions.*", "VertexHelpers.*", "RenderFrame.*" },
 		["Modules/Base"] = { "Module.*", "ModuleMetaData.*", "IModuleLoopHandler.*", "ModuleSettings.*" },

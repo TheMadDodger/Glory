@@ -1,6 +1,6 @@
 #include "CommandLine.h"
 
-namespace Glory
+namespace Glory::Utils
 {
 	CommandLine::CommandLine(int argc, char* argv[])
 	{
@@ -12,7 +12,7 @@ namespace Glory
 			std::string arg = argv[i];
 			if (arg[0] != '-') continue;
 
-			argName = arg;
+			argName = arg.substr(1);
 			size_t assignmentOpIndex = arg.find('=');
 			if (assignmentOpIndex != std::string::npos)
 			{

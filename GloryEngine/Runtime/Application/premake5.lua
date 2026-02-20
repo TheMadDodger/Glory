@@ -35,6 +35,7 @@ project "GloryRuntimeApplication"
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
 		"%{IncludeDir.Utils}",
+		"%{IncludeDir.CommandLine}",
 		"%{IncludeDir.ECS}",
 		"%{IncludeDir.glm}",
 	}
@@ -59,6 +60,7 @@ project "GloryRuntimeApplication"
 		"GloryECS",
 		"GloryUtils",
 		"GloryUtilsVersion",
+		"GloryCommandLine",
 		"yaml-cpp",
 	}
 

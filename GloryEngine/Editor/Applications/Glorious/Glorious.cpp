@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
         console.RegisterConsole(&logs);
         console.RegisterConsole(&windowsConsole);
 
-        Glory::CommandLine commandLine(argc, argv);
+        Glory::Utils::CommandLine commandLine(argc, argv);
 
         std::string projectPath;
         if (!commandLine.GetValue("projectPath", projectPath))
