@@ -15,14 +15,11 @@
 namespace Glory
 {
 	class Module;
-	class Buffer;
-	class Mesh;
 	class PipelineData;
 	class CubemapData;
 	class MaterialData;
 	class GPUTextureAtlas;
 	class GraphicsDevice;
-	struct RenderPass;
 	struct TextureCreateInfo;
 
 	struct PickResult
