@@ -2,7 +2,7 @@
 #include <map>
 #include <string>
 
-namespace Glory
+namespace Glory::Utils
 {
 	class CommandLine
 	{

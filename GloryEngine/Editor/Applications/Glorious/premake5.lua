@@ -42,6 +42,7 @@ project "Glorious"
 		"%{IncludeDir.Version}",
 		"%{IncludeDir.Utils}",
 		"%{IncludeDir.ECS}",
+		"%{IncludeDir.CommandLine}",
 
 		"%{rapidjson}",
 	}
@@ -74,6 +75,7 @@ project "Glorious"
 		"GloryECS",
 		"GloryUtils",
 		"GloryUtilsVersion",
+		"GloryCommandLine",
 
 		--todo: When asset management is contained in its own lib these links are no more needed
 		"GloryJobs",
