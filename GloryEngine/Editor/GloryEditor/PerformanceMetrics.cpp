@@ -4,7 +4,7 @@
 #include <GameTime.h>
 #include <imgui.h>
 #include <Engine.h>
-#include <GraphicsModule.h>
+#include <GraphicsDevice.h>
 #include <Renderer.h>
 
 namespace Glory::Editor
@@ -29,8 +29,8 @@ namespace Glory::Editor
 		ImGui::Text("Average Frame Time: %.3f ms - Framerate: %.1f", m_LastFrameTime, m_LastFramerate);
 		ImGui::Text("Frame Count: %d", pEngine->Time().GetTotalFrames());
 
-		GraphicsModule* pGraphics = pEngine->GetMainModule<GraphicsModule>();
-		ImGui::Text("Draw Calls: %d - Vertices: %d - Triangles: %d", pGraphics->GetLastDrawCalls(), pGraphics->GetLastVertexCount(), pGraphics->GetLastTriangleCount());
+		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
+		ImGui::Text("Draw Calls: %d - Vertices: %d - Triangles: %d", pDevice->GetLastDrawCalls(), pDevice->GetLastVertexCount(), pDevice->GetLastTriangleCount());
 
 		Renderer* pRenderer = pEngine->ActiveRenderer();
 		ImGui::Text("Active Objects: %d - Active Cameras: %d", pRenderer->LastSubmittedObjectCount(), pRenderer->LastSubmittedCameraCount());

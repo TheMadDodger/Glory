@@ -274,16 +274,6 @@ namespace Glory
         return m_Samplers.emplace(settings, newSampler).first->second;
     }
 
-    void VulkanGraphicsModule::OnBeginFrame()
-    {
-        GraphicsModule::OnBeginFrame();
-    }
-
-    void VulkanGraphicsModule::OnEndFrame()
-    {
-        GraphicsModule::OnEndFrame();
-    }
-
     const std::type_info& VulkanGraphicsModule::GetModuleType()
     {
         return typeid(VulkanGraphicsModule);
