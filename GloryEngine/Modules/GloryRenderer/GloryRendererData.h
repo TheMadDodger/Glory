@@ -84,41 +84,43 @@ namespace Glory
 		float zFar;
 	};
 
-	struct OrderedObject
+	struct OrderedObjects
 	{
-		float minDistance;
-		UUID meshID;
-		uint32_t meshObjectIndex;
-		uint32_t objectIndex;
+		OrderedObjects(float distance): MinDistance(distance) {}
 
-		bool operator>(const OrderedObject& other) const
+		const float MinDistance;
+		mutable std::vector<UUID> MeshIDs;
+		mutable std::vector<uint32_t> MeshObjectIndices;
+		mutable std::vector<uint32_t> ObjectIndices;
+
+		bool operator>(const OrderedObjects& other) const
 		{
-			return minDistance < other.minDistance;
+			return MinDistance < other.MinDistance;
 		}
 
-		bool operator<(const OrderedObject& other) const
+		bool operator<(const OrderedObjects& other) const
 		{
-			return minDistance > other.minDistance;
+			return MinDistance > other.MinDistance;
 		}
 
-		bool operator==(const OrderedObject& other) const
+		bool operator==(const OrderedObjects& other) const
 		{
-			return minDistance == other.minDistance;
+			return MinDistance == other.MinDistance;
 		}
 
-		bool operator!=(const OrderedObject& other) const
+		bool operator!=(const OrderedObjects& other) const
 		{
-			return minDistance != other.minDistance;
+			return MinDistance != other.MinDistance;
 		}
 
-		bool operator>=(const OrderedObject& other) const
+		bool operator>=(const OrderedObjects& other) const
 		{
-			return minDistance <= other.minDistance;
+			return MinDistance <= other.MinDistance;
 		}
 
-		bool operator<=(const OrderedObject& other) const
+		bool operator<=(const OrderedObjects& other) const
 		{
-			return minDistance >= other.minDistance;
+			return MinDistance >= other.MinDistance;
 		}
 	};
 
