@@ -5,6 +5,7 @@
 #include "EditorAssetManager.h"
 
 #include <GScene.h>
+#include <PrefabData.h>
 #include <Components.h>
 #include <EditorAssetDatabase.h>
 
@@ -58,5 +59,25 @@ namespace Glory::Editor
 
 		EditorAssetManager& assets = EditorApplication::GetInstance()->GetAssetManager();
 		return assets.FindResource(meshID);
+	}
+
+	void SetupPrefabScene(Entity root, UUID prefabID)
+	{
+		EditorAssetManager& assets = EditorApplication::GetInstance()->GetAssetManager();
+		Resource* pPrefabResource = assets.FindResource(prefabID);
+		PrefabData* pPrefab = static_cast<PrefabData*>(pPrefabResource);
+
+		Entity meshEntity = root.GetScene()->InstantiatePrefab(root.EntityUUID(), pPrefab, {}, glm::identity<glm::quat>(), glm::vec3{ 1.0f });
+		root.GetScene()->SetParent(meshEntity.GetEntityID(), root.GetEntityID());
+
+		const glm::quat rotation1 = glm::rotate(glm::identity<glm::quat>(), glm::radians(45.0f), glm::vec3{ 0.0f, 1.0f, 0.0f });
+		const glm::quat rotation2 = glm::rotate(glm::identity<glm::quat>(), glm::radians(45.0f), glm::vec3{ -1.0f, 0.0f, 0.0f });
+		root.GetComponent<Transform>().Rotation = rotation1*rotation2;
+	}
+
+	bool CanRenderPrefab(UUID prefabID)
+	{
+		EditorAssetManager& assets = EditorApplication::GetInstance()->GetAssetManager();
+		return assets.FindResource(prefabID);
 	}
 }

@@ -9,6 +9,7 @@
 #include <Engine.h>
 #include <GraphicsDevice.h>
 #include <MaterialData.h>
+#include <PrefabData.h>
 
 namespace Glory::Editor
 {
@@ -76,6 +77,7 @@ namespace Glory::Editor
 	{
 		RegisterRenderableThumbnail<MaterialData>(SetupMaterialScene, CanRenderMaterial);
 		RegisterRenderableThumbnail<MeshData>(SetupMeshScene, CanRenderMesh);
+		RegisterRenderableThumbnail<PrefabData>(SetupPrefabScene, CanRenderPrefab);
 	}
 
 	BaseThumbnailGenerator* ThumbnailManager::GetGenerator(uint32_t hashCode)

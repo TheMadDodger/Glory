@@ -15,4 +15,7 @@ namespace Glory::Editor
 
 	void SetupMeshScene(Entity root, UUID meshID);
 	bool CanRenderMesh(UUID meshID);
+
+	void SetupPrefabScene(Entity root, UUID meshID);
+	bool CanRenderPrefab(UUID meshID);
 }
