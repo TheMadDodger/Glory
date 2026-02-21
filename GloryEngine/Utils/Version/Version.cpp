@@ -4,6 +4,20 @@
 
 namespace Glory
 {
+    Version::Version(Version&& other) noexcept:
+        v{ other.Major, other.Minor, other.SubMinor, other.RC }
+    {
+        other.Major = 0;
+        other.Minor = 0;
+        other.SubMinor = 0;
+        other.RC = 0;
+    }
+
+    Version::Version(const Version& other)
+        : v{ other.Major, other.Minor, other.SubMinor, other.RC }
+    {
+    }
+
     Version Glory::Version::Parse(const char* str)
     {
         std::string_view strView = str;
@@ -21,6 +35,9 @@ namespace Glory
             splits.push_back(std::string_view(strView.data() + index, nextIndex - index));
             index = nextIndex + 1;
         }
+
+        if (splits.size() < 3)
+            throw std::exception("Incomplete version string");
 
         const int rc = splits.size() > 3 ? (int)std::strtol(splits[3].substr(3).data(), nullptr, 10) : 0;
 
@@ -50,6 +67,31 @@ namespace Glory
     int Version::operator[](size_t index) const
     {
         return v[index];
+    }
+
+    Version& Version::operator=(Version&& other) noexcept
+    {
+        Major = other.Major;
+        Minor = other.Minor;
+        SubMinor = other.SubMinor;
+        RC = other.RC;
+
+        other.Major = 0;
+        other.Minor = 0;
+        other.SubMinor = 0;
+        other.RC = 0;
+
+        return *this;
+    }
+
+    Version& Version::operator=(const Version& other) noexcept
+    {
+        Major = other.Major;
+        Minor = other.Minor;
+        SubMinor = other.SubMinor;
+        RC = other.RC;
+
+        return *this;
     }
 
     bool Version::IsValid() const
