@@ -7,6 +7,8 @@ namespace Glory
 	{
 	public:
 		Version() : v{0, 0, 0, 0} {}
+		Version(Version&& other) noexcept;
+		Version(const Version& other);
 		constexpr Version(int major, int minor, int subMinor, int rc) : v{major, minor, subMinor, rc} {}
 
 		static Version Parse(const char* str);
@@ -20,6 +22,9 @@ namespace Glory
 		static constexpr char Separator = '.';
 
 		int operator[](size_t index) const;
+		Version& operator=(Version&& other) noexcept;
+		Version& operator=(const Version& other) noexcept;
+
 		bool IsValid() const;
 		void GetVersionString(std::string& out) const;
 

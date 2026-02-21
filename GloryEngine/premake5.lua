@@ -133,6 +133,10 @@ group "Utils"
 	include "Utils/GloryTestFramework"
 group ""
 
+group "Utils/Tests"
+	include "Utils/Tests"
+group ""
+
 group "Engine"
 	include "Engine/GloryEngineBuilder"
 	include "Engine/Core"
