@@ -47,11 +47,13 @@ GloryEngine/Modules/**/Debug
 GloryEngine/Editor/**/Debug
 GloryEngine/Runtime/**/Debug
 GloryEngine/Scripting/**/Debug
+GloryEngine/RunTests/**/Debug
 GloryEngine/Engine/**/Release
 GloryEngine/Modules/**/Release
 GloryEngine/Editor/**/Release
 GloryEngine/Runtime/**/Release
 GloryEngine/Scripting/**/Release
+GloryEngine/RunTests/**/Release
 
 !GloryEngine/Engine/**/Data/Debug
 !GloryEngine/Engine/**/Data/Release
