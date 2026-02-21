@@ -20,16 +20,30 @@
 }
 
 /** @brief Set current state of test to current source location */
-#define GLORY_TEST_GET_STATE											\
+#define GLORY_TEST_SET_STATE											\
 	const std::source_location source = std::source_location::current();\
 	SetState(source);
+
+/** @brief Set current state of test to current source location and expect next expression to fail */
+#define GLORY_TEST_SET_STATE_FAIL										\
+	const std::source_location source = std::source_location::current();\
+	SetState(source, true);
 
 /**
  * @brief Verify if an expression is true.
  * @param expression Expression to check.
  */
 #define GLORY_TEST_VERIFY(expression) do {								\
-	GLORY_TEST_GET_STATE												\
+	GLORY_TEST_SET_STATE												\
+	VerifyInternal(#expression, expression);							\
+} while (false);
+
+ /**
+  * @brief Verify if an expression fails.
+  * @param expression Expression to check.
+  */
+#define GLORY_TEST_FAIL(expression) do {								\
+	GLORY_TEST_SET_STATE_FAIL											\
 	VerifyInternal(#expression, expression);							\
 } while (false);
 
@@ -40,9 +54,9 @@
 * @param comparator Comparator class.
 */
 #define GLORY_TEST_COMPARE_CUSTOM(a, b, comparator) do {				\
-	GLORY_TEST_GET_STATE												\
+	GLORY_TEST_SET_STATE												\
 	auto result = comparator()(a, b);									\
-	CompareInternal(#comparator, result);								\
+	CompareInternal(STRINGIFY(a and b using comparator), result);		\
 } while (false);
 
 /**
@@ -70,3 +84,22 @@ GLORY_TEST_COMPARE_CUSTOM(a, b, Glory::Utils::CompareVectors<comparer>)
 */
 #define GLORY_TEST_COMPARE_VECTORS(a, b)								\
 GLORY_TEST_COMPARE_VECTORS_CUSTOM(a, b, Glory::Utils::CompareEqual)
+
+/**
+* @brief Check if an expression throws a specific exception.
+* @param expression Expression to check.
+* @param exception The expected exception.
+*/
+#define GLORY_TEST_THROW(expression, exception) do {					\
+	GLORY_TEST_SET_STATE												\
+	bool raised = false;												\
+	try																	\
+	{																	\
+		expression;														\
+	}																	\
+	catch (const exception&)											\
+	{																	\
+		raised = true;													\
+	}																	\
+	ExpectThrowInternal(#expression, raised);							\
+} while (false);

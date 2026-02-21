@@ -11,6 +11,16 @@ namespace Glory::Utils
 {
 	struct Exception {};
 
+	uint8_t NumDigits(uint32_t x)
+	{
+		if (x >= 100000) return 6;
+		if (x >= 10000) return 5;
+		if (x >= 1000) return 4;
+		if (x >= 100) return 3;
+		if (x >= 10) return 2;
+		return 1;
+	}
+
 	Tester::Tester(): m_pCommandLine(nullptr), m_pCurrentTest(nullptr), m_Verbose(false)
 	{
 	}
@@ -39,7 +49,8 @@ namespace Glory::Utils
 			const uint32_t lastCheckCount = m_State.m_CheckCounter;
 
 			m_pCurrentTest = &testCase;
-			(this->*testCase.Initilizer)();
+			if (testCase.Initilizer)
+				(this->*testCase.Initilizer)();
 			bool fail = false;
 			try
 			{
@@ -50,7 +61,19 @@ namespace Glory::Utils
 				++m_State.m_ErrorCounter;
 				fail = true;
 			}
-			(this->*testCase.Cleanup)();
+			catch (const std::exception& e)
+			{
+				++m_State.m_ErrorCounter;
+				++m_State.m_ThrowCounter;
+				fail = true;
+				CONSOLE_INDENT(2);
+				std::println(CONSOLE_RED(THROW) " " CONSOLE_MAGENTA([) CONSOLE_CYAN({}) CONSOLE_MAGENTA(]) " {}",
+					m_State.m_TestCounter, m_State.m_CurrentFunction);
+				CONSOLE_INDENT(11 + NumDigits(m_State.m_TestCounter));
+				std::println("{}", e.what());
+			}
+			if (testCase.Cleanup)
+				(this->*testCase.Cleanup)();
 			if (!fail && lastCheckCount == m_State.m_CheckCounter)
 			{
 				CONSOLE_INDENT(2);
@@ -84,20 +107,11 @@ namespace Glory::Utils
 		m_Testname = testname;
 	}
 
-	void Tester::SetState(const std::source_location& source)
+	void Tester::SetState(const std::source_location& source, bool fail)
 	{
+		m_State.m_ExpectFail = fail;
 		m_State.m_CurrentFunction = GetFunctionName(source);
 		m_State.m_CurrentLine = source.line();
-	}
-
-	uint8_t NumDigits(uint32_t x)
-	{
-		if (x >= 100000) return 6;
-		if (x >= 10000) return 5;
-		if (x >= 1000) return 4;
-		if (x >= 100) return 3;
-		if (x >= 10) return 2;
-		return 1;
 	}
 
 	void Tester::VerifyInternal(const char* expression, bool result)
@@ -106,7 +120,7 @@ namespace Glory::Utils
 
 		++m_State.m_CheckCounter;
 
-		if (result)
+		if (!m_State.m_ExpectFail && result || m_State.m_ExpectFail && !result)
 		{
 			LogCheck(expression);
 			return;
@@ -116,7 +130,12 @@ namespace Glory::Utils
 			m_State.m_CurrentFunction, m_Filename, m_State.m_CurrentLine);
 
 		CONSOLE_INDENT(10 + NumDigits(m_State.m_TestCounter));
-		std::println("Expression \"{}\" failed.", expression);
+		std::println("Expression \"{}\" {}.", expression, result ? "passed" : "failed");
+		if (m_State.m_ExpectFail)
+		{
+			CONSOLE_INDENT(10 + NumDigits(m_State.m_TestCounter));
+			std::println("{}", "But was expected to fail.");
+		}
 		throw Exception();
 	}
 
@@ -139,6 +158,28 @@ namespace Glory::Utils
 		std::println("Comparison \"{}\" failed.", comparator);
 		CONSOLE_INDENT(10 + NumDigits(m_State.m_TestCounter));
 		std::println("{}", result.error());
+		throw Exception();
+	}
+
+	void Tester::ExpectThrowInternal(const char* expression, bool raised)
+	{
+		assert(m_pCurrentTest != nullptr);
+
+		++m_State.m_CheckCounter;
+
+		if (raised)
+		{
+			LogCheck(std::format("{} raised exception", expression));
+			return;
+		}
+		CONSOLE_INDENT(2);
+		std::println(CONSOLE_RED(FAIL) " " CONSOLE_MAGENTA([) CONSOLE_CYAN({}) CONSOLE_MAGENTA(]) " {} at {}:{}", m_State.m_TestCounter,
+			m_State.m_CurrentFunction, m_Filename, m_State.m_CurrentLine);
+
+		CONSOLE_INDENT(10 + NumDigits(m_State.m_TestCounter));
+		std::println("Expected \"{}\" to throw.", expression);
+		CONSOLE_INDENT(10 + NumDigits(m_State.m_TestCounter));
+		std::println("{}", "But it passed instead.");
 		throw Exception();
 	}
 

@@ -53,23 +53,25 @@ namespace Glory::Utils
 		{
 			for (auto test : tests)
 				AddTestCase({ static_cast<Test::Function>(test),
-					initializer ? static_cast<Test::Function>(initializer) : NULL,
-					cleanup ? static_cast<Test::Function>(cleanup) : NULL });
+					static_cast<Test::Function>(initializer),
+					static_cast<Test::Function>(cleanup) });
 		}
 
 		/** @overload Adds tests without initializer or cleanup. */
 		template<class T>
 		void AddTests(std::initializer_list<void(T::*)()> tests)
 		{
-			AddTests(tests, NULL, NULL);
+			for (auto test : tests)
+				AddTestCase({ static_cast<Test::Function>(test), NULL, NULL });
 		}
 
 	protected:
 		/**
 		 * @brief Set current test state to source location.
 		 * @param source Current source location of test.
+		 * @param fail Whether the next verify should fail.
 		 */
-		void SetState(const std::source_location& source);
+		void SetState(const std::source_location& source, bool fail=false);
 		/**
 		 * @brief Verify an expressions result and report it.
 		 * @param expression Expression string.
@@ -86,6 +88,14 @@ namespace Glory::Utils
 		 * If comparison failed, this method will report the eror and throw.
 		 */
 		void CompareInternal(const char* comparator, std::expected<std::string, std::string>& result);
+		/**
+		 * @brief Check the result of an exception check.
+		 * @param expression Expression string.
+		 * @param raised Whether the expression raised the correct exception.
+		 *
+		 * If comparison failed, this method will report the eror and throw.
+		 */
+		void ExpectThrowInternal(const char* expression, bool raised);
 
 	private:
 		std::string_view m_Filename;
@@ -100,11 +110,13 @@ namespace Glory::Utils
 		{
 			std::string_view m_CurrentFunction;
 			size_t m_CurrentLine = 0;
+			bool m_ExpectFail = false;
 
 			uint32_t m_CheckCounter = 0;
 			uint32_t m_TestCounter = 0;
 			uint32_t m_ErrorCounter = 0;
 			uint32_t m_WarnCounter = 0;
+			uint32_t m_ThrowCounter = 0;
 		} m_State;
 
 	private:

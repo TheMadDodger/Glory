@@ -6,10 +6,22 @@
 
 namespace Glory::Utils
 {
+	template<typename T>
+	concept Comparable = requires (const T a, const T b) {
+		{ a == b } -> std::same_as<bool>;
+		{ a >  b } -> std::same_as<bool>;
+		{ a <  b } -> std::same_as<bool>;
+		{ a >= b } -> std::same_as<bool>;
+		{ a <= b } -> std::same_as<bool>;
+	};
+
+	template<typename T>
+	concept Formattable = std::formattable<T, char>;
+
 	/** @brief Compare an input to an expected value */
 	struct CompareEqual
 	{
-		template<typename T>
+		template<typename T> requires Comparable<T> && Formattable<T>
 		std::expected<std::string, std::string> operator()(const T& a, const T& b)
 		{
 			if (a == b) return std::format("{} == {}", a, b);
@@ -20,7 +32,7 @@ namespace Glory::Utils
 	/** @brief Compare if an input is greater than a reference value */
 	struct CompareGreater
 	{
-		template<typename T>
+		template<typename T> requires Comparable<T>&& Formattable<T>
 		std::expected<std::string, std::string> operator()(const T& a, const T& b)
 		{
 			if (a > b) return std::format("{} > {}", a, b);
@@ -31,7 +43,7 @@ namespace Glory::Utils
 	/** @brief Compare if an input is less than a reference value */
 	struct CompareLess
 	{
-		template<typename T>
+		template<typename T> requires Comparable<T>&& Formattable<T>
 		std::expected<std::string, std::string> operator()(const T& a, const T& b)
 		{
 			if (a < b) return std::format("{} < {}", a, b);
@@ -42,7 +54,7 @@ namespace Glory::Utils
 	/** @brief Compare if an input is greater than or equal to a reference value */
 	struct CompareGreaterOrEqual
 	{
-		template<typename T>
+		template<typename T> requires Comparable<T>&& Formattable<T>
 		std::expected<std::string, std::string> operator()(const T& a, const T& b)
 		{
 			if (a >= b) return std::format("{} >= {}", a, b);
@@ -53,7 +65,7 @@ namespace Glory::Utils
 	/** @brief Compare if an input is less than or equal to a reference value */
 	struct CompareLessOrEqual
 	{
-		template<typename T>
+		template<typename T> requires Comparable<T> && Formattable<T>
 		std::expected<std::string, std::string> operator()(const T& a, const T& b)
 		{
 			if (a <= b) return std::format("{} <= {}", a, b);
@@ -68,7 +80,7 @@ namespace Glory::Utils
 	template<typename Comp>
 	struct CompareVectors
 	{
-		template<typename E>
+		template<typename E> requires Formattable<E>
 		std::expected<std::string, std::string> operator()(const std::vector<E>& a, const std::vector<E>& b)
 		{
 			if (a.size() != b.size())
