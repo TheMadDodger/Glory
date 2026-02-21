@@ -20,7 +20,7 @@ env:
   BUILD_CONFIGURATION: Release
 
   BUILD_PATH: ./GloryEngine/Build/Release/x64/Launcher
-  TEST_PATH: ./GloryEngine/bin/Engine/Release/x64
+  TEST_PATH: ./bin/Engine/Release/x64/Tests
 
 permissions:
   contents: read
@@ -100,9 +100,16 @@ jobs:
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x64 .
 
+    - name: Setup python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
     - name: Test
-      working-directory: ${{env.TEST_PATH}}
-      run: ./RunTests.exe
+      working-directory: ${{env.SOLUTION_FILE_PATH}}
+      env:
+        PYTHONUNBUFFERED: "1"
+      run: python RunTests.py --path=${{env.TEST_PATH}}
 
     - name: Upload editor Artifact
       uses: actions/upload-artifact@v4

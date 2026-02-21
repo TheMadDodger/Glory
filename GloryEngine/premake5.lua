@@ -218,5 +218,3 @@ group "Runtime"
 	include "Runtime/Application"
 	include "Runtime/RuntimeTestApplication"
 group ""
-
-include "RunTests"
