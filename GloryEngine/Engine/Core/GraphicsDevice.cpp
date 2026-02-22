@@ -293,7 +293,7 @@ namespace Glory
 		defaultTextureInfo.m_ImageType = ImageType::IT_2D;
 		defaultTextureInfo.m_InternalFormat = PixelFormat::PF_R8G8B8A8Srgb;
 		defaultTextureInfo.m_PixelFormat = PixelFormat::PF_RGBA;
-		defaultTextureInfo.m_Type = DataType::DT_Float;
+		defaultTextureInfo.m_Type = DataType::DT_UByte;
 		defaultTextureInfo.m_SamplerSettings.MipmapMode = Filter::F_None;
 		defaultTextureInfo.m_SamplerSettings.MaxAnisotropy = 1.0f;
 		defaultTextureInfo.m_SamplerSettings.MinFilter = Filter::F_Nearest;

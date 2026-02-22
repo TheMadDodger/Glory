@@ -438,7 +438,7 @@ namespace Glory
 			renderPassInfo.RenderTextureInfo.Width = m_Resolution.x;
 			renderPassInfo.RenderTextureInfo.Height = m_Resolution.y;
 			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("UIColor", PixelFormat::PF_RGBA,
-				PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+				PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UByte));
 
 			m_UIPasses[i] = pDevice->CreateRenderPass(std::move(renderPassInfo));
 			RenderTextureHandle uiRenderTexture = pDevice->GetRenderPassRenderTexture(m_UIPasses[i]);

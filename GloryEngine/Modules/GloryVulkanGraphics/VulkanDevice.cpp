@@ -1119,8 +1119,18 @@ namespace Glory
 
 		VK_Image* vkSrcImage = m_Images.Find(vkSrcTexture->m_Image);
 
-		CopyToBuffer(*iter->second, vkSrcImage->m_VKImage, vkSrcImage->m_VKFinalLayout, vkDstBuffer->m_VKBuffer,
+		const bool transitionLayout = vkSrcImage->m_VKFinalLayout != vk::ImageLayout::eTransferSrcOptimal;
+
+		if (transitionLayout)
+			TransitionImageLayout(*iter->second, vkSrcImage->m_VKImage, vkSrcImage->m_VKFormat,
+				vkSrcImage->m_VKFinalLayout, vk::ImageLayout::eTransferSrcOptimal, vkSrcImage->m_VKAspect, 1, 1);
+
+		CopyToBuffer(*iter->second, vkSrcImage->m_VKImage, vk::ImageLayout::eTransferSrcOptimal, vkDstBuffer->m_VKBuffer,
 			vkSrcImage->m_VKAspect, {}, 0, { vkSrcImage->m_Width, vkSrcImage->m_Height, 1 }, 1);
+
+		if (transitionLayout)
+			TransitionImageLayout(*iter->second, vkSrcImage->m_VKImage, vkSrcImage->m_VKFormat,
+				vk::ImageLayout::eTransferSrcOptimal, vkSrcImage->m_VKFinalLayout, vkSrcImage->m_VKAspect, 1, 1);
 	}
 
 	GraphicsDevice::SwapchainResult VulkanDevice::AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex,
@@ -3121,6 +3131,38 @@ namespace Glory
 			sourceStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
 			destinationStage = vk::PipelineStageFlagBits::eTransfer;
 		}
+		else if (oldLayout == vk::ImageLayout::eTransferDstOptimal && newLayout == vk::ImageLayout::eTransferSrcOptimal)
+		{
+			barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+			barrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
+
+			sourceStage = vk::PipelineStageFlagBits::eTransfer;
+			destinationStage = vk::PipelineStageFlagBits::eTransfer;
+		}
+		else if (oldLayout == vk::ImageLayout::eTransferSrcOptimal && newLayout == vk::ImageLayout::eTransferDstOptimal)
+		{
+			barrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
+			barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+
+			sourceStage = vk::PipelineStageFlagBits::eTransfer;
+			destinationStage = vk::PipelineStageFlagBits::eTransfer;
+		}
+		else if (oldLayout == vk::ImageLayout::eShaderReadOnlyOptimal && newLayout == vk::ImageLayout::eTransferSrcOptimal)
+		{
+			barrier.srcAccessMask = vk::AccessFlagBits::eShaderRead;
+			barrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
+
+			sourceStage = vk::PipelineStageFlagBits::eFragmentShader;
+			destinationStage = vk::PipelineStageFlagBits::eTransfer;
+		}
+		else if (oldLayout == vk::ImageLayout::eTransferSrcOptimal && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
+		{
+			barrier.srcAccessMask = vk::AccessFlagBits::eTransferRead;
+			barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+			sourceStage = vk::PipelineStageFlagBits::eTransfer;
+			destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
+		}
 		else
 		{
 			throw std::invalid_argument("Unsupported layout transition!");
@@ -3448,7 +3490,7 @@ namespace Glory
 		imageInfo.sharingMode = vk::SharingMode::eExclusive;
 		imageInfo.samples = vk::SampleCountFlagBits::e1;
 		imageInfo.flags = isCubemap ? vk::ImageCreateFlagBits::eCubeCompatible : (vk::ImageCreateFlags)0;
-		imageInfo.mipLevels = mipLevels;
+		imageInfo.mipLevels = textureInfo.m_SamplerSettings.MipmapMode == Filter::F_None ? 1 : mipLevels;
 		if (imageInfo.mipLevels > 1)
 			imageInfo.usage |= vk::ImageUsageFlagBits::eTransferSrc;
 
@@ -3528,6 +3570,18 @@ namespace Glory
 
 			image.m_VKFinalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 		}
+		else if (textureInfo.m_Flags & IF_CopyDst)
+		{
+			vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+			TransitionImageLayout(commandBuffer, image.m_VKImage, format, vk::ImageLayout::eUndefined,
+				vk::ImageLayout::eTransferDstOptimal, image.m_VKAspect,
+				imageInfo.mipLevels, imageInfo.arrayLayers);
+
+			EndSingleTimeCommands(commandBuffer);
+
+			image.m_VKFinalLayout = vk::ImageLayout::eTransferDstOptimal;
+		}
 		else if (textureInfo.m_Flags & IF_CopySrc)
 		{
 			vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
@@ -3539,18 +3593,6 @@ namespace Glory
 			EndSingleTimeCommands(commandBuffer);
 
 			image.m_VKFinalLayout = vk::ImageLayout::eTransferSrcOptimal;
-		}
-		else if(textureInfo.m_Flags & IF_CopyDst)
-		{
-			vk::CommandBuffer commandBuffer = BeginSingleTimeCommands();
-
-			TransitionImageLayout(commandBuffer, image.m_VKImage, format, vk::ImageLayout::eUndefined,
-				vk::ImageLayout::eTransferDstOptimal, image.m_VKAspect,
-				imageInfo.mipLevels, imageInfo.arrayLayers);
-
-			EndSingleTimeCommands(commandBuffer);
-
-			image.m_VKFinalLayout = vk::ImageLayout::eTransferDstOptimal;
 		}
 
 		/* Create texture image view */

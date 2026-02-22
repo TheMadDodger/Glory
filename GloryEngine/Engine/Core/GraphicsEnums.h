@@ -449,6 +449,16 @@ namespace Glory
 
     struct SamplerSettings
     {
+        constexpr SamplerSettings(Filter magFilter, Filter minFilter, SamplerAddressMode addressModeU,
+            SamplerAddressMode addressModeV, SamplerAddressMode addressModeW, float maxAnisotropy,
+            bool unnormalizedCoordinates, bool compareEnable, CompareOp compareOp, Filter mipmapMode,
+            float mipLODBias, float minLOD, float maxLOD) : MagFilter(magFilter), MinFilter(minFilter),
+            AddressModeU(addressModeU), AddressModeV(addressModeV), AddressModeW(addressModeW),
+            MaxAnisotropy(maxAnisotropy), UnnormalizedCoordinates(unnormalizedCoordinates),
+            CompareEnable(compareEnable), CompareOp(compareOp), MipmapMode(mipmapMode),
+            MipLODBias(mipLODBias), MinLOD(minLOD), MaxLOD(maxLOD)
+        {};
+
         constexpr SamplerSettings() : MagFilter(Filter::F_Linear), MinFilter(Filter::F_Linear),
             AddressModeU(SamplerAddressMode::SAM_Repeat), AddressModeV(SamplerAddressMode::SAM_Repeat),
             AddressModeW(SamplerAddressMode::SAM_Repeat), MaxAnisotropy(16.f),

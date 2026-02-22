@@ -25,6 +25,7 @@ namespace Glory::Editor
 		DescriptorSetHandle m_CubemapSet;
 
 		TextureHandle m_CubemapFaces[6];
+		BufferHandle m_StagingBuffers[6];
 
 		std::string m_OutputPath;
 		std::string m_Filename;
