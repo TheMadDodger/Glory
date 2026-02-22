@@ -11,7 +11,6 @@
 #include <CubemapData.h>
 #include <GraphicsDevice.h>
 #include <InternalPipeline.h>
-#include <RenderHelpers.h>
 
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -32,16 +31,25 @@ namespace Glory::Editor
 
 	static constexpr char* EnvironmentPassName = "Environment Generator Pass";
 
+	static constexpr uint32_t IrradianceMapResolution = 32;
+	static constexpr uint32_t IrradianceMapChannels = 4;
+	static constexpr uint32_t IrradianceMapBytesPerChannel = sizeof(float);
+	static constexpr uint32_t IrradianceMapBytesPerPixel = IrradianceMapChannels*IrradianceMapBytesPerChannel;
+
+	static constexpr uint32_t IrradianceMapTotalPixels = IrradianceMapResolution*IrradianceMapResolution;
+	static constexpr uint32_t IrradianceMapSize = IrradianceMapTotalPixels*IrradianceMapChannels;
+	static constexpr uint32_t IrradianceMapTotalByteSize = IrradianceMapSize*IrradianceMapBytesPerChannel;
+
 	EnvironmentGenerator::EnvironmentGenerator() :
 		EditorWindowTemplate("Environment Generator", 600.0f, 600.0f), m_CurrentCubemap(0),
 		m_Generate(false), m_IrradianceRenderPass(NULL),
 		m_pFaces {
-			new float[32*32*4],
-			new float[32*32*4],
-			new float[32*32*4],
-			new float[32*32*4],
-			new float[32*32*4],
-			new float[32*32*4],
+			new float[IrradianceMapSize],
+			new float[IrradianceMapSize],
+			new float[IrradianceMapSize],
+			new float[IrradianceMapSize],
+			new float[IrradianceMapSize],
+			new float[IrradianceMapSize],
 		}
 	{
 	}
@@ -95,7 +103,7 @@ namespace Glory::Editor
 			Initialize();
 
 		TextureCreateInfo attachmentInfo;
-		attachmentInfo.m_Width = attachmentInfo.m_Height = 32;
+		attachmentInfo.m_Width = attachmentInfo.m_Height = IrradianceMapResolution;
 		attachmentInfo.m_ImageAspectFlags = IA_Color;
 		attachmentInfo.m_ImageType = ImageType::IT_2D;
 		attachmentInfo.m_PixelFormat = PixelFormat::PF_RGBA;
@@ -108,8 +116,8 @@ namespace Glory::Editor
 		RenderPassInfo info;
 		info.RenderTextureInfo.HasDepth = false;
 		info.RenderTextureInfo.HasStencil = false;
-		info.RenderTextureInfo.Width = 32;
-		info.RenderTextureInfo.Height = 32;
+		info.RenderTextureInfo.Width = IrradianceMapResolution;
+		info.RenderTextureInfo.Height = IrradianceMapResolution;
 		info.RenderTextureInfo.Attachments.push_back(Attachment("Color", attachmentInfo.m_PixelFormat,
 			attachmentInfo.m_InternalFormat, attachmentInfo.m_ImageType, attachmentInfo.m_ImageAspectFlags, attachmentInfo.m_Type));
 		info.RenderTextureInfo.Attachments[0].Texture = attachment;
@@ -128,15 +136,16 @@ namespace Glory::Editor
 		for (size_t i = 0; i < 6; ++i)
 		{
 			TextureCreateInfo texInfo;
-			texInfo.m_Width = texInfo.m_Height = 32;
+			texInfo.m_Width = texInfo.m_Height = IrradianceMapResolution;
 			texInfo.m_ImageAspectFlags = IA_Color;
 			texInfo.m_ImageType = ImageType::IT_2D;
 			texInfo.m_PixelFormat = PixelFormat::PF_RGBA;
 			texInfo.m_InternalFormat = PixelFormat::PF_R32G32B32A32Sfloat;
 			texInfo.m_SamplingEnabled = false;
 			texInfo.m_Type = DataType::DT_Float;
-			texInfo.m_Flags = ImageFlags(IF_Read | IF_CopyDst);
+			texInfo.m_Flags = ImageFlags(IF_CopyDst | IF_CopySrc);
 			m_CubemapFaces[i] = pDevice->CreateTexture(texInfo);
+			m_StagingBuffers[i] = pDevice->CreateBuffer(IrradianceMapTotalByteSize, BufferType::BT_TransferWrite, BufferFlags::BF_Read);
 		}
 	}
 
@@ -149,7 +158,10 @@ namespace Glory::Editor
 		pDevice->FreeDescriptorSet(m_CubemapSet);
 
 		for (size_t i = 0; i < 6; ++i)
+		{
 			pDevice->FreeTexture(m_CubemapFaces[i]);
+			pDevice->FreeBuffer(m_StagingBuffers[i]);
+		}
 	}
 
 	void EnvironmentGenerator::EnvironmentPass()
@@ -169,7 +181,7 @@ namespace Glory::Editor
 			return;
 		}
 
-		TextureHandle cubemapTexture = pDevice->CreateTexture(pCubemap);
+		const TextureHandle cubemapTexture = pDevice->CreateTexture(pCubemap);
 		if (!cubemapTexture)
 		{
 			m_Generate = false;
@@ -182,10 +194,9 @@ namespace Glory::Editor
 		setUpdateInfo.m_Samplers[0].m_TextureHandle = cubemapTexture;
 		pDevice->UpdateDescriptorSet(m_CubemapSet, setUpdateInfo);
 
-		glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-		FixProjection(captureProjection, pDevice);
+		const glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 
-		glm::mat4 captureViews[] =
+		const glm::mat4 captureViews[] =
 		{
 		   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
 		   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
@@ -195,10 +206,10 @@ namespace Glory::Editor
 		   glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
 		};
 
-		RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_IrradianceRenderPass);
-		TextureHandle irradianceResultTexture = pDevice->GetRenderTextureAttachment(renderTexture, 0);
+		const RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_IrradianceRenderPass);
+		const TextureHandle irradianceResultTexture = pDevice->GetRenderTextureAttachment(renderTexture, 0);
 
-		CommandBufferHandle commandBuffer = pDevice->Begin();
+		const CommandBufferHandle commandBuffer = pDevice->Begin();
 
 		for (size_t i = 0; i < 6; ++i)
 		{
@@ -208,8 +219,8 @@ namespace Glory::Editor
 			pDevice->BeginPipeline(commandBuffer, m_IrradiancePipeline);
 			pDevice->PushConstants(commandBuffer, m_IrradiancePipeline, 0, sizeof(glm::mat4)*2, constants, STF_Vertex);
 			pDevice->BindDescriptorSets(commandBuffer, m_IrradiancePipeline, { m_CubemapSet });
-			pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, 32.0f, 32.0f);
-			pDevice->SetScissor(commandBuffer, 0, 0, 32, 32);
+			pDevice->SetViewport(commandBuffer, 0.0f, 0.0f, float(IrradianceMapResolution), float(IrradianceMapResolution));
+			pDevice->SetScissor(commandBuffer, 0, 0, IrradianceMapResolution, IrradianceMapResolution);
 			/* Render irradiance */
 			pDevice->DrawUnitCube(commandBuffer);
 			pDevice->EndPipeline(commandBuffer);
@@ -221,6 +232,7 @@ namespace Glory::Editor
 			irradianceBarrier.m_DstAccessMask = AF_CopySrc;
 			pDevice->PipelineBarrier(commandBuffer, {}, { irradianceBarrier }, PST_ColorAttachmentOutput, PST_Transfer);
 			pDevice->CopyImage(commandBuffer, irradianceResultTexture, m_CubemapFaces[i]);
+			pDevice->CopyImageToBuffer(commandBuffer, m_CubemapFaces[i], m_StagingBuffers[i]);
 		}
 
 		pDevice->End(commandBuffer);
@@ -242,11 +254,12 @@ namespace Glory::Editor
 		for (size_t i = 0; i < 6; ++i)
 		{
 			/* Read pixels to buffer */
-			pDevice->ReadTexturePixels(m_CubemapFaces[i], m_pFaces[i], 0, 32*32*4*sizeof(float));
+			pDevice->ReadBuffer(m_StagingBuffers[i], m_pFaces[i], 0, IrradianceMapTotalByteSize);
 
-			pImages[i] = new ImageData(32, 32, PixelFormat::PF_R32G32B32A32Sfloat, PixelFormat::PF_RGBA,
-				4*sizeof(float), std::move((char*)m_pFaces[i]), 32*32*4*sizeof(float), false, DataType::DT_Float);
-			m_pFaces[i] = new float[32*32*4];
+			pImages[i] = new ImageData(IrradianceMapResolution, IrradianceMapResolution,
+				PixelFormat::PF_R32G32B32A32Sfloat, PixelFormat::PF_RGBA,
+				IrradianceMapBytesPerPixel, std::move((char*)m_pFaces[i]), IrradianceMapTotalByteSize, false, DataType::DT_Float);
+			m_pFaces[i] = new float[IrradianceMapSize];
 			std::filesystem::path path = m_OutputPath;
 			path.append(m_Filename + "_irradiance_" + sides[i].data()).replace_extension(".hdr");
 			path = EditorAssetDatabase::GetAbsoluteAssetPath(path.string());

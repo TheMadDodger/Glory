@@ -4,19 +4,28 @@
 
 namespace Glory
 {
-	CubemapData::CubemapData()
+	CubemapData::CubemapData():
+		m_SamplerSettings{ Filter::F_Linear, Filter::F_Linear, SamplerAddressMode::SAM_Repeat,
+			SamplerAddressMode::SAM_Repeat, SamplerAddressMode::SAM_Repeat, 16.f, false, false,
+			CompareOp::OP_Never, Filter::F_None, 0.0f, 0.0f, 1000.0f }
 	{
 		APPEND_TYPE(CubemapData);
 	}
 
 	CubemapData::CubemapData(UUID right, UUID left, UUID down, UUID up, UUID front, UUID back):
-		m_Faces{ right, left, down, up, front, back }
+		m_Faces{ right, left, down, up, front, back },
+		m_SamplerSettings{ Filter::F_Linear, Filter::F_Linear, SamplerAddressMode::SAM_Repeat,
+			SamplerAddressMode::SAM_Repeat, SamplerAddressMode::SAM_Repeat, 16.f, false, false,
+			CompareOp::OP_Never, Filter::F_None, 0.0f, 0.0f, 1000.0f }
 	{
 		APPEND_TYPE(CubemapData);
 	}
 
 	CubemapData::CubemapData(ImageData* pRight, ImageData* pLeft, ImageData* pDown, ImageData* pUp, ImageData* pFront, ImageData* pBack):
-		m_Faces{ pRight->GetUUID(), pLeft->GetUUID(), pDown->GetUUID(), pUp->GetUUID(), pFront->GetUUID(), pBack->GetUUID() }
+		m_Faces{ pRight->GetUUID(), pLeft->GetUUID(), pDown->GetUUID(), pUp->GetUUID(), pFront->GetUUID(), pBack->GetUUID() },
+		m_SamplerSettings{ Filter::F_Linear, Filter::F_Linear, SamplerAddressMode::SAM_Repeat,
+			SamplerAddressMode::SAM_Repeat, SamplerAddressMode::SAM_Repeat, 16.f, false, false,
+			CompareOp::OP_Never, Filter::F_None, 0.0f, 0.0f, 1000.0f }
 	{
 		APPEND_TYPE(CubemapData);
 	}

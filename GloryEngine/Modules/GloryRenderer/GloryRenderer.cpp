@@ -324,7 +324,7 @@ namespace Glory
 			info.RenderTextureInfo.Height = m_Resolution.y;
 			info.RenderTextureInfo.Attachments.push_back(
 				Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Unorm,
-					Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float)
+					Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UByte)
 			);
 			m_FinalFrameColorPasses[i] = pDevice->CreateRenderPass(std::move(info));
 	
@@ -1234,7 +1234,7 @@ namespace Glory
 			renderPassInfo.RenderTextureInfo.EnableDepthStencilSampling = false;
 			renderPassInfo.RenderTextureInfo.Width = m_Resolution.x;
 			renderPassInfo.RenderTextureInfo.Height = m_Resolution.y;
-			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("color", PixelFormat::PF_BGRA, PixelFormat::PF_B8G8R8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float, false));
+			renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("color", PixelFormat::PF_BGRA, PixelFormat::PF_B8G8R8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UByte, false));
 			renderPassInfo.RenderTextureInfo.Attachments[0].Texture = image;
 			if (!m_SwapchainPasses[i])
 				m_SwapchainPasses[i] = pDevice->CreateRenderPass(std::move(renderPassInfo));
@@ -1274,7 +1274,7 @@ namespace Glory
 			postProcessPassInfo.RenderTextureInfo.Height = m_Resolution.y;
 			postProcessPassInfo.RenderTextureInfo.Attachments.push_back(
 				Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Unorm,
-					Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float)
+					Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UByte)
 			);
 			if (!m_FinalFrameColorPasses[i])
 				m_FinalFrameColorPasses[i] = pDevice->CreateRenderPass(std::move(postProcessPassInfo));
@@ -2115,7 +2115,7 @@ namespace Glory
 		textureInfo.m_PixelFormat = PixelFormat::PF_RGBA;
 		textureInfo.m_InternalFormat = PixelFormat::PF_R16G16B16A16Sfloat;
 		textureInfo.m_ImageType = ImageType::IT_2D;
-		textureInfo.m_Type = DataType::DT_Float;
+		textureInfo.m_Type = DataType::DT_Short;
 		textureInfo.m_ImageAspectFlags = ImageAspect::IA_Color;
 		textureInfo.m_SamplerSettings.MipmapMode = Filter::F_None;
 		m_SampleNoiseTexture = pDevice->CreateTexture(textureInfo, static_cast<const void*>(ssaoNoise.data()), sizeof(glm::vec4)*ssaoNoise.size());
@@ -2254,8 +2254,8 @@ namespace Glory
 				renderPassInfo.RenderTextureInfo.Height = resolution.y;
 				renderPassInfo.RenderTextureInfo.HasDepth = true;
 				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("object", PixelFormat::PF_RGBAI, PixelFormat::PF_R32G32B32A32Uint, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UInt, false));
-				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
-				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Normal", PixelFormat::PF_RGBA, PixelFormat::PF_R16G16B16A16Sfloat, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UByte));
+				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Normal", PixelFormat::PF_RGBA, PixelFormat::PF_R16G16B16A16Sfloat, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Short));
 				renderPassInfo.m_Position = RenderPassPosition::RP_Start;
 				renderPassInfo.m_LoadOp = RenderPassLoadOp::OP_Clear;
 				renderPass = pDevice->CreateRenderPass(std::move(renderPassInfo));
@@ -2284,7 +2284,7 @@ namespace Glory
 				renderPassInfo.RenderTextureInfo.Height = resolution.y;
 				renderPassInfo.RenderTextureInfo.HasDepth = false;
 				renderPassInfo.RenderTextureInfo.HasStencil = false;
-				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Unorm, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Unorm, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UByte));
 				renderPassInfo.m_Position = RenderPassPosition::RP_Final;
 				renderPassInfo.m_LoadOp = RenderPassLoadOp::OP_Clear;
 				postProcessPass.m_BackBufferPass = pDevice->CreateRenderPass(std::move(renderPassInfo));
@@ -2303,7 +2303,7 @@ namespace Glory
 				renderPassInfo.RenderTextureInfo.Height = resolution.y;
 				renderPassInfo.RenderTextureInfo.HasDepth = false;
 				renderPassInfo.RenderTextureInfo.HasStencil = false;
-				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Unorm, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_Float));
+				renderPassInfo.RenderTextureInfo.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Unorm, Glory::ImageType::IT_2D, Glory::ImageAspect::IA_Color, DataType::DT_UByte));
 				renderPassInfo.m_Position = RenderPassPosition::RP_Final;
 				renderPassInfo.m_LoadOp = RenderPassLoadOp::OP_Clear;
 				postProcessPass.m_FrontBufferPass = pDevice->CreateRenderPass(std::move(renderPassInfo));

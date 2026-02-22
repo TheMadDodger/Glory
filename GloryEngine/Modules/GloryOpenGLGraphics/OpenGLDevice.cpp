@@ -681,7 +681,7 @@ namespace Glory
 
 	void OpenGLDevice::Commit(CommandBufferHandle, const std::vector<SemaphoreHandle>&, const std::vector<SemaphoreHandle>&)
 	{
-		//glFlush();
+		glFlush();
 	}
 
 	GraphicsDevice::WaitResult OpenGLDevice::Wait(CommandBufferHandle, uint64_t)
@@ -779,7 +779,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindTexture(GL_TEXTURE_2D, glSrcTexture->m_GLTextureID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glGetTexImage(GL_TEXTURE_2D, 0, glSrcTexture->m_GLFormat, GL_UNSIGNED_BYTE, (void*)(0));
+		glGetTexImage(GL_TEXTURE_2D, 0, glSrcTexture->m_GLFormat, glSrcTexture->m_GLDataType, (void*)(0));
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		glBindBuffer(GL_PIXEL_PACK_BUFFER, NULL);
@@ -1940,7 +1940,7 @@ namespace Glory
 			info.Width = uint32_t(width);
 			info.Height = uint32_t(height);
 			info.Attachments.push_back(Attachment("Color", PixelFormat::PF_RGBA,
-				PixelFormat::PF_R8G8B8A8Srgb, ImageType::IT_2D, ImageAspect::IA_Color, DataType::DT_Float));
+				PixelFormat::PF_R8G8B8A8Srgb, ImageType::IT_2D, ImageAspect::IA_Color, DataType::DT_UByte));
 			swapchain.m_SwapchainImages[i] = CreateRenderTexture(NULL, std::move(info));
 		}
 
