@@ -762,7 +762,28 @@ namespace Glory
 
 	void OpenGLDevice::CopyImageToBuffer(CommandBufferHandle commandBuffer, TextureHandle src, BufferHandle dst)
 	{
+		GL_Texture* glSrcTexture = m_Textures.Find(src);
+		GL_Buffer* glDstBuffer = m_Buffers.Find(dst);
+		if (!glSrcTexture)
+		{
+			Debug().LogError("OpenGLDevice::CopyImageToBuffer: Invalid src texture handle.");
+			return;
+		}
+		if (!glDstBuffer)
+		{
+			Debug().LogError("OpenGLDevice::CopyImageToBuffer: Invalid dst buffer handle.");
+			return;
+		}
 
+		glBindBuffer(GL_PIXEL_PACK_BUFFER, glDstBuffer->m_GLBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindTexture(GL_TEXTURE_2D, glSrcTexture->m_GLTextureID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glGetTexImage(GL_TEXTURE_2D, 0, glSrcTexture->m_GLFormat, GL_UNSIGNED_BYTE, (void*)(0));
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glBindBuffer(GL_PIXEL_PACK_BUFFER, NULL);
+		glBindTexture(GL_TEXTURE_2D, NULL);
 	}
 
 	GraphicsDevice::SwapchainResult OpenGLDevice::AcquireNextSwapchainImage(SwapchainHandle swapchain, uint32_t* imageIndex, SemaphoreHandle)

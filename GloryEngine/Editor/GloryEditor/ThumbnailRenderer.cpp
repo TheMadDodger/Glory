@@ -182,7 +182,8 @@ namespace Glory::Editor
 				continue;
 			}
 
-			ImageData* pImage = new ImageData(ThumbnailResolution.x, ThumbnailResolution.y, PixelFormat::PF_RGBA, PixelFormat::PF_R8G8B8A8Srgb, 4, std::move(pixels), ThumbnailDataSize);
+			ImageData* pImage = new ImageData(ThumbnailResolution.x, ThumbnailResolution.y,
+				PixelFormat::PF_R8G8B8A8Srgb, PixelFormat::PF_RGBA, 4, std::move(pixels), ThumbnailDataSize);
 			pImage->SetResourceUUID(m_RenderingIDs[i]);
 			m_RenderResults.emplace_back(pImage);
 			InternalTexture* pTexture = new InternalTexture(pImage);
