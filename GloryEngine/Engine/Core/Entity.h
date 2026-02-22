@@ -71,8 +71,6 @@ namespace Glory
 		void SetActiveHierarchy(bool active);
 
 		std::string_view Name() const;
-
-	private:
 		void UpdateHierarchyActive();
 
 	private:
