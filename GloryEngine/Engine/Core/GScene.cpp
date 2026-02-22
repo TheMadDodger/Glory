@@ -397,7 +397,7 @@ namespace Glory
 			InstantiateEntity(pOther, IDRemapper, child, newEntities, newEntity);
 		}
 
-		return Entity{ newEntity, this };
+		return { newEntity, this };
 	}
 
 	void GScene::References(Engine* pEngine, std::vector<UUID>& references) const
@@ -437,7 +437,8 @@ namespace Glory
 		for (size_t i = 0; i < pOther->ChildCount(0); ++i)
 		{
 			const Utils::ECS::EntityID child = pOther->Child(0, i);
-			const Entity nextEntity = InstantiateEntity(pOther, IDRemapper, child, newEntities, parent);
+			Entity nextEntity = InstantiateEntity(pOther, IDRemapper, child, newEntities, parent);
+			nextEntity.UpdateHierarchyActive();
 			if (i == 0)
 				firstEntity = nextEntity;
 		}
