@@ -45,7 +45,7 @@ namespace Editor
 		 * @param materialID ID of the material
 		 * @param pipelineID ID of the pipeline
 		 */
-		GLORY_EDITOR_API void SetMaterialPipeline(UUID materialID, UUID pipelineID);
+		GLORY_EDITOR_API void SetMaterialPipeline(UUID materialID, UUID pipelineID) const;
 
 		/** @brief Get a material or material instance by ID */
 		GLORY_EDITOR_API virtual MaterialData* GetMaterial(UUID materialID) const override;
@@ -77,12 +77,12 @@ namespace Editor
 		 * @param properties Properties YAML destination
 		 * @param pMaterial Material to read the properties from
 		 */
-		void WritePropertiesTo(Utils::NodeValueRef& properties, MaterialData* pMaterial);
+		void WritePropertiesTo(Utils::NodeValueRef& properties, MaterialData* pMaterial) const;
 
 		/** @brief Update a material by loading the properties of its attached shaders and reload the YAML data if possible
 		 * @param pMaterial Material to update
 		 */
-		void UpdateMaterial(MaterialData* pMaterial);
+		void UpdateMaterial(MaterialData* pMaterial) const;
 
 	private:
 		std::vector<UUID> m_Materials;

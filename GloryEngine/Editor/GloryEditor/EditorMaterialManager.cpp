@@ -57,12 +57,10 @@ namespace Glory::Editor
 	void EditorMaterialManager::LoadIntoMaterial(Utils::NodeValueRef node, MaterialData* pMaterial, bool clearProperties) const
 	{
 		const UUID pipelineID = node["Pipeline"].As<uint64_t>(pMaterial->GetPipelineID());
-		pMaterial->SetPipeline(pipelineID);
-		auto properties = node["Properties"];
-		ReadPropertiesInto(properties, pMaterial, clearProperties);
+		SetMaterialPipeline(pMaterial->GetUUID(), pipelineID);
 	}
 
-	void EditorMaterialManager::SetMaterialPipeline(UUID materialID, UUID pipelineID)
+	void EditorMaterialManager::SetMaterialPipeline(UUID materialID, UUID pipelineID) const
 	{
 		Resource* pResource = m_pEngine->GetAssetManager().FindResource(materialID);
 		if (!pResource) return;
@@ -132,29 +130,30 @@ namespace Glory::Editor
 
 		const uint32_t typeHash = meta.Hash();
 		static const size_t materialDataHash = ResourceTypes::GetHash<MaterialData>();
-		if (typeHash == materialDataHash)
-		{
-			Resource* pResource = m_pEngine->GetAssetManager().FindResource(callback.m_UUID);
-			if (!pResource)
-			{
-				MaterialData* pMaterialData = new MaterialData();
-				pResource = pMaterialData;
-				pResource->SetResourceUUID(callback.m_UUID);
-				if (!location.SubresourcePath.empty())
-				{
-					delete pMaterialData;
-					return;
-				}
-				EditableResource* pMaterialResource = resourceManager.GetEditableResource(callback.m_UUID);
-				YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(pMaterialResource);
-				LoadIntoMaterial(**pMaterial, pMaterialData);
-				m_pEngine->GetAssetManager().AddLoadedResource(pResource);
-			}
+		if (typeHash != materialDataHash) return;
 
-			MaterialData* pMaterial = static_cast<MaterialData*>(pResource);
-			pMaterial->SetResourceUUID(callback.m_UUID);
-			m_Materials.push_back(callback.m_UUID);
+		Resource* pResource = m_pEngine->GetAssetManager().FindResource(callback.m_UUID);
+		MaterialData* pMaterialData = nullptr;
+		if (!pResource)
+		{
+			MaterialData* pMaterialData = new MaterialData();
+			pResource = pMaterialData;
+			pResource->SetResourceUUID(callback.m_UUID);
+			if (!location.SubresourcePath.empty())
+			{
+				delete pMaterialData;
+				return;
+			}
 		}
+
+		pMaterialData = static_cast<MaterialData*>(pResource);
+		pMaterialData->SetResourceUUID(callback.m_UUID);
+		m_Materials.push_back(callback.m_UUID);
+		m_pEngine->GetAssetManager().AddLoadedResource(pResource);
+
+		EditableResource* pMaterialResource = resourceManager.GetEditableResource(callback.m_UUID);
+		YAMLResource<MaterialData>* pMaterial = static_cast<YAMLResource<MaterialData>*>(pMaterialResource);
+		LoadIntoMaterial(**pMaterial, pMaterialData);
 	}
 
 	void EditorMaterialManager::AssetUpdatedCallback(const AssetCallbackData& callback)
@@ -211,7 +210,7 @@ namespace Glory::Editor
 		}
 	}
 
-	void EditorMaterialManager::WritePropertiesTo(Utils::NodeValueRef& properties, MaterialData* pMaterial)
+	void EditorMaterialManager::WritePropertiesTo(Utils::NodeValueRef& properties, MaterialData* pMaterial) const
 	{
 		if (!properties.IsMap()) properties.SetMap();
 
@@ -242,13 +241,14 @@ namespace Glory::Editor
 		}
 	}
 
-	void EditorMaterialManager::UpdateMaterial(MaterialData* pMaterial)
+	void EditorMaterialManager::UpdateMaterial(MaterialData* pMaterial) const
 	{
 		EditorApplication* pApplication = EditorApplication::GetInstance();
 
 		pMaterial->ClearProperties();
 		PipelineManager& pipelines = m_pEngine->GetPipelineManager();
 		PipelineData* pPipeline = pMaterial->GetPipeline(pipelines);
+		if (!pPipeline) return;
 		pPipeline->LoadIntoMaterial(pMaterial);
 
 		EditableResource* pResource = pApplication->GetResourceManager().GetEditableResource(pMaterial->GetUUID());
