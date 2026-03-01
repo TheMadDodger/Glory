@@ -29,6 +29,7 @@ namespace Glory
 	struct WindowCreateInfo;
 	struct Version;
 	struct UUIDRemapper;
+	struct Version;
 
 	namespace Jobs
 	{
@@ -91,6 +92,8 @@ namespace Glory
 		}
 
 	public:
+		virtual const Version& EngineVersion() const = 0;
+
 		virtual SceneManager* GetSceneManager() = 0;
 
 		virtual void AddMainModule(Module* pModule, bool initialize = false) = 0;

@@ -1,6 +1,7 @@
 #pragma once
-#include "UUID.h"
 #include "ResourceType.h"
+
+#include <UUID.h>
 
 #include <Reflection.h>
 

@@ -1,5 +1,4 @@
 #include "GraphicsDevice.h"
-#include "Module.h"
 #include "IEngine.h"
 #include "Debug.h"
 #include "EngineProfiler.h"
@@ -9,6 +8,8 @@
 #include "MeshData.h"
 #include "FileData.h"
 #include "CubemapData.h"
+
+#include <Module.h>
 
 #define TEMPLATE_GETTER(type) template<> \
 type* GraphicsDevice::GetResource<type>(UUID id)\

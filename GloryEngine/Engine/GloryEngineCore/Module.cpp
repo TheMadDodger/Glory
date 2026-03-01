@@ -1,4 +1,5 @@
 #include "Module.h"
+#include "IEngine.h"
 
 namespace Glory
 {
@@ -47,7 +48,7 @@ namespace Glory
 
     const Version& Module::ModuleVersion() const
     {
-        return CoreVersion;
+        return m_pEngine->EngineVersion();
     }
 
     ModuleSettings& Module::Settings()

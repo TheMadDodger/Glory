@@ -1,11 +1,11 @@
 #pragma once
-#include "ResourceType.h"
-#include <yaml-cpp/yaml.h>
 #include "SerializedTypes.h"
+
+#include <Hash.h>
+#include <yaml-cpp/yaml.h>
 
 #include <map>
 #include <sstream>
-#include <Reflection.h>
 
 namespace Glory
 {
@@ -37,7 +37,7 @@ namespace Glory
 				m_SettingsNode[name] = stringValue;
 			}
 
-			RegisterValue(name, ST_Enum, ResourceTypes::GetHash<T>());
+			RegisterValue(name, ST_Enum, Hashing::Hash(typeid(T).name()));
 		}
 
 		template<typename T>
@@ -48,7 +48,7 @@ namespace Glory
 				m_SettingsNode[name] = YAML::Node(YAML::NodeType::Sequence);
 
 			if (m_Types.find(name) != m_Types.end()) return;
-			RegisterValue(name, ST_Array, ResourceTypes::GetHash<T>());
+			RegisterValue(name, ST_Array, Hashing::Hash(typeid(T).name()));
 		}
 
 		template<typename T>
@@ -58,7 +58,7 @@ namespace Glory
 			if (!node.IsDefined())
 				m_SettingsNode[name] = defaultValue;
 
-			const uint32_t type = ResourceTypes::GetHash<T>();
+			const uint32_t type = Hashing::Hash(typeid(T).name());
 			RegisterValue(name, ST_Asset, type);
 		}
 
@@ -130,7 +130,7 @@ namespace Glory
 		void RegisterValue(const std::string& name)
 		{
 			if (m_Types.find(name) != m_Types.end()) return;
-			const uint32_t type = ResourceTypes::GetHash<T>();
+			const uint32_t type = Hashing::Hash(typeid(T).name());
 			RegisterValue(name, type, type);
 		}
 

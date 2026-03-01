@@ -1,12 +1,13 @@
 #pragma once
+#include "Input.h"
+
 #include <string_view>
 #include <map>
 #include <vector>
 #include <filesystem>
 #include <glm/vec2.hpp>
 
-#include "Input.h"
-#include "UUID.h"
+#include <UUID.h>
 
 namespace Glory
 {

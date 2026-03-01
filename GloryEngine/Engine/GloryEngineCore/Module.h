@@ -1,13 +1,12 @@
 #pragma once
-#include "Object.h"
 #include "ModuleMetaData.h"
 #include "ModuleSettings.h"
-#include "Version.h"
+#include "UUID.h"
 
 #include <typeinfo>
 
 #define GLORY_MODULE_H																						\
-extern "C" GLORY_API Glory::Module * OnLoadModule();														\
+extern "C" GLORY_API Glory::Module* OnLoadModule();															\
 extern "C" GLORY_API const char* ModuleVersion();
 
 #define GLORY_MODULE_CPP(moduleName)																		\
@@ -51,8 +50,10 @@ p##moduleName->func;
 namespace Glory
 {
 	class IEngine;
+	class Resource;
+	struct Version;
 
-	class Module : public Object
+	class Module
 	{
 	public:
 		Module();

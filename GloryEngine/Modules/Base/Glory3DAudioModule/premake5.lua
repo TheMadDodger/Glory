@@ -24,6 +24,7 @@ project "Glory3DAudioModule"
 		"%{DepsIncludeDir}",
 
 		"%{IncludeDir.glm}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",

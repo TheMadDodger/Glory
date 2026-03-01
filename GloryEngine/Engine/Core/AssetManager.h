@@ -1,6 +1,7 @@
 #pragma once
-#include "UUID.h"
 #include "Resource.h"
+
+#include <UUID.h>
 
 #include <unordered_map>
 #include <vector>

@@ -3,6 +3,7 @@
 #include <Glory.h>
 
 #include <vector>
+#include <functional>
 
 namespace Glory
 {

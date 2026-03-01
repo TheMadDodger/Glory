@@ -1,7 +1,8 @@
 #pragma once
 #include "ThreadedVar.h"
-#include "UUID.h"
 #include "Object.h"
+
+#include <UUID.h>
 
 namespace Glory
 {

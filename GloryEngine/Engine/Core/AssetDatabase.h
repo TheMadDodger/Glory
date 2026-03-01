@@ -1,8 +1,8 @@
 #pragma once
-#include "UUID.h"
 #include "AssetLocation.h"
 #include "ResourceMeta.h"
 
+#include <UUID.h>
 #include <map>
 
 namespace Glory

@@ -1,5 +1,4 @@
 #pragma once
-#include "UUID.h"
 #include "SceneObjectRef.h"
 #include "LayerMask.h"
 #include "CameraRef.h"
@@ -9,6 +8,8 @@
 #include "RenderFrame.h"
 #include "ShapeProperty.h"
 #include "VertexHelpers.h"
+
+#include <UUID.h>
 
 #include <glm/glm.hpp>
 

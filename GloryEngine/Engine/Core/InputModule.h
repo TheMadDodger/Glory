@@ -1,6 +1,8 @@
 #pragma once
-#include "Module.h"
 #include "PlayerInput.h"
+#include "Glory.h"
+
+#include <Module.h>
 
 #include <glm/glm.hpp>
 
