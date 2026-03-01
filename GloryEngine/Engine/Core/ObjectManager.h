@@ -1,8 +1,9 @@
 #pragma once
-#include "ThreadedVar.h"
 #include "Object.h"
 
 #include <UUID.h>
+
+#include <vector>
 
 namespace Glory
 {
@@ -28,7 +29,7 @@ namespace Glory
 		O* Create(Args&&... args)
 		{
 			O* newObject = new O(args...);
-			m_pAllObjects.push_back(newObject);
+			m_pAllObjects.emplace_back(newObject);
 			return newObject;
 		}
 
@@ -37,7 +38,7 @@ namespace Glory
 		void Destroy(O* pObject)
 		{
 			if (!pObject) return;
-			m_pAllObjects.Erase(pObject);
+			Remove(pObject);
 			delete pObject;
 		}
 
@@ -56,6 +57,6 @@ namespace Glory
 
 	private:
 		friend class Object;
-		ThreadedVector<Object*> m_pAllObjects;
+		std::vector<Object*> m_pAllObjects;
 	};
 }
