@@ -1,5 +1,6 @@
 #pragma once
 #include "Resource.h"
+#include "Glory.h"
 #include "MaterialPropertyInfo.h"
 #include "GraphicsEnums.h"
 #include "AssetReference.h"

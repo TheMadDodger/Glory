@@ -1,7 +1,5 @@
 #pragma once
-#include "Glory.h"
-
-#include <UUID.h>
+#include "UUID.h"
 
 #include <typeindex>
 #include <string>

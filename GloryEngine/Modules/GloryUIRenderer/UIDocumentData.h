@@ -1,5 +1,6 @@
 #pragma once
 #include <Resource.h>
+#include <Glory.h>
 #include <EntityRegistry.h>
 #include <TypeData.h>
 

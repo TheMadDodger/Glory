@@ -19,7 +19,7 @@ project "GloryCore"
 		["Asset Management"] = { "BinaryStream.*", "AssetArchive.*", "AssetDatabase.*", "AssetLocation.*", "AssetManager.*", "ResourceMeta.*", "ResourceType.*" },
 		["Resources"] = { "PrefabData.*", "MaterialData.*", "MaterialPropertyInfo.*", "TextureData.*", "MeshData.*", "ModelData.*", "ImageData.*", "FileData.*", "CubemapData.*", "FontData.*", "FontDataStructs.*", "PipelineData.*" },
 		["Console"] = { "Logs.*", "Commands.*", "Console.*", "Debug.*", "DebugConsoleInput.*", "IConsole.*", "WindowsDebugConsole.*" },
-		["Core"] = { "ObjectManager.*", "TypeFlags.*", "GloryContext.*", "BuiltInModules.*", "GloryEngine.*", "Object.*", "Glory.*", "GameTime.*" },
+		["Core"] = { "TypeFlags.*", "GloryContext.*", "BuiltInModules.*", "GloryEngine.*", "Glory.*", "GameTime.*" },
 		["Graphics"] = { "GraphicsDevice.*", "GraphicsEnums.*", "VertexDefinitions.*", "VertexHelpers.*", "RenderFrame.*" },
 		["Modules/Renderer/Camera"] = { "Camera.*", "CameraManager.*", "CameraRef.*" },
 		["Modules/Renderer/Layers"] = { "Layer.*", "LayerManager.*", "LayerMask.*" },
@@ -36,7 +36,7 @@ project "GloryCore"
 		["Helpers"] = { "GLORY_YAML.*", "YAML_GLM.*", "ComponentTypes.*" },
 		["Serialization"] = { "SceneObjectRefSerializer.*", "StructPropertySerializer.*", "AssetReference.*", "SceneObjectRef.*", "AssetRef.*", "LayerRef.*", "EnumPropertySerializer.*", "PropertyFlags.*", "PropertySerializer.*", "SerializedProperty.*", "Serializers.*", "AssetReferencePropertySerializer.*", "SerializedArrayProperty.*", "SerializedPropertyManager.*", "ArrayPropertySerializer.*", "AssetReferencePropertyTemplate.*", "ShapePropertySerializer.*", "ScriptedComponentSerializer.*" },
 		["Scripting"] = { "ScriptExtensions.*", "ScriptingExtender.*", "ScriptProperty.*" },
-		["SceneManagement"] = { "UUIDRemapper.*", "SceneManager.*", "SceneObject.*", "GScene.*", "Components.*", "Entity.*", "EntityComponentObject.*", "SceneObject.*" },
+		["SceneManagement"] = { "UUIDRemapper.*", "SceneManager.*", "SceneObject.*", "GScene.*", "Components.*", "Entity.*", "EntityComponentObject.*" },
 		["EntitySystems"] = { "CharacterControllerSystem.*", "ModelRenderSystem.*", "ScriptedSystem.*", "MeshRenderSystem.*", "Systems.*", "TransformSystem.*", "CameraSystem.*", "LookAtSystem.*", "SpinSystem.*", "LightSystem.*", "MeshFilterSystem.*" },
 	}
 

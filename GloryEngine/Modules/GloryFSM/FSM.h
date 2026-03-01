@@ -1,8 +1,9 @@
 #pragma once
+#include <Glory.h>
+#include <Resource.h>
+
 #include <string>
 #include <vector>
-
-#include <Resource.h>
 
 #include <Reflection.h>
 #include <UUID.h>

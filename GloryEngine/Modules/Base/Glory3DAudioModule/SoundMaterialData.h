@@ -1,5 +1,7 @@
 #pragma once
+#include <Glory.h>
 #include <Resource.h>
+
 #include <glm/glm.hpp>
 
 #include <Reflection.h>

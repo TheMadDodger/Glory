@@ -1,7 +1,7 @@
 #pragma once
-#include "Object.h"
 #include "Glory.h"
 
+#include <Object.h>
 #include <EntityID.h>
 #include <EntityRegistry.h>
 
