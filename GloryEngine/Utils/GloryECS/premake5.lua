@@ -20,7 +20,7 @@ project "GloryECS"
 
 	includedirs
 	{
-		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{IncludeDir.Utils}",
 	}
 
