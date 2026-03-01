@@ -7,7 +7,7 @@
 #include <FSMModule.h>
 #include <GloryMonoScipting.h>
 #include <ScriptingExtender.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <Assembly.h>
 #include <Debug.h>
 #include <FSM.h>
@@ -42,12 +42,12 @@ namespace Glory
 		return true;
 	}
 
-	void FSMLibManager::CollectTypes(Engine*, Assembly*)
+	void FSMLibManager::CollectTypes(IEngine*, Assembly*)
 	{
 		AddMonoType("GloryEngine.FSM.FSMTemplate", SerializedType::ST_Asset, ResourceTypes::GetHash<FSMData>());
 	}
 
-	void FSMLibManager::Initialize(Engine* pEngine, Assembly* pAssembly)
+	void FSMLibManager::Initialize(IEngine* pEngine, Assembly* pAssembly)
 	{
 		m_pAssembly = pAssembly;
 
@@ -106,11 +106,11 @@ namespace Glory
 		};
 	}
 
-	void FSMLibManager::Cleanup(Engine*)
+	void FSMLibManager::Cleanup(IEngine*)
 	{
 	}
 
-	void FSMLibManager::Reset(Engine*)
+	void FSMLibManager::Reset(IEngine*)
 	{
 		AssemblyClass* pFSDMManagerClass = m_pAssembly->GetClass("GloryEngine.FSM", "FSMManager");
 		MonoMethod* pReset = pFSDMManagerClass->GetMethod(".::Reset");

@@ -20,7 +20,7 @@ namespace Glory::Editor
 	{
 	}
 
-	void SetUIParentAction::StoreDocumentState(Engine* pEngine, UIDocument* pDocument, Utils::NodeValueRef entities)
+	void SetUIParentAction::StoreDocumentState(IEngine* pEngine, UIDocument* pDocument, Utils::NodeValueRef entities)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->Registry();
 		entities.SetMap();
@@ -37,7 +37,7 @@ namespace Glory::Editor
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		UIMainWindow* pMainWindow = pApp->GetMainEditor().GetMainWindow<UIMainWindow>();
 		UIDocument* pDocument = pMainWindow->FindEditingDocument(actionRecord.ObjectID);
-		Engine* pEngine = pApp->GetEngine();
+		IEngine* pEngine = pApp->GetEngine();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(actionRecord.ObjectID);
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
@@ -57,7 +57,7 @@ namespace Glory::Editor
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		UIMainWindow* pMainWindow = pApp->GetMainEditor().GetMainWindow<UIMainWindow>();
 		UIDocument* pDocument = pMainWindow->FindEditingDocument(actionRecord.ObjectID);
-		Engine* pEngine = pApp->GetEngine();
+		IEngine* pEngine = pApp->GetEngine();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(actionRecord.ObjectID);
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);

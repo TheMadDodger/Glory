@@ -58,7 +58,7 @@ namespace Glory::Editor
 	{
 		if (EditorApplication::GetInstance()->IsInPlayMode()) return;
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(m_EditingFSM);
 		YAMLResource<FSMData>* pDocument = static_cast<YAMLResource<FSMData>*>(pResource);
@@ -125,7 +125,7 @@ namespace Glory::Editor
 		Dockspace(height);
 	}
 
-	FSMData* FindFSM(const std::filesystem::path& path, Engine* pEngine)
+	FSMData* FindFSM(const std::filesystem::path& path, IEngine* pEngine)
 	{
 		const UUID fsmID = EditorAssetDatabase::FindAssetUUID(path.string());
 		if (!fsmID) return nullptr;
@@ -138,7 +138,7 @@ namespace Glory::Editor
 	void FSMEditor::Initialize()
 	{
 		EditorApplication* pApp = EditorApplication::GetInstance();
-		Engine* pEngine = pApp->GetEngine();
+		IEngine* pEngine = pApp->GetEngine();
 		Serializers& serializers = pEngine->GetSerializers();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 

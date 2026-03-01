@@ -2,7 +2,7 @@
 #include "GloryRuntime.h"
 
 #include <GScene.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <Debug.h>
 #include <AssetDatabase.h>
 #include <filesystem>

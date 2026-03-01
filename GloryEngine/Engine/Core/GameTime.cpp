@@ -1,8 +1,14 @@
 #include "GameTime.h"
-#include "Engine.h"
+#include "IEngine.h"
 
 namespace Glory
 {
+    GameTime::GameTime(IEngine* pEngine) : m_pEngine(pEngine) {}
+    GameTime::~GameTime()
+    {
+        m_pEngine = nullptr;
+    }
+
     void GameTime::Initialize()
     {
         m_StartTime = Now();
@@ -71,11 +77,5 @@ namespace Glory
     float GameTime::TimeSinceSeconds(uint64_t timestamp)
     {
         return (Now() - timestamp)/(1000.0f*1000.0f);
-    }
-
-    GameTime::GameTime(Engine* pEngine): m_pEngine(pEngine) {}
-    GameTime::~GameTime()
-    {
-        m_pEngine = nullptr;
     }
 }

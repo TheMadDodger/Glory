@@ -20,6 +20,6 @@ namespace Glory
         static void CopyEntity(PrefabData* pPrefab, GScene* pScene, Utils::ECS::EntityID entity, Utils::ECS::EntityID parent);
 
         /** @brief Get a vector containing other resources referenced by this resource */
-        virtual void References(Engine* pEngine, std::vector<UUID>& references) const override;
+        virtual void References(IEngine* pEngine, std::vector<UUID>& references) const override;
     };
 }

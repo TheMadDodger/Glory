@@ -29,6 +29,7 @@ project "GloryEditorVulkan"
 		"%{vulkanDir}/include",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGui}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.vulkan}",
 		"%{GloryIncludeDir.editor}",
@@ -59,6 +60,7 @@ project "GloryEditorVulkan"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"yaml-cpp",
 		"GloryEditor",

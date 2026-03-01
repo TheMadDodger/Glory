@@ -12,14 +12,14 @@
 #include "EditableResource.h"
 
 #include <JobManager.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <Debug.h>
 
 namespace Glory::Editor
 {
 	ThreadedVector<UUID> m_UnsavedAssets;
 
-	Engine* DB_EngineInstance = nullptr;
+	IEngine* DB_EngineInstance = nullptr;
 
 	struct ImportedResourceData
 	{

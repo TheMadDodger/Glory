@@ -26,6 +26,7 @@ project "GloryFSMMonoExtender"
 
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.FSM}",
 		"%{GloryIncludeDir.mono}",
@@ -45,6 +46,7 @@ project "GloryFSMMonoExtender"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryFSM",
 		"GloryMonoScripting",

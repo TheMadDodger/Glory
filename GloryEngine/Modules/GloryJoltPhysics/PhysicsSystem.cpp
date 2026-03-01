@@ -3,7 +3,7 @@
 
 #include <PhysicsComponents.h>
 #include <PhysicsSystem.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <GScene.h>
 #include <SceneManager.h>
 #include <Components.h>
@@ -27,7 +27,7 @@ namespace Glory
 	void PhysicsSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 
 		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics)
@@ -42,7 +42,7 @@ namespace Glory
 	void PhysicsSystem::OnStop(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 
 		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics) return;
@@ -54,7 +54,7 @@ namespace Glory
 	void PhysicsSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 
 		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics)
@@ -77,7 +77,7 @@ namespace Glory
 	void PhysicsSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 
 		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics)

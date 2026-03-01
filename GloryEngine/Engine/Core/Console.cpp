@@ -1,6 +1,6 @@
 #include "Console.h"
 #include "Commands.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "WindowModule.h"
 #include "StringUtils.h"
 
@@ -40,7 +40,7 @@ namespace Glory
 		m_CommandQueue.pop();
 	}
 
-	void Console::SetEngine(Engine* pEngine)
+	void Console::SetEngine(IEngine* pEngine)
 	{
 		m_pEngine = pEngine;
 	}

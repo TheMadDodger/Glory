@@ -12,7 +12,7 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 	class BinaryStream;
 	class ShaderSourceData;
 
@@ -43,7 +43,7 @@ namespace Glory::Editor
 	{
 	public:
 		/** @brief Constructor */
-		EditorPipelineManager(Engine* pEngine);
+		EditorPipelineManager(IEngine* pEngine);
 		/** @brief Destructor */
 		virtual ~EditorPipelineManager();
 

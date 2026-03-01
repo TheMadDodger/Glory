@@ -55,7 +55,7 @@ namespace Glory
         m_EngineLoader.reset(new EngineLoader("./Modules"));
 
         EngineCreateInfo info = m_EngineLoader->LoadEngineInfoFromPath(m_Console.get(), m_Debug.get());
-        m_Engine.reset(new Engine(info));
+        m_Engine.reset(new GloryEngine(info));
         m_Console->SetEngine(m_Engine.get());
         std::filesystem::path moduleSettingsRootPath = dataPath;
         moduleSettingsRootPath = moduleSettingsRootPath.parent_path();

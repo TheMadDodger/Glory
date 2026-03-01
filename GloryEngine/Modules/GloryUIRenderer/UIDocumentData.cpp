@@ -182,7 +182,7 @@ namespace Glory
 		}
 	}
 
-	void UIDocumentData::References(Engine* pEngine, std::vector<UUID>& references) const
+	void UIDocumentData::References(IEngine* pEngine, std::vector<UUID>& references) const
 	{
 		const size_t typeViewCount = m_Registry.TypeViewCount();
 		for (size_t i = 0; i < typeViewCount; ++i)

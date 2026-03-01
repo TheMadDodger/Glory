@@ -3,7 +3,7 @@
 #include "Resource.h"
 #include "ResourceType.h"
 #include "Debug.h"
-#include "Engine.h"
+#include "IEngine.h"
 
 #include <sstream>
 
@@ -75,7 +75,7 @@ namespace Glory
 		pResource->Serialize(*m_pStream);
 	}
 
-	void AssetArchive::Deserialize(Engine* pEngine)
+	void AssetArchive::Deserialize(IEngine* pEngine)
 	{
 		if (!VerifyVersion())
 		{
@@ -101,7 +101,7 @@ namespace Glory
 		return m_pResources.size();
 	}
 
-	Resource* AssetArchive::Get(Engine* pEngine, size_t index) const
+	Resource* AssetArchive::Get(IEngine* pEngine, size_t index) const
 	{
 		if (!m_Owned.IsSet(index))
 		{
@@ -122,7 +122,7 @@ namespace Glory
 		m_pStream->Read(m_Version);
 	}
 
-	Resource* AssetArchive::ReadResource(Engine* pEngine)
+	Resource* AssetArchive::ReadResource(IEngine* pEngine)
 	{
 		std::string name;
 		uint32_t typeHash = 0;

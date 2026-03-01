@@ -6,7 +6,7 @@
 #include "ScriptTypeReferenceDrawer.h"
 
 #include <Debug.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <AssetDatabase.h>
 #include <MonoManager.h>
 #include <AssemblyDomain.h>
@@ -164,7 +164,7 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::Initialize()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
 		m_pMonoScriptingModule = pEngine->GetOptionalModule<GloryMonoScipting>();
 		Reflect::SetReflectInstance(&pEngine->Reflection());
@@ -206,7 +206,7 @@ namespace Glory::Editor
 			task.m_TotalSubTasks = 1;
 			task.m_TaskID = "CompilScripting-Mono";
 			task.m_TaskName = "Compiling mono scripting assembly";
-			task.m_Callback = [this](Glory::Engine*, const std::filesystem::path& packageRoot, PackageTaskState& task) {
+			task.m_Callback = [this](Glory::IEngine*, const std::filesystem::path& packageRoot, PackageTaskState& task) {
 				OnEndPackage(packageRoot);
 				++task.m_ProcessedSubTasks;
 				return true;

@@ -5,7 +5,7 @@
 #include "PropertyFlags.h"
 #include "Systems.h"
 #include "Components.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "Serializers.h"
 #include "Renderer.h"
 
@@ -13,7 +13,7 @@
 
 namespace Glory
 {
-	SceneManager::SceneManager(Engine* pEngine) : m_pEngine(pEngine), m_pRenderer(nullptr), m_ActiveSceneIndex(0),
+	SceneManager::SceneManager(IEngine* pEngine) : m_pEngine(pEngine), m_pRenderer(nullptr), m_ActiveSceneIndex(0),
 		m_HoveringObjectSceneID(0), m_HoveringObjectID(0), m_HoveringPos(),
 		m_HoveringNormal(), m_pComponentTypesInstance(nullptr), m_NextFrameLoadIsAdditive(false)
 	{
@@ -100,7 +100,7 @@ namespace Glory
 		m_NextFrameLoadIsAdditive = additive;
 	}
 
-	Engine* SceneManager::GetEngine()
+	IEngine* SceneManager::GetEngine()
 	{
 		return m_pEngine;
 	}

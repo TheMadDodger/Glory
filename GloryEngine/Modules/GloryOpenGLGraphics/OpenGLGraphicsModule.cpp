@@ -4,18 +4,19 @@
 #include "GloryOGL.h"
 #include "GLConverter.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Window.h>
 #include <Debug.h>
 #include <WindowModule.h>
 #include <Debug.h>
 #include <ios>
+#include <WindowData.h>
 
 namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(OpenGLGraphicsModule);
 
-	Engine* EngineInstance;
+	IEngine* EngineInstance;
 
 	OpenGLGraphicsModule::OpenGLGraphicsModule(): m_Device(this)
 	{

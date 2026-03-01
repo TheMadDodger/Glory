@@ -1,5 +1,4 @@
 #pragma once
-#include <any>
 #include <string>
 #include <typeindex>
 #include <functional>
@@ -12,7 +11,6 @@ namespace Glory::Utils::Reflect
 		FactoryBase(uint32_t typeHash);
 		virtual ~FactoryBase();
 
-		virtual std::any CreateAsValue() const = 0;
 		virtual void* CreateAsPointer() const = 0;
 		virtual void CreateAsTemporary(std::function<void(void*)> callback) const = 0;
 
@@ -27,11 +25,6 @@ namespace Glory::Utils::Reflect
 	public:
 		Factory() : FactoryBase(Reflect::Hash<T>()) {}
 		virtual ~Factory() {}
-
-		virtual std::any CreateAsValue() const override
-		{
-			return T();
-		}
 
 		virtual void* CreateAsPointer() const override
 		{

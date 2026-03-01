@@ -5,7 +5,7 @@
 #include "EditorApplication.h"
 
 #include <WindowModule.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <imgui.h>
 #include <algorithm>
 #include <EditorAssetDatabase.h>

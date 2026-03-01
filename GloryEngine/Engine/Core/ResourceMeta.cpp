@@ -1,6 +1,6 @@
 #include "ResourceMeta.h"
 #include "Debug.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include <filesystem>
 
 namespace Glory

@@ -4,7 +4,7 @@
 #include "EditorApplication.h"
 
 #include <SceneManager.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <EditorSceneManager.h>
 #include <CreateObjectAction.h>
 #include <Components.h>

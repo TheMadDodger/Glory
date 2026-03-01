@@ -31,6 +31,7 @@ project "GloryEditorSDL"
 
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGui}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.sdlwindow}",
@@ -59,6 +60,7 @@ project "GloryEditorSDL"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryReflect",
 		"GloryECS",

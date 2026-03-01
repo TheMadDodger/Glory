@@ -2,7 +2,7 @@
 #include "SDLWindow.h"
 #include "SDLWindowExceptions.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 
 namespace Glory
 {

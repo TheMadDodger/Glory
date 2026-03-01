@@ -5,6 +5,7 @@
 #include "ArrayTypes.h"
 #include "Enum.h"
 #include "CustomTypeHash.h"
+
 #include <map>
 #include <vector>
 
@@ -61,7 +62,6 @@ namespace Glory::Utils::Reflect
 		static std::map<uint32_t, const TypeData*>::iterator GetTypeIterator();
 		static std::map<uint32_t, const TypeData*>::iterator GetTypeIteratorEnd();
 
-		static std::any CreateAsValue(uint32_t hash);
 		static void* CreateAsPointer(uint32_t hash);
 		static void CreateAsTemporary(uint32_t hash, std::function<void(void*)> callback);
 

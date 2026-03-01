@@ -29,7 +29,7 @@ namespace Glory
 		Serializers* m_pSerializers;
 
 	private:
-		friend class Engine;
+		friend class IEngine;
 		friend class Serializers;
 
 	private:

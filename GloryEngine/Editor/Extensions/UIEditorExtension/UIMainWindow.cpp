@@ -12,7 +12,7 @@
 #include <AssetCompiler.h>
 #include <Dispatcher.h>
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Serializers.h>
 
 #include <UIDocument.h>
@@ -52,7 +52,7 @@ namespace Glory::Editor
 
 		m_SelectedEntity = 0;
 		m_EditingDocument = documentID;
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		Renderer* pRenderer = pEngine->ActiveRenderer();
 		UIRendererModule* pUIRenderer = pEngine->GetOptionalModule<UIRendererModule>();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
@@ -109,7 +109,7 @@ namespace Glory::Editor
 	void UIMainWindow::SetResolution(const glm::uvec2& resolution)
 	{
 		m_Resolution = resolution;
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		Renderer* pRenderer = pEngine->ActiveRenderer();
 		UIRendererModule* pUIRenderer = pEngine->GetOptionalModule<UIRendererModule>();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
@@ -139,7 +139,7 @@ namespace Glory::Editor
 	void UIMainWindow::Initialize()
 	{
 		EditorApplication* pApp = EditorApplication::GetInstance();
-		Engine* pEngine = pApp->GetEngine();
+		IEngine* pEngine = pApp->GetEngine();
 		Serializers& serializers = pEngine->GetSerializers();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 
@@ -285,7 +285,7 @@ namespace Glory::Editor
 			const UUID documentID = CurrentDocumentID();
 			const glm::uvec2 resolution = Resolution();
 			if (documentID == 0 || !pDocument) return;
-			Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+			IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 			UIRendererModule* pRenderer = pEngine->GetOptionalModule<UIRendererModule>();
 
 			UIRenderData data;
@@ -303,7 +303,7 @@ namespace Glory::Editor
 	{
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		EditorResourceManager& resources = pApp->GetResourceManager();
-		Engine* pEngine = pApp->GetEngine();
+		IEngine* pEngine = pApp->GetEngine();
 
 		for (size_t i = 0; i < m_pDocuments.size(); ++i)
 		{

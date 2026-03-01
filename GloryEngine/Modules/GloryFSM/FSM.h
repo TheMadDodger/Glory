@@ -188,7 +188,7 @@ namespace Glory
 
 	private:
 		/** @brief Get a vector containing other resources referenced by this resource */
-		virtual void References(Engine*, std::vector<UUID>&) const override;
+		virtual void References(IEngine*, std::vector<UUID>&) const override;
 
 		virtual void Serialize(BinaryStream& container) const override;
 		virtual void Deserialize(BinaryStream& container) override;

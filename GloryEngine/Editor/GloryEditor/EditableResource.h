@@ -35,7 +35,7 @@ namespace Glory::Editor
 		bool& WasSaved() { return m_WasSaved; }
 
 	private:
-		virtual void References(Engine*, std::vector<UUID>&) const override {}
+		virtual void References(IEngine*, std::vector<UUID>&) const override {}
 
 	protected:
 		bool m_Dirty{ false };

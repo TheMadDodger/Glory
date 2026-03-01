@@ -28,7 +28,7 @@ namespace Glory::Editor
 		void TogglePauze();
 		void TickFrame();
 
-		void Tick(Engine* pEngine);
+		void Tick(IEngine* pEngine);
 		void EndTick();
 
 		virtual bool HandleModuleLoop(Module* pModule) override;

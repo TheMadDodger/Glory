@@ -6,7 +6,7 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 
 	/** @brief Texture atlas */
 	class TextureAtlas
@@ -17,7 +17,7 @@ namespace Glory
 		 * @param width Width of the atlas
 		 * @param width Height of the atlas
 		 */
-		TextureAtlas(Engine* pEngine, uint32_t width, uint32_t height);
+		TextureAtlas(IEngine* pEngine, uint32_t width, uint32_t height);
 		/** @brief Destructor */
 		virtual ~TextureAtlas();
 
@@ -93,7 +93,7 @@ namespace Glory
 		virtual void OnResize() = 0;
 
 	protected:
-		Engine* m_pEngine;
+		IEngine* m_pEngine;
 		std::vector<ReservedChunk> m_ReservedChunks;
 		std::vector<RowData> m_Rows;
 		uint32_t m_Width;

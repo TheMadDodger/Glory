@@ -6,7 +6,7 @@
 #include <implot.h>
 #include <ImGuizmo.h>
 #include <imgui_internal.h>
-#include <Engine.h>
+#include <IEngine.h>
 
 #include <IconsFontAwesome6.h>
 #include <IconsFontAwesome6Brand.h>
@@ -33,7 +33,7 @@ namespace Glory::Editor
 		m_pRenderImpl = nullptr;
 	}
 
-	void EditorPlatform::Initialize(Engine* pEngine)
+	void EditorPlatform::Initialize(IEngine* pEngine)
 	{
 		m_pWindowImpl->Initialize();
 		SetupDearImGuiContext();

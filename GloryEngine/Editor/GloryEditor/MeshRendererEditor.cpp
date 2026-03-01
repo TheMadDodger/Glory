@@ -2,7 +2,7 @@
 #include "EditorApplication.h"
 #include "EditorAssetManager.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Renderer.h>
 #include <Components.h>
 

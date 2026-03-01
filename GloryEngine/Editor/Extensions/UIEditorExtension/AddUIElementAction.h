@@ -5,7 +5,7 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 	class UIDocument;
 	namespace Utils
 	{
@@ -21,9 +21,9 @@ namespace Glory::Editor
 		AddUIElementAction(uint32_t type, UUID uuid, UUID parent, size_t siblingIndex);
 		virtual ~AddUIElementAction() = default;
 
-		static UUID AddElement(Engine* pEngine, UIDocument* pDocument, Utils::YAMLFileRef& file,
+		static UUID AddElement(IEngine* pEngine, UIDocument* pDocument, Utils::YAMLFileRef& file,
 			std::string_view name, uint32_t type, UUID parent, size_t siblingIndex);
-		static UUID DuplicateElement(Engine* pEngine, UIDocument* pDocument, Utils::YAMLFileRef& file, UUID objectID);
+		static UUID DuplicateElement(IEngine* pEngine, UIDocument* pDocument, Utils::YAMLFileRef& file, UUID objectID);
 
 	private:
 		void OnUndo(const ActionRecord& actionRecord) override;

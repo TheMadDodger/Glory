@@ -3,7 +3,7 @@
 
 #include <PhysicsComponents.h>
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <SceneManager.h>
 #include <Components.h>
 
@@ -31,7 +31,7 @@ namespace Glory::Editor
 
 	void AudioSceneWindow::OnGUI()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		EditorSceneManager& sceneManager = EditorApplication::GetInstance()->GetSceneManager();
 		SteamAudioModule* pModule = pEngine->GetOptionalModule<SteamAudioModule>();
 		const size_t sceneCount = sceneManager.OpenScenesCount();
@@ -109,7 +109,7 @@ namespace Glory::Editor
 
 	void AudioSceneWindow::OnOpen()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		EditorSceneManager& sceneManager = EditorApplication::GetInstance()->GetSceneManager();
 
 		m_SceneEventsListener = sceneManager.SceneEventsDispatcher().AddListener([pEngine, &sceneManager, this](const EditorSceneManager::EditorSceneEvent& e) {

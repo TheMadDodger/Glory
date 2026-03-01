@@ -9,7 +9,7 @@
 
 namespace Glory::Editor
 {
-	DeleteUIElementAction::DeleteUIElementAction(Engine* pEngine, UUID uuid, UIDocument* pDocument, size_t siblingIndex):
+	DeleteUIElementAction::DeleteUIElementAction(IEngine* pEngine, UUID uuid, UIDocument* pDocument, size_t siblingIndex):
 		m_ID(uuid), m_SiblingIndex(siblingIndex)
 	{
 		const Utils::ECS::EntityID entity = pDocument->EntityID(uuid);
@@ -18,7 +18,7 @@ namespace Glory::Editor
 		UIDocumentImporter::SerializeEntityRecursive(pEngine, pDocument, entity, entities);
 	}
 
-	void DeleteUIElementAction::DeleteElement(Engine* pEngine, UIDocument* pDocument, Utils::YAMLFileRef& file, UUID uuid)
+	void DeleteUIElementAction::DeleteElement(IEngine* pEngine, UIDocument* pDocument, Utils::YAMLFileRef& file, UUID uuid)
 	{
 		if (!pDocument->EntityExists(uuid)) return;
 		const Utils::ECS::EntityID entity = pDocument->EntityID(uuid);
@@ -35,7 +35,7 @@ namespace Glory::Editor
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		UIMainWindow* pMainWindow = pApp->GetMainEditor().GetMainWindow<UIMainWindow>();
 		UIDocument* pDocument = pMainWindow->FindEditingDocument(actionRecord.ObjectID);
-		Engine* pEngine = pApp->GetEngine();
+		IEngine* pEngine = pApp->GetEngine();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(actionRecord.ObjectID);
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
@@ -57,7 +57,7 @@ namespace Glory::Editor
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		UIMainWindow* pMainWindow = pApp->GetMainEditor().GetMainWindow<UIMainWindow>();
 		UIDocument* pDocument = pMainWindow->FindEditingDocument(actionRecord.ObjectID);
-		Engine* pEngine = pApp->GetEngine();
+		IEngine* pEngine = pApp->GetEngine();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(actionRecord.ObjectID);
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);

@@ -9,7 +9,8 @@
 #include "AssetCompiler.h"
 
 #include <Debug.h>
-#include <Engine.h>
+#include <UUIDRemapper.h>
+#include <IEngine.h>
 #include <AssetDatabase.h>
 #include <SceneManager.h>
 #include <TitleBar.h>
@@ -369,7 +370,7 @@ namespace Glory::Editor
 			{
 				const UUID parentUUID = parentEntity.EntityUUID();
 				entity["ParentUUID"].Set((uint64_t)parentUUID);
-				EditorApplication::GetInstance()->GetEngine()->m_UUIDRemapper.EnforceRemap(parentUUID, parentUUID);
+				EditorApplication::GetInstance()->GetEngine()->GetUUIDRemapper().EnforceRemap(parentUUID, parentUUID);
 			}
 
 			Entity newEntity = EditorSceneSerializer::DeserializeEntity(EditorApplication::GetInstance()->GetEngine(), pScene, entity, EditorSceneSerializer::Flags::GenerateNewUUIDs);
@@ -382,7 +383,7 @@ namespace Glory::Editor
 			}
 		}
 
-		EditorApplication::GetInstance()->GetEngine()->m_UUIDRemapper.Reset();
+		EditorApplication::GetInstance()->GetEngine()->GetUUIDRemapper().Reset();
 
 		/* Set scene dirty */
 		SetSceneDirty(pScene);

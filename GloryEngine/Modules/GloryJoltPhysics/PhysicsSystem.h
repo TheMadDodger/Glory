@@ -11,7 +11,7 @@ namespace Glory::Utils::ECS
 
 namespace Glory
 {
-    class Engine;
+    class IEngine;
     class JoltPhysicsModule;
     struct PhysicsBody;
 
@@ -40,11 +40,11 @@ namespace Glory
         static GLORY_API PhysicsSystem* Instance();
 
     public:
-        std::function<void(Engine*, UUID, UUID)> OnBodyActivated_Callback;
-        std::function<void(Engine*, UUID, UUID)> OnBodyDeactivated_Callback;
-        std::function<void(Engine*, UUID, UUID, UUID, UUID)> OnContactAdded_Callback;
-        std::function<void(Engine*, UUID, UUID, UUID, UUID)> OnContactPersisted_Callback;
-        std::function<void(Engine*, UUID, UUID, UUID, UUID)> OnContactRemoved_Callback;
+        std::function<void(IEngine*, UUID, UUID)> OnBodyActivated_Callback;
+        std::function<void(IEngine*, UUID, UUID)> OnBodyDeactivated_Callback;
+        std::function<void(IEngine*, UUID, UUID, UUID, UUID)> OnContactAdded_Callback;
+        std::function<void(IEngine*, UUID, UUID, UUID, UUID)> OnContactPersisted_Callback;
+        std::function<void(IEngine*, UUID, UUID, UUID, UUID)> OnContactRemoved_Callback;
 
     private:
         static void SetupBody(JoltPhysicsModule* pPhysics, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, PhysicsBody& pComponent);

@@ -151,7 +151,7 @@ namespace Glory::Editor
 
 		ImGuiListClipper clipper(m_SearchResultCache.size(), rowHeight + 2*ImGui::GetCurrentTable()->CellPaddingY);
 
-		Engine* pEngine = pApp->GetEngine();
+		IEngine* pEngine = pApp->GetEngine();
 		EditorAssetManager& assetManager = pApp->GetAssetManager();
 		ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
 
@@ -261,7 +261,7 @@ namespace Glory::Editor
 		m_ProjectOpenCallback = ProjectSpace::RegisterCallback(ProjectCallback::OnOpen, [&](ProjectSpace*) { m_ForceFilter = true; });
 		AllResourceTypes.clear();
 		std::vector<ResourceType*> types;
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
 
 		resourceTypes.GetAllResourceTypesThatHaveSubType(ResourceTypes::GetHash<Resource>(), types);
@@ -289,7 +289,7 @@ namespace Glory::Editor
 		m_SearchResultCache.clear();
 		m_SearchResultIndexCache.clear();
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		EditorAssetManager& assetManager = EditorApplication::GetInstance()->GetAssetManager();
 		ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
 

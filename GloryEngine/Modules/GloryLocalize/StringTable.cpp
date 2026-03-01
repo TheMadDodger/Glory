@@ -146,7 +146,7 @@ namespace Glory
 		return m_Strings.end();
 	}
 
-	void StringTable::References(Engine*, std::vector<UUID>&) const
+	void StringTable::References(IEngine*, std::vector<UUID>&) const
 	{
 	}
 

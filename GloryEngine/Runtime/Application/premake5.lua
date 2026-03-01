@@ -26,6 +26,7 @@ project "GloryRuntimeApplication"
 		"%{DepsIncludeDir}",
 		"%{engineDir}/GloryEngineBuilder",
 
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.runtime}",
 		"%{GloryIncludeDir.threads}",
@@ -50,6 +51,7 @@ project "GloryRuntimeApplication"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryEngineBuilder",
 		"GloryReflect",

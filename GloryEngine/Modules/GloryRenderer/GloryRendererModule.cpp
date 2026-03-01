@@ -1,7 +1,7 @@
 #include "GloryRendererModule.h"
 #include "GloryRenderer.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Console.h>
 #include <GraphicsDevice.h>
 #include <BinaryStream.h>

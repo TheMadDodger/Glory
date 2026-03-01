@@ -23,16 +23,16 @@ namespace Glory
         GLORY_API MonoObject* GetEngine();
 
     public:
-        virtual void CollectTypes(Engine*, Assembly*) override;
-        void Initialize(Engine* pEngine, Assembly* pAssembly) override;
-        void Cleanup(Engine* pEngine) override;
-        void Reset(Engine* pEngine) override;
+        virtual void CollectTypes(IEngine*, Assembly*) override;
+        void Initialize(IEngine* pEngine, Assembly* pAssembly) override;
+        void Cleanup(IEngine* pEngine) override;
+        void Reset(IEngine* pEngine) override;
 
         MonoObject* CreateAssetObject(UUID uuid, const std::string_view type);
         MonoObject* CreateSceneObject(UUID objectID, UUID sceneID);
 
     private:
-        void CreateEngine(Engine* pEngine);
+        void CreateEngine(IEngine* pEngine);
 
         void OnSceneDestroy(UUID sceneID);
         void OnSceneObjectDestroy(UUID objectID, UUID sceneID);

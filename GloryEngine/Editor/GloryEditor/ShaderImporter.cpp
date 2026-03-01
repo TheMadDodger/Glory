@@ -235,7 +235,7 @@ namespace Glory::Editor
 
     void ShaderImporter::Initialize()
     {
-        Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+        IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
         for (size_t i = 0; i < pEngine->ModulesCount(); ++i)
         {

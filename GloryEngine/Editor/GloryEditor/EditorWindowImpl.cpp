@@ -1,7 +1,7 @@
 #include "EditorWindowImpl.h"
 #include "EditorApplication.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <WindowModule.h>
 
 

@@ -8,7 +8,7 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 
 namespace Editor
 {
@@ -21,7 +21,7 @@ namespace Editor
 		EditorPlatform(EditorWindowImpl* pWindowImpl, EditorRenderImpl* pRenderImpl);
 		virtual ~EditorPlatform();
 
-		void Initialize(Engine* pEngine);
+		void Initialize(IEngine* pEngine);
 		bool PollEvents();
 		void Destroy();
 

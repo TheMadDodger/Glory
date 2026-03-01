@@ -32,6 +32,7 @@ project "GloryMonoScripting"
 
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 
 		"%{GloryIncludeDir.threads}",
@@ -55,6 +56,7 @@ project "GloryMonoScripting"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryAudioModule",
 		"shaderc",

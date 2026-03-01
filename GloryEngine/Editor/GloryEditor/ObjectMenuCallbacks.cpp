@@ -16,7 +16,7 @@
 
 #include <AssetManager.h>
 #include <AssetDatabase.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <SceneManager.h>
 #include <PipelineData.h>
 #include <MaterialData.h>
@@ -106,7 +106,7 @@ namespace Glory::Editor
 
 	OBJECTMENU_CALLBACK(PasteObjectCallback)
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
 		const char* clipboardText = ImGui::GetClipboardText();
 		Utils::InMemoryYAML clipboard{ clipboardText };
@@ -291,7 +291,7 @@ namespace Glory::Editor
 		if (!pObject)
 		{
 			Selection::SetActiveObject(nullptr);
-			Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+			IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 			GScene* pActiveScene = pEngine->GetSceneManager()->GetActiveScene();
 			if (pActiveScene == nullptr) pActiveScene = EditorApplication::GetInstance()->GetSceneManager().NewScene();
 			Entity newEnity = pActiveScene->CreateEmptyObject();
@@ -464,7 +464,7 @@ namespace Glory::Editor
 		Selection::SetActiveObject(nullptr);
 		std::filesystem::path file = FileBrowserItem::GetHighlightedPath();
 		const UUID uuid = EditorAssetDatabase::FindAssetUUID(file.string());
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		Resource* pLoadedResource = pEngine->GetAssetManager().FindResource(uuid);
 		//if (pLoadedResource) return;
 		EditorAssetDatabase::RemoveAsset(uuid);
@@ -483,7 +483,7 @@ namespace Glory::Editor
 	void DeleteFolder()
 	{
 		std::filesystem::path path = m_DeletingFile;
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		std::filesystem::path relativePath = path.lexically_relative(pEngine->GetAssetDatabase().GetAssetPath());
 		if (!std::filesystem::exists(path)) return;
 		if (!std::filesystem::remove_all(path)) return;
@@ -495,7 +495,7 @@ namespace Glory::Editor
 	void DeleteResource(std::filesystem::path path)
 	{
 		if (path.empty()) path = FileBrowserItem::GetHighlightedPath();
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		std::filesystem::path relativePath = path.lexically_relative(pEngine->GetAssetDatabase().GetAssetPath());
 		if (!std::filesystem::remove(path)) return;
 

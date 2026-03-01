@@ -50,7 +50,7 @@ p##moduleName->func;
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 
 	class Module : public Object
 	{
@@ -61,7 +61,7 @@ namespace Glory
 		virtual const std::type_info& GetModuleType() = 0;
 		virtual const std::type_info& GetBaseModuleType() { return GetModuleType(); };
 
-		Engine* GetEngine();
+		IEngine* GetEngine();
 
 		const ModuleMetaData& GetMetaData() const;
 		void SetMetaData(const ModuleMetaData& metaData);
@@ -81,7 +81,7 @@ namespace Glory
 
 		virtual void CollectReferences(std::vector<UUID>& references) {};
 
-	protected:
+	private:
 		virtual void LoadSettings(ModuleSettings& settings) {};
 		virtual void PreInitialize() {};
 		virtual void Initialize() = 0;
@@ -103,13 +103,12 @@ namespace Glory
 		virtual void Postload() {};
 
 	protected:
-		Engine* m_pEngine;
+		IEngine* m_pEngine;
 		std::filesystem::path m_ModulePath;
 		bool m_IsInitialized;
 
 	private:
-		friend class Engine;
-		friend class ScriptingBinder;
+		friend class GloryEngine;
 		ModuleMetaData m_MetaData;
 		ModuleSettings m_Settings;
 	};

@@ -6,11 +6,12 @@
 namespace Glory
 {
 	class Camera;
-	class Engine;
+	class IEngine;
 
 	class CameraManager
 	{
 	public:
+		CameraManager(IEngine* pEngine);
 		virtual ~CameraManager();
 
 		CameraRef GetNewOrUnusedCamera();
@@ -18,13 +19,11 @@ namespace Glory
 		Camera* GetCamera(UUID uuid);
 
 	private:
-		friend class Engine;
+		friend class IEngine;
 		void Cleanup();
 
-		CameraManager(Engine* pEngine);
-
 	private:
-		Engine* m_pEngine;
+		IEngine* m_pEngine;
 		std::vector<Camera> m_Cameras;
 		std::vector<size_t> m_UnusedCameraIndices;
 		std::unordered_map<UUID, size_t> m_IDToCamera;

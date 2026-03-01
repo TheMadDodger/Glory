@@ -2,7 +2,7 @@
 
 #include "TransformSystem.h"
 
-#include "Engine.h"
+#include "IEngine.h"
 #include "Renderer.h"
 #include "Debug.h"
 #include "AssetManager.h"
@@ -21,7 +21,7 @@ namespace Glory
         GScene* pScene = pRegistry->GetUserData<GScene*>();
         Renderer* pRenderer = pScene->Manager()->GetRenderer();
         if (!pRenderer) return;
-        Engine* pEngine = pScene->Manager()->GetEngine();
+        IEngine* pEngine = pScene->Manager()->GetEngine();
 
         MaterialManager* pMaterials = &pEngine->GetMaterialManager();
         MaterialData* pMaterial = pMaterials->GetMaterial(pComponent.m_Material.AssetUUID());
@@ -42,7 +42,7 @@ namespace Glory
         GScene* pScene = pRegistry->GetUserData<GScene*>();
         Renderer* pRenderer = pScene->Manager()->GetRenderer();
         if (!pRenderer) return;
-        Engine* pEngine = pScene->Manager()->GetEngine();
+        IEngine* pEngine = pScene->Manager()->GetEngine();
         AssetManager* pAssets = &pEngine->GetAssetManager();
         MaterialManager* pMaterials = &pEngine->GetMaterialManager();
         AssetDatabase* pAssetDB = &pEngine->GetAssetDatabase();
@@ -100,7 +100,7 @@ namespace Glory
         GScene* pScene = pRegistry->GetUserData<GScene*>();
         Renderer* pRenderer = pScene->Manager()->GetRenderer();
         if (!pRenderer) return;
-        Engine* pEngine = pScene->Manager()->GetEngine();
+        IEngine* pEngine = pScene->Manager()->GetEngine();
         AssetManager* pAssets = &pEngine->GetAssetManager();
         MaterialManager* pMaterials = &pEngine->GetMaterialManager();
         AssetDatabase* pAssetDB = &pEngine->GetAssetDatabase();
@@ -151,7 +151,7 @@ namespace Glory
         GScene* pScene = pRegistry->GetUserData<GScene*>();
         Renderer* pRenderer = pScene->Manager()->GetRenderer();
         if (!pRenderer) return;
-        Engine* pEngine = pScene->Manager()->GetEngine();
+        IEngine* pEngine = pScene->Manager()->GetEngine();
 
         MaterialManager* pMaterials = &pEngine->GetMaterialManager();
         MaterialData* pMaterial = pMaterials->GetMaterial(pComponent.m_Material.AssetUUID());

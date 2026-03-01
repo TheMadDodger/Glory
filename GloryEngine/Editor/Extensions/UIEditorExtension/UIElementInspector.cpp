@@ -38,7 +38,7 @@ namespace Glory::Editor
 		}
 
 		EditorApplication* pApp = EditorApplication::GetInstance();
-		Engine* pEngine = pApp->GetEngine();
+		IEngine* pEngine = pApp->GetEngine();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(pDocument->OriginalDocumentID());
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
@@ -153,7 +153,7 @@ namespace Glory::Editor
 		UIMainWindow* pMainWindow = GetMainWindow();
 		UIDocument* pDocument = pMainWindow->CurrentDocument();
 		EditorApplication* pApp = EditorApplication::GetInstance();
-		Engine* pEngine = pApp->GetEngine();
+		IEngine* pEngine = pApp->GetEngine();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(pDocument->OriginalDocumentID());
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);

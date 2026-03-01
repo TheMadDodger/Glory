@@ -1,6 +1,6 @@
 #include "CameraSystem.h"
 
-#include "Engine.h"
+#include "IEngine.h"
 #include "WindowModule.h"
 #include "Renderer.h"
 #include "Window.h"
@@ -23,7 +23,7 @@ namespace Glory
 	void CameraSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		Renderer* pRenderer = pScene->Manager()->GetRenderer();
 		if (!pRenderer) return;
 
@@ -56,7 +56,7 @@ namespace Glory
 	void CameraSystem::OnComponentAdded(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		Window* pWindow = pEngine->GetMainModule<WindowModule>()->GetMainWindow();
 		pComponent.m_Camera = pEngine->GetCameraManager().GetNewOrUnusedCamera();
 		OnValidate(pRegistry, entity, pComponent);
@@ -71,7 +71,7 @@ namespace Glory
 	void CameraSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		pComponent.m_Camera.SetView(glm::inverse(transform.MatTransform));
@@ -84,7 +84,7 @@ namespace Glory
 	void CameraSystem::OnEnableDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		Renderer* pRenderer = pScene->Manager()->GetRenderer();
 		if (!pRenderer) return;
 		pRenderer->SubmitCamera(pComponent.m_Camera);
@@ -93,7 +93,7 @@ namespace Glory
 	void CameraSystem::OnDisableDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CameraComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		Renderer* pRenderer = pScene->Manager()->GetRenderer();
 		if (!pRenderer) return;
 		pRenderer->UnsubmitCamera(pComponent.m_Camera);

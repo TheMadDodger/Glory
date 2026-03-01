@@ -52,7 +52,7 @@ namespace Glory
 	{
 		const Debug::LogLevel debugLogLevel = logLevel ? MONOTOLOGLEVEL.at(logLevel) : Debug::LogLevel::Info;
 
-		Engine* pEngine = (Engine*)userData;
+		IEngine* pEngine = (IEngine*)userData;
 
 		std::stringstream str;
 		str << "MONO: ";
@@ -76,7 +76,7 @@ namespace Glory
 		const int32_t size = mono_class_instance_size(pMonoClass);
 
 		GMonoProfiler* pGProfiler = (GMonoProfiler*)pProfiler;
-		Engine* pEngine = pGProfiler->m_pMonoManager->Module()->GetEngine();
+		IEngine* pEngine = pGProfiler->m_pMonoManager->Module()->GetEngine();
 		const ModuleSettings& settings = pGProfiler->m_pMonoManager->Module()->Settings();
 		const bool gcLogging = settings.Value<bool>("Enable GC allocation logging");
 		if (gcLogging)
@@ -93,13 +93,13 @@ namespace Glory
 
 	void OnPrintCallback(const char* string, mono_bool)
 	{
-		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
+		IEngine* pEngine = MonoManager::Instance()->Module()->GetEngine();
 		pEngine->GetDebug().LogWarning(string);
 	}
 
 	void OnPrintErrorCallback(const char* string, mono_bool)
 	{
-		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
+		IEngine* pEngine = MonoManager::Instance()->Module()->GetEngine();
 		pEngine->GetDebug().LogError(string);
 	}
 
@@ -280,7 +280,7 @@ namespace Glory
 		}
 	}
 
-	void MonoManager::Reset(Engine* pEngine)
+	void MonoManager::Reset(IEngine* pEngine)
 	{
 		m_pAppDomain->ForEachAssembly([pEngine](Assembly* pAssembly) {
 			IMonoLibManager* pLibManager = pAssembly->LibManager();

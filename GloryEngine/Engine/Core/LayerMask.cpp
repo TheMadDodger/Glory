@@ -1,5 +1,5 @@
 #include "LayerMask.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "Debug.h"
 #include "LayerManager.h"
 #include "Layer.h"
@@ -25,7 +25,7 @@ namespace Glory
 		return mask;
 	}
 
-	LayerMask LayerMask::FromString(Engine* pEngine, const std::string& names)
+	LayerMask LayerMask::FromString(IEngine* pEngine, const std::string& names)
 	{
 		size_t currentIndex = 0;
 		size_t nextIndex = 0;

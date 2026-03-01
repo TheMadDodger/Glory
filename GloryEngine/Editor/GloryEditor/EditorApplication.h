@@ -17,7 +17,7 @@ namespace efsw
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 
 namespace Editor
 {
@@ -61,7 +61,7 @@ namespace Editor
 		GLORY_EDITOR_API bool IsPaused();
 		GLORY_EDITOR_API void Quit();
 		GLORY_EDITOR_API void TryToQuit();
-		GLORY_EDITOR_API Glory::Engine* GetEngine();
+		GLORY_EDITOR_API Glory::IEngine* GetEngine();
 		GLORY_EDITOR_API EditorAssetManager& GetAssetManager();
 		GLORY_EDITOR_API EditorSceneManager& GetSceneManager();
 		GLORY_EDITOR_API EditorResourceManager& GetResourceManager();
@@ -95,7 +95,7 @@ namespace Editor
 		virtual void EndCapture() override;
 
 	private:
-		Glory::Engine* m_pEngine;
+		Glory::IEngine* m_pEngine;
 
 		EditorPlatform m_Platform;
 		MainEditor m_MainEditor;

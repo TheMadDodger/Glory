@@ -26,6 +26,8 @@ namespace Glory
 		Window* CreateNewWindow(WindowCreateInfo& createInfo);
 		virtual void OpenMessageBox(const std::string& message);
 
+		virtual void PollEvents();
+
 	protected: // Internal functions
 		virtual Window* CreateWindow_Internal(const WindowCreateInfo& createInfo) = 0;
 
@@ -36,11 +38,8 @@ namespace Glory
 	private:
 		virtual void Initialize() override;
 		virtual void Cleanup() override;
-		virtual void PollEvents();
 
 	private: // Memory stuff
-		friend class MainThread;
-		friend class Engine;
 		std::vector<Window*> m_pWindows;
 		Window* m_pMainWindow;
     };

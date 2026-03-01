@@ -149,15 +149,6 @@ namespace Glory::Utils::Reflect
 		return m_pReflectInstance->m_pTypeDatas.end();
 	}
 
-	std::any Reflect::CreateAsValue(uint32_t hash)
-	{
-		if (m_pReflectInstance->m_pFactories.find(hash) == m_pReflectInstance->m_pFactories.end())
-			throw new std::exception("Type not found");
-
-		const FactoryBase* pFactory = m_pReflectInstance->m_pFactories[hash];
-		return pFactory->CreateAsValue();
-	}
-
 	void* Reflect::CreateAsPointer(uint32_t hash)
 	{
 		if (m_pReflectInstance->m_pFactories.find(hash) == m_pReflectInstance->m_pFactories.end())

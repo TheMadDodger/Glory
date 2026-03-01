@@ -24,6 +24,7 @@ namespace Glory::Editor
 	{
 		if (!m_pRootType) return;
 
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		const FieldData* pField = nullptr;
 		const TypeData* pType = m_pRootType;
 		for (const std::filesystem::path& subPath : m_PropertyPath)
@@ -47,13 +48,14 @@ namespace Glory::Editor
 
 		auto value = m_OldValue.RootNodeRef().ValueRef();
 		value.SetMap();
-		EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty(pField, pObject, value);
+		pEngine->GetSerializers().SerializeProperty(pField, pObject, value);
 	}
 
 	void ValueChangeAction::SetNewValue(void* pObject)
 	{
 		if (!m_pRootType) return;
 
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		const FieldData* pField = nullptr;
 		const TypeData* pType = m_pRootType;
 		for (const std::filesystem::path& subPath : m_PropertyPath)
@@ -77,14 +79,15 @@ namespace Glory::Editor
 
 		auto value = m_NewValue.RootNodeRef().ValueRef();
 		value.SetMap();
-		EditorApplication::GetInstance()->GetEngine()->GetSerializers().SerializeProperty(pField, pObject, value);
+		pEngine->GetSerializers().SerializeProperty(pField, pObject, value);
 	}
 
 	void ValueChangeAction::OnUndo(const ActionRecord& actionRecord)
 	{
 		if (!m_pRootType) return;
 
-		Object* pObject = EditorApplication::GetInstance()->GetEngine()->GetObjectManager().Find(actionRecord.ObjectID);
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		Object* pObject = pEngine->GetObjectManager().Find(actionRecord.ObjectID);
 		void* pAddress = pObject->GetRootDataAddress();
 
 		const FieldData* pField = nullptr;
@@ -119,14 +122,15 @@ namespace Glory::Editor
 			throw std::exception("Unknown field");
 		}
 
-		EditorApplication::GetInstance()->GetEngine()->GetSerializers().DeserializeProperty(pField, pAddress, m_OldValue[pField->Name()]);
+		pEngine->GetSerializers().DeserializeProperty(pField, pAddress, m_OldValue[pField->Name()]);
 	}
 
 	void ValueChangeAction::OnRedo(const ActionRecord& actionRecord)
 	{
 		if (!m_pRootType) return;
 
-		Object* pObject = EditorApplication::GetInstance()->GetEngine()->GetObjectManager().Find(actionRecord.ObjectID);
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		Object* pObject = pEngine->GetObjectManager().Find(actionRecord.ObjectID);
 		void* pAddress = pObject->GetRootDataAddress();
 
 		const FieldData* pField = nullptr;
@@ -161,7 +165,7 @@ namespace Glory::Editor
 			throw std::exception("Unknown field");
 		}
 
-		EditorApplication::GetInstance()->GetEngine()->GetSerializers().DeserializeProperty(pField, pAddress, m_NewValue[pField->Name()]);
+		pEngine->GetSerializers().DeserializeProperty(pField, pAddress, m_NewValue[pField->Name()]);
 	}
 
 	bool ValueChangeAction::Combine(IAction* pOther)

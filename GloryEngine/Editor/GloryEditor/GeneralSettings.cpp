@@ -5,7 +5,7 @@
 
 #include <BinaryStream.h>
 #include <Glory.h>
-#include <Engine.h>
+#include <IEngine.h>
 
 namespace Glory::Editor
 {
@@ -69,7 +69,7 @@ namespace Glory::Editor
 		if (!organization.Exists()) organization.Set("My Company");
 		if (!appName.Exists()) appName.Set("My Game");
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		pEngine->SetOrganizationAndAppName(std::move(organization.As<std::string>()), std::move(appName.As<std::string>()));
 	}
 
@@ -97,7 +97,7 @@ namespace Glory::Editor
 
 	void GeneralSettings::OnStartPlay_Impl()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		auto root = RootValue();
 		auto major = root["Major"];
 		auto minor = root["Minor"];

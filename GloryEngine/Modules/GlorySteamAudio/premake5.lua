@@ -28,6 +28,7 @@ project "GlorySteamAudio"
 		"%{BaseIncludeDir.audio3d}",
 
 		"%{IncludeDir.glm}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
@@ -52,6 +53,7 @@ project "GlorySteamAudio"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryAudioModule",
 		"Glory3DAudioModule",

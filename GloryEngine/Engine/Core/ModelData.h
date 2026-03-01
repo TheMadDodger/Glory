@@ -12,6 +12,6 @@ namespace Glory
 		virtual ~ModelData();
 
 	private:
-		virtual void References(Engine* pEngine, std::vector<UUID>& references) const override {}
+		virtual void References(IEngine* pEngine, std::vector<UUID>& references) const override {}
 	};
 }

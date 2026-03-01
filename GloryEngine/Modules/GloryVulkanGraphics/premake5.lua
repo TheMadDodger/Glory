@@ -28,6 +28,7 @@ project "GloryVulkanGraphics"
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.shaderc}",
 		"%{IncludeDir.spirv_cross}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 
 		"%{IncludeDir.Reflect}",
@@ -49,6 +50,7 @@ project "GloryVulkanGraphics"
 	links
 	{
 		"vulkan-1",
+		"GloryEngineCore",
 		"GloryCore",
 		"shaderc",
 		"shaderc_combined",

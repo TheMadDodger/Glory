@@ -37,7 +37,7 @@ namespace Glory
         bool IsOutdated(uint64_t cacheWriteTime) const;
 
     private:
-        virtual void References(Engine*, std::vector<UUID>&) const override {}
+        virtual void References(IEngine*, std::vector<UUID>&) const override {}
 
     private:
         ShaderType m_ShaderType;

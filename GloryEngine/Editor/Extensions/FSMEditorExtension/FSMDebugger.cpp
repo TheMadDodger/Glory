@@ -34,7 +34,7 @@ namespace Glory::Editor
 
 		UUID& debuggingInstance = GetMainWindow()->DebuggingInstance();
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		FSMModule* pFSMModule = pEngine->GetOptionalModule<FSMModule>();
 
 		ForceInstancesFilter |= m_LastFrameInstancesCount != pFSMModule->FSMInstanceCount();
@@ -152,7 +152,7 @@ namespace Glory::Editor
 		UUID& debuggingInstance = GetMainWindow()->DebuggingInstance();
 		if (!debuggingInstance || !EditorApplication::GetInstance()->IsInPlayMode()) return;
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		FSMModule* pFSMModule = pEngine->GetOptionalModule<FSMModule>();
 
 		const FSMState* state = pFSMModule->FSMInstance(debuggingInstance);

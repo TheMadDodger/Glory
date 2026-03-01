@@ -4,7 +4,7 @@
 #include "PipelineData.h"
 #include "TextureData.h"
 #include "PipelineManager.h"
-#include "Engine.h"
+#include "IEngine.h"
 
 #include <algorithm>
 
@@ -270,7 +270,7 @@ namespace Glory
 		container.Read(m_TextureSetBits);
 	}
 
-	void MaterialData::References(Engine* pEngine, std::vector<UUID>& references) const
+	void MaterialData::References(IEngine* pEngine, std::vector<UUID>& references) const
 	{
 		if (m_Pipeline) references.push_back(m_Pipeline);
 		for (auto& ref: m_Resources)

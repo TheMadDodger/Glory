@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine.h"
+#include <GloryEngine.h>
 
 namespace Glory
 {

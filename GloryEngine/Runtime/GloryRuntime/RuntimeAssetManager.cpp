@@ -1,6 +1,6 @@
 #include "RuntimeAssetManager.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Debug.h>
 #include <AssetDatabase.h>
 #include <BinaryStream.h>
@@ -9,7 +9,7 @@
 
 namespace Glory
 {
-	RuntimeAssetManager::RuntimeAssetManager(Engine* pEngine) : AssetManager(pEngine)
+	RuntimeAssetManager::RuntimeAssetManager(IEngine* pEngine) : AssetManager(pEngine)
 	{
 	}
 

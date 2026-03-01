@@ -1,12 +1,12 @@
 #include "RuntimePipelineManager.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <AssetManager.h>
 #include <PipelineData.h>
 
 namespace Glory
 {
-	RuntimePipelineManager::RuntimePipelineManager(Engine* pEngine): PipelineManager(pEngine)
+	RuntimePipelineManager::RuntimePipelineManager(IEngine* pEngine): PipelineManager(pEngine)
 	{
 	}
 

@@ -6,7 +6,7 @@
 #include "AudioSceneTools.h"
 
 #include <Debug.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <AudioComponents.h>
 #include <SceneManager.h>
 #include <SteamAudioModule.h>
@@ -49,7 +49,7 @@ namespace Glory::Editor
 	void SteamAudioExtension::HandleBeforeStart(Module* pModule)
 	{
 		/* Build audio occlusion scene and send to SteamAudio */
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		SteamAudioModule* pSteamAudio = pEngine->GetOptionalModule<SteamAudioModule>();
 		if (!pSteamAudio) return;
 		SceneManager* sceneManager = pEngine->GetSceneManager();
@@ -76,7 +76,7 @@ namespace Glory::Editor
 
 	void SteamAudioExtension::HandleStop(Module* pModule)
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		SteamAudioModule* pAudio = pEngine->GetOptionalModule<SteamAudioModule>();
 		pAudio->RemoveAllAudioScenes();
 	}
@@ -89,7 +89,7 @@ namespace Glory::Editor
 	{
 	}
 
-	bool PackageAudioScenesTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	bool PackageAudioScenesTask(IEngine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		SteamAudioModule* pModule = pEngine->GetOptionalModule<SteamAudioModule>();
 
@@ -137,7 +137,7 @@ namespace Glory::Editor
 	void SteamAudioExtension::Initialize()
 	{
 		EditorApplication* pApp = EditorApplication::GetInstance();
-		Engine* pEngine = pApp->GetEngine();
+		IEngine* pEngine = pApp->GetEngine();
 		Reflect::SetReflectInstance(&pEngine->Reflection());
 
 		pEngine->GetSceneManager()->ComponentTypesInstance();

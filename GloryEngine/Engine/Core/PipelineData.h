@@ -266,7 +266,7 @@ namespace Glory
         const Utils::BitSet& SettingsTogglesBitSet() const { return m_SettingsToggles; }
 
     private:
-        virtual void References(Engine*, std::vector<UUID>&) const override {}
+        virtual void References(IEngine*, std::vector<UUID>&) const override {}
 
     protected:
         PipelineType m_Type = PT_Phong;

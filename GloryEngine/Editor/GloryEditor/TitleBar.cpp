@@ -2,7 +2,7 @@
 #include "EditorApplication.h"
 
 #include <WindowModule.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <sstream>
 
 namespace Glory::Editor

@@ -4,7 +4,7 @@
 #include "Localize.h"
 #include "LocalizeSystem.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Console.h>
 #include <AssetManager.h>
 #include <SceneManager.h>

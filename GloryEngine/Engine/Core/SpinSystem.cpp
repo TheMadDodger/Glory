@@ -1,6 +1,6 @@
 #include "SpinSystem.h"
 #include "GameTime.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "SceneManager.h"
 #include "GSCene.h"
 
@@ -13,7 +13,7 @@ namespace Glory
 	void SpinSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, Spin& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);
 		pComponent.m_Time += pEngine->Time().GetDeltaTime()*pComponent.m_Speed;

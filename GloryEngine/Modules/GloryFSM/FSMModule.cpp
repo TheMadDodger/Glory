@@ -1,7 +1,7 @@
 #include "FSMModule.h"
 #include "FSM.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 
 namespace Glory
 {

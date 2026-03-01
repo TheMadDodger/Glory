@@ -1,8 +1,11 @@
 #include "EntityComponentPopup.h"
-#include <imgui.h>
-#include <algorithm>
+
 #include <Reflection.h>
 #include <TypeFlags.h>
+#include <IEngine.h>
+
+#include <imgui.h>
+#include <algorithm>
 
 namespace Glory::Editor
 {

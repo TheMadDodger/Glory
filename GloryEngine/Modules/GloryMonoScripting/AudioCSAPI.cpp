@@ -8,7 +8,7 @@
 
 namespace Glory
 {
-	Engine* AudioManager_EngineInstance = nullptr;
+	IEngine* AudioManager_EngineInstance = nullptr;
 
 	float AudioManager_GetMasterVolume()
 	{
@@ -78,7 +78,7 @@ namespace Glory
 		BIND("GloryEngine.AudioManager::AudioManager_PlayMusic", AudioManager_PlayMusic);
 	}
 
-	void AudioCSAPI::SetEngine(Engine* pEngine)
+	void AudioCSAPI::SetEngine(IEngine* pEngine)
 	{
 		AudioManager_EngineInstance = pEngine;
 	}

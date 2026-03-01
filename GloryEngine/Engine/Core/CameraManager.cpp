@@ -1,5 +1,5 @@
 #include "CameraManager.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "WindowModule.h"
 #include "Window.h"
 #include "EngineProfiler.h"
@@ -51,7 +51,7 @@ namespace Glory
 		m_IDToCamera.clear();
 	}
 
-	CameraManager::CameraManager(Engine* pEngine): m_pEngine(pEngine)
+	CameraManager::CameraManager(IEngine* pEngine): m_pEngine(pEngine)
 	{
 	}
 

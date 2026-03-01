@@ -13,7 +13,7 @@
 #include "EntityEditor.h"
 #include "EditorApplication.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Debug.h>
 #include <GScene.h>
 #include <SceneManager.h>
@@ -481,7 +481,7 @@ namespace Glory::Editor
 
 		const uint32_t prefabHash = ResourceTypes::GetHash<PrefabData>();
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		AssetManager& assetManager = pEngine->GetAssetManager();
 		if (dndHash == ST_Path)
 		{

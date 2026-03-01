@@ -1,12 +1,12 @@
 #include "RuntimeMaterialManager.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <AssetManager.h>
 #include <MaterialData.h>
 
 namespace Glory
 {
-	RuntimeMaterialManager::RuntimeMaterialManager(Engine* pEngine): MaterialManager(pEngine)
+	RuntimeMaterialManager::RuntimeMaterialManager(IEngine* pEngine): MaterialManager(pEngine)
 	{
 	}
 

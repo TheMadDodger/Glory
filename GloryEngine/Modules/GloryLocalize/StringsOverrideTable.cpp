@@ -39,7 +39,7 @@ namespace Glory
 		m_OverrideLanguage = std::move(language);
 	}
 
-	void StringsOverrideTable::References(Engine*, std::vector<UUID>& references) const
+	void StringsOverrideTable::References(IEngine*, std::vector<UUID>& references) const
 	{
 		if (!m_BaseTableID) return;
 		references.push_back(m_BaseTableID);

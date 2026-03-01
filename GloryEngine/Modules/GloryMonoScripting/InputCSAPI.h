@@ -4,12 +4,12 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 
 	class InputCSAPI
 	{
 	public:
 		static void AddInternalCalls(std::vector<InternalCall>& internalCalls);
-		static void SetEngine(Engine* pEngine);
+		static void SetEngine(IEngine* pEngine);
 	};
 }

@@ -19,7 +19,7 @@ namespace Glory::Editor
 	bool AudioDataEditor::OnGUI()
 	{
 		NonEditableResource<AudioData>* pAudioData = (NonEditableResource<AudioData>*)m_pTarget;
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		SDLAudioModule* pAudioModule = pEngine->GetOptionalModule<SDLAudioModule>();
 
 		const std::string name = EditorAssetDatabase::GetAssetName(pAudioData->GetUUID());

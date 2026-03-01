@@ -37,7 +37,7 @@ namespace Glory
 		void OnThreadIdle(Thread* pThread);
 
 	private:
-		friend class Engine;
+		friend class IEngine;
 		static size_t m_HardwareThreads;
 		std::mutex m_IdleQueueMutex;
 		std::queue<size_t> m_IdleThreads;

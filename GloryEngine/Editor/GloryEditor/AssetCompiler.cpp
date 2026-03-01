@@ -47,7 +47,7 @@ namespace Glory::Editor
 
 	void AssetCompiler::CompileAssetDatabase(const std::vector<UUID>& ids)
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		AssetDatabase& assetDatabase = pEngine->GetAssetDatabase();
 		AssetManager& assetManager = pEngine->GetAssetManager();
 		AssetDatabase::WriteLock lock{ &assetDatabase };
@@ -100,7 +100,7 @@ namespace Glory::Editor
 
 	void AssetCompiler::CompileAssets(const std::vector<UUID>& ids)
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
 		if (!CompilationJobPool)
 			CompilationJobPool = pEngine->Jobs().Run<bool, const AssetData>();
@@ -127,7 +127,7 @@ namespace Glory::Editor
 
 	void AssetCompiler::CompileAssetsImmediately(const std::vector<UUID>& ids)
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		AssetDatabase& assetDatabase = pEngine->GetAssetDatabase();
 
 		for (UUID id : ids)
@@ -268,7 +268,7 @@ namespace Glory::Editor
 
 	bool AssetCompiler::CompileJob(const AssetData asset)
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		AssetDatabase& assetDatabase = pEngine->GetAssetDatabase();
 		AssetManager& assetManager = pEngine->GetAssetManager();
 

@@ -5,7 +5,7 @@
 
 #include <LocalizeModule.h>
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <LayerManager.h>
 #include <imgui.h>
 #include <BinaryStream.h>

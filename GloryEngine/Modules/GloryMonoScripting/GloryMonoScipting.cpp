@@ -14,7 +14,7 @@
 #include <Console.h>
 #include <SceneManager.h>
 #include <PropertySerializer.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <BinaryStream.h>
 
 namespace Glory

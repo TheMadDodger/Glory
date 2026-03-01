@@ -2,7 +2,7 @@
 #include "Module.h"
 #include "Resource.h"
 #include "ResourceType.h"
-#include "Engine.h"
+#include "IEngine.h"
 
 #include <string>
 #include <yaml-cpp/yaml.h>
@@ -44,7 +44,7 @@ namespace Glory
 		virtual void Cleanup() = 0;
 
 	private:
-		friend class Engine;
+		friend class GloryEngine;
 		virtual bool HasPriority() override;
 	};
 

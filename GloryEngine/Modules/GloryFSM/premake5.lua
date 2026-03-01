@@ -25,6 +25,7 @@ project "GloryFSM"
 		"%{DepsIncludeDir}",
 		"%{IncludeDir.glm}",
 
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 
 		"%{IncludeDir.ECS}",
@@ -45,6 +46,7 @@ project "GloryFSM"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryReflect",
 		"GloryECS",

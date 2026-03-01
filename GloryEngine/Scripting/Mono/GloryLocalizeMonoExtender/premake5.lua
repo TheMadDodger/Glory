@@ -26,6 +26,7 @@ project "GloryLocalizeMonoExtender"
 
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{BaseIncludeDir.localize}",
 		"%{GloryIncludeDir.Localize}",
@@ -46,6 +47,7 @@ project "GloryLocalizeMonoExtender"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryLocalize",
 		"GloryMonoScripting",

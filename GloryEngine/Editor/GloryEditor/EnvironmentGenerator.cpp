@@ -96,7 +96,7 @@ namespace Glory::Editor
 
 	void EnvironmentGenerator::OnOpen()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
 
 		if (!m_Initialized)
@@ -151,7 +151,7 @@ namespace Glory::Editor
 
 	void EnvironmentGenerator::OnClose()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
 		pDevice->FreePipeline(m_IrradiancePipeline);
 		pDevice->FreeRenderPass(m_IrradianceRenderPass);
@@ -168,7 +168,7 @@ namespace Glory::Editor
 	{
 		if (!m_Generate) return;
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
 		AssetManager& assets = pEngine->GetAssetManager();
 
@@ -288,7 +288,7 @@ namespace Glory::Editor
 	void EnvironmentGenerator::Initialize()
 	{
 		EditorApplication* pApplication = EditorApplication::GetInstance();
-		Engine* pEngine = pApplication->GetEngine();
+		IEngine* pEngine = pApplication->GetEngine();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
 
 		ImportedResource vertexShader = Importer::Import("./EditorAssets/Shaders/Irradiance_Vert.shader");

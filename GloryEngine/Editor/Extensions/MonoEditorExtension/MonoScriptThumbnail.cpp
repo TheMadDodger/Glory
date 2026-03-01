@@ -5,7 +5,7 @@
 #include <EditorApplication.h>
 #include <EditorTextureData.h>
 #include <Importer.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <EditorAssetDatabase.h>
 
 namespace Glory::Editor

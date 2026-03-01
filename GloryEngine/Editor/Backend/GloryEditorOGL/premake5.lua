@@ -28,6 +28,7 @@ project "GloryEditorOGL"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGui}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.opengl}",
 		"%{GloryIncludeDir.editor}",
@@ -58,6 +59,7 @@ project "GloryEditorOGL"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"yaml-cpp",
 		"GloryEditor",

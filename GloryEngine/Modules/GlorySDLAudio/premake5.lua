@@ -28,6 +28,7 @@ project "GlorySDLAudio"
 		"%{BaseIncludeDir.audio}",
 
 		"%{IncludeDir.glm}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
@@ -55,6 +56,7 @@ project "GlorySDLAudio"
 		"SDL2",
 		"SDL2_mixer",
 
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryAudioModule",
 		"GloryReflect",

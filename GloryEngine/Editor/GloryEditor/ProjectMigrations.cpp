@@ -103,7 +103,7 @@ namespace Glory::Editor
 
         std::map<std::string_view, UUID> imageIDToTextureID;
 
-        Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+        IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
         for (size_t i = 0; i < imageAssets.size(); i++)
         {
             const std::string_view assetID = imageAssets[i];

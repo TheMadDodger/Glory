@@ -41,7 +41,7 @@ namespace Glory
 		Unload();
 	}
 
-	Engine EngineLoader::LoadEngine(Console* pConsole, Debug* pDebug)
+	GloryEngine EngineLoader::LoadEngine(Console* pConsole, Debug* pDebug)
 	{
 		if (!std::filesystem::exists(m_CFGPath))
 		{
@@ -69,7 +69,7 @@ namespace Glory
 		return { m_EngineInfo };
 	}
 
-	Engine EngineLoader::LoadEngineFromPath(Console* pConsole, Debug* pDebug)
+	GloryEngine EngineLoader::LoadEngineFromPath(Console* pConsole, Debug* pDebug)
 	{
 		return LoadEngineInfoFromPath(pConsole, pDebug);
 	}

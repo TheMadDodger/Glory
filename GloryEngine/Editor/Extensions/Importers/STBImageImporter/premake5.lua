@@ -26,6 +26,7 @@ project "STBImageImporter"
 
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
@@ -56,6 +57,7 @@ project "STBImageImporter"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryEditor",
 		"shaderc",

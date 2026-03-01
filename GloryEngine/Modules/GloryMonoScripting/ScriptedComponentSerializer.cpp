@@ -7,8 +7,6 @@
 #include "GloryMonoScipting.h"
 #include "AssetManager.h"
 
-#include <Engine.h>
-
 namespace Glory
 {
 	ScriptedComponentSerailizer::ScriptedComponentSerailizer(Serializers* pSerializers):

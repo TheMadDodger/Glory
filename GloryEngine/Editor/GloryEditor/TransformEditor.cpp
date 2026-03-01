@@ -2,7 +2,7 @@
 #include "Undo.h"
 #include "GizmoAction.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <GScene.h>
 #include <glm/gtx/quaternion.hpp>
 #include <TypeData.h>

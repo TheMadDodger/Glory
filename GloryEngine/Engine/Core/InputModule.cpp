@@ -1,5 +1,5 @@
 #include "InputModule.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "Debug.h"
 #include "BinaryStream.h"
 

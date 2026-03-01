@@ -1,6 +1,6 @@
 #include "FSMImporter.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Serializers.h>
 #include <SceneManager.h>
 #include <FSMModule.h>
@@ -71,7 +71,7 @@ namespace Glory::Editor
 
     ImportedResource FSMImporter::LoadResource(const std::filesystem::path& path, void*) const
     {
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
         FSMData* pNewFSM = new FSMData();
 		Utils::YAMLFileRef file{ path };
         LoadInto(pNewFSM, file);
@@ -80,7 +80,7 @@ namespace Glory::Editor
 
     bool FSMImporter::SaveResource(const std::filesystem::path& path, FSMData* pFSM) const
     {
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
         Utils::YAMLFileRef file{ path };
 

@@ -4,7 +4,7 @@
 #include "Undo.h"
 
 #include <JoltPhysicsModule.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <YAML_GLM.h>
 #include <LayerManager.h>
 #include <imgui.h>

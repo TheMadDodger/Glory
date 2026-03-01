@@ -26,6 +26,7 @@ project "GloryUIMonoExtender"
 
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.ui}",
 		"%{BaseIncludeDir.localize}",
@@ -46,6 +47,7 @@ project "GloryUIMonoExtender"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryUIRenderer",
 		"GloryMonoScripting",

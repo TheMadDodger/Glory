@@ -9,7 +9,7 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 	class Resource;
 	struct UUID;
 
@@ -24,7 +24,7 @@ namespace Editor
 	{
 	public:
 		/** @brief Constructor */
-		EditorResourceManager(Engine* pEngine);
+		EditorResourceManager(IEngine* pEngine);
 		/** @brief Destructor */
 		~EditorResourceManager();
 
@@ -54,7 +54,7 @@ namespace Editor
 		std::map<UUID, uint32_t> m_Hashes;
 		std::map<UUID, std::function<void(Resource*)>> m_Callbacks;
 
-		Engine* m_pEngine;
+		IEngine* m_pEngine;
 
 		std::map<UUID, EditableResource*> m_pEditableResources;
 	};

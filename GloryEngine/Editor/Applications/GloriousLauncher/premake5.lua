@@ -24,6 +24,7 @@ project "GloriousLauncher"
 	{
 		"%{DepsIncludeDir}",
 
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{IncludeDir.Version}",
 		"%{IncludeDir.yaml_cpp}",
@@ -53,6 +54,7 @@ project "GloriousLauncher"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryAPI",
 		"ImGui",

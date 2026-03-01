@@ -4,7 +4,7 @@
 
 #include <EntityRegistry.h>
 #include <GScene.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <SceneManager.h>
 #include <Components.h>
 
@@ -18,7 +18,7 @@ namespace Glory
 	void AudioSourceSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
 
 		auto& callback = pAudioModule->SourceSystem().OnSourceStart;
@@ -36,7 +36,7 @@ namespace Glory
 	void AudioSourceSystem::OnStop(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
 
 		auto& callback = pAudioModule->SourceSystem().OnSourceStop;
@@ -48,14 +48,14 @@ namespace Glory
 	void AudioSourceSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioSource& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
 
 		auto& callback = pAudioModule->SourceSystem().OnSourceUpdate;
 		if (callback) callback(pRegistry, entity, pComponent);
 	}
 
-	void FinishedCallback(Engine* pEngine, const AudioChannel& channel)
+	void FinishedCallback(IEngine* pEngine, const AudioChannel& channel)
 	{
 		if (channel.m_UserData.m_Type != AudioChannelUDataType::Entity) return;
 		GScene* pScene = pEngine->GetSceneManager()->GetOpenScene(channel.m_UserData.sceneID());
@@ -71,7 +71,7 @@ namespace Glory
 		if (!pComponent.m_Audio.AssetUUID()) return;
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
 
 		AudioData* pAudio = pComponent.m_Audio.Get(&pEngine->GetAssetManager());
@@ -102,7 +102,7 @@ namespace Glory
 		if (pComponent.m_CurrentChannel == -1) return;
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
 
 		if (pComponent.m_AsMusic)
@@ -120,7 +120,7 @@ namespace Glory
 		if (pComponent.m_CurrentChannel == -1) return;
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
 
 		if (pComponent.m_AsMusic)
@@ -136,7 +136,7 @@ namespace Glory
 		if (pComponent.m_CurrentChannel == -1) return;
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
 
 		if (pComponent.m_AsMusic)
@@ -152,7 +152,7 @@ namespace Glory
 		if (pComponent.m_CurrentChannel == -1) return;
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
 
 		if (pComponent.m_AsMusic)
@@ -176,7 +176,7 @@ namespace Glory
 	void AudioListenerSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioListener& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
 
 		auto& callback = pAudioModule->ListenerSystem().OnListenerStart;
@@ -186,7 +186,7 @@ namespace Glory
 	void AudioListenerSystem::OnStop(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, AudioListener& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
 
 		auto& callback = pAudioModule->ListenerSystem().OnListenerStop;
@@ -198,7 +198,7 @@ namespace Glory
 		if (!pComponent.m_Enable) return;
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AudioModule* pAudioModule = pEngine->GetOptionalModule<AudioModule>();
 
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);

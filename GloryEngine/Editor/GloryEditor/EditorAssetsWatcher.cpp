@@ -4,7 +4,7 @@
 #include "EditorApplication.h"
 #include "Dispatcher.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 
 namespace Glory::Editor
 {

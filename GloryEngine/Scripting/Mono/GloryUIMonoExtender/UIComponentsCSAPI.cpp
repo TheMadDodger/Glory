@@ -12,13 +12,13 @@
 #include <MathCSAPI.h>
 #include <GloryMonoScipting.h>
 #include <Debug.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <LocalizeModuleBase.h>
 
 #define UI_MODULE UIComponents_EngineInstance->GetOptionalModule<UIRendererModule>()
 namespace Glory
 {
-	Engine* UIComponents_EngineInstance;
+	IEngine* UIComponents_EngineInstance;
 
 	template<typename T>
 	static T& GetComponent(UUID sceneID, UUID objectID, uint64_t componentID)
@@ -585,7 +585,7 @@ namespace Glory
 		BIND("GloryEngine.UI.UIInteraction::UIInteraction_SetEnabled", UIInteraction_SetEnabled);
 	}
 
-	void UIComponentsCSAPI::SetEngine(Engine* pEngine)
+	void UIComponentsCSAPI::SetEngine(IEngine* pEngine)
 	{
 		UIComponents_EngineInstance = pEngine;
 	}

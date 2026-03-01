@@ -26,6 +26,7 @@ project "SDLImageImporter"
 
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
@@ -57,6 +58,7 @@ project "SDLImageImporter"
 		"SDL2",
 		"SDL2_image",
 
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryEditor",
 		"shaderc",

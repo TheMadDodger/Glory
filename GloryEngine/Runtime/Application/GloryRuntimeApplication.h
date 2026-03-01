@@ -6,7 +6,7 @@ namespace Glory
 {
 	class Debug;
 	class Console;
-	class Engine;
+	class IEngine;
 	class GloryRuntime;
 	class EngineLoader;
 
@@ -29,7 +29,7 @@ namespace Glory
 		std::unique_ptr<Debug> m_Debug;
 		std::unique_ptr<Console> m_Console;
 		std::unique_ptr<EngineLoader> m_EngineLoader;
-		std::unique_ptr<Engine> m_Engine;
+		std::unique_ptr<IEngine> m_Engine;
 		std::unique_ptr<GloryRuntime> m_Runtime;
 	};
 }

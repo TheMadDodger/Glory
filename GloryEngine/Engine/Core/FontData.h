@@ -29,7 +29,7 @@ namespace Glory
         GLORY_API void Deserialize(BinaryStream& container) override;
 
     private:
-        void References(Engine* pEngine, std::vector<UUID>& references) const override;
+        void References(IEngine* pEngine, std::vector<UUID>& references) const override;
 
     private:
         uint32_t m_FontHeight;

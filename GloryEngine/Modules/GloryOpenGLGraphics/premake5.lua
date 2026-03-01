@@ -28,6 +28,7 @@ project "GloryOpenGLGraphics"
 
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 
 		"%{IncludeDir.Reflect}",
@@ -46,6 +47,7 @@ project "GloryOpenGLGraphics"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"shaderc",
 		"shaderc_combined",

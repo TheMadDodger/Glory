@@ -7,7 +7,7 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 	class Module;
 
 	extern "C" GLORY_API bool OnLoadExtra(const char* path, Module* pModule, Module* pRequiredModule);
@@ -15,10 +15,10 @@ namespace Glory
 	class LocalizeLibManager : public IMonoLibManager
 	{
 	public: /* Lib manager implementation */
-		virtual void CollectTypes(Engine*, Assembly*) override;
-		virtual void Initialize(Engine* pEngine, Assembly* pAssembly) override;
-		virtual void Cleanup(Engine*) override;
-		virtual void Reset(Engine*) override;
+		virtual void CollectTypes(IEngine*, Assembly*) override;
+		virtual void Initialize(IEngine* pEngine, Assembly* pAssembly) override;
+		virtual void Cleanup(IEngine*) override;
+		virtual void Reset(IEngine*) override;
 
 	private:
 		Assembly* m_pAssembly;

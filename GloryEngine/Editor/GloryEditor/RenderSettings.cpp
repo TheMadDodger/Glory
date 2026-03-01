@@ -69,7 +69,7 @@ namespace Glory::Editor
 
 		static const uint32_t pipelineHash = ResourceTypes::GetHash<PipelineData>();
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		EditorAssetManager& assetManager = EditorApplication::GetInstance()->GetAssetManager();
 		EditorPipelineManager& pipelines = EditorApplication::GetInstance()->GetPipelineManager();
 		ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
@@ -273,7 +273,7 @@ namespace Glory::Editor
 
 	void RenderSettings::SendToRenderer()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		Renderer* pRenderer = pEngine->ActiveRenderer();
 		if (!pRenderer) return;
 

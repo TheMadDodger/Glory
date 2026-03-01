@@ -3,13 +3,13 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 	class MaterialData;
 
 	class MaterialManager
 	{
 	public:
-		MaterialManager(Engine* pEngine);
+		MaterialManager(IEngine* pEngine);
 		virtual ~MaterialManager() = default;
 
 		virtual MaterialData* GetMaterial(UUID materialID) const = 0;
@@ -17,6 +17,6 @@ namespace Glory
 		virtual void DestroyRuntimeMaterials() = 0;
 
 	protected:
-		Engine* m_pEngine;
+		IEngine* m_pEngine;
 	};
 }

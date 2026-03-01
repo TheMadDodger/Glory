@@ -4,7 +4,7 @@
 #include <GloryECS/EntityRegistry.h>
 #include <GloryECS/EntityView.h>
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <SceneManager.h>
 
 namespace Glory

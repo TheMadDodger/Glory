@@ -99,7 +99,7 @@ namespace Glory::Editor
 	}
 
 	std::vector<LocaleData> LocaleDatas;
-	void PackageStringOverrideTables(Glory::Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	void PackageStringOverrideTables(Glory::IEngine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		LocaleDatas.clear();
 
@@ -150,7 +150,7 @@ namespace Glory::Editor
 		}
 	}
 
-	void PackageLocaleData(Glory::Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	void PackageLocaleData(Glory::IEngine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		task.m_SubTaskName = "Locale.dat";
 
@@ -193,7 +193,7 @@ namespace Glory::Editor
 	{
 		ProjectSettings::Add(&LangSettings);
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		Reflect::SetReflectInstance(&pEngine->Reflection());
 		pEngine->GetSceneManager()->ComponentTypesInstance();
 
@@ -216,7 +216,7 @@ namespace Glory::Editor
 			stringTablesTask.m_TotalSubTasks = 1;
 			stringTablesTask.m_TaskID = "PackageStringOverrideTables";
 			stringTablesTask.m_TaskName = "Packaging string override tables";
-			stringTablesTask.m_Callback = [this](Glory::Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task) {
+			stringTablesTask.m_Callback = [this](Glory::IEngine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task) {
 				PackageStringOverrideTables(pEngine, packageRoot, task);
 				return true;
 			};
@@ -226,7 +226,7 @@ namespace Glory::Editor
 			localeTask.m_TotalSubTasks = 1;
 			localeTask.m_TaskID = "PackageLocale";
 			localeTask.m_TaskName = "Packaging locale data";
-			localeTask.m_Callback = [this](Glory::Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task) {
+			localeTask.m_Callback = [this](Glory::IEngine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task) {
 				PackageLocaleData(pEngine, packageRoot, task);
 				return true;
 			};

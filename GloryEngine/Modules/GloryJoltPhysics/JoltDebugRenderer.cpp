@@ -2,12 +2,12 @@
 #ifdef JPH_DEBUG_RENDERER
 #include "Helpers.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Renderer.h>
 
 namespace Glory
 {
-	JoltDebugRenderer::JoltDebugRenderer(Engine* pEngine)
+	JoltDebugRenderer::JoltDebugRenderer(IEngine* pEngine)
 		: m_pEngine(pEngine)
 	{
 		Initialize();

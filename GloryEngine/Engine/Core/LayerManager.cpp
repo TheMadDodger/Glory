@@ -1,5 +1,5 @@
 #include "LayerManager.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "AssetDatabase.h"
 #include "Debug.h"
 
@@ -9,6 +9,9 @@
 
 namespace Glory
 {
+	LayerManager::LayerManager(IEngine* pEngine) : m_pEngine(pEngine) {}
+	LayerManager::~LayerManager() { m_pEngine = nullptr; }
+
 	void LayerManager::AddLayer(const std::string& name)
 	{
 		size_t index = m_Layers.size();
@@ -116,7 +119,4 @@ namespace Glory
 		AddLayer("UI");
 		AddLayer("Effects");
 	}
-
-	LayerManager::LayerManager(Engine* pEngine): m_pEngine(pEngine) {}
-	LayerManager::~LayerManager() { m_pEngine = nullptr; }
 }

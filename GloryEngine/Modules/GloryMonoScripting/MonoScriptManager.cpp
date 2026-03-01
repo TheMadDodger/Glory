@@ -11,7 +11,7 @@
 #include <GScene.h>
 #include <SceneManager.h>
 #include <SceneObjectRef.h>
-#include <Engine.h>
+#include <IEngine.h>
 
 namespace Glory
 {
@@ -186,7 +186,7 @@ namespace Glory
 		if (!MonoManager::Instance()->ScriptExecutionAllowed()) return;
 		if (pMonoObject == nullptr) return;
 
-		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
+		IEngine* pEngine = MonoManager::Instance()->Module()->GetEngine();
 		const AssemblyClass& cls = m_ScriptClasses[typeIndex];
 		const std::vector<ScriptProperty>& properties = m_ScriptProperties[typeIndex];
 

@@ -10,7 +10,7 @@ namespace Glory
     {
     }
 
-    Engine* Module::GetEngine()
+    IEngine* Module::GetEngine()
     {
         return m_pEngine;
     }

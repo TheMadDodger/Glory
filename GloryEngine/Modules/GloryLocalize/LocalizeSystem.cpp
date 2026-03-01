@@ -4,7 +4,7 @@
 
 #include <GScene.h>
 #include <SceneManager.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <Debug.h>
 
 #include <TypeView.h>
@@ -16,7 +16,7 @@ namespace Glory
 	void StringTableLoaderSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, StringTableLoader& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		LocalizeModule* pModule = pEngine->GetOptionalModule<LocalizeModule>();
 		pModule->LoadStringTable(pComponent.m_StringTable.AssetUUID());
 	}
@@ -25,7 +25,7 @@ namespace Glory
 	{
 		if (pComponent.m_KeepLoaded) return;
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		LocalizeModule* pModule = pEngine->GetOptionalModule<LocalizeModule>();
 		pModule->UnloadStringTable(pComponent.m_StringTable.AssetUUID());
 	}
@@ -45,14 +45,14 @@ namespace Glory
 	{
 		if (pRegistry->HasComponent<TextComponent>(entity)) return;
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		pEngine->GetDebug().LogError("Localize component requires a TextComponent on the entity");
 	}
 
 	void LocalizeSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, Localize& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		LocalizeModule* pModule = pEngine->GetOptionalModule<LocalizeModule>();
 		if (!pRegistry->HasComponent<TextComponent>(entity)) return;
 		TextComponent& text = pRegistry->GetComponent<TextComponent>(entity);

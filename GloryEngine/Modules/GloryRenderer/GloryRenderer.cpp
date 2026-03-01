@@ -1,7 +1,7 @@
 #include "GloryRenderer.h"
 #include "GloryRendererModule.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Console.h>
 #include <GScene.h>
 #include <SceneManager.h>

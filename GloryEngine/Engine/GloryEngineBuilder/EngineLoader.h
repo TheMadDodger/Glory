@@ -1,5 +1,5 @@
 #pragma once
-#include <Engine.h>
+#include <GloryEngine.h>
 #include <Window.h>
 #include <Module.h>
 
@@ -18,8 +18,8 @@ namespace Glory
 		EngineLoader(const std::filesystem::path& cfgPath);
 		virtual ~EngineLoader();
 
-		Engine LoadEngine(Console* pConsole, Debug* pDebug);
-		Engine LoadEngineFromPath(Console* pConsole, Debug* pDebug);
+		GloryEngine LoadEngine(Console* pConsole, Debug* pDebug);
+		GloryEngine LoadEngineFromPath(Console* pConsole, Debug* pDebug);
 		EngineCreateInfo LoadEngineInfoFromPath(Console* pConsole, Debug* pDebug);
 		void Unload();
 

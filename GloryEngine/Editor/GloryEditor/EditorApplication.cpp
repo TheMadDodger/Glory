@@ -480,7 +480,7 @@ namespace Glory::Editor
 		m_IsStarting = false;
 	}
 
-	Engine* EditorApplication::GetEngine()
+	IEngine* EditorApplication::GetEngine()
 	{
 		return m_pEngine;
 	}

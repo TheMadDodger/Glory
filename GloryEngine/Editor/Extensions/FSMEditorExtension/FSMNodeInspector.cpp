@@ -7,7 +7,7 @@
 #include <EditorAssetDatabase.h>
 #include <Undo.h>
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <WindowModule.h>
 #include <FSM.h>
 
@@ -58,7 +58,7 @@ namespace Glory::Editor
 			return;
 		}
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(fsmID);
 		if (!pResource) return;

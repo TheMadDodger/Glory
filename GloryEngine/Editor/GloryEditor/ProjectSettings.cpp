@@ -16,7 +16,7 @@
 namespace Glory::Editor
 {
 	GeneralSettings General;
-	EngineSettings Engine;
+	EngineSettings IEngine;
 	LayerSettings Layer;
 	InputSettings Input;
 	PackageSettings Packaging;
@@ -24,7 +24,7 @@ namespace Glory::Editor
 
 	std::vector<ProjectSettings*> Settings = {
 		&General,
-		&Engine,
+		&IEngine,
 		&Layer,
 		&Input,
 		&Packaging,
@@ -125,7 +125,7 @@ namespace Glory::Editor
 		PackageTask task;
 		task.m_TaskName = "Compiling project settings";
 		task.m_TotalSubTasks = Settings.size();
-		task.m_Callback = [](Glory::Engine*, const std::filesystem::path& packageRoot, PackageTaskState& task) {
+		task.m_Callback = [](Glory::IEngine*, const std::filesystem::path& packageRoot, PackageTaskState& task) {
 			std::filesystem::path path = packageRoot;
 			path.append("Data/Dummy");
 			for (size_t i = 0; i < Settings.size(); ++i)

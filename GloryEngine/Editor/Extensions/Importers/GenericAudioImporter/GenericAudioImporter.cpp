@@ -43,7 +43,7 @@ namespace Glory::Editor
 
 	ImportedResource GenericAudioImporter::LoadResource(const std::filesystem::path& path, void* userData) const
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
 		std::ifstream file(path, std::ios::binary | std::ios::ate);
 

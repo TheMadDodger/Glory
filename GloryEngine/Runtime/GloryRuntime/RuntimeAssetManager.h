@@ -12,7 +12,7 @@ namespace Glory
 	{
 	public:
 		/** @brief Constructor */
-		RuntimeAssetManager(Engine* pEngine);
+		RuntimeAssetManager(IEngine* pEngine);
 		/** @brief Destructor */
 		virtual ~RuntimeAssetManager();
 

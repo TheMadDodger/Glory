@@ -3,6 +3,7 @@
 #include "SerializedTypes.h"
 #include "GScene.h"
 #include "PropertySerializer.h"
+#include "IEngine.h"
 
 namespace Glory
 {
@@ -13,7 +14,7 @@ namespace Glory
 		{ 201832386, 1226719936 }
 	};
 
-	Serializers::Serializers(Engine* pEngine): m_pEngine(pEngine)
+	Serializers::Serializers(IEngine* pEngine): m_pEngine(pEngine)
 	{
 	}
 
@@ -158,7 +159,7 @@ namespace Glory
 		throw new std::exception("Missing serializer!");
 	}
 
-	Engine* Serializers::GetEngine() const
+	IEngine* Serializers::GetEngine() const
 	{
 		return m_pEngine;
 	}

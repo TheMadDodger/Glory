@@ -4,7 +4,7 @@
 #include <Renderer.h>
 #include <Console.h>
 #include <MaterialManager.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <Window.h>
 #include <AssetManager.h>
 #include <CameraManager.h>

@@ -26,6 +26,7 @@ project "FSMEditorExtension"
 
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
@@ -55,6 +56,7 @@ project "FSMEditorExtension"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryEditor",
 		"GloryFSM",
