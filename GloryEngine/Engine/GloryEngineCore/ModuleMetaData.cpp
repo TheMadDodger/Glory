@@ -1,5 +1,4 @@
 #include "ModuleMetaData.h"
-#include "Debug.h"
 
 #include <NodeRef.h>
 
@@ -43,11 +42,7 @@ namespace Glory
 
 	void ModuleMetaData::Read()
 	{
-		if (!std::filesystem::exists(m_Path))
-		{
-			//m_pEngine->GetDebug().LogWarning("Could not load Module.yaml at path: " + m_Path.string());
-			return;
-		}
+		if (!std::filesystem::exists(m_Path)) return;
 
 		Utils::YAMLFileRef metaFile{ m_Path };
 		metaFile.Load();
@@ -59,20 +54,14 @@ namespace Glory
 
 		if (type == "SceneManagement")
 		{
-			//m_pEngine->GetDebug().LogError("Scene modules are no longer supported as of 0.3.0");
 			m_Type = ModuleType::MT_Invalid;
 			return;
 		}
 		if (type == "Physics")
-		{
-			//m_pEngine->GetDebug().LogWarning("As of 0.3.0 physics modules are now categorized as \"Other\" modules");
 			type = "Other";
-		}
-		if (type == "Scripting")
-		{
-			//m_pEngine->GetDebug().LogWarning("As of 0.3.0 scripting modules are now categorized as \"Other\" modules");
+		else if (type == "Scripting")
 			type = "Other";
-		}
+
 		if (STRINGTOMODULETYPE.find(type) != STRINGTOMODULETYPE.end()) m_Type = STRINGTOMODULETYPE[type];
 
 		Utils::NodeValueRef dependenciesNode = rootNode["Dependencies"];

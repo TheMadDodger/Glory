@@ -1,6 +1,7 @@
 #pragma once
 #include <Module.h>
 #include <Hash.h>
+#include <CommonMacros.h>
 
 #define FEATURE(name) static constexpr uint32_t name = Hashing::Hash(STRINGIFY(AudioFeature_##name))
 

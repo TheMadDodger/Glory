@@ -1,4 +1,5 @@
 #pragma once
+typedef unsigned int uint32_t;
 
 #define A 54059 /* a prime */
 #define B 76963 /* another prime */

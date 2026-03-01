@@ -47,6 +47,11 @@
 
 namespace Glory
 {
+	const Version& GloryEngine::EngineVersion() const
+	{
+		return CoreVersion;
+	}
+
 	SceneManager* GloryEngine::GetSceneManager()
 	{
 		return m_pSceneManager;

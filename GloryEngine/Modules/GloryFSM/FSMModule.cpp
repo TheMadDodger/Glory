@@ -2,6 +2,7 @@
 #include "FSM.h"
 
 #include <IEngine.h>
+#include <ResourceType.h>
 
 namespace Glory
 {

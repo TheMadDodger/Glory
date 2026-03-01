@@ -1,7 +1,7 @@
 #pragma once
 #include <ostream>
 
-#include "UUID.h"
+#include <UUID.h>
 
 namespace Glory
 {

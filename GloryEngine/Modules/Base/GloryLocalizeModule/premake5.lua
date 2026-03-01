@@ -24,7 +24,7 @@ project "GloryLocalizeModule"
 		"%{DepsIncludeDir}",
 
 		"%{IncludeDir.glm}",
-		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
 		"%{IncludeDir.Utils}",

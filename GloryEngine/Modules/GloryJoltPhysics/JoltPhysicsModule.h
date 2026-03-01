@@ -1,6 +1,8 @@
 #pragma once
 #include <Physics.h>
 
+#include <Glory.h>
+
 #include <PhysicsModule.h>
 #include <glm/fwd.hpp>
 

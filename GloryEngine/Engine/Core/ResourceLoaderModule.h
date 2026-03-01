@@ -1,8 +1,9 @@
 #pragma once
-#include "Module.h"
 #include "Resource.h"
 #include "ResourceType.h"
 #include "IEngine.h"
+
+#include <Module.h>
 
 #include <string>
 #include <yaml-cpp/yaml.h>

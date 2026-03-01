@@ -1,6 +1,8 @@
 #pragma once
 #include <AudioModule.h>
 
+#include <Glory.h>
+
 #include <SDL2/SDL_mixer.h>
 
 namespace Glory

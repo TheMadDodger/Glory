@@ -1,6 +1,8 @@
 #pragma once
 #include <WindowModule.h>
 
+#include <Glory.h>
+
 namespace Glory
 {
     class SDLWindowModule : public WindowModule

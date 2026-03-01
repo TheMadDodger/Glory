@@ -1,5 +1,6 @@
 #pragma once
 #include <Module.h>
+#include <Glory.h>
 #include <WindowModule.h>
 #include <GraphicsEnums.h>
 

@@ -3,6 +3,8 @@
 #include "MonoScriptLoader.h"
 #include "GloryMono.h"
 
+#include <Reflection.h>
+
 #define BIND(x, y) internalCalls.push_back(InternalCall(x, &y))
 
 REFLECTABLE_ENUM_NS(Glory, MonoLogLevel, error, critical, warning, message, info, debug);

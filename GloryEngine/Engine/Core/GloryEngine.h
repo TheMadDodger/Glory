@@ -73,13 +73,15 @@ namespace Utils::Reflect
 	/// This class describes the engine a GloryGame object will run on.
 	/// It holds the required modules used to run the game, as well as optional modules.
 	/// </summary>
-	class GloryEngine : public IEngine
+	class GloryEngine final : public IEngine
 	{
 	public:
 		GloryEngine(const EngineCreateInfo& createInfo);
 		virtual ~GloryEngine();
 
 	public:
+		const Version& EngineVersion() const override;
+
 		SceneManager* GetSceneManager() override;
 
 		void AddMainModule(Module* pModule, bool initialize = false) override;

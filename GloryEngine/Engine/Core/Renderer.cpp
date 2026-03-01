@@ -3,8 +3,9 @@
 #include "IEngine.h"
 #include "AssetManager.h"
 #include "MaterialData.h"
-#include "Module.h"
 #include "GPUTextureAtlas.h"
+
+#include <Module.h>
 
 #include <glm/ext/scalar_constants.hpp>
 

@@ -1,7 +1,8 @@
 #pragma once
-#include "UUID.h"
 #include "Resource.h"
 #include "GraphicsEnums.h"
+
+#include <UUID.h>
 
 #include <string>
 #include <vector>

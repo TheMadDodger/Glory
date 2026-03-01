@@ -20,10 +20,10 @@ project "GloryEngineCore"
 		--"%{GloryIncludeDir.jobs}",
 		--"%{DepsIncludeDir}",
 		--"%{IncludeDir.glm}",
-		--"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.yaml_cpp}",
 		--"%{IncludeDir.Reflect}",
 		--"%{IncludeDir.Version}",
-		--"%{IncludeDir.Utils}",
+		"%{IncludeDir.Utils}",
 		--"%{IncludeDir.ECS}",
 		--"%{stb_image}/..",
 	}

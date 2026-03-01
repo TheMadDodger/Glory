@@ -1,7 +1,8 @@
 #pragma once
 #include "Commands.h"
 #include "IConsole.h"
-#include "UUID.h"
+
+#include <UUID.h>
 
 #include <thread>
 #include <queue>
