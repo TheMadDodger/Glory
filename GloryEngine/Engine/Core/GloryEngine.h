@@ -1,11 +1,12 @@
 #pragma once
-#include "Object.h"
 #include "ResourceType.h"
 #include "WindowData.h"
 
 #include "UUIDRemapper.h"
 
+#include <Object.h>
 #include <IEngine.h>
+#include <Version.h>
 
 #include <memory>
 #include <filesystem>

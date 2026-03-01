@@ -64,7 +64,7 @@ namespace Glory::Editor
 		finalPath.replace_filename("Layers.dat");
 		BinaryFileStream file{ finalPath };
 		BinaryStream* stream = &file;
-		stream->Write(CoreVersion);
+		stream->Write(EditorApplication::GetInstance()->GetEngine()->EngineVersion());
 
 		Utils::NodeValueRef layersNode = RootValue()["Layers"];
 

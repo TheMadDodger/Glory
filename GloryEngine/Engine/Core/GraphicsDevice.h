@@ -4,8 +4,6 @@
 #include "GraphicsFeatures.h"
 #include "GraphicsHandles.h"
 
-#include <UUID.h>
-
 #include <glm/vec4.hpp>
 
 namespace Glory

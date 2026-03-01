@@ -1,4 +1,5 @@
 #pragma once
+#include <Glory.h>
 #include <GloryEngine.h>
 
 namespace Glory
