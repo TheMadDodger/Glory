@@ -12,11 +12,11 @@
 #include <MathCSAPI.h>
 #include <GloryMonoScipting.h>
 #include <Debug.h>
-#include <Engine.h>
+#include <IEngine.h>
 
 namespace Glory
 {
-	Engine* PhysicsComponents_EngineInstance;
+	IEngine* PhysicsComponents_EngineInstance;
 
 	template<typename T>
 	static T& GetComponent(UUID sceneID, UUID objectID, uint64_t componentID)
@@ -461,7 +461,7 @@ namespace Glory
 		BIND("GloryEngine.Entities.CharacterController::CharacterController_AddImpulse", CharacterController_AddImpulse);
 	}
 
-	void PhysicsComponentsCSAPI::SetEngine(Engine* pEngine)
+	void PhysicsComponentsCSAPI::SetEngine(IEngine* pEngine)
 	{
 		PhysicsComponents_EngineInstance = pEngine;
 	}

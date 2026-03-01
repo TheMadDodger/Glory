@@ -39,7 +39,7 @@ namespace Glory
 		size_t m_Index = 0;
 		void* m_CurrentChunk = NULL;
 		AudioChannelUData m_UserData;
-		std::function<void(Engine*, const AudioChannel&)> m_FinishedCallback = NULL;
+		std::function<void(IEngine*, const AudioChannel&)> m_FinishedCallback = NULL;
 	};
 
 	/** @brief Music channel */
@@ -67,7 +67,7 @@ namespace Glory
 		 * @param finishedCallback Callback that will be called when the audio finishes playing
 		 * @returns The channel that was chosen to play the audio
 		 */
-		virtual int Play(AudioData* pAudio, int loops = 0, AudioChannelUData&& udata={}, std::function<void(Engine*, const AudioChannel&)> finishedCallback = NULL) = 0;
+		virtual int Play(AudioData* pAudio, int loops = 0, AudioChannelUData&& udata={}, std::function<void(IEngine*, const AudioChannel&)> finishedCallback = NULL) = 0;
 		/** @brief Play an audio resource with 3D effects enabled
 		 * @param pAudio Audio asset to play
 		 * @param loops How many times to loop the audio
@@ -75,7 +75,7 @@ namespace Glory
 		 * @param finishedCallback Callback that will be called when the audio finishes playing
 		 * @returns The channel that was chosen to play the audio
 		 */
-		virtual int PlayWithEffects(AudioData* pAudio, int loops=0, AudioChannelUData&& udata={}, std::function<void(Engine*, const AudioChannel&)> finishedCallback=NULL) = 0;
+		virtual int PlayWithEffects(AudioData* pAudio, int loops=0, AudioChannelUData&& udata={}, std::function<void(IEngine*, const AudioChannel&)> finishedCallback=NULL) = 0;
 		/** @brief Get an @ref AudioChannel used for mixing */
 		virtual AudioChannel& Channel(int channel) = 0;
 

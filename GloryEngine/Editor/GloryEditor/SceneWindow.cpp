@@ -13,7 +13,7 @@
 #include <SceneManager.h>
 #include <AssetManager.h>
 #include <PrefabData.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <Renderer.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <imgui_internal.h>
@@ -183,7 +183,7 @@ namespace Glory::Editor
 
 	void SceneWindow::DrawScene()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
 		Renderer* pRenderer = pEngine->ActiveRenderer();
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
@@ -268,7 +268,7 @@ namespace Glory::Editor
 		textureCoord.y = resolution.y - textureCoord.y;
 		m_PickPos = textureCoord;
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		Renderer* pRenderer = pEngine->ActiveRenderer();
 		size_t pickIndex = 0;
 		m_CurrentPick.m_Object = SceneObjectRef();
@@ -299,7 +299,7 @@ namespace Glory::Editor
 
 	void SceneWindow::FocusSelected()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		Object* pSelected = Selection::GetActiveObject();
 		if (!pSelected) return;
 		EditableEntity* pEntity = dynamic_cast<EditableEntity*>(pSelected);
@@ -313,7 +313,7 @@ namespace Glory::Editor
 
 	void SceneWindow::HandleDragAndDrop(std::string& path)
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		const UUID uuid = EditorAssetDatabase::FindAssetUUID(path);
 		if (!uuid) return;
 		ResourceMeta meta;

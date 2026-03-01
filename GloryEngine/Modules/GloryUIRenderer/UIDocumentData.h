@@ -50,7 +50,7 @@ namespace Glory
         void Deserialize(BinaryStream& container) override;
 
         /** @brief Get a vector containing other resources referenced by this resource */
-        virtual void References(Engine* pEngine, std::vector<UUID>& references) const override;
+        virtual void References(IEngine* pEngine, std::vector<UUID>& references) const override;
 
     private:
         friend class UIDocument;

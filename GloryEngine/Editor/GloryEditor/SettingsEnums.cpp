@@ -1,10 +1,10 @@
 #include "SettingsEnums.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 
 namespace Glory::Editor
 {
-    void RegisterSettingsEnums(Engine* pEngine)
+    void RegisterSettingsEnums(IEngine* pEngine)
     {
         pEngine->Reflection().RegisterEnum<PackageScenes>();
     }

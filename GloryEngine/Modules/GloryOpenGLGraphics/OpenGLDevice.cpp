@@ -2,7 +2,7 @@
 
 #include "OpenGLGraphicsModule.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Debug.h>
 #include <Window.h>
 

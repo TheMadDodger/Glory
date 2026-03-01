@@ -8,7 +8,7 @@ namespace Glory
     {
 	public:
 		/** @brief Constructor */
-		RuntimePipelineManager(Engine* pEngine);
+		RuntimePipelineManager(IEngine* pEngine);
 		/** @brief Destructor */
 		virtual ~RuntimePipelineManager() = default;
 

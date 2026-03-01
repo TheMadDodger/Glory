@@ -8,14 +8,14 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 
 	/** @brief Base class for asset management */
 	class AssetManager
 	{
 	public:
 		/** @brief Constructor */
-		AssetManager(Engine* pEngine);
+		AssetManager(IEngine* pEngine);
 		/** @brief Destructor */
 		virtual ~AssetManager();
 
@@ -86,10 +86,6 @@ namespace Glory
 		virtual void Initialize() = 0;
 
 	protected:
-		Engine* m_pEngine;
-
-	private:
-		friend class Engine;
-		friend class AssetDatabase;
+		IEngine* m_pEngine;
 	};
 }

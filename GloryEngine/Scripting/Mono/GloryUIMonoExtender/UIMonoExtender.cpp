@@ -10,7 +10,7 @@
 #include <UIRendererModule.h>
 #include <GloryMonoScipting.h>
 #include <ScriptingExtender.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <Assembly.h>
 #include <UIDocument.h>
 
@@ -45,12 +45,12 @@ namespace Glory
 		return true;
 	}
 
-	void UILibManager::CollectTypes(Engine*, Assembly*)
+	void UILibManager::CollectTypes(IEngine*, Assembly*)
 	{
 		AddMonoType("GloryEngine.UI.UIDocument", SerializedType::ST_Asset, ResourceTypes::GetHash<UIDocumentData>());
 	}
 
-	void UILibManager::Initialize(Engine* pEngine, Assembly* pAssembly)
+	void UILibManager::Initialize(IEngine* pEngine, Assembly* pAssembly)
 	{
 		UIComponentsCSAPI::SetEngine(pEngine);
 		UISceneCSAPI::SetEngine(pEngine);
@@ -67,7 +67,7 @@ namespace Glory
 		AssemblyDomain* pDomain = pAssembly->GetDomain();
 
 		UIInteractionSystem::Instance()->OnElementHover_Callback =
-		[pDomain, pHoverMethod](Engine* pEngine, UUID sceneID, UUID objectID, UUID elementID, UUID componentID) {
+		[pDomain, pHoverMethod](IEngine* pEngine, UUID sceneID, UUID objectID, UUID elementID, UUID componentID) {
 			MonoObject* pEngineObject = MonoManager::Instance()->GetCoreLibManager()->GetEngine();
 			void* args[] = {
 				pEngineObject,
@@ -81,7 +81,7 @@ namespace Glory
 		};
 
 		UIInteractionSystem::Instance()->OnElementUnHover_Callback =
-		[pDomain, pUnhoverMethod](Engine* pEngine, UUID sceneID, UUID objectID, UUID elementID, UUID componentID) {
+		[pDomain, pUnhoverMethod](IEngine* pEngine, UUID sceneID, UUID objectID, UUID elementID, UUID componentID) {
 			MonoObject* pEngineObject = MonoManager::Instance()->GetCoreLibManager()->GetEngine();
 			void* args[] = {
 				pEngineObject,
@@ -95,7 +95,7 @@ namespace Glory
 		};
 
 		UIInteractionSystem::Instance()->OnElementDown_Callback =
-		[pDomain, pDownMethod](Engine* pEngine, UUID sceneID, UUID objectID, UUID elementID, UUID componentID) {
+		[pDomain, pDownMethod](IEngine* pEngine, UUID sceneID, UUID objectID, UUID elementID, UUID componentID) {
 			MonoObject* pEngineObject = MonoManager::Instance()->GetCoreLibManager()->GetEngine();
 			void* args[] = {
 				pEngineObject,
@@ -109,7 +109,7 @@ namespace Glory
 		};
 
 		UIInteractionSystem::Instance()->OnElementUp_Callback =
-		[pDomain, pUpMethod](Engine* pEngine, UUID sceneID, UUID objectID, UUID elementID, UUID componentID) {
+		[pDomain, pUpMethod](IEngine* pEngine, UUID sceneID, UUID objectID, UUID elementID, UUID componentID) {
 			MonoObject* pEngineObject = MonoManager::Instance()->GetCoreLibManager()->GetEngine();
 			void* args[] = {
 				pEngineObject,
@@ -123,11 +123,11 @@ namespace Glory
 		};
 	}
 
-	void UILibManager::Cleanup(Engine*)
+	void UILibManager::Cleanup(IEngine*)
 	{
 	}
 
-	void UILibManager::Reset(Engine*)
+	void UILibManager::Reset(IEngine*)
 	{
 	}
 }

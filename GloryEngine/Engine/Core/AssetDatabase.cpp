@@ -1,7 +1,7 @@
 #include "AssetDatabase.h"
 #include "AssetManager.h"
 #include "LayerManager.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "GScene.h"
 
 #include <fstream>
@@ -10,6 +10,21 @@
 
 namespace Glory
 {
+	AssetDatabase::AssetDatabase()
+		: m_IsWriting(false), m_IsReading(false) {
+	}
+
+	AssetDatabase::~AssetDatabase() {}
+
+	void AssetDatabase::Initialize()
+	{
+	}
+
+	void AssetDatabase::Destroy()
+	{
+		Clear();
+	}
+
 	bool AssetDatabase::GetAssetLocation(UUID uuid, AssetLocation& location)
 	{
 		ReadLock readLock{ this };
@@ -150,15 +165,6 @@ namespace Glory
 		return m_EntrySceneID;
 	}
 
-	void AssetDatabase::Initialize()
-	{
-	}
-
-	void AssetDatabase::Destroy()
-	{
-		Clear();
-	}
-
 	void AssetDatabase::Clear()
 	{
 		while (m_IsReading)
@@ -178,11 +184,6 @@ namespace Glory
 		pResource->m_ID = newID;
 		pResource->m_Name = name;
 	}
-
-	AssetDatabase::AssetDatabase()
-		: m_IsWriting(false), m_IsReading(false) {}
-
-	AssetDatabase::~AssetDatabase() {}
 
 	size_t AssetDatabase::ReadLock::m_LockCounter = 0;
 	size_t AssetDatabase::WriteLock::m_LockCounter = 0;

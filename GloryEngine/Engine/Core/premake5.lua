@@ -19,7 +19,7 @@ project "GloryCore"
 		["Asset Management"] = { "BinaryStream.*", "AssetArchive.*", "AssetDatabase.*", "AssetLocation.*", "AssetManager.*", "ResourceMeta.*", "ResourceType.*" },
 		["Resources"] = { "PrefabData.*", "MaterialData.*", "MaterialPropertyInfo.*", "TextureData.*", "MeshData.*", "ModelData.*", "ImageData.*", "FileData.*", "CubemapData.*", "FontData.*", "FontDataStructs.*", "PipelineData.*" },
 		["Console"] = { "Logs.*", "Commands.*", "Console.*", "Debug.*", "DebugConsoleInput.*", "IConsole.*", "WindowsDebugConsole.*" },
-		["Core"] = { "ObjectManager.*", "TypeFlags.*", "GloryContext.*", "BuiltInModules.*", "Engine.*", "Object.*", "UUID.*", "Glory.*", "GameTime.*" },
+		["Core"] = { "ObjectManager.*", "TypeFlags.*", "GloryContext.*", "BuiltInModules.*", "GloryEngine.*", "Object.*", "UUID.*", "Glory.*", "GameTime.*" },
 		["Graphics"] = { "GraphicsDevice.*", "GraphicsEnums.*", "VertexDefinitions.*", "VertexHelpers.*", "RenderFrame.*" },
 		["Modules/Base"] = { "Module.*", "ModuleMetaData.*", "IModuleLoopHandler.*", "ModuleSettings.*" },
 		["Modules/Renderer/Camera"] = { "Camera.*", "CameraManager.*", "CameraRef.*" },
@@ -43,6 +43,8 @@ project "GloryCore"
 
 	includedirs
 	{
+		"%{GloryIncludeDir.enginecore}",
+
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
 

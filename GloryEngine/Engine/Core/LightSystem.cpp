@@ -1,6 +1,6 @@
 #include "LightSystem.h"
 
-#include "Engine.h"
+#include "IEngine.h"
 #include "GScene.h"
 #include "SceneManager.h"
 #include "Renderer.h"

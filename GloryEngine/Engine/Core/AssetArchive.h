@@ -8,7 +8,7 @@ namespace Glory
 {
 	class Resource;
 	class BinaryStream;
-	class Engine;
+	class IEngine;
 
 	enum AssetArchiveFlags
 	{
@@ -30,16 +30,16 @@ namespace Glory
 
 		void Serialize(Resource* pResource) const;
 		void Serialize(const Resource* pResource) const;
-		void Deserialize(Engine* pEngine);
+		void Deserialize(IEngine* pEngine);
 
 		size_t Size() const;
-		Resource* Get(Engine* pEngine, size_t index) const;
+		Resource* Get(IEngine* pEngine, size_t index) const;
 
 	private:
 		void WriteVersion();
 		void ReadVersion();
 
-		Resource* ReadResource(Engine* pEngine);
+		Resource* ReadResource(IEngine* pEngine);
 
 		BinaryStream* m_pStream;
 		Version m_Version;

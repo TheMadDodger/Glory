@@ -26,6 +26,7 @@ project "GlorySDLInput"
 	{
 		"%{DepsIncludeDir}",
 
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 
 		"%{IncludeDir.yaml_cpp}",
@@ -47,6 +48,7 @@ project "GlorySDLInput"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"shaderc",
 		"shaderc_combined",

@@ -31,6 +31,7 @@ project "GloryJoltPhysics"
 		"%{IncludeDir.glm}",
 		"%{BaseIncludeDir.physics}",
 
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 
 		"%{IncludeDir.ECS}",
@@ -61,6 +62,7 @@ project "GloryJoltPhysics"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryPhysicsModule",
 		"GloryReflect",

@@ -8,7 +8,7 @@
 namespace Glory
 {
 	class MaterialData;
-	class Engine;
+	class IEngine;
 	class PipelineData;
 
 namespace Utils
@@ -26,7 +26,7 @@ namespace Editor
 	{
 	public:
 		/** @brief Constructor */
-		EditorMaterialManager(Engine* pEngine);
+		EditorMaterialManager(IEngine* pEngine);
 		/** @brief Destructor */
 		virtual ~EditorMaterialManager();
 
@@ -88,7 +88,7 @@ namespace Editor
 		std::vector<UUID> m_Materials;
 		std::vector<UUID> m_RuntimeMaterials;
 
-		Engine* m_pEngine;
+		IEngine* m_pEngine;
 		UUID m_AssetRegisteredCallback;
 		UUID m_AssetUpdatedCallback;
 		UUID m_PipelineUpdatedCallback;

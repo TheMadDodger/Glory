@@ -16,7 +16,7 @@
 #include <ShaderSourceData.h>
 #include <GScene.h>
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Debug.h>
 #include <AssetDatabase.h>
 #include <AssetArchive.h>
@@ -68,7 +68,7 @@ namespace Glory::Editor
 
 	UUID EntryScene = 0;
 
-	bool PackageJob(Engine* pEngine, std::filesystem::path packageRoot)
+	bool PackageJob(IEngine* pEngine, std::filesystem::path packageRoot)
 	{
 		Running = true;
 		for (size_t i = 0; i < PackagingTasks.size(); ++i)
@@ -134,7 +134,7 @@ namespace Glory::Editor
 		EntryScene = entryScene.As<uint64_t>();
 	}
 
-	void ScanForAssetsInResource(Engine* pEngine, Resource* pResource, std::vector<UUID>& assets)
+	void ScanForAssetsInResource(IEngine* pEngine, Resource* pResource, std::vector<UUID>& assets)
 	{
 		if (!pResource) return;
 		const size_t count = assets.size();
@@ -147,7 +147,7 @@ namespace Glory::Editor
 		}
 	}
 
-	void ScanForAssets(Engine* pEngine, Utils::NodeValueRef& node, std::vector<UUID>& assets)
+	void ScanForAssets(IEngine* pEngine, Utils::NodeValueRef& node, std::vector<UUID>& assets)
 	{
 		if (node.IsMap())
 		{
@@ -204,7 +204,7 @@ namespace Glory::Editor
 		}
 	}
 
-	void ScanSceneFileForAssets(Engine* pEngine, Utils::YAMLFileRef& file, std::vector<UUID>& assets)
+	void ScanSceneFileForAssets(IEngine* pEngine, Utils::YAMLFileRef& file, std::vector<UUID>& assets)
 	{
 		Utils::NodeValueRef root = file.RootNodeRef().ValueRef();
 		ScanForAssets(pEngine, root, assets);
@@ -227,7 +227,7 @@ namespace Glory::Editor
 
 #pragma region Tasks
 
-	bool CalculateAssetGroupsTask(Engine* pEngine, const std::filesystem::path&, PackageTaskState& task)
+	bool CalculateAssetGroupsTask(IEngine* pEngine, const std::filesystem::path&, PackageTaskState& task)
 	{
 		task.m_SubTaskName = "Calculating";
 
@@ -355,7 +355,7 @@ namespace Glory::Editor
 	//	return true;
 	//}
 
-	bool PackageScenesTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	bool PackageScenesTask(IEngine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		/* Open every scene and package them individually along with their assets */
 		std::filesystem::path relativeDataPath = "Data";
@@ -387,7 +387,7 @@ namespace Glory::Editor
 		return true;
 	}
 
-	bool PackageAssetsTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	bool PackageAssetsTask(IEngine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		size_t totalAssets = 0;
 		for (size_t i = 0; i < ScenesToPackage.size(); ++i)
@@ -463,7 +463,7 @@ namespace Glory::Editor
 		return true;
 	}
 
-	bool PackageShadersTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	bool PackageShadersTask(IEngine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		task.m_TotalSubTasks = Pipelines.size();
 
@@ -530,7 +530,7 @@ namespace Glory::Editor
 		return true;
 	}
 
-	bool PackageAssetDatabase(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	bool PackageAssetDatabase(IEngine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		task.m_TotalSubTasks = UsedAssets.size();
 
@@ -567,7 +567,7 @@ namespace Glory::Editor
 		return true;
 	}
 
-	bool CopyFilesTask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	bool CopyFilesTask(IEngine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		/* Copy modules and their resources and settings */
 		std::filesystem::path modulesPath = packageRoot;
@@ -651,7 +651,7 @@ namespace Glory::Editor
 		return true;
 	}
 
-	bool CompileEXETask(Engine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
+	bool CompileEXETask(IEngine* pEngine, const std::filesystem::path& packageRoot, PackageTaskState& task)
 	{
 		/* Compile exe */
 		task.m_SubTaskName = "Copying source files";
@@ -793,7 +793,7 @@ namespace Glory::Editor
 
 #pragma endregion
 
-	void StartPackage(Engine* pEngine)
+	void StartPackage(IEngine* pEngine)
 	{
 		if (AssetCompiler::IsBusy())
 		{
@@ -926,7 +926,7 @@ namespace Glory::Editor
 			LoadedScenesToPackage.push_back(pScene);
 		}
 
-		static auto pPackagingJob = pEngine->Jobs().Run<bool, Engine*, std::filesystem::path>();
+		static auto pPackagingJob = pEngine->Jobs().Run<bool, IEngine*, std::filesystem::path>();
 		pPackagingJob->QueueSingleJob(PackageJob, pEngine, packageRoot);
 
 		PackagingStartedEvent().Dispatch({});

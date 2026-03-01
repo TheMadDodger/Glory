@@ -5,7 +5,7 @@
 #include "Constraints.h"
 
 #include <GScene.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <GameTime.h>
 #include <FontData.h>
 #include <SceneManager.h>
@@ -119,7 +119,7 @@ namespace Glory
 
 		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
 		UIRendererModule* pUIRenderer = pDocument->Renderer();
-		Engine* pEngine = pUIRenderer->GetEngine();
+		IEngine* pEngine = pUIRenderer->GetEngine();
 		LocalizeModuleBase* pLocalize = pEngine->GetOptionalModule<LocalizeModuleBase>();
 		if (!pLocalize) return;
 
@@ -141,7 +141,7 @@ namespace Glory
 		if (pComponent.m_Text.empty()) return;
         UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
         UIRendererModule* pUIRenderer = pDocument->Renderer();
-		Engine* pEngine = pUIRenderer->GetEngine();
+		IEngine* pEngine = pUIRenderer->GetEngine();
 		AssetManager& assets = pEngine->GetAssetManager();
 		const UUID objectID = pDocument->EntityUUID(entity);
 
@@ -221,7 +221,7 @@ namespace Glory
 		if (!inputAllowed) return;
 
 		UIRendererModule* pUIRenderer = pDocument->Renderer();
-		Engine* pEngine = pUIRenderer->GetEngine();
+		IEngine* pEngine = pUIRenderer->GetEngine();
 		const UITransform& transform = pRegistry->GetComponent<UITransform>(entity);
 
 		const glm::vec4 cursor{ pDocument->GetCursorPos(), 0.0f, 1.0f };
@@ -374,7 +374,7 @@ namespace Glory
 		if (!pRegistry->HasComponent<UIInteraction>(entity)) return;
 		UIInteraction& interaction = pRegistry->GetComponent<UIInteraction>(entity);
 		UIDocument* pDocument = pRegistry->GetUserData<UIDocument*>();
-		Engine* pEngine = pDocument->Renderer()->GetEngine();
+		IEngine* pEngine = pDocument->Renderer()->GetEngine();
 
 		const glm::vec2& cursorScrollDelta = pDocument->GetCursorScrollDelta();
 		const float length = glm::length(cursorScrollDelta);

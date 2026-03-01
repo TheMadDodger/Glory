@@ -6,12 +6,12 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 
 	class JoltDebugRenderer : public JPH::DebugRenderer
 	{
 	public:
-		JoltDebugRenderer(Engine* pEngine);
+		JoltDebugRenderer(IEngine* pEngine);
 
 		void DrawLine(JPH::RVec3Arg inFrom, JPH::RVec3Arg inTo, JPH::ColorArg inColor) override;
 		void DrawTriangle(JPH::RVec3Arg inV1, JPH::RVec3Arg inV2, JPH::RVec3Arg inV3, JPH::ColorArg inColor) override;
@@ -23,7 +23,7 @@ namespace Glory
 		virtual void DrawText3D(JPH::RVec3Arg inPosition, const JPH::string_view& inString, JPH::ColorArg inColor = JPH::Color::sWhite, float inHeight = 0.5f) override;
 
 	private:
-		Engine* m_pEngine;
+		IEngine* m_pEngine;
 	};
 }
 

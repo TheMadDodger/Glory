@@ -2,7 +2,7 @@
 #include "BinaryStream.h"
 #include "AssetManager.h"
 #include "TextureData.h"
-#include "Engine.h"
+#include "IEngine.h"
 
 namespace Glory
 {
@@ -83,7 +83,7 @@ namespace Glory
 			m_CharacterCodes[i] = m_Glyphs[i].Code;
 	}
 
-	void FontData::References(Engine* pEngine, std::vector<UUID>& references) const
+	void FontData::References(IEngine* pEngine, std::vector<UUID>& references) const
 	{
 		if (m_Texture)
 		{

@@ -1,5 +1,5 @@
 #include "MonoScriptLoader.h"
-#include <Engine.h>
+#include <IEngine.h>
 #include <FileLoaderModule.h>
 
 namespace Glory

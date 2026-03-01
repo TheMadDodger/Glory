@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <GloryMonoScipting.h>
 #include <Debug.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <ComponentTypes.h>
 #include <AssetManager.h>
 #include <FSM.h>
@@ -11,7 +11,7 @@
 
 namespace Glory
 {
-	Engine* FSM_EngineInstance;
+	IEngine* FSM_EngineInstance;
 #define FSM_MODULE FSM_EngineInstance->GetOptionalModule<FSMModule>()
 
 #pragma region FSM Template
@@ -202,7 +202,7 @@ namespace Glory
         BIND("GloryEngine.FSM.FSMInstance::FSMInstance_SetFloat", FSMInstance_SetFloat);
 	}
 
-	void FSMCSAPI::SetEngine(Engine* pEngine)
+	void FSMCSAPI::SetEngine(IEngine* pEngine)
 	{
 		FSM_EngineInstance = pEngine;
 	}

@@ -6,7 +6,7 @@
 #include "TextureImporter.h"
 #include "ThumbnailManager.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <AssetDatabase.h>
 #include <Undo.h>
 

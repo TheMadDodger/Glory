@@ -29,6 +29,7 @@ project "GloryUIRenderer"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
 
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
@@ -50,6 +51,7 @@ project "GloryUIRenderer"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryLocalizeModule",
 		"shaderc",

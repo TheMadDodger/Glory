@@ -20,7 +20,7 @@
 
 namespace Glory
 {
-	Engine* Entity_EngineInstance;
+	IEngine* Entity_EngineInstance;
 
 #pragma region Entity
 
@@ -1177,7 +1177,7 @@ namespace Glory
 		BIND("GloryEngine.Entities.TextComponent::TextComponent_GetWrapWidth", TextComponent_GetWrapWidth);
 	}
 
-	void EntityCSAPI::SetEngine(Engine* pEngine)
+	void EntityCSAPI::SetEngine(IEngine* pEngine)
 	{
 		Entity_EngineInstance = pEngine;
 	}

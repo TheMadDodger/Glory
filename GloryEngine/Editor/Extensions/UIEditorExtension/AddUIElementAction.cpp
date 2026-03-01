@@ -1,5 +1,6 @@
 #include "AddUIElementAction.h"
 
+#include <UUIDRemapper.h>
 #include <UIDocumentData.h>
 #include <UIDocument.h>
 #include <GameTime.h>
@@ -23,7 +24,7 @@ namespace Glory::Editor
 	{
 	}
 
-	UUID AddUIElementAction::AddElement(Engine* pEngine, UIDocument* pDocument, Utils::YAMLFileRef& file,
+	UUID AddUIElementAction::AddElement(IEngine* pEngine, UIDocument* pDocument, Utils::YAMLFileRef& file,
 		std::string_view name, uint32_t type, UUID parent, size_t siblingIndex)
 	{
 		const UUID newEntityID{};
@@ -43,7 +44,7 @@ namespace Glory::Editor
 		return newEntityID;
 	}
 
-	UUID AddUIElementAction::DuplicateElement(Engine* pEngine, UIDocument* pDocument, Utils::YAMLFileRef& file, UUID objectID)
+	UUID AddUIElementAction::DuplicateElement(IEngine* pEngine, UIDocument* pDocument, Utils::YAMLFileRef& file, UUID objectID)
 	{
 		if (!pDocument->EntityExists(objectID)) return 0;
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
@@ -97,7 +98,7 @@ namespace Glory::Editor
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		UIMainWindow* pMainWindow = pApp->GetMainEditor().GetMainWindow<UIMainWindow>();
 		UIDocument* pDocument = pMainWindow->FindEditingDocument(actionRecord.ObjectID);
-		Engine* pEngine = pApp->GetEngine();
+		IEngine* pEngine = pApp->GetEngine();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(actionRecord.ObjectID);
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
@@ -112,7 +113,7 @@ namespace Glory::Editor
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		UIMainWindow* pMainWindow = pApp->GetMainEditor().GetMainWindow<UIMainWindow>();
 		UIDocument* pDocument = pMainWindow->FindEditingDocument(actionRecord.ObjectID);
-		Engine* pEngine = pApp->GetEngine();
+		IEngine* pEngine = pApp->GetEngine();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(actionRecord.ObjectID);
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);

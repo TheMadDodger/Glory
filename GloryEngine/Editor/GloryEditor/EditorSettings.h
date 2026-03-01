@@ -1,5 +1,5 @@
 #pragma once
-#include <Engine.h>
+#include <IEngine.h>
 #include <NodeRef.h>
 #include <GloryEditor.h>
 
@@ -10,14 +10,14 @@ namespace Glory::Editor
 	public:
 		EditorSettings(std::filesystem::path editorSettingsPath = "./EditorSettings.yaml");
 		virtual ~EditorSettings();
-		void Load(Engine* pEngine);
-		void Save(Engine* pEngine);
+		void Load(IEngine* pEngine);
+		void Save(IEngine* pEngine);
 
 		GLORY_EDITOR_API Utils::NodeValueRef operator[](const std::filesystem::path& path);
 
 	private:
-		void LoadSettingsFile(Engine* pEngine);
-		void LoadDefaultSettings(Engine* pEngine);
+		void LoadSettingsFile(IEngine* pEngine);
+		void LoadDefaultSettings(IEngine* pEngine);
 
 	private:
 		Utils::YAMLFileRef m_YAMLFile;

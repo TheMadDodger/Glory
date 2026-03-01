@@ -48,7 +48,7 @@ namespace Glory
         void Serialize(BinaryStream& container) const override;
         void Deserialize(BinaryStream& container) override;
 
-        void References(Engine* pEngine, std::vector<UUID>& references) const override;
+        void References(IEngine* pEngine, std::vector<UUID>& references) const override;
 
         void CopyProperties(void* dst);
         size_t PropertyDataSize();

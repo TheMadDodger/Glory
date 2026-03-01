@@ -65,7 +65,7 @@ namespace Glory::Editor
 	void UIEditor::OnGUI()
 	{
 		EditorApplication* pApp = EditorApplication::GetInstance();
-		Engine* pEngine = pApp->GetEngine();
+		IEngine* pEngine = pApp->GetEngine();
 		UIRendererModule* pUIRenderer = pEngine->GetOptionalModule<UIRendererModule>();
 		Renderer* pRenderer = pEngine->ActiveRenderer();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();

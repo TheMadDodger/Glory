@@ -13,7 +13,7 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 	class MeshData;
 	class ImageData;
 	class InternalTexture;
@@ -28,7 +28,7 @@ namespace Glory
 		class ThumbnailRenderer : public SceneManager
 		{
 		public:
-			ThumbnailRenderer(Engine* pEngine);
+			ThumbnailRenderer(IEngine* pEngine);
 			virtual ~ThumbnailRenderer();
 
 			GLORY_EDITOR_API void RegisterRenderableThumbnail(uint32_t hashCode,

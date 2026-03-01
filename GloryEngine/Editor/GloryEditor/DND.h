@@ -1,7 +1,6 @@
 #pragma once
 #include "EditorApplication.h"
 
-#include <Engine.h>
 #include <ResourceType.h>
 #include <Enum.h>
 #include <functional>

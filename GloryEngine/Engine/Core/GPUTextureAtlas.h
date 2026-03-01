@@ -17,7 +17,7 @@ namespace Glory
 		 * @param createInfo Creation info for the attached texture
 		 * @param pEngine Engine instance
 		 */
-		GPUTextureAtlas(TextureCreateInfo&& createInfo, Engine* pEngine, TextureHandle texture=0);
+		GPUTextureAtlas(TextureCreateInfo&& createInfo, IEngine* pEngine, TextureHandle texture=0);
 		/** @brief Destructor */
 		virtual ~GPUTextureAtlas();
 

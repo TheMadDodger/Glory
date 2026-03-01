@@ -4,7 +4,7 @@
 #include "CoreLibManager.h"
 
 #include <GScene.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <SceneManager.h>
 #include <AssetManager.h>
 #include <Debug.h>
@@ -16,7 +16,7 @@ namespace Glory
 	void MonoScriptedSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AssetManager* pAssets = &pEngine->GetAssetManager();
 
 		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
@@ -45,7 +45,7 @@ namespace Glory
 	void MonoScriptedSystem::OnStop(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AssetManager* pAssets = &pEngine->GetAssetManager();
 
 		MonoScriptManager& scriptManager = MonoManager::Instance()->GetCoreLibManager()->ScriptManager();
@@ -60,7 +60,7 @@ namespace Glory
 	void MonoScriptedSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AssetManager* pAssets = &pEngine->GetAssetManager();
 
 		Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entity);
@@ -88,7 +88,7 @@ namespace Glory
 	void MonoScriptedSystem::OnEnable(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AssetManager* pAssets = &pEngine->GetAssetManager();
 
 		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
@@ -104,7 +104,7 @@ namespace Glory
 	void MonoScriptedSystem::OnDisable(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AssetManager* pAssets = &pEngine->GetAssetManager();
 
 		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
@@ -120,7 +120,7 @@ namespace Glory
 	void MonoScriptedSystem::OnUpdate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AssetManager* pAssets = &pEngine->GetAssetManager();
 
 		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
@@ -142,7 +142,7 @@ namespace Glory
 	void MonoScriptedSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, MonoScriptComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		AssetManager* pAssets = &pEngine->GetAssetManager();
 
 		CoreLibManager* pCoreLibManager = MonoManager::Instance()->GetCoreLibManager();
@@ -201,7 +201,7 @@ namespace Glory
 		}
 	}
 
-	void MonoScriptedSystem::OnBodyActivated(Engine* pEngine, UUID sceneID, UUID entityUUID)
+	void MonoScriptedSystem::OnBodyActivated(IEngine* pEngine, UUID sceneID, UUID entityUUID)
 	{
 		GScene* pScene = pEngine->GetSceneManager()->GetOpenScene(sceneID);
 		if (!pScene) return;
@@ -218,7 +218,7 @@ namespace Glory
 		scriptManager.Invoke((size_t)typeIndex, pScriptObject, "OnBodyActivated", nullptr);
 	}
 
-	void MonoScriptedSystem::OnBodyDeactivated(Engine* pEngine, UUID sceneID, UUID entityUUID)
+	void MonoScriptedSystem::OnBodyDeactivated(IEngine* pEngine, UUID sceneID, UUID entityUUID)
 	{
 		GScene* pScene = pEngine->GetSceneManager()->GetOpenScene(sceneID);
 		if (!pScene) return;
@@ -235,7 +235,7 @@ namespace Glory
 		scriptManager.Invoke((size_t)typeIndex, pScriptObject, "OnBodyDeactivated", nullptr);
 	}
 
-	void MonoScriptedSystem::OnContactAdded(Engine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID)
+	void MonoScriptedSystem::OnContactAdded(IEngine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID)
 	{
 		GScene* pScene1 = pEngine->GetSceneManager()->GetOpenScene(scene1ID);
 		if (!pScene1) return;
@@ -281,7 +281,7 @@ namespace Glory
 		}
 	}
 
-	void MonoScriptedSystem::OnContactPersisted(Engine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID)
+	void MonoScriptedSystem::OnContactPersisted(IEngine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID)
 	{
 		GScene* pScene1 = pEngine->GetSceneManager()->GetOpenScene(scene1ID);
 		if (!pScene1) return;
@@ -327,7 +327,7 @@ namespace Glory
 		}
 	}
 
-	void MonoScriptedSystem::OnContactRemoved(Engine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID)
+	void MonoScriptedSystem::OnContactRemoved(IEngine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID)
 	{
 		GScene* pScene1 = pEngine->GetSceneManager()->GetOpenScene(scene1ID);
 		if (!pScene1) return;

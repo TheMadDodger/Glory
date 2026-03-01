@@ -2,7 +2,7 @@
 #include "AudioComponents.h"
 #include "AudioSourceSystem.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <SceneManager.h>
 
 #include <EntityRegistry.h>

@@ -1,6 +1,6 @@
 #include "GraphicsDevice.h"
 #include "Module.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "Debug.h"
 #include "EngineProfiler.h"
 

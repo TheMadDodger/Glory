@@ -3,12 +3,12 @@
 #include "GloryMonoScipting.h"
 #include "MonoManager.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <InputModule.h>
 
 namespace Glory
 {
-	Engine* Input_EngineInstance;
+	IEngine* Input_EngineInstance;
 
 #pragma region Input Device
 
@@ -151,7 +151,7 @@ namespace Glory
 		BIND("GloryEngine.InputDevice::InputMode_GetInputDeviceType", InputMode_GetInputDeviceType);
 	}
 
-	void InputCSAPI::SetEngine(Engine* pEngine)
+	void InputCSAPI::SetEngine(IEngine* pEngine)
 	{
 		Input_EngineInstance = pEngine;
 	}

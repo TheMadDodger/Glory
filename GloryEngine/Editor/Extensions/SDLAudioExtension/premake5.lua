@@ -28,6 +28,7 @@ project "SDLAudioExtension"
 
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
@@ -62,6 +63,7 @@ project "SDLAudioExtension"
 		"SDL2",
 		"SDL2_mixer",
 
+		"GloryEngineCore",
 		"GloryCore",
 		"GlorySDLAudio",
 		"GloryEditor",

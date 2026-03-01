@@ -127,7 +127,7 @@ namespace Glory::Editor
 
 	void GameWindow::View()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
 		Renderer* pRenderer = EditorApplication::GetInstance()->GetEngine()->ActiveRenderer();
 

@@ -1,5 +1,4 @@
 #include "EngineProfiler.h"
-#include "Engine.h"
 
 namespace Glory
 {

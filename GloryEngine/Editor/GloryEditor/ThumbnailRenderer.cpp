@@ -1,7 +1,7 @@
 #include "ThumbnailRenderer.h"
 #include "Importer.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <InternalTexture.h>
 #include <GraphicsDevice.h>
 #include <Components.h>
@@ -23,7 +23,7 @@ namespace Glory::Editor
 	static constexpr glm::uvec2 ThumbnailResolution{ 256, 256 };
 	const size_t ThumbnailDataSize = ThumbnailResolution.x*ThumbnailResolution.y*4;
 
-	ThumbnailRenderer::ThumbnailRenderer(Engine* pEngine) : SceneManager(pEngine), m_RenderingIDs{ 0ull }
+	ThumbnailRenderer::ThumbnailRenderer(IEngine* pEngine) : SceneManager(pEngine), m_RenderingIDs{ 0ull }
 	{
 	}
 

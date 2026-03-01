@@ -1,7 +1,7 @@
 #include "TextImporter.h"
 #include "EditorApplication.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Debug.h>
 
 #include <fstream>

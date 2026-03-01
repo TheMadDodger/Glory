@@ -2,7 +2,7 @@
 
 namespace Glory
 {
-	PipelineManager::PipelineManager(Engine* pEngine): m_pEngine(pEngine)
+	PipelineManager::PipelineManager(IEngine* pEngine): m_pEngine(pEngine)
 	{
 	}
 }

@@ -3,11 +3,12 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 
 	class GameTime
 	{
 	public:
+		GameTime(IEngine* pEngine);
 		virtual ~GameTime();
 
 		void Initialize();
@@ -28,10 +29,9 @@ namespace Glory
 		static float TimeSinceSeconds(uint64_t timestamp);
 
 	private:
-		friend class Engine;
-		GameTime(Engine* pEngine);
+		friend class IEngine;
 
-		Engine* m_pEngine;
+		IEngine* m_pEngine;
 		float m_TimeScale = 1.0f;
 		int m_TotalFrames = 0;
 

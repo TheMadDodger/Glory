@@ -28,6 +28,7 @@ project "GlorySDLWindow"
 		"%{DepsIncludeDir}",
 
 		"%{IncludeDir.glm}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
@@ -52,6 +53,7 @@ project "GlorySDLWindow"
 	{
 		"SDL2",
 
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryReflect",
 		"GloryECS",

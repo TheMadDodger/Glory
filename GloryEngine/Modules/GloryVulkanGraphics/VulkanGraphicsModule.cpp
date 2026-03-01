@@ -8,10 +8,11 @@
 #include <chrono>
 #include <iostream>
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Debug.h>
 #include <Window.h>
 #include <VertexHelpers.h>
+#include <WindowData.h>
 
 namespace Glory
 {

@@ -8,7 +8,7 @@
 #include <imgui.h>
 #include <algorithm>
 #include <EditorAssetDatabase.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <WindowModule.h>
 #include <SerializedTypes.h>
 #include <StringUtils.h>

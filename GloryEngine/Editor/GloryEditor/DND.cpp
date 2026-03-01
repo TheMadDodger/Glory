@@ -52,6 +52,9 @@ namespace Glory::Editor
 
     bool DND::HandleTargetInternal(std::function<void(uint32_t, const ImGuiPayload*)> callback)
     {
+        IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
+        ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
+
         for (size_t i = 0; i < m_AcceptedTypes.size(); ++i)
         {
             const uint32_t type = m_AcceptedTypes[i];
@@ -64,7 +67,7 @@ namespace Glory::Editor
             }
 
             std::string_view name;
-            ResourceType* pResource = EditorApplication::GetInstance()->GetEngine()->GetResourceTypes().GetResourceType(type);
+            ResourceType* pResource = resourceTypes.GetResourceType(type);
             if (!pResource)
             {
                 const TypeData* pType = Reflect::GetTyeData(type);

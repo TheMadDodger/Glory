@@ -2,7 +2,7 @@
 #define NOMINMAX
 
 #include <iostream>
-#include <Engine.h>
+#include <GloryEngine.h>
 #include <windows.h>
 #include <EngineLoader.h>
 #include <EditorApplication.h>

@@ -4,7 +4,7 @@
 #include <vector>
 #include <glm/gtx/matrix_decompose.hpp>
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Debug.h>
 #include <SceneManager.h>
 #include <GScene.h>

@@ -1,7 +1,7 @@
 #include "BoundingBox.h"
 #include "Components.h"
 
-#include "Engine.h"
+#include "IEngine.h"
 #include "AssetManager.h"
 
 #include <glm/gtx/matrix_decompose.hpp>
@@ -77,7 +77,7 @@ namespace Glory
 		m_Radius = glm::length(edgeToEdge)/2.0f;
 	}
 
-	static void CollectAABBChild(Entity entity, AABB& boundingBox, Engine* pEngine)
+	static void CollectAABBChild(Entity entity, AABB& boundingBox, IEngine* pEngine)
 	{
 		if (entity.HasComponent<MeshRenderer>())
 		{
@@ -95,14 +95,14 @@ namespace Glory
 			CollectAABBChild(entity.ChildEntity(i), boundingBox, pEngine);
 	}
 
-	AABB GenerateAABB(Entity entity, Engine* pEngine, const glm::vec3& origin)
+	AABB GenerateAABB(Entity entity, IEngine* pEngine, const glm::vec3& origin)
 	{
 		AABB boundingBox{ origin };
 		CollectAABBChild(entity, boundingBox, pEngine);
 		return boundingBox;
 	}
 
-	static void CollectBoundingSphereChild(Entity entity, BoundingSphere& boundingSphere, Engine* pEngine)
+	static void CollectBoundingSphereChild(Entity entity, BoundingSphere& boundingSphere, IEngine* pEngine)
 	{
 		if (entity.HasComponent<MeshRenderer>())
 		{
@@ -120,7 +120,7 @@ namespace Glory
 			CollectBoundingSphereChild(entity.ChildEntity(i), boundingSphere, pEngine);
 	}
 
-	BoundingSphere GenerateBoundingSphere(Entity entity, Engine* pEngine, const glm::vec3& defaultCenter, float defaultRadius)
+	BoundingSphere GenerateBoundingSphere(Entity entity, IEngine* pEngine, const glm::vec3& defaultCenter, float defaultRadius)
 	{
 		BoundingSphere boundingSphere{ {}, 0.0f };
 		CollectBoundingSphereChild(entity, boundingSphere, pEngine);

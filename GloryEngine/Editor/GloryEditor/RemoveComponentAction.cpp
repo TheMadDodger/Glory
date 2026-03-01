@@ -6,7 +6,7 @@
 #include "EditorApplication.h"
 
 #include <SceneManager.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <UUIDRemapper.h>
 
 #include <EntityRegistry.h>

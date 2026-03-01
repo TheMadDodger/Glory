@@ -4,7 +4,7 @@
 #include "GScene.h"
 #include "Renderer.h"
 #include "SceneManager.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "VertexHelpers.h"
 #include "RenderData.h"
 #include "AssetManager.h"
@@ -17,7 +17,7 @@ namespace Glory
 	void TextSystem::OnDisableDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, TextComponent& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		const UUID meshID = pScene->GetEntityUUID(entity);
 		pEngine->GetAssetManager().UnloadAsset(meshID);
 	}
@@ -30,7 +30,7 @@ namespace Glory
 		Renderer* pRenderer = pScene->Manager()->GetRenderer();
 		if (!pRenderer) return;
 
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		LayerManager* pLayers = &pEngine->GetLayerManager();
 
 		FontData* pFont = pComponent.m_Font.Get(&pEngine->GetAssetManager());

@@ -1,6 +1,6 @@
 #include "SDLAudioModule.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <SceneManager.h>
 #include <AudioData.h>
 #include <Debug.h>
@@ -12,7 +12,7 @@ namespace Glory
 	std::vector<AudioChannel> MixChannels;
 	MusicChannel Music;
 
-	Engine* Audio_EngineInstance = nullptr;
+	IEngine* Audio_EngineInstance = nullptr;
 
 	GLORY_MODULE_VERSION_CPP(SDLAudioModule);
 
@@ -35,7 +35,7 @@ namespace Glory
 
 	}
 
-	int SDLAudioModule::Play(AudioData* pAudio, int loops, AudioChannelUData&& udata, std::function<void(Engine*, const AudioChannel&)> finishedCallback)
+	int SDLAudioModule::Play(AudioData* pAudio, int loops, AudioChannelUData&& udata, std::function<void(IEngine*, const AudioChannel&)> finishedCallback)
 	{
 		auto itor = m_Chunks.find(pAudio->GetUUID());
 		if (itor == m_Chunks.end())
@@ -106,7 +106,7 @@ namespace Glory
 		return int(oldChannels);
 	}
 
-	int SDLAudioModule::PlayWithEffects(AudioData* pAudio, int loops, AudioChannelUData&& udata, std::function<void(Engine*, const AudioChannel&)> finishedCallback)
+	int SDLAudioModule::PlayWithEffects(AudioData* pAudio, int loops, AudioChannelUData&& udata, std::function<void(IEngine*, const AudioChannel&)> finishedCallback)
 	{
 		const int channelIndex = Play(pAudio, loops, std::move(udata), finishedCallback);
 		Mix_RegisterEffect(channelIndex, EffectCallback, EffectDoneCallback, &MixChannels[channelIndex]);

@@ -10,7 +10,11 @@ namespace Glory
 	class AssetDatabase
 	{
 	public:
+		AssetDatabase();
 		virtual ~AssetDatabase();
+
+		void Initialize();
+		void Destroy();
 
 		bool GetAssetLocation(UUID uuid, AssetLocation& location);
 		bool GetResourceMeta(UUID uuid, ResourceMeta& meta);
@@ -61,15 +65,6 @@ namespace Glory
 
 		void SetEntryScene(UUID uuid);
 		UUID GetEntryScene() const;
-
-	private:
-		void Initialize();
-		void Destroy();
-
-	private:
-		friend class Engine;
-		friend class AssetManager;
-		AssetDatabase();
 
 	private:
 		bool m_IsWriting;

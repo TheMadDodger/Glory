@@ -6,13 +6,13 @@
 #include "PhysicsSystem.h"
 #include "Debug.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <GScene.h>
 #include <SceneManager.h>
 #include <PhysicsComponents.h>
 
 #include <Components.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <glm/gtx/matrix_decompose.hpp>
 
 namespace Glory
@@ -20,7 +20,7 @@ namespace Glory
 	void CharacterControllerSystem::OnStart(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CharacterController& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 
 		pComponent.m_BodyID = PhysicsBody::InvalidBodyID;
 		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
@@ -60,7 +60,7 @@ namespace Glory
 		if (!pComponent.m_CharacterID) return;
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 
 		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 		JoltCharacterManager* pCharacters = pPhysics->GetCharacterManager();
@@ -75,7 +75,7 @@ namespace Glory
 	void CharacterControllerSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, CharacterController& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 
 		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 		if (!pPhysics)
@@ -92,7 +92,7 @@ namespace Glory
 		if (!pComponent.m_CharacterID) return;
 
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 
 		JoltPhysicsModule* pPhysics = pEngine->GetOptionalModule<JoltPhysicsModule>();
 

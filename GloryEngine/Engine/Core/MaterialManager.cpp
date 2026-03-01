@@ -2,6 +2,6 @@
 
 namespace Glory
 {
-	MaterialManager::MaterialManager(Engine* pEngine):
+	MaterialManager::MaterialManager(IEngine* pEngine):
 		m_pEngine(pEngine) {}
 }

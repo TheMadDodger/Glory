@@ -5,7 +5,7 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 
 	struct BoundingBox
 	{
@@ -49,6 +49,6 @@ namespace Glory
 		void Combine(const BoundingSphere& bounds, const glm::mat4& transform);
 	};
 
-	AABB GenerateAABB(Entity entity, Engine* pEngine, const glm::vec3& origin={});
-	BoundingSphere GenerateBoundingSphere(Entity entity, Engine* pEngine, const glm::vec3& defaultCenter={}, float defaultRadius=1.0f);
+	AABB GenerateAABB(Entity entity, IEngine* pEngine, const glm::vec3& origin={});
+	BoundingSphere GenerateBoundingSphere(Entity entity, IEngine* pEngine, const glm::vec3& defaultCenter={}, float defaultRadius=1.0f);
 }

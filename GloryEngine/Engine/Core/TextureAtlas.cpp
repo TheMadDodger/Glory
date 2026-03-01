@@ -1,11 +1,11 @@
 #include "TextureAtlas.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "Debug.h"
 #include "GraphicsEnums.h"
 
 namespace Glory
 {
-	TextureAtlas::TextureAtlas(Engine* pEngine, uint32_t width, uint32_t height):
+	TextureAtlas::TextureAtlas(IEngine* pEngine, uint32_t width, uint32_t height):
 		m_pEngine(pEngine), m_Width(width), m_Height(height), m_AvailableHeight(height)
 	{
 	}

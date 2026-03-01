@@ -6,7 +6,7 @@
 #include <GloryMonoScipting.h>
 #include <ScriptingExtender.h>
 #include <PhysicsSystem.h>
-#include <Engine.h>
+#include <IEngine.h>
 
 namespace Glory
 {
@@ -39,11 +39,11 @@ namespace Glory
 		return true;
 	}
 
-	void JoltLibManager::CollectTypes(Engine*, Assembly*)
+	void JoltLibManager::CollectTypes(IEngine*, Assembly*)
 	{
 	}
 
-	void JoltLibManager::Initialize(Engine* pEngine, Assembly*)
+	void JoltLibManager::Initialize(IEngine* pEngine, Assembly*)
 	{
 		PhysicsCSAPI::SetEngine(pEngine);
 		PhysicsComponentsCSAPI::SetEngine(pEngine);
@@ -55,7 +55,7 @@ namespace Glory
 		PhysicsSystem::Instance()->OnContactRemoved_Callback = MonoScriptedSystem::OnContactRemoved;
 	}
 
-	void JoltLibManager::Cleanup(Engine*)
+	void JoltLibManager::Cleanup(IEngine*)
 	{
 		PhysicsSystem::Instance()->OnBodyActivated_Callback = NULL;
 		PhysicsSystem::Instance()->OnBodyDeactivated_Callback = NULL;
@@ -64,7 +64,7 @@ namespace Glory
 		PhysicsSystem::Instance()->OnContactRemoved_Callback = NULL;
 	}
 
-	void JoltLibManager::Reset(Engine*)
+	void JoltLibManager::Reset(IEngine*)
 	{
 	}
 }

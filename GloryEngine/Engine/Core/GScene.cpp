@@ -6,7 +6,7 @@
 #include "DistributedRandom.h"
 #include "PropertySerializer.h"
 #include "SceneManager.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "Debug.h"
 #include "BinaryStream.h"
 #include "BinarySerialization.h"
@@ -400,7 +400,7 @@ namespace Glory
 		return { newEntity, this };
 	}
 
-	void GScene::References(Engine* pEngine, std::vector<UUID>& references) const
+	void GScene::References(IEngine* pEngine, std::vector<UUID>& references) const
 	{
 		if (m_Settings.m_LightingSettings.m_Skybox)
 		{

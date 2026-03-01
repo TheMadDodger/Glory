@@ -3,7 +3,7 @@
 #include "PropertySerializer.h"
 #include "GScene.h"
 #include "SceneManager.h"
-#include "Engine.h"
+#include "IEngine.h"
 
 #include <yaml-cpp/yaml.h>
 #include <NodeRef.h>
@@ -41,7 +41,7 @@ namespace Glory
 		}
 	}
 
-	void PrefabData::References(Engine* pEngine, std::vector<UUID>& references) const
+	void PrefabData::References(IEngine* pEngine, std::vector<UUID>& references) const
 	{
 		const size_t typeViewCount = m_Registry.TypeViewCount();
 		for (size_t i = 0; i < typeViewCount; ++i)

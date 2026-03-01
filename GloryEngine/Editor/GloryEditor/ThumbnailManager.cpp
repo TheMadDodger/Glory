@@ -6,7 +6,7 @@
 #include "EditorApplication.h"
 #include "ThumbnailSceneSetup.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <GraphicsDevice.h>
 #include <MaterialData.h>
 

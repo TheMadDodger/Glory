@@ -1,7 +1,7 @@
 #include "MonoScriptImporter.h"
 
 #include <EditorApplication.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <FileLoaderModule.h>
 
 namespace Glory::Editor

@@ -2,7 +2,7 @@
 #include "EditorPipelineManager.h"
 
 #include <EditorApplication.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <Debug.h>
 #include <FileLoaderModule.h>
 #include <InternalTexture.h>
@@ -29,7 +29,7 @@ namespace Glory::Editor
 
 	ImportedResource FontImporter::LoadResource(const std::filesystem::path& path, void*) const
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		Debug& debug = pEngine->GetDebug();
 		LoaderModule* pModule = pEngine->GetLoaderModule<FileData>();
 		FileImportSettings fileImportSettings;

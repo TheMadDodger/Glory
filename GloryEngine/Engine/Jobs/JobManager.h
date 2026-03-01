@@ -47,7 +47,7 @@ namespace Glory::Jobs
 		}
 
 	private:
-		friend class Engine;
+		friend class IEngine;
 		std::vector<JobWorkerPoolBase*> m_pJobPools;
 		ThreadManager* m_pThreads;
 	};

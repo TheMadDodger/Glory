@@ -70,7 +70,7 @@ namespace Glory
 		container.Read(m_SamplerSettings);
 	}
 
-	void CubemapData::References(Engine* pEngine, std::vector<UUID>& references) const
+	void CubemapData::References(IEngine* pEngine, std::vector<UUID>& references) const
 	{
 		for (size_t i = 0; i < 6; ++i)
 		{

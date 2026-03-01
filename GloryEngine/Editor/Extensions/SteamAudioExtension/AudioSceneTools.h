@@ -6,10 +6,10 @@
 namespace Glory
 {
 	class GScene;
-	class Engine;
+	class IEngine;
 }
 
 namespace Glory::Editor
 {
-	GLORY_EDITOR_API bool GenerateAudioScene(Engine* pEngine, GScene* pScene, const SoundMaterial* defaultMaterial, AudioScene& audioScene);
+	GLORY_EDITOR_API bool GenerateAudioScene(IEngine* pEngine, GScene* pScene, const SoundMaterial* defaultMaterial, AudioScene& audioScene);
 }

@@ -11,7 +11,7 @@
 #include "EditorPipeline.h"
 
 #include <ShaderSourceData.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <Debug.h>
 #include <AssetManager.h>
 #include <BinaryStream.h>
@@ -78,7 +78,7 @@ namespace Glory::Editor
 		{ spirv_cross::SPIRType::BaseType::Unknown, { 0 } },
 	};
 
-	EditorPipelineManager::EditorPipelineManager(Engine* pEngine): PipelineManager(pEngine), m_pPipelineJobsPool(nullptr)
+	EditorPipelineManager::EditorPipelineManager(IEngine* pEngine): PipelineManager(pEngine), m_pPipelineJobsPool(nullptr)
 	{
 	}
 

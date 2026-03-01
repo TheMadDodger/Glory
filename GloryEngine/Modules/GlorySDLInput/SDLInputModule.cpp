@@ -1,6 +1,6 @@
 #include "SDLInputModule.h"
 #include <Debug.h>
-#include <Engine.h>
+#include <IEngine.h>
 
 namespace Glory
 {

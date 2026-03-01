@@ -26,6 +26,7 @@ project "GloryRuntime"
 
 		"%{IncludeDir.glm}",
 
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
@@ -49,6 +50,7 @@ project "GloryRuntime"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryJobs",
 		"GloryThreads",

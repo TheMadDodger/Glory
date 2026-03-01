@@ -4,12 +4,12 @@
 namespace Glory
 {
 	class InternalCall;
-	class Engine;
+	class IEngine;
 
 	class AudioCSAPI
 	{
 	public:
 		static void GetInternallCalls(std::vector<InternalCall>& internalCalls);
-		static void SetEngine(Engine* pEngine);
+		static void SetEngine(IEngine* pEngine);
 	};
 }

@@ -26,6 +26,7 @@ project "LocalizeEditorExtension"
 
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
@@ -56,6 +57,7 @@ project "LocalizeEditorExtension"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryEditor",
 		"GloryLocalize",

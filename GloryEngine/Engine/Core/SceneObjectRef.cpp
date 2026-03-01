@@ -1,6 +1,6 @@
 #include "SceneObjectRef.h"
 #include "SceneManager.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "GScene.h"
 
 namespace Glory

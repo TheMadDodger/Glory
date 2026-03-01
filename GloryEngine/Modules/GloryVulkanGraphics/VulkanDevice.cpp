@@ -4,7 +4,7 @@
 #include "DescriptorAllocator.h"
 
 #include <Debug.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <Window.h>
 
 #include <PipelineData.h>

@@ -7,7 +7,7 @@
 #include <Undo.h>
 #include <ObjectMenuCallbacks.h>
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <WindowModule.h>
 
 #include <StringUtils.h>
@@ -480,7 +480,7 @@ namespace Glory::Editor
 		ImGui::TableSetupScrollFreeze(0, 1);
 		ImGui::TableHeadersRow();
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		EditorAssetManager& assetManager = EditorApplication::GetInstance()->GetAssetManager();
 		ResourceTypes& resourceTypes = pEngine->GetResourceTypes();
 		const std::string tableName = EditorAssetDatabase::GetAssetName(m_TableID);

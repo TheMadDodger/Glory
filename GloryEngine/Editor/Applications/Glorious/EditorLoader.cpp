@@ -40,7 +40,7 @@ namespace Glory
 	{
 	}
 
-	Glory::EditorCreateInfo EditorLoader::LoadEditor(Engine* pEngine, EngineLoader& engineLoader)
+	Glory::EditorCreateInfo EditorLoader::LoadEditor(IEngine* pEngine, EngineLoader& engineLoader)
 	{
 		Glory::EditorCreateInfo editorCreateInfo{};
 		editorCreateInfo.pEngine = pEngine;
@@ -123,7 +123,7 @@ namespace Glory
 		LoadBackendDLL(dllPath, editorBackend, editorCreateInfo);
 	}
 
-	void EditorLoader::LoadExtensions(Engine* pEngine, const ModuleMetaData& metaData)
+	void EditorLoader::LoadExtensions(IEngine* pEngine, const ModuleMetaData& metaData)
 	{
 		const std::vector<std::string>& extensionNames = metaData.EditorExtensions();
 		std::filesystem::path extensionsPath = metaData.Path();
@@ -158,7 +158,7 @@ namespace Glory
 		m_Libs.push_back(lib);
 	}
 
-	void EditorLoader::LoadExtensionDLL(Engine* pEngine, const std::filesystem::path& dllPath, const std::string& name)
+	void EditorLoader::LoadExtensionDLL(IEngine* pEngine, const std::filesystem::path& dllPath, const std::string& name)
 	{
 		pEngine->GetDebug().LogInfo("Loading editor extension: " + name + "...");
 		if (!std::filesystem::exists(dllPath))
@@ -192,7 +192,7 @@ namespace Glory
 		pExtension->SetSetContextProc(contextProc);
 	}
 
-	void EditorLoader::LoadExtensionDependencyDLL(Engine* pEngine, const std::filesystem::path& dllPath, const std::string& name)
+	void EditorLoader::LoadExtensionDependencyDLL(IEngine* pEngine, const std::filesystem::path& dllPath, const std::string& name)
 	{
 		pEngine->GetDebug().LogInfo("Loading editor extension dependency: " + name + "...");
 		HMODULE lib = LoadLibrary(dllPath.wstring().c_str());
@@ -204,7 +204,7 @@ namespace Glory
 		m_Libs.push_back(lib);
 	}
 
-	void EditorLoader::LoadGlobalExtensionDependencies(Engine* pEngine)
+	void EditorLoader::LoadGlobalExtensionDependencies(IEngine* pEngine)
 	{
 		const std::filesystem::path extensionsPath = "./Extensions/Dependencies";
 
@@ -220,7 +220,7 @@ namespace Glory
 		}
 	}
 
-	void EditorLoader::LoadGlobalExtensions(Engine* pEngine)
+	void EditorLoader::LoadGlobalExtensions(IEngine* pEngine)
 	{
 		const std::filesystem::path extensionsPath = "./Extensions";
 

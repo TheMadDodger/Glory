@@ -6,7 +6,7 @@
 
 #include <WindowModule.h>
 #include <InputModule.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <imgui.h>
 #include <Input.h>
 
@@ -646,14 +646,14 @@ namespace Glory::Editor
 
 	void InputSettings::OnStartPlay_Impl()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		pEngine->GetMainModule<InputModule>()->ReadInputData(RootValue().Node());
 		pEngine->GetMainModule<InputModule>()->InputBlocked() = false;
 	}
 
 	void InputSettings::OnStopPlay_Impl()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		pEngine->GetMainModule<InputModule>()->InputBlocked() = true;
 		pEngine->GetMainModule<InputModule>()->ClearInputData();
 	}

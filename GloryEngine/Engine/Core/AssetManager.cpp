@@ -1,6 +1,6 @@
 #include "AssetManager.h"
 #include "AssetDatabase.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "Debug.h"
 #include "BinaryStream.h"
 #include "AssetArchive.h"
@@ -9,7 +9,7 @@
 
 namespace Glory
 {
-	AssetManager::AssetManager(Engine* pEngine) : m_pEngine(pEngine) {}
+	AssetManager::AssetManager(IEngine* pEngine) : m_pEngine(pEngine) {}
 
 	AssetManager::~AssetManager()
 	{

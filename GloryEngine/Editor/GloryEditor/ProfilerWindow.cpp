@@ -2,7 +2,6 @@
 #include "EditorApplication.h"
 
 #include <EngineProfiler.h>
-#include <Engine.h>
 #include <imgui.h>
 #include <implot.h>
 #include <GameTime.h>

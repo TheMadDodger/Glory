@@ -337,7 +337,7 @@ namespace Glory
 		m_Reloadable = false;
 		m_State = AssemblyState::AS_NotLoaded;
 
-		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
+		IEngine* pEngine = MonoManager::Instance()->Module()->GetEngine();
 		if (m_pLibManager) m_pLibManager->Cleanup(pEngine);
 		m_pLibManager = nullptr;
 		m_Namespaces.clear();
@@ -352,13 +352,13 @@ namespace Glory
 
 	void Assembly::Initialize()
 	{
-		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
+		IEngine* pEngine = MonoManager::Instance()->Module()->GetEngine();
 		if (m_pLibManager) m_pLibManager->Initialize(pEngine, this);
 	}
 
 	void Assembly::CollectTypes()
 	{
-		Engine* pEngine = MonoManager::Instance()->Module()->GetEngine();
+		IEngine* pEngine = MonoManager::Instance()->Module()->GetEngine();
 		if (m_pLibManager) m_pLibManager->CollectTypes(pEngine, this);
 	}
 

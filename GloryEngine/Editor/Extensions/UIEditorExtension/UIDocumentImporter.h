@@ -14,12 +14,12 @@ namespace Glory::Editor
 
 		std::string_view Name() const override;
 
-		GLORY_API static void DeserializeComponent(Engine* pEngine, UIDocumentData* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef component);
-		GLORY_API static void DeserializeEntity(Engine* pEngine, UIDocumentData* pDocument, Utils::NodeValueRef node);
-		GLORY_API static void DeserializeComponent(Engine* pEngine, UIDocument* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef component);
-		GLORY_API static void DeserializeEntity(Engine* pEngine, UIDocument* pDocument, Utils::NodeValueRef node);
-		GLORY_API static void SerializeEntityRecursive(Engine* pEngine, UIDocumentData* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef entities);
-		GLORY_API static void SerializeEntityRecursive(Engine* pEngine, UIDocument* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef entities);
+		GLORY_API static void DeserializeComponent(IEngine* pEngine, UIDocumentData* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef component);
+		GLORY_API static void DeserializeEntity(IEngine* pEngine, UIDocumentData* pDocument, Utils::NodeValueRef node);
+		GLORY_API static void DeserializeComponent(IEngine* pEngine, UIDocument* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef component);
+		GLORY_API static void DeserializeEntity(IEngine* pEngine, UIDocument* pDocument, Utils::NodeValueRef node);
+		GLORY_API static void SerializeEntityRecursive(IEngine* pEngine, UIDocumentData* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef entities);
+		GLORY_API static void SerializeEntityRecursive(IEngine* pEngine, UIDocument* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef entities);
 
 	private:
 		virtual bool SupportsExtension(const std::filesystem::path& extension) const override;

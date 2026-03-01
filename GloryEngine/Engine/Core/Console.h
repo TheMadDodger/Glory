@@ -13,7 +13,7 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 
 	/** @brief Console variable data */
 	struct CVar
@@ -83,7 +83,7 @@ namespace Glory
 		 * only required for writing configs to pref path
 		 * @param pEngine Engine instance
 		 */
-		void SetEngine(Engine* pEngine);
+		void SetEngine(IEngine* pEngine);
 
 		/** @brief Number of lines currently logged in the console */
 		size_t LineCount() const;
@@ -141,7 +141,7 @@ namespace Glory
 		CVar* FindCVar(std::string_view name);
 
 	private:
-		friend class Engine;
+		friend class IEngine;
 		friend class Debug;
 		friend class GloryContext;
 		std::vector<BaseConsoleCommand*> m_pCommands;
@@ -157,6 +157,6 @@ namespace Glory
 		std::vector<CVar> m_CVars;
 
 		std::map<std::string, std::vector<std::function<void(const CVar*)>>> m_ChangeHandlers;
-		Engine* m_pEngine;
+		IEngine* m_pEngine;
 	};
 }

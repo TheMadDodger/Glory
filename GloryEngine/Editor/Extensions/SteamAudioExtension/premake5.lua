@@ -29,6 +29,7 @@ project "SteamAudioExtension"
 
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
@@ -61,6 +62,7 @@ project "SteamAudioExtension"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GlorySteamAudio",
 		"GloryPhysicsModule",

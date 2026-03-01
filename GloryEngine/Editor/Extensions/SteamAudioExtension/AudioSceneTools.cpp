@@ -4,7 +4,7 @@
 #include <PhysicsComponents.h>
 #include <Components.h>
 #include <SoundComponents.h>
-#include <Engine.h>
+#include <IEngine.h>
 
 namespace Glory::Editor
 {
@@ -73,7 +73,7 @@ namespace Glory::Editor
 		return mesh;
 	}
 
-	bool GenerateAudioScene(Engine* pEngine, GScene* pScene, const SoundMaterial* defaultMaterial, AudioScene& audioScene)
+	bool GenerateAudioScene(IEngine* pEngine, GScene* pScene, const SoundMaterial* defaultMaterial, AudioScene& audioScene)
 	{
 		Utils::ECS::EntityRegistry& registry = pScene->GetRegistry();
 		Utils::ECS::TypeView<PhysicsBody>* pPhysicsBodies = registry.GetTypeView<PhysicsBody>();

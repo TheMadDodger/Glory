@@ -1,4 +1,4 @@
-#include "Engine.h"
+#include "GloryEngine.h"
 #include "Console.h"
 #include "AssetManager.h"
 #include "PropertySerializer.h"
@@ -47,12 +47,12 @@
 
 namespace Glory
 {
-	SceneManager* Engine::GetSceneManager()
+	SceneManager* GloryEngine::GetSceneManager()
 	{
 		return m_pSceneManager;
 	}
 
-	void Engine::AddMainModule(Module* pModule, bool initialize)
+	void GloryEngine::AddMainModule(Module* pModule, bool initialize)
 	{
 		m_pMainModules.push_back(pModule);
 		m_pAllModules.push_back(pModule);
@@ -62,7 +62,7 @@ namespace Glory
 		pModule->m_IsInitialized = true;
 	}
 
-	void Engine::AddOptionalModule(Module* pModule, bool initialize)
+	void GloryEngine::AddOptionalModule(Module* pModule, bool initialize)
 	{
 		m_pOptionalModules.push_back(pModule);
 		m_pAllModules.push_back(pModule);
@@ -72,7 +72,7 @@ namespace Glory
 		pModule->m_IsInitialized = true;
 	}
 
-	void Engine::AddInternalModule(Module* pModule, bool initialize)
+	void GloryEngine::AddInternalModule(Module* pModule, bool initialize)
 	{
 		m_pInternalModules.push_back(pModule);
 		m_pAllModules.push_back(pModule);
@@ -82,7 +82,7 @@ namespace Glory
 		pModule->m_IsInitialized = true;
 	}
 
-	void Engine::AddLoaderModule(LoaderModule* pModule, bool initialize)
+	void GloryEngine::AddLoaderModule(LoaderModule* pModule, bool initialize)
 	{
 		m_pLoaderModules.push_back(pModule);
 		m_pAllModules.push_back(pModule);
@@ -92,7 +92,7 @@ namespace Glory
 		pModule->m_IsInitialized = true;
 	}
 
-	Module* Engine::GetMainModule(const std::type_info& type) const
+	Module* GloryEngine::GetMainModule(const std::type_info& type) const
 	{
 		auto it = std::find_if(m_pMainModules.begin(), m_pMainModules.end(), [&](Module* pModule)
 		{
@@ -103,7 +103,7 @@ namespace Glory
 		return *it;
 	}
 
-	Module* Engine::GetMainModule(const std::string& name) const
+	Module* GloryEngine::GetMainModule(const std::string& name) const
 	{
 		auto it = std::find_if(m_pMainModules.begin(), m_pMainModules.end(), [&](Module* pModule)
 		{
@@ -114,7 +114,7 @@ namespace Glory
 		return *it;
 	}
 
-	Module* Engine::GetOptionalModule(const std::type_info& type) const
+	Module* GloryEngine::GetOptionalModule(const std::type_info& type) const
 	{
 		auto it = std::find_if(m_pOptionalModules.begin(), m_pOptionalModules.end(), [&](Module* pModule)
 		{
@@ -125,7 +125,7 @@ namespace Glory
 		return *it;
 	}
 
-	Module* Engine::GetOptionalModule(const std::string& name) const
+	Module* GloryEngine::GetOptionalModule(const std::string& name) const
 	{
 		auto it = std::find_if(m_pOptionalModules.begin(), m_pOptionalModules.end(), [&](Module* pModule)
 		{
@@ -136,7 +136,7 @@ namespace Glory
 		return *it;
 	}
 
-	Module* Engine::GetModule(const std::type_info& type) const
+	Module* GloryEngine::GetModule(const std::type_info& type) const
 	{
 		auto it = std::find_if(m_pAllModules.begin(), m_pAllModules.end(), [&](Module* pModule)
 		{
@@ -147,7 +147,7 @@ namespace Glory
 		return *it;
 	}
 
-	Module* Engine::GetModule(const std::string& name) const
+	Module* GloryEngine::GetModule(const std::string& name) const
 	{
 		auto it = std::find_if(m_pAllModules.begin(), m_pAllModules.end(), [&](Module* pModule)
 		{
@@ -158,7 +158,7 @@ namespace Glory
 		return *it;
 	}
 
-	Module* Engine::GetInternalModule(const std::type_info& type) const
+	Module* GloryEngine::GetInternalModule(const std::type_info& type) const
 	{
 		auto it = std::find_if(m_pInternalModules.begin(), m_pInternalModules.end(), [&](Module* pModule)
 		{
@@ -169,39 +169,39 @@ namespace Glory
 		return *it;
 	}
 
-	LoaderModule* Engine::GetLoaderModule(const std::string& extension)
+	LoaderModule* GloryEngine::GetLoaderModule(const std::string& extension)
 	{
 		const ResourceType* pResourceType = m_ResourceTypes->GetResourceType(extension);
 		if (!pResourceType) return nullptr;
 		return GetLoaderModule(pResourceType->Hash());
 	}
 
-	LoaderModule* Engine::GetLoaderModule(const std::type_info& resourceType)
+	LoaderModule* GloryEngine::GetLoaderModule(const std::type_info& resourceType)
 	{
 		if (m_TypeToLoader.find(resourceType) == m_TypeToLoader.end()) return nullptr;
 		size_t loaderIndex = m_TypeToLoader[resourceType];
 		return m_pLoaderModules[loaderIndex];
 	}
 
-	LoaderModule* Engine::GetLoaderModule(uint32_t typeHash)
+	LoaderModule* GloryEngine::GetLoaderModule(uint32_t typeHash)
 	{
 		if (m_TypeHashToLoader.find(typeHash) == m_TypeHashToLoader.end()) return nullptr;
 		size_t loaderIndex = m_TypeHashToLoader[typeHash];
 		return m_pLoaderModules[loaderIndex];
 	}
 
-	void Engine::UpdateSceneManager()
+	void GloryEngine::UpdateSceneManager()
 	{
 		m_pSceneManager->Update();
 	}
 
-	void Engine::DrawSceneManager()
+	void GloryEngine::DrawSceneManager()
 	{
 		m_pSceneManager->SetRenderer(ActiveRenderer());
 		m_pSceneManager->Draw();
 	}
 
-	Engine::Engine(const EngineCreateInfo& createInfo)
+	GloryEngine::GloryEngine(const EngineCreateInfo& createInfo)
 		: m_ActiveGraphicsDevice(0), m_ActiveRenderer(0), m_pSceneManager(createInfo.pSceneManager),
 		m_ThreadManager(new ThreadManager()), m_JobManager(new Jobs::JobManager(m_ThreadManager.get())),
 		m_Reflection(new Reflect), m_CreateInfo(createInfo), m_ResourceTypes(new ResourceTypes),
@@ -238,19 +238,19 @@ namespace Glory
 		}
 	}
 
-	Engine::~Engine()
+	GloryEngine::~GloryEngine()
 	{
 		Cleanup();
 	}
 
-	void Engine::Initialize()
+	void GloryEngine::Initialize()
 	{
 		if (m_Initialized) return;
 
 		m_Console->Initialize();
 		m_UUIDRemapper.Reset();
 
-		WindowModule* pWindows = GetMainModule<WindowModule>();
+		WindowModule* pWindows = IEngine::GetMainModule<WindowModule>();
 		m_Debug->SetWindowModule(pWindows);
 
 		RegisterBasicTypes();
@@ -307,7 +307,7 @@ namespace Glory
 		m_pSceneManager->SetRenderer(ActiveRenderer());
 
 		m_Console->RegisterCommand(new ConsoleCommand1<size_t>("type", [this](size_t hash) {
-			const Utils::Reflect::TypeData* pType = m_Reflection->GetTyeData(hash);
+			const Utils::Reflect::TypeData* pType = Reflect::GetTyeData(hash);
 			if (!pType) return false;
 			m_Console->WriteLine(std::to_string(hash) + " = " + pType->TypeName());
 			return true;
@@ -328,7 +328,7 @@ namespace Glory
 		m_Time->Initialize();
 	}
 
-	void Engine::Cleanup()
+	void GloryEngine::Cleanup()
 	{
 		if (!m_Initialized) return;
 
@@ -364,7 +364,7 @@ namespace Glory
 		m_Initialized = false;
 	}
 
-	void Engine::Draw()
+	void GloryEngine::Draw()
 	{
 		if (!m_pRenderers.empty())
 		{
@@ -376,138 +376,138 @@ namespace Glory
 			pRenderer->Draw();
 	}
 
-	GameTime& Engine::Time()
+	GameTime& GloryEngine::Time()
 	{
 		return *m_Time;
 	}
 
-	CameraManager& Engine::GetCameraManager()
+	CameraManager& GloryEngine::GetCameraManager()
 	{
 		return *m_CameraManager;
 	}
 
-	AssetDatabase& Engine::GetAssetDatabase()
+	AssetDatabase& GloryEngine::GetAssetDatabase()
 	{
 		return *m_AssetDatabase;
 	}
 
-	AssetManager& Engine::GetAssetManager()
+	AssetManager& GloryEngine::GetAssetManager()
 	{
 		return *m_pAssetsManager;
 	}
 
-	ResourceTypes& Engine::GetResourceTypes()
+	ResourceTypes& GloryEngine::GetResourceTypes()
 	{
 		return *m_ResourceTypes;
 	}
 
-	Serializers& Engine::GetSerializers()
+	Serializers& GloryEngine::GetSerializers()
 	{
 		return *m_Serializers;
 	}
 
-	Console& Engine::GetConsole()
+	Console& GloryEngine::GetConsole()
 	{
 		return *m_Console;
 	}
 
-	LayerManager& Engine::GetLayerManager()
+	LayerManager& GloryEngine::GetLayerManager()
 	{
 		return *m_LayerManager;
 	}
 
-	MaterialManager& Engine::GetMaterialManager()
+	MaterialManager& GloryEngine::GetMaterialManager()
 	{
 		return *m_pMaterialManager;
 	}
 
-	PipelineManager& Engine::GetPipelineManager()
+	PipelineManager& GloryEngine::GetPipelineManager()
 	{
 		return *m_pPipelineManager;
 	}
 
-	Utils::Reflect::Reflect& Engine::Reflection()
+	Utils::Reflect::Reflect& GloryEngine::Reflection()
 	{
 		return *m_Reflection;
 	}
 
-	ObjectManager& Engine::GetObjectManager()
+	ObjectManager& GloryEngine::GetObjectManager()
 	{
 		return *m_ObjectManager;
 	}
 
-	EngineProfiler& Engine::Profiler()
+	EngineProfiler& GloryEngine::Profiler()
 	{
 		return *m_Profiler;
 	}
 
-	ThreadManager& Engine::Threads()
+	ThreadManager& GloryEngine::Threads()
 	{
 		return *m_ThreadManager;
 	}
 
-	Jobs::JobManager& Engine::Jobs()
+	Jobs::JobManager& GloryEngine::Jobs()
 	{
 		return *m_JobManager;
 	}
 
-	void Engine::SetAssetManager(AssetManager* pManager)
+	void GloryEngine::SetAssetManager(AssetManager* pManager)
 	{
 		m_pAssetsManager = pManager;
 	}
 
-	void Engine::SetSceneManager(SceneManager* pManager)
+	void GloryEngine::SetSceneManager(SceneManager* pManager)
 	{
 		m_pSceneManager = pManager;
 	}
 
-	void Engine::SetMaterialManager(MaterialManager* pManager)
+	void GloryEngine::SetMaterialManager(MaterialManager* pManager)
 	{
 		m_pMaterialManager = pManager;
 	}
 
-	void Engine::SetPipelineManager(PipelineManager* pManager)
+	void GloryEngine::SetPipelineManager(PipelineManager* pManager)
 	{
 		m_pPipelineManager = pManager;
 	}
 
-	Debug& Engine::GetDebug()
+	Debug& GloryEngine::GetDebug()
 	{
 		return *m_Debug;
 	}
 
-	void Engine::AddUserContext(uint32_t hash, void* pUserContext)
+	void GloryEngine::AddUserContext(uint32_t hash, void* pUserContext)
 	{
 		m_pUserContexts.emplace(hash, pUserContext);
 	}
 
-	void* Engine::GetUserContext(uint32_t hash)
+	void* GloryEngine::GetUserContext(uint32_t hash)
 	{
 		return m_pUserContexts.at(hash);
 	}
 
-	void Engine::RequestQuit()
+	void GloryEngine::RequestQuit()
 	{
 		m_Quit = true;
 	}
 
-	void Engine::CancelQuit()
+	void GloryEngine::CancelQuit()
 	{
 		m_Quit = false;
 	}
 
-	bool Engine::WantsToQuit() const
+	bool GloryEngine::WantsToQuit() const
 	{
 		return m_Quit;
 	}
 
-	void Engine::AddData(const std::filesystem::path& path, const std::string& name, std::vector<char>&& data)
+	void GloryEngine::AddData(const std::filesystem::path& path, const std::string& name, std::vector<char>&& data)
 	{
 		m_Datas.emplace(name, std::move(data));
 		m_DataPaths.emplace(name, path);
 	}
 
-	void Engine::ProcessData()
+	void GloryEngine::ProcessData()
 	{
 		if (HasData("Layers"))
 		{
@@ -554,32 +554,32 @@ namespace Glory
 		}
 	}
 
-	bool Engine::HasData(const std::string& name) const
+	bool GloryEngine::HasData(const std::string& name) const
 	{
 		return m_Datas.find(name) != m_Datas.end();
 	}
 
-	const std::filesystem::path& Engine::DataPath(const std::string& name) const
+	const std::filesystem::path& GloryEngine::DataPath(const std::string& name) const
 	{
 		return m_DataPaths.at(name);
 	}
 
-	std::vector<char>& Engine::GetData(const std::string& name)
+	std::vector<char>& GloryEngine::GetData(const std::string& name)
 	{
 		return m_Datas.at(name);
 	}
 
-	void Engine::SetRootPath(const std::filesystem::path& path)
+	void GloryEngine::SetRootPath(const std::filesystem::path& path)
 	{
 		m_RootPath = path;
 	}
 
-	const std::filesystem::path& Engine::RootPath() const
+	const std::filesystem::path& GloryEngine::RootPath() const
 	{
 		return m_RootPath;
 	}
 
-	void Engine::SetApplicationVersion(uint32_t major, uint32_t minor, uint32_t subMinor, uint32_t rc)
+	void GloryEngine::SetApplicationVersion(uint32_t major, uint32_t minor, uint32_t subMinor, uint32_t rc)
 	{
 		m_ApplicationVersion.Major = (int)major;
 		m_ApplicationVersion.Minor = (int)minor;
@@ -587,61 +587,61 @@ namespace Glory
 		m_ApplicationVersion.RC = (int)rc;
 	}
 
-	const Version& Engine::GetApplicationVersion() const
+	const Version& GloryEngine::GetApplicationVersion() const
 	{
 		return m_ApplicationVersion;
 	}
 
-	void Engine::SetOrganizationAndAppName(std::string&& organization, std::string&& appName)
+	void GloryEngine::SetOrganizationAndAppName(std::string&& organization, std::string&& appName)
 	{
 		m_Organization = std::move(organization);
 		m_AppName = std::move(appName);
 	}
 
-	std::string_view Engine::Organization() const
+	std::string_view GloryEngine::Organization() const
 	{
 		return m_Organization;
 	}
 
-	std::string_view Engine::AppName() const
+	std::string_view GloryEngine::AppName() const
 	{
 		return m_AppName;
 	}
 
-	void Engine::SetMainWindowInfo(WindowCreateInfo&& info)
+	void GloryEngine::SetMainWindowInfo(WindowCreateInfo&& info)
 	{
 		m_MainWindowInfo = std::move(info);
 	}
 
-	WindowCreateInfo& Engine::MainWindowInfo()
+	WindowCreateInfo& GloryEngine::MainWindowInfo()
 	{
 		return m_MainWindowInfo;
 	}
 
-	void Engine::AddGraphicsDevice(GraphicsDevice* pGraphicsDevice)
+	void GloryEngine::AddGraphicsDevice(GraphicsDevice* pGraphicsDevice)
 	{
 		m_pGraphicsDevices.emplace_back(pGraphicsDevice);
 		pGraphicsDevice->Initialize();
 	}
 
-	GraphicsDevice* Engine::ActiveGraphicsDevice()
+	GraphicsDevice* GloryEngine::ActiveGraphicsDevice()
 	{
 		return m_ActiveGraphicsDevice >= m_pGraphicsDevices.size() ?
 			nullptr : m_pGraphicsDevices[m_ActiveGraphicsDevice];
 	}
 
-	void Engine::AddMainRenderer(Renderer* pRenderer)
+	void GloryEngine::AddMainRenderer(Renderer* pRenderer)
 	{
 		m_pRenderers.emplace_back(pRenderer);
 		pRenderer->InitializeAsMainRenderer();
 	}
 
-	Renderer* Engine::ActiveRenderer()
+	Renderer* GloryEngine::ActiveRenderer()
 	{
 		return m_pRenderers.empty() ? nullptr : m_pRenderers[m_ActiveRenderer];
 	}
 
-	void Engine::Load()
+	void GloryEngine::Load()
 	{
 		for (Module* pModule : m_pAllModules)
 			pModule->Preload();
@@ -651,7 +651,12 @@ namespace Glory
 			pModule->Postload();
 	}
 
-	void Engine::RegisterStandardSerializers()
+	UUIDRemapper& GloryEngine::GetUUIDRemapper()
+	{
+		return m_UUIDRemapper;
+	}
+
+	void GloryEngine::RegisterStandardSerializers()
 	{
 		// Standard
 		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<int>>();
@@ -679,9 +684,10 @@ namespace Glory
 		m_Serializers->RegisterSerializer<ShapePropertySerializer>();
 	}
 
-	void Engine::RegisterBasicTypes()
+	void GloryEngine::RegisterBasicTypes()
 	{
 		Reflect::SetReflectInstance(m_Reflection.get());
+		Utils::ECS::ComponentTypes::SetInstance(m_pSceneManager->ComponentTypesInstance());
 		Reflect::RegisterTemplatedType("std::vector,vector", (size_t)CustomTypeHash::Array, 0);
 
 		m_ResourceTypes->RegisterType<int>();
@@ -746,11 +752,11 @@ namespace Glory
 		Reflect::RegisterTemplatedType("AssetReference,Glory::AssetReference,class Glory::AssetReference", ST_Asset, sizeof(UUID));
 	}
 
-	void Engine::Update()
+	void GloryEngine::Update()
 	{
 		BeginFrame();
 		m_Console->Update();
-		WindowModule* pWindows = GetMainModule<WindowModule>();
+		WindowModule* pWindows = IEngine::GetMainModule<WindowModule>();
 		if (pWindows) pWindows->PollEvents();
 		m_pSceneManager->SetRenderer(ActiveRenderer());
 		m_pSceneManager->Update();
@@ -760,7 +766,7 @@ namespace Glory
 		EndFrame();
 	}
 
-	void Engine::ModulesLoop(IModuleLoopHandler* pLoopHandler)
+	void GloryEngine::ModulesLoop(IModuleLoopHandler* pLoopHandler)
 	{
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
@@ -773,7 +779,7 @@ namespace Glory
 		}
 	}
 
-	void Engine::BeginFrame()
+	void GloryEngine::BeginFrame()
 	{
 		m_Profiler->BeginThread("Main");
 		m_Time->BeginFrame();
@@ -793,7 +799,7 @@ namespace Glory
 			pRenderer->BeginFrame();
 	}
 
-	void Engine::EndFrame()
+	void GloryEngine::EndFrame()
 	{
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
@@ -813,33 +819,33 @@ namespace Glory
 		m_Profiler->EndThread();
 	}
 
-	void Engine::CallModuleUpdate(Module* pModule)
+	void GloryEngine::CallModuleUpdate(Module* pModule) const
 	{
 		pModule->Update();
 	}
 
-	void Engine::CallModuleDraw(Module* pModule)
+	void GloryEngine::CallModuleDraw(Module* pModule) const
 	{
 		pModule->Draw();
 	}
 
-	const size_t Engine::InternalModulesCount() const
+	const size_t GloryEngine::InternalModulesCount() const
 	{
 		return m_pInternalModules.size();
 	}
 
-	const size_t Engine::ModulesCount() const
+	const size_t GloryEngine::ModulesCount() const
 	{
 		return m_pAllModules.size();
 	}
 
-	Module* Engine::GetModule(size_t index) const
+	Module* GloryEngine::GetModule(size_t index) const
 	{
 		if (index >= m_pAllModules.size()) return nullptr;
 		return m_pAllModules[index];
 	}
 
-	void Engine::LoadModuleSettings(const std::filesystem::path& overrideRootPath)
+	void GloryEngine::LoadModuleSettings(const std::filesystem::path& overrideRootPath)
 	{
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{

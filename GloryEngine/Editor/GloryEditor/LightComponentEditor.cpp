@@ -1,7 +1,7 @@
 #include "LightComponentEditor.h"
 #include "EditorApplication.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Renderer.h>
 
 namespace Glory::Editor

@@ -7,7 +7,7 @@
 #include <EditorAssetDatabase.h>
 #include <Undo.h>
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <FSM.h>
 #include <FSMModule.h>
 #include <AssetManager.h>
@@ -33,7 +33,7 @@ namespace Glory::Editor
 		const UUID fsmID = GetMainWindow()->CurrentFSMID();
 		if (!fsmID) return;
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(fsmID);
 		if (!pResource) return;

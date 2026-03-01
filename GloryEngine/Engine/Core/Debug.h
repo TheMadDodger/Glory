@@ -74,23 +74,18 @@ namespace Glory
 		void DrawLineQuad(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& p4, const glm::vec4& color, float time = 0.1f);
 		void DrawWireCube(const glm::vec3& position, const glm::vec3& extends, const glm::vec4& color, float time = 0.1f);
 		void DrawRay(const glm::vec3& start, const glm::vec3& dir, const glm::vec4& color, float length = 1.0f, float time = 0.1f);
+		void SubmitLines(Renderer* pRenderer, GameTime* pTime);
 
 #endif
 
 	private:
-		friend class Engine;
+		friend class IEngine;
 
 		std::mutex m_Lock;
 		Console* m_pConsole;
 		WindowModule* m_pWindowModule;
 
 		ICaptureHandler* m_pCaptureHandler;
-
-#ifndef GLORY_NO_DEBUG_LINES
-
-		void SubmitLines(Renderer* pRenderer, GameTime* pTime);
-
-#endif
 
 #ifndef GLORY_NO_DEBUG_LINES
 

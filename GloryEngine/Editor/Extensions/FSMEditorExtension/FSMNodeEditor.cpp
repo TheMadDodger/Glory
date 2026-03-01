@@ -8,7 +8,7 @@
 #include <Undo.h>
 #include <Shortcuts.h>
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <WindowModule.h>
 #include <FSM.h>
 #include <YAML_GLM.h>
@@ -38,7 +38,7 @@ namespace Glory::Editor
 		const UUID& activeNode = GetMainWindow()->ActiveNode();
 		const UUID& lastActiveNode = GetMainWindow()->LastActiveNode();
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(fsmID);
 		if (!pResource) return;

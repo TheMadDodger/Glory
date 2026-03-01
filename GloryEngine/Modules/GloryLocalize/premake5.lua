@@ -27,6 +27,7 @@ project "GloryLocalize"
 		"%{DepsIncludeDir}",
 		"%{IncludeDir.glm}",
 
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 
 		"%{IncludeDir.ECS}",
@@ -47,6 +48,7 @@ project "GloryLocalize"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryLocalizeModule",
 		"GloryReflect",

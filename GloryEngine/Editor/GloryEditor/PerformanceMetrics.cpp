@@ -3,7 +3,7 @@
 
 #include <GameTime.h>
 #include <imgui.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <GraphicsDevice.h>
 #include <Renderer.h>
 
@@ -18,7 +18,7 @@ namespace Glory::Editor
 
 	void PerformanceMetrics::OnGUI()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
 		std::chrono::time_point<std::chrono::system_clock> currentTime = std::chrono::system_clock::now();
 		std::chrono::duration<float> frameDuration = currentTime - m_LastRefresh;
@@ -38,7 +38,7 @@ namespace Glory::Editor
 
 	void PerformanceMetrics::Refresh()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
 		m_LastFrameTime = pEngine->Time().GetUnscaledDeltaTime();
 		m_LastFramerate = pEngine->Time().GetFrameRate();

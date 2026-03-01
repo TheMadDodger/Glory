@@ -33,7 +33,7 @@
 
 #include <JoltDebugRenderer.h>
 #include <GameTime.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <SceneManager.h>
 #include <BinaryStream.h>
 #include <PhysicsComponents.h>

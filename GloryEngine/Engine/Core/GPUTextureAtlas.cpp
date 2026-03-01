@@ -1,12 +1,12 @@
 #include "GPUTextureAtlas.h"
 #include "GraphicsDevice.h"
 
-#include "Engine.h"
+#include "IEngine.h"
 #include "Debug.h"
 
 namespace Glory
 {
-	GPUTextureAtlas::GPUTextureAtlas(TextureCreateInfo&& createInfo, Engine* pEngine, TextureHandle texture):
+	GPUTextureAtlas::GPUTextureAtlas(TextureCreateInfo&& createInfo, IEngine* pEngine, TextureHandle texture):
 		TextureAtlas(pEngine, createInfo.m_Width, createInfo.m_Height),
 		m_TextureInfo(std::move(createInfo)), m_Texture(texture)
 	{

@@ -29,6 +29,7 @@ project "GloryOverlayConsole"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.yaml_cpp}",
 
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
@@ -49,6 +50,7 @@ project "GloryOverlayConsole"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"shaderc",
 		"shaderc_combined",

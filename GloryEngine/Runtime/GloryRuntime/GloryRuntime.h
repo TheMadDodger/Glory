@@ -16,7 +16,7 @@ namespace std::filesystem
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 	class RuntimeAssetManager;
 	class RuntimeSceneManager;
 	class RuntimePipelineManager;
@@ -29,7 +29,7 @@ namespace Glory
 	{
 	public:
 		/** @brief Constructor */
-		GLORY_RUNTIME_API GloryRuntime(Engine* pEngine);
+		GLORY_RUNTIME_API GloryRuntime(IEngine* pEngine);
 		/** @brief Destructor */
 		GLORY_RUNTIME_API ~GloryRuntime();
 		/** @brief Initialize the runtime */
@@ -45,7 +45,7 @@ namespace Glory
 		/** @brief Load a shader pack at a path */
 		GLORY_RUNTIME_API void LoadShaderPack(const std::filesystem::path& path);
 		/** @brief Get the engine attached to this runtime */
-		GLORY_RUNTIME_API Engine* GetEngine();
+		GLORY_RUNTIME_API IEngine* GetEngine();
 		/** @brief Set the data path */
 		GLORY_RUNTIME_API void SetDataPath(const std::string& dataPath);
 		/** @brief Get the data path */
@@ -60,7 +60,7 @@ namespace Glory
 		void EndFrame();
 
 	private:
-		Engine* m_pEngine;
+		IEngine* m_pEngine;
 		Renderer* m_pRenderer;
 		WindowModule* m_pWindows;
 		std::unique_ptr<RuntimeAssetManager> m_AssetManager;

@@ -4,7 +4,7 @@
 #include "Assembly.h"
 #include "AssemblyDomain.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Debug.h>
 #include <SceneManager.h>
 
@@ -21,11 +21,11 @@ namespace Glory
 		return m_pAssembly;
 	}
 
-	void CoreLibManager::CollectTypes(Engine*, Assembly*)
+	void CoreLibManager::CollectTypes(IEngine*, Assembly*)
 	{
 	}
 
-	void CoreLibManager::Initialize(Engine* pEngine, Assembly* pAssembly)
+	void CoreLibManager::Initialize(IEngine* pEngine, Assembly* pAssembly)
 	{
 		m_pAssembly = pAssembly;
 		CreateEngine(pEngine);
@@ -53,7 +53,7 @@ namespace Glory
 		Utils::ECS::ComponentTypes::SetInstance(pEngine->GetSceneManager()->ComponentTypesInstance());
 	}
 
-	void CoreLibManager::Cleanup(Engine* pEngine)
+	void CoreLibManager::Cleanup(IEngine* pEngine)
 	{
 		if (m_SceneClosingCallback) pEngine->GetSceneManager()->RemoveSceneClosingCallback(m_SceneClosingCallback);
 		if (m_SceneObjectDestroyedCallback) pEngine->GetSceneManager()->RemoveSceneObjectDestroyedCallback(m_SceneObjectDestroyedCallback);
@@ -62,7 +62,7 @@ namespace Glory
 		m_SceneObjectDestroyedCallback = 0;
 	}
 
-	void CoreLibManager::Reset(Engine* pEngine)
+	void CoreLibManager::Reset(IEngine* pEngine)
 	{
 		AssemblyClass* pEngineClass = m_pAssembly->GetClass("GloryEngine", "Engine");
 		MonoMethod* pReset = pEngineClass->GetMethod(".::Reset");
@@ -148,7 +148,7 @@ namespace Glory
 		return pReturn;
 	}
 
-	void CoreLibManager::CreateEngine(Engine* pEngine)
+	void CoreLibManager::CreateEngine(IEngine* pEngine)
 	{
 		if (m_EngineGCHandle)
 		{

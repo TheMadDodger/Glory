@@ -30,7 +30,7 @@ namespace Glory::Editor
 
 	void* EditorVulkanRenderImpl::GetTextureID(TextureHandle texture)
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		m_pDevice = static_cast<VulkanDevice*>(pEngine->ActiveGraphicsDevice());
 		const bool hasImage = m_pDevice->TextureHasImage(texture);
 		if (!hasImage)
@@ -57,7 +57,7 @@ namespace Glory::Editor
 
 	void EditorVulkanRenderImpl::Setup()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		VulkanGraphicsModule* pGraphicsModule = pEngine->GetMainModule<VulkanGraphicsModule>();
 		VkInstance instance = pGraphicsModule->GetCInstance();
 		m_pDevice = static_cast<VulkanDevice*>(pEngine->ActiveGraphicsDevice());

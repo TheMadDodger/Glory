@@ -6,7 +6,7 @@
 #include <EntityRegistry.h>
 #include <SceneManager.h>
 #include <GScene.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <InputModule.h>
 #include <Components.h>
 
@@ -16,7 +16,7 @@ namespace Glory
 	{
 		if (!pComponent.m_RenderDocumentID) return;
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		UIRendererModule* pModule = pEngine->GetOptionalModule<UIRendererModule>();
 		UIDocument* pDocument = pModule->FindDocument(pComponent.m_RenderDocumentID);
 		if (!pDocument) return;
@@ -26,7 +26,7 @@ namespace Glory
 	void UIRenderSystem::OnValidate(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIRenderer& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		UIRendererModule* pModule = pEngine->GetOptionalModule<UIRendererModule>();
 
 		UIDocumentData* pDocument = pComponent.m_Document.Get(&pEngine->GetAssetManager());
@@ -89,7 +89,7 @@ namespace Glory
 	void UIRenderSystem::OnDraw(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entity, UIRenderer& pComponent)
 	{
 		GScene* pScene = pRegistry->GetUserData<GScene*>();
-		Engine* pEngine = pScene->Manager()->GetEngine();
+		IEngine* pEngine = pScene->Manager()->GetEngine();
 		UIRendererModule* pModule = pEngine->GetOptionalModule<UIRendererModule>();
 
 		Transform& transform = pRegistry->GetComponent<Transform>(entity);

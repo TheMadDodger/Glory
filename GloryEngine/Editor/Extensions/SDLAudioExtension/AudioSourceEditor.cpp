@@ -36,6 +36,8 @@ namespace Glory::Editor
 
 	bool AudioSourceEditor::OnGUI()
 	{
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
+
 		Undo::StartRecord("Property Change", m_pComponentObject->GetUUID(), true);
 		bool change = false;
 

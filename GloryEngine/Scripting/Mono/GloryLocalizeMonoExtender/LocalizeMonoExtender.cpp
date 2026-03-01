@@ -7,7 +7,7 @@
 #include <LocalizeModule.h>
 #include <GloryMonoScipting.h>
 #include <ScriptingExtender.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <Assembly.h>
 #include <Debug.h>
 #include <StringsOverrideTable.h>
@@ -42,13 +42,13 @@ namespace Glory
 		return true;
 	}
 
-	void LocalizeLibManager::CollectTypes(Engine*, Assembly*)
+	void LocalizeLibManager::CollectTypes(IEngine*, Assembly*)
 	{
 		AddMonoType("GloryEngine.Localize.StringTable", SerializedType::ST_Asset, ResourceTypes::GetHash<StringTable>());
 		AddMonoType("GloryEngine.Localize.StringsOverrideTable", SerializedType::ST_Asset, ResourceTypes::GetHash<StringsOverrideTable>());
 	}
 
-	void LocalizeLibManager::Initialize(Engine* pEngine, Assembly* pAssembly)
+	void LocalizeLibManager::Initialize(IEngine* pEngine, Assembly* pAssembly)
 	{
 		m_pAssembly = pAssembly;
 
@@ -72,11 +72,11 @@ namespace Glory
 		};
 	}
 
-	void LocalizeLibManager::Cleanup(Engine*)
+	void LocalizeLibManager::Cleanup(IEngine*)
 	{
 	}
 
-	void LocalizeLibManager::Reset(Engine*)
+	void LocalizeLibManager::Reset(IEngine*)
 	{
 		AssemblyClass* pFSDMManagerClass = m_pAssembly->GetClass("GloryEngine.Localize", "Locale");
 		MonoMethod* pReset = pFSDMManagerClass->GetMethod(".::Reset");

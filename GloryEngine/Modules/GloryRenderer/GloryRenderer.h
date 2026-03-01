@@ -8,7 +8,7 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 	class GraphicsDevice;
 	class GPUTextureAtlas;
 	class GloryRendererModule;

@@ -6,7 +6,7 @@
 #include "CoreLibManager.h"
 #include "GloryMonoScipting.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <GScene.h>
 #include <Serializers.h>
 #include <SceneManager.h>

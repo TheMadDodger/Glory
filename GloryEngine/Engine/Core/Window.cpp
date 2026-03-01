@@ -1,7 +1,7 @@
 #include "Window.h"
 #include "WindowModule.h"
 #include "InputModule.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "WindowData.h"
 #include "IWindowInputOverrideHandler.h"
 

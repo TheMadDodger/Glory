@@ -43,7 +43,7 @@ namespace Glory::Editor
 
 	void CreateUIRenderer(Object* pObject, const ObjectMenuType& currentMenu)
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		pEngine->GetSceneManager()->ComponentTypesInstance();
 
 		Entity newEntity = CreateNewEmptyObject(pObject, "UIRenderer", currentMenu);
@@ -85,9 +85,9 @@ namespace Glory::Editor
 		Importer::Register(&importer);
 
 		EditorApplication* pApp = EditorApplication::GetInstance();
+		IEngine* pEngine = pApp->GetEngine();
 		MainEditor& editor = pApp->GetMainEditor();
 		editor.RegisterMainWindow(&UIEditorMainWindow);
-		Engine* pEngine = pApp->GetEngine();
 		Reflect::SetReflectInstance(&pEngine->Reflection());
 		Reflect::RegisterType<UIElementType>();
 

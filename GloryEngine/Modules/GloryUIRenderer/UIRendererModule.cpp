@@ -9,7 +9,7 @@
 #include <AssetManager.h>
 #include <PipelineManager.h>
 #include <MaterialManager.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <GraphicsDevice.h>
 #include <CameraManager.h>
 #include <InternalMaterial.h>

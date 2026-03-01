@@ -14,7 +14,7 @@ namespace Glory
     struct MonoScriptComponent;
     struct UUIDRemapper;
     class GScene;
-    class Engine;
+    class IEngine;
 
     class MonoScriptedSystem
     {
@@ -30,12 +30,12 @@ namespace Glory
 
         static void GetReferences(const Utils::ECS::BaseTypeView* pTypeView, std::vector<UUID>& references);
 
-        GLORY_API static void OnBodyActivated(Engine* pEngine, UUID sceneID, UUID entityUUID);
-        GLORY_API static void OnBodyDeactivated(Engine* pEngine, UUID sceneID, UUID entityUUID);
+        GLORY_API static void OnBodyActivated(IEngine* pEngine, UUID sceneID, UUID entityUUID);
+        GLORY_API static void OnBodyDeactivated(IEngine* pEngine, UUID sceneID, UUID entityUUID);
 
-        GLORY_API static void OnContactAdded(Engine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID);
-        GLORY_API static void OnContactPersisted(Engine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID);
-        GLORY_API static void OnContactRemoved(Engine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID);
+        GLORY_API static void OnContactAdded(IEngine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID);
+        GLORY_API static void OnContactPersisted(IEngine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID);
+        GLORY_API static void OnContactRemoved(IEngine* pEngine, UUID scene1ID, UUID entity1UUID, UUID scene2ID, UUID entity2UUID);
 
     private:
         MonoScriptedSystem() {}

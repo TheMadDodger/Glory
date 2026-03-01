@@ -14,7 +14,7 @@ namespace std::filesystem
 namespace Glory
 {
 	class GScene;
-	class Engine;
+	class IEngine;
 	class AssetArchive;
 
 	namespace Utils
@@ -49,11 +49,11 @@ namespace Glory::Editor
 	{
 		std::string m_TaskID;
 		std::string m_TaskName;
-		std::function<bool(Glory::Engine*, const std::filesystem::path&, PackageTaskState&)> m_Callback;
+		std::function<bool(Glory::IEngine*, const std::filesystem::path&, PackageTaskState&)> m_Callback;
 		size_t m_TotalSubTasks{ 0 };
 	};
 
-	GLORY_EDITOR_API void StartPackage(Glory::Engine* pEngine);
+	GLORY_EDITOR_API void StartPackage(Glory::IEngine* pEngine);
 	GLORY_EDITOR_API void CancelPackage();
 	GLORY_EDITOR_API void AddPackagingTask(PackageTask&& task, const std::string& before);
 	GLORY_EDITOR_API void AddPackagingTaskAfter(PackageTask&& task, const std::string& after);
@@ -61,9 +61,9 @@ namespace Glory::Editor
 	GLORY_EDITOR_API bool IsPackagingBusy();
 	GLORY_EDITOR_API bool PackageFailed();
 	GLORY_EDITOR_API bool IsAssetPackaged(UUID assetID);
-	GLORY_EDITOR_API void Package(Glory::Engine* pEngine);
-	GLORY_EDITOR_API void ScanSceneFileForAssets(Glory::Engine* pEngine, Utils::YAMLFileRef& file, std::vector<UUID>& assets);
-	GLORY_EDITOR_API void ScanSceneFileForAssets(Glory::Engine* pEngine, Utils::YAMLFileRef& file, std::vector<UUID>& assets);
+	GLORY_EDITOR_API void Package(Glory::IEngine* pEngine);
+	GLORY_EDITOR_API void ScanSceneFileForAssets(Glory::IEngine* pEngine, Utils::YAMLFileRef& file, std::vector<UUID>& assets);
+	GLORY_EDITOR_API void ScanSceneFileForAssets(Glory::IEngine* pEngine, Utils::YAMLFileRef& file, std::vector<UUID>& assets);
 	GLORY_EDITOR_API void PackageScene(GScene* pScene, const std::filesystem::path& path);
 	GLORY_EDITOR_API size_t NumScenesToPackage();
 	GLORY_EDITOR_API UUID SceneToPackage(size_t index);

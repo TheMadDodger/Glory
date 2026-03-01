@@ -3,7 +3,7 @@
 #include "GizmoAction.h"
 
 #include <EditorApplication.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <Renderer.h>
 #include <glm/gtx/quaternion.hpp>
 #include <TypeData.h>

@@ -7,7 +7,7 @@
 #include "EditorApplication.h"
 #include "TextureImporter.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <imgui.h>
 #include <ResourceType.h>
 #include <ImageData.h>

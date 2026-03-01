@@ -3,12 +3,14 @@
 
 #include <Debug.h>
 #include <WindowModule.h>
-#include <filesystem>
-#include <yaml-cpp/yaml.h>
-#include <Object.h>
-#include <fstream>
+#include <WindowData.h>
+
 #include <YAML_GLM.h>
 #include <Shortcuts.h>
+
+#include <yaml-cpp/yaml.h>
+#include <fstream>
+#include <filesystem>
 
 namespace Glory::Editor
 {
@@ -20,7 +22,7 @@ namespace Glory::Editor
     {
     }
 
-    void EditorSettings::Load(Engine* pEngine)
+    void EditorSettings::Load(IEngine* pEngine)
 	{
         if (std::filesystem::exists(m_YAMLFile.Path()))
         {
@@ -30,7 +32,7 @@ namespace Glory::Editor
         LoadDefaultSettings(pEngine);
 	}
 
-    void EditorSettings::Save(Engine* pEngine)
+    void EditorSettings::Save(IEngine* pEngine)
     {
         WindowModule* pWindowModule = pEngine->GetMainModule<WindowModule>();
         Window* pMainWindow = pWindowModule->GetMainWindow();
@@ -68,7 +70,7 @@ namespace Glory::Editor
         return m_YAMLFile[path];
     }
 
-    void EditorSettings::LoadSettingsFile(Engine* pEngine)
+    void EditorSettings::LoadSettingsFile(IEngine* pEngine)
     {
         WindowModule* pWindowModule = pEngine->GetMainModule<WindowModule>();
         WindowCreateInfo& mainWindowSettings = pEngine->MainWindowInfo();
@@ -93,7 +95,7 @@ namespace Glory::Editor
         EditorApplication::GetInstance()->GetEngine()->GetDebug().LogInfo(stream.str());
     }
 
-    void EditorSettings::LoadDefaultSettings(Engine* pEngine)
+    void EditorSettings::LoadDefaultSettings(IEngine* pEngine)
     {
         WindowModule* pWindowModule = pEngine->GetMainModule<WindowModule>();
         WindowCreateInfo& mainWindowSettings = pEngine->MainWindowInfo();

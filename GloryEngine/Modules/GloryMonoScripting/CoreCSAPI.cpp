@@ -4,7 +4,7 @@
 #include "MathCSAPI.h"
 #include "ComponentHelpers.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Window.h>
 #include <SceneManager.h>
 #include <MaterialManager.h>
@@ -24,7 +24,7 @@
 
 namespace Glory
 {
-	Engine* Core_EngineInstance;
+	IEngine* Core_EngineInstance;
 
 	LayerWrapper::LayerWrapper(const Layer* pLayer) : Mask(pLayer ? pLayer->m_Mask : 0),
 		Name(mono_string_new(mono_domain_get(), pLayer ? pLayer->m_Name.c_str() : ""))
@@ -777,7 +777,7 @@ namespace Glory
 		BIND("GloryEngine.Application::Application_GetPrefPath", Application_GetPrefPath);
 	}
 
-	void CoreCSAPI::SetEngine(Engine* pEngine)
+	void CoreCSAPI::SetEngine(IEngine* pEngine)
 	{
 		Core_EngineInstance = pEngine;
 	}

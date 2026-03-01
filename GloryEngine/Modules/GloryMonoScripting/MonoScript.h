@@ -33,7 +33,7 @@ namespace Glory
         GLORY_API size_t ClassCount() const;
 
     private:
-        virtual void References(Engine*, std::vector<UUID>&) const override {}
+        virtual void References(IEngine*, std::vector<UUID>&) const override {}
 
     private:
         friend class MonoScriptLoader;

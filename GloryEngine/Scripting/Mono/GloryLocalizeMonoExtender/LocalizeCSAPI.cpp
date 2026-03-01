@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <GloryMonoScipting.h>
 #include <Debug.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <GScene.h>
 #include <AssetManager.h>
 #include <Localize.h>
@@ -14,7 +14,7 @@
 
 namespace Glory
 {
-	Engine* Localize_EngineInstance;
+	IEngine* Localize_EngineInstance;
 #define LOCALIZE_MODULE Localize_EngineInstance->GetOptionalModule<LocalizeModule>()
 
 	template<typename T>
@@ -270,7 +270,7 @@ namespace Glory
         BIND("GloryEngine.Localize.StringTable::StringTable_FindKeysRecursiveNoAlloc", StringTable_FindKeysRecursiveNoAlloc);
 	}
 
-	void LocalizeCSAPI::SetEngine(Engine* pEngine)
+	void LocalizeCSAPI::SetEngine(IEngine* pEngine)
 	{
 		Localize_EngineInstance = pEngine;
 	}

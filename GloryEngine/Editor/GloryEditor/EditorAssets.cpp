@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <GraphicsDevice.h>
 
 namespace Glory::Editor

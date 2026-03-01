@@ -14,7 +14,7 @@ namespace Glory
 {
     struct UUIDRemapper;
     class GScene;
-    class Engine;
+    class IEngine;
 
 namespace Editor
 {
@@ -39,14 +39,14 @@ namespace Editor
          * @param pScene The scene to serialize
          * @param node YAML node to serialize the scene to
          */
-        GLORY_EDITOR_API static void SerializeScene(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node);
+        GLORY_EDITOR_API static void SerializeScene(IEngine* pEngine, GScene* pScene, Utils::NodeValueRef node);
         /**
          * @brief Serialize scene settings to YAML
          * @param pEngine The current engine instance
          * @param pScene The scene to serialize
          * @param node YAML node to serialize the scene settings to
          */
-        GLORY_EDITOR_API static void SerializeSceneSettings(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node);
+        GLORY_EDITOR_API static void SerializeSceneSettings(IEngine* pEngine, GScene* pScene, Utils::NodeValueRef node);
         /**
          * @brief Deserialize a scene from a YAML node
          * @param pEngine The current engine instance
@@ -55,7 +55,7 @@ namespace Editor
          * @param name Name to pass to the scenes constructor
          * @param flags Deserialization flags
          */
-        GLORY_EDITOR_API static GScene* DeserializeScene(Engine* pEngine, Utils::NodeValueRef node, UUID uuid, const std::string& name, Flags flags = Flags(0));
+        GLORY_EDITOR_API static GScene* DeserializeScene(IEngine* pEngine, Utils::NodeValueRef node, UUID uuid, const std::string& name, Flags flags = Flags(0));
 
         /**
          * @brief Deserialize a scene from a YAML node
@@ -66,7 +66,7 @@ namespace Editor
          * @param name Name to pass to the scenes constructor
          * @param flags Deserialization flags
          */
-        GLORY_EDITOR_API static void DeserializeScene(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node, UUID uuid, const std::string& name, Flags flags = Flags(0));
+        GLORY_EDITOR_API static void DeserializeScene(IEngine* pEngine, GScene* pScene, Utils::NodeValueRef node, UUID uuid, const std::string& name, Flags flags = Flags(0));
 
         /**
          * @brief Serialize an entity
@@ -75,7 +75,7 @@ namespace Editor
          * @param entity ID of the entity
          * @param entityNode YAML node to serialize the entity to
          */
-        GLORY_EDITOR_API static void SerializeEntity(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, Utils::NodeValueRef entityNode);
+        GLORY_EDITOR_API static void SerializeEntity(IEngine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, Utils::NodeValueRef entityNode);
         /**
          * @brief Serialize an entity and all its children
          * @param pEngine The current engine instance
@@ -83,7 +83,7 @@ namespace Editor
          * @param entity ID of the entity
          * @param entities The YAML sequence node to serialize to
          */
-        GLORY_EDITOR_API static void SerializeEntityRecursive(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, Utils::NodeValueRef entities);
+        GLORY_EDITOR_API static void SerializeEntityRecursive(IEngine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, Utils::NodeValueRef entities);
         /**
          * @brief Deserialize an entity from a YAML node
          * @param pEngine The current engine instance
@@ -91,7 +91,7 @@ namespace Editor
          * @param node Serialized YAML entity data
          * @param flags Deserialization flags
          */
-        GLORY_EDITOR_API static Entity DeserializeEntity(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node, Flags flags = Flags(0));
+        GLORY_EDITOR_API static Entity DeserializeEntity(IEngine* pEngine, GScene* pScene, Utils::NodeValueRef node, Flags flags = Flags(0));
         /**
          * @brief Serialize a component on an entity
          * @param pEngine The current engine instance
@@ -101,7 +101,7 @@ namespace Editor
          * @param index Index of the component to serialize
          * @param node The YAML node to serialize to
          */
-        GLORY_EDITOR_API static void SerializeComponent(Engine* pEngine, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityView* pEntityView, Utils::ECS::EntityID entity, size_t index, Utils::NodeValueRef node);
+        GLORY_EDITOR_API static void SerializeComponent(IEngine* pEngine, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityView* pEntityView, Utils::ECS::EntityID entity, size_t index, Utils::NodeValueRef node);
         /**
          * @brief Deserialize a component to an entity
          * @param pEngine The current engine instance
@@ -111,7 +111,7 @@ namespace Editor
          * @param component Serialized component data
          * @param flags Deserialization flags
          */
-        GLORY_EDITOR_API static void DeserializeComponent(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, UUIDRemapper& uuidRemapper, Utils::NodeValueRef component, Flags flags = Flags(0));
+        GLORY_EDITOR_API static void DeserializeComponent(IEngine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, UUIDRemapper& uuidRemapper, Utils::NodeValueRef component, Flags flags = Flags(0));
     };
 }
 }

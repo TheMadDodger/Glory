@@ -7,7 +7,7 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 	class Resource;
 	class AssetArchive;
 }

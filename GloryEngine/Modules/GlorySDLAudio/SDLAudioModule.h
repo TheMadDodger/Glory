@@ -27,7 +27,7 @@ namespace Glory
 		 * @param finishedCallback Callback that will be called when the audio finishes playing
 		 * @returns The channel that was chosen to play the audio
 		 */
-		GLORY_API int Play(AudioData* pAudio, int loops=0, AudioChannelUData&& udata={}, std::function<void(Engine*, const AudioChannel&)> finishedCallback=NULL) override;
+		GLORY_API int Play(AudioData* pAudio, int loops=0, AudioChannelUData&& udata={}, std::function<void(IEngine*, const AudioChannel&)> finishedCallback=NULL) override;
 		/** @brief Play an audio resource
 		 * @param pAudio Audio asset to play
 		 * @param loops How many times to loop the audio
@@ -35,7 +35,7 @@ namespace Glory
 		 * @param finishedCallback Callback that will be called when the audio finishes playing
 		 * @returns The channel that was chosen to play the audio
 		 */
-		GLORY_API int PlayWithEffects(AudioData* pAudio, int loops = 0, AudioChannelUData&& udata={}, std::function<void(Engine*, const AudioChannel&)> finishedCallback = NULL) override;
+		GLORY_API int PlayWithEffects(AudioData* pAudio, int loops = 0, AudioChannelUData&& udata={}, std::function<void(IEngine*, const AudioChannel&)> finishedCallback = NULL) override;
 		/** @brief Play an audio resource with 3D effects enabled
 		 * @param pAudio Audio asset to play
 		 * @param loops How many times to loop the audio

@@ -26,6 +26,7 @@ project "MonoEditorExtension"
 
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
@@ -59,6 +60,7 @@ project "MonoEditorExtension"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryEditor",
 		"GloryMonoScripting",

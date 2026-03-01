@@ -3,7 +3,7 @@
 #include "EditorSceneManager.h"
 #include "EditorApplication.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 
 namespace Glory::Editor
 {

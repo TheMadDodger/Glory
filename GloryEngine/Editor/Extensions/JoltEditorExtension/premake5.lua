@@ -27,6 +27,7 @@ project "JoltEditorExtension"
 
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.ImGui}",
@@ -58,6 +59,7 @@ project "JoltEditorExtension"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryEditor",
 		"GloryJoltPhysics",

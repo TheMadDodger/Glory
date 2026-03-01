@@ -4,7 +4,7 @@
 #include "RuntimeMaterialManager.h"
 #include "RuntimePipelineManager.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Window.h>
 #include <Renderer.h>
 #include <GraphicsDevice.h>
@@ -23,7 +23,7 @@
 
 namespace Glory
 {
-	GloryRuntime::GloryRuntime(Engine* pEngine): m_pEngine(pEngine),
+	GloryRuntime::GloryRuntime(IEngine* pEngine): m_pEngine(pEngine),
 		m_AssetManager(new RuntimeAssetManager(pEngine)),
 		m_SceneManager(new RuntimeSceneManager(this)),
 		m_PipelineManager(new RuntimePipelineManager(pEngine)),
@@ -235,7 +235,7 @@ namespace Glory
 		}
 	}
 
-	Engine* GloryRuntime::GetEngine()
+	IEngine* GloryRuntime::GetEngine()
 	{
 		return m_pEngine;
 	}

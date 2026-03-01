@@ -68,7 +68,7 @@ namespace Glory::Editor
 		OBJECT_CREATE_MENU(PhysicsBody, PhysicsBody);
 		OBJECT_CREATE_MENU(Character, CharacterController);
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		Utils::Reflect::Reflect& reflect = pEngine->Reflection();
 		Reflect::SetReflectInstance(&reflect);
 

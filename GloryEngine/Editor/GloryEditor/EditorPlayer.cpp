@@ -39,7 +39,7 @@ namespace Glory::Editor
 	{
 		ProjectSettings::OnStartPlay();
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		Renderer* pRenderer = pEngine->ActiveRenderer();
 		if (pRenderer) pRenderer->Reset();
 		for (size_t i = 0; i < m_pSceneLoopHandlers.size(); i++)
@@ -84,7 +84,7 @@ namespace Glory::Editor
 	{
 		ProjectSettings::OnStopPlay();
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
 		SceneManager* pScenes = pEngine->GetSceneManager();
 		Utils::ECS::ComponentTypes* pComponentTypes = pScenes->ComponentTypesInstance();
@@ -141,7 +141,7 @@ namespace Glory::Editor
 		m_FrameRequested = true;
 	}
 
-	void EditorPlayer::Tick(Engine* pEngine)
+	void EditorPlayer::Tick(IEngine* pEngine)
 	{
 		if (EditorApplication::GetInstance()->CurrentMode() == EditorMode::M_Play)
 		{

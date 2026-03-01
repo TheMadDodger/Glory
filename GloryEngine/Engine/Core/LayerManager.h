@@ -8,11 +8,12 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 
 	class LayerManager
 	{
 	public:
+		LayerManager(IEngine* pEngine);
 		virtual ~LayerManager();
 
 		void AddLayer(const std::string& name);
@@ -31,12 +32,9 @@ namespace Glory
 		void CreateDefaultLayers();
 
 	private:
-		LayerManager(Engine* pEngine);
-
-	private:
 		friend class GloryContext;
-		friend class Engine;
-		Engine* m_pEngine;
+		friend class IEngine;
+		IEngine* m_pEngine;
 		std::vector<Layer> m_Layers;
 		std::unordered_map<std::string, size_t> m_NameToLayer;
 	};

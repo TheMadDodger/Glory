@@ -27,6 +27,7 @@ project "FreeTypeFontImporter"
 
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.ui}",
 		"%{GloryIncludeDir.threads}",
@@ -58,6 +59,7 @@ project "FreeTypeFontImporter"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryEditor",
 		"shaderc",

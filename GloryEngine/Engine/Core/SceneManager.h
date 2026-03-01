@@ -9,7 +9,7 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 	class GScene;
 	class Renderer;
 	struct UUIDRemapper;
@@ -17,7 +17,7 @@ namespace Glory
 	class SceneManager
 	{
 	public:
-		SceneManager(Engine* pEngine);
+		SceneManager(IEngine* pEngine);
 		virtual ~SceneManager();
 
 		void SetRenderer(Renderer* pRenderer);
@@ -44,7 +44,7 @@ namespace Glory
 		}
 
 		/** @brief Get the engine that owns this manager */
-		Engine* GetEngine();
+		IEngine* GetEngine();
 		GScene* GetActiveScene(bool force=false);
 		void SetActiveScene(GScene* pScene);
 
@@ -83,20 +83,18 @@ namespace Glory
 		void SubscribeOnCopy(uint32_t hash, std::function<void(GScene*, void*, UUID, UUIDRemapper&)> callback);
 		void TriggerOnCopy(uint32_t hash, GScene* pScene, void* data, UUID componentID, UUIDRemapper& remapper);
 
-	protected:
-		virtual void OnInitialize() = 0;
-		virtual void OnCleanup() = 0;
-		virtual void OnSetActiveScene(GScene* pActiveScene) = 0;
-
-	private:
-		friend class Engine;
 		void Initialize();
 		void Cleanup();
 		void Update();
 		void Draw();
+
+	protected:
+		virtual void OnInitialize() = 0;
+		virtual void OnCleanup() = 0;
+		virtual void OnSetActiveScene(GScene* pActiveScene) = 0;
 		
 	protected:
-		Engine* m_pEngine;
+		IEngine* m_pEngine;
 		Renderer* m_pRenderer;
 		std::vector<GScene*> m_pOpenScenes;
 		std::vector<GScene*> m_pExternalScenes;

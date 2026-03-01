@@ -10,7 +10,7 @@
 #include <AssemblyDomain.h>
 #include <JoltPhysicsModule.h>
 #include <Renderer.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <LayerMask.h>
 
 #define PHYSICS Physics_EngineInstance->GetOptionalModule<JoltPhysicsModule>()
@@ -20,7 +20,7 @@
 
 namespace Glory
 {
-	Engine* Physics_EngineInstance;
+	IEngine* Physics_EngineInstance;
 
 #pragma region Ray Casting
 
@@ -380,7 +380,7 @@ namespace Glory
 		BIND("GloryEngine.Shapes::Shapes_CreateCapsule", Shapes_CreateCapsule);
 	}
 
-	void PhysicsCSAPI::SetEngine(Engine* pEngine)
+	void PhysicsCSAPI::SetEngine(IEngine* pEngine)
 	{
 		Physics_EngineInstance = pEngine;
 	}

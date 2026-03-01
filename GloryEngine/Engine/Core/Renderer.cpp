@@ -1,6 +1,6 @@
 #include "Renderer.h"
 #include "EngineProfiler.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "AssetManager.h"
 #include "MaterialData.h"
 #include "Module.h"

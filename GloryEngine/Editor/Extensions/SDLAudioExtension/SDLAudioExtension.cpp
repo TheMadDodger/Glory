@@ -3,7 +3,7 @@
 #include "AudioSourceEditor.h"
 
 #include <Debug.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <AudioComponents.h>
 #include <SceneManager.h>
 #include <SDLAudioModule.h>
@@ -29,7 +29,7 @@ namespace Glory::Editor
 
 	void SDLAudioExtension::HandleStop(Module* pModule)
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		SDLAudioModule* pAudio = pEngine->GetOptionalModule<SDLAudioModule>();
 		pAudio->StopAll();
 		pAudio->StopMusic();
@@ -45,7 +45,7 @@ namespace Glory::Editor
 
 	void SDLAudioExtension::Initialize()
 	{
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		Reflect::SetReflectInstance(&pEngine->Reflection());
 
 		pEngine->GetSceneManager()->ComponentTypesInstance();

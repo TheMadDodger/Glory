@@ -31,6 +31,7 @@ project "Glorious"
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.implot}",
 
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.editor}",
@@ -60,6 +61,7 @@ project "Glorious"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryEngineBuilder",
 		"shaderc",

@@ -17,13 +17,13 @@
 #include <Serializers.h>
 #include <NodeRef.h>
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <AssetDatabase.h>
 #include <AssetManager.h>
 
 namespace Glory::Editor
 {
-	EditorMaterialManager::EditorMaterialManager(Engine* pEngine):
+	EditorMaterialManager::EditorMaterialManager(IEngine* pEngine):
 		m_pEngine(pEngine), m_AssetRegisteredCallback(0), m_AssetUpdatedCallback(0),
 		m_PipelineUpdatedCallback(0), MaterialManager(pEngine)
 	{

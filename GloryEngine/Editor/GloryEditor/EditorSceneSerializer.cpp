@@ -4,17 +4,18 @@
 
 #include <Serializers.h>
 #include <PropertySerializer.h>
+#include <UUIDRemapper.h>
 #include <AssetManager.h>
 #include <PrefabData.h>
 #include <Components.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <GScene.h>
 #include <Reflection.h>
 #include <NodeRef.h>
 
 namespace Glory::Editor
 {
-	void EditorSceneSerializer::SerializeScene(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node)
+	void EditorSceneSerializer::SerializeScene(IEngine* pEngine, GScene* pScene, Utils::NodeValueRef node)
 	{
 		if (!node.Exists() || !node.IsMap())
 			node.Set(YAML::Node(YAML::NodeType::Map));
@@ -35,7 +36,7 @@ namespace Glory::Editor
 		}
 	}
 
-	void EditorSceneSerializer::SerializeSceneSettings(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node)
+	void EditorSceneSerializer::SerializeSceneSettings(IEngine* pEngine, GScene* pScene, Utils::NodeValueRef node)
 	{
 		if (!node.Exists() || !node.IsMap())
 			node.SetMap();
@@ -81,14 +82,14 @@ namespace Glory::Editor
 		contrast.Set(sceneSettings.m_SSAOSettings.m_Contrast);
 	}
 
-	GScene* EditorSceneSerializer::DeserializeScene(Engine* pEngine, Utils::NodeValueRef node, UUID uuid, const std::string& name, Flags flags)
+	GScene* EditorSceneSerializer::DeserializeScene(IEngine* pEngine, Utils::NodeValueRef node, UUID uuid, const std::string& name, Flags flags)
 	{
 		GScene* pScene = new GScene(name, uuid);
 		DeserializeScene(pEngine, pScene, node, uuid, name, flags);
 		return pScene;
 	}
 
-	void EditorSceneSerializer::DeserializeScene(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node, UUID uuid, const std::string& name, Flags flags)
+	void EditorSceneSerializer::DeserializeScene(IEngine* pEngine, GScene* pScene, Utils::NodeValueRef node, UUID uuid, const std::string& name, Flags flags)
 	{
 		EditorSceneManager::SetupCallbacks(pScene);
 		pScene->SetManager(pEngine->GetSceneManager());
@@ -107,7 +108,7 @@ namespace Glory::Editor
 		AssetCompiler::CompileSceneSettings(pScene, node);
 	}
 
-	void EditorSceneSerializer::SerializeEntity(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, Utils::NodeValueRef entityNode)
+	void EditorSceneSerializer::SerializeEntity(IEngine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, Utils::NodeValueRef entityNode)
 	{
 		Entity entityHandle = pScene->GetEntityByEntityID(entity);
 		Utils::ECS::EntityRegistry& pRegistry = entityHandle.GetScene()->GetRegistry();
@@ -164,7 +165,7 @@ namespace Glory::Editor
 		}
 	}
 
-	void EditorSceneSerializer::SerializeEntityRecursive(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, Utils::NodeValueRef entities)
+	void EditorSceneSerializer::SerializeEntityRecursive(IEngine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, Utils::NodeValueRef entities)
 	{
 		if (!pScene->PrefabChild(pScene->GetEntityUUID(entity)))
 		{
@@ -182,9 +183,9 @@ namespace Glory::Editor
 		}
 	}
 
-	Entity EditorSceneSerializer::DeserializeEntity(Engine* pEngine, GScene* pScene, Utils::NodeValueRef node, Flags flags)
+	Entity EditorSceneSerializer::DeserializeEntity(IEngine* pEngine, GScene* pScene, Utils::NodeValueRef node, Flags flags)
 	{
-		UUIDRemapper& uuidRemapper = pEngine->m_UUIDRemapper;
+		UUIDRemapper& uuidRemapper = pEngine->GetUUIDRemapper();
 
 		const std::string name = node["Name"].As<std::string>();
 		UUID uuid = node["UUID"].As<uint64_t>();
@@ -285,7 +286,7 @@ namespace Glory::Editor
 		return entityHandle;
 	}
 
-	void EditorSceneSerializer::SerializeComponent(Engine* pEngine, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityView* pEntityView, Utils::ECS::EntityID entity, size_t index, Utils::NodeValueRef node)
+	void EditorSceneSerializer::SerializeComponent(IEngine* pEngine, Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityView* pEntityView, Utils::ECS::EntityID entity, size_t index, Utils::NodeValueRef node)
 	{
 		node.Set(YAML::Node(YAML::NodeType::Map));
 		const UUID compUUID = pEntityView->ComponentUUIDAt(index);
@@ -301,7 +302,7 @@ namespace Glory::Editor
 		pEngine->GetSerializers().SerializeProperty(pType, pRegistry->GetComponentAddress(entity, compUUID), node["Properties"]);
 	}
 
-	void EditorSceneSerializer::DeserializeComponent(Engine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, UUIDRemapper& uuidRemapper, Utils::NodeValueRef component, Flags flags)
+	void EditorSceneSerializer::DeserializeComponent(IEngine* pEngine, GScene* pScene, Utils::ECS::EntityID entity, UUIDRemapper& uuidRemapper, Utils::NodeValueRef component, Flags flags)
 	{
 		const uint32_t transformTypeHash = ResourceTypes::GetHash(typeid(Transform));
 

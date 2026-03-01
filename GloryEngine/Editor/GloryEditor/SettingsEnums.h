@@ -7,10 +7,10 @@ REFLECTABLE_ENUM_NS(Glory::Editor, PackageScenes, All, Opened, List)
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 }
 
 namespace Glory::Editor
 {
-	GLORY_EDITOR_API void RegisterSettingsEnums(Engine* pEngine);
+	GLORY_EDITOR_API void RegisterSettingsEnums(IEngine* pEngine);
 }

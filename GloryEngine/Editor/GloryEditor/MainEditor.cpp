@@ -16,7 +16,6 @@
 #include "EditorPreferencesWindow.h"
 #include "ProjectSettingsWindow.h"
 #include "Window.h"
-#include "PopupManager.h"
 #include "EditorAssets.h"
 #include "ProjectSpace.h"
 #include "ThumbnailManager.h"
@@ -76,7 +75,7 @@
 #include <imgui.h>
 #include <ImGuizmo.h>
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Components.h>
 #include <Debug.h>
 
@@ -169,7 +168,9 @@ namespace Glory::Editor
 
 		Gizmos::Initialize();
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		Reflect::SetReflectInstance(&pEngine->Reflection());
+		Utils::ECS::ComponentTypes::SetInstance(pEngine->GetSceneManager()->ComponentTypesInstance());
 		m_Settings.Load(pEngine);
 
 		pEngine->GetDebug().LogInfo("Initialized editor");
@@ -198,7 +199,7 @@ namespace Glory::Editor
 	{
 		ObjectMenu::Cleanup();
 
-		Engine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 		m_Settings.Save(pEngine);
 		Shortcuts::Clear();
 

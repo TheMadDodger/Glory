@@ -6,13 +6,13 @@
 #include <cstdint>
 #include <GloryMonoScipting.h>
 #include <Debug.h>
-#include <Engine.h>
+#include <IEngine.h>
 #include <ComponentTypes.h>
 #include <AssetManager.h>
 
 namespace Glory
 {
-	Engine* UIScene_EngineInstance;
+	IEngine* UIScene_EngineInstance;
 #define UI_MODULE UIScene_EngineInstance->GetOptionalModule<UIRendererModule>()
 
 #pragma region UI Scene
@@ -314,7 +314,7 @@ namespace Glory
         BIND("GloryEngine.UI.UIComponent::UIComponent_SetActive", UIComponent_SetActive);
 	}
 
-	void UISceneCSAPI::SetEngine(Engine* pEngine)
+	void UISceneCSAPI::SetEngine(IEngine* pEngine)
 	{
 		UIScene_EngineInstance = pEngine;
 	}

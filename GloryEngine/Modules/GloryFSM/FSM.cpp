@@ -3,7 +3,7 @@
 
 #include <BinaryStream.h>
 #include <AssetManager.h>
-#include <Engine.h>
+#include <IEngine.h>
 
 namespace Glory
 {
@@ -240,7 +240,7 @@ namespace Glory
 		m_StartNodeIndex = 0;
 	}
 
-	void FSMData::References(Engine*, std::vector<UUID>&) const {}
+	void FSMData::References(IEngine*, std::vector<UUID>&) const {}
 
 	void FSMData::Serialize(BinaryStream& container) const
 	{

@@ -6,7 +6,7 @@
 
 namespace Glory
 {
-	class Engine;
+	class IEngine;
 	class PipelineData;
 	enum class ShaderType;
 
@@ -15,7 +15,7 @@ namespace Glory
 	{
 	public:
 		/** @brief Constructor */
-		PipelineManager(Engine* pEngine);
+		PipelineManager(IEngine* pEngine);
 		/** @brief Destructor */
 		virtual ~PipelineManager() = default;
 
@@ -33,6 +33,6 @@ namespace Glory
 		virtual void AddShader(FileData* pShader) = 0;
 
 	protected:
-		Engine* m_pEngine;
+		IEngine* m_pEngine;
 	};
 }

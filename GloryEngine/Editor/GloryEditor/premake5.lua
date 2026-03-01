@@ -57,6 +57,7 @@ project "GloryEditor"
 		"%{IncludeDir.implot}",
 		"%{IncludeDir.yaml_cpp}",
 
+		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
@@ -89,6 +90,7 @@ project "GloryEditor"
 
 	links
 	{
+		"GloryEngineCore",
 		"GloryCore",
 		"GloryJobs",
 		"GloryThreads",

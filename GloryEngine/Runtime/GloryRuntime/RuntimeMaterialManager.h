@@ -8,7 +8,7 @@ namespace Glory
 	{
 	public:
 		/** @brief Constructor */
-		RuntimeMaterialManager(Engine* pEngine);
+		RuntimeMaterialManager(IEngine* pEngine);
 		/** @brief Destructor */
 		virtual ~RuntimeMaterialManager() = default;
 

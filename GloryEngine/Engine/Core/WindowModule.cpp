@@ -1,5 +1,5 @@
 #include "WindowModule.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "Window.h"
 #include "Renderer.h"
 
@@ -33,6 +33,14 @@ namespace Glory
 
     void WindowModule::OpenMessageBox(const std::string&) {}
 
+    void WindowModule::PollEvents()
+    {
+        for (size_t i = 0; i < m_pWindows.size(); i++)
+        {
+            m_pWindows[i]->PollEvents();
+        }
+    }
+
     void WindowModule::Initialize()
     {
         OnInitialize();
@@ -56,13 +64,5 @@ namespace Glory
         m_pMainWindow = nullptr;
 
         OnCleanup();
-    }
-
-    void WindowModule::PollEvents()
-    {
-        for (size_t i = 0; i < m_pWindows.size(); i++)
-        {
-            m_pWindows[i]->PollEvents();
-        }
     }
 }

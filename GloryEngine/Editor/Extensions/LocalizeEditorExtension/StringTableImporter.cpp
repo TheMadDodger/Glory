@@ -1,6 +1,6 @@
 #include "StringTableImporter.h"
 
-#include <Engine.h>
+#include <IEngine.h>
 #include <Serializers.h>
 #include <SceneManager.h>
 #include <StringsOverrideTable.h>

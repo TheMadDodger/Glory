@@ -24,7 +24,8 @@ namespace Glory
 	struct UIConstraint;
 	struct UIVerticalContainer;
 	struct UIScrollView;
-	class Engine;
+
+	class IEngine;
 
 	class UITransformSystem
 	{
@@ -64,14 +65,14 @@ namespace Glory
 		static GLORY_API UIInteractionSystem* Instance();
 
 	public:
-		/* Engine, SceneID, ObjectID, ElementID, ComponentID */
-		std::function<void(Engine*, UUID, UUID, UUID, UUID)> OnElementHover_Callback;
-		/* Engine, SceneID, ObjectID, ElementID, ComponentID */
-		std::function<void(Engine*, UUID, UUID, UUID, UUID)> OnElementUnHover_Callback;
-		/* Engine, SceneID, ObjectID, ElementID, ComponentID */
-		std::function<void(Engine*, UUID, UUID, UUID, UUID)> OnElementDown_Callback;
-		/* Engine, SceneID, ObjectID, ElementID, ComponentID */
-		std::function<void(Engine*, UUID, UUID, UUID, UUID)> OnElementUp_Callback;
+		/* IEngine, SceneID, ObjectID, ElementID, ComponentID */
+		std::function<void(IEngine*, UUID, UUID, UUID, UUID)> OnElementHover_Callback;
+		/* IEngine, SceneID, ObjectID, ElementID, ComponentID */
+		std::function<void(IEngine*, UUID, UUID, UUID, UUID)> OnElementUnHover_Callback;
+		/* IEngine, SceneID, ObjectID, ElementID, ComponentID */
+		std::function<void(IEngine*, UUID, UUID, UUID, UUID)> OnElementDown_Callback;
+		/* IEngine, SceneID, ObjectID, ElementID, ComponentID */
+		std::function<void(IEngine*, UUID, UUID, UUID, UUID)> OnElementUp_Callback;
 	};
 
 	class UIPanelSystem

@@ -1,6 +1,6 @@
 #include "PlayerInput.h"
 #include "InputModule.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "GameTime.h"
 
 #define _USE_MATH_DEFINES

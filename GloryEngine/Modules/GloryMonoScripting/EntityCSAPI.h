@@ -6,7 +6,7 @@
 namespace Glory
 {
 	class InternalCall;
-	class Engine;
+	class IEngine;
 	class GScene;
 
 	GLORY_API GScene* GetEntityScene(uint64_t sceneID);
@@ -15,6 +15,6 @@ namespace Glory
 	{
 	public:
 		static void GetInternallCalls(std::vector<InternalCall>& internalCalls);
-		static void SetEngine(Engine* pEngine);
+		static void SetEngine(IEngine* pEngine);
 	};
 }

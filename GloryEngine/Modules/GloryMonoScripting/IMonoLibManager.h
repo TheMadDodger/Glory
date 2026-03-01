@@ -3,14 +3,14 @@
 namespace Glory
 {
 	class Assembly;
-	class Engine;
+	class IEngine;
 
 	class IMonoLibManager
 	{
 	public:
-		virtual void CollectTypes(Engine* pEngine, Assembly* pAssembly) = 0;
-		virtual void Initialize(Engine* pEngine, Assembly* pAssembly) = 0;
-		virtual void Cleanup(Engine* pEngine) = 0;
-		virtual void Reset(Engine* pEngine) = 0;
+		virtual void CollectTypes(IEngine* pEngine, Assembly* pAssembly) = 0;
+		virtual void Initialize(IEngine* pEngine, Assembly* pAssembly) = 0;
+		virtual void Cleanup(IEngine* pEngine) = 0;
+		virtual void Reset(IEngine* pEngine) = 0;
 	};
 }

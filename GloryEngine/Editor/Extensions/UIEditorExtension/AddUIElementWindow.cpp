@@ -95,7 +95,7 @@ namespace Glory::Editor
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && documentID && pDocument)
 		{
 			EditorApplication* pApp = EditorApplication::GetInstance();
-			Engine* pEngine = pApp->GetEngine();
+			IEngine* pEngine = pApp->GetEngine();
 			EditorResourceManager& resources = pApp->GetResourceManager();
 			EditableResource* pResource = resources.GetEditableResource(documentID);
 			YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);

@@ -1,5 +1,5 @@
 #include "FileLoaderModule.h"
-#include "Engine.h"
+#include "IEngine.h"
 #include "EngineProfiler.h"
 #include "Debug.h"
 
