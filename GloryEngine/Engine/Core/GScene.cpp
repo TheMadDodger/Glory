@@ -4,7 +4,6 @@
 #include "PrefabData.h"
 #include "UUIDRemapper.h"
 #include "DistributedRandom.h"
-#include "PropertySerializer.h"
 #include "SceneManager.h"
 #include "IEngine.h"
 #include "Debug.h"

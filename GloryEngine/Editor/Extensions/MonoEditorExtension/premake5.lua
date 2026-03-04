@@ -23,24 +23,22 @@ project "MonoEditorExtension"
 		"%{DepsIncludeDir}",
 
 		"%{IncludeDir.glm}",
-
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.Utils}",
+		"%{IncludeDir.Utils}",
+		"%{IncludeDir.ECS}",
+		"%{IncludeDir.Version}",
+		"%{IncludeDir.Reflect}",
+		"%{IncludeDir.FA}",
+
 		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.serialization}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
 		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.mono}",
-		"%{GloryIncludeDir.ImGui}",
-		"%{GloryIncludeDir.mono}",
-
-		"%{IncludeDir.FA}",
-
-		"%{IncludeDir.ECS}",
-		"%{IncludeDir.Reflect}",
-		"%{IncludeDir.Version}",
-		"%{IncludeDir.Utils}",
 
 		"%{rapidjson}",
 
@@ -63,6 +61,7 @@ project "MonoEditorExtension"
 		"GloryEngineCore",
 		"GloryCore",
 		"GloryEditor",
+		"GloryEditorSerialization",
 		"GloryMonoScripting",
 		"shaderc",
 		"shaderc_combined",

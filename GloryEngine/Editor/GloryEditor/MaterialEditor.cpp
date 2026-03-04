@@ -214,7 +214,7 @@ namespace Glory::Editor
 		EditorResourceManager& resourceManager = EditorApplication::GetInstance()->GetResourceManager();
 		EditorMaterialManager& materialManager = EditorApplication::GetInstance()->GetMaterialManager();
 		EditorPipelineManager& pipelineManager = EditorApplication::GetInstance()->GetPipelineManager();
-		Serializers& serializers = EditorApplication::GetInstance()->GetEngine()->GetSerializers();
+		Serializers& serializers = EditorApplication::GetInstance()->GetSerializers();
 		EditorRenderImpl* pRenderImpl = EditorApplication::GetInstance()->GetEditorPlatform().GetRenderImpl();
 
 		bool change = false;
@@ -335,7 +335,7 @@ namespace Glory::Editor
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		EditorMaterialManager& materialManager = pApp->GetMaterialManager();
 		EditorPipelineManager& pipelineManager = pApp->GetPipelineManager();
-		Serializers& serializers = pApp->GetEngine()->GetSerializers();
+		Serializers& serializers  = pApp->GetSerializers();
 		EditorRenderImpl* pRenderImpl = pApp->GetEditorPlatform().GetRenderImpl();
 
 		const UUID pipelineID = pMaterialData->GetPipelineID();

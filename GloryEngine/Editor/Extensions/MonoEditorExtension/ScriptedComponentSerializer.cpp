@@ -1,24 +1,24 @@
 #include "ScriptedComponentSerializer.h"
-#include "PropertySerializer.h"
-#include "MonoComponents.h"
-#include "MonoScriptManager.h"
-#include "MonoManager.h"
-#include "CoreLibManager.h"
-#include "GloryMonoScipting.h"
-#include "AssetManager.h"
+
+#include <MonoComponents.h>
+#include <MonoScriptManager.h>
+#include <MonoManager.h>
+#include <CoreLibManager.h>
+#include <GloryMonoScipting.h>
+#include <AssetManager.h>
 
 namespace Glory
 {
-	ScriptedComponentSerailizer::ScriptedComponentSerailizer(Serializers* pSerializers):
+	ScriptedComponentSerializer::ScriptedComponentSerializer(Serializers* pSerializers):
 		PropertySerializer(pSerializers, ResourceTypes::GetHash<MonoScriptComponent>())
 	{
 	}
 
-	ScriptedComponentSerailizer::~ScriptedComponentSerailizer()
+	ScriptedComponentSerializer::~ScriptedComponentSerializer()
 	{
 	}
 
-	void ScriptedComponentSerailizer::Serialize(void* data, uint32_t typeHash, Utils::NodeValueRef node)
+	void ScriptedComponentSerializer::Serialize(void* data, uint32_t typeHash, Utils::NodeValueRef node)
 	{
 		MonoScriptComponent* pScriptedComponent = (MonoScriptComponent*)data;
 		node.Set(YAML::Node(YAML::NodeType::Map));
@@ -58,7 +58,7 @@ namespace Glory
 		}
 	}
 
-	void ScriptedComponentSerailizer::Deserialize(void* data, uint32_t typeHash, Utils::NodeValueRef node)
+	void ScriptedComponentSerializer::Deserialize(void* data, uint32_t typeHash, Utils::NodeValueRef node)
 	{
 		auto scriptNode = node["m_Script"];
 		auto scriptTypeNode = node["m_ScriptType"];

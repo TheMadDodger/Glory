@@ -1,7 +1,5 @@
 #include "PrefabData.h"
 #include "GScene.h"
-#include "PropertySerializer.h"
-#include "GScene.h"
 #include "SceneManager.h"
 #include "IEngine.h"
 

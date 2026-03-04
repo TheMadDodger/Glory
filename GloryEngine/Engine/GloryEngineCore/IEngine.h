@@ -17,7 +17,6 @@ namespace Glory
 	class AssetDatabase;
 	class AssetManager;
 	class ResourceTypes;
-	class Serializers;
 	class LayerManager;
 	class MaterialManager;
 	class PipelineManager;
@@ -142,7 +141,6 @@ namespace Glory
 		virtual AssetDatabase& GetAssetDatabase() = 0;
 		virtual AssetManager& GetAssetManager() = 0;
 		virtual ResourceTypes& GetResourceTypes() = 0;
-		virtual Serializers& GetSerializers() = 0;
 		virtual LayerManager& GetLayerManager() = 0;
 		virtual MaterialManager& GetMaterialManager() = 0;
 		virtual PipelineManager& GetPipelineManager() = 0;

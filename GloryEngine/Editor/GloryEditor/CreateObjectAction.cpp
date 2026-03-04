@@ -28,7 +28,7 @@ namespace Glory::Editor
 		/* Take a snapshot of the object for redoing */
 		auto entities = m_SerializedObject.RootNodeRef().ValueRef();
 		entities.SetSequence();
-		EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, entity.GetEntityID(), entities);
+		EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance(), pScene, entity.GetEntityID(), entities);
 
 		DestroyEntity(entity.GetEntityID(), pScene);
 	}
@@ -41,7 +41,7 @@ namespace Glory::Editor
 		for (size_t i = 0; i < entities.ValueRef().Size(); i++)
 		{
 			Utils::NodeValueRef entity = entities.ValueRef()[i];
-			Entity newEntity = EditorSceneSerializer::DeserializeEntity(EditorApplication::GetInstance()->GetEngine(), pScene, entity);
+			Entity newEntity = EditorSceneSerializer::DeserializeEntity(EditorApplication::GetInstance(), pScene, entity);
 			GetEditableEntity(newEntity.GetEntityID(), pScene);
 		}
 	}

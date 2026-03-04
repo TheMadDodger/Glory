@@ -52,11 +52,12 @@ namespace Glory::Editor
 
 		m_SelectedEntity = 0;
 		m_EditingDocument = documentID;
-		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		EditorApplication* pApp = EditorApplication::GetInstance();
+		IEngine* pEngine = pApp->GetEngine();
 		Renderer* pRenderer = pEngine->ActiveRenderer();
 		UIRendererModule* pUIRenderer = pEngine->GetOptionalModule<UIRendererModule>();
 		GraphicsDevice* pDevice = pEngine->ActiveGraphicsDevice();
-		EditorResourceManager& resources = EditorApplication::GetInstance()->GetResourceManager();
+		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(documentID);
 		YAMLResource<UIDocumentData>* pDocument = static_cast<YAMLResource<UIDocumentData>*>(pResource);
 		Utils::NodeValueRef rootNode = **pDocument;
@@ -66,7 +67,7 @@ namespace Glory::Editor
 		for (auto iter = entities.Begin(); iter != entities.End(); ++iter)
 		{
 			Utils::NodeValueRef entity = entities[*iter];
-			UIDocumentImporter::DeserializeEntity(pEngine, &document, entity);
+			UIDocumentImporter::DeserializeEntity(pApp, &document, entity);
 		}
 		document.SetName(EditorAssetDatabase::GetAssetName(documentID));
 		document.SetResourceUUID(documentID);
@@ -140,11 +141,11 @@ namespace Glory::Editor
 	{
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		IEngine* pEngine = pApp->GetEngine();
-		Serializers& serializers = pEngine->GetSerializers();
+		Serializers& serializers = pApp->GetSerializers();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 
 		Undo::RegisterChangeHandler(std::string(".gui"), std::string("Entities"),
-		[this, pEngine](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+		[this, pApp](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
 			std::vector<std::string> components;
 			Reflect::Tokenize(path.string(), components, '\\');
 			if (components.size() != 2) return;
@@ -167,7 +168,7 @@ namespace Glory::Editor
 			}
 
 			/* Add it */
-			UIDocumentImporter::DeserializeEntity(pEngine, pDocument, file[path]);
+			UIDocumentImporter::DeserializeEntity(pApp, pDocument, file[path]);
 			const Utils::ECS::EntityID newEntityID = pDocument->EntityID(entityUUID);
 			pDocument->SetEntityDirty(newEntityID, true, true);
 			pDocument->SetDrawDirty();
@@ -247,22 +248,22 @@ namespace Glory::Editor
 			}
 		});
 
-		Shortcuts::AddMainWindowAction("Delete", m_MainWindowIndex, [this, pEngine, &resources]() {
+		Shortcuts::AddMainWindowAction("Delete", m_MainWindowIndex, [this, pApp, &resources]() {
 			UIDocument* pDocument = CurrentDocument();
 			if (!m_EditingDocument || !pDocument || !m_SelectedEntity) return;
 
 			EditableResource* pResource = resources.GetEditableResource(m_EditingDocument);
 			YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-			DeleteUIElementAction::DeleteElement(pEngine, pDocument, pDocumentData->File(), m_SelectedEntity);
+			DeleteUIElementAction::DeleteElement(pApp, pDocument, pDocumentData->File(), m_SelectedEntity);
 		});
 
-		Shortcuts::AddMainWindowAction("Duplicate", m_MainWindowIndex, [this, pEngine, &resources]() {
+		Shortcuts::AddMainWindowAction("Duplicate", m_MainWindowIndex, [this, pApp, &resources]() {
 			UIDocument* pDocument = CurrentDocument();
 			if (!m_EditingDocument || !pDocument || !m_SelectedEntity) return;
 
 			EditableResource* pResource = resources.GetEditableResource(m_EditingDocument);
 			YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
-			m_SelectedEntity = AddUIElementAction::DuplicateElement(pEngine, pDocument, pDocumentData->File(), m_SelectedEntity);
+			m_SelectedEntity = AddUIElementAction::DuplicateElement(pApp, pDocument, pDocumentData->File(), m_SelectedEntity);
 		});
 
 		Shortcuts::AddMainWindowAction("Save Scene", m_MainWindowIndex, [this, pApp, &resources]() {
@@ -303,7 +304,6 @@ namespace Glory::Editor
 	{
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		EditorResourceManager& resources = pApp->GetResourceManager();
-		IEngine* pEngine = pApp->GetEngine();
 
 		for (size_t i = 0; i < m_pDocuments.size(); ++i)
 		{
@@ -325,7 +325,7 @@ namespace Glory::Editor
 				for (auto iter = entities.Begin(); iter != entities.End(); ++iter)
 				{
 					Utils::NodeValueRef entity = entities[*iter];
-					UIDocumentImporter::DeserializeEntity(pEngine, pUIDcoumentData, entity);
+					UIDocumentImporter::DeserializeEntity(pApp, pUIDcoumentData, entity);
 				}
 			}
 		}

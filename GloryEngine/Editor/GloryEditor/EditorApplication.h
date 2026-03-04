@@ -18,6 +18,7 @@ namespace efsw
 namespace Glory
 {
 	class IEngine;
+	class Serializers;
 
 namespace Editor
 {
@@ -68,6 +69,7 @@ namespace Editor
 		GLORY_EDITOR_API EditorPipelineManager& GetPipelineManager();
 		GLORY_EDITOR_API EditorMaterialManager& GetMaterialManager();
 		GLORY_EDITOR_API ThumbnailManager& GetThumbnailManager();
+		GLORY_EDITOR_API Serializers& GetSerializers();
 
 		GLORY_EDITOR_API void OnFileDragAndDrop(std::vector<std::string_view>& paths);
 		GLORY_EDITOR_API static EditorApplication* GetInstance();
@@ -86,6 +88,7 @@ namespace Editor
 		void InitializePlatform();
 		void InitializeExtensions();
 		void RenderStartup();
+		void RegisterStandardSerializers();
 
 		static void VersionCheck(const Glory::Version& latestVersion);
 
@@ -106,6 +109,7 @@ namespace Editor
 		std::unique_ptr<EditorPipelineManager> m_PipelineManager;
 		std::unique_ptr<EditorMaterialManager> m_MaterialManager;
 		std::unique_ptr<ThumbnailManager> m_ThumbnailManager;
+		std::unique_ptr<Serializers> m_Serializers;
 		efsw::FileWatcher* m_pFileWatcher;
 
 		std::vector<BaseEditorExtension*> m_pExtensions;

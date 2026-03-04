@@ -2,7 +2,7 @@
 #include "Undo.h"
 #include "GloryEditor.h"
 
-#include "EntityID.h"
+#include <EntityID.h>
 #include <NodeRef.h>
 
 namespace Glory

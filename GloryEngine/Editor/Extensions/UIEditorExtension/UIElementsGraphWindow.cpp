@@ -59,7 +59,6 @@ namespace Glory::Editor
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 
 		EditorApplication* pApp = EditorApplication::GetInstance();
-		IEngine* pEngine = pApp->GetEngine();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(pDocument->OriginalDocumentID());
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
@@ -78,7 +77,7 @@ namespace Glory::Editor
 				/* Create new entity */
 				const uint32_t type = (uint32_t)payload.m_EntityID;
 				const Utils::Reflect::TypeData* pType = Reflect::GetTyeData(type);
-				AddUIElementAction::AddElement(pEngine, pDocument, file, pType->TypeName(), type, newParentID, newSiblingIndex);
+				AddUIElementAction::AddElement(pApp, pDocument, file, pType->TypeName(), type, newParentID, newSiblingIndex);
 				return;
 			}
 
@@ -93,7 +92,7 @@ namespace Glory::Editor
 
 			registry.SetParent(draggingEntity, newParentID);
 			registry.SetSiblingIndex(draggingEntity, newSiblingIndex);
-			SetUIParentAction::StoreDocumentState(pEngine, pDocument, node["Entities"]);
+			SetUIParentAction::StoreDocumentState(pApp, pDocument, node["Entities"]);
 			pDocument->SetDrawDirty();
 		});
 
@@ -128,7 +127,7 @@ namespace Glory::Editor
 				/* Create new entity */
 				const uint32_t type = (uint32_t)payload.m_EntityID;
 				const Utils::Reflect::TypeData* pType = Reflect::GetTyeData(type);
-				AddUIElementAction::AddElement(pEngine, pDocument, file, pType->TypeName(), type, newParentID, newSiblingIndex);
+				AddUIElementAction::AddElement(pApp, pDocument, file, pType->TypeName(), type, newParentID, newSiblingIndex);
 				return;
 			}
 
@@ -143,7 +142,7 @@ namespace Glory::Editor
 			
 			registry.SetParent(draggingEntity, newParentID);
 			registry.SetSiblingIndex(draggingEntity, newSiblingIndex);
-			SetUIParentAction::StoreDocumentState(pEngine, pDocument, node["Entities"]);
+			SetUIParentAction::StoreDocumentState(pApp, pDocument, node["Entities"]);
 			pDocument->SetDrawDirty();
 		});
 
@@ -160,13 +159,13 @@ namespace Glory::Editor
 			if (ImGui::MenuItem("Delete", Shortcuts::GetShortcutString("Delete").data(), false))
 			{
 				if (selectedEntity == m_RightClickedElement) selectedEntity = 0;
-				DeleteUIElementAction::DeleteElement(pEngine, pDocument, file, m_RightClickedElement);
+				DeleteUIElementAction::DeleteElement(pApp, pDocument, file, m_RightClickedElement);
 				m_RightClickedElement = 0;
 			}
 			if (ImGui::MenuItem("Duplicate", Shortcuts::GetShortcutString("Duplicate").data(), false))
 			{
 				if (selectedEntity == m_RightClickedElement) selectedEntity = 0;
-				selectedEntity = AddUIElementAction::DuplicateElement(pEngine, pDocument, file, m_RightClickedElement);
+				selectedEntity = AddUIElementAction::DuplicateElement(pApp, pDocument, file, m_RightClickedElement);
 				m_RightClickedElement = 0;
 			}
 			ImGui::EndPopup();
@@ -195,7 +194,6 @@ namespace Glory::Editor
 		const size_t childCount = registry.ChildCount(entity);
 
 		EditorApplication* pApp = EditorApplication::GetInstance();
-		IEngine* pEngine = pApp->GetEngine();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(pDocument->OriginalDocumentID());
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
@@ -217,7 +215,7 @@ namespace Glory::Editor
 					/* Create new entity */
 					const uint32_t type = (uint32_t)payload.m_EntityID;
 					const Utils::Reflect::TypeData* pType = Reflect::GetTyeData(type);
-					AddUIElementAction::AddElement(pEngine, pDocument, file, pType->TypeName(), type, newParentID, newSiblingIndex);
+					AddUIElementAction::AddElement(pApp, pDocument, file, pType->TypeName(), type, newParentID, newSiblingIndex);
 					return;
 				}
 
@@ -248,7 +246,7 @@ namespace Glory::Editor
 
 					registry.SetParent(draggingEntity, parent);
 					registry.SetSiblingIndex(draggingEntity, newSiblingIndex);
-					SetUIParentAction::StoreDocumentState(pEngine, pDocument, node["Entities"]);
+					SetUIParentAction::StoreDocumentState(pApp, pDocument, node["Entities"]);
 					pDocument->SetDrawDirty();
 				}
 			});
@@ -273,7 +271,7 @@ namespace Glory::Editor
 				/* Create new entity */
 				const uint32_t type = (uint32_t)payload.m_EntityID;
 				const Utils::Reflect::TypeData* pType = Reflect::GetTyeData(type);
-				AddUIElementAction::AddElement(pEngine, pDocument, file, pType->TypeName(), type, newParentID, newSiblingIndex);
+				AddUIElementAction::AddElement(pApp, pDocument, file, pType->TypeName(), type, newParentID, newSiblingIndex);
 				return;
 			}
 
@@ -301,7 +299,7 @@ namespace Glory::Editor
 				Undo::StopRecord();
 
 				registry.SetParent(draggingEntity, entity);
-				SetUIParentAction::StoreDocumentState(pEngine, pDocument, node["Entities"]);
+				SetUIParentAction::StoreDocumentState(pApp, pDocument, node["Entities"]);
 				pDocument->SetDrawDirty();
 			}
 		});
@@ -349,7 +347,7 @@ namespace Glory::Editor
 				/* Create new entity */
 				const uint32_t type = (uint32_t)payload.m_EntityID;
 				const Utils::Reflect::TypeData* pType = Reflect::GetTyeData(type);
-				AddUIElementAction::AddElement(pEngine, pDocument, file, pType->TypeName(), type, newParentID, newSiblingIndex);
+				AddUIElementAction::AddElement(pApp, pDocument, file, pType->TypeName(), type, newParentID, newSiblingIndex);
 				return;
 			}
 
@@ -381,7 +379,7 @@ namespace Glory::Editor
 
 				registry.SetParent(draggingEntity, parent);
 				registry.SetSiblingIndex(draggingEntity, newSiblingIndex);
-				SetUIParentAction::StoreDocumentState(pEngine, pDocument, node["Entities"]);
+				SetUIParentAction::StoreDocumentState(pApp, pDocument, node["Entities"]);
 				pDocument->SetDrawDirty();
 			}
 		});

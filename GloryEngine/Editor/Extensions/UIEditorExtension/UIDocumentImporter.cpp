@@ -1,6 +1,5 @@
 #include "UIDocumentImporter.h"
 
-#include <IEngine.h>
 #include <Serializers.h>
 #include <SceneManager.h>
 #include <UIRendererModule.h>
@@ -22,7 +21,7 @@ namespace Glory::Editor
         return extension.compare(".gui") == 0;
     }
 
-	void UIDocumentImporter::DeserializeComponent(IEngine* pEngine, UIDocumentData* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef component)
+	void UIDocumentImporter::DeserializeComponent(EditorApplication* pApp, UIDocumentData* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef component)
 	{
 		const UUID compUUID = component["UUID"].As<uint64_t>();
 		Utils::NodeValueRef activeNode = component["Active"];
@@ -34,13 +33,13 @@ namespace Glory::Editor
 
 		void* pComponentAddress = pRegistry.CreateComponent(entity, typeHash, compUUID);
 		const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
-		pEngine->GetSerializers().DeserializeProperty(pTypeData, pComponentAddress, component["Properties"]);
+		pApp->GetSerializers().DeserializeProperty(pTypeData, pComponentAddress, component["Properties"]);
 
 		Utils::ECS::BaseTypeView* pTypeView = pRegistry.GetTypeView(typeHash);
 		pTypeView->SetActive(entity, active);
 	}
 
-	void UIDocumentImporter::DeserializeEntity(IEngine* pEngine, UIDocumentData* pDocument, Utils::NodeValueRef node)
+	void UIDocumentImporter::DeserializeEntity(EditorApplication* pApp, UIDocumentData* pDocument, Utils::NodeValueRef node)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
 		const UUID uuid = node["UUID"].As<uint64_t>();
@@ -63,12 +62,12 @@ namespace Glory::Editor
 		for (size_t i = 0; i < components.Size(); ++i)
 		{
 			Utils::NodeValueRef component = components[i];
-			DeserializeComponent(pEngine, pDocument, entity, component);
+			DeserializeComponent(pApp, pDocument, entity, component);
 			++currentComponentIndex;
 		}
 	}
 
-	void UIDocumentImporter::DeserializeComponent(IEngine* pEngine, UIDocument* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef component)
+	void UIDocumentImporter::DeserializeComponent(EditorApplication* pApp, UIDocument* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef component)
 	{
 		const UUID compUUID = component["UUID"].As<uint64_t>();
 		Utils::NodeValueRef activeNode = component["Active"];
@@ -80,13 +79,13 @@ namespace Glory::Editor
 
 		void* pComponentAddress = pRegistry.CreateComponent(entity, typeHash, compUUID);
 		const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
-		pEngine->GetSerializers().DeserializeProperty(pTypeData, pComponentAddress, component["Properties"]);
+		pApp->GetSerializers().DeserializeProperty(pTypeData, pComponentAddress, component["Properties"]);
 
 		Utils::ECS::BaseTypeView* pTypeView = pRegistry.GetTypeView(typeHash);
 		pTypeView->SetActive(entity, active);
 	}
 
-	void UIDocumentImporter::DeserializeEntity(IEngine* pEngine, UIDocument* pDocument, Utils::NodeValueRef node)
+	void UIDocumentImporter::DeserializeEntity(EditorApplication* pApp, UIDocument* pDocument, Utils::NodeValueRef node)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->Registry();
 		const UUID uuid = node["UUID"].As<uint64_t>();
@@ -108,14 +107,14 @@ namespace Glory::Editor
 		for (size_t i = 0; i < components.Size(); ++i)
 		{
 			Utils::NodeValueRef component = components[i];
-			DeserializeComponent(pEngine, pDocument, entity, component);
+			DeserializeComponent(pApp, pDocument, entity, component);
 			++currentComponentIndex;
 		}
 	}
 
     ImportedResource UIDocumentImporter::LoadResource(const std::filesystem::path& path, void*) const
     {
-		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		EditorApplication* pApp = EditorApplication::GetInstance();
         UIDocumentData* pNewDocument = new UIDocumentData();
 		Utils::YAMLFileRef file{ path };
 		auto node = file.RootNodeRef().ValueRef();
@@ -124,13 +123,13 @@ namespace Glory::Editor
 		for (auto iter = entities.Begin(); iter != entities.End(); ++iter)
 		{
 			Utils::NodeValueRef entity = entities[*iter];
-			DeserializeEntity(pEngine, pNewDocument, entity);
+			DeserializeEntity(pApp, pNewDocument, entity);
 		}
 
         return { path, pNewDocument };
     }
 
-	void SerializeComponent(IEngine* pEngine, UIDocumentData* pDocument, Utils::ECS::EntityView* pEntityView, Utils::ECS::EntityID entity, size_t index, Utils::NodeValueRef node)
+	void SerializeComponent(EditorApplication* pApp, UIDocumentData* pDocument, Utils::ECS::EntityView* pEntityView, Utils::ECS::EntityID entity, size_t index, Utils::NodeValueRef node)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
 
@@ -145,10 +144,10 @@ namespace Glory::Editor
 		node["TypeHash"].Set(uint64_t(type));
 		node["Active"].Set(registry.GetTypeView(type)->IsActive(entity));
 
-		pEngine->GetSerializers().SerializeProperty(pType, registry.GetComponentAddress(entity, compUUID), node["Properties"]);
+		pApp->GetSerializers().SerializeProperty(pType, registry.GetComponentAddress(entity, compUUID), node["Properties"]);
 	}
 
-	void SerializeEntity(IEngine* pEngine, UIDocumentData* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef entityNode)
+	void SerializeEntity(EditorApplication* pApp, UIDocumentData* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef entityNode)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
 
@@ -165,11 +164,11 @@ namespace Glory::Editor
 		components.Set(YAML::Node(YAML::NodeType::Sequence));
 		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
 		{
-			SerializeComponent(pEngine, pDocument, pEntityView, entity, i, components[i]);
+			SerializeComponent(pApp, pDocument, pEntityView, entity, i, components[i]);
 		}
 	}
 
-	void UIDocumentImporter::SerializeEntityRecursive(IEngine* pEngine, UIDocumentData* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef entities)
+	void UIDocumentImporter::SerializeEntityRecursive(EditorApplication* pApp, UIDocumentData* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef entities)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->GetRegistry();
 
@@ -178,16 +177,16 @@ namespace Glory::Editor
 		entities[idStr].SetMap();
 
 		/* Serialize entity first then its children */
-		SerializeEntity(pEngine, pDocument, entity, entities[idStr]);
+		SerializeEntity(pApp, pDocument, entity, entities[idStr]);
 
 		for (size_t i = 0; i < registry.ChildCount(entity); ++i)
 		{
 			Utils::ECS::EntityID child = registry.Child(entity, i);
-			SerializeEntityRecursive(pEngine, pDocument, child, entities);
+			SerializeEntityRecursive(pApp, pDocument, child, entities);
 		}
 	}
 
-	void SerializeComponent(IEngine* pEngine, UIDocument* pDocument, Utils::ECS::EntityView* pEntityView, Utils::ECS::EntityID entity, size_t index, Utils::NodeValueRef node)
+	void SerializeComponent(EditorApplication* pApp, UIDocument* pDocument, Utils::ECS::EntityView* pEntityView, Utils::ECS::EntityID entity, size_t index, Utils::NodeValueRef node)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->Registry();
 
@@ -202,10 +201,10 @@ namespace Glory::Editor
 		node["TypeHash"].Set(uint64_t(type));
 		node["Active"].Set(registry.GetTypeView(type)->IsActive(entity));
 
-		pEngine->GetSerializers().SerializeProperty(pType, registry.GetComponentAddress(entity, compUUID), node["Properties"]);
+		pApp->GetSerializers().SerializeProperty(pType, registry.GetComponentAddress(entity, compUUID), node["Properties"]);
 	}
 
-	void SerializeEntity(IEngine* pEngine, UIDocument* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef entityNode)
+	void SerializeEntity(EditorApplication* pApp, UIDocument* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef entityNode)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->Registry();
 
@@ -222,11 +221,11 @@ namespace Glory::Editor
 		components.Set(YAML::Node(YAML::NodeType::Sequence));
 		for (size_t i = 0; i < pEntityView->ComponentCount(); ++i)
 		{
-			SerializeComponent(pEngine, pDocument, pEntityView, entity, i, components[i]);
+			SerializeComponent(pApp, pDocument, pEntityView, entity, i, components[i]);
 		}
 	}
 
-	void UIDocumentImporter::SerializeEntityRecursive(IEngine* pEngine, UIDocument* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef entities)
+	void UIDocumentImporter::SerializeEntityRecursive(EditorApplication* pApp, UIDocument* pDocument, Utils::ECS::EntityID entity, Utils::NodeValueRef entities)
 	{
 		Utils::ECS::EntityRegistry& registry = pDocument->Registry();
 
@@ -235,18 +234,18 @@ namespace Glory::Editor
 		entities[idStr].SetMap();
 
 		/* Serialize entity first then its children */
-		SerializeEntity(pEngine, pDocument, entity, entities[idStr]);
+		SerializeEntity(pApp, pDocument, entity, entities[idStr]);
 
 		for (size_t i = 0; i < registry.ChildCount(entity); ++i)
 		{
 			Utils::ECS::EntityID child = registry.Child(entity, i);
-			SerializeEntityRecursive(pEngine, pDocument, child, entities);
+			SerializeEntityRecursive(pApp, pDocument, child, entities);
 		}
 	}
 
     bool UIDocumentImporter::SaveResource(const std::filesystem::path& path, UIDocumentData* pDocument) const
     {
-		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		EditorApplication* pApp = EditorApplication::GetInstance();
 
         Utils::YAMLFileRef file{ path };
 
@@ -263,7 +262,7 @@ namespace Glory::Editor
         for (size_t i = 0; i < registry.ChildCount(0); ++i)
         {
             Utils::ECS::EntityID child = registry.Child(0, i);
-            SerializeEntityRecursive(pEngine, pDocument, child, entities);
+            SerializeEntityRecursive(pApp, pDocument, child, entities);
         }
 
         file.Save();

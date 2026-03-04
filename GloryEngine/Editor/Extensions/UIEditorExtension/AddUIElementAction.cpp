@@ -24,7 +24,7 @@ namespace Glory::Editor
 	{
 	}
 
-	UUID AddUIElementAction::AddElement(IEngine* pEngine, UIDocument* pDocument, Utils::YAMLFileRef& file,
+	UUID AddUIElementAction::AddElement(EditorApplication* pApp, UIDocument* pDocument, Utils::YAMLFileRef& file,
 		std::string_view name, uint32_t type, UUID parent, size_t siblingIndex)
 	{
 		const UUID newEntityID{};
@@ -39,12 +39,12 @@ namespace Glory::Editor
 		Undo::AddAction<AddUIElementAction>(type, newEntityID, parent, siblingIndex);
 		Undo::StopRecord();
 
-		SetUIParentAction::StoreDocumentState(pEngine, pDocument, file["Entities"]);
+		SetUIParentAction::StoreDocumentState(pApp, pDocument, file["Entities"]);
 		pDocument->SetDrawDirty();
 		return newEntityID;
 	}
 
-	UUID AddUIElementAction::DuplicateElement(IEngine* pEngine, UIDocument* pDocument, Utils::YAMLFileRef& file, UUID objectID)
+	UUID AddUIElementAction::DuplicateElement(EditorApplication* pApp, UIDocument* pDocument, Utils::YAMLFileRef& file, UUID objectID)
 	{
 		if (!pDocument->EntityExists(objectID)) return 0;
 		const Utils::ECS::EntityID entity = pDocument->EntityID(objectID);
@@ -53,9 +53,9 @@ namespace Glory::Editor
 
 		Utils::InMemoryYAML duplicateYAML;
 		auto newEntitiesNode = duplicateYAML["Entities"];
-		UIDocumentImporter::SerializeEntityRecursive(pEngine, pDocument, entity, newEntitiesNode);
+		UIDocumentImporter::SerializeEntityRecursive(pApp, pDocument, entity, newEntitiesNode);
 
-		UUIDRemapper remapper{ uint32_t(pEngine->Time().GetTime()*1000.0f) };
+		UUIDRemapper remapper{ uint32_t(pApp->GetEngine()->Time().GetTime() * 1000.0f)};
 		if (parentUUID) remapper.EnforceRemap(parentUUID, parentUUID);
 		const UUID newObjectID = remapper(objectID);
 
@@ -98,14 +98,13 @@ namespace Glory::Editor
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		UIMainWindow* pMainWindow = pApp->GetMainEditor().GetMainWindow<UIMainWindow>();
 		UIDocument* pDocument = pMainWindow->FindEditingDocument(actionRecord.ObjectID);
-		IEngine* pEngine = pApp->GetEngine();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(actionRecord.ObjectID);
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
 		Utils::NodeValueRef node = **pDocumentData;
 
 		pDocument->DestroyEntity(m_ID);
-		SetUIParentAction::StoreDocumentState(pEngine, pDocument, node["Entities"]);
+		SetUIParentAction::StoreDocumentState(pApp, pDocument, node["Entities"]);
 	}
 
 	void AddUIElementAction::OnRedo(const ActionRecord& actionRecord)
@@ -113,7 +112,6 @@ namespace Glory::Editor
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		UIMainWindow* pMainWindow = pApp->GetMainEditor().GetMainWindow<UIMainWindow>();
 		UIDocument* pDocument = pMainWindow->FindEditingDocument(actionRecord.ObjectID);
-		IEngine* pEngine = pApp->GetEngine();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 		EditableResource* pResource = resources.GetEditableResource(actionRecord.ObjectID);
 		YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
@@ -127,6 +125,6 @@ namespace Glory::Editor
 		registry.AddComponent<UIInteraction>(entity, UUID());
 		registry.SetParent(entity, parent);
 		registry.SetSiblingIndex(entity, m_SiblingIndex);
-		SetUIParentAction::StoreDocumentState(pEngine, pDocument, node["Entities"]);
+		SetUIParentAction::StoreDocumentState(pApp, pDocument, node["Entities"]);
 	}
 }

@@ -26,6 +26,7 @@ project "UIEditorExtension"
 
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.yaml_cpp}",
+		"%{GloryIncludeDir.serialization}",
 		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
@@ -59,6 +60,7 @@ project "UIEditorExtension"
 		"GloryEngineCore",
 		"GloryCore",
 		"GloryEditor",
+		"GloryEditorSerialization",
 		"GloryUIRenderer",
 		"shaderc",
 		"shaderc_combined",

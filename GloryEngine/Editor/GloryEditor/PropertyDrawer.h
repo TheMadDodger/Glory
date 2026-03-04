@@ -6,7 +6,6 @@
 #include <ResourceType.h>
 #include <typeindex>
 #include <vector>
-#include <ResourceType.h>
 #include <any>
 #include <Reflection.h>
 #include <yaml-cpp/yaml.h>
