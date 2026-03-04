@@ -95,7 +95,6 @@ namespace Glory::Editor
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && documentID && pDocument)
 		{
 			EditorApplication* pApp = EditorApplication::GetInstance();
-			IEngine* pEngine = pApp->GetEngine();
 			EditorResourceManager& resources = pApp->GetResourceManager();
 			EditableResource* pResource = resources.GetEditableResource(documentID);
 			YAMLResource<UIDocumentData>* pDocumentData = static_cast<YAMLResource<UIDocumentData>*>(pResource);
@@ -103,7 +102,7 @@ namespace Glory::Editor
 
 			const size_t siblingIndex = pDocument->Registry().ChildCount(0);
 			pMainWindow->SelectedEntity() =
-				AddUIElementAction::AddElement(pEngine, pDocument, file, typeName, type->m_TypeHash, 0, siblingIndex);
+				AddUIElementAction::AddElement(pApp, pDocument, file, typeName, type->m_TypeHash, 0, siblingIndex);
 		}
 
 		ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });

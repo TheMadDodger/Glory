@@ -59,6 +59,7 @@ project "GloryEditor"
 
 		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.serialization}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
 		"%{GloryIncludeDir.ImGui}",
@@ -92,6 +93,7 @@ project "GloryEditor"
 	{
 		"GloryEngineCore",
 		"GloryCore",
+		"GloryEditorSerialization",
 		"GloryJobs",
 		"GloryThreads",
 		"GloryAPI",

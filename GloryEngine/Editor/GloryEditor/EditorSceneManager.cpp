@@ -53,7 +53,7 @@ namespace Glory::Editor
 		YAMLResource<GScene>& yamlFile = m_SceneFiles[index];
 
 		std::filesystem::path filePath = path;
-		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), *yamlFile, uuid, filePath.filename().replace_extension().string());
+		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance(), *yamlFile, uuid, filePath.filename().replace_extension().string());
 		if (pScene == nullptr) return;
 		pScene->SetResourceUUID(uuid);
 		m_pOpenScenes.emplace_back(pScene);
@@ -101,7 +101,7 @@ namespace Glory::Editor
 		std::string path = std::string{ EditorApplication::GetInstance()->GetEngine()->GetAssetDatabase().GetAssetPath() } + "\\" + location.Path;
 		Utils::YAMLFileRef file{ path };
 		std::filesystem::path filePath = path;
-		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), file.RootNodeRef().ValueRef(), uuid,
+		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance(), file.RootNodeRef().ValueRef(), uuid,
 			filePath.filename().replace_extension().string(), EditorSceneSerializer::NoComponentCallbacks);
 		return pScene;
 	}
@@ -168,7 +168,7 @@ namespace Glory::Editor
 		FullYAMLResource<GScene>& yamlFile = m_SceneFiles[index];
 
 		std::filesystem::path filePath = path;
-		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), *yamlFile, uuid, filePath.filename().replace_extension().string());
+		GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance(), *yamlFile, uuid, filePath.filename().replace_extension().string());
 
 		if (pScene == nullptr) return;
 		pScene->SetResourceUUID(uuid);
@@ -292,7 +292,7 @@ namespace Glory::Editor
 			scene["Name"].Set(pScene->Name());
 			scene["UUID"].Set(uint64_t(pScene->GetUUID()));
 
-			EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance()->GetEngine(), pScene, scene["Scene"]);
+			EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance(), pScene, scene["Scene"]);
 		}
 	}
 
@@ -307,7 +307,7 @@ namespace Glory::Editor
 			auto uuidNode = sceneDataNode["UUID"];
 			UUID uuid = uuidNode.As<uint64_t>();
 			auto sceneNode = sceneDataNode["Scene"];
-			GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), sceneNode, uuid, name);
+			GScene* pScene = EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance(), sceneNode, uuid, name);
 			OpenScene(pScene, uuid);
 		}
 	}
@@ -352,7 +352,7 @@ namespace Glory::Editor
 		Utils::InMemoryYAML data;
 		auto root = data.RootNodeRef().ValueRef();
 		root.SetSequence();
-		EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, entity.GetEntityID(), root);
+		EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance(), pScene, entity.GetEntityID(), root);
 
 		/* Deserialize node into a new objects */
 		PasteSceneObject(pScene, entity.Parent(), root);
@@ -373,7 +373,7 @@ namespace Glory::Editor
 				EditorApplication::GetInstance()->GetEngine()->GetUUIDRemapper().EnforceRemap(parentUUID, parentUUID);
 			}
 
-			Entity newEntity = EditorSceneSerializer::DeserializeEntity(EditorApplication::GetInstance()->GetEngine(), pScene, entity, EditorSceneSerializer::Flags::GenerateNewUUIDs);
+			Entity newEntity = EditorSceneSerializer::DeserializeEntity(EditorApplication::GetInstance(), pScene, entity, EditorSceneSerializer::Flags::GenerateNewUUIDs);
 			if (i == 0 && newEntity.IsValid())
 			{
 				Undo::StartRecord("Duplicate", newEntity.EntityUUID());
@@ -446,7 +446,7 @@ namespace Glory::Editor
 		auto root = **yamlResource;
 
 		GScene* pScene = GetOpenScene(uuid);
-		EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance()->GetEngine(), pScene, root);
+		EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance(), pScene, root);
 		yamlResource->SetDirty(true);
 		yamlResource->Save();
 

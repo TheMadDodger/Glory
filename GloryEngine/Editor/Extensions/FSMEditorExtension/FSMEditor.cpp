@@ -139,11 +139,10 @@ namespace Glory::Editor
 	{
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		IEngine* pEngine = pApp->GetEngine();
-		Serializers& serializers = pEngine->GetSerializers();
 		EditorResourceManager& resources = pApp->GetResourceManager();
 
 		Undo::RegisterChangeHandler(std::string(".gfsm"), std::string("Nodes"),
-		[this, &serializers, pEngine](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+		[this, pEngine](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
 			FSMData* pFSM = FindFSM(file.Path(), pEngine);
 			if (!pFSM) return;
 
@@ -181,7 +180,7 @@ namespace Glory::Editor
 		});
 
 		Undo::RegisterChangeHandler(std::string(".gfsm"), std::string("Transitions"),
-		[this, &serializers, pEngine](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+		[this, pEngine](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
 			FSMData* pFSM = FindFSM(file.Path(), pEngine);
 			if (!pFSM) return;
 
@@ -240,7 +239,7 @@ namespace Glory::Editor
 		});
 		
 		Undo::RegisterChangeHandler(std::string(".gfsm"), std::string("Properties"),
-		[this, &serializers, pEngine](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+		[this, pEngine](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
 			FSMData* pFSM = FindFSM(file.Path(), pEngine);
 			if (!pFSM) return;
 
@@ -284,7 +283,7 @@ namespace Glory::Editor
 		});
 		
 		Undo::RegisterChangeHandler(std::string(".gfsm"), std::string("StartNode"),
-		[this, &serializers, pEngine](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
+		[this, pEngine](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
 			FSMData* pFSM = FindFSM(file.Path(), pEngine);
 			if (!pFSM) return;
 				

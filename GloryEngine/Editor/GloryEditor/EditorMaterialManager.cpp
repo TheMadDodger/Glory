@@ -23,9 +23,9 @@
 
 namespace Glory::Editor
 {
-	EditorMaterialManager::EditorMaterialManager(IEngine* pEngine):
-		m_pEngine(pEngine), m_AssetRegisteredCallback(0), m_AssetUpdatedCallback(0),
-		m_PipelineUpdatedCallback(0), MaterialManager(pEngine)
+	EditorMaterialManager::EditorMaterialManager(EditorApplication* pApp):
+		m_pApplication(pApp), m_AssetRegisteredCallback(0), m_AssetUpdatedCallback(0),
+		m_PipelineUpdatedCallback(0), MaterialManager(pApp->GetEngine())
 	{
 	}
 
@@ -199,7 +199,7 @@ namespace Glory::Editor
 				size_t index = 0;
 				pMaterial->GetPropertyInfoIndex(displayName, index);
 				const size_t offset = pMaterial->GetPropertyInfoAt(index)->Offset();
-				m_pEngine->GetSerializers().DeserializeProperty(pMaterial->GetBufferReference(), type, offset, typeData != nullptr ? typeData->m_Size : 4, value);
+				m_pApplication->GetSerializers().DeserializeProperty(pMaterial->GetBufferReference(), type, offset, typeData != nullptr ? typeData->m_Size : 4, value);
 			}
 			else
 			{
@@ -231,7 +231,7 @@ namespace Glory::Editor
 			if (!isResource)
 			{
 				const size_t offset = propInfo->Offset();
-				m_pEngine->GetSerializers().SerializeProperty(pMaterial->GetBufferReference(), type, offset, typeData != nullptr ? typeData->m_Size : 4, value);
+				m_pApplication->GetSerializers().SerializeProperty(pMaterial->GetBufferReference(), type, offset, typeData != nullptr ? typeData->m_Size : 4, value);
 			}
 			else
 			{

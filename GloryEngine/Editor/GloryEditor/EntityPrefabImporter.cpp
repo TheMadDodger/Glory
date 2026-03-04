@@ -28,7 +28,7 @@ namespace Glory::Editor
 	{
         Utils::YAMLFileRef yamlFile{ path };
         PrefabData* pPrefab = new PrefabData();
-		EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance()->GetEngine(), pPrefab, yamlFile.RootNodeRef().ValueRef(), 0, "");
+		EditorSceneSerializer::DeserializeScene(EditorApplication::GetInstance(), pPrefab, yamlFile.RootNodeRef().ValueRef(), 0, "");
         return { path, pPrefab };
 	}
 
@@ -36,7 +36,7 @@ namespace Glory::Editor
 	{
 		Utils::YAMLFileRef yamlFile{ path };
         YAML::Emitter out;
-        EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance()->GetEngine(), pResource, yamlFile.RootNodeRef().ValueRef());
+        EditorSceneSerializer::SerializeScene(EditorApplication::GetInstance(), pResource, yamlFile.RootNodeRef().ValueRef());
 		yamlFile.Save();
         return true;
 	}

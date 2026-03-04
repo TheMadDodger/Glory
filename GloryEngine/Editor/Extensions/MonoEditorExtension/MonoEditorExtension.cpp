@@ -4,6 +4,7 @@
 #include "MonoScriptComponentEditor.h"
 #include "EditorAssetManager.h"
 #include "ScriptTypeReferenceDrawer.h"
+#include "ScriptedComponentSerializer.h"
 
 #include <Debug.h>
 #include <IEngine.h>
@@ -164,13 +165,13 @@ namespace Glory::Editor
 
 	void MonoEditorExtension::Initialize()
 	{
-		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		EditorApplication* pEditorApp = EditorApplication::GetInstance();
+		IEngine* pEngine = pEditorApp->GetEngine();
 
 		m_pMonoScriptingModule = pEngine->GetOptionalModule<GloryMonoScipting>();
 		Reflect::SetReflectInstance(&pEngine->Reflection());
 		pEngine->GetSceneManager()->ComponentTypesInstance();
 
-		EditorApplication* pEditorApp = EditorApplication::GetInstance();
 		EditorSettings& settings = pEditorApp->GetMainEditor().Settings();
 		std::filesystem::path visualStudioPath = settings["Mono/VisualStudioPath"].As<std::string>("");
 		if (!FindMSBuildInVSPath(visualStudioPath, std::filesystem::path{}))
@@ -213,6 +214,8 @@ namespace Glory::Editor
 			};
 			AddPackagingTask(std::move(task), "CompileEXE");
 		});
+
+		pEditorApp->GetSerializers().RegisterSerializer<ScriptedComponentSerializer>();
 	}
 
 	void MonoEditorExtension::Update()

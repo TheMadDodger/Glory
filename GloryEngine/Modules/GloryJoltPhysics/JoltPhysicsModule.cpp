@@ -38,6 +38,8 @@
 #include <BinaryStream.h>
 #include <PhysicsComponents.h>
 
+#include <EntityRegistry.h>
+
 
 using namespace JPH;
 using namespace JPH::literals;

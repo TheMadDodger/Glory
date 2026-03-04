@@ -5,19 +5,20 @@
 
 namespace Glory
 {
-	class IEngine;
 	class UIDocument;
 }
 
 namespace Glory::Editor
 {
+	class EditorApplication;
+
 	class SetUIParentAction : public IAction
 	{
 	public:
 		SetUIParentAction(UUID toReParent, UUID oldParent, UUID newParent, size_t oldSiblingIndex, size_t newSiblingIndex);
 		virtual ~SetUIParentAction() = default;
 
-		static void StoreDocumentState(IEngine* pEngine, UIDocument* pDocument, Utils::NodeValueRef entities);
+		static void StoreDocumentState(EditorApplication* pApp, UIDocument* pDocument, Utils::NodeValueRef entities);
 
 	private:
 		void OnUndo(const ActionRecord& actionRecord) override;

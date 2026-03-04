@@ -68,11 +68,12 @@ namespace Glory::Editor
 		OBJECT_CREATE_MENU(PhysicsBody, PhysicsBody);
 		OBJECT_CREATE_MENU(Character, CharacterController);
 
-		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		EditorApplication* pApp = EditorApplication::GetInstance();
+		IEngine* pEngine = pApp->GetEngine();
 		Utils::Reflect::Reflect& reflect = pEngine->Reflection();
 		Reflect::SetReflectInstance(&reflect);
 
-		pEngine->GetSerializers().RegisterSerializer<SimpleTemplatedPropertySerializer<AllowedDOFFlag>>();
+		pApp->GetSerializers().RegisterSerializer<SimpleTemplatedPropertySerializer<AllowedDOFFlag>>();
 
 		pEngine->GetSceneManager()->ComponentTypesInstance();
 	}

@@ -58,7 +58,7 @@ namespace Glory::Editor
 			auto value = objects["Value"];
 			value.SetSequence();
 			GScene* pScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pSceneObject->SceneID());
-			EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance()->GetEngine(), pScene, pSceneObject->EntityID(), value);
+			EditorSceneSerializer::SerializeEntityRecursive(EditorApplication::GetInstance(), pScene, pSceneObject->EntityID(), value);
 			ImGui::SetClipboardText(data.ToString().c_str());
 			break;
 		}

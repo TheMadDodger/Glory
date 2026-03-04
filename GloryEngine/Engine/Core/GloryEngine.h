@@ -130,7 +130,6 @@ namespace Utils::Reflect
 		AssetDatabase& GetAssetDatabase() override;
 		AssetManager& GetAssetManager() override;
 		ResourceTypes& GetResourceTypes() override;
-		Serializers& GetSerializers() override;
 		LayerManager& GetLayerManager() override;
 		MaterialManager& GetMaterialManager() override;
 		PipelineManager& GetPipelineManager() override;
@@ -180,7 +179,6 @@ namespace Utils::Reflect
 		UUIDRemapper& GetUUIDRemapper() override;
 
 	private:
-		void RegisterStandardSerializers();
 		void RegisterBasicTypes();
 
 	private:
@@ -238,13 +236,11 @@ namespace Utils::Reflect
 		std::unique_ptr<CameraManager> m_CameraManager;
 		std::unique_ptr<AssetDatabase> m_AssetDatabase;
 		std::unique_ptr<ResourceTypes> m_ResourceTypes;
-		std::unique_ptr<Serializers> m_Serializers;
 		std::unique_ptr<LayerManager> m_LayerManager;
 		std::unique_ptr<Utils::Reflect::Reflect> m_Reflection;
 		std::unique_ptr<ObjectManager> m_ObjectManager;
 		std::unique_ptr<EngineProfiler> m_Profiler;
 		std::map<size_t, void*> m_pUserContexts;
-		std::vector<PropertySerializer*> m_pRegisteredPropertySerializers;
 		std::map<std::string, std::vector<char>> m_Datas;
 		std::map<std::string, std::filesystem::path> m_DataPaths;
 

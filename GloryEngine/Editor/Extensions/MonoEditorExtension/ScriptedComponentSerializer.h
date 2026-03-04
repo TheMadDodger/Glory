@@ -1,14 +1,14 @@
 #pragma once
-#include "Components.h"
-#include "PropertySerializer.h"
+#include <Components.h>
+#include <PropertySerializer.h>
 
 namespace Glory
 {
-	class ScriptedComponentSerailizer : public PropertySerializer
+	class ScriptedComponentSerializer : public PropertySerializer
 	{
     public:
-        ScriptedComponentSerailizer(Serializers* pSerializers);
-        virtual ~ScriptedComponentSerailizer();
+        ScriptedComponentSerializer(Serializers* pSerializers);
+        virtual ~ScriptedComponentSerializer();
 
     private:
         virtual void Serialize(void* data, uint32_t typeHash, Utils::NodeValueRef node) override;

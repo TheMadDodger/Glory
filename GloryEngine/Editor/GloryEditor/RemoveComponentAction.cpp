@@ -16,7 +16,7 @@ namespace Glory::Editor
 	RemoveComponentAction::RemoveComponentAction(Utils::ECS::EntityRegistry* pRegistry, Utils::ECS::EntityID entityID, size_t componentIndex) : m_ComponentIndex(componentIndex)
 	{
 		Utils::ECS::EntityView* pEntityView = pRegistry->GetEntityView(entityID);
-		EditorSceneSerializer::SerializeComponent(EditorApplication::GetInstance()->GetEngine(), pRegistry, pEntityView, entityID, componentIndex, m_SerializedComponent.RootNodeRef().ValueRef());
+		EditorSceneSerializer::SerializeComponent(EditorApplication::GetInstance(), pRegistry, pEntityView, entityID, componentIndex, m_SerializedComponent.RootNodeRef().ValueRef());
 	}
 
 	RemoveComponentAction::~RemoveComponentAction()
@@ -32,7 +32,7 @@ namespace Glory::Editor
 		GScene* pEntityScene = EditorApplication::GetInstance()->GetSceneManager().GetOpenScene(pEntityObject->SceneID());
 		Utils::ECS::EntityView* pEntityView = pEntityScene->GetRegistry().GetEntityView(pEntityObject->EntityID());
 		const size_t index = pEntityView->ComponentCount();
-		EditorSceneSerializer::DeserializeComponent(EditorApplication::GetInstance()->GetEngine(), pEntityScene, pEntityObject->EntityID(), UUIDRemapper{}, m_SerializedComponent.RootNodeRef().ValueRef());
+		EditorSceneSerializer::DeserializeComponent(EditorApplication::GetInstance(), pEntityScene, pEntityObject->EntityID(), UUIDRemapper{}, m_SerializedComponent.RootNodeRef().ValueRef());
 		pEntityView->SetComponentIndex(index, m_ComponentIndex);
 
 		for (size_t i = 0; i < editors.size(); ++i)

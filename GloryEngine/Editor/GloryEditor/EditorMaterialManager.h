@@ -20,13 +20,14 @@ namespace Utils
 namespace Editor
 {
 	struct AssetCallbackData;
+	struct EditorApplication;
 
 	/** @brief Material manager for the editor */
 	class EditorMaterialManager : public MaterialManager
 	{
 	public:
 		/** @brief Constructor */
-		EditorMaterialManager(IEngine* pEngine);
+		EditorMaterialManager(EditorApplication* pApp);
 		/** @brief Destructor */
 		virtual ~EditorMaterialManager();
 
@@ -88,7 +89,7 @@ namespace Editor
 		std::vector<UUID> m_Materials;
 		std::vector<UUID> m_RuntimeMaterials;
 
-		IEngine* m_pEngine;
+		EditorApplication* m_pApplication;
 		UUID m_AssetRegisteredCallback;
 		UUID m_AssetUpdatedCallback;
 		UUID m_PipelineUpdatedCallback;

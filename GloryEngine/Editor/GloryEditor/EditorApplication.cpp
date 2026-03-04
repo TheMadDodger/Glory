@@ -14,6 +14,15 @@
 #include "FileBrowser.h"
 #include "ProjectSettings.h"
 
+#include "PropertySerializer.h"
+#include "AssetReferencePropertySerializer.h"
+#include "ArrayPropertySerializer.h"
+#include "EnumPropertySerializer.h"
+#include "StructPropertySerializer.h"
+#include "SceneObjectRefSerializer.h"
+#include "ShapePropertySerializer.h"
+#include "Serializers.h"
+
 #include <imgui.h>
 #include <Console.h>
 #include <implot.h>
@@ -44,9 +53,10 @@ namespace Glory::Editor
 		m_SceneManager(new EditorSceneManager(this)),
 		m_ResourceManager(new EditorResourceManager(createInfo.pEngine)),
 		m_PipelineManager(new EditorPipelineManager(createInfo.pEngine)),
-		m_MaterialManager(new EditorMaterialManager(createInfo.pEngine)),
+		m_MaterialManager(new EditorMaterialManager(this)),
 		m_ThumbnailManager(new ThumbnailManager(this)),
-		m_pFileWatcher(new efsw::FileWatcher())
+		m_pFileWatcher(new efsw::FileWatcher()),
+		m_Serializers(new Serializers(createInfo.pEngine))
 	{
 		// Copy the optional modules into the optional modules vector
 		if (createInfo.ExtensionsCount > 0 && createInfo.pExtensions != nullptr)
@@ -76,6 +86,7 @@ namespace Glory::Editor
 
 	void EditorApplication::Initialize()
 	{
+		RegisterStandardSerializers();
 		m_pEngine->Initialize();
 
 		EditorAssetDatabase::Initialize();
@@ -124,6 +135,34 @@ namespace Glory::Editor
 		ImGui::TextUnformatted("Getting things ready for you.");
 		ImGui::TextUnformatted(m_StartupStatus.data());
 		ImGui::EndPopup();
+	}
+
+	void EditorApplication::RegisterStandardSerializers()
+	{
+		// Standard
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<int>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<float>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<double>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<bool>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<long>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<uint32_t>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<uint64_t>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<glm::vec2>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<glm::vec3>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<glm::vec4>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<glm::quat>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<LayerMask>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<LayerRef>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<SceneObjectRef>>();
+		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<std::string>>();
+
+		// Special
+		m_Serializers->RegisterSerializer<AssetReferencePropertySerializer>();
+		m_Serializers->RegisterSerializer<ArrayPropertySerializer>();
+		m_Serializers->RegisterSerializer<EnumPropertySerializer>();
+		m_Serializers->RegisterSerializer<StructPropertySerializer>();
+		m_Serializers->RegisterSerializer<SceneObjectRefSerializer>();
+		m_Serializers->RegisterSerializer<ShapePropertySerializer>();
 	}
 
 	void EditorApplication::Start(const std::string& projectPath)
@@ -513,6 +552,11 @@ namespace Glory::Editor
 	ThumbnailManager& EditorApplication::GetThumbnailManager()
 	{
 		return *m_ThumbnailManager;
+	}
+
+	Serializers& EditorApplication::GetSerializers()
+	{
+		return *m_Serializers;
 	}
 
 	void EditorApplication::TryToQuit()

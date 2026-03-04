@@ -5,7 +5,6 @@
 #include "EntityCSAPI.h"
 #include "AudioCSAPI.h"
 #include "MonoManager.h"
-#include "ScriptedComponentSerializer.h"
 #include "MonoComponents.h"
 #include "MonoScriptedSystem.h"
 #include "ScriptingExtender.h"
@@ -13,9 +12,10 @@
 
 #include <Console.h>
 #include <SceneManager.h>
-#include <PropertySerializer.h>
 #include <IEngine.h>
 #include <BinaryStream.h>
+
+#include <EntityRegistry.h>
 
 namespace Glory
 {
@@ -77,8 +77,6 @@ namespace Glory
 		AudioCSAPI::SetEngine(m_pEngine);
 
 		m_pEngine->GetSceneManager()->RegisterComponent<MonoScriptComponent>();
-		m_pEngine->GetSerializers().RegisterSerializer<ScriptedComponentSerailizer>();
-
 		m_pEngine->GetResourceTypes().RegisterResource<MonoScript>(".cs");
 
 		// Scripted

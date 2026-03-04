@@ -1,13 +1,6 @@
 #include "GloryEngine.h"
 #include "Console.h"
 #include "AssetManager.h"
-#include "PropertySerializer.h"
-#include "AssetReferencePropertySerializer.h"
-#include "ArrayPropertySerializer.h"
-#include "EnumPropertySerializer.h"
-#include "StructPropertySerializer.h"
-#include "SceneObjectRefSerializer.h"
-#include "ShapePropertySerializer.h"
 #include "LayerRef.h"
 #include "SceneObjectRef.h"
 #include "ShapeProperty.h"
@@ -27,7 +20,6 @@
 
 #include "Debug.h"
 #include "AssetDatabase.h"
-#include "Serializers.h"
 #include "LayerManager.h"
 #include "ObjectManager.h"
 #include "CameraManager.h"
@@ -44,6 +36,8 @@
 #include <ThreadManager.h>
 
 #include <algorithm>
+
+#include <glm/detail/type_quat.hpp>
 
 namespace Glory
 {
@@ -212,9 +206,8 @@ namespace Glory
 		m_Reflection(new Reflect), m_CreateInfo(createInfo), m_ResourceTypes(new ResourceTypes),
 		m_Time(new GameTime(this)), m_Debug(createInfo.m_pDebug), m_LayerManager(new LayerManager(this)),
 		m_pAssetsManager(createInfo.pAssetManager), m_Console(createInfo.m_pConsole), m_Profiler(new EngineProfiler()),
-		m_Serializers(new Serializers(this)), m_CameraManager(new CameraManager(this)),
-		m_pMaterialManager(createInfo.pMaterialManager), m_AssetDatabase(new AssetDatabase),
-		m_ObjectManager(new ObjectManager), m_RootPath("./")
+		m_CameraManager(new CameraManager(this)), m_pMaterialManager(createInfo.pMaterialManager),
+		m_AssetDatabase(new AssetDatabase), m_ObjectManager(new ObjectManager), m_RootPath("./")
 	{
 		/* Copy main modules */
 		m_pMainModules.resize(createInfo.MainModuleCount);
@@ -259,7 +252,6 @@ namespace Glory
 		m_Debug->SetWindowModule(pWindows);
 
 		RegisterBasicTypes();
-		RegisterStandardSerializers();
 		m_pSceneManager->Initialize();
 
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
@@ -404,11 +396,6 @@ namespace Glory
 	ResourceTypes& GloryEngine::GetResourceTypes()
 	{
 		return *m_ResourceTypes;
-	}
-
-	Serializers& GloryEngine::GetSerializers()
-	{
-		return *m_Serializers;
 	}
 
 	Console& GloryEngine::GetConsole()
@@ -659,34 +646,6 @@ namespace Glory
 	UUIDRemapper& GloryEngine::GetUUIDRemapper()
 	{
 		return m_UUIDRemapper;
-	}
-
-	void GloryEngine::RegisterStandardSerializers()
-	{
-		// Standard
-		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<int>>();
-		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<float>>();
-		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<double>>();
-		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<bool>>();
-		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<long>>();
-		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<uint32_t>>();
-		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<uint64_t>>();
-		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<glm::vec2>>();
-		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<glm::vec3>>();
-		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<glm::vec4>>();
-		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<glm::quat>>();
-		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<LayerMask>>();
-		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<LayerRef>>();
-		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<SceneObjectRef>>();
-		m_Serializers->RegisterSerializer<SimpleTemplatedPropertySerializer<std::string>>();
-
-		// Special
-		m_Serializers->RegisterSerializer<AssetReferencePropertySerializer>();
-		m_Serializers->RegisterSerializer<ArrayPropertySerializer>();
-		m_Serializers->RegisterSerializer<EnumPropertySerializer>();
-		m_Serializers->RegisterSerializer<StructPropertySerializer>();
-		m_Serializers->RegisterSerializer<SceneObjectRefSerializer>();
-		m_Serializers->RegisterSerializer<ShapePropertySerializer>();
 	}
 
 	void GloryEngine::RegisterBasicTypes()

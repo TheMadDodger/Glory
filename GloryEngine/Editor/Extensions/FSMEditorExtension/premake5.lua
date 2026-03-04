@@ -28,6 +28,7 @@ project "FSMEditorExtension"
 		"%{IncludeDir.yaml_cpp}",
 		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
+		"%{GloryIncludeDir.serialization}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.jobs}",
 		"%{GloryIncludeDir.editor}",
