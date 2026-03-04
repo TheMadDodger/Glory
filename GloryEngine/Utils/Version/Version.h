@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <string_view>
 
 namespace Glory
 {
@@ -11,7 +12,7 @@ namespace Glory
 		Version(const Version& other);
 		constexpr Version(int major, int minor, int subMinor, int rc) : v{major, minor, subMinor, rc} {}
 
-		static Version Parse(const char* str);
+		static Version Parse(std::string_view str);
 		/** @brief Compare 2 versions
 		 * @param v1 Version 1
 		 * @param v2 Version 2

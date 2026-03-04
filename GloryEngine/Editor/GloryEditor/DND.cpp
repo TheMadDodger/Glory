@@ -60,7 +60,7 @@ namespace Glory::Editor
             const uint32_t type = m_AcceptedTypes[i];
             if (type == ST_Path)
             {
-                const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(STNames[ST_Path], m_DNDFlags);
+                const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(STNames[ST_Path].data(), m_DNDFlags);
                 if (!payload) continue;
                 callback(type, payload);
                 return true;

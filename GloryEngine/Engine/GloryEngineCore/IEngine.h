@@ -78,18 +78,6 @@ namespace Glory
 			return pModule;
 		}
 
-		template<class T>
-		void AddUserContext(T* pUserContext)
-		{
-			AddUserContext(ResourceType::GetHash(typeid(T)), (void*)pUserContext);
-		}
-
-		template<class T>
-		T* GetUserContext()
-		{
-			return (T*)GetUserContext(ResourceType::GetHash(typeid(T)));
-		}
-
 	public:
 		virtual const Version& EngineVersion() const = 0;
 

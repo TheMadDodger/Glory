@@ -95,7 +95,7 @@ REFLECTABLE_ENUM_NS(Glory, BlendOp,
 namespace Glory
 {
     constexpr size_t AspectRatioCount = 5;
-    constexpr char* AspectRatios[AspectRatioCount] = {
+    constexpr std::string_view AspectRatios[AspectRatioCount] = {
         "4:3",
         "16:9",
         "16:10",

@@ -18,21 +18,20 @@ namespace Glory
     {
     }
 
-    Version Glory::Version::Parse(const char* str)
+    Version Glory::Version::Parse(std::string_view str)
     {
-        std::string_view strView = str;
         std::vector<std::string_view> splits;
         size_t index = 0;
         while (true)
         {
-            const size_t nextIndex = strView.find(Separator, index);
+            const size_t nextIndex = str.find(Separator, index);
             if (nextIndex == std::string_view::npos)
             {
-                splits.push_back(std::string_view(strView.data() + index));
+                splits.push_back(std::string_view(str.data() + index));
                 index = nextIndex + 1;
                 break;
             }
-            splits.push_back(std::string_view(strView.data() + index, nextIndex - index));
+            splits.push_back(std::string_view(str.data() + index, nextIndex - index));
             index = nextIndex + 1;
         }
 
