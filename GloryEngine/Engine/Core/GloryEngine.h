@@ -178,6 +178,18 @@ namespace Utils::Reflect
 
 		UUIDRemapper& GetUUIDRemapper() override;
 
+		template<class T>
+		void AddUserContext(T* pUserContext)
+		{
+			AddUserContext(ResourceType::GetHash(typeid(T)), (void*)pUserContext);
+		}
+
+		template<class T>
+		T* GetUserContext()
+		{
+			return (T*)GetUserContext(ResourceType::GetHash(typeid(T)));
+		}
+
 	private:
 		void RegisterBasicTypes();
 

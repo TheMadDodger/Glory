@@ -201,7 +201,7 @@ namespace Glory::Editor
 		if (ImGui::BeginDragDropTargetCustom(rect, ImGui::GetCurrentWindow()->ID))
 		{
 			const ImGuiPayload* pPayload = ImGui::GetDragDropPayload();
-			if (pPayload && pPayload->IsDataType(STNames[ST_Path]))
+			if (pPayload && pPayload->IsDataType(STNames[ST_Path].data()))
 			{
 				std::string path = (const char*)pPayload->Data;
 				HandleDragAndDrop(path);
@@ -353,7 +353,7 @@ namespace Glory::Editor
 
 		if (!pPrefab) return;
 
-		const ImGuiPayload* pPayload = ImGui::AcceptDragDropPayload(STNames[ST_Path]);
+		const ImGuiPayload* pPayload = ImGui::AcceptDragDropPayload(STNames[ST_Path].data());
 		if (pPayload)
 		{
 			if (m_PrefabInstance)

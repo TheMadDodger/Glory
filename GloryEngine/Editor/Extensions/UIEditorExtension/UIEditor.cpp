@@ -210,7 +210,7 @@ namespace Glory::Editor
 			{
 				for (size_t i = 0; i < AspectRatioCount; ++i)
 				{
-					if (ImGui::BeginMenu(AspectRatios[i]))
+					if (ImGui::BeginMenu(AspectRatios[i].data()))
 					{
 						for (size_t j = 0; j < Resolutions[i].size(); ++j)
 						{
