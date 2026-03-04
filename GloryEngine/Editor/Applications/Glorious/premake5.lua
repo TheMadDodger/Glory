@@ -35,7 +35,6 @@ project "Glorious"
 		"%{GloryIncludeDir.core}",
 		"%{GloryIncludeDir.threads}",
 		"%{GloryIncludeDir.editor}",
-		"%{engineDir}/GloryEngineBuilder",
 
 		"%{IncludeDir.FA}",
 
@@ -63,7 +62,6 @@ project "Glorious"
 	{
 		"GloryEngineCore",
 		"GloryCore",
-		"GloryEngineBuilder",
 		"shaderc",
 		"shaderc_combined",
 		"shaderc_shared",

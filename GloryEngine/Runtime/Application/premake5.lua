@@ -24,7 +24,6 @@ project "GloryRuntimeApplication"
 	includedirs
 	{
 		"%{DepsIncludeDir}",
-		"%{engineDir}/GloryEngineBuilder",
 
 		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.core}",
@@ -53,7 +52,6 @@ project "GloryRuntimeApplication"
 	{
 		"GloryEngineCore",
 		"GloryCore",
-		"GloryEngineBuilder",
 		"GloryReflect",
 		"GloryRuntime",
 		"GloryJobs",
@@ -68,16 +66,25 @@ project "GloryRuntimeApplication"
 
 	dependson
 	{
-		"GloryClusteredRenderer",
-		"GloryOpenGLGraphics",
-		--"GloryVulkanGraphics",
-		"GlorySDLWindow",
-		"GlorySDLInput",
+		"GloryFSM",
 		"GloryJoltPhysics",
-		--"GloryEditorVulkan",
+		"GloryLocalize",
 		"GloryMonoScripting",
+		"GloryOpenGLGraphics",
+		"GloryOverlayConsole",
+		"GloryRenderer",
+		"GlorySDLAudio",
+		"GlorySDLInput",
+		"GlorySDLWindow",
+		"GlorySteamAudio",
+		"GloryUIRenderer",
+		"GloryVulkanGraphics",
+
 		"GloryEngine.Core",
-		"GloryEngine.Entities",
+		"GloryEngine.FSM",
+		"GloryEngine.Jolt",
+		"GloryEngine.Localize",
+		"GloryEngine.UI",
 		"CSAPIInstall",
 	}
 
