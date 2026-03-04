@@ -1,4 +1,5 @@
 #pragma once
+#include <string_view>
 
 namespace Glory
 {
@@ -18,7 +19,7 @@ namespace Glory
 		ST_Count,
 	};
 
-	constexpr char* STNames[5] = {
+	constexpr std::string_view STNames[5] = {
 		"ST_Value",
 		"ST_String",
 		"ST_Object",

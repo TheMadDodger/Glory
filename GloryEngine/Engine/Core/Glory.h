@@ -19,6 +19,6 @@
 
 namespace Glory
 {
-	constexpr char* GloryCoreVersion = GLORY_CORE_VERSION;
+	constexpr std::string_view GloryCoreVersion = GLORY_CORE_VERSION;
 	const Version CoreVersion = Version::Parse(GloryCoreVersion);
 }

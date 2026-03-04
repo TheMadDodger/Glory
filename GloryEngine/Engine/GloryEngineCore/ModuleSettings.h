@@ -125,6 +125,8 @@ namespace Glory
 		void SetDirty(bool dirty = true);
 		bool IsDirty() const;
 
+		ModuleSettings& operator=(const YAML::Node& settingsNode);
+
 	private:
 		template<typename T>
 		void RegisterValue(const std::string& name)

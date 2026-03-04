@@ -81,6 +81,15 @@ namespace Glory
 		return m_Dirty;
 	}
 
+	ModuleSettings& ModuleSettings::operator=(const YAML::Node& settingsNode)
+	{
+		m_SettingsNode = settingsNode;
+		m_GroupNames = { "General" },
+		m_Groups = { {"General", std::vector<std::string>()} };
+		m_Dirty = false;
+		return *this;
+	}
+
 	void ModuleSettings::RegisterValue(const std::string& name, uint32_t type, uint32_t elementType)
 	{
 		m_ValueNames.push_back(name);
