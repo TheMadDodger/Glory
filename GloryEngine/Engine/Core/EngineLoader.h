@@ -1,6 +1,7 @@
 #pragma once
-#include <GloryEngine.h>
-#include <Window.h>
+#include "GloryEngine.h"
+#include "Window.h"
+
 #include <Module.h>
 
 #include <string>
