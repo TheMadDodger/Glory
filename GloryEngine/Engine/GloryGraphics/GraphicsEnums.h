@@ -2,7 +2,7 @@
 #include "GraphicsHandles.h"
 
 #include <Reflection.h>
-#include <glm/ext/vector_uint2.hpp>
+#include <glm/glm.hpp>
 
 REFLECTABLE_ENUM_NS(Glory, Filter,
     F_None,
@@ -1005,5 +1005,69 @@ namespace Glory
     {
         TopLeft,
         BottomLeft
+    };
+
+    enum class AttributeType
+    {
+        Float,
+        Float2,
+        Float3,
+        Float4,
+        UINT,
+        UINT2,
+        UINT3,
+        UINT4,
+        SINT,
+        SINT2,
+        SINT3,
+        SINT4,
+    };
+
+    enum class InputRate
+    {
+        Vertex,
+        Instance,
+    };
+
+    struct Vertex
+    {
+        glm::vec2 Pos;
+        glm::vec3 Color;
+    };
+
+    struct VertexPosColorTex
+    {
+        glm::vec2 Pos;
+        glm::vec3 Color;
+        glm::vec2 TexCoord;
+    };
+
+    struct Vertex3DColorTex
+    {
+        glm::vec3 Pos;
+        glm::vec3 Color;
+        glm::vec2 TexCoord;
+    };
+
+    struct Vertex3DTex
+    {
+        glm::vec3 Pos;
+        glm::vec2 TexCoord;
+    };
+
+    struct LineVertex
+    {
+        glm::vec3 Pos;
+        glm::vec4 Color;
+    };
+
+    struct DefaultVertex3D
+    {
+        glm::vec3 Pos;
+        glm::vec3 Normal;
+        glm::vec3 Tangent;
+        glm::vec3 Bitangent;
+        glm::vec2 TexCoord;
+        glm::vec4 Color;
     };
 }

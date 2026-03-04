@@ -1,5 +1,4 @@
 #pragma once
-#include "VertexDefinitions.h"
 #include "GraphicsEnums.h"
 #include "GraphicsFeatures.h"
 #include "GraphicsHandles.h"

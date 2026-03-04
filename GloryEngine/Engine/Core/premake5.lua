@@ -20,7 +20,7 @@ project "GloryCore"
 		["Resources"] = { "PrefabData.*", "MaterialData.*", "MaterialPropertyInfo.*", "TextureData.*", "MeshData.*", "ModelData.*", "ImageData.*", "FileData.*", "CubemapData.*", "FontData.*", "FontDataStructs.*", "PipelineData.*" },
 		["Console"] = { "Logs.*", "Commands.*", "Console.*", "Debug.*", "DebugConsoleInput.*", "IConsole.*", "WindowsDebugConsole.*" },
 		["Core"] = { "TypeFlags.*", "GloryContext.*", "BuiltInModules.*", "GloryEngine.*", "Glory.*", "GameTime.*" },
-		["Graphics"] = { "GraphicsDevice.*", "GraphicsEnums.*", "VertexDefinitions.*", "VertexHelpers.*", "RenderFrame.*" },
+		["Graphics"] = { "RenderFrame.*" },
 		["Modules/Renderer/Camera"] = { "Camera.*", "CameraManager.*", "CameraRef.*" },
 		["Modules/Renderer/Layers"] = { "Layer.*", "LayerManager.*", "LayerMask.*" },
 		["Modules/Renderer/Data"] = { "LightData.*", "RenderData.*" },
