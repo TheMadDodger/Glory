@@ -39,6 +39,7 @@ namespace Glory::Utils::ECS
 		m_Parents[newEntity] = 0ull;
 		m_EntityTrees[0ull].emplace_back(newEntity);
 		m_HasComponent[newEntity].Reserve(m_ComponentManagers.size());
+		m_HasComponent[newEntity].Clear();
 
 		return newEntity;
 	}
@@ -102,8 +103,7 @@ namespace Glory::Utils::ECS
 		for (size_t i = 0; i < m_ComponentManagers.size(); ++i)
 		{
 			if (!m_ComponentOrderDirty.IsSet(i)) continue;
-			size_t index = 0;
-			m_ComponentManagers[i]->Sort(m_EntityTrees, index);
+			m_ComponentManagers[i]->Sort(m_EntityTrees);
 			m_ComponentOrderDirty.Set(i, false);
 		}
 	}

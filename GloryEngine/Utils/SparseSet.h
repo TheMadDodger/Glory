@@ -250,7 +250,10 @@ namespace Glory::Utils::ECS
 				OnRemove(sparseID, *index);
 				return;
 			}
-			Swap(*index, m_DenseSize);
+
+			/* Move to end of array */
+			for (size_t i = *index; i < oldSize; ++i)
+				Swap(i, i + 1);
 			OnRemove(sparseID, *index);
 		}
 

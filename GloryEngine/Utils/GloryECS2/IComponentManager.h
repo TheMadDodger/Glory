@@ -13,6 +13,7 @@ namespace Glory::Utils::ECS
 	public:
 		virtual uint32_t ComponentHash() const = 0;
 		virtual void* Add(EntityID entity) = 0;
+		virtual void Remove(EntityID entity) = 0;
 
 		//virtual void OnAdd() = 0;
 		//virtual void OnRemove() = 0;
@@ -23,7 +24,7 @@ namespace Glory::Utils::ECS
 		//virtual void OnDisableDraw() = 0;
 		//virtual void OnDirty() = 0;
 
-		virtual void Sort(const std::vector<std::vector<EntityID>>& entityTrees, size_t& currentIndex, EntityID root=0ull) = 0;
+		virtual void Sort(const std::vector<std::vector<EntityID>>& entityTrees) = 0;
 
 		virtual void Initialize() = 0;
 		virtual void Start() = 0;

@@ -49,6 +49,15 @@ namespace Glory::Utils::ECS
 		}
 
 		template<ComponentCompatible Component>
+		void RemoveComponent(EntityID entity)
+		{
+			size_t index = 0;
+			ComponentManager<Component>* manager = GetComponentManager<Component>(&index);
+			m_HasComponent[entity].UnSet(index);
+			return *static_cast<Component*>(manager->Remove(entity));
+		}
+
+		template<ComponentCompatible Component>
 		Component& GetComponent(EntityID entity)
 		{
 			ComponentManager<Component>* manager = GetComponentManager<Component>();

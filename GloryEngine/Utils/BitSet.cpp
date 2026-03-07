@@ -82,7 +82,7 @@ namespace Glory::Utils
 
 	void BitSet::SetAll()
 	{
-		std::memset(m_pMemory, ~0, m_Capacity);
+		std::memset(m_pMemory, ~0, m_Capacity/8);
 	}
 
 	void BitSet::UnSet(size_t index)
@@ -94,7 +94,7 @@ namespace Glory::Utils
 
 	void BitSet::Clear()
 	{
-		std::memset(m_pMemory, 0, m_Capacity);
+		std::memset(m_pMemory, 0, m_Capacity/8);
 	}
 
 	void BitSet::Reserve(size_t capacity)

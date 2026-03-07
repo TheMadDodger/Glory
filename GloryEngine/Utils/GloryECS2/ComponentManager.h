@@ -17,7 +17,7 @@ namespace Glory::Utils::ECS
 	public:
 		ComponentManager(EntityRegistry* pRegistry, size_t capacity=32):
 			m_pRegistry(pRegistry), SparseSet<EntityID, Component>{ 1000, capacity },
-			m_ComponentEnabled(capacity) {}
+			m_ComponentActive(capacity), m_ActiveSize(0) {}
 		virtual ~ComponentManager() = default;
 
 		static uint32_t GetComponentHash()
@@ -30,27 +30,26 @@ namespace Glory::Utils::ECS
 			return ComponentTypeHash;
 		}
 
-		virtual void* Add(EntityID entity)
+		virtual void* Add(EntityID entity) override
 		{
 			return &SparseSet<EntityID, Component>::Add(entity, Component());
 		}
 
-		virtual Component& Get(EntityID entity)
+		virtual void Remove(EntityID entity) override
+		{
+			SparseSet<EntityID, Component>::Remove(entity);
+		}
+
+		Component& Get(EntityID entity)
 		{
 			return SparseSet<EntityID, Component>::Get(entity);
 		}
 
-		void Sort(const std::vector<std::vector<EntityID>>& entityTrees, size_t& currentIndex, EntityID root=0ull) override
+		void Sort(const std::vector<std::vector<EntityID>>& entityTrees) override
 		{
-			for (size_t i = 0; i < entityTrees[root].size(); ++i)
-			{
-				const EntityID child = entityTrees[root][i];
-				const size_t index = SparseSet<EntityID, Component>::Index(child);
-				if (index == SparseSet<EntityID, Component>::InvalidIndex) continue;
-				SparseSet<EntityID, Component>::Swap(currentIndex, index);
-				++currentIndex;
-				Sort(entityTrees, currentIndex, child);
-			}
+			size_t currentIndex = 0;
+			SortRecursive(entityTrees, currentIndex);
+			m_ActiveSize = currentIndex;
 		}
 
 		virtual void Initialize()
@@ -92,19 +91,21 @@ namespace Glory::Utils::ECS
 	private:
 		virtual void OnAdd(size_t denseIndex, EntityID entity, Component& component) override final
 		{
-			m_ComponentEnabled.Set(denseIndex);
+			m_ComponentActive.Set(denseIndex);
+			++m_ActiveSize;
 			OnAddComponent(entity, component);
 		}
 
 		virtual void OnRemove(EntityID entity, size_t index) override final
 		{
-			m_ComponentEnabled.Set(index, false);
+			m_ComponentActive.Set(index, false);
+			--m_ActiveSize;
 			OnRemoveComponent(entity, index);
 		}
 
 		virtual void OnReserveDense() override final
 		{
-			m_ComponentEnabled.Reserve(SparseSet<EntityID, Component>::DenseCapacity());
+			m_ComponentActive.Reserve(SparseSet<EntityID, Component>::DenseCapacity());
 			OnReserveComponents();
 		}
 
@@ -115,10 +116,10 @@ namespace Glory::Utils::ECS
 
 		virtual void OnSwap(size_t index1, size_t index2) override final
 		{
-			const bool enabled1 = m_ComponentEnabled.IsSet(index1);
-			const bool enabled2 = m_ComponentEnabled.IsSet(index2);
-			m_ComponentEnabled.Set(index1, enabled2);
-			m_ComponentEnabled.Set(index2, enabled1);
+			const bool enabled1 = m_ComponentActive.IsSet(index1);
+			const bool enabled2 = m_ComponentActive.IsSet(index2);
+			m_ComponentActive.Set(index1, enabled2);
+			m_ComponentActive.Set(index2, enabled1);
 			OnSwapComponents(index1, index2);
 		}
 
@@ -129,9 +130,7 @@ namespace Glory::Utils::ECS
 			const size_t numComponents = SparseSet<EntityID, Component>::Size();
 			for (size_t i = 0; i < numComponents; ++i)
 			{
-				if (!m_ComponentEnabled.IsSet(i)) continue;
 				const EntityID entity = SparseSet<EntityID, Component>::DenseID(i);
-				if (!m_pRegistry->EntityActive(entity)) continue;
 				(this->*DoStart)(entity, SparseSet<EntityID, Component>::GetAt(i));
 			}
 		}
@@ -143,9 +142,7 @@ namespace Glory::Utils::ECS
 			const size_t numComponents = SparseSet<EntityID, Component>::Size();
 			for (size_t i = 0; i < numComponents; ++i)
 			{
-				if (!m_ComponentEnabled.IsSet(i)) continue;
 				const EntityID entity = SparseSet<EntityID, Component>::DenseID(i);
-				if (!m_pRegistry->EntityActive(entity)) continue;
 				(this->*DoStop)(entity, SparseSet<EntityID, Component>::GetAt(i));
 			}
 		}
@@ -154,12 +151,9 @@ namespace Glory::Utils::ECS
 		{
 			if (!DoPreUpdate) return;
 
-			const size_t numComponents = SparseSet<EntityID, Component>::Size();
-			for (size_t i = 0; i < numComponents; ++i)
+			for (size_t i = 0; i < m_ActiveSize; ++i)
 			{
-				if (!m_ComponentEnabled.IsSet(i)) continue;
 				const EntityID entity = SparseSet<EntityID, Component>::DenseID(i);
-				if (!m_pRegistry->EntityActive(entity)) continue;
 				(this->*DoPreUpdate)(entity, SparseSet<EntityID, Component>::GetAt(i), dt);
 			}
 		}
@@ -168,12 +162,9 @@ namespace Glory::Utils::ECS
 		{
 			if (!DoUpdate) return;
 
-			const size_t numComponents = SparseSet<EntityID, Component>::Size();
-			for (size_t i = 0; i < numComponents; ++i)
+			for (size_t i = 0; i < m_ActiveSize; ++i)
 			{
-				if (!m_ComponentEnabled.IsSet(i)) continue;
 				const EntityID entity = SparseSet<EntityID, Component>::DenseID(i);
-				if (!m_pRegistry->EntityActive(entity)) continue;
 				(this->*DoUpdate)(entity, SparseSet<EntityID, Component>::GetAt(i), dt);
 			}
 		}
@@ -182,12 +173,9 @@ namespace Glory::Utils::ECS
 		{
 			if (!DoPostUpdate) return;
 
-			const size_t numComponents = SparseSet<EntityID, Component>::Size();
-			for (size_t i = 0; i < numComponents; ++i)
+			for (size_t i = 0; i < m_ActiveSize; ++i)
 			{
-				if (!m_ComponentEnabled.IsSet(i)) continue;
 				const EntityID entity = SparseSet<EntityID, Component>::DenseID(i);
-				if (!m_pRegistry->EntityActive(entity)) continue;
 				(this->*DoPostUpdate)(entity, SparseSet<EntityID, Component>::GetAt(i), dt);
 			}
 		}
@@ -196,12 +184,9 @@ namespace Glory::Utils::ECS
 		{
 			if (!DoPreDraw) return;
 
-			const size_t numComponents = SparseSet<EntityID, Component>::Size();
-			for (size_t i = 0; i < numComponents; ++i)
+			for (size_t i = 0; i < m_ActiveSize; ++i)
 			{
-				if (!m_ComponentEnabled.IsSet(i)) continue;
 				const EntityID entity = SparseSet<EntityID, Component>::DenseID(i);
-				if (!m_pRegistry->EntityActive(entity)) continue;
 				(this->*DoPreDraw)(entity, SparseSet<EntityID, Component>::GetAt(i));
 			}
 		}
@@ -210,12 +195,9 @@ namespace Glory::Utils::ECS
 		{
 			if (!DoDraw) return;
 
-			const size_t numComponents = SparseSet<EntityID, Component>::Size();
-			for (size_t i = 0; i < numComponents; ++i)
+			for (size_t i = 0; i < m_ActiveSize; ++i)
 			{
-				if (!m_ComponentEnabled.IsSet(i)) continue;
 				const EntityID entity = SparseSet<EntityID, Component>::DenseID(i);
-				if (!m_pRegistry->EntityActive(entity)) continue;
 				(this->*DoDraw)(entity, SparseSet<EntityID, Component>::GetAt(i));
 			}
 		}
@@ -224,19 +206,31 @@ namespace Glory::Utils::ECS
 		{
 			if (!DoPostDraw) return;
 
-			const size_t numComponents = SparseSet<EntityID, Component>::Size();
-			for (size_t i = 0; i < numComponents; ++i)
+			for (size_t i = 0; i < m_ActiveSize; ++i)
 			{
-				if (!m_ComponentEnabled.IsSet(i)) continue;
 				const EntityID entity = SparseSet<EntityID, Component>::DenseID(i);
-				if (!m_pRegistry->EntityActive(entity)) continue;
 				(this->*DoPostDraw)(entity, SparseSet<EntityID, Component>::GetAt(i));
+			}
+		}
+
+		void SortRecursive(const std::vector<std::vector<EntityID>>& entityTrees, size_t& currentIndex, EntityID root=0ull)
+		{
+			for (size_t i = 0; i < entityTrees[root].size(); ++i)
+			{
+				const EntityID child = entityTrees[root][i];
+				const size_t index = SparseSet<EntityID, Component>::Index(child);
+				if (index == SparseSet<EntityID, Component>::InvalidIndex) continue;
+				if (!m_ComponentActive.IsSet(i) || !m_pRegistry->EntityActive(child)) continue;
+				SparseSet<EntityID, Component>::Swap(currentIndex, index);
+				++currentIndex;
+				SortRecursive(entityTrees, currentIndex, child);
 			}
 		}
 
 	protected:
 		const uint32_t ComponentTypeHash = Hashing::Hash(typeid(Component).name());
 		EntityRegistry* m_pRegistry;
-		BitSet m_ComponentEnabled;
+		BitSet m_ComponentActive;
+		size_t m_ActiveSize;
 	};
 }
