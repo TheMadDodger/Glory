@@ -46,7 +46,7 @@ namespace Glory::Utils::ECS
 			void Add(Element&& elem)
 			{
 				assert(m_Size < MAX_PAGE_SIZE);
-				const size_t newSize = m_Size + 1;
+				const size_t newSize = m_Size + 1ull;
 				Element* newElements = new Element[newSize];
 				for (size_t i = 0; i < m_Size; ++i)
 					newElements[i] = std::move(m_Elements[i]);
@@ -67,7 +67,7 @@ namespace Glory::Utils::ECS
 				const uint8_t newSize = index + 1;
 				Element* newElements = new Element[newSize];
 				std::memcpy(&newElements[0], &m_Elements[0], sizeof(Element)*m_Size);
-				std::memset(&newElements[m_Size], Element(0), sizeof(Element)*(newSize - m_Size));
+				std::memset(&newElements[m_Size], Element(0), sizeof(Element)*size_t(newSize - m_Size));
 				newElements[index] = elem;
 				m_Elements.reset(newElements);
 				m_Size = newSize;
@@ -82,7 +82,7 @@ namespace Glory::Utils::ECS
 					return;
 				}
 
-				const size_t newSize = index + 1;
+				const size_t newSize = index + 1ull;
 				Element* newElements = new Element[newSize];
 				for (size_t i = 0; i < m_Size; ++i)
 					newElements[i] = std::move(m_Elements[i]);

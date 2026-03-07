@@ -220,7 +220,7 @@ namespace Glory::Utils::ECS
 				const EntityID child = entityTrees[root][i];
 				const size_t index = SparseSet<EntityID, Component>::Index(child);
 				if (index == SparseSet<EntityID, Component>::InvalidIndex) continue;
-				if (!m_ComponentActive.IsSet(i) || !m_pRegistry->EntityActive(child)) continue;
+				if (!m_ComponentActive.IsSet(i) || !m_pRegistry->EntityActiveHierarchy(child)) continue;
 				SparseSet<EntityID, Component>::Swap(currentIndex, index);
 				++currentIndex;
 				SortRecursive(entityTrees, currentIndex, child);

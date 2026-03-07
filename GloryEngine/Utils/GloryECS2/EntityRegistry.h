@@ -30,7 +30,7 @@ namespace Glory::Utils::ECS
 			const uint32_t index = uint32_t(m_ComponentManagers.size());
 			auto& newManager = m_ComponentManagers.emplace_back(new Manager());
 			m_HashToComponentManagerIndex.emplace(hash, index);
-			m_ComponentOrderDirty.Reserve(index + 1);
+			m_ComponentOrderDirty.Reserve(index + 1ull);
 			m_ComponentOrderDirty.Set(index, false);
 			newManager->Initialize();
 			return static_cast<Manager&>(*newManager);
@@ -74,17 +74,23 @@ namespace Glory::Utils::ECS
 		IComponentManager* GetComponentManager(uint32_t componentHash, size_t* outIndex=nullptr);
 
 		bool EntityValid(EntityID entity) const;
-		bool EntityActive(EntityID entity) const;
+		bool EntityActiveHierarchy(EntityID entity) const;
+		bool EntityActiveSelf(EntityID entity) const;
 
 		void SetParent(EntityID entity, EntityID parent);
 
 		void Sort();
+
+		void SetActive(EntityID entity, bool active);
 
 	public:
 		void Start();
 		void Stop();
 		void Update(float dt);
 		void Draw();
+
+	private:
+		void SetHierarchyActiveStateChildren(EntityID entity, bool active);
 
 	private:
 		std::vector<std::unique_ptr<IComponentManager>> m_ComponentManagers;

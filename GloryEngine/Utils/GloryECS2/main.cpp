@@ -69,13 +69,13 @@ namespace Glory::Utils::ECS
 
 using namespace Glory::Utils::ECS;
 
-uint64_t Now()
+static uint64_t Now()
 {
 	return std::chrono::duration_cast<std::chrono::microseconds>(
 		std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
-float TimeSinceSeconds(uint64_t timestamp)
+static float TimeSinceSeconds(uint64_t timestamp)
 {
 	return (Now() - timestamp)/(1000.0f*1000.0f);
 }
@@ -116,8 +116,11 @@ int main(int argc, char* argv[])
 	}
 
 	double averageDeltaTime = 0.0f;
+	double longestDeltaTime = 0.0f;
+	double shortestDeltaTime = DBL_MAX;
 	const size_t runCount = 50000;
 
+	std::println("Running {} updates on {} entities", runCount, entityCount);
 	for (size_t i = 0; i < runCount; ++i)
 	{
 		const float time = TimeSinceSeconds(startTime);
@@ -125,11 +128,16 @@ int main(int argc, char* argv[])
 		averageDeltaTime += deltaTime;
 		lastTime = time;
 
+		shortestDeltaTime = std::min(shortestDeltaTime, deltaTime);
+		longestDeltaTime = std::max(longestDeltaTime, deltaTime);
+
 		registry.Update(float(deltaTime));
 	}
 
 	averageDeltaTime /= runCount;
-	std::println("Average delta time for running {} updates on {} entities: {}", runCount, entityCount, averageDeltaTime);
+	std::println("Average delta time: {}", averageDeltaTime);
+	std::println("Longest delta time: {}", longestDeltaTime);
+	std::println("Shortest delta time: {}", shortestDeltaTime);
 	std::println("Average framerate: {}", 60.0/averageDeltaTime);
 
 	return 0;
