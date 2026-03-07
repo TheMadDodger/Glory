@@ -16,14 +16,14 @@ namespace Glory::Utils
 		void operator=(const BitSet& other) noexcept;
 
 	public:
-		void Set(Element index);
-		void Toggle(Element index);
-		void Set(Element index, bool on);
+		void Set(size_t index);
+		void Toggle(size_t index);
+		void Set(size_t index, bool on);
 		void SetAll();
-		void UnSet(Element index);
+		void UnSet(size_t index);
 		void Clear();
 		void Reserve(size_t capacity);
-		bool IsSet(Element index) const;
+		bool IsSet(size_t index) const;
 		bool HasAnySet() const;
 
 		Element* Data() const;

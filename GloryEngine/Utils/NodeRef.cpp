@@ -151,11 +151,11 @@ namespace Glory::Utils
 		{
 			const size_t index = std::stoul(subPathString.substr(2));
 			path = path.lexically_relative(subPathString);
-			YAML::Node& nextNode = node[index];
+			YAML::Node nextNode = node[index];
 			return FindNode(nextNode, path);
 		}
 
-		YAML::Node& nextNode = node[subPathString];
+		YAML::Node nextNode = node[subPathString];
 		path = path.lexically_relative(subPathString);
 		return FindNode(nextNode, path);
 	}
@@ -169,11 +169,11 @@ namespace Glory::Utils
 		{
 			const size_t index = std::stoul(subPathString.substr(2));
 			path = path.lexically_relative(subPathString);
-			YAML::Node& nextNode = node[index];
+			YAML::Node nextNode = node[index];
 			return FindNode(nextNode, path);
 		}
 
-		YAML::Node& nextNode = node[subPathString];
+		YAML::Node nextNode = node[subPathString];
 		path = path.lexically_relative(subPathString);
 		return FindNode(nextNode, path);
 	}

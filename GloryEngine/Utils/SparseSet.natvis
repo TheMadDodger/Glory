@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="Glory::Utils::ECS::SparseSet&lt;*,*&gt;">
+    <DisplayString>{{ SparseSet with {"$T2"} size={m_DenseSize} }}</DisplayString>
+    <Expand>
+      <Item Name="[sparse capacity]">m_SparseCapacity</Item>
+      <Item Name="[dense capacity]">m_DenseCapacity</Item>
+      <Item Name="[dense size]">m_DenseSize</Item>
+      <Item Name="[sparse]">m_Sparse</Item>
+      <Synthetic Name="Dense">
+        <DisplayString>{{ size={m_DenseSize} }}</DisplayString>
+        <Expand>
+          <ArrayItems>
+            <Size>m_DenseSize</Size>
+            <ValuePointer>m_Dense._Mypair._Myval2</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+      <Synthetic Name="Dense IDs">
+        <DisplayString>{{ size={m_DenseSize} }}</DisplayString>
+        <Expand>
+          <ArrayItems>
+            <Size>m_DenseSize</Size>
+            <ValuePointer>m_DenseIDs._Mypair._Myval2</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+</AutoVisualizer>

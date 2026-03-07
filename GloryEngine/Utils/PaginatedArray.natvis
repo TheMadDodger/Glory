@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="Glory::Utils::ECS::PaginatedArray&lt;*,*&gt;">
+    <DisplayString>{{ PaginatedArray with {"$T1"} pageCount={m_PageCount} }}</DisplayString>
+    <Expand>
+      <Item Name="[max page size]">MaxPageSize</Item>
+      <Item Name="[page count]">m_PageCount</Item>
+      <ArrayItems>
+        <Size>m_PageCount</Size>
+        <ValuePointer>m_Pages._Mypair._Myval2</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <Type Name="Glory::Utils::ECS::PaginatedArray&lt;*,*&gt;::Page">
+    <DisplayString>{{ Page with {"$T1"} size={m_Size} }}</DisplayString>
+    <Expand>
+      <Item Name="[page size]">m_Size</Item>
+      <ArrayItems>
+        <Size>m_Size</Size>
+        <ValuePointer>m_Elements._Mypair._Myval2</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+</AutoVisualizer>
