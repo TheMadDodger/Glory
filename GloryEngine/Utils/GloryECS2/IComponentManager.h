@@ -1,6 +1,8 @@
 #pragma once
 #include "EntityID.h"
 
+#include <vector>
+
 namespace Glory::Utils::ECS
 {
 	class IComponentManager
@@ -20,6 +22,8 @@ namespace Glory::Utils::ECS
 		//virtual void OnEnableDraw() = 0;
 		//virtual void OnDisableDraw() = 0;
 		//virtual void OnDirty() = 0;
+
+		virtual void Sort(const std::vector<std::vector<EntityID>>& entityTrees, size_t& currentIndex, EntityID root=0ull) = 0;
 
 		virtual void Initialize() = 0;
 		virtual void Start() = 0;

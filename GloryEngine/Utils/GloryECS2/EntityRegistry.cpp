@@ -4,10 +4,13 @@
 
 namespace Glory::Utils::ECS
 {
-	EntityRegistry::EntityRegistry(size_t reserveComponentManager):
-		m_ComponentManagers(), m_NextEntityID(1ull)
+	EntityRegistry::EntityRegistry(size_t reserveComponentManagers, size_t reserveEntities):
+		m_ComponentManagers(), m_ComponentOrderDirty(reserveComponentManagers), m_NextEntityID(1ull)
 	{
-		m_ComponentManagers.reserve(reserveComponentManager);
+		m_ComponentManagers.reserve(reserveComponentManagers);
+		m_EntityTrees.resize(reserveEntities);
+		m_Parents.resize(reserveEntities);
+		m_HasComponent.resize(reserveEntities);
 	}
 
 	EntityRegistry::~EntityRegistry()
@@ -29,13 +32,33 @@ namespace Glory::Utils::ECS
 		m_EntityActiveSelf.Set(newEntity, true);
 		m_EntityActiveHierarchy.Set(newEntity, true);
 
+		m_EntityTrees.resize(newEntity + 1);
+		m_Parents.resize(newEntity + 1);
+		m_HasComponent.resize(newEntity + 1);
+
+		m_Parents[newEntity] = 0ull;
+		m_EntityTrees[0ull].emplace_back(newEntity);
+		m_HasComponent[newEntity].Reserve(m_ComponentManagers.size());
+
 		return newEntity;
 	}
 
-	IComponentManager* EntityRegistry::GetComponentManager(uint32_t componentHash)
+	void EntityRegistry::AddManager(IComponentManager* manager)
+	{
+		const uint32_t hash = manager->ComponentHash();
+		const uint32_t index = uint32_t(m_ComponentManagers.size());
+		m_ComponentManagers.emplace_back(manager);
+		m_ComponentOrderDirty.Reserve(index + 1);
+		m_ComponentOrderDirty.Set(index, false);
+		m_HashToComponentManagerIndex.emplace(hash, index);
+		manager->Initialize();
+	}
+
+	IComponentManager* EntityRegistry::GetComponentManager(uint32_t componentHash, size_t* outIndex)
 	{
 		auto iter = m_HashToComponentManagerIndex.find(componentHash);
 		assert(iter != m_HashToComponentManagerIndex.end());
+		if (outIndex) *outIndex = iter->second;
 		return m_ComponentManagers[iter->second].get();
 	}
 
@@ -48,6 +71,41 @@ namespace Glory::Utils::ECS
 	{
 		return entity < m_NextEntityID ? m_EntityActiveSelf.IsSet(entity) &&
 			m_EntityActiveHierarchy.IsSet(entity) : false;
+	}
+
+	void EntityRegistry::SetParent(EntityID entity, EntityID parent)
+	{
+		EntityID& oldParent = m_Parents[entity];
+		if (oldParent == parent) return;
+
+		/*
+		 * Check if the chosen parent is not inside the tree of the entity.
+		 * Since we can't just have a parenting loop.
+		 */
+		/* TODO */
+
+		/* Erase from old parent tree */
+		auto iter = std::find(m_EntityTrees[oldParent].begin(), m_EntityTrees[oldParent].end(), entity);
+		m_EntityTrees[oldParent].erase(iter);
+
+		/* Add to new parent tree */
+		oldParent = parent;
+		m_EntityTrees[parent].emplace_back(entity);
+
+		/* Component managers for components on this entity will need to be resorted */
+		for (size_t i = 0; i < m_ComponentManagers.size(); ++i)
+			m_ComponentOrderDirty.Set(i, m_HasComponent[entity].IsSet(i));
+	}
+
+	void EntityRegistry::Sort()
+	{
+		for (size_t i = 0; i < m_ComponentManagers.size(); ++i)
+		{
+			if (!m_ComponentOrderDirty.IsSet(i)) continue;
+			size_t index = 0;
+			m_ComponentManagers[i]->Sort(m_EntityTrees, index);
+			m_ComponentOrderDirty.Set(i, false);
+		}
 	}
 
 	void EntityRegistry::Start()
@@ -64,6 +122,8 @@ namespace Glory::Utils::ECS
 
 	void EntityRegistry::Update(float dt)
 	{
+		Sort();
+
 		for (auto& manager : m_ComponentManagers)
 			manager->PreUpdate(dt);
 		for (auto& manager : m_ComponentManagers)

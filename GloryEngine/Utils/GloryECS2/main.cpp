@@ -100,10 +100,20 @@ int main(int argc, char* argv[])
 		velocity.x = (std::rand()%1000)/1000.0f;
 		velocity.y = (std::rand()%1000)/1000.0f;
 		velocity.z = (std::rand()%1000)/1000.0f;
+		if (i <= 20) continue;
+		EntityID parent = EntityID(std::rand()%i);
+		if (parent == 0ull) continue;
+		registry.SetParent(entity, parent);
 	}
 
 	const uint64_t startTime = Now();
 	float lastTime = TimeSinceSeconds(startTime);
+	{
+		registry.Sort();
+		const float time = TimeSinceSeconds(startTime);
+		double sortTime = time - lastTime;
+		std::println("Sorting took {} seconds", sortTime);
+	}
 
 	double averageDeltaTime = 0.0f;
 	const size_t runCount = 50000;
@@ -116,7 +126,6 @@ int main(int argc, char* argv[])
 		lastTime = time;
 
 		registry.Update(float(deltaTime));
-		registry.Draw();
 	}
 
 	averageDeltaTime /= runCount;

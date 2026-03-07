@@ -18,7 +18,7 @@ namespace Glory::Utils::ECS
 	class EntityRegistry
 	{
 	public:
-		EntityRegistry(size_t reserveComponentManager=1);
+		EntityRegistry(size_t reserveComponentManagers=1, size_t reserveEntities=100);
 		virtual ~EntityRegistry();
 
 		EntityID CreateEntity();
@@ -30,23 +30,21 @@ namespace Glory::Utils::ECS
 			const uint32_t index = uint32_t(m_ComponentManagers.size());
 			auto& newManager = m_ComponentManagers.emplace_back(new Manager());
 			m_HashToComponentManagerIndex.emplace(hash, index);
+			m_ComponentOrderDirty.Reserve(index + 1);
+			m_ComponentOrderDirty.Set(index, false);
 			newManager->Initialize();
 			return static_cast<Manager&>(*newManager);
 		}
 
-		void AddManager(IComponentManager* manager)
-		{
-			const uint32_t hash = manager->ComponentHash();
-			const uint32_t index = uint32_t(m_ComponentManagers.size());
-			m_ComponentManagers.emplace_back(manager);
-			m_HashToComponentManagerIndex.emplace(hash, index);
-			manager->Initialize();
-		}
+		void AddManager(IComponentManager* manager);
 
 		template<ComponentCompatible Component>
 		Component& AddComponent(EntityID entity)
 		{
-			ComponentManager<Component>* manager = GetComponentManager<Component>();
+			size_t index = 0;
+			ComponentManager<Component>* manager = GetComponentManager<Component>(&index);
+			m_ComponentOrderDirty.Set(index);
+			m_HasComponent[entity].Set(index);
 			return *static_cast<Component*>(manager->Add(entity));
 		}
 
@@ -58,16 +56,20 @@ namespace Glory::Utils::ECS
 		}
 
 		template<typename Component>
-		ComponentManager<Component>* GetComponentManager()
+		ComponentManager<Component>* GetComponentManager(size_t* outIndex=nullptr)
 		{
 			const uint32_t hash = Hashing::Hash(typeid(Component).name());
-			return static_cast<ComponentManager<Component>*>(GetComponentManager(hash));
+			return static_cast<ComponentManager<Component>*>(GetComponentManager(hash, outIndex));
 		}
 
-		IComponentManager* GetComponentManager(uint32_t componentHash);
+		IComponentManager* GetComponentManager(uint32_t componentHash, size_t* outIndex=nullptr);
 
 		bool EntityValid(EntityID entity) const;
 		bool EntityActive(EntityID entity) const;
+
+		void SetParent(EntityID entity, EntityID parent);
+
+		void Sort();
 
 	public:
 		void Start();
@@ -78,11 +80,15 @@ namespace Glory::Utils::ECS
 	private:
 		std::vector<std::unique_ptr<IComponentManager>> m_ComponentManagers;
 		std::unordered_map<uint32_t, uint32_t> m_HashToComponentManagerIndex;
+		BitSet m_ComponentOrderDirty;
+
 		BitSet m_EntityAlive;
 		BitSet m_EntityActiveSelf;
 		BitSet m_EntityActiveHierarchy;
 
-		/* Hierarchy? */
+		std::vector<std::vector<EntityID>> m_EntityTrees;
+		std::vector<EntityID> m_Parents;
+		std::vector<BitSet> m_HasComponent;
 
 		EntityID m_NextEntityID;
 	};

@@ -254,19 +254,6 @@ namespace Glory::Utils::ECS
 			OnRemove(sparseID, *index);
 		}
 
-		void Sort(const std::vector<Sparse>& order)
-		{
-			size_t currentIndex = 0;
-			for (const Sparse& sparse : order)
-			{
-				size_t* index = m_Sparse[sparse];
-				if (!index) continue;
-				if (currentIndex == *index) continue;
-				Swap(currentIndex, *index);
-				++currentIndex;
-			}
-		}
-
 		Dense& Get(Sparse sparse)
 		{
 			auto index = m_Sparse[sparse];
@@ -289,6 +276,33 @@ namespace Glory::Utils::ECS
 		inline const Dense& GetAt(size_t index) const
 		{
 			return m_Dense[index];
+		}
+
+		inline size_t Size() const
+		{
+			return m_DenseSize;
+		}
+
+		inline size_t Index(Sparse sparse) const
+		{
+			const size_t* index = m_Sparse[sparse];
+
+			return index ? *index : InvalidIndex;
+		}
+
+		inline Sparse DenseID(size_t index) const
+		{
+			return m_DenseIDs[index];
+		}
+
+		inline Sparse SparseCapacity() const
+		{
+			return m_SparseCapacity;
+		}
+
+		inline size_t DenseCapacity() const
+		{
+			return m_DenseCapacity;
 		}
 
 		struct Iterator
@@ -326,25 +340,7 @@ namespace Glory::Utils::ECS
 			return Iterator(&m_Dense[0], m_DenseSize);
 		}
 
-		inline size_t Size() const
-		{
-			return m_DenseSize;
-		}
-
-		inline Sparse DenseID(size_t index) const
-		{
-			return m_DenseIDs[index];
-		}
-
-		inline Sparse SparseCapacity() const
-		{
-			return m_SparseCapacity;
-		}
-
-		inline size_t DenseCapacity() const
-		{
-			return m_DenseCapacity;
-		}
+		static constexpr size_t InvalidIndex = UINT64_MAX;
 
 	protected:
 		virtual void OnAdd(size_t, Sparse, Dense&) {};

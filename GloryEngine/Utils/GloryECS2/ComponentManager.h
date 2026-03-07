@@ -40,6 +40,19 @@ namespace Glory::Utils::ECS
 			return SparseSet<EntityID, Component>::Get(entity);
 		}
 
+		void Sort(const std::vector<std::vector<EntityID>>& entityTrees, size_t& currentIndex, EntityID root=0ull) override
+		{
+			for (size_t i = 0; i < entityTrees[root].size(); ++i)
+			{
+				const EntityID child = entityTrees[root][i];
+				const size_t index = SparseSet<EntityID, Component>::Index(child);
+				if (index == SparseSet<EntityID, Component>::InvalidIndex) continue;
+				SparseSet<EntityID, Component>::Swap(currentIndex, index);
+				++currentIndex;
+				Sort(entityTrees, currentIndex, child);
+			}
+		}
+
 		virtual void Initialize()
 		{
 			OnInitialize();
@@ -117,8 +130,9 @@ namespace Glory::Utils::ECS
 			for (size_t i = 0; i < numComponents; ++i)
 			{
 				if (!m_ComponentEnabled.IsSet(i)) continue;
-				if (!m_pRegistry->EntityActive(i)) continue;
-				(this->*DoStart)(SparseSet<EntityID, Component>::DenseID(i), SparseSet<EntityID, Component>::GetAt(i));
+				const EntityID entity = SparseSet<EntityID, Component>::DenseID(i);
+				if (!m_pRegistry->EntityActive(entity)) continue;
+				(this->*DoStart)(entity, SparseSet<EntityID, Component>::GetAt(i));
 			}
 		}
 
@@ -130,8 +144,9 @@ namespace Glory::Utils::ECS
 			for (size_t i = 0; i < numComponents; ++i)
 			{
 				if (!m_ComponentEnabled.IsSet(i)) continue;
-				if (!m_pRegistry->EntityActive(i)) continue;
-				(this->*DoStop)(SparseSet<EntityID, Component>::DenseID(i), SparseSet<EntityID, Component>::GetAt(i));
+				const EntityID entity = SparseSet<EntityID, Component>::DenseID(i);
+				if (!m_pRegistry->EntityActive(entity)) continue;
+				(this->*DoStop)(entity, SparseSet<EntityID, Component>::GetAt(i));
 			}
 		}
 
@@ -143,8 +158,9 @@ namespace Glory::Utils::ECS
 			for (size_t i = 0; i < numComponents; ++i)
 			{
 				if (!m_ComponentEnabled.IsSet(i)) continue;
-				if (!m_pRegistry->EntityActive(i)) continue;
-				(this->*DoPreUpdate)(SparseSet<EntityID, Component>::DenseID(i), SparseSet<EntityID, Component>::GetAt(i), dt);
+				const EntityID entity = SparseSet<EntityID, Component>::DenseID(i);
+				if (!m_pRegistry->EntityActive(entity)) continue;
+				(this->*DoPreUpdate)(entity, SparseSet<EntityID, Component>::GetAt(i), dt);
 			}
 		}
 
@@ -156,8 +172,9 @@ namespace Glory::Utils::ECS
 			for (size_t i = 0; i < numComponents; ++i)
 			{
 				if (!m_ComponentEnabled.IsSet(i)) continue;
-				if (!m_pRegistry->EntityActive(i)) continue;
-				(this->*DoUpdate)(SparseSet<EntityID, Component>::DenseID(i), SparseSet<EntityID, Component>::GetAt(i), dt);
+				const EntityID entity = SparseSet<EntityID, Component>::DenseID(i);
+				if (!m_pRegistry->EntityActive(entity)) continue;
+				(this->*DoUpdate)(entity, SparseSet<EntityID, Component>::GetAt(i), dt);
 			}
 		}
 
@@ -169,8 +186,9 @@ namespace Glory::Utils::ECS
 			for (size_t i = 0; i < numComponents; ++i)
 			{
 				if (!m_ComponentEnabled.IsSet(i)) continue;
-				if (!m_pRegistry->EntityActive(i)) continue;
-				(this->*DoPostUpdate)(SparseSet<EntityID, Component>::DenseID(i), SparseSet<EntityID, Component>::GetAt(i), dt);
+				const EntityID entity = SparseSet<EntityID, Component>::DenseID(i);
+				if (!m_pRegistry->EntityActive(entity)) continue;
+				(this->*DoPostUpdate)(entity, SparseSet<EntityID, Component>::GetAt(i), dt);
 			}
 		}
 
@@ -182,8 +200,9 @@ namespace Glory::Utils::ECS
 			for (size_t i = 0; i < numComponents; ++i)
 			{
 				if (!m_ComponentEnabled.IsSet(i)) continue;
-				if (!m_pRegistry->EntityActive(i)) continue;
-				(this->*DoPreDraw)(SparseSet<EntityID, Component>::DenseID(i), SparseSet<EntityID, Component>::GetAt(i));
+				const EntityID entity = SparseSet<EntityID, Component>::DenseID(i);
+				if (!m_pRegistry->EntityActive(entity)) continue;
+				(this->*DoPreDraw)(entity, SparseSet<EntityID, Component>::GetAt(i));
 			}
 		}
 
@@ -195,8 +214,9 @@ namespace Glory::Utils::ECS
 			for (size_t i = 0; i < numComponents; ++i)
 			{
 				if (!m_ComponentEnabled.IsSet(i)) continue;
-				if (!m_pRegistry->EntityActive(i)) continue;
-				(this->*DoDraw)(SparseSet<EntityID, Component>::DenseID(i), SparseSet<EntityID, Component>::GetAt(i));
+				const EntityID entity = SparseSet<EntityID, Component>::DenseID(i);
+				if (!m_pRegistry->EntityActive(entity)) continue;
+				(this->*DoDraw)(entity, SparseSet<EntityID, Component>::GetAt(i));
 			}
 		}
 
@@ -208,8 +228,9 @@ namespace Glory::Utils::ECS
 			for (size_t i = 0; i < numComponents; ++i)
 			{
 				if (!m_ComponentEnabled.IsSet(i)) continue;
-				if (!m_pRegistry->EntityActive(i)) continue;
-				(this->*DoPostDraw)(SparseSet<EntityID, Component>::DenseID(i), SparseSet<EntityID, Component>::GetAt(i));
+				const EntityID entity = SparseSet<EntityID, Component>::DenseID(i);
+				if (!m_pRegistry->EntityActive(entity)) continue;
+				(this->*DoPostDraw)(entity, SparseSet<EntityID, Component>::GetAt(i));
 			}
 		}
 
