@@ -4,6 +4,7 @@
 #include "FileBrowserItem.h"
 #include "EditorAssets.h"
 #include "ThumbnailManager.h"
+#include "Thumbnails.h"
 #include "ThumbnailGenerator.h"
 #include "Selection.h"
 #include "ObjectMenu.h"
@@ -499,7 +500,7 @@ namespace Glory::Editor
 		}
 
 		ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
-		ImGui::Image(texture ? pRenderImpl->GetTextureID(texture) : NULL, ImVec2((float)iconSize, (float)iconSize));
+		pApplication->GetThumbnails().DrawThumbnail(uuid, float(iconSize));
 		DrawName(padding);
 		ImGui::EndChild();
 	}

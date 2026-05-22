@@ -9,6 +9,7 @@
 #include "EditorPipelineManager.h"
 #include "EditorMaterialManager.h"
 #include "ThumbnailManager.h"
+#include "Thumbnails.h"
 #include "FileBrowser.h"
 #include "ProjectSettings.h"
 
@@ -56,6 +57,7 @@ namespace Glory::Editor
 		m_MaterialManager(new EditorMaterialManager(this)),
 		m_ResourceLoader(new EditorResourceLoader(this, &createInfo.pEngine->Jobs(), &createInfo.pEngine->GetDebug())),
 		m_ThumbnailManager(new ThumbnailManager(this)),
+		m_Thumbnails(new Thumbnails(this)),
 		m_pFileWatcher(new efsw::FileWatcher()),
 		m_Serializers(new Serializers(createInfo.pEngine))
 	{
@@ -329,6 +331,7 @@ namespace Glory::Editor
 
 			/* Update thumbnail manager */
 			m_ThumbnailManager->Update();
+			m_Thumbnails->Update();
 
 			/* End the current frame */
 			m_pEngine->EndFrame();
@@ -480,6 +483,7 @@ namespace Glory::Editor
 
 		InitializeExtensions();
 		m_ThumbnailManager->Initialize();
+		m_Thumbnails->Initialize();
 
 		m_pEngine->GetDebug().LogInfo("Initialized editor platform");
 	}
@@ -555,6 +559,11 @@ namespace Glory::Editor
 	ThumbnailManager& EditorApplication::GetThumbnailManager()
 	{
 		return *m_ThumbnailManager;
+	}
+
+	Thumbnails& EditorApplication::GetThumbnails()
+	{
+		return *m_Thumbnails;
 	}
 
 	Serializers& EditorApplication::GetSerializers()
