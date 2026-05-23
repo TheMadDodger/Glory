@@ -21,7 +21,8 @@ namespace Glory::Editor
 	bool CanRenderMesh(UUID meshID);
 
 	void SetupImageScene(Entity root, UUID imageID);
-	bool CanRenderImage(UUID imageID);
 	void CustomRenderImage(UUID imageID, GraphicsDevice* pDevice, Renderer* pRenderer,
+		uint32_t frameIndex, CommandBufferHandle commandBuffer);
+	void CustomRenderTexture(UUID imageID, GraphicsDevice* pDevice, Renderer* pRenderer,
 		uint32_t frameIndex, CommandBufferHandle commandBuffer);
 }

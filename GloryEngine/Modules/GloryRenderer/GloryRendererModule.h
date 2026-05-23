@@ -47,7 +47,9 @@ namespace Glory
 
 	private:
 		GloryRenderer m_Renderer;
-		std::vector<GloryRenderer> m_SecondaryRenderer;
+		static constexpr size_t MaxSecondaryRenderers = 10;
+		size_t m_NextSecundaryRenderer = 0;
+		std::array<GloryRenderer, MaxSecondaryRenderers> m_SecondaryRenderers;
 
 		std::vector<UUID> m_PipelineOrder;
 	};

@@ -35,11 +35,11 @@ namespace Glory::Editor
 		virtual ~Thumbnails();
 
 		template<class T>
-		void RegisterRenderableThumbnail(std::function<void(Entity, UUID)> sceneSetup,
+		void RegisterRenderableThumbnail(std::function<void(Entity, UUID)> sceneSetup, std::function<bool(UUID)> canRender=NULL,
 			std::function<void(UUID, GraphicsDevice*, Renderer*, uint32_t, CommandBufferHandle)> customRender=NULL)
 		{
 			const uint32_t hash = ResourceTypes::GetHash<T>();
-			RegisterRenderableThumbnail(hash, sceneSetup, customRender);
+			RegisterRenderableThumbnail(hash, sceneSetup, canRender, customRender);
 		}
 
 		GLORY_EDITOR_API void Initialize();
@@ -50,7 +50,7 @@ namespace Glory::Editor
 
 	private:
 		GLORY_EDITOR_API void RegisterRenderableThumbnail(uint32_t hashCode, std::function<void(Entity, UUID)> sceneSetup,
-			std::function<void(UUID, GraphicsDevice*, Renderer*, uint32_t, CommandBufferHandle)> customRender=NULL);
+			std::function<bool(UUID)> canRender=NULL, std::function<void(UUID, GraphicsDevice*, Renderer*, uint32_t, CommandBufferHandle)> customRender=NULL);
 		GLORY_EDITOR_API std::filesystem::path GenerateCachedThumbnailPath(const UUID uuid) const;
 
 	private:

@@ -7,6 +7,7 @@
 #include "Importer.h"
 
 #include <ResourceMeta.h>
+#include <MaterialData.h>
 #include <ImageData.h>
 #include <Resources.h>
 #include <GraphicsDevice.h>
@@ -50,9 +51,10 @@ namespace Glory::Editor
 
 	void Thumbnails::SetupInternalRenderableThumbnails()
 	{
-		//RegisterRenderableThumbnail<MaterialData>(SetupMaterialScene, CanRenderMaterial);
+		RegisterRenderableThumbnail<MaterialData>(SetupMaterialScene, CanRenderMaterial);
 		//RegisterRenderableThumbnail<MeshData>(SetupMeshScene, CanRenderMesh);
-		RegisterRenderableThumbnail<ImageData>(SetupImageScene, CustomRenderImage);
+		RegisterRenderableThumbnail<ImageData>(SetupImageScene, NULL, CustomRenderImage);
+		RegisterRenderableThumbnail<TextureData>(SetupImageScene, NULL, CustomRenderTexture);
 	}
 
 	void Thumbnails::DrawThumbnail(UUID uuid, float size)
@@ -104,9 +106,9 @@ namespace Glory::Editor
 	}
 
 	void Thumbnails::RegisterRenderableThumbnail(uint32_t hashCode, std::function<void(Entity, UUID)> sceneSetup,
-		std::function<void(UUID, GraphicsDevice*, Renderer*, uint32_t, CommandBufferHandle)> customRender)
+		std::function<bool(UUID)> canRender, std::function<void(UUID, GraphicsDevice*, Renderer*, uint32_t, CommandBufferHandle)> customRender)
 	{
-		m_ThumbnailsRenderer->RegisterRenderableThumbnail(hashCode, sceneSetup, customRender);
+		m_ThumbnailsRenderer->RegisterRenderableThumbnail(hashCode, sceneSetup, canRender, customRender);
 	}
 
 	std::filesystem::path Thumbnails::GenerateCachedThumbnailPath(const UUID uuid) const

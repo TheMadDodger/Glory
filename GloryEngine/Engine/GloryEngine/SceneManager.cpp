@@ -171,38 +171,8 @@ namespace Glory
 
 	void SceneManager::Initialize()
 	{
-		/* Register component types */
-		Reflect::RegisterEnum<CameraPerspective>();
-		Reflect::RegisterEnum<CameraOutputMode>();
-		Reflect::RegisterType<ShadowSettings>();
-
 		/* Register engine component managers */
-		RegisterComponentManager<TransformManager, Transform>();
-		RegisterComponentManager<Utils::ECS::ComponentManager<LayerComponent>, LayerComponent>();
-		RegisterComponentManager<CameraComponentManager, CameraComponent>(
-			[this](Utils::ECS::EntityRegistry*, CameraComponentManager* manager) {
-				manager->m_pSceneManager = this;
-				manager->m_pCameraManager = &m_pEngine->GetCameraManager();
-			});
-		RegisterComponentManager<MeshRenderManager, MeshRenderer>(
-			[this](Utils::ECS::EntityRegistry*, MeshRenderManager* manager) {
-				manager->m_pSceneManager = this;
-				manager->m_pResources = &m_pEngine->GetResources();
-				manager->m_pMaterialManager = &m_pEngine->GetMaterialManager();
-				manager->m_pAssetDatabase = &m_pEngine->GetAssetDatabase();
-				manager->m_pLayerManager = &m_pEngine->GetLayerManager();
-				manager->m_pDebug = &m_pEngine->GetDebug();
-			});
-		RegisterComponentManager<LightManager, LightComponent>(
-			[this](Utils::ECS::EntityRegistry*, LightManager* manager) {
-				manager->m_pSceneManager = this;
-			});
-		RegisterComponentManager<TextManager, TextComponent>(
-			[this](Utils::ECS::EntityRegistry*, TextManager* manager) {
-				manager->m_pSceneManager = this;
-				manager->m_pResources = &m_pEngine->GetResources();
-				manager->m_pLayerManager = &m_pEngine->GetLayerManager();
-			});
+		RegisterComponentManagers();
 
 		const Utils::Reflect::FieldData* pTextField = TextComponent::GetTypeData()->GetFieldData("m_Text");
 		const Utils::Reflect::FieldData* pColorField = TextComponent::GetTypeData()->GetFieldData("m_Color");
@@ -254,6 +224,36 @@ namespace Glory
 		ProfileSample s{ &m_pEngine->Profiler(), "SceneManager::Paint" };
 		std::for_each(m_pOpenScenes.begin(), m_pOpenScenes.end(), [](GScene* pScene) { pScene->OnPaint(); });
 		std::for_each(m_pExternalScenes.begin(), m_pExternalScenes.end(), [](GScene* pScene) { pScene->OnPaint(); });
+	}
+
+	void SceneManager::RegisterComponentManagers()
+	{
+		RegisterComponentManager<TransformManager, Transform>();
+		RegisterComponentManager<Utils::ECS::ComponentManager<LayerComponent>, LayerComponent>();
+		RegisterComponentManager<CameraComponentManager, CameraComponent>(
+			[this](Utils::ECS::EntityRegistry*, CameraComponentManager* manager) {
+				manager->m_pSceneManager = this;
+				manager->m_pCameraManager = &m_pEngine->GetCameraManager();
+			});
+		RegisterComponentManager<MeshRenderManager, MeshRenderer>(
+			[this](Utils::ECS::EntityRegistry*, MeshRenderManager* manager) {
+				manager->m_pSceneManager = this;
+				manager->m_pResources = &m_pEngine->GetResources();
+				manager->m_pMaterialManager = &m_pEngine->GetMaterialManager();
+				manager->m_pAssetDatabase = &m_pEngine->GetAssetDatabase();
+				manager->m_pLayerManager = &m_pEngine->GetLayerManager();
+				manager->m_pDebug = &m_pEngine->GetDebug();
+			});
+		RegisterComponentManager<LightManager, LightComponent>(
+			[this](Utils::ECS::EntityRegistry*, LightManager* manager) {
+				manager->m_pSceneManager = this;
+			});
+		RegisterComponentManager<TextManager, TextComponent>(
+			[this](Utils::ECS::EntityRegistry*, TextManager* manager) {
+				manager->m_pSceneManager = this;
+				manager->m_pResources = &m_pEngine->GetResources();
+				manager->m_pLayerManager = &m_pEngine->GetLayerManager();
+			});
 	}
 
 	void SceneManager::Start()

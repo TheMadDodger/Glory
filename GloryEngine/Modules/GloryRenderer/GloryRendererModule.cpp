@@ -19,6 +19,8 @@ namespace Glory
 
 	GloryRendererModule::GloryRendererModule() : m_Renderer(this)
 	{
+		for (size_t i = 0; i < MaxSecondaryRenderers; ++i)
+			m_SecondaryRenderers[i].SetModule(this);
 	}
 
 	GloryRendererModule::~GloryRendererModule()
@@ -106,8 +108,8 @@ namespace Glory
 
 	void GloryRendererModule::Cleanup()
 	{
-		for (auto& renderer : m_SecondaryRenderer)
-			renderer.Cleanup();
+		for (size_t i = 0; i < m_NextSecundaryRenderer; ++i)
+			m_SecondaryRenderers[i].Cleanup();
 	}
 
 	void GloryRendererModule::LoadSettings(ModuleSettings& settings)
@@ -282,7 +284,10 @@ namespace Glory
 
 	GloryRenderer* GloryRendererModule::CreateSecondaryRenderer(size_t imageCount)
 	{
-		GloryRenderer& renderer = m_SecondaryRenderer.emplace_back(this);
+		GLORY_ASSERT(m_NextSecundaryRenderer < MaxSecondaryRenderers, "Max number of secundary renderers reached!");
+
+		GloryRenderer& renderer = m_SecondaryRenderers[m_NextSecundaryRenderer];
+		++m_NextSecundaryRenderer;
 		renderer.SetSSAOEnabled(false);
 		renderer.SetShadowsEnabled(false);
 		renderer.SetSkyboxEnabled(false);

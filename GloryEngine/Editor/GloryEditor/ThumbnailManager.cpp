@@ -12,7 +12,7 @@
 
 namespace Glory::Editor
 {
-	ThumbnailManager::ThumbnailManager(EditorApplication* pApp): m_pApplication(pApp), m_ThumbnailRenderer(new ThumbnailRenderer(pApp->GetEngine())) {}
+	ThumbnailManager::ThumbnailManager(EditorApplication* pApp): m_pApplication(pApp), m_ThumbnailRenderer(nullptr) {}
 
 	ThumbnailManager::~ThumbnailManager()
 	{
@@ -76,8 +76,8 @@ namespace Glory::Editor
 
 	void ThumbnailManager::SetupInternalRenderableThumbnails()
 	{
-		RegisterRenderableThumbnail<MaterialData>(SetupMaterialScene, CanRenderMaterial);
-		RegisterRenderableThumbnail<MeshData>(SetupMeshScene, CanRenderMesh);
+		//RegisterRenderableThumbnail<MaterialData>(SetupMaterialScene, CanRenderMaterial);
+		//RegisterRenderableThumbnail<MeshData>(SetupMeshScene, CanRenderMesh);
 	}
 
 	BaseThumbnailGenerator* ThumbnailManager::GetGenerator(uint32_t hashCode)
@@ -95,12 +95,12 @@ namespace Glory::Editor
 
 	void ThumbnailManager::Initialize()
 	{
-		m_ThumbnailRenderer->LoadResources();
+		//m_ThumbnailRenderer->LoadResources();
 	}
 
 	void ThumbnailManager::Update()
 	{
-		m_ThumbnailRenderer->CheckRenders();
+		//m_ThumbnailRenderer->CheckRenders();
 	}
 
 	void ThumbnailManager::AddGenerator(BaseThumbnailGenerator* pGenerator)

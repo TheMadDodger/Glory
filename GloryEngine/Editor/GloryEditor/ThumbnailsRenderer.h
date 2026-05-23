@@ -40,7 +40,7 @@ namespace Glory::Editor
 		virtual ~ThumbnailsRenderer();
 
 		GLORY_EDITOR_API void RegisterRenderableThumbnail(uint32_t hashCode, std::function<void(Entity, UUID)> sceneSetup,
-			std::function<void(UUID, GraphicsDevice*, Renderer*, uint32_t, CommandBufferHandle)> customRender);
+			std::function<bool(UUID)> canRender, std::function<void(UUID, GraphicsDevice*, Renderer*, uint32_t, CommandBufferHandle)> customRender);
 		GLORY_EDITOR_API bool IsResourceRenderable(uint32_t hashCode);
 		GLORY_EDITOR_API void QueueRenderThumbnail(uint32_t hashCode, UUID uuid);
 		GLORY_EDITOR_API ImageData* GetRenderResult(UUID uuid);
@@ -63,6 +63,7 @@ namespace Glory::Editor
 
 	private:
 		std::map<uint32_t, std::function<void(Entity, UUID)>> m_ThumbnailRenderSetupCallbacks;
+		std::map<uint32_t, std::function<bool(UUID)>> m_CanRenderThumbnailCallback;
 		std::map<uint32_t, std::function<void(UUID, GraphicsDevice*, Renderer*, uint32_t, CommandBufferHandle)>> m_CustomRenderThumbnailCallbacks;
 
 		BufferHandle m_PixelCopyBuffer;

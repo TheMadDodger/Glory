@@ -71,13 +71,6 @@ namespace Glory::Editor
 	{
 	}
 
-	bool CanRenderImage(UUID imageID)
-	{
-		if (!ImagePipelineHandle) return false;
-		Resources& resources = EditorApplication::GetInstance()->GetEngine()->GetResources();
-		return resources.GetResource(imageID);
-	}
-
 	void CustomRenderImage(UUID imageID, GraphicsDevice* pDevice, Renderer* pRenderer, uint32_t frameIndex, CommandBufferHandle commandBuffer)
 	{
 		Resources& resources = EditorApplication::GetInstance()->GetEngine()->GetResources();
@@ -85,6 +78,29 @@ namespace Glory::Editor
 		ImageData* pImage = static_cast<ImageData*>(pResource);
 		InternalTexture textureData = InternalTexture(pImage, false);
 		TextureHandle texture = pDevice->CreateTexture(&textureData);
+
+		DescriptorSetUpdateInfo writeInfo;
+		writeInfo.m_Samplers.resize(1);
+		writeInfo.m_Samplers[0].m_DescriptorIndex = 0;
+		writeInfo.m_Samplers[0].m_TextureHandle = texture;
+		pDevice->UpdateDescriptorSet(ImageSetHandles[frameIndex], writeInfo);
+
+		RenderPassHandle renderPass = pRenderer->FinalColorRenderPass(frameIndex);
+		pDevice->BeginRenderPass(commandBuffer, renderPass);
+		pDevice->BeginPipeline(commandBuffer, ImagePipelineHandle);
+		pDevice->BindDescriptorSets(commandBuffer, ImagePipelineHandle, { ImageSetHandles[frameIndex] });
+		pDevice->SetViewport(commandBuffer, 0.0, 0.0, ThumbnailResolution.x, ThumbnailResolution.y);
+		pDevice->SetScissor(commandBuffer, 0, 0, uint32_t(ThumbnailResolution.x), uint32_t(ThumbnailResolution.y));
+		pDevice->DrawQuad(commandBuffer);
+		pDevice->EndRenderPass(commandBuffer);
+	}
+
+	void CustomRenderTexture(UUID imageID, GraphicsDevice* pDevice, Renderer* pRenderer, uint32_t frameIndex, CommandBufferHandle commandBuffer)
+	{
+		Resources& resources = EditorApplication::GetInstance()->GetEngine()->GetResources();
+		Resource* pResource = resources.GetResource(imageID);
+		TextureData* pTexture = static_cast<TextureData*>(pResource);
+		TextureHandle texture = pDevice->CreateTexture(pTexture);
 
 		DescriptorSetUpdateInfo writeInfo;
 		writeInfo.m_Samplers.resize(1);

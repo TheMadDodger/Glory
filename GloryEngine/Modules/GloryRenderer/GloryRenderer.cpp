@@ -48,6 +48,12 @@ namespace Glory
 	{
 	}
 
+	void GloryRenderer::SetModule(GloryRendererModule* pModule)
+	{
+		m_pModule = pModule;
+		Renderer::m_pModule = pModule;
+	}
+
 	void GloryRenderer::OnCameraResize(CameraRef camera)
 	{
 		GraphicsDevice* pDevice = m_pModule->GetEngine()->ActiveGraphicsDevice();
