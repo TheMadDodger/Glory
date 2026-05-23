@@ -52,7 +52,7 @@ namespace Glory::Editor
 	void Thumbnails::SetupInternalRenderableThumbnails()
 	{
 		RegisterRenderableThumbnail<MaterialData>(SetupMaterialScene, CanRenderMaterial);
-		//RegisterRenderableThumbnail<MeshData>(SetupMeshScene, CanRenderMesh);
+		RegisterRenderableThumbnail<MeshData>(SetupMeshScene, CanRenderMesh);
 		RegisterRenderableThumbnail<ImageData>(SetupImageScene, NULL, CustomRenderImage);
 		RegisterRenderableThumbnail<TextureData>(SetupImageScene, NULL, CustomRenderTexture);
 	}

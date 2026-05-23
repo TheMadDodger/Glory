@@ -1,6 +1,7 @@
 #include "ResourcesWindow.h"
 #include "EditorAssetDatabase.h"
 #include "ThumbnailManager.h"
+#include "Thumbnails.h"
 #include "EditorApplication.h"
 #include "Selection.h"
 #include "EditorResourceManager.h"
@@ -204,7 +205,7 @@ namespace Glory::Editor
 					}
 
 					DND::DragAndDropSource(pPayloadType->Name(), &payload, sizeof(AssetPayload), [&]() {
-						ImGui::Image(thumbnail ? pRenderImpl->GetTextureID(thumbnail) : NULL, { 64.0f, 64.0f });
+						pApp->GetThumbnails().DrawThumbnail(uuid, 64.0f);
 						ImGui::SameLine();
 						ImGui::Text(name.data());
 					});
@@ -215,7 +216,7 @@ namespace Glory::Editor
 
 				if (ImGui::TableNextColumn())
 				{
-					ImGui::Image(thumbnail ? pRenderImpl->GetTextureID(thumbnail) : NULL, { rowHeight, rowHeight });
+					pApp->GetThumbnails().DrawThumbnail(uuid, rowHeight);
 				}
 
 				if (ImGui::TableNextColumn())

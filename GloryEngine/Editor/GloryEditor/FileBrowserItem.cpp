@@ -463,7 +463,7 @@ namespace Glory::Editor
 		{
 			std::string path = m_CachedPath.string();
 			DND::DragAndDropSource(STNames[ST_Path], path.data(), path.size() + 1, [&]() {
-				ImGui::Image(texture ? pRenderImpl->GetTextureID(texture) : NULL, { 64.0f, 64.0f });
+				pApplication->GetThumbnails().DrawThumbnail(uuid, 64.0f);
 				ImGui::SameLine();
 				ImGui::Text(m_CachedPath.string().data());
 			});
