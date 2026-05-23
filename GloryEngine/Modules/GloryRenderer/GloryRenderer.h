@@ -84,10 +84,15 @@ namespace Glory
 
 		virtual uint32_t GetNumFramesInFlight() const override;
 		virtual uint32_t GetCurrentFrameInFlight() const override;
+		virtual uint32_t IncrementFrameInFlight() override;
 
 		virtual void Initialize() override;
 		virtual void Cleanup() override;
 		virtual void InitializeAsMainRenderer() override;
+		virtual void WaitForCurrentFrame() override;
+		virtual CommandBufferHandle BeginFrameCommands() override;
+		virtual void EndFrameCommands(std::vector<SemaphoreHandle>& waitSemaphores,
+			std::vector<SemaphoreHandle> signalSemaphores) override;
 		virtual void Draw() override;
 
 		virtual Renderer* CreateSecondaryRenderer(size_t imageCount) override;
@@ -114,6 +119,8 @@ namespace Glory
 		virtual TextureHandle CameraAttachmentPreview(CameraRef camera, size_t index) const override;
 		virtual TextureHandle FinalColor() const override;
 		virtual TextureHandle FinalColor(uint32_t frameIndex) const override;
+		virtual RenderPassHandle FinalColorRenderPass(uint32_t frameIndex) const override;
+		virtual CommandBufferHandle FrameCommandBuffer(uint32_t frameIndex) const override;
 		virtual void VisualizeAttachment(CameraRef camera, size_t index) override;
 
 		virtual size_t DebugOverlayCount() const override;

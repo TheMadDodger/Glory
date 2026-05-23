@@ -81,6 +81,16 @@ namespace Glory::Editor
 		return Process("", pSDLImage);
 	}
 
+	bool SDLImageImporter::SaveResource(const std::filesystem::path& path, ImageData* pResource) const
+	{
+		SDL_Surface* surface = SDL_CreateRGBSurfaceWithFormatFrom(pResource->GetPixels(), pResource->GetWidth(), pResource->GetHeight(), 1,
+			pResource->GetWidth()*pResource->GetBytesPerPixel(), SDL_PixelFormatEnum::SDL_PIXELFORMAT_RGBA32);
+		if (!surface) return false;
+		const bool result = IMG_SavePNG(surface, path.string().data()) == 0;
+		SDL_FreeSurface(surface);
+		return result;
+	}
+
 	void SDLImageImporter::Initialize()
 	{
 		// Initialize for all available extensions

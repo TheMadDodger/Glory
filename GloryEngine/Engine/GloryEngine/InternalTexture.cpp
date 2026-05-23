@@ -5,20 +5,20 @@
 namespace Glory
 {
 	InternalTexture::InternalTexture():
-		m_pImage(nullptr)
+		m_pImage(nullptr), m_Owning(false)
 	{
 		APPEND_TYPE(InternalTexture);
 	}
 
-	InternalTexture::InternalTexture(ImageData* pImage):
-		m_pImage(pImage)
+	InternalTexture::InternalTexture(ImageData* pImage, bool owning):
+		m_pImage(pImage), m_Owning(owning)
 	{
 		APPEND_TYPE(InternalTexture);
 	}
 
 	InternalTexture::~InternalTexture()
 	{
-		if (!m_pImage) return;
+		if (!m_pImage || !m_Owning) return;
 		delete m_pImage;
 		m_pImage = nullptr;
 	}
@@ -47,5 +47,14 @@ namespace Glory
 				m_pImage = new ImageData();
 			m_pImage->Deserialize(container);
 		}
+	}
+
+	void InternalTexture::SetImage(ImageData* pImage, bool owning)
+	{
+		if (m_pImage && m_Owning)
+			delete m_pImage;
+
+		m_pImage = pImage;
+		m_Owning = owning;
 	}
 }

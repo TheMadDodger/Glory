@@ -3,6 +3,8 @@
 
 #include <Entity.h>
 #include <ResourceType.h>
+#include <GraphicsHandles.h>
+#include <InternalTexture.h>
 
 #include <memory>
 #include <functional>
@@ -11,12 +13,14 @@
 namespace Glory
 {
 	class ImageData;
+	class GraphicsDevice;
+	class Renderer;
 }
 
 namespace Glory::Editor
 {
 	class EditorApplication;
-	class ThumbnailRenderer;
+	class ThumbnailsRenderer;
 
 	//struct ThumbnailData
 	//{
@@ -31,10 +35,11 @@ namespace Glory::Editor
 		virtual ~Thumbnails();
 
 		template<class T>
-		void RegisterRenderableThumbnail(std::function<void(Entity, UUID)> sceneSetup, std::function<bool(UUID)> canRender)
+		void RegisterRenderableThumbnail(std::function<void(Entity, UUID)> sceneSetup,
+			std::function<void(UUID, GraphicsDevice*, Renderer*, uint32_t, CommandBufferHandle)> customRender=NULL)
 		{
 			const uint32_t hash = ResourceTypes::GetHash<T>();
-			RegisterRenderableThumbnail(hash, sceneSetup, canRender);
+			RegisterRenderableThumbnail(hash, sceneSetup, customRender);
 		}
 
 		GLORY_EDITOR_API void Initialize();
@@ -44,13 +49,16 @@ namespace Glory::Editor
 		GLORY_EDITOR_API void DrawThumbnail(UUID uuid, float size);
 
 	private:
-		GLORY_EDITOR_API void RegisterRenderableThumbnail(uint32_t hashCode,
-			std::function<void(Entity, UUID)> sceneSetup, std::function<bool(UUID)> canRender);
+		GLORY_EDITOR_API void RegisterRenderableThumbnail(uint32_t hashCode, std::function<void(Entity, UUID)> sceneSetup,
+			std::function<void(UUID, GraphicsDevice*, Renderer*, uint32_t, CommandBufferHandle)> customRender=NULL);
 		GLORY_EDITOR_API std::filesystem::path GenerateCachedThumbnailPath(const UUID uuid) const;
 
 	private:
 		EditorApplication* m_pApp;
-		std::unique_ptr<ThumbnailRenderer> m_ThumbnailRenderer;
-		std::unordered_map<UUID, ImageData*> m_CachedThumbnail;
+		std::unique_ptr<ThumbnailsRenderer> m_ThumbnailsRenderer;
+		std::vector<InternalTexture> m_CachedThumbnailTextures;
+		std::unordered_map<UUID, TextureHandle> m_CachedThumbnailTextureHandles;
+
+		std::unordered_map<UUID, uint8_t> m_CurrentRenderingThumbnails;
 	};
 }

@@ -37,6 +37,7 @@ namespace Glory
         GLORY_ENGINE_API uint8_t GetBytesPerPixel() const;
         GLORY_ENGINE_API uint32_t GetByteSize() const;
         GLORY_ENGINE_API virtual const void* GetPixels() const;
+        GLORY_ENGINE_API virtual void* GetPixels();
         GLORY_ENGINE_API virtual size_t DataSize() const;
         GLORY_ENGINE_API virtual DataType GetDataType() const;
 

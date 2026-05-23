@@ -227,6 +227,13 @@ namespace Glory
 		return m_CurrentFrameIndex;
 	}
 
+	uint32_t GloryRenderer::IncrementFrameInFlight()
+	{
+		const uint32_t frameInFlight = m_CurrentFrameIndex;
+		++m_CurrentFrameIndex;
+		return frameInFlight;
+	}
+
 	void GloryRenderer::Initialize()
 	{
 		GraphicsDevice* pDevice = m_pModule->GetEngine()->ActiveGraphicsDevice();
@@ -637,41 +644,8 @@ namespace Glory
 		m_SettingsToggles.SetAll();
 	}
 
-	//void GloryRenderer::Update()
-	//{
-	//	ModuleSettings& settings = Settings();
-	//	if (!settings.IsDirty()) return;
-	//
-	//	const UUID linesPipeline = settings.Value<uint64_t>("Lines Pipeline");
-	//	const UUID screenPipeline = settings.Value<uint64_t>("Screen Pipeline");
-	//	const UUID SSAOPrePassPipeline = settings.Value<uint64_t>("SSAO Prepass Pipeline");
-	//	const UUID SSAOBlurPipeline = settings.Value<uint64_t>("SSAO Blur Pipeline");
-	//	const UUID textPipeline = settings.Value<uint64_t>("Text Pipeline");
-	//	const UUID displayPipeline = settings.Value<uint64_t>("Display Copy Pipeline");
-	//	const UUID skyboxPipeline = settings.Value<uint64_t>("Skybox Pipeline");
-	//	const UUID irradiancePipeline = settings.Value<uint64_t>("Irradiance Pipeline");
-	//	const UUID shadowsPipeline = settings.Value<uint64_t>("Shadows Pipeline");
-	//	const UUID shadowsTransparentPipeline = settings.Value<uint64_t>("Shadows Transparent Textured Pipeline");
-	//	const UUID clusterGeneratorPipeline = settings.Value<uint64_t>("Cluster Generator");
-	//	const UUID clusterCullLightPipeline = settings.Value<uint64_t>("Cluster Cull Light");
-	//	const UUID pickingPipeline = settings.Value<uint64_t>("Picking");
-	//	const UUID ssaoPostpassPipeline = settings.Value<uint64_t>("SSAO Postpass");
-	//	const UUID ssaoVisualizerPipeline = settings.Value<uint64_t>("SSAO Visualizer");
-	//	const UUID objectIDVisualizerPipeline = settings.Value<uint64_t>("ObjectID Visualizer");
-	//	const UUID depthVisualizerPipeline = settings.Value<uint64_t>("Depth Visualizer");
-	//	const UUID lightComplexityVisualizerPipeline = settings.Value<uint64_t>("Light Complexity Visualizer");
-	//
-	//	settings.SetDirty(false);
-	//}
-
-	void GloryRenderer::Draw()
+	void GloryRenderer::WaitForCurrentFrame()
 	{
-		ProfileSample s{ &m_pModule->GetEngine()->Profiler(), "GloryRenderer::Draw" };
-		if (!m_Enabled) return;
-
-		const ModuleSettings& settings = m_pModule->Settings();
-		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
-
 		GraphicsDevice* pDevice = m_pModule->GetEngine()->ActiveGraphicsDevice();
 		if (!pDevice) return;
 
@@ -721,6 +695,67 @@ namespace Glory
 			if (result == GraphicsDevice::WR_Timeout) continue;
 			m_pModule->GetEngine()->GetDebug().LogError("Failed to wait for render finished!");
 		}
+	}
+
+	CommandBufferHandle GloryRenderer::BeginFrameCommands()
+	{
+		GraphicsDevice* pDevice = m_pModule->GetEngine()->ActiveGraphicsDevice();
+		m_FrameCommandBuffers[m_CurrentFrameIndex] = pDevice->Begin();
+		return m_FrameCommandBuffers[m_CurrentFrameIndex];
+	}
+
+	void GloryRenderer::EndFrameCommands(std::vector<SemaphoreHandle>& waitSemaphores, std::vector<SemaphoreHandle> signalSemaphores)
+	{
+		GraphicsDevice* pDevice = m_pModule->GetEngine()->ActiveGraphicsDevice();
+		pDevice->End(m_FrameCommandBuffers[m_CurrentFrameIndex]);
+		pDevice->Commit(m_FrameCommandBuffers[m_CurrentFrameIndex], waitSemaphores, signalSemaphores);
+
+		if (!m_Swapchain)
+		{
+			++m_CurrentFrameIndex;
+			m_CurrentFrameIndex = m_CurrentFrameIndex % m_ImageCount;
+		}
+	}
+
+	//void GloryRenderer::Update()
+	//{
+	//	ModuleSettings& settings = Settings();
+	//	if (!settings.IsDirty()) return;
+	//
+	//	const UUID linesPipeline = settings.Value<uint64_t>("Lines Pipeline");
+	//	const UUID screenPipeline = settings.Value<uint64_t>("Screen Pipeline");
+	//	const UUID SSAOPrePassPipeline = settings.Value<uint64_t>("SSAO Prepass Pipeline");
+	//	const UUID SSAOBlurPipeline = settings.Value<uint64_t>("SSAO Blur Pipeline");
+	//	const UUID textPipeline = settings.Value<uint64_t>("Text Pipeline");
+	//	const UUID displayPipeline = settings.Value<uint64_t>("Display Copy Pipeline");
+	//	const UUID skyboxPipeline = settings.Value<uint64_t>("Skybox Pipeline");
+	//	const UUID irradiancePipeline = settings.Value<uint64_t>("Irradiance Pipeline");
+	//	const UUID shadowsPipeline = settings.Value<uint64_t>("Shadows Pipeline");
+	//	const UUID shadowsTransparentPipeline = settings.Value<uint64_t>("Shadows Transparent Textured Pipeline");
+	//	const UUID clusterGeneratorPipeline = settings.Value<uint64_t>("Cluster Generator");
+	//	const UUID clusterCullLightPipeline = settings.Value<uint64_t>("Cluster Cull Light");
+	//	const UUID pickingPipeline = settings.Value<uint64_t>("Picking");
+	//	const UUID ssaoPostpassPipeline = settings.Value<uint64_t>("SSAO Postpass");
+	//	const UUID ssaoVisualizerPipeline = settings.Value<uint64_t>("SSAO Visualizer");
+	//	const UUID objectIDVisualizerPipeline = settings.Value<uint64_t>("ObjectID Visualizer");
+	//	const UUID depthVisualizerPipeline = settings.Value<uint64_t>("Depth Visualizer");
+	//	const UUID lightComplexityVisualizerPipeline = settings.Value<uint64_t>("Light Complexity Visualizer");
+	//
+	//	settings.SetDirty(false);
+	//}
+
+	void GloryRenderer::Draw()
+	{
+		ProfileSample s{ &m_pModule->GetEngine()->Profiler(), "GloryRenderer::Draw" };
+		if (!m_Enabled) return;
+
+		const ModuleSettings& settings = m_pModule->Settings();
+		PipelineManager& pipelines = m_pModule->GetEngine()->GetPipelineManager();
+
+		GraphicsDevice* pDevice = m_pModule->GetEngine()->ActiveGraphicsDevice();
+		if (!pDevice) return;
+
+		WaitForCurrentFrame();
 
 		std::vector<SemaphoreHandle> waitSemaphores;
 		std::vector<SemaphoreHandle> signalSemaphores;
@@ -764,7 +799,7 @@ namespace Glory
 		}
 
 		/* Command buffer start */
-		m_FrameCommandBuffers[m_CurrentFrameIndex] = pDevice->Begin();
+		BeginFrameCommands();
 
 		/* Light cluster culling */
 		for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
@@ -1090,14 +1125,8 @@ namespace Glory
 				injectedSubpass(pDevice, m_SwapchainPasses[m_CurrentSemaphoreIndex], m_FrameCommandBuffers[m_CurrentFrameIndex]);
 			pDevice->EndRenderPass(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 		}
-		pDevice->End(m_FrameCommandBuffers[m_CurrentFrameIndex]);
-		pDevice->Commit(m_FrameCommandBuffers[m_CurrentFrameIndex], waitSemaphores, signalSemaphores);
 
-		if (!m_Swapchain)
-		{
-			++m_CurrentFrameIndex;
-			m_CurrentFrameIndex = m_CurrentFrameIndex % m_ImageCount;
-		}
+		EndFrameCommands(waitSemaphores, signalSemaphores);
 	}
 
 	Renderer* GloryRenderer::CreateSecondaryRenderer(size_t imageCount)
@@ -1250,6 +1279,16 @@ namespace Glory
 		GraphicsDevice* pDevice = m_pModule->GetEngine()->ActiveGraphicsDevice();
 		RenderTextureHandle renderTexture = pDevice->GetRenderPassRenderTexture(m_FinalFrameColorPasses[frameIndex]);
 		return pDevice->GetRenderTextureAttachment(renderTexture, 0);
+	}
+
+	RenderPassHandle GloryRenderer::FinalColorRenderPass(uint32_t frameIndex) const
+	{
+		return m_FinalFrameColorPasses[frameIndex];
+	}
+
+	CommandBufferHandle GloryRenderer::FrameCommandBuffer(uint32_t frameIndex) const
+	{
+		return m_FrameCommandBuffers[frameIndex];
 	}
 
 	void GloryRenderer::VisualizeAttachment(CameraRef camera, size_t index)
