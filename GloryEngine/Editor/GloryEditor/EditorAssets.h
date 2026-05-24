@@ -3,6 +3,7 @@
 
 #include <GraphicsHandles.h>
 #include <string>
+#include <filesystem>
 
 namespace Glory
 {
@@ -32,9 +33,9 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API TextureData* GetTextureData(const std::string& key);
 
 	private:
-		static void LoadImage(GraphicsDevice* pDevice, const std::string& path, const std::string& key);
+		static void LoadDirectory(GraphicsDevice* pDevice, const std::filesystem::path& path);
+		static void LoadImageAsset(GraphicsDevice* pDevice, const std::filesystem::path& path, const std::string& key);
 
-	private:
 		EditorAssets();
 		virtual ~EditorAssets();
 

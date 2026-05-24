@@ -23,6 +23,7 @@
 #include <ObjectMenuCallbacks.h>
 #include <FileBrowser.h>
 #include <ThumbnailManager.h>
+#include <Thumbnails.h>
 #include <EntitySceneObjectEditor.h>
 #include <ScriptingExtender.h>
 #include <MainEditor.h>
@@ -37,6 +38,7 @@
 #include <SceneManager.h>
 #include <CoreLibManager.h>
 #include <BinaryStream.h>
+#include <EditorAssets.h>
 
 #include <fstream>
 #include <string>
@@ -190,6 +192,7 @@ namespace Glory::Editor
 		MenuBar::AddMenuItem("File/Compile C# Project", []() { CompileProject(ProjectSpace::GetOpenProject()); });
 
 		pEditorApp->GetThumbnailManager().AddGenerator<MonoScriptThumbnail>();
+		pEditorApp->GetThumbnails().RegisterDefaultThumbnail<MonoScript>("Mono/Code");
 
 		EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetUpdated, AssetCallback);
 		EditorPreferencesWindow::AddPreferencesTab({ "Mono", [this]() { Preferences(); } });

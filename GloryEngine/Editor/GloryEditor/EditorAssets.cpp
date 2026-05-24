@@ -19,6 +19,8 @@ namespace Glory::Editor
 	std::mutex QueueLock;
 	std::vector<TextureData*> TextureCreationQueue;
 
+	static constexpr std::string_view ThumbRootPath = "./EditorAssets/Thumb";
+
 	void EditorAssets::LoadAssets()
 	{
 		GraphicsDevice* pDevice = EditorApplication::GetInstance()->GetEngine()->ActiveGraphicsDevice();
@@ -30,12 +32,7 @@ namespace Glory::Editor
 		lock.unlock();
 
 		if (m_IsInitialized) return;
-
-		LoadImage(pDevice, "./EditorAssets/Thumb/folder.png", "folder");
-		LoadImage(pDevice, "./EditorAssets/Thumb/file.png", "file");
-		LoadImage(pDevice, "./EditorAssets/Thumb/scene.png", "scene");
-		LoadImage(pDevice, "./EditorAssets/Thumb/audio.png", "audio");
-
+		LoadDirectory(pDevice, ThumbRootPath);
 		m_IsInitialized = true;
 	}
 
@@ -71,7 +68,35 @@ namespace Glory::Editor
 		return it->second;
 	}
 
-	void EditorAssets::LoadImage(GraphicsDevice* pDevice, const std::string& path, const std::string& key)
+	void EditorAssets::LoadDirectory(GraphicsDevice* pDevice, const std::filesystem::path& path)
+	{
+		for (const auto& entry : std::filesystem::directory_iterator(path))
+		{
+			if (entry.is_directory())
+			{
+				LoadDirectory(pDevice, entry.path());
+				continue;
+			}
+			const std::filesystem::path filePath = entry.path();
+			const bool isImage = filePath.extension().compare(".png") == 0 ||
+				filePath.extension().compare(".jpg") == 0 ||
+				filePath.extension().compare(".jpeg") == 0;
+			if (!isImage) continue;
+
+			std::filesystem::path relative = filePath.lexically_relative(ThumbRootPath);
+			relative.replace_extension("");
+			std::stringstream str;
+			for (const auto& pathPiece : relative)
+			{
+				if (!str.str().empty())
+					str << "/";
+				str << pathPiece.string();
+			}
+			LoadImageAsset(pDevice, filePath, str.str());
+		}
+	}
+
+	void EditorAssets::LoadImageAsset(GraphicsDevice* pDevice, const std::filesystem::path& path, const std::string& key)
 	{
 		ImportedResource resource = Importer::Import(path, nullptr);
 

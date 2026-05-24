@@ -19,6 +19,7 @@
 #include "EditorAssets.h"
 #include "ProjectSpace.h"
 #include "ThumbnailManager.h"
+#include "Thumbnails.h"
 #include "ImageThumbnailGenerator.h"
 #include "TextureThumbnailGenerator.h"
 #include "SceneThumbnailGenerator.h"
@@ -75,9 +76,12 @@
 #include <imgui.h>
 #include <ImGuizmo.h>
 
+#include <AudioData.h>
 #include <IEngine.h>
 #include <Components.h>
 #include <Debug.h>
+
+#include <IconsFontAwesome6.h>
 
 #define GIZMO_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { if(var == value) Gizmos::ToggleMode(); var = value; }, []() { return var == value; }, shortcut)
 #define GIZMO_MODE_MENU(path, var, value, shortcut) MenuBar::AddMenuItem(path, []() { var = value; }, []() { return var == value; }, shortcut)
@@ -160,11 +164,15 @@ namespace Glory::Editor
 		//if (ProjectSpace::GetOpenProject() == nullptr)
 		//	m_pProjectPopup->Open();
 
-		ThumbnailManager& thumbnails = EditorApplication::GetInstance()->GetThumbnailManager();
-		thumbnails.AddGenerator<ImageThumbnailGenerator>();
-		thumbnails.AddGenerator<TextureThumbnailGenerator>();
-		thumbnails.AddGenerator<SceneThumbnailGenerator>();
-		thumbnails.SetupInternalRenderableThumbnails();
+		ThumbnailManager& thumbnailManager = EditorApplication::GetInstance()->GetThumbnailManager();
+		thumbnailManager.AddGenerator<ImageThumbnailGenerator>();
+		thumbnailManager.AddGenerator<TextureThumbnailGenerator>();
+		thumbnailManager.AddGenerator<SceneThumbnailGenerator>();
+		thumbnailManager.SetupInternalRenderableThumbnails();
+		Thumbnails& thumbnails = EditorApplication::GetInstance()->GetThumbnails();
+		thumbnails.RegisterDefaultThumbnail<GScene>("scene");
+		thumbnails.RegisterDefaultThumbnail<FontData>("font");
+		thumbnails.RegisterDefaultThumbnail<AudioData>("audio");
 
 		Gizmos::Initialize();
 

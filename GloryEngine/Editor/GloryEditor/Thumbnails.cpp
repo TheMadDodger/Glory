@@ -76,7 +76,12 @@ namespace Glory::Editor
 		if (thumb.Texture)
 			return ImGui::ImageButton(pRenderImpl->GetTextureID(thumb.Texture), ImVec2(size, size));
 		else if (!thumb.Icon.empty())
-			return ImGui::Button(thumb.Icon.data(), { size, size });
+		{
+			ImGui::PushFont(EditorPlatform::HugeFont);
+			const bool pressed = ImGui::Button(thumb.Icon.data(), { size, size });
+			ImGui::PopFont();
+			return pressed;
+		}
 		return false;
 	}
 
@@ -86,8 +91,12 @@ namespace Glory::Editor
 		EditorRenderImpl* pRenderImpl = m_pApp->GetEditorPlatform().GetRenderImpl();
 		if (thumb.Texture)
 			ImGui::Image(pRenderImpl->GetTextureID(thumb.Texture), ImVec2(size, size));
-		else if(!thumb.Icon.empty())
+		else if (!thumb.Icon.empty())
+		{
+			ImGui::PushFont(EditorPlatform::HugeFont);
 			ImGui::TextUnformatted(thumb.Icon.data());
+			ImGui::PopFont();
+		}
 	}
 
 	void Thumbnails::SetDirty(UUID uuid)
@@ -120,6 +129,21 @@ namespace Glory::Editor
 
 	ThumbnailData Thumbnails::GetThumbnail(const UUID uuid)
 	{
+		ResourceMeta meta;
+		EditorAssetDatabase::GetAssetMetadata(uuid, meta);
+
+		if (m_IconThumbnails.contains(meta.Hash()))
+		{
+			const std::string& icon = m_IconThumbnails.at(meta.Hash());
+			return { nullptr, icon };
+		}
+
+		if (m_DefaultThumbnails.contains(meta.Hash()))
+		{
+			const std::string& textureName = m_DefaultThumbnails.at(meta.Hash());
+			return { EditorAssets::GetTexture(textureName), ""};
+		}
+
 		const std::filesystem::path cachedThumbnailPath = GenerateCachedThumbnailPath(uuid);
 		EditorRenderImpl* pRenderImpl = m_pApp->GetEditorPlatform().GetRenderImpl();
 		if (m_CurrentRenderingThumbnails.contains(uuid) && m_CurrentRenderingThumbnails.at(uuid))
@@ -151,8 +175,6 @@ namespace Glory::Editor
 			return { textureHandle, "" };
 		}
 
-		ResourceMeta meta;
-		EditorAssetDatabase::GetAssetMetadata(uuid, meta);
 		if (m_ThumbnailsRenderer->IsResourceRenderable(meta.Hash()))
 		{
 			/* Request the thumbnail to be rendered */
@@ -162,5 +184,15 @@ namespace Glory::Editor
 
 		TextureHandle texture = EditorAssets::GetTexture("file");
 		return { texture, "" };
+	}
+
+	void Thumbnails::RegisterIconThumbnail(uint32_t hash, std::string&& icon)
+	{
+		m_IconThumbnails.emplace(hash, std::move(icon));
+	}
+
+	void Thumbnails::RegisterDefaultThumbnail(uint32_t hash, std::string&& name)
+	{
+		m_DefaultThumbnails.emplace(hash, std::move(name));
 	}
 }
