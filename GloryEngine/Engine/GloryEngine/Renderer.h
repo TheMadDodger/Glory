@@ -242,6 +242,8 @@ namespace Glory
 		virtual TextureHandle CameraAttachmentPreview(CameraRef camera, size_t index) const = 0;
 		virtual TextureHandle FinalColor() const = 0;
 		virtual TextureHandle FinalColor(uint32_t frameIndex) const = 0;
+		virtual RenderPassHandle FinalColorRenderPass(uint32_t frameIndex) const = 0;
+		virtual CommandBufferHandle FrameCommandBuffer(uint32_t frameIndex) const = 0;
 		virtual void VisualizeAttachment(CameraRef camera, size_t index) = 0;
 
 		virtual size_t DebugOverlayCount() const = 0;
@@ -266,6 +268,7 @@ namespace Glory
 
 		virtual uint32_t GetNumFramesInFlight() const = 0;
 		virtual uint32_t GetCurrentFrameInFlight() const = 0;
+		virtual uint32_t IncrementFrameInFlight() = 0;
 
 		inline virtual RenderPassHandle GetSwapchainPass() const { return NULL; };
 		inline virtual RenderPassHandle GetDummyPostProcessPass() const { return NULL; };
@@ -275,6 +278,10 @@ namespace Glory
 		virtual void Initialize() = 0;
 		virtual void Cleanup() = 0;
 		virtual void InitializeAsMainRenderer() = 0;
+		virtual void WaitForCurrentFrame() = 0;
+		virtual CommandBufferHandle BeginFrameCommands() = 0;
+		virtual void EndFrameCommands(std::vector<SemaphoreHandle>& waitSemaphores,
+			std::vector<SemaphoreHandle> signalSemaphores) = 0;
 		virtual void Draw() = 0;
 
 		GLORY_ENGINE_API void BeginFrame();

@@ -12,7 +12,7 @@
 
 namespace Glory::Editor
 {
-	ThumbnailManager::ThumbnailManager(EditorApplication* pApp): m_pApplication(pApp), m_ThumbnailRenderer(new ThumbnailRenderer(pApp->GetEngine())) {}
+	ThumbnailManager::ThumbnailManager(EditorApplication* pApp): m_pApplication(pApp), m_ThumbnailRenderer(nullptr) {}
 
 	ThumbnailManager::~ThumbnailManager()
 	{
@@ -25,43 +25,45 @@ namespace Glory::Editor
 
 	TextureHandle ThumbnailManager::GetThumbnail(UUID uuid)
 	{
-		GraphicsDevice* pDevice = EditorApplication::GetInstance()->GetEngine()->ActiveGraphicsDevice();
+		return nullptr;
 
-		auto it = m_pThumbnails.find(uuid);
-		if (it != m_pThumbnails.end())
-		{
-			TextureData* pTextureData = m_pThumbnails.at(uuid);
-			if (pDevice->CachedTextureExists(pTextureData))
-				return pDevice->AcquireCachedTexture(pTextureData);
-			return EditorAssets::GetTexture("file");
-		}
+		//GraphicsDevice* pDevice = EditorApplication::GetInstance()->GetEngine()->ActiveGraphicsDevice();
 
-		ResourceMeta meta;
-		EditorAssetDatabase::GetAssetMetadata(uuid, meta);
+		//auto it = m_pThumbnails.find(uuid);
+		//if (it != m_pThumbnails.end())
+		//{
+		//	TextureData* pTextureData = m_pThumbnails.at(uuid);
+		//	if (pDevice->CachedTextureExists(pTextureData))
+		//		return pDevice->AcquireCachedTexture(pTextureData);
+		//	return EditorAssets::GetTexture("file");
+		//}
 
-		/* Find thumbnail in cache */
-		TextureData* pImage = nullptr;
+		//ResourceMeta meta;
+		//EditorAssetDatabase::GetAssetMetadata(uuid, meta);
 
-		if (m_ThumbnailRenderer->IsResourceRenderable(meta.Hash()))
-		{
-			/* Request the thumbnail to be renderer */
-			pImage = m_ThumbnailRenderer->QueueThumbnailForRendering(meta.Hash(), uuid);
-		}
-		else
-		{
-			BaseThumbnailGenerator* pGenerator = GetGenerator(meta.Hash());
-			if (pGenerator == nullptr)
-				return EditorAssets::GetTexture("file");
+		///* Find thumbnail in cache */
+		//TextureData* pImage = nullptr;
 
-			pImage = pGenerator->GetThumbnail(&meta);
-		}
+		//if (m_ThumbnailRenderer->IsResourceRenderable(meta.Hash()))
+		//{
+		//	/* Request the thumbnail to be renderer */
+		//	pImage = m_ThumbnailRenderer->QueueThumbnailForRendering(meta.Hash(), uuid);
+		//}
+		//else
+		//{
+		//	BaseThumbnailGenerator* pGenerator = GetGenerator(meta.Hash());
+		//	if (pGenerator == nullptr)
+		//		return EditorAssets::GetTexture("file");
 
-		if (pImage == nullptr)
-			return EditorAssets::GetTexture("file");
+		//	pImage = pGenerator->GetThumbnail(&meta);
+		//}
 
-		m_pThumbnails.emplace(uuid, pImage);
-		EditorAssets::EnqueueTextureCreation(pImage);
-		return EditorAssets::GetTexture("file");
+		//if (pImage == nullptr)
+		//	return EditorAssets::GetTexture("file");
+
+		//m_pThumbnails.emplace(uuid, pImage);
+		//EditorAssets::EnqueueTextureCreation(pImage);
+		//return EditorAssets::GetTexture("file");
 	}
 
 	void ThumbnailManager::SetDirty(UUID uuid)
@@ -74,8 +76,8 @@ namespace Glory::Editor
 
 	void ThumbnailManager::SetupInternalRenderableThumbnails()
 	{
-		RegisterRenderableThumbnail<MaterialData>(SetupMaterialScene, CanRenderMaterial);
-		RegisterRenderableThumbnail<MeshData>(SetupMeshScene, CanRenderMesh);
+		//RegisterRenderableThumbnail<MaterialData>(SetupMaterialScene, CanRenderMaterial);
+		//RegisterRenderableThumbnail<MeshData>(SetupMeshScene, CanRenderMesh);
 	}
 
 	BaseThumbnailGenerator* ThumbnailManager::GetGenerator(uint32_t hashCode)
@@ -93,12 +95,12 @@ namespace Glory::Editor
 
 	void ThumbnailManager::Initialize()
 	{
-		m_ThumbnailRenderer->LoadResources();
+		//m_ThumbnailRenderer->LoadResources();
 	}
 
 	void ThumbnailManager::Update()
 	{
-		m_ThumbnailRenderer->CheckRenders();
+		//m_ThumbnailRenderer->CheckRenders();
 	}
 
 	void ThumbnailManager::AddGenerator(BaseThumbnailGenerator* pGenerator)

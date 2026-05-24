@@ -90,6 +90,7 @@ namespace Glory
 		GLORY_ENGINE_API void Cleanup();
 		GLORY_ENGINE_API void Update(float dt);
 		GLORY_ENGINE_API void Draw();
+		GLORY_ENGINE_API void RegisterComponentManagers();
 
 	protected:
 		virtual void OnInitialize() = 0;

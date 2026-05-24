@@ -67,6 +67,11 @@ namespace Glory
 		return m_pPixels;
 	}
 
+	void* ImageData::GetPixels()
+	{
+		return m_pPixels;
+	}
+
 	size_t ImageData::DataSize() const
 	{
 		return m_Header.m_DataSize;

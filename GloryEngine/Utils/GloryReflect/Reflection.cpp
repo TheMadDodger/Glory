@@ -8,12 +8,13 @@ namespace Glory::Utils::Reflect
 	bool Reflect::m_InstanceOwned = false;
 	const char* Reflect::BASIC_VALUE_NAME = "m_value";
 
-	void Reflect::RegisterType(uint32_t hash, const TypeData* pTypeData, uint64_t flags)
+	bool Reflect::RegisterType(uint32_t hash, const TypeData* pTypeData, uint64_t flags)
 	{
-		if (m_pReflectInstance->m_pTypeDatas.find(hash) != m_pReflectInstance->m_pTypeDatas.end()) return;
+		if (m_pReflectInstance->m_pTypeDatas.find(hash) != m_pReflectInstance->m_pTypeDatas.end()) return false;
 		m_pReflectInstance->m_pTypeDatas.emplace(hash, pTypeData);
 		m_pReflectInstance->m_DataTypeFlags.emplace(hash, flags);
 		m_pReflectInstance->m_StringToTypeHash.emplace(pTypeData->TypeName(), hash);
+		return true;
 	}
 
 	const TypeData* Reflect::RegisterBasicType(const std::type_info& type, size_t size, const std::string& aliasName, uint64_t flags)

@@ -4,6 +4,7 @@
 #include "FileBrowserItem.h"
 #include "EditorAssets.h"
 #include "ThumbnailManager.h"
+#include "Thumbnails.h"
 #include "ThumbnailGenerator.h"
 #include "Selection.h"
 #include "ObjectMenu.h"
@@ -462,7 +463,7 @@ namespace Glory::Editor
 		{
 			std::string path = m_CachedPath.string();
 			DND::DragAndDropSource(STNames[ST_Path], path.data(), path.size() + 1, [&]() {
-				ImGui::Image(texture ? pRenderImpl->GetTextureID(texture) : NULL, { 64.0f, 64.0f });
+				pApplication->GetThumbnails().DrawThumbnail(uuid, 64.0f);
 				ImGui::SameLine();
 				ImGui::Text(m_CachedPath.string().data());
 			});
@@ -499,7 +500,7 @@ namespace Glory::Editor
 		}
 
 		ImGui::SetCursorPos({ cursorPos.x + padding, cursorPos.y + padding });
-		ImGui::Image(texture ? pRenderImpl->GetTextureID(texture) : NULL, ImVec2((float)iconSize, (float)iconSize));
+		pApplication->GetThumbnails().DrawThumbnail(uuid, float(iconSize));
 		DrawName(padding);
 		ImGui::EndChild();
 	}

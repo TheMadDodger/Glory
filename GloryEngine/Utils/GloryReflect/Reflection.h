@@ -22,7 +22,7 @@ namespace Glory::Utils::Reflect
 		static const TypeData* RegisterType(uint64_t flags = 0)
 		{
 			const TypeData* pTypeData = T::GetTypeData();
-			RegisterType(pTypeData->TypeHash(), pTypeData, flags);
+			if (!RegisterType(pTypeData->TypeHash(), pTypeData, flags)) return pTypeData;
 			m_pReflectInstance->m_pFactories.emplace(pTypeData->TypeHash(), new Factory<T>());
 			RegisterArrayType<T>(pTypeData);
 			return pTypeData;
@@ -91,7 +91,7 @@ namespace Glory::Utils::Reflect
 		static void Tokenize(std::string_view str, std::vector<std::string_view>& tokens, char separator = ',');
 
 	private:
-		static void RegisterType(uint32_t hash, const TypeData* pTypeData, uint64_t flags = 0);
+		static bool RegisterType(uint32_t hash, const TypeData* pTypeData, uint64_t flags = 0);
 		static const TypeData* RegisterBasicType(const std::type_info& type, size_t size, const std::string& aliasName, uint64_t flags);
 		static const TypeData* RegisterEnumType(const char* typeName, uint32_t enumTypeHash, const std::string& aliasName, uint64_t flags);
 

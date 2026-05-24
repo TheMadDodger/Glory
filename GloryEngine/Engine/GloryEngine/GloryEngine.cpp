@@ -9,6 +9,7 @@
 #include "EngineProfiler.h"
 #include "LightData.h"
 #include "Input.h"
+#include "Components.h"
 
 #include "PrefabData.h"
 #include "PipelineData.h"
@@ -738,6 +739,10 @@ namespace Glory
 		Reflect::RegisterType<Capsule>();
 		Reflect::RegisterType<TaperedCapsule>();
 		Reflect::RegisterType<ShapeProperty>();
+
+		Reflect::RegisterEnum<CameraPerspective>();
+		Reflect::RegisterEnum<CameraOutputMode>();
+		Reflect::RegisterType<ShadowSettings>();
 
 		//Reflect::RegisterBasicType<TextureData>("TextureData");
 		//Reflect::RegisterBasicType<FontData>("FontData");
