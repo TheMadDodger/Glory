@@ -41,6 +41,18 @@ namespace Glory::Editor
 			const uint32_t hash = ResourceTypes::GetHash<T>();
 			RegisterRenderableThumbnail(hash, sceneSetup, canRender, customRender);
 		}
+		template<class T>
+		void RegisterIconThumbnail(std::string&& icon)
+		{
+			const uint32_t hash = ResourceTypes::GetHash<T>();
+			RegisterIconThumbnail(hash, std::move(icon));
+		}
+		template<class T>
+		void RegisterDefaultThumbnail(std::string&& name)
+		{
+			const uint32_t hash = ResourceTypes::GetHash<T>();
+			RegisterDefaultThumbnail(hash, std::move(name));
+		}
 
 		GLORY_EDITOR_API void Initialize();
 		GLORY_EDITOR_API void Update();
@@ -55,6 +67,8 @@ namespace Glory::Editor
 			std::function<bool(UUID)> canRender=NULL, std::function<void(UUID, GraphicsDevice*, Renderer*, uint32_t, CommandBufferHandle)> customRender=NULL);
 		GLORY_EDITOR_API std::filesystem::path GenerateCachedThumbnailPath(const UUID uuid) const;
 		GLORY_EDITOR_API ThumbnailData GetThumbnail(const UUID uuid);
+		GLORY_EDITOR_API void RegisterIconThumbnail(uint32_t hash, std::string&& icon);
+		GLORY_EDITOR_API void RegisterDefaultThumbnail(uint32_t hash, std::string&& name);
 
 	private:
 		EditorApplication* m_pApp;
@@ -63,5 +77,7 @@ namespace Glory::Editor
 		std::unordered_map<UUID, UUID> m_ResourceIDToThumbnailID;
 		std::unordered_map<UUID, TextureHandle> m_CachedThumbnailTextureHandles;
 		std::unordered_map<UUID, uint8_t> m_CurrentRenderingThumbnails;
+		std::unordered_map<uint32_t, std::string> m_IconThumbnails;
+		std::unordered_map<uint32_t, std::string> m_DefaultThumbnails;
 	};
 }
