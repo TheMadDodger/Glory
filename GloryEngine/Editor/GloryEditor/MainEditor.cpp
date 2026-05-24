@@ -18,11 +18,7 @@
 #include "Window.h"
 #include "EditorAssets.h"
 #include "ProjectSpace.h"
-#include "ThumbnailManager.h"
 #include "Thumbnails.h"
-#include "ImageThumbnailGenerator.h"
-#include "TextureThumbnailGenerator.h"
-#include "SceneThumbnailGenerator.h"
 #include "Editor.h"
 #include "ProfilerWindow.h"
 #include "EditorSceneManager.h"
@@ -164,11 +160,10 @@ namespace Glory::Editor
 		//if (ProjectSpace::GetOpenProject() == nullptr)
 		//	m_pProjectPopup->Open();
 
-		ThumbnailManager& thumbnailManager = EditorApplication::GetInstance()->GetThumbnailManager();
-		thumbnailManager.AddGenerator<ImageThumbnailGenerator>();
-		thumbnailManager.AddGenerator<TextureThumbnailGenerator>();
-		thumbnailManager.AddGenerator<SceneThumbnailGenerator>();
-		thumbnailManager.SetupInternalRenderableThumbnails();
+		FileBrowser::RegisterFileDoubleClickCallback<GScene>([](UUID uuid) {
+			EditorApplication::GetInstance()->GetSceneManager().OpenScene(uuid, true);
+		});
+
 		Thumbnails& thumbnails = EditorApplication::GetInstance()->GetThumbnails();
 		thumbnails.RegisterDefaultThumbnail<GScene>("scene");
 		thumbnails.RegisterDefaultThumbnail<FontData>("font");

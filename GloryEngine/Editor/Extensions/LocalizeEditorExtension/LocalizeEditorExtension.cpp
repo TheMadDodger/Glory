@@ -1,6 +1,5 @@
 #include "LocalizeEditorExtension.h"
 #include "StringTableImporter.h"
-#include "StringTableThumbnailGenerator.h"
 #include "LanguageSettings.h"
 #include "StringTableEditor.h"
 #include "StringsOverrideTableEditor.h"
@@ -20,7 +19,6 @@
 #include <FileBrowser.h>
 #include <EditorAssetDatabase.h>
 #include <ObjectMenuCallbacks.h>
-#include <ThumbnailManager.h>
 #include <MenuBar.h>
 #include <Package.h>
 #include <Dispatcher.h>
@@ -204,8 +202,16 @@ namespace Glory::Editor
 		Importer::Register(&TableImporter);
 		Importer::Register(&OverrideTableImporter);
 		Editor::RegisterEditor(&OverrideTableEditor);
-		pApp->GetThumbnailManager().AddGenerator<StringTableThumbnailGenerator>();
-		pApp->GetThumbnailManager().AddGenerator<StringsOverrideTableThumbnailGenerator>();
+		FileBrowser::RegisterFileDoubleClickCallback<StringTable>([](UUID uuid) {
+			MainEditor& editor = EditorApplication::GetInstance()->GetMainEditor();
+			StringTableEditor* pEditor = editor.GetWindow<StringTableEditor>();
+			pEditor->SetTable(uuid);
+		});
+		FileBrowser::RegisterFileDoubleClickCallback<StringsOverrideTable>([](UUID uuid) {
+			MainEditor& editor = EditorApplication::GetInstance()->GetMainEditor();
+			StringTableEditor* pEditor = editor.GetWindow<StringTableEditor>();
+			pEditor->SetTable(uuid);
+		});
 		ObjectMenu::AddMenuItem("Create/Localize/String Table", OnCreateStringTable, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 		ObjectMenu::AddMenuItem("Create/Localize/String Override Table", OnCreateStringOverrideTable, ObjectMenuType::T_ContentBrowser | ObjectMenuType::T_Resource | ObjectMenuType::T_Folder);
 		MenuBar::AddMenuItem("Window/Localize/String Table Editor", [&editor]() { editor.GetWindow<StringTableEditor>(); }, NULL, Shortcut_Window_StringTableEditor);

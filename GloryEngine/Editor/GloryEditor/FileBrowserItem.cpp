@@ -15,6 +15,7 @@
 #include "DND.h"
 #include "PopupManager.h"
 #include "Dispatcher.h"
+#include "FileBrowser.h"
 
 #include <stack>
 #include <imgui.h>
@@ -475,14 +476,8 @@ namespace Glory::Editor
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 		{
 			ResourceMeta meta;
-			EditorAssetDatabase::GetAssetMetadata(uuid, meta);
-			BaseThumbnailGenerator* pGenerator = pApplication->GetThumbnailManager().GetGenerator(meta.Hash());
-			if (!pGenerator)
-			{
-				ImGui::EndChild();
-				return;
-			}
-			pGenerator->OnFileDoubleClick(uuid);
+			if (EditorAssetDatabase::GetAssetMetadata(uuid, meta))
+				FileBrowser::HandleFileDoubleClick(meta.Hash(), uuid);
 		}
 
 		if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
