@@ -1,6 +1,5 @@
 #include "FSMEditorExtension.h"
 #include "FSMImporter.h"
-#include "FSMThumbnailGenerator.h"
 #include "FSMEditor.h"
 #include "FSMPropertiesWindow.h"
 #include "FSMNodeEditor.h"

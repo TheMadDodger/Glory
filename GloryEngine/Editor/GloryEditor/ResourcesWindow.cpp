@@ -1,6 +1,5 @@
 #include "ResourcesWindow.h"
 #include "EditorAssetDatabase.h"
-#include "ThumbnailManager.h"
 #include "Thumbnails.h"
 #include "EditorApplication.h"
 #include "Selection.h"
@@ -177,7 +176,6 @@ namespace Glory::Editor
 				ResourceMeta meta;
 				EditorAssetDatabase::GetAssetMetadata(uuid, meta);
 				const ResourceType* pType = resourceTypes.GetResourceType(meta.Hash());
-				TextureHandle thumbnail = pApp->GetThumbnailManager().GetThumbnail(uuid);
 				const std::string name = EditorAssetDatabase::GetAssetName(uuid);
 
 				AssetLocation location;

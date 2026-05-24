@@ -3,7 +3,6 @@
 #include "EditorAssetDatabase.h"
 #include "PropertyDrawer.h"
 #include "EditorUI.h"
-#include "ThumbnailManager.h"
 #include "EditorApplication.h"
 #include "TextureImporter.h"
 

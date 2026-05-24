@@ -3,9 +3,7 @@
 #include "EditorApplication.h"
 #include "FileBrowserItem.h"
 #include "EditorAssets.h"
-#include "ThumbnailManager.h"
 #include "Thumbnails.h"
-#include "ThumbnailGenerator.h"
 #include "Selection.h"
 #include "ObjectMenu.h"
 #include "EntityEditor.h"
@@ -452,7 +450,6 @@ namespace Glory::Editor
 		if (relativePath == "") relativePath = m_CachedPath;
 		AssetDatabase& assetDatabase = pApplication->GetEngine()->GetAssetDatabase();
 		const UUID uuid = EditorAssetDatabase::FindAssetUUID(relativePath.string());
-		TextureHandle texture = pApplication->GetThumbnailManager().GetThumbnail(uuid);
 
 		const UUID selectedID = Selection::GetActiveObject() ? Selection::GetActiveObject()->GetUUID() : UUID(0ull);
 		const bool selected = (selectedID != 0 && selectedID == uuid) || m_HighlightedPath == m_CachedPath.string();
