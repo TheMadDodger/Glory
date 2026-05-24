@@ -8,7 +8,6 @@
 #include "ProjectSpace.h"
 #include "EditorPipelineManager.h"
 #include "EditorMaterialManager.h"
-#include "ThumbnailManager.h"
 #include "Thumbnails.h"
 #include "FileBrowser.h"
 #include "ProjectSettings.h"
@@ -56,7 +55,6 @@ namespace Glory::Editor
 		m_PipelineManager(new EditorPipelineManager(createInfo.pEngine)),
 		m_MaterialManager(new EditorMaterialManager(this)),
 		m_ResourceLoader(new EditorResourceLoader(this, &createInfo.pEngine->Jobs(), &createInfo.pEngine->GetDebug())),
-		m_ThumbnailManager(new ThumbnailManager(this)),
 		m_Thumbnails(new Thumbnails(this)),
 		m_pFileWatcher(new efsw::FileWatcher()),
 		m_Serializers(new Serializers(createInfo.pEngine))
@@ -330,7 +328,6 @@ namespace Glory::Editor
 			m_pEngine->Draw();
 
 			/* Update thumbnail manager */
-			m_ThumbnailManager->Update();
 			m_Thumbnails->Update();
 
 			/* End the current frame */
@@ -482,7 +479,6 @@ namespace Glory::Editor
 		m_MainEditor.Initialize();
 
 		InitializeExtensions();
-		m_ThumbnailManager->Initialize();
 		m_Thumbnails->Initialize();
 
 		m_pEngine->GetDebug().LogInfo("Initialized editor platform");
@@ -554,11 +550,6 @@ namespace Glory::Editor
 	EditorMaterialManager& EditorApplication::GetMaterialManager()
 	{
 		return *m_MaterialManager;
-	}
-
-	ThumbnailManager& EditorApplication::GetThumbnailManager()
-	{
-		return *m_ThumbnailManager;
 	}
 
 	Thumbnails& EditorApplication::GetThumbnails()

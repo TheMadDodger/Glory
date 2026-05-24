@@ -35,7 +35,6 @@ namespace Editor
 	class EditorPipelineManager;
 	class EditorMaterialManager;
 	class EditorResourceLoader;
-	class ThumbnailManager;
 	class Thumbnails;
 
 	class EditorApplication : public ICaptureHandler
@@ -69,7 +68,6 @@ namespace Editor
 		GLORY_EDITOR_API EditorResourceManager& GetResourceManager();
 		GLORY_EDITOR_API EditorPipelineManager& GetPipelineManager();
 		GLORY_EDITOR_API EditorMaterialManager& GetMaterialManager();
-		GLORY_EDITOR_API ThumbnailManager& GetThumbnailManager();
 		GLORY_EDITOR_API Thumbnails& GetThumbnails();
 		GLORY_EDITOR_API Serializers& GetSerializers();
 
@@ -110,7 +108,6 @@ namespace Editor
 		std::unique_ptr<EditorPipelineManager> m_PipelineManager;
 		std::unique_ptr<EditorMaterialManager> m_MaterialManager;
 		std::unique_ptr<EditorResourceLoader> m_ResourceLoader;
-		std::unique_ptr<ThumbnailManager> m_ThumbnailManager;
 		std::unique_ptr<Thumbnails> m_Thumbnails;
 		std::unique_ptr<Serializers> m_Serializers;
 		efsw::FileWatcher* m_pFileWatcher;
