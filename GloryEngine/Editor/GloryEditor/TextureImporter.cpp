@@ -1,4 +1,7 @@
 #include "TextureImporter.h"
+#include "EditorAssetDatabase.h"
+#include "EditorApplication.h"
+#include "EditorResourceManager.h"
 
 #include <NodeRef.h>
 
@@ -45,10 +48,19 @@ namespace Glory::Editor
 
 	ImportedResource TextureImporter::LoadResource(const std::filesystem::path& path, void*) const
 	{
+		TextureData* pTexture = new TextureData();
+		const UUID textureID = EditorAssetDatabase::FindAssetUUID(path.string());
+		if (textureID)
+		{
+			YAMLResource<TextureData>* pTextureData = static_cast<YAMLResource<TextureData>*>(
+				EditorApplication::GetInstance()->GetResourceManager().GetEditableResource(textureID));
+			LoadIntoTexture(pTextureData->File(), pTexture);
+			return { path, pTexture };
+		}
+
 		Utils::YAMLFileRef file{ path };
 		file.Load();
 
-		TextureData* pTexture = new TextureData();
 		LoadIntoTexture(file, pTexture);
 		return ImportedResource{ path, pTexture };
 	}

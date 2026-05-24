@@ -23,6 +23,7 @@ namespace Glory::Editor
 	void SetupImageScene(Entity root, UUID imageID);
 	void CustomRenderImage(UUID imageID, GraphicsDevice* pDevice, Renderer* pRenderer,
 		uint32_t frameIndex, CommandBufferHandle commandBuffer);
+	bool CanRenderTexture(UUID textureID);
 	void CustomRenderTexture(UUID imageID, GraphicsDevice* pDevice, Renderer* pRenderer,
 		uint32_t frameIndex, CommandBufferHandle commandBuffer);
 }

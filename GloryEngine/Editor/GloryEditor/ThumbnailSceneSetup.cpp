@@ -95,6 +95,14 @@ namespace Glory::Editor
 		pDevice->EndRenderPass(commandBuffer);
 	}
 
+	bool CanRenderTexture(UUID textureID)
+	{
+		Resources& resources = EditorApplication::GetInstance()->GetEngine()->GetResources();
+		Resource* pResource = resources.GetResource(textureID);
+		TextureData* pTexture = static_cast<TextureData*>(pResource);
+		return !pTexture->Image() || resources.GetResource(pTexture->Image().GetUUID());
+	}
+
 	void CustomRenderTexture(UUID imageID, GraphicsDevice* pDevice, Renderer* pRenderer, uint32_t frameIndex, CommandBufferHandle commandBuffer)
 	{
 		Resources& resources = EditorApplication::GetInstance()->GetEngine()->GetResources();

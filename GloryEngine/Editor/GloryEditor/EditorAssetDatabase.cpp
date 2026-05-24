@@ -10,6 +10,7 @@
 #include "AssetDatabase.h"
 #include "EditorResourceManager.h"
 #include "EditableResource.h"
+#include "Thumbnails.h"
 
 #include <JobManager.h>
 #include <IEngine.h>
@@ -558,6 +559,8 @@ namespace Glory::Editor
 
 	void EditorAssetDatabase::SetAssetDirty(UUID uuid)
 	{
+		EditorAssetCallbacks::EnqueueCallback(AssetCallbackType::CT_AssetDirty, uuid, nullptr);
+		EditorApplication::GetInstance()->GetThumbnails().SetDirty(uuid);
 		if (m_UnsavedAssets.Contains(uuid)) return;
 		m_UnsavedAssets.push_back(uuid);
 		SetDirty();

@@ -32,13 +32,11 @@ namespace Glory::Editor
 		auto sampler = node["Sampler"];
 
 		const uint64_t oldValue = image.As<uint64_t>();
-		ResourceReference<ImageData> imageRef = oldValue;
 
-		UUID assetID;
+		UUID assetID = oldValue;
 		if(AssetPicker::ResourceDropdown("Image", ResourceTypes::GetHash<ImageData>(), &assetID))
 		{
-			imageRef.SetUUID(assetID);
-			Undo::ApplyYAMLEdit(file, image.Path(), oldValue, uint64_t(imageRef.GetUUID()));
+			Undo::ApplyYAMLEdit(file, image.Path(), oldValue, uint64_t(assetID));
 			change = true;
 		}
 
@@ -51,8 +49,8 @@ namespace Glory::Editor
 
 		if (change)
 		{
-			EditorAssetDatabase::SetAssetDirty(pTextureData);
 			pTextureData->SetDirty(true);
+			EditorAssetDatabase::SetAssetDirty(pTextureData);
 		}
 		return change;
 	}

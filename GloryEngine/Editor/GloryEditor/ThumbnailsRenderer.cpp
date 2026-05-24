@@ -33,6 +33,9 @@ namespace Glory::Editor
 	{
 		m_ThumbnailRenderSetupCallbacks.clear();
 		m_CustomRenderThumbnailCallbacks.clear();
+
+		for (auto pair : m_RenderResults)
+			delete pair.second;
 		m_RenderResults.clear();
 	}
 
@@ -59,7 +62,9 @@ namespace Glory::Editor
 	ImageData* ThumbnailsRenderer::GetRenderResult(UUID uuid)
 	{
 		if (!m_RenderResults.contains(uuid)) return nullptr;
-		return &m_RenderResults.at(uuid);
+		ImageData* pImage = m_RenderResults.at(uuid);
+		m_RenderResults.erase(uuid);
+		return pImage;
 	}
 
 	void ThumbnailsRenderer::LoadResources()
@@ -208,16 +213,14 @@ namespace Glory::Editor
 			auto iter = m_RenderResults.find(m_RenderingIDs[i]);
 			if (iter != m_RenderResults.end())
 			{
-				iter->second.SetPixels(std::move(pixels), ThumbnailDataSize);
-				iter->second.SetDirty(true);
+				iter->second->SetPixels(std::move(pixels), ThumbnailDataSize);
+				iter->second->SetDirty(false);
 				m_RenderingIDs[i] = 0ull;
 				continue;
 			}
 
-			ImageData image(ThumbnailResolution.x, ThumbnailResolution.y,
-				PixelFormat::PF_R8G8B8A8Srgb, PixelFormat::PF_RGBA, 4, std::move(pixels), ThumbnailDataSize);
-			image.SetResourceUUID(m_RenderingIDs[i]);
-			m_RenderResults.emplace(m_RenderingIDs[i], std::move(image));
+			m_RenderResults.emplace(m_RenderingIDs[i], new ImageData(ThumbnailResolution.x, ThumbnailResolution.y,
+				PixelFormat::PF_R8G8B8A8Srgb, PixelFormat::PF_RGBA, 4, std::move(pixels), ThumbnailDataSize));
 			m_References.erase(m_RenderingIDs[i]);
 
 			m_RenderingIDs[i] = 0ull;

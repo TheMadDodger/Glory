@@ -71,7 +71,7 @@ namespace Glory::Editor
 		std::unordered_map<UUID, ResourceReferenceBase> m_References;
 		std::vector<std::pair<uint32_t, UUID>> m_ToQueueThumbnails;
 		std::queue<std::pair<uint32_t, UUID>> m_QueuedThumbnails;
-		std::unordered_map<UUID, ImageData> m_RenderResults;
+		std::unordered_map<UUID, ImageData*> m_RenderResults;
 
 		static const size_t MaxThumbnailsInFlight = 1;
 		UUID m_RenderingIDs[MaxThumbnailsInFlight];

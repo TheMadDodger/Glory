@@ -1,7 +1,7 @@
 #include "AssetPicker.h"
 #include "EditorUI.h"
 #include "DND.h"
-#include "ThumbnailManager.h"
+#include "Thumbnails.h"
 #include "EditorApplication.h"
 #include "FileBrowser.h"
 #include "EditorAssetDatabase.h"
@@ -128,8 +128,7 @@ namespace Glory::Editor
 
 		bool openPopup = false;
 		const float start = popupStart, width = popupWidth;
-		TextureHandle thumbnail = pApp->GetThumbnailManager().GetThumbnail(*value);
-		if(*value && ImGui::ImageButton(thumbnail ? pRenderImpl->GetTextureID(thumbnail) : NULL, ImVec2(buttonWidth, buttonWidth)))
+		if(*value && pApp->GetThumbnails().DrawThumbnailButton(*value, buttonWidth))
 		{
 			ForceFilter = true;
 			openPopup = true;
@@ -286,9 +285,8 @@ namespace Glory::Editor
 						FileBrowser::NavigateToAndHighlight(location.Path);
 				}
 
-				TextureHandle thumbnail = pApp->GetThumbnailManager().GetThumbnail(*it);
 				ImGui::SameLine();
-				ImGui::Image(thumbnail ? pRenderImpl->GetTextureID(thumbnail) : NULL, { rowHeight, rowHeight });
+				pApp->GetThumbnails().DrawThumbnail(*it, rowHeight);
 				ImGui::SameLine();
 				ImGui::TextUnformatted(name.c_str());
 				ImGui::PopID();

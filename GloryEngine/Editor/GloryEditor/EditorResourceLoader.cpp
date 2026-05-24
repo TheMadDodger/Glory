@@ -4,7 +4,7 @@
 #include "Undo.h"
 #include "TextureImporter.h"
 #include "EditorApplication.h"
-#include "ThumbnailManager.h"
+#include "Thumbnails.h"
 #include "Dispatcher.h"
 #include "RemovedAssetsPopup.h"
 #include "EditorSceneManager.h"
@@ -107,7 +107,7 @@ namespace Glory::Editor
 			if (!pResource) return;
 			TextureData* pTexture = static_cast<TextureData*>(pResource);
 			TextureImporter::LoadIntoTexture(file, pTexture);
-			m_pApplication->GetThumbnailManager().SetDirty(uuid);
+			EditorAssetDatabase::SetAssetDirty(pTexture);
 		});
 
 		AddTypeToLoadImmediately<PipelineData>();
@@ -118,7 +118,7 @@ namespace Glory::Editor
 		SetResourceNonCachable<PipelineData>();
 		SetResourceNonCachable<GScene>();
 
-		m_AssetUpdatedCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetUpdated,
+		m_AssetUpdatedCallback = EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetDirty,
 			[this](const AssetCallbackData& callback) {
 				const std::filesystem::path cachePath = GenerateCompiledResourcePath(callback.m_UUID);
 				if (std::filesystem::exists(cachePath))
@@ -546,7 +546,7 @@ namespace Glory::Editor
 				{ return CacheJob(id, cachePath, pResource); }, resourceID, cachePath, pNewResource);
 		}
 
-		m_pApplication->GetThumbnailManager().SetDirty(resourceID);
+		m_pApplication->GetThumbnails().SetDirty(resourceID);
 		GetAssetCompilerEventDispatcher().Dispatch({ resourceID });
 
 		m_CompilingAssets.erase(resourceID);
