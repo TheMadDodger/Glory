@@ -1,6 +1,7 @@
 #pragma once
 #include "EditorWindow.h"
 #include "FileBrowserItem.h"
+
 #include <Resource.h>
 
 namespace Glory::Editor
@@ -20,6 +21,16 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API void OnFileDragAndDrop(const std::vector<std::string_view>& paths);
 
 		static GLORY_EDITOR_API void NavigateToAndHighlight(const std::filesystem::path& path);
+		static GLORY_EDITOR_API void HandleFileDoubleClick(uint32_t hash, UUID id);
+
+		template<class T>
+		static void RegisterFileDoubleClickCallback(std::function<void(UUID)> callback)
+		{
+			const uint32_t hash = ResourceTypes::GetHash<T>();
+			RegisterFileDoubleClickCallback(hash, callback);
+		}
+
+		static GLORY_EDITOR_API void RegisterFileDoubleClickCallback(uint32_t hash, std::function<void(UUID)> callback);
 
 	private:
 		virtual void OnOpen() override;

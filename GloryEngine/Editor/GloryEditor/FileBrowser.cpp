@@ -22,6 +22,8 @@
 
 namespace Glory::Editor
 {
+    static std::unordered_map<uint32_t, std::function<void(UUID)>> FileDoubleClickCallbacks;
+
     int FileBrowser::m_IconSize = 128;
     bool FileBrowser::m_SearchInCurrent = false;
 
@@ -274,6 +276,18 @@ namespace Glory::Editor
         }
         else
             FileBrowserItem::SetSelectedFolder(pWindow->m_pRootItems[0]);
+    }
+
+    void FileBrowser::HandleFileDoubleClick(uint32_t hash, UUID id)
+    {
+        auto iter = FileDoubleClickCallbacks.find(hash);
+        if (iter == FileDoubleClickCallbacks.end()) return;
+        iter->second(id);
+    }
+
+    void FileBrowser::RegisterFileDoubleClickCallback(uint32_t hash, std::function<void(UUID)> callback)
+    {
+        FileDoubleClickCallbacks.emplace(hash, callback);
     }
 
     void FileBrowser::DirectoryBrowser()

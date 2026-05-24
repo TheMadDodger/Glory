@@ -1,5 +1,4 @@
 #include "MonoEditorExtension.h"
-#include "MonoScriptThumbnail.h"
 #include "MonoScriptImporter.h"
 #include "MonoScriptComponentEditor.h"
 #include "ScriptTypeReferenceDrawer.h"
@@ -22,7 +21,6 @@
 #include <EditorAssetCallbacks.h>
 #include <ObjectMenuCallbacks.h>
 #include <FileBrowser.h>
-#include <ThumbnailManager.h>
 #include <Thumbnails.h>
 #include <EntitySceneObjectEditor.h>
 #include <ScriptingExtender.h>
@@ -191,7 +189,18 @@ namespace Glory::Editor
 
 		MenuBar::AddMenuItem("File/Compile C# Project", []() { CompileProject(ProjectSpace::GetOpenProject()); });
 
-		pEditorApp->GetThumbnailManager().AddGenerator<MonoScriptThumbnail>();
+		FileBrowser::RegisterFileDoubleClickCallback<MonoScript>([](UUID uuid) {
+			AssetLocation location;
+			if (!EditorAssetDatabase::GetAssetLocation(uuid, location)) return;
+
+			/* Open project first before opening a single file */
+			OpenCSharpProject();
+
+			ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+			std::filesystem::path path = pProject->RootPath();
+			path = path.append("Assets").append(location.Path);
+			OpenFile(path);
+		});
 		pEditorApp->GetThumbnails().RegisterDefaultThumbnail<MonoScript>("Mono/Code");
 
 		EditorAssetCallbacks::RegisterCallback(AssetCallbackType::CT_AssetUpdated, AssetCallback);
