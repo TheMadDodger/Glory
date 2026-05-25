@@ -487,6 +487,8 @@ namespace Glory
 					return false;
 				}
 
+				if (!previewPipeline || !previewSamplerSet) return false;
+
 				const glm::uvec2& resolution = camera.GetResolution();
 				pDevice->BeginRenderPass(commandBuffer, renderPass);
 				pDevice->BeginPipeline(commandBuffer, previewPipeline);
@@ -520,8 +522,9 @@ namespace Glory
 
 				const bool shadowAtlas = m_DebugOverlayBits.IsSet(DebugOverlayBitIndices::ShadowAtlas) ||
 					uniqueCameraData.m_DebugOverlayBits.IsSet(DebugOverlayBitIndices::ShadowAtlas);
-				const bool lightComplexity = m_DebugOverlayBits.IsSet(DebugOverlayBitIndices::LightComplexity) ||
-					uniqueCameraData.m_DebugOverlayBits.IsSet(DebugOverlayBitIndices::LightComplexity);
+				const bool lightComplexity = (m_DebugOverlayBits.IsSet(DebugOverlayBitIndices::LightComplexity) ||
+					uniqueCameraData.m_DebugOverlayBits.IsSet(DebugOverlayBitIndices::LightComplexity)) &&
+					RendererPipelines::m_VisualizeLightComplexityPipeline;
 
 				const glm::uvec2& resolution = camera.GetResolution();
 				pDevice->BeginRenderPass(commandBuffer, renderPass);
@@ -546,7 +549,8 @@ namespace Glory
 					constants.Resolution = camera.GetResolution();
 					constants.GridSize = glm::uvec4(GridSizeX, GridSizeY, NUM_DEPTH_SLICES, 0.0f);
 
-					pDevice->PushConstants(commandBuffer, RendererPipelines::m_VisualizeLightComplexityPipeline, 0, sizeof(LightComplexityConstants), &constants, STF_Fragment);
+					pDevice->PushConstants(commandBuffer, RendererPipelines::m_VisualizeLightComplexityPipeline, 0,
+						sizeof(LightComplexityConstants), &constants, STF_Fragment);
 					pDevice->BindDescriptorSets(commandBuffer, RendererPipelines::m_VisualizeLightComplexityPipeline,
 						{ uniqueCameraData.m_DepthSamplerSets[m_CurrentFrameIndex], uniqueCameraData.m_LightGridSets[m_CurrentFrameIndex] });
 					pDevice->DrawQuad(commandBuffer);
@@ -761,6 +765,10 @@ namespace Glory
 		GraphicsDevice* pDevice = m_pModule->GetEngine()->ActiveGraphicsDevice();
 		if (!pDevice) return;
 
+		if (!RendererPipelines::m_ClusterGeneratorPipeline) return;
+		if (!RendererPipelines::m_ClusterCullLightPipeline) return;
+		if (!RendererPipelines::m_DisplayCopyPipeline) return;
+
 		WaitForCurrentFrame();
 
 		std::vector<SemaphoreHandle> waitSemaphores;
@@ -820,7 +828,7 @@ namespace Glory
 		for (auto& injectedPrePass : m_InjectedPreRenderPasses)
 			injectedPrePass(pDevice, m_FrameCommandBuffers[m_CurrentFrameIndex], m_CurrentFrameIndex);
 
-		if (ShadowsEnabled())
+		if (ShadowsEnabled_Internal())
 		{
 			const GPUTextureAtlas& shadowAtlas = GetGPUTextureAtlas(m_ShadowAtlasses[m_CurrentFrameIndex]);
 			/* Wait for shadow rendering to finish */
@@ -864,7 +872,7 @@ namespace Glory
 			SkyboxPass(m_FrameCommandBuffers[m_CurrentFrameIndex], static_cast<uint32_t>(i));
 			DynamicObjectsPass(m_FrameCommandBuffers[m_CurrentFrameIndex], static_cast<uint32_t>(i));
 
-			if (m_LineVertexCount && LinesEnabled())
+			if (m_LineVertexCount && LinesEnabled_Internal())
 			{
 				uint32_t cameraIndex = static_cast<uint32_t>(i);
 				pDevice->BeginPipeline(m_FrameCommandBuffers[m_CurrentFrameIndex], RendererPipelines::m_LineRenderPipeline);
@@ -2201,7 +2209,7 @@ namespace Glory
 
 	void GloryRenderer::SkyboxPass(CommandBufferHandle commandBuffer, uint32_t cameraIndex)
 	{
-		if (!SkyboxEnabled()) return;
+		if (!SkyboxEnabled_Internal()) return;
 
 		GScene* pActiveScene = m_pModule->GetEngine()->GetSceneManager()->GetActiveScene();
 		if (!pActiveScene) return;
@@ -2313,7 +2321,7 @@ namespace Glory
 
 	void GloryRenderer::ShadowMapsPass(CommandBufferHandle commandBuffer)
 	{
-		if (!ShadowsEnabled()) return;
+		if (!ShadowsEnabled_Internal()) return;
 
 		ProfileSample s{ &m_pModule->GetEngine()->Profiler(), "GloryRenderer::ShadowMapsPass" };
 		if (m_FrameData.ActiveLights.count() == 0) return;
@@ -2800,6 +2808,22 @@ namespace Glory
 
 	bool GloryRenderer::SSAOEnabled_Internal() const
 	{
-		return SSAOEnabled() && m_SSAOSettings.m_Enabled;
+		return SSAOEnabled() && m_SSAOSettings.m_Enabled && RendererPipelines::m_SSAOBlurPipeline &&
+			RendererPipelines::m_SSAOPipeline && RendererPipelines::m_SSAOPostPassPipeline;
+	}
+
+	bool GloryRenderer::SkyboxEnabled_Internal() const
+	{
+		return SkyboxEnabled() && RendererPipelines::m_SkyboxPipeline;
+	}
+
+	bool GloryRenderer::LinesEnabled_Internal() const
+	{
+		return LinesEnabled() && RendererPipelines::m_LineRenderPipeline;
+	}
+
+	bool GloryRenderer::ShadowsEnabled_Internal() const
+	{
+		return ShadowsEnabled() && (RendererPipelines::m_ShadowRenderPipeline || RendererPipelines::m_TransparentShadowRenderPipeline);
 	}
 }

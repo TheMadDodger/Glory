@@ -52,5 +52,7 @@ namespace Glory
 		std::array<GloryRenderer, MaxSecondaryRenderers> m_SecondaryRenderers;
 
 		std::vector<UUID> m_PipelineOrder;
+
+		bool m_FirstPipelineCacheCheck = true;
 	};
 }

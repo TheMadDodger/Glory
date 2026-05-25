@@ -51,6 +51,9 @@ namespace Glory
 		std::vector<DescriptorSetLayoutHandle>&& descriptorSets, size_t stride,
 		const std::vector<AttributeType>& attributeTypes)
 	{
+		if (!pPipeline)
+			return nullptr;
+
 		auto iter = m_PipelineHandles.find(pPipeline->GetGPUUUID());
 		if (iter == m_PipelineHandles.end())
 		{

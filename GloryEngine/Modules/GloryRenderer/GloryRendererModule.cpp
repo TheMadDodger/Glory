@@ -13,6 +13,12 @@
 
 GLORY_MODULE_CPP(GloryRendererModule);
 
+#define CHECK_REQUIRED_PIPELINE(pipeline, name) if (!pipeline)\
+debug.LogError("Missing " name ", engine will be unable to render any objects!");
+
+#define CHECK_PIPELINE(pipeline, name) if (!pipeline)\
+debug.LogWarning("Missing " name ", some features of the renderer may not work!");
+
 namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(GloryRendererModule);
@@ -33,7 +39,6 @@ namespace Glory
 
 		std::vector<UUID> newReferences;
 		newReferences.push_back(settings.Value<uint64_t>("Lines Pipeline"));
-		newReferences.push_back(settings.Value<uint64_t>("Screen Pipeline"));
 		newReferences.push_back(settings.Value<uint64_t>("SSAO Prepass Pipeline"));
 		newReferences.push_back(settings.Value<uint64_t>("SSAO Blur Pipeline"));
 		newReferences.push_back(settings.Value<uint64_t>("Text Pipeline"));
@@ -115,13 +120,11 @@ namespace Glory
 	void GloryRendererModule::LoadSettings(ModuleSettings& settings)
 	{
 		settings.RegisterAssetReference<PipelineData>("Lines Pipeline", 19);
-		settings.RegisterAssetReference<PipelineData>("Screen Pipeline", 20);
 		settings.RegisterAssetReference<PipelineData>("SSAO Prepass Pipeline", 21);
 		settings.RegisterAssetReference<PipelineData>("SSAO Blur Pipeline", 4);
 		settings.RegisterAssetReference<PipelineData>("Text Pipeline", 23);
 		settings.RegisterAssetReference<PipelineData>("Display Copy Pipeline", 30);
 		settings.RegisterAssetReference<PipelineData>("Skybox Pipeline", 33);
-		settings.RegisterAssetReference<PipelineData>("Irradiance Pipeline", 35);
 		settings.RegisterAssetReference<PipelineData>("Shadows Pipeline", 38);
 		settings.RegisterAssetReference<PipelineData>("Shadows Transparent Textured Pipeline", 39);
 		settings.RegisterAssetReference<PipelineData>("Cluster Generator", 44);
@@ -265,6 +268,30 @@ namespace Glory
 		RendererPipelines::m_LineRenderPipeline = pDevice->AcquireCachedPipeline(DummyRenderPasses::m_DummyRenderPass, pPipeline,
 			{ RendererDSLayouts::m_GlobalLineRenderSetLayout }, sizeof(LineVertex),
 			{ AttributeType::Float3, AttributeType::Float4 });
+
+		if (m_FirstPipelineCacheCheck)
+		{
+			Debug& debug = m_pEngine->GetDebug();
+			CHECK_REQUIRED_PIPELINE(RendererPipelines::m_ClusterGeneratorPipeline, "Cluster Generator");
+			CHECK_REQUIRED_PIPELINE(RendererPipelines::m_ClusterCullLightPipeline, "Cluster Cull Light");
+			CHECK_REQUIRED_PIPELINE(RendererPipelines::m_DisplayCopyPipeline, "Display Copy Pipeline");
+
+			CHECK_PIPELINE(RendererPipelines::m_PickingPipeline, "Picking");
+			CHECK_PIPELINE(RendererPipelines::m_SSAOPipeline, "SSAO Prepass Pipeline");
+			CHECK_PIPELINE(RendererPipelines::m_SSAOBlurPipeline, "SSAO Blur Pipeline");
+			CHECK_PIPELINE(RendererPipelines::m_SSAOPostPassPipeline, "SSAO Postpass");
+			CHECK_PIPELINE(RendererPipelines::m_SkyboxPipeline, "Skybox Pipeline");
+			CHECK_PIPELINE(RendererPipelines::m_ShadowRenderPipeline, "Shadows Pipeline");
+			CHECK_PIPELINE(RendererPipelines::m_TransparentShadowRenderPipeline, "Shadows Transparent Textured Pipeline");
+			CHECK_PIPELINE(RendererPipelines::m_LineRenderPipeline, "Lines Pipeline");
+
+			CHECK_PIPELINE(RendererPipelines::m_VisualizeSSAOPipeline, "SSAO Visualizer");
+			CHECK_PIPELINE(RendererPipelines::m_VisualizeObjectIDPipeline, "ObjectID Visualizer");
+			CHECK_PIPELINE(RendererPipelines::m_VisualizeDepthPipeline, "Depth Visualizer");
+			CHECK_PIPELINE(RendererPipelines::m_VisualizeLightComplexityPipeline, "Light Complexity Visualizer");
+
+			m_FirstPipelineCacheCheck = false;
+		}
 	}
 
 	const std::vector<UUID>& GloryRendererModule::PipelineOrder() const
