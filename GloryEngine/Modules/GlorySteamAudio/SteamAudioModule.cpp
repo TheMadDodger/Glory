@@ -25,6 +25,22 @@ namespace Glory
 {
 	GLORY_MODULE_VERSION_CPP(SteamAudioModule);
 
+	class SoundOccluderManager : public Utils::ECS::ComponentManager<SoundOccluder>
+	{
+	public:
+		SoundOccluderManager(Utils::ECS::EntityRegistry* pRegistry, size_t capacity=32):
+			ComponentManager(pRegistry, capacity) { }
+
+		void OnDeserialize(Utils::BinaryStream&) override
+		{
+			for (size_t i = 0; i < Size(); ++i)
+			{
+				const SoundOccluder& occluder = GetAt(i);
+				occluder.m_MaterialAsset.ManualRegisterReference();
+			}
+		}
+	};
+
 	SteamAudioModule::SteamAudioModule(): m_SceneClosing(0)
 	{
 	}
@@ -207,7 +223,7 @@ namespace Glory
 		m_pEngine->GetResources().RegisterResource<SoundMaterialData>();
 		m_pEngine->GetResources().RegisterResource<AudioSceneData>();
 
-		m_pEngine->GetSceneManager()->RegisterComponentManager<Utils::ECS::ComponentManager<SoundOccluder>, SoundOccluder>();
+		m_pEngine->GetSceneManager()->RegisterComponentManager<SoundOccluderManager, SoundOccluder>();
 
 		m_pAudioModule = m_pEngine->GetOptionalModule<AudioModule>();
 		if (!m_pAudioModule)

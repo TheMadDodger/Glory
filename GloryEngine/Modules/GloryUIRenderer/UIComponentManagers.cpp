@@ -134,6 +134,15 @@ namespace Glory
 		}
 	}
 
+	void UIImageManager::OnDeserialize(Utils::BinaryStream&)
+	{
+		for (size_t i = 0; i < Size(); ++i)
+		{
+			const UIImage& image = GetAt(i);
+			image.m_Image.ManualRegisterReference();
+		}
+	}
+
 	void UIImageManager::OnInitialize()
 	{
 		Bind(DoDraw, &UIImageManager::OnDrawImpl);
@@ -231,6 +240,15 @@ namespace Glory
 			const UIText& uiText = GetAt(i);
 			const UUID font = uiText.m_Font.GetUUID();
 			if (font) references.push_back(font);
+		}
+	}
+
+	void UITextManager::OnDeserialize(Utils::BinaryStream&)
+	{
+		for (size_t i = 0; i < Size(); ++i)
+		{
+			const UIText& text = GetAt(i);
+			text.m_Font.ManualRegisterReference();
 		}
 	}
 

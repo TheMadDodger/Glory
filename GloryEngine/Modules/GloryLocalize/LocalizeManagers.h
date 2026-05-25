@@ -18,6 +18,7 @@ namespace Glory
         void OnValidateImpl(Utils::ECS::EntityID entity, StringTableLoader& pComponent);
         void OnStopImpl(Utils::ECS::EntityID entity, StringTableLoader& pComponent);
         void GetReferencesImpl(std::vector<UUID>& references) const;
+        void OnDeserialize(Utils::BinaryStream&) override;
 
     private:
         virtual void OnInitialize() override;

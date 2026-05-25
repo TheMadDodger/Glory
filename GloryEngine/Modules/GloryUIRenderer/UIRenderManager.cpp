@@ -174,6 +174,16 @@ namespace Glory
 		}
 	}
 
+	void UIRenderManager::OnDeserialize(Utils::BinaryStream&)
+	{
+		for (size_t i = 0; i < Size(); ++i)
+		{
+			const UIRenderer& renderer = GetAt(i);
+			renderer.m_Document.ManualRegisterReference();
+			renderer.m_WorldMaterial.ManualRegisterReference();
+		}
+	}
+
 	void UIRenderManager::OnInitialize()
 	{
 		Bind(DoStart, &UIRenderManager::OnStartImpl);

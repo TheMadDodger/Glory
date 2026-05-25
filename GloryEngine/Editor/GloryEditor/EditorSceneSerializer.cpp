@@ -207,6 +207,12 @@ namespace Glory::Editor
 		{
 			const UUID prefabID = prefabIDRef.As<uint64_t>();
 			PrefabData* pPrefab = pApp->GetEngine()->GetResources().GetResource<PrefabData>(prefabID);
+			if (!pPrefab)
+			{
+				Resource* pResource = pApp->GetEngine()->GetResourceLoader().LoadImmediately(prefabID);
+				if (pResource) pPrefab = static_cast<PrefabData*>(pResource);
+			}
+
 			if (pPrefab)
 			{
 				Utils::NodeValueRef idsRemapValue = node["IDRemap"];

@@ -2,10 +2,14 @@
 #include "EditorApplication.h"
 #include "EditorPlatform.h"
 #include "PropertyDrawer.h"
+#include "EditorUI.h"
 
 #include <imgui.h>
 #include <IEngine.h>
 #include <PropertySerializer.h>
+
+#include <IconsFontAwesome6.h>
+
 #include <fstream>
 
 namespace Glory::Editor
@@ -135,6 +139,16 @@ namespace Glory::Editor
                 const uint32_t type = settings.Type(value);
                 const uint32_t elementType = settings.ElementType(value);
                 auto valueNode = settingsNode[value];
+                const bool isDefault = settings.IsSetToDefault(value);
+
+                const float start = ImGui::GetCursorPosX();
+                const float totalWidth = ImGui::GetContentRegionAvail().x;
+
+                if (!isDefault)
+                {
+                    EditorUI::PushFlag(EditorUI::Flag::HasSmallButton);
+                    EditorUI::RemoveButtonPadding = 32.0f;
+                }
                 switch (type)
                 {
                 case ST_Enum:
@@ -144,6 +158,17 @@ namespace Glory::Editor
                 default:
                     change |= PropertyDrawer::DrawProperty(value, settingsNode, type, elementType, 0);
                     break;
+                }
+                if (!isDefault)
+                {
+                    EditorUI::RemoveButtonPadding = 24.0f;
+                    EditorUI::PopFlag();
+                    ImGui::SameLine();
+                    if (ImGui::Button(ICON_FA_ARROW_ROTATE_LEFT, { 24.0f, 24.0f }))
+                    {
+                        settings.ResetToDefault(value);
+                        change = true;
+                    }
                 }
             }
         }

@@ -350,6 +350,7 @@ namespace Glory::Editor
 			if (shouldLoadImmediately)
 			{
 				LoadCacheJob(id, cachePath);
+				UpdateLoadedResources();
 				return;
 			}
 
@@ -369,6 +370,7 @@ namespace Glory::Editor
 		if (shouldLoadImmediately)
 		{
 			CompileJob(assetPath);
+			UpdateImportedResources();
 			return;
 		}
 
@@ -565,6 +567,7 @@ namespace Glory::Editor
 		{
 			Resource*& pResource = m_LoadedResources[m_CurrentLoadedResourceReadIndex];
 			UUID& resourceID = m_LoadedResourceIDs[m_CurrentLoadedResourceReadIndex];
+			pResource->SetResourceUUID(resourceID);
 			++m_CurrentLoadedResourceReadIndex;
 			m_CurrentLoadedResourceReadIndex = m_CurrentLoadedResourceReadIndex % LoadedResourcesRingBufferSize;
 			if (pResource && !m_pResources->AddResource(&pResource))

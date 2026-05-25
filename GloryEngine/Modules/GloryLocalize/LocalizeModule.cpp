@@ -226,7 +226,6 @@ namespace Glory
 		m_pEngine->GetResources().RegisterResource<StringTable>();
 		m_pEngine->GetResources().RegisterResource<StringsOverrideTable>();
 
-		Reflect::RegisterType<StringTableRef>();
 		Reflect::RegisterType<StringTableLoader>();
 		Reflect::RegisterType<Localize>();
 

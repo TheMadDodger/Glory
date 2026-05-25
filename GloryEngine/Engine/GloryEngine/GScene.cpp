@@ -46,6 +46,9 @@ namespace Glory
 
 	GScene& GScene::operator=(GScene&& other) noexcept
 	{
+		m_Inheritence = std::move(other.m_Inheritence);
+		m_ID = other.m_ID;
+		m_Name = std::move(other.m_Name);
 		m_Ids = std::move(other.m_Ids);
 		m_UUIds = std::move(other.m_UUIds);
 		m_Names = std::move(other.m_Names);
@@ -168,13 +171,13 @@ namespace Glory
 	const UUID GScene::Prefab(UUID objectID) const
 	{
 		const auto itor = m_ActivePrefabs.find(objectID);
-		return itor != m_ActivePrefabs.end() ? itor->second : UUID(0ull);
+		return itor != m_ActivePrefabs.end() ? itor->second.GetUUID() : UUID(0ull);
 	}
 
 	const UUID GScene::PrefabChild(UUID objectID) const
 	{
 		const auto itor = m_ActivePrefabChildren.find(objectID);
-		return itor != m_ActivePrefabChildren.end() ? itor->second : UUID(0ull);
+		return itor != m_ActivePrefabChildren.end() ? itor->second.GetUUID() : UUID(0ull);
 	}
 
 	Utils::ECS::EntityRegistry& GScene::GetRegistry()

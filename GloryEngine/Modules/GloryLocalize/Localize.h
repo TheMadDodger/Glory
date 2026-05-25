@@ -7,26 +7,6 @@
 
 namespace Glory
 {
-	struct StringTableRef
-	{
-		StringTableRef() : m_STReference(0ull) {}
-		StringTableRef(UUID uuid) : m_STReference(uuid) {}
-
-		bool operator==(const StringTableRef&& other)
-		{
-			return other.m_STReference.GetUUID() == other.m_STReference.GetUUID();
-		}
-
-		bool operator==(StringTableRef& other)
-		{
-			return other.m_STReference.GetUUID() == other.m_STReference.GetUUID();
-		}
-
-		REFLECTABLE(StringTableRef,
-			(ResourceReference<StringTable>) (m_STReference)
-		)
-	};
-
 	/** @brief String table loader component */
 	struct StringTableLoader
 	{
