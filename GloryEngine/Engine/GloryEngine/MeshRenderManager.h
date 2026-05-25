@@ -25,6 +25,7 @@ namespace Glory
         GLORY_ENGINE_API void OnDisableDrawImpl(Utils::ECS::EntityID entity, MeshRenderer& pComponent);
         GLORY_ENGINE_API void OnValidateImpl(Utils::ECS::EntityID entity, MeshRenderer& pComponent);
         GLORY_ENGINE_API void GetReferencesImpl(std::vector<UUID>& references) const;
+        GLORY_ENGINE_API void OnDeserialize(Utils::BinaryStream&) override;
 
     private:
         virtual void OnInitialize() override;

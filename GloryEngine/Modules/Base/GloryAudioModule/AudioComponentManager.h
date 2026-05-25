@@ -31,6 +31,8 @@ namespace Glory
 
         void GetReferencesImpl(std::vector<UUID>& references) const;
 
+        void OnDeserialize(Utils::BinaryStream&) override;
+
     private:
         virtual void OnInitialize() override;
 

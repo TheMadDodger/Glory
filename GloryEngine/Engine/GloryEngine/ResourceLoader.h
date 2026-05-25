@@ -7,6 +7,7 @@
 
 namespace Glory
 {
+	class Resource;
 	class Resources;
 
 	/** @brief Resource loader base class. */
@@ -23,6 +24,7 @@ namespace Glory
 		GLORY_ENGINE_API void Update();
 		/** @brief Set @ref Resources instance. */
 		GLORY_ENGINE_API void SetResources(Resources* pResources);
+		GLORY_ENGINE_API Resource* LoadImmediately(UUID id);
 
 		virtual bool IsBusy() const = 0;
 

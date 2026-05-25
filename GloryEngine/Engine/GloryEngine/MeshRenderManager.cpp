@@ -181,6 +181,16 @@ namespace Glory
         }
     }
 
+    void MeshRenderManager::OnDeserialize(Utils::BinaryStream&)
+    {
+        for (size_t i = 0; i < Size(); ++i)
+        {
+            const MeshRenderer& mesh = GetAt(i);
+            mesh.m_Material.ManualRegisterReference();
+            mesh.m_Mesh.ManualRegisterReference();
+        }
+    }
+
     void MeshRenderManager::OnInitialize()
     {
         Bind(DoOnDirty, &MeshRenderManager::OnDirtyImpl);

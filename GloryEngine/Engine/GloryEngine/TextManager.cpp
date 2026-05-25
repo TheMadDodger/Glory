@@ -91,6 +91,15 @@ namespace Glory
 		}
 	}
 
+	void TextManager::OnDeserialize(Utils::BinaryStream&)
+	{
+		for (size_t i = 0; i < Size(); ++i)
+		{
+			const TextComponent& text = GetAt(i);
+			text.m_Font.ManualRegisterReference();
+		}
+	}
+
 	void TextManager::OnInitialize()
 	{
 		Bind(DoDraw, &TextManager::OnDrawImpl);

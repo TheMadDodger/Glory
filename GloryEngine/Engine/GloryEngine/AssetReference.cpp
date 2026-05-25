@@ -82,6 +82,12 @@ namespace Glory
 		return m_AssetUUID;
 	}
 
+	void ResourceReferenceBase::ManualRegisterReference() const
+	{
+		if (m_AssetUUID)
+			AddResourceReference(m_AssetUUID);
+	}
+
 	WeakResourceReference::WeakResourceReference(): m_AssetUUID(0)
 	{
 	}

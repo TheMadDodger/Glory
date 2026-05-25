@@ -31,4 +31,10 @@ namespace Glory
 	{
 		m_pResources = pResources;
 	}
+
+	Resource* ResourceLoader::LoadImmediately(UUID id)
+	{
+		QueueLoad(id, true);
+		return m_pResources->GetResource(id);
+	}
 }

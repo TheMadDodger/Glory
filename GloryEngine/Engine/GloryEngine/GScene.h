@@ -2,6 +2,7 @@
 #include "Resource.h"
 #include "Entity.h"
 #include "GraphicsEnums.h"
+#include "AssetReference.h"
 
 #include <engine_visibility.h>
 
@@ -255,8 +256,8 @@ namespace Glory
 		std::map<UUID, Utils::ECS::EntityID> m_Ids;
 		std::map<Utils::ECS::EntityID, UUID> m_UUIds;
 		std::map<Utils::ECS::EntityID, std::string> m_Names;
-		std::map<UUID, UUID> m_ActivePrefabs;
-		std::map<UUID, UUID> m_ActivePrefabChildren;
+		std::map<UUID, ResourceReference<PrefabData>> m_ActivePrefabs;
+		std::map<UUID, ResourceReference<PrefabData>> m_ActivePrefabChildren;
 
 		Utils::ECS::EntityRegistry m_Registry;
 

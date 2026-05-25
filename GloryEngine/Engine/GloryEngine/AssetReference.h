@@ -36,6 +36,7 @@ namespace Glory
 		virtual ResourceReferenceBase* CreateCopy() { return new ResourceReferenceBase(m_AssetUUID); };
 
 		GLORY_ENGINE_API operator bool() const;
+		GLORY_ENGINE_API void ManualRegisterReference() const;
 
 	protected:
 		REFLECTABLE(ResourceReferenceBase, (UUID) (m_AssetUUID));

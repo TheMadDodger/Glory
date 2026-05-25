@@ -33,6 +33,7 @@ namespace Glory
 	public:
 		void OnDrawImpl(Utils::ECS::EntityID entity, UIImage& pComponent);
 		void GetReferencesImpl(std::vector<UUID>& references) const;
+		void OnDeserialize(Utils::BinaryStream&) override;
 
 	private:
 		void OnInitialize() override;
@@ -49,6 +50,7 @@ namespace Glory
 		void OnDrawImpl(Utils::ECS::EntityID entity, UIText& pComponent);
 		void OnDirtyImpl(Utils::ECS::EntityID entity, UIText& pComponent);
 		void GetReferencesImpl(std::vector<UUID>& references) const;
+		void OnDeserialize(Utils::BinaryStream&) override;
 
 	private:
 		void OnInitialize() override;

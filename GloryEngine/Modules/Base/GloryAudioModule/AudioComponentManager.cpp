@@ -147,6 +147,15 @@ namespace Glory
 		}
 	}
 
+	void AudioSourceManager::OnDeserialize(Utils::BinaryStream&)
+	{
+		for (size_t i = 0; i < Size(); ++i)
+		{
+			const AudioSource& audio = GetAt(i);
+			audio.m_Audio.ManualRegisterReference();
+		}
+	}
+
 	void AudioSourceManager::OnInitialize()
 	{
 		Bind(DoOnRemove, &AudioSourceManager::OnRemoveImpl);

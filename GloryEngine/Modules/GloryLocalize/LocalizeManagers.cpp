@@ -39,6 +39,15 @@ namespace Glory
 		}
 	}
 
+	void StringTableLoaderManager::OnDeserialize(Utils::BinaryStream&)
+	{
+		for (size_t i = 0; i < Size(); ++i)
+		{
+			const StringTableLoader& loader = GetAt(i);
+			loader.m_StringTable.ManualRegisterReference();
+		}
+	}
+
 	void StringTableLoaderManager::OnInitialize()
 	{
 		Bind(DoValidate, &StringTableLoaderManager::OnValidateImpl);
