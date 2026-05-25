@@ -22,6 +22,7 @@ namespace Glory
 			YAML::Node node = m_SettingsNode[name];
 			if (!node.IsDefined())
 				m_SettingsNode[name] = defaultValue;
+			m_DefaultSettingsNode[name] = defaultValue;
 
 			RegisterValue<T>(name);
 		}
@@ -30,12 +31,11 @@ namespace Glory
 		void RegisterEnumValue(const std::string& name, T defaultValue)
 		{
 			YAML::Node node = m_SettingsNode[name];
+			std::string stringValue = "";
+			Enum<T>().ToString(defaultValue, stringValue);
 			if (!node.IsDefined())
-			{
-				std::string stringValue = "";
-				Enum<T>().ToString(defaultValue, stringValue);
 				m_SettingsNode[name] = stringValue;
-			}
+			m_DefaultSettingsNode[name] = stringValue;
 
 			RegisterValue(name, ST_Enum, Hashing::Hash(typeid(T).name()));
 		}
@@ -46,6 +46,7 @@ namespace Glory
 			YAML::Node node = m_SettingsNode[name];
 			if (!node.IsDefined())
 				m_SettingsNode[name] = YAML::Node(YAML::NodeType::Sequence);
+			m_DefaultSettingsNode[name] = YAML::Node(YAML::NodeType::Sequence);
 
 			if (m_Types.find(name) != m_Types.end()) return;
 			RegisterValue(name, ST_Array, Hashing::Hash(typeid(T).name()));
@@ -57,6 +58,7 @@ namespace Glory
 			YAML::Node node = m_SettingsNode[name];
 			if (!node.IsDefined())
 				m_SettingsNode[name] = defaultValue;
+			m_DefaultSettingsNode[name] = defaultValue;
 
 			const uint32_t type = Hashing::Hash(typeid(T).name());
 			RegisterValue(name, ST_Asset, type);
@@ -127,6 +129,9 @@ namespace Glory
 
 		ModuleSettings& operator=(const YAML::Node& settingsNode);
 
+		bool IsSetToDefault(const std::string& name) const;
+		void ResetToDefault(const std::string& name) const;
+
 	private:
 		template<typename T>
 		void RegisterValue(const std::string& name)
@@ -140,6 +145,7 @@ namespace Glory
 
 	private:
 		YAML::Node m_SettingsNode;
+		YAML::Node m_DefaultSettingsNode;
 		std::vector<std::string> m_ValueNames;
 		std::vector<std::string> m_GroupNames;
 

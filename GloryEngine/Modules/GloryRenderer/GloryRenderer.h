@@ -173,6 +173,9 @@ namespace Glory
 		virtual void SetPipelineOrder(std::vector<UUID>&& pipelineOrder) override;
 
 		bool SSAOEnabled_Internal() const;
+		bool SkyboxEnabled_Internal() const;
+		bool LinesEnabled_Internal() const;
+		bool ShadowsEnabled_Internal() const;
 
 	private:
 		friend class GloryRendererModule;

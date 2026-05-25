@@ -90,6 +90,22 @@ namespace Glory
 		return *this;
 	}
 
+	bool ModuleSettings::IsSetToDefault(const std::string& name) const
+	{
+		auto node = m_SettingsNode[name];
+		auto defaultNode = m_DefaultSettingsNode[name];
+		if (node.IsNull() || !node.IsDefined() || node.IsMap() || node.IsSequence()) return true;
+		return node.as<std::string>() == defaultNode.as<std::string>();
+	}
+
+	void ModuleSettings::ResetToDefault(const std::string& name) const
+	{
+		auto node = m_SettingsNode[name];
+		auto defaultNode = m_DefaultSettingsNode[name];
+		if (node.IsNull() || !node.IsDefined() || node.IsMap() || node.IsSequence()) return;
+		node = defaultNode;
+	}
+
 	void ModuleSettings::RegisterValue(const std::string& name, uint32_t type, uint32_t elementType)
 	{
 		m_ValueNames.push_back(name);
