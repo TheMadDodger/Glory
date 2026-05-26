@@ -100,6 +100,45 @@ namespace Glory
 		}
 	}
 
+	void TextManager::UnpackDataInto(const void* data, TextComponent& newComponent)
+	{
+		const TextComponent* pSourceText = reinterpret_cast<const TextComponent*>(data);
+		newComponent.m_Font = pSourceText->m_Font;
+		newComponent.m_Text = pSourceText->m_Text;
+		newComponent.m_Scale = pSourceText->m_Scale;
+		newComponent.m_Color = pSourceText->m_Color;
+		newComponent.m_Alignment = pSourceText->m_Alignment;
+		newComponent.m_WrapWidth = pSourceText->m_WrapWidth;
+	}
+
+	void TextManager::SerializeDense(Utils::BinaryStream& stream) const
+	{
+		for (size_t i = 0; i < Size(); ++i)
+		{
+			const TextComponent& text = GetAt(i);
+			stream.Write(text.m_Font)
+				.Write(text.m_Text)
+				.Write(text.m_Scale)
+				.Write(text.m_Color)
+				.Write(text.m_Alignment)
+				.Write(text.m_WrapWidth);
+		}
+	}
+
+	void TextManager::DeserializeDense(Utils::BinaryStream& stream)
+	{
+		for (size_t i = 0; i < Size(); ++i)
+		{
+			TextComponent& text = GetAt(i);
+			stream.Read(text.m_Font)
+				.Read(text.m_Text)
+				.Read(text.m_Scale)
+				.Read(text.m_Color)
+				.Read(text.m_Alignment)
+				.Read(text.m_WrapWidth);
+		}
+	}
+
 	void TextManager::OnInitialize()
 	{
 		Bind(DoDraw, &TextManager::OnDrawImpl);

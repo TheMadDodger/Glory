@@ -18,6 +18,7 @@ namespace Glory
 	PrefabData* PrefabData::CreateFromEntity(GScene* pScene, Utils::ECS::EntityID entity)
 	{
 		PrefabData* pPrefab = new PrefabData();
+		pScene->Manager()->GetRegistryFactory().PopulateRegisry(pPrefab->GetRegistry());
 		pPrefab->SetName(pScene->EntityName(entity));
 		CopyEntity(pPrefab, pScene, entity, 0);
 		return pPrefab;

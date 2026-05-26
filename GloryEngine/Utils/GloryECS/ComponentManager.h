@@ -51,10 +51,15 @@ namespace Glory::Utils::ECS
 			return &SparseSet<EntityID, Component>::Add(entity, Component());
 		}
 
+		virtual void UnpackDataInto(const void* data, Component& newComponent)
+		{
+			std::memcpy(&newComponent, data, sizeof(Component));
+		}
+
 		virtual void* Add(EntityID entity, const void* data) override
 		{
 			Component newComponent = Component();
-			std::memcpy(&newComponent, data, sizeof(Component));
+			UnpackDataInto(data, newComponent);
 			return &SparseSet<EntityID, Component>::Add(entity, std::move(newComponent));
 		}
 

@@ -252,6 +252,45 @@ namespace Glory
 		}
 	}
 
+	void UITextManager::UnpackDataInto(const void* data, UIText& newComponent)
+	{
+		const UIText* pTextSource = reinterpret_cast<const UIText*>(data);
+		newComponent.m_Font = pTextSource->m_Font;
+		newComponent.m_Text = pTextSource->m_Text;
+		newComponent.m_LocalizeTerm = pTextSource->m_LocalizeTerm;
+		newComponent.m_Scale = pTextSource->m_Scale;
+		newComponent.m_Color = pTextSource->m_Color;
+		newComponent.m_Alignment = pTextSource->m_Alignment;
+	}
+
+	void UITextManager::SerializeDense(Utils::BinaryStream& stream) const
+	{
+		for (size_t i = 0; i < Size(); ++i)
+		{
+			const UIText& component = GetAt(i);
+			stream.Write(component.m_Font)
+				.Write(component.m_Text)
+				.Write(component.m_LocalizeTerm)
+				.Write(component.m_Scale)
+				.Write(component.m_Color)
+				.Write(component.m_Alignment);
+		}
+	}
+
+	void UITextManager::DeserializeDense(Utils::BinaryStream& stream)
+	{
+		for (size_t i = 0; i < Size(); ++i)
+		{
+			UIText& component = GetAt(i);
+			stream.Read(component.m_Font)
+				.Read(component.m_Text)
+				.Read(component.m_LocalizeTerm)
+				.Read(component.m_Scale)
+				.Read(component.m_Color)
+				.Read(component.m_Alignment);
+		}
+	}
+
 	void UITextManager::OnInitialize()
 	{
 		Bind(DoStart, &UITextManager::OnStartImpl);

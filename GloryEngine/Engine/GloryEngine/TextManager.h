@@ -15,6 +15,9 @@ namespace Glory
         GLORY_ENGINE_API void OnDrawImpl(Utils::ECS::EntityID entity, TextComponent& pComponent);
         GLORY_ENGINE_API void GetReferencesImpl(std::vector<UUID>& references) const;
         GLORY_ENGINE_API void OnDeserialize(Utils::BinaryStream&) override;
+        GLORY_ENGINE_API void UnpackDataInto(const void* data, TextComponent& newComponent) override;
+        GLORY_ENGINE_API void SerializeDense(Utils::BinaryStream& stream) const override;
+        GLORY_ENGINE_API void DeserializeDense(Utils::BinaryStream& stream) override;
 
     private:
         virtual void OnInitialize() override;

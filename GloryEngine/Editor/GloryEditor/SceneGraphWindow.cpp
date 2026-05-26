@@ -12,6 +12,7 @@
 #include "EditableEntity.h"
 #include "EntityEditor.h"
 #include "EditorApplication.h"
+#include "ResourceLoader.h"
 
 #include <IEngine.h>
 #include <Debug.h>
@@ -520,6 +521,11 @@ namespace Glory::Editor
 			else
 			{
 				pPrefab = resources.GetResource<PrefabData>(uuid);
+				if (!pPrefab)
+				{
+					Resource* pResource = pEngine->GetResourceLoader().LoadImmediately(uuid);
+					if (pResource) pPrefab = static_cast<PrefabData*>(pResource);
+				}
 			}
 		}
 		else if (dndHash = ResourceTypes::GetHash<PrefabData>())

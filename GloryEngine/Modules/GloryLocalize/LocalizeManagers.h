@@ -37,6 +37,9 @@ namespace Glory
     public:
         void OnValidateImpl(Utils::ECS::EntityID entity, Localize& pComponent);
         void OnStartImpl(Utils::ECS::EntityID entity, Localize& pComponent);
+        void UnpackDataInto(const void* data, Localize& newComponent) override;
+        void SerializeDense(Utils::BinaryStream& stream) const override;
+        void DeserializeDense(Utils::BinaryStream& stream) override;
 
     private:
         virtual void OnInitialize() override;
