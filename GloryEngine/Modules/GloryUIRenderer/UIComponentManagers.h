@@ -51,6 +51,9 @@ namespace Glory
 		void OnDirtyImpl(Utils::ECS::EntityID entity, UIText& pComponent);
 		void GetReferencesImpl(std::vector<UUID>& references) const;
 		void OnDeserialize(Utils::BinaryStream&) override;
+		void UnpackDataInto(const void* data, UIText& newComponent) override;
+		void SerializeDense(Utils::BinaryStream& stream) const override;
+		void DeserializeDense(Utils::BinaryStream& stream) override;
 
 	private:
 		void OnInitialize() override;

@@ -806,8 +806,9 @@ namespace Glory::Utils::ECS
 		for (size_t i = 0; i < m_EntityTrees[entity].size(); ++i)
 		{
 			EntityID child = m_EntityTrees[entity][i];
-			m_EntityActiveHierarchy.Set(child, active);
-			SetHierarchyActiveStateChildren(child, active);
+			const bool activeSelf = m_EntityActiveSelf.IsSet(child);
+			m_EntityActiveHierarchy.Set(child, active && activeSelf);
+			SetHierarchyActiveStateChildren(child, active && activeSelf);
 		}
 	}
 }

@@ -82,6 +82,30 @@ namespace Glory
 		text.m_Dirty |= m_pModule->FindString(tableName, term, text.m_Text);
 	}
 
+	void LocalizeManager::UnpackDataInto(const void* data, Localize& newComponent)
+	{
+		const Localize* pLocalizeSource = reinterpret_cast<const Localize*>(data);
+		newComponent.m_Term = pLocalizeSource->m_Term;
+	}
+
+	void LocalizeManager::SerializeDense(Utils::BinaryStream& stream) const
+	{
+		for (size_t i = 0; i < Size(); ++i)
+		{
+			const Localize& localize = GetAt(i);
+			stream.Write(localize.m_Term);
+		}
+	}
+
+	void LocalizeManager::DeserializeDense(Utils::BinaryStream& stream)
+	{
+		for (size_t i = 0; i < Size(); ++i)
+		{
+			Localize& localize = GetAt(i);
+			stream.Read(localize.m_Term);
+		}
+	}
+
 	void LocalizeManager::OnInitialize()
 	{
 		Bind(DoValidate, &LocalizeManager::OnValidateImpl);

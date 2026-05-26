@@ -29,12 +29,21 @@ namespace Glory
 	{
 	}
 
+	void MonoScriptedManager::UnpackDataInto(const void* data, MonoScriptComponent& newComponent)
+	{
+		const MonoScriptComponent* pScriptSource = reinterpret_cast<const MonoScriptComponent*>(data);
+		newComponent.m_ScriptType = pScriptSource->m_ScriptType;
+		newComponent.m_ScriptData.m_Buffer.resize(pScriptSource->m_ScriptData.m_Buffer.size());
+		std::memcpy(newComponent.m_ScriptData.m_Buffer.data(), pScriptSource->m_ScriptData.m_Buffer.data(),
+			pScriptSource->m_ScriptData.m_Buffer.size());
+	}
+
 	void MonoScriptedManager::SerializeDense(Utils::BinaryStream& stream) const
 	{
 		for (size_t i = 0; i < Size(); ++i)
 		{
 			const MonoScriptComponent& component = GetAt(i);
-			stream.Write(component.m_ScriptData.m_Buffer).Write(component.m_ScriptType);
+			stream.Write<char>(component.m_ScriptData.m_Buffer).Write(component.m_ScriptType);
 		}
 	}
 
