@@ -5,27 +5,27 @@
 
 namespace Glory
 {
-	Resource::Resource(): m_IsDirty(true)
+	Resource::Resource()
 	{
 		APPEND_TYPE(Resource);
 	}
 
-	Resource::Resource(UUID uuid) : Object(uuid), m_IsDirty(true)
+	Resource::Resource(UUID uuid) : Object(uuid)
 	{
 		APPEND_TYPE(Resource);
 	}
 
-	Resource::Resource(const std::string& name) : Object(name), m_IsDirty(true)
+	Resource::Resource(const std::string& name) : Object(name)
 	{
 		APPEND_TYPE(Resource);
 	}
 
-	Resource::Resource(UUID uuid, const std::string& name) : Object(uuid, name), m_IsDirty(true)
+	Resource::Resource(UUID uuid, const std::string& name) : Object(uuid, name)
 	{
 		APPEND_TYPE(Resource);
 	}
 
-	Resource::Resource(Resource&& other) noexcept: Object(), m_IsDirty(true)
+	Resource::Resource(Resource&& other) noexcept: Object()
 	{
 		m_Inheritence = std::move(other.m_Inheritence);
 		m_ID = other.m_ID;
@@ -37,7 +37,7 @@ namespace Glory
 		m_Inheritence = std::move(other.m_Inheritence);
 		m_ID = other.m_ID;
 		m_Name = std::move(other.m_Name);
-		m_IsDirty = true;
+		++m_DirtyVersion;
 		return *this;
 	}
 
@@ -45,14 +45,24 @@ namespace Glory
 	{
 	}
 
-	bool Resource::IsDirty() const
+	bool Resource::IsDirty(uint64_t compare) const
 	{
-		return m_IsDirty;
+		return compare < m_DirtyVersion;
 	}
 
-	void Resource::SetDirty(bool dirty)
+	void Resource::IncrementDirtyVersion()
 	{
-		m_IsDirty = dirty;
+		++m_DirtyVersion;
+	}
+
+	uint64_t Resource::DirtyVersion() const
+	{
+		return m_DirtyVersion;
+	}
+
+	void Resource::SetDirtyVersion(uint64_t version)
+	{
+		m_DirtyVersion = version;
 	}
 
 	void Resource::SetResourceUUID(UUID uuid)

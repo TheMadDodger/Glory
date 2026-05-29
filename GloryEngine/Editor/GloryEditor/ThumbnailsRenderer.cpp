@@ -214,7 +214,6 @@ namespace Glory::Editor
 			if (iter != m_RenderResults.end())
 			{
 				iter->second->SetPixels(std::move(pixels), ThumbnailDataSize);
-				iter->second->SetDirty(false);
 				m_RenderingIDs[i] = 0ull;
 				continue;
 			}

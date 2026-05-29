@@ -46,9 +46,6 @@ namespace Glory
 		GLORY_ENGINE_API void ClearVertices();
 		GLORY_ENGINE_API void ClearIndices();
 
-		GLORY_ENGINE_API bool IsDirty() const;
-		GLORY_ENGINE_API void SetDirty(bool dirty);
-
 		GLORY_ENGINE_API void Merge(MeshData* pOther);
 
 		GLORY_ENGINE_API void AddBoundingBox(const glm::vec3& min, const glm::vec3& max);
@@ -68,6 +65,5 @@ namespace Glory
 		uint32_t m_VertexSize;
 		BoundingBox m_BoundingBox;
 		BoundingSphere m_BoundingSphere;
-		bool m_IsDirty;
 	};
 }

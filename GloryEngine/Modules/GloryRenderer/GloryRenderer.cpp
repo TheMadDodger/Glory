@@ -1822,6 +1822,7 @@ namespace Glory
 
 			PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineBatch.m_PipelineID);
 			if (!pPipelineData) continue;
+			uint64_t& pipelineCacheVersion = m_ResourceCacheVersions[pipelineBatch.m_PipelineID];
 
 			PipelineBatchData& batchData = batchDatas.at(batchIndex);
 			++batchIndex;
@@ -1881,6 +1882,7 @@ namespace Glory
 				const UUID materialID = pipelineBatch.m_UniqueMaterials[i];
 				const bool differentMaterial = batchData.m_LastFrameUniqueMaterials[i] != materialID;
 				batchData.m_LastFrameUniqueMaterials[i] = materialID;
+				uint64_t& materialCacheVersion = m_ResourceCacheVersions[materialID];
 
 				MaterialData* pMaterialData = materials.GetMaterial(materialID);
 				if (!pMaterialData) continue;
@@ -1899,10 +1901,7 @@ namespace Glory
 				}
 
 				if (textureCount == 0)
-				{
-					pMaterialData->SetDirty(false);
 					continue;
-				}
 
 				/* Textures */
 				if (!batchData.m_TextureSets[i])
@@ -1923,7 +1922,7 @@ namespace Glory
 						setInfo.m_Samplers[j].m_TextureHandle = pDevice->AcquireCachedTexture(pTexture);
 					}
 					batchData.m_TextureSets[i] = pDevice->CreateDescriptorSet(std::move(setInfo));
-					pMaterialData->SetDirty(false);
+					materialCacheVersion = pMaterialData->DirtyVersion();
 					continue;
 				}
 
@@ -1932,6 +1931,8 @@ namespace Glory
 				for (size_t j = 0; j < textureCount; ++j)
 				{
 					const UUID textureID = pMaterialData->GetResourceUUIDPointer(j)->GetUUID();
+					uint64_t& textureCacheVersion = m_ResourceCacheVersions[textureID];
+					uint64_t& textureImageCacheVersion = m_TextureImageCacheVersions[textureID];
 					Resource* pResource = resources.GetResource(textureID);
 					if (!pResource)
 					{
@@ -1940,11 +1941,19 @@ namespace Glory
 					}
 					textures[j] = static_cast<TextureData*>(pResource);
 					ImageData* pImage = textures[j]->GetImageData(&resources);
-					if (!pImage) continue;
-					texturesDirty |= textures[j]->IsDirty() || pImage ? pImage->IsDirty() : false;
+					uint64_t* imageCacheVersion = pImage ? &m_ResourceCacheVersions[pImage->GetUUID()] : nullptr;
+					texturesDirty |= textures[j]->IsDirty(textureCacheVersion) ||
+						(pImage ? (pImage->IsDirty(*imageCacheVersion) || pImage->IsDirty(textureImageCacheVersion)) : false);
+					textureCacheVersion = textures[j]->DirtyVersion();
+					if (pImage)
+					{
+						textureImageCacheVersion = pImage->DirtyVersion();
+						*imageCacheVersion = pImage->DirtyVersion();
+					}
+					else textureImageCacheVersion = 0;
 				}
 
-				if (pMaterialData->IsDirty() || differentMaterial || texturesDirty)
+				if (pMaterialData->IsDirty(materialCacheVersion) || differentMaterial || texturesDirty)
 				{
 					DescriptorSetUpdateInfo dsUpdateInfo;
 					dsUpdateInfo.m_Samplers.resize(textureCount);
@@ -1956,7 +1965,7 @@ namespace Glory
 					}
 					pDevice->UpdateDescriptorSet(batchData.m_TextureSets[i], dsUpdateInfo);
 				}
-				pMaterialData->SetDirty(false);
+				materialCacheVersion = pMaterialData->DirtyVersion();
 			}
 
 			if (!batchData.m_WorldsBuffer)
@@ -2067,7 +2076,7 @@ namespace Glory
 				pDevice->UpdateDescriptorSet(batchData.m_MaterialSet, dsWrite);
 			}
 
-			if (!batchData.m_Pipeline || pPipelineData->IsDirty() || pPipelineData->SettingsDirty())
+			if (!batchData.m_Pipeline || pPipelineData->IsDirty(pipelineCacheVersion) || pPipelineData->SettingsDirty())
 			{
 				std::vector<DescriptorSetLayoutHandle> descriptorSetLayouts(textureCount ? 7 : 6);
 				descriptorSetLayouts[0] = RendererDSLayouts::m_GlobalRenderSetLayout;
@@ -2085,6 +2094,7 @@ namespace Glory
 				MeshData* pMesh = static_cast<MeshData*>(pMeshResource);
 				batchData.m_Pipeline = pDevice->AcquireCachedPipeline(defaultRenderPass, pPipelineData,
 					std::move(descriptorSetLayouts), pMesh->VertexSize(), pMesh->AttributeTypesVector());
+				pipelineCacheVersion = pPipelineData->DirtyVersion();
 			}
 		}
 	}
@@ -2164,8 +2174,10 @@ namespace Glory
 			m_SkyboxCubemap = 0;
 			return;
 		}
+		uint64_t& skyboxCacheVersion = m_ResourceCacheVersions[skyboxID];
 		CubemapData* pCubemap = static_cast<CubemapData*>(pResource);
-		const bool cubemapDirty = pCubemap->IsDirty();
+		const bool cubemapDirty = pCubemap->IsDirty(skyboxCacheVersion);
+		skyboxCacheVersion = pCubemap->DirtyVersion();
 		TextureHandle cubemap = pDevice->AcquireCachedTexture(pCubemap);
 		if (!cubemap) return;
 		if (!m_GlobalSkyboxSamplerSet)

@@ -533,7 +533,7 @@ namespace Glory::Editor
 			}
 		}
 
-		pPipeline->SetDirty(true);
+		pPipeline->IncrementDirtyVersion();
 		PipelineUpdateEvents().Dispatch({ pPipeline });
 	}
 

@@ -80,7 +80,7 @@ namespace Glory::Editor
 			EditorAssetDatabase::SetAssetDirty(pMaterial);
 			pMaterial->SetDirty(true);
 			if (pMaterialData)
-				pMaterialData->SetDirty(true);
+				pMaterialData->IncrementDirtyVersion();
 		}
 		return change;
 	}

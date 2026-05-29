@@ -673,6 +673,7 @@ namespace Glory
 
 		GLORY_ENGINE_API void SetCachedTexture(TextureData* pTexture, TextureHandle texture);
 		GLORY_ENGINE_API TextureHandle GetCachedTexture(TextureData* pTexture) const;
+		GLORY_ENGINE_API bool IsDirty(UUID resourceID, uint64_t version) const;
 
 	public: /* Resource management */
 		
@@ -938,11 +939,13 @@ namespace Glory
 		int m_LastTriangles;
 		int m_CurrentTriangles;
 
+		std::unordered_map<UUID, uint64_t> m_CacheVersions;
+
 	private:
 		/* Cached handles */
-		std::map<UUID, PipelineHandle> m_PipelineHandles;
-		std::map<UUID, MeshHandle> m_MeshHandles;
-		std::map<UUID, TextureHandle> m_TextureHandles;
-		std::map<size_t, ShaderHandle> m_ShaderHandles;
+		std::unordered_map<UUID, PipelineHandle> m_PipelineHandles;
+		std::unordered_map<UUID, MeshHandle> m_MeshHandles;
+		std::unordered_map<UUID, TextureHandle> m_TextureHandles;
+		std::unordered_map<size_t, ShaderHandle> m_ShaderHandles;
 	};
 }

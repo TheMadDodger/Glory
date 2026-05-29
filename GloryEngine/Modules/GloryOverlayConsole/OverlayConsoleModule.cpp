@@ -360,7 +360,7 @@ namespace Glory
 				textData.m_Offsets.y = -1.0f*textLineHeight*(i+1);
 				textData.m_Append = true;
 				Utils::GenerateTextMesh(m_pConsoleLogTextMesh.get(), pFont, textData);
-				m_pConsoleLogTextMesh->SetDirty(true);
+				m_pConsoleLogTextMesh->IncrementDirtyVersion();
 			}
 			m_TextDirty = false;
 		}
@@ -376,7 +376,7 @@ namespace Glory
 			textData.m_Offsets.y = -1.0f*textLineHeight;
 			textData.m_Append = false;
 			m_InputTextWidth = Utils::GenerateTextMesh(m_pInputTextMesh.get(), pFont, textData).x;
-			m_pInputTextMesh->SetDirty(true);
+			m_pInputTextMesh->IncrementDirtyVersion();
 			m_InputTextDirty = false;
 		}
 
