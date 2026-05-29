@@ -105,7 +105,7 @@ namespace Glory
 
 	void Resources::HandleToLoadImmediately(std::function<void(UUID)> callback)
 	{
-		const uint32_t size = m_CurrentLoadImmediatelyCount.load();
+		const uint64_t size = m_CurrentLoadImmediatelyCount.load();
 		if (size == 0) return;
 
 		m_AlreadyLoading = true;

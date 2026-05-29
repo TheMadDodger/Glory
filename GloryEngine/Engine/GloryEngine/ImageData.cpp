@@ -87,7 +87,7 @@ namespace Glory
 		delete[] m_pPixels;
 		m_pPixels = std::move(pPixels);
 		m_Header.m_DataSize = dataSize;
-		SetDirty(true);
+		IncrementDirtyVersion();
 	}
 
 	void ImageData::Serialize(Utils::BinaryStream& container) const

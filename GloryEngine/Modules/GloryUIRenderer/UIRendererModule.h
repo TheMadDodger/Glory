@@ -118,6 +118,7 @@ namespace Glory
 		MeshHandle m_ImageMesh = 0;
 		std::map<UUID, MeshData*> m_pDocumentQuads;
 		std::map<UUID, std::vector<TextureData*>> m_pDocumentTextures;
+		std::unordered_map<UUID, uint64_t> m_ResourceCacheVersions;
 
 		struct UIBatchData
 		{

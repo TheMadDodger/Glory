@@ -3420,7 +3420,9 @@ namespace Glory
 			/* Return the default pink image */
 			return m_DefaultImage;
 
-		auto iter = m_ImageHandles.find(pImage->GetGPUUUID());
+		uint64_t& cacheVersion = m_CacheVersions[pImage->GetUUID()];
+
+		auto iter = m_ImageHandles.find(pImage->GetUUID());
 		if (iter == m_ImageHandles.end())
 		{
 			TextureCreateInfo createInfo;
@@ -3436,17 +3438,17 @@ namespace Glory
 
 			ImageHandle newImage = CreateImage(createInfo, pImage->GetPixels(), pImage->DataSize());
 			iter = m_ImageHandles.emplace(pImage->GetGPUUUID(), newImage).first;
-			pImage->SetDirty(false);
+			cacheVersion = pImage->DirtyVersion();
 
 			return newImage;
 		}
 
 		ImageHandle image = iter->second;
 
-		if (pImage->IsDirty())
+		if (pImage->IsDirty(cacheVersion))
 		{
 			UpdateImage(image, pImage);
-			pImage->SetDirty(false);
+			cacheVersion = pImage->DirtyVersion();
 		}
 
 		return image;

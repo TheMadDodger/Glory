@@ -54,6 +54,8 @@ namespace Glory
 		if (!pPipeline)
 			return nullptr;
 
+		uint64_t& cacheVersion = m_CacheVersions[pPipeline->GetUUID()];
+
 		auto iter = m_PipelineHandles.find(pPipeline->GetGPUUUID());
 		if (iter == m_PipelineHandles.end())
 		{
@@ -61,7 +63,7 @@ namespace Glory
 				std::move(descriptorSets), stride, attributeTypes);
 			m_PipelineHandles.emplace(pPipeline->GetGPUUUID(), newPipeline).first;
 
-			pPipeline->SetDirty(false);
+			cacheVersion = pPipeline->DirtyVersion();
 			pPipeline->SettingsDirty() = false;
 
 			return newPipeline;
@@ -69,12 +71,12 @@ namespace Glory
 
 		PipelineHandle pipeline = iter->second;
 
-		if (pPipeline->IsDirty())
+		if (pPipeline->IsDirty(cacheVersion))
 			RecreatePipeline(pipeline, pPipeline);
 		else if (pPipeline->SettingsDirty())
 			UpdatePipelineSettings(pipeline, pPipeline);
 
-		pPipeline->SetDirty(false);
+		cacheVersion = pPipeline->DirtyVersion();
 		pPipeline->SettingsDirty() = false;
 
 		return pipeline;
@@ -83,19 +85,24 @@ namespace Glory
 	PipelineHandle GraphicsDevice::AcquireCachedComputePipeline(PipelineData* pPipeline,
 		std::vector<DescriptorSetLayoutHandle>&& descriptorSets)
 	{
+		if (!pPipeline)
+			return nullptr;
+
+		uint64_t& cacheVersion = m_CacheVersions[pPipeline->GetUUID()];
+
 		auto iter = m_PipelineHandles.find(pPipeline->GetGPUUUID());
 		if (iter == m_PipelineHandles.end())
 		{
 			PipelineHandle newPipeline = CreateComputePipeline(pPipeline, std::move(descriptorSets));
 			m_PipelineHandles.emplace(pPipeline->GetGPUUUID(), newPipeline).first;
 
-			pPipeline->SetDirty(false);
+			cacheVersion = pPipeline->DirtyVersion();
 			pPipeline->SettingsDirty() = false;
 
 			return newPipeline;
 		}
 
-		pPipeline->SetDirty(false);
+		cacheVersion = pPipeline->DirtyVersion();
 		pPipeline->SettingsDirty() = false;
 
 		return iter->second;
@@ -103,21 +110,26 @@ namespace Glory
 
 	MeshHandle GraphicsDevice::AcquireCachedMesh(MeshData* pMesh, MeshUsage usage)
 	{
+		if (!pMesh)
+			return nullptr;
+
+		uint64_t& cacheVersion = m_CacheVersions[pMesh->GetUUID()];
+
 		auto iter = m_MeshHandles.find(pMesh->GetGPUUUID());
 		if (iter == m_MeshHandles.end())
 		{
 			MeshHandle newMesh = CreateMesh(pMesh, usage);
 			iter = m_MeshHandles.emplace(pMesh->GetGPUUUID(), newMesh).first;
-			pMesh->SetDirty(false);
+			cacheVersion = pMesh->DirtyVersion();
 			return newMesh;
 		}
 
 		MeshHandle mesh = iter->second;
 
-		if (pMesh->IsDirty())
+		if (pMesh->IsDirty(cacheVersion))
 		{
 			UpdateMesh(mesh, pMesh);
-			pMesh->SetDirty(false);
+			cacheVersion = pMesh->DirtyVersion();
 		}
 
 		return mesh;
@@ -127,23 +139,28 @@ namespace Glory
 	{
 		if (!pTexture) return m_DefaultTexture;
 
+		uint64_t& cacheVersion = m_CacheVersions[pTexture->GetUUID()];
+
 		auto iter = m_TextureHandles.find(pTexture->GetGPUUUID());
 		if (iter == m_TextureHandles.end())
 		{
 			TextureHandle newTexture = CreateTexture(pTexture);
+			if (!newTexture) return nullptr;
 			iter = m_TextureHandles.emplace(pTexture->GetGPUUUID(), newTexture).first;
-			pTexture->SetDirty(false);
+			cacheVersion = pTexture->DirtyVersion();
 			return newTexture;
 		}
 
 		TextureHandle texture = iter->second;
 		ImageData* pImage = pTexture->GetImageData(&m_pModule->GetEngine()->GetResources());
+		uint64_t* imageCacheVersion = pImage ? &m_CacheVersions[pImage->GetUUID()] : nullptr;
 
-		if (pTexture->IsDirty() || (pImage && pImage->IsDirty()))
+		if (pTexture->IsDirty(cacheVersion) || (pImage && pImage->IsDirty(*imageCacheVersion)))
 		{
 			UpdateTexture(texture, pTexture);
-			pTexture->SetDirty(false);
-			pImage->SetDirty(false);
+			cacheVersion = pTexture->DirtyVersion();
+			if (pImage)
+				*imageCacheVersion = pImage->DirtyVersion();
 		}
 
 		return texture;
@@ -151,12 +168,17 @@ namespace Glory
 
 	TextureHandle GraphicsDevice::AcquireCachedTexture(CubemapData* pCubemap)
 	{
+		if (!pCubemap)
+			return nullptr;
+
+		uint64_t& cacheVersion = m_CacheVersions[pCubemap->GetUUID()];
+
 		auto iter = m_TextureHandles.find(pCubemap->GetGPUUUID());
 		if (iter == m_TextureHandles.end())
 		{
 			TextureHandle newTexture = CreateTexture(pCubemap);
 			iter = m_TextureHandles.emplace(pCubemap->GetGPUUUID(), newTexture).first;
-			pCubemap->SetDirty(false);
+			cacheVersion = pCubemap->DirtyVersion();
 			return newTexture;
 		}
 		return iter->second;
@@ -191,6 +213,13 @@ namespace Glory
 		auto iter = m_TextureHandles.find(pTexture->GetGPUUUID());
 		if (iter == m_TextureHandles.end()) return nullptr;
 		return iter->second;
+	}
+
+	bool GraphicsDevice::IsDirty(UUID resourceID, uint64_t version) const
+	{
+		auto iter = m_CacheVersions.find(resourceID);
+		if (iter == m_CacheVersions.end()) return true;
+		return version < iter->second;
 	}
 
 	MeshHandle GraphicsDevice::CreateMesh(MeshData* pMeshData, MeshUsage usage)

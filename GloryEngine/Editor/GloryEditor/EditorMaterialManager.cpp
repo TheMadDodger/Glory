@@ -72,7 +72,7 @@ namespace Glory::Editor
 			{
 				pMaterial->SetPipeline(pipelineID);
 				pMaterial->ClearProperties();
-				pMaterial->SetDirty(true);
+				pMaterial->IncrementDirtyVersion();
 			}
 			return;
 		}
@@ -129,7 +129,7 @@ namespace Glory::Editor
 		}
 
 		pMaterial->SetPipeline(pipelineID);
-		pMaterial->SetDirty(true);
+		pMaterial->IncrementDirtyVersion();
 		pPipeline->LoadIntoMaterial(pMaterial);
 
 		ReadPropertiesInto(node["Properties"], pMaterial);

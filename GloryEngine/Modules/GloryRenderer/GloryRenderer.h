@@ -266,5 +266,8 @@ namespace Glory
 		std::vector<MeshHandle> m_LineMeshes;
 
 		Utils::BitSet m_DebugOverlayBits;
+
+		std::unordered_map<UUID, uint64_t> m_ResourceCacheVersions;
+		std::unordered_map<UUID, uint64_t> m_TextureImageCacheVersions;
 	};
 }

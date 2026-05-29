@@ -619,12 +619,13 @@ namespace Glory
 			if (pOldTexture != pTexture)
 			{
 				pMaterial->SetTexture(data.m_MaterialTextureName, pTexture);
-				pMaterial->SetDirty(true);
+				pMaterial->IncrementDirtyVersion();
 			}
-			if (pTexture->IsDirty())
+			uint64_t& textureCacheVersion = m_ResourceCacheVersions[pTexture->GetUUID()];
+			if (pTexture->IsDirty(textureCacheVersion))
 			{
-				pTexture->SetDirty(false);
-				pMaterial->SetDirty(true);
+				textureCacheVersion = pTexture->DirtyVersion();
+				pMaterial->IncrementDirtyVersion();
 			}
 
 			/* Submit data to renderer */
@@ -781,7 +782,7 @@ namespace Glory
 			iter->second->AddVertex(reinterpret_cast<float*>(&vertices[2]));
 			iter->second->AddVertex(reinterpret_cast<float*>(&vertices[3]));
 			iter->second->AddFace(0, 1, 2, 3);
-			iter->second->SetDirty(true);
+			iter->second->IncrementDirtyVersion();
 		}
 
 		return iter->second;
@@ -797,7 +798,7 @@ namespace Glory
 			for (size_t i = 0; i < imageCount; ++i)
 			{
 				ImageData* pImage = new ImageData();
-				pImage->SetDirty(false);
+				pImage->SetDirtyVersion(0);
 				iter->second[i] = new InternalTexture(pImage);
 				iter->second[i]->GetSamplerSettings().MipmapMode = Filter::F_None;
 				m_pEngine->GetResources().AddResource(&iter->second[i]);
@@ -810,7 +811,7 @@ namespace Glory
 			if (!iter->second[i])
 			{
 				ImageData* pImage = new ImageData();
-				pImage->SetDirty(false);
+				pImage->SetDirtyVersion(0);
 				iter->second[i] = new InternalTexture(pImage);
 				iter->second[i]->GetSamplerSettings().MipmapMode = Filter::F_None;
 				m_pEngine->GetResources().AddResource(&iter->second[i]);
@@ -822,7 +823,7 @@ namespace Glory
 			if (texture != currentTexture)
 			{
 				pDevice->SetCachedTexture(iter->second[i], currentTexture);
-				iter->second[i]->SetDirty(true);
+				iter->second[i]->IncrementDirtyVersion();
 			}
 		}
 

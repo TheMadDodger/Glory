@@ -6,7 +6,7 @@ namespace Glory
 {
 	MeshData::MeshData()
 		: m_VertexCount(0), m_IndexCount(0), m_Vertices(),
-		m_Indices(), m_Attributes(), m_VertexSize(0), m_IsDirty(true),
+		m_Indices(), m_Attributes(), m_VertexSize(0),
 		m_BoundingBox()
 	{
 		APPEND_TYPE(MeshData);
@@ -14,7 +14,7 @@ namespace Glory
 
 	MeshData::MeshData(uint32_t reservedVertexCount, uint32_t vertexSize, std::vector<AttributeType>&& attributes):
 		m_VertexCount(0), m_IndexCount(0), m_Vertices(), m_Indices(),
-		m_Attributes(std::move(attributes)), m_VertexSize(vertexSize), m_IsDirty(true),
+		m_Attributes(std::move(attributes)), m_VertexSize(vertexSize),
 		m_BoundingBox()
 	{
 		m_Vertices.reserve(reservedVertexCount*vertexSize/sizeof(float));
@@ -24,7 +24,7 @@ namespace Glory
 
 	MeshData::MeshData(uint32_t vertexCount, uint32_t vertexSize, const std::vector<float>& vertices, uint32_t indexCount, const std::vector<uint32_t>& indices, const std::vector<AttributeType>& attributes) :
 		m_VertexCount(vertexCount), m_IndexCount(indexCount), m_Vertices(vertices),
-		m_Indices(indices), m_Attributes(attributes), m_VertexSize(vertexSize), m_IsDirty(true),
+		m_Indices(indices), m_Attributes(attributes), m_VertexSize(vertexSize),
 		m_BoundingBox()
 	{
 		APPEND_TYPE(MeshData);
@@ -32,7 +32,7 @@ namespace Glory
 
 	MeshData::MeshData(uint32_t vertexCount, uint32_t vertexSize, const float* vertices, uint32_t indexCount, const uint32_t* indices, const std::vector<AttributeType>& attributes) :
 		m_VertexCount(vertexCount), m_IndexCount(indexCount), m_Vertices(std::vector<float>(vertexCount*vertexSize/sizeof(float))),
-		m_Indices(std::vector<uint32_t>(indexCount)), m_Attributes(attributes), m_VertexSize(vertexSize), m_IsDirty(true),
+		m_Indices(std::vector<uint32_t>(indexCount)), m_Attributes(attributes), m_VertexSize(vertexSize),
 		m_BoundingBox()
 	{
 		memcpy(&m_Vertices[0], vertices, vertexCount*vertexSize);
@@ -42,7 +42,7 @@ namespace Glory
 
 	MeshData::MeshData(uint32_t vertexCount, uint32_t vertexSize, const float* vertices, const std::vector<AttributeType>& attributes) :
 		m_VertexCount(vertexCount), m_IndexCount(0), m_Vertices(std::vector<float>(vertexCount*vertexSize/sizeof(float))),
-		m_Indices(), m_Attributes(attributes), m_VertexSize(vertexSize), m_IsDirty(true),
+		m_Indices(), m_Attributes(attributes), m_VertexSize(vertexSize),
 		m_BoundingBox()
 	{
 		memcpy(&m_Vertices[0], vertices, vertexCount*vertexSize);
@@ -159,31 +159,21 @@ namespace Glory
 
 		m_IndexCount += 6;
 
-		m_IsDirty = true;
+		IncrementDirtyVersion();
 	}
 
 	void MeshData::ClearVertices()
 	{
 		m_Vertices.clear();
 		m_VertexCount = 0;
-		m_IsDirty = true;
+		IncrementDirtyVersion();
 	}
 
 	void MeshData::ClearIndices()
 	{
 		m_Indices.clear();
 		m_IndexCount = 0;
-		m_IsDirty = true;
-	}
-
-	bool MeshData::IsDirty() const
-	{
-		return m_IsDirty;
-	}
-
-	void MeshData::SetDirty(bool dirty)
-	{
-		m_IsDirty = dirty;
+		IncrementDirtyVersion();
 	}
 
 	void MeshData::Merge(MeshData* pOther)
@@ -196,7 +186,7 @@ namespace Glory
 		m_Indices.resize(m_Indices.size() + pOther->m_Indices.size());
 		std::memcpy(&m_Vertices[vertexStart], pOther->m_Vertices.data(), pOther->m_Vertices.size()*sizeof(float));
 		std::memcpy(&m_Indices[indexStart], pOther->m_Indices.data(), pOther->m_Indices.size()*sizeof(uint32_t));
-		m_IsDirty = true;
+		IncrementDirtyVersion();
 	}
 
 	void MeshData::AddBoundingBox(const glm::vec3& min, const glm::vec3& max)
@@ -204,14 +194,14 @@ namespace Glory
 		const glm::vec3 halfExtends = (max - min)/2.0f;
 		m_BoundingBox.m_HalfExtends = glm::vec4(halfExtends, 1.0f);
 		m_BoundingBox.m_Center = glm::vec4(min + halfExtends, 1.0f);
-		m_IsDirty = true;
+		IncrementDirtyVersion();
 	}
 
 	void MeshData::AddBoundingSphere(const glm::vec3& center, float radius)
 	{
 		m_BoundingSphere.m_Center = center;
 		m_BoundingSphere.m_Radius = radius;
-		m_IsDirty = true;
+		IncrementDirtyVersion();
 	}
 
 	const BoundingBox& MeshData::GetBoundingBox() const

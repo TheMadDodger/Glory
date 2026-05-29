@@ -38,10 +38,10 @@ namespace Glory
         /** @brief Destructor */
         GLORY_ENGINE_API virtual ~Resource();
 
-        /** @brief Whether the resource is dirty */
-        GLORY_ENGINE_API bool IsDirty() const;
-        /** @brief Set resource dirty */
-        GLORY_ENGINE_API void SetDirty(bool dirty);
+        GLORY_ENGINE_API bool IsDirty(uint64_t compare) const;
+        GLORY_ENGINE_API void IncrementDirtyVersion();
+        GLORY_ENGINE_API uint64_t DirtyVersion() const;
+        GLORY_ENGINE_API void SetDirtyVersion(uint64_t version);
 
     public:
         virtual void Serialize(Utils::BinaryStream& container) const {};
@@ -65,6 +65,6 @@ namespace Glory
         friend class AssetDatabase;
         friend class LoaderModule;
 
-        bool m_IsDirty;
+        uint64_t m_DirtyVersion = 1;
     };
 }
