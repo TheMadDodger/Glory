@@ -156,6 +156,11 @@ namespace Glory
 		}
 	}
 
+	void AudioSourceManager::OnCopy(AudioSource& audio)
+	{
+		audio.m_Audio.ManualRegisterReference();
+	}
+
 	void AudioSourceManager::OnInitialize()
 	{
 		Bind(DoOnRemove, &AudioSourceManager::OnRemoveImpl);

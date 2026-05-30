@@ -29,6 +29,7 @@ namespace Glory
     public:
         virtual void OnSerialize(Utils::BinaryStream& stream) const override;
         virtual void OnDeserialize(Utils::BinaryStream& stream) override;
+        virtual void OnCopy(MonoScriptComponent& script) override;
 
         void UnpackDataInto(const void* data, MonoScriptComponent& newComponent) override;
         virtual void SerializeDense(Utils::BinaryStream& stream) const override;

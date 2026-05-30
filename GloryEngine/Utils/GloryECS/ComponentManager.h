@@ -56,11 +56,15 @@ namespace Glory::Utils::ECS
 			std::memcpy(&newComponent, data, sizeof(Component));
 		}
 
+		virtual void OnCopy(Component&) {}
+
 		virtual void* Add(EntityID entity, const void* data) override
 		{
 			Component newComponent = Component();
 			UnpackDataInto(data, newComponent);
-			return &SparseSet<EntityID, Component>::Add(entity, std::move(newComponent));
+			Component& finalComponent = SparseSet<EntityID, Component>::Add(entity, std::move(newComponent));
+			OnCopy(finalComponent);
+			return &finalComponent;
 		}
 
 		virtual void Remove(EntityID entity) override

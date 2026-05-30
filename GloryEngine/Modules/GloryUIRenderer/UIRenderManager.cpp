@@ -184,6 +184,12 @@ namespace Glory
 		}
 	}
 
+	void UIRenderManager::OnCopy(UIRenderer& renderer)
+	{
+		renderer.m_Document.ManualRegisterReference();
+		renderer.m_WorldMaterial.ManualRegisterReference();
+	}
+
 	void UIRenderManager::OnInitialize()
 	{
 		Bind(DoStart, &UIRenderManager::OnStartImpl);

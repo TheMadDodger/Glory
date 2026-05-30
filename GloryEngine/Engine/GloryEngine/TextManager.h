@@ -18,6 +18,7 @@ namespace Glory
         GLORY_ENGINE_API void UnpackDataInto(const void* data, TextComponent& newComponent) override;
         GLORY_ENGINE_API void SerializeDense(Utils::BinaryStream& stream) const override;
         GLORY_ENGINE_API void DeserializeDense(Utils::BinaryStream& stream) override;
+        GLORY_ENGINE_API void OnCopy(TextComponent& text) override;
 
     private:
         virtual void OnInitialize() override;
