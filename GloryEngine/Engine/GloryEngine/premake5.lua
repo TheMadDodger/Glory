@@ -36,7 +36,7 @@ project "GloryEngine"
 		["Helpers"] = { "GLORY_YAML.*", "YAML_GLM.*" },
 		["References"] = { "AssetReference.*", "SceneObjectRef.*", "LayerRef.*", "PropertyFlags.*" },
 		["Scripting"] = { "ScriptExtensions.*", "ScriptingExtender.*", "ScriptProperty.*" },
-		["SceneManagement"] = { "UUIDRemapper.*", "SceneManager.*", "SceneObject.*", "GScene.*", "Components.*", "Entity.*", "EntityComponentObject.*" },
+		["SceneManagement"] = { "UUIDRemapper.*", "SceneManager.*", "SceneObject.*", "GScene.*", "Components.*", "Entity.*" },
 		["ComponentManagers"] = { "MeshRenderManager.*", "TransformManager.*", "CameraComponentManager.*", "LightManager.*", "TextManager.*" },
 	}
 
