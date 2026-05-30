@@ -2,8 +2,8 @@
 #include "EntityComponentPopup.h"
 #include "EditableEntity.h"
 #include "Editor.h"
+#include "EntityComponentObject.h"
 
-#include <EntityComponentObject.h>
 #include <filesystem>
 
 namespace Glory

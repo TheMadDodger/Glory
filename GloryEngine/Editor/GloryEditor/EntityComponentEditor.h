@@ -2,11 +2,11 @@
 #include "Editor.h"
 #include "PropertyDrawer.h"
 #include "EditorUI.h"
+#include "EntityComponentObject.h"
 
 #include <ComponentManager.h>
 
 #include <Object.h>
-#include <EntityComponentObject.h>
 #include <TypeData.h>
 
 namespace Glory::Editor
