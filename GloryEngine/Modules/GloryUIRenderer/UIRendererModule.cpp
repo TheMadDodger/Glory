@@ -116,7 +116,7 @@ namespace Glory
 		pDocument->m_InputEnabled = data.m_InputEnabled;
 		pDocument->Update(m_pEngine->Time().GetDeltaTime());
 
-		if (!pDocument->m_DrawIsDirty.IsSet(frameIndex)) return;
+		//if (!pDocument->m_DrawIsDirty.IsSet(frameIndex)) return;
 		pDocument->Draw();
 		pDocument->m_DrawIsDirty.Set(frameIndex, false);
 
@@ -478,23 +478,6 @@ namespace Glory
 
 	void UIRendererModule::PostInitialize()
 	{
-		const ModuleSettings& settings = Settings();
-		const UUID uiPrepassStencilPipeline = settings.Value<uint64_t>("UI Prepass Stencil Pipeline");
-		const UUID uiPrepassPipeline = settings.Value<uint64_t>("UI Prepass Pipeline");
-		const UUID uiTextPrepassPipeline = settings.Value<uint64_t>("UI Text Prepass Pipeline");
-		const UUID uiOverlayPipeline = settings.Value<uint64_t>("UI Overlay Pipeline");
-
-		m_pUIPrepassStencilMaterial = new MaterialData();
-		m_pUIPrepassStencilMaterial->SetPipeline(uiPrepassStencilPipeline);
-		m_pUIPrepassMaterial = new MaterialData();
-		m_pUIPrepassMaterial->SetPipeline(uiPrepassPipeline);
-		m_pUIPrepassMaterial->AddProperty("Color", "Color", ResourceTypes::GetHash<glm::vec4>(), sizeof(glm::vec4));
-		m_pUIPrepassMaterial->AddProperty("HasTexture", "HasTexture", ResourceTypes::GetHash<glm::vec4>(), sizeof(glm::vec4));
-		m_pUITextPrepassMaterial = new MaterialData();
-		m_pUITextPrepassMaterial->SetPipeline(uiTextPrepassPipeline);
-		m_pUIOverlayMaterial = new MaterialData();
-		m_pUIOverlayMaterial->SetPipeline(uiOverlayPipeline);
-
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
 
 		DescriptorSetLayoutInfo samplerSetLayoutInfo;
@@ -558,6 +541,23 @@ namespace Glory
 
 	void UIRendererModule::Load()
 	{
+		const ModuleSettings& settings = Settings();
+		const UUID uiPrepassStencilPipeline = settings.Value<uint64_t>("UI Prepass Stencil Pipeline");
+		const UUID uiPrepassPipeline = settings.Value<uint64_t>("UI Prepass Pipeline");
+		const UUID uiTextPrepassPipeline = settings.Value<uint64_t>("UI Text Prepass Pipeline");
+		const UUID uiOverlayPipeline = settings.Value<uint64_t>("UI Overlay Pipeline");
+
+		m_pUIPrepassStencilMaterial = new MaterialData();
+		m_pUIPrepassStencilMaterial->SetPipeline(uiPrepassStencilPipeline);
+		m_pUIPrepassMaterial = new MaterialData();
+		m_pUIPrepassMaterial->SetPipeline(uiPrepassPipeline);
+		m_pUIPrepassMaterial->AddProperty("Color", "Color", ResourceTypes::GetHash<glm::vec4>(), sizeof(glm::vec4));
+		m_pUIPrepassMaterial->AddProperty("HasTexture", "HasTexture", ResourceTypes::GetHash<glm::vec4>(), sizeof(glm::vec4));
+		m_pUITextPrepassMaterial = new MaterialData();
+		m_pUITextPrepassMaterial->SetPipeline(uiTextPrepassPipeline);
+		m_pUIOverlayMaterial = new MaterialData();
+		m_pUIOverlayMaterial->SetPipeline(uiOverlayPipeline);
+
 		Renderer* pRenderer = m_pEngine->ActiveRenderer();
 		if (!pRenderer) return;
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
