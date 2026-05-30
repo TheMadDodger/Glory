@@ -38,6 +38,17 @@ namespace Glory::Utils::Reflect
 		}
 
 		template<typename T>
+		static const TypeData* RegisterResourceType(uint64_t flags = 0)
+		{
+			const std::type_info& type = typeid(T);
+			const std::string_view nameStr = type.name();
+			const size_t separatorIndex = nameStr.find("::");
+			const std::string aliasName = nameStr.substr(separatorIndex + 2).data();
+			const TypeData* pTypeData = RegisterBasicType(type, sizeof(T), aliasName, flags);
+			return pTypeData;
+		}
+
+		template<typename T>
 		static const TypeData* RegisterEnum(const std::string& aliasName = "", uint64_t flags = 0)
 		{
 			Enum<T>* pNewEnum = new Enum<T>();

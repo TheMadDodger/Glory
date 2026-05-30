@@ -112,7 +112,7 @@ namespace Glory::Utils::Reflect
 	const TypeData* Reflect::GetTyeData(const std::string& name)
 	{
 		if (m_pReflectInstance->m_StringToTypeHash.find(name) == m_pReflectInstance->m_StringToTypeHash.end()) return nullptr;
-		uint32_t typeHash = m_pReflectInstance->m_StringToTypeHash[name];
+		const uint32_t typeHash = m_pReflectInstance->m_StringToTypeHash[name];
 		return GetTyeData(typeHash);
 	}
 
