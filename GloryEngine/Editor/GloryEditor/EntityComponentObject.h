@@ -1,5 +1,5 @@
 #pragma once
-#include <engine_visibility.h>
+#include "GloryEditor.h"
 
 #include <Object.h>
 #include <EntityID.h>
@@ -10,9 +10,9 @@ namespace Glory
 	class EntityComponentObject : public Object
 	{
 	public:
-		GLORY_ENGINE_API EntityComponentObject();
-		GLORY_ENGINE_API EntityComponentObject(Utils::ECS::EntityID entityID, UUID componentID, uint32_t componentType, Utils::ECS::EntityRegistry* pRegistry);
-		GLORY_ENGINE_API virtual ~EntityComponentObject();
+		GLORY_EDITOR_API EntityComponentObject();
+		GLORY_EDITOR_API EntityComponentObject(Utils::ECS::EntityID entityID, UUID componentID, uint32_t componentType, Utils::ECS::EntityRegistry* pRegistry);
+		GLORY_EDITOR_API virtual ~EntityComponentObject();
 
 		template<typename T>
 		inline T& GetData()
@@ -20,11 +20,11 @@ namespace Glory
 			return m_pRegistry->GetComponent<T>(m_EntityID);
 		}
 
-		GLORY_ENGINE_API Utils::ECS::EntityRegistry* GetRegistry() const;
-		GLORY_ENGINE_API const Utils::ECS::EntityID EntityID() const;
-		GLORY_ENGINE_API const uint32_t ComponentType() const;
+		GLORY_EDITOR_API Utils::ECS::EntityRegistry* GetRegistry() const;
+		GLORY_EDITOR_API const Utils::ECS::EntityID EntityID() const;
+		GLORY_EDITOR_API const uint32_t ComponentType() const;
 
-		GLORY_ENGINE_API virtual void* GetRootDataAddress() override;
+		GLORY_EDITOR_API virtual void* GetRootDataAddress() override;
 
 	private:
 		Utils::ECS::EntityID m_EntityID;
