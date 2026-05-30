@@ -139,6 +139,11 @@ namespace Glory
 		}
 	}
 
+	void TextManager::OnCopy(TextComponent& text)
+	{
+		text.m_Font.ManualRegisterReference();
+	}
+
 	void TextManager::OnInitialize()
 	{
 		Bind(DoDraw, &TextManager::OnDrawImpl);

@@ -143,6 +143,11 @@ namespace Glory
 		}
 	}
 
+	void UIImageManager::OnCopy(UIImage& image)
+	{
+		image.m_Image.ManualRegisterReference();
+	}
+
 	void UIImageManager::OnInitialize()
 	{
 		Bind(DoDraw, &UIImageManager::OnDrawImpl);
@@ -250,6 +255,11 @@ namespace Glory
 			const UIText& text = GetAt(i);
 			text.m_Font.ManualRegisterReference();
 		}
+	}
+
+	void UITextManager::OnCopy(UIText& text)
+	{
+		text.m_Font.ManualRegisterReference();
 	}
 
 	void UITextManager::UnpackDataInto(const void* data, UIText& newComponent)

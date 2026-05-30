@@ -48,6 +48,11 @@ namespace Glory
 		}
 	}
 
+	void StringTableLoaderManager::OnCopy(StringTableLoader& loader)
+	{
+		loader.m_StringTable.ManualRegisterReference();
+	}
+
 	void StringTableLoaderManager::OnInitialize()
 	{
 		Bind(DoValidate, &StringTableLoaderManager::OnValidateImpl);

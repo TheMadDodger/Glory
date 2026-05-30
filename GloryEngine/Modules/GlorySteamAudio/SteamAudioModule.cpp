@@ -39,6 +39,11 @@ namespace Glory
 				occluder.m_MaterialAsset.ManualRegisterReference();
 			}
 		}
+
+		void OnCopy(SoundOccluder& occluder) override
+		{
+			occluder.m_MaterialAsset.ManualRegisterReference();
+		}
 	};
 
 	SteamAudioModule::SteamAudioModule(): m_SceneClosing(0)

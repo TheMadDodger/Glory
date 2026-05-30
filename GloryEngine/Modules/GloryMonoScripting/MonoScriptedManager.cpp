@@ -29,6 +29,10 @@ namespace Glory
 	{
 	}
 
+	void MonoScriptedManager::OnCopy(MonoScriptComponent& script)
+	{
+	}
+
 	void MonoScriptedManager::UnpackDataInto(const void* data, MonoScriptComponent& newComponent)
 	{
 		const MonoScriptComponent* pScriptSource = reinterpret_cast<const MonoScriptComponent*>(data);

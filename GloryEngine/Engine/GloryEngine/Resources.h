@@ -4,6 +4,7 @@
 #include "ResourceManager.h"
 
 #include <GloryAssert.h>
+#include <Reflection.h>
 
 #include <array>
 #include <set>
@@ -42,6 +43,7 @@ namespace Glory
 			ResourceManager<R>* pManager = new ResourceManager<R>(this);
 			m_HashToManagerIndex.emplace(pManager->TypeHash, managerIndex);
 			m_Managers.emplace_back(pManager);
+			Reflect::RegisterResourceType<R>();
 		}
 
 		/** @brief Add a resource to a compatible manager

@@ -191,6 +191,12 @@ namespace Glory
         }
     }
 
+    void MeshRenderManager::OnCopy(MeshRenderer& mesh)
+    {
+        mesh.m_Material.ManualRegisterReference();
+        mesh.m_Mesh.ManualRegisterReference();
+    }
+
     void MeshRenderManager::OnInitialize()
     {
         Bind(DoOnDirty, &MeshRenderManager::OnDirtyImpl);

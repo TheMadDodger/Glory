@@ -32,6 +32,7 @@ namespace Glory
         void GetReferencesImpl(std::vector<UUID>& references) const;
 
         void OnDeserialize(Utils::BinaryStream&) override;
+        void OnCopy(AudioSource& audio) override;
 
     private:
         virtual void OnInitialize() override;

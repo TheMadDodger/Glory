@@ -23,6 +23,7 @@ namespace Glory
 		void OnDrawImpl(Utils::ECS::EntityID entity, UIRenderer& pComponent);
 		void GetReferencesImpl(std::vector<UUID>& references) const;
 		void OnDeserialize(Utils::BinaryStream&) override;
+		void OnCopy(UIRenderer& renderer) override;
 
 	private:
 		void OnInitialize() override;
