@@ -18,11 +18,11 @@ namespace Glory
 
     ShaderSourceData::ShaderSourceData(ShaderType shaderType, std::vector<char>&& source,
         std::vector<char>&& processed, std::vector<std::string>&& features,
-        std::vector<std::filesystem::path>&& includes)
+        std::vector<std::string>&& defines, std::vector<std::filesystem::path>&& includes)
         : m_ShaderType(shaderType), m_OriginalSource(std::move(source)),
-        m_ProcessedSource(std::move(processed)), m_Features(std::move(features)),
-        m_Includes(std::move(includes)), m_IncludesLastWriteTimes(m_Includes.size(), 0ull),
-        m_TimeSinceLastWrite(0)
+        m_ProcessedSource(std::move(processed)), m_Defines(std::move(defines)),
+        m_Features(std::move(features)), m_Includes(std::move(includes)),
+        m_IncludesLastWriteTimes(m_Includes.size(), 0ull), m_TimeSinceLastWrite(0)
     {
         APPEND_TYPE(ShaderSourceData);
     }
@@ -98,6 +98,16 @@ namespace Glory
     std::string_view ShaderSourceData::Feature(size_t index) const
     {
         return m_Features[index];
+    }
+
+    size_t ShaderSourceData::DefineCount() const
+    {
+        return m_Defines.size();
+    }
+
+    std::string_view ShaderSourceData::Define(size_t index) const
+    {
+        return m_Defines[index];
     }
 
     bool ShaderSourceData::IsOutdated(uint64_t cacheWriteTime) const

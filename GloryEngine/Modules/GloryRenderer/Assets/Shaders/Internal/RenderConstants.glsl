@@ -1,4 +1,4 @@
-#ifdef PUSH_CONSTANTS
+#ifndef NO_PUSH_CONSTANTS
 layout(push_constant) uniform RenderConstantsUBO
 #else
 layout(set = 0, std140, binding = 0) readonly uniform RenderConstantsUBO

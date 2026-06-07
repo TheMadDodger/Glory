@@ -191,7 +191,7 @@ namespace Glory::Editor
 		DescriptorSetUpdateInfo setUpdateInfo;
 		setUpdateInfo.m_Samplers.resize(1);
 		setUpdateInfo.m_Samplers[0].m_DescriptorIndex = 0;
-		setUpdateInfo.m_Samplers[0].m_TextureHandle = cubemapTexture;
+		setUpdateInfo.m_Samplers[0].m_TextureHandles = &cubemapTexture;
 		pDevice->UpdateDescriptorSet(m_CubemapSet, setUpdateInfo);
 
 		const glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);

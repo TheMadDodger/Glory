@@ -50,6 +50,14 @@ namespace Glory::Editor
 		std::memcpy(out.data(), editorShader.Data(), editorShader.Size()*sizeof(uint32_t));
 	}
 
+	const std::vector<std::string>& EditorVulkanRenderImpl::GetDeviceUniqueDefines() const
+	{
+		static std::vector<std::string> defines = {
+			"DEVICE_VULKAN"
+		};
+		return defines;
+	}
+
 	void EditorVulkanRenderImpl::SetContext(ImGuiContext* pImguiConext)
 	{
 		ImGui::SetCurrentContext(pImguiConext);

@@ -421,7 +421,7 @@ namespace Glory
 
 			DescriptorSetUpdateInfo dsWriteInfo;
 			dsWriteInfo.m_Samplers.resize(1);
-			dsWriteInfo.m_Samplers[0].m_TextureHandle = uiTexture;
+			dsWriteInfo.m_Samplers[0].m_TextureHandles = &uiTexture;
 			dsWriteInfo.m_Samplers[0].m_DescriptorIndex = 0;
 			pDevice->UpdateDescriptorSet(m_UIOverlaySets[i], dsWriteInfo);
 		}

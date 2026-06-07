@@ -30,6 +30,15 @@ namespace Glory::Editor
 		out.back() = '\0';
 	}
 
+	const std::vector<std::string>& EditorOpenGLRenderImpl::GetDeviceUniqueDefines() const
+	{
+		static std::vector<std::string> defines = {
+			"DEVICE_OPENGL",
+			"NO_PUSH_CONSTANTS"
+		};
+		return defines;
+	}
+
 	void EditorOpenGLRenderImpl::SetContext(ImGuiContext* pImguiConext)
 	{
 		ImGui::SetCurrentContext(pImguiConext);

@@ -217,6 +217,7 @@ namespace Glory
 		static DescriptorSetLayoutHandle m_GlobalClusterSetLayout;
 		static DescriptorSetLayoutHandle m_GlobalLightSetLayout;
 		static DescriptorSetLayoutHandle m_GlobalSampleDomeSetLayout;
+		static DescriptorSetLayoutHandle m_GlobalSamplersLayout;
 
 		/* Individual */
 		static DescriptorSetLayoutHandle m_CameraClusterSetLayout;

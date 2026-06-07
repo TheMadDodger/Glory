@@ -222,6 +222,7 @@ namespace Glory
 				Write(uint8_t(m_StorageBuffers[i].ShaderFlags));
 		}
 
+		container.Write(m_Features).Write(m_FeaturesEnabled).Write(m_Defines);
 		container.Write(m_TotalPropertiesByteSize);
 
 		/* Write settings */
@@ -279,6 +280,7 @@ namespace Glory
 				Read(reinterpret_cast<uint8_t&>(m_StorageBuffers[i].ShaderFlags));
 		}
 
+		container.Read(m_Features).Read(m_FeaturesEnabled).Read(m_Defines);
 		container.Read(m_TotalPropertiesByteSize);
 
 		/* Read settings */
@@ -313,9 +315,14 @@ namespace Glory
 			return;
 		}
 
-		m_Features.push_back(std::string(feature));
+		m_Features.emplace_back(feature);
 		m_FeaturesEnabled.Reserve(m_Features.size());
 		m_FeaturesEnabled.Set(index, isOn);
+	}
+
+	void PipelineData::AddDefine(std::string_view define)
+	{
+		m_Defines.emplace_back(define);
 	}
 
 	size_t PipelineData::FeatureIndex(std::string_view feature) const
@@ -333,9 +340,24 @@ namespace Glory
 		return m_Features.size();
 	}
 
+	size_t PipelineData::DefineCount() const
+	{
+		return m_Defines.size();
+	}
+
 	std::string_view PipelineData::FeatureName(size_t index) const
 	{
 		return m_Features[index];
+	}
+
+	std::string_view PipelineData::Define(size_t index) const
+	{
+		return m_Defines[index];
+	}
+
+	bool PipelineData::HasDefine(std::string_view define) const
+	{
+		return std::find(m_Defines.begin(), m_Defines.end(), define) != m_Defines.end();
 	}
 
 	bool PipelineData::FeatureEnabled(size_t index) const
@@ -353,6 +375,11 @@ namespace Glory
 	{
 		m_Features.clear();
 		m_FeaturesEnabled.Clear();
+	}
+
+	void PipelineData::ClearDefines()
+	{
+		m_Defines.clear();
 	}
 
 	size_t PipelineData::TotalPropertiesByteSize() const

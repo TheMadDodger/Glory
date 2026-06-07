@@ -38,6 +38,7 @@ namespace Glory
         uint32_t m_GLFormat;
         uint32_t m_GLInternalFormat;
         uint32_t m_GLDataType;
+        uint64_t m_GLBindlessHandle;
 
         int m_GLMinFilter;
         int m_GLMagFilter;
@@ -198,6 +199,7 @@ namespace Glory
         virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) override;
         virtual void UpdateTexture(TextureHandle texture, TextureData* pTextureData) override;
         virtual void ReadTexturePixels(TextureHandle texture, void* dst, size_t offset, size_t size) override;
+        virtual uint64_t GetTextureBindlessHandle(TextureHandle texture) override;
 
         virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info) override;
         virtual TextureHandle GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index) override;

@@ -140,6 +140,11 @@ namespace Glory
          */
         GLORY_ENGINE_API void AddFeature(std::string_view feature, bool isOn);
 
+        /** @brief Add a define
+         * @param define The name of the define
+         */
+        GLORY_ENGINE_API void AddDefine(std::string_view define);
+
         /** @brief Get the index of a feature
          * @param feature Name of the feature
          */
@@ -147,9 +152,15 @@ namespace Glory
 
         /** @brief Number of available features for this pipeline */
         GLORY_ENGINE_API size_t FeatureCount() const;
+        /** @brief Number of defines for this pipeline */
+        GLORY_ENGINE_API size_t DefineCount() const;
 
         /** @brief Get the name of a feature */
         GLORY_ENGINE_API std::string_view FeatureName(size_t index) const;
+        /** @brief Get a define */
+        GLORY_ENGINE_API std::string_view Define(size_t index) const;
+        /** @brief Check if this pipeline has a define */
+        GLORY_ENGINE_API bool HasDefine(std::string_view define) const;
 
         /** @brief Check if a feature is enabled */
         GLORY_ENGINE_API bool FeatureEnabled(size_t index) const;
@@ -158,6 +169,8 @@ namespace Glory
         GLORY_ENGINE_API void SetFeatureEnabled(size_t index, bool enabled);
         /** @brief Remove all features */
         GLORY_ENGINE_API void ClearFeatures();
+        /** @brief Remove all defines */
+        GLORY_ENGINE_API void ClearDefines();
 
         /** @brief Get total size of properties buffer in bytes */
         GLORY_ENGINE_API size_t TotalPropertiesByteSize() const;
@@ -285,6 +298,7 @@ namespace Glory
         std::vector<ShaderBufferInfo> m_UniformBuffers;
         std::vector<ShaderBufferInfo> m_StorageBuffers;
         std::vector<std::string> m_Features;
+        std::vector<std::string> m_Defines;
         Utils::BitSet m_FeaturesEnabled;
 
         size_t m_CurrentOffset = 0;

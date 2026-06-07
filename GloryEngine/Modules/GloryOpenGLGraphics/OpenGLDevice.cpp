@@ -1246,6 +1246,9 @@ namespace Glory
 		glBindTexture(texture.m_GLTextureType, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
+		texture.m_GLBindlessHandle = glGetTextureHandleARB(texture.m_GLTextureID);
+		glMakeTextureHandleResidentARB(texture.m_GLBindlessHandle);
+
 		return handle;
 	}
 
@@ -1322,6 +1325,9 @@ namespace Glory
 		glBindTexture(texture.m_GLTextureType, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
+		texture.m_GLBindlessHandle = glGetTextureHandleARB(texture.m_GLTextureID);
+		glMakeTextureHandleResidentARB(texture.m_GLBindlessHandle);
+
 		return handle;
 	}
 
@@ -1387,6 +1393,9 @@ namespace Glory
 
 		glBindTexture(texture.m_GLTextureType, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		texture.m_GLBindlessHandle = glGetTextureHandleARB(texture.m_GLTextureID);
+		glMakeTextureHandleResidentARB(texture.m_GLBindlessHandle);
 
 		return handle;
 	}
@@ -1455,6 +1464,17 @@ namespace Glory
 
 		glGetTextureImage(glTexture->m_GLTextureID, 0, glTexture->m_GLFormat, glTexture->m_GLDataType, size, dst);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+	}
+
+	uint64_t OpenGLDevice::GetTextureBindlessHandle(TextureHandle texture)
+	{
+		GL_Texture* glTexture = m_Textures.Find(texture);
+		if (!glTexture)
+		{
+			Debug().LogError("OpenGLDevice::ReadTexturePixels: Invalid texture handle.");
+			return 0ull;
+		}
+		return glTexture->m_GLBindlessHandle;
 	}
 
 	RenderTextureHandle OpenGLDevice::CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info)
@@ -1913,7 +1933,7 @@ namespace Glory
 		for (size_t i = 0; i < setWriteInfo.m_Samplers.size(); ++i)
 		{
 			auto& samplerInfo = setWriteInfo.m_Samplers[i];
-			glSet->m_Textures[samplerInfo.m_DescriptorIndex - setWriteInfo.m_Buffers.size()] = samplerInfo.m_TextureHandle;
+			glSet->m_Textures[samplerInfo.m_DescriptorIndex - setWriteInfo.m_Buffers.size()] = *samplerInfo.m_TextureHandles;
 		}
 	}
 

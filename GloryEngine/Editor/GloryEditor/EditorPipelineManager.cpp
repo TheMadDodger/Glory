@@ -500,6 +500,12 @@ namespace Glory::Editor
 				const bool enabled = features[feature].As<bool>(true);
 				pPipeline->AddFeature(feature, enabled);
 			}
+
+			for (size_t i = 0; i < shader.m_Defines.size(); ++i)
+			{
+				const std::string_view define = shader.m_Defines[i];
+				pPipeline->AddDefine(define);
+			}
 		}
 
 		for (size_t i = 0; i < m_Pipelines.size(); ++i)
@@ -624,8 +630,17 @@ namespace Glory::Editor
 				options.AddMacroDefinition(definition);
 			}
 
+			for (size_t j = 0; j < pShaderSource->DefineCount(); ++j)
+			{
+				const std::string_view define = pShaderSource->Define(j);
+				compiledShaders[i].m_Defines.emplace_back(define);
+			}
+
 			if (pEditorRenderer->PushConstantsSupported())
 				options.AddMacroDefinition("PUSH_CONSTANTS");
+
+			for (const auto& define : pEditorRenderer->GetDeviceUniqueDefines())
+				options.AddMacroDefinition(define);
 
 			compiledShaders[i].m_ShaderType = shaderType;
 			shaderc::Compiler compiler;
@@ -730,12 +745,12 @@ namespace Glory::Editor
 	{
 		spirv_cross::Compiler compiler(pEditorShader->Data(), pEditorShader->Size());
 		compiler.compile();
-		spirv_cross::ShaderResources resources = compiler.get_shader_resources();
+		const spirv_cross::ShaderResources resources = compiler.get_shader_resources();
 
 		for (size_t i = 0; i < resources.sampled_images.size(); ++i)
 		{
-			spirv_cross::Resource sampler = resources.sampled_images[i];
-			if (sampler.name == "ShadowAtlas") continue;
+			const spirv_cross::Resource sampler = resources.sampled_images[i];
+			if (sampler.name == "ShadowAtlas" || sampler.name.find("Textures") != std::string::npos) continue;
 
 			const spirv_cross::SPIRType& type = compiler.get_type(sampler.type_id);
 			ImageType imageType = ImageType::IT_UNDEFINED;
@@ -775,6 +790,16 @@ namespace Glory::Editor
 				spirv_cross::TypeID memberTypeID = materialArrayType.member_types[j];
 				const spirv_cross::SPIRType& memberType = compiler.get_type(memberTypeID);
 				const std::string& name = compiler.get_member_name(materialArrayType.self, j);
+				if (memberType.basetype == spirv_cross::SPIRType::Struct)
+				{
+					const std::string& typeName = compiler.get_name(memberTypeID);
+					if (typeName == "Texture2D" && pEditorShader->HasDefine("ENABLE_BINDLESS"))
+					{
+						pEditorShader->m_SamplerNames.push_back(name);
+						pEditorShader->m_SamplerTypes.push_back(ImageType::IT_2D);
+					}
+					continue;
+				}
 				const uint32_t hash = memberType.vecsize - 1 < SpirBaseTypeToHashOne[memberType.basetype].size() ?
 					SpirBaseTypeToHashOne[memberType.basetype][memberType.vecsize - 1] : 0;
 				pEditorShader->m_PropertyInfos.push_back(EditorShaderData::PropertyInfo(name, hash));

@@ -65,6 +65,7 @@ namespace Glory
 	struct SamplerDescritporLayout
 	{
 		uint32_t m_BindingIndex;
+		uint32_t m_SamplerCount = 1;
 		ShaderTypeFlag m_ShaderStages = ShaderTypeFlag::STF_All;
 	};
 
@@ -357,7 +358,8 @@ namespace Glory
 	/** @brief Sampler descriptor update info */
 	struct SamplerDescriptorUpdate
 	{
-		TextureHandle m_TextureHandle;
+		const TextureHandle* m_TextureHandles;
+		uint32_t m_DescriptorCount = 1;
 		uint32_t m_DescriptorIndex;
 	};
 
@@ -773,6 +775,7 @@ namespace Glory
 
 		virtual void UpdateTexture(TextureHandle texture, TextureData* pTextureData) = 0;
 		virtual void ReadTexturePixels(TextureHandle texture, void* dst, size_t offset, size_t size) = 0;
+		virtual uint64_t GetTextureBindlessHandle(TextureHandle texture) = 0;
 
 		/* Render texture */
 

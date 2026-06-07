@@ -35,6 +35,7 @@ namespace Glory::Editor
     private:
         virtual std::string ShadingLanguage() override;
         virtual void CompileShaderForEditor(const EditorShaderData& editorShader, std::vector<char>& out) override;
+        virtual const std::vector<std::string>& GetDeviceUniqueDefines() const override;
 
         void SetupVulkanWindow(VkInstance instance, ImGui_ImplVulkanH_Window* wd, VkSurfaceKHR surface, int width, int height);
         void CreateDescriptorPool(VkDevice device);

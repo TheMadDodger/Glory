@@ -280,7 +280,7 @@ namespace Glory
 		{
 			TextureHandle texture = pDevice->AcquireCachedTexture(pTextureData);
 			DescriptorSetUpdateInfo updateInfo;
-			updateInfo.m_Samplers = { { texture, 0 } };
+			updateInfo.m_Samplers = { { &texture, 1, 0 } };
 			m_LastFontID = consoleFontID;
 			pDevice->UpdateDescriptorSet(m_TextRenderSet, updateInfo);
 		}
