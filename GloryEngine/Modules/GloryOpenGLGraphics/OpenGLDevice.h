@@ -40,6 +40,7 @@ namespace Glory
         uint32_t m_GLDataType;
         uint64_t m_GLBindlessHandle;
 
+        uint32_t m_GLSamplerID;
         int m_GLMinFilter;
         int m_GLMagFilter;
         int m_GLTextureWrapS;
@@ -108,6 +109,7 @@ namespace Glory
 
         std::vector<uint32_t> m_BindingIndices;
         std::vector<std::string> m_SamplerNames;
+        std::vector<uint32_t> m_DescriptorCounts;
     };
 
     struct GL_DescriptorSet
@@ -117,6 +119,7 @@ namespace Glory
         DescriptorSetLayoutHandle m_Layout;
         std::vector<BufferHandle> m_Buffers;
         std::vector<TextureHandle> m_Textures;
+        std::vector<BufferHandle> m_BindlessTexturesBuffers;
     };
 
     struct GL_Swapchain

@@ -12,6 +12,14 @@
 
 namespace Glory::Editor
 {
+	constexpr std::string_view BindlessExtensionLine = "\n#extension GL_ARB_bindless_texture : require\n";
+	constexpr std::string_view TextureArraySrc = "Textures2D[1024];";
+	constexpr std::string_view TextureArrayDst =
+		"layout(binding = 1, std430) readonly buffer Textures2DSSBO\n"
+		"{\n"
+		"    sampler2D Textures2D[];\n"
+		"};\n";
+
 	EditorOpenGLRenderImpl::EditorOpenGLRenderImpl() {}
 
 	EditorOpenGLRenderImpl::~EditorOpenGLRenderImpl() {}
@@ -24,7 +32,26 @@ namespace Glory::Editor
 	void EditorOpenGLRenderImpl::CompileShaderForEditor(const EditorShaderData& editorShader, std::vector<char>& out)
 	{
 		spirv_cross::CompilerGLSL compiler(editorShader.Data(), editorShader.Size());
-		const std::string compiledShader = compiler.compile();
+		std::string compiledShader = compiler.compile();
+
+		const bool isBindless = editorShader.HasDefine("ENABLE_BINDLESS");
+
+		if (isBindless)
+		{
+			const size_t textureArrayIndex = compiledShader.find(TextureArraySrc);
+			if (textureArrayIndex != std::string::npos)
+			{
+				const size_t textureArrayLineStart = compiledShader.rfind('\n', textureArrayIndex) + 1;
+				const size_t textureArrayLineEnd = compiledShader.find('\n', textureArrayLineStart);
+				const size_t textureArrayLineLength = textureArrayLineEnd - textureArrayLineStart;
+				compiledShader.replace(textureArrayLineStart, textureArrayLineLength, TextureArrayDst, 0, TextureArrayDst.size());
+
+				const size_t versionIndex = compiledShader.find("#version");
+				const size_t nextLineIndex = compiledShader.find('\n', versionIndex) + 1;
+				compiledShader.insert(nextLineIndex, BindlessExtensionLine);
+			}
+		}
+
 		out.resize(compiledShader.length() + 1);
 		std::memcpy(out.data(), compiledShader.data(), compiledShader.length());
 		out.back() = '\0';

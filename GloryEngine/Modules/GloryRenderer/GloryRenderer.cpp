@@ -1571,7 +1571,7 @@ namespace Glory
 				pDevice->BindDescriptorSets(commandBuffer, batchData.m_Pipeline, { shadowsSet }, 5);
 
 			const bool isBindless = pPipelineData->HasDefine("ENABLE_BINDLESS");
-			if(isBindless && pPipelineData->ResourcePropertyCount() > 0)
+			if (isBindless && pPipelineData->ResourcePropertyCount() > 0)
 				pDevice->BindDescriptorSets(commandBuffer, batchData.m_Pipeline, { m_GlobalSamplersSet }, 6);
 
 			if (pPipelineData->BlendEnabled())
