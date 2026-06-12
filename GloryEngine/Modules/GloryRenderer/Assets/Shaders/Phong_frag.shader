@@ -1,6 +1,6 @@
 #type frag
 
-#version 450
+#version 460 core
 #extension GL_ARB_separate_shader_objects : enable
 
 #define FEATURE_TEXTURED
@@ -72,12 +72,9 @@ void main()
 
 #ifdef WITH_TEXTURED
 #ifdef ENABLE_BINDLESS
-	vec4 baseColor = mat.texSampler.ID != InvalidTextureID ?
-		SampleTexture2D(mat.texSampler, fragTexCoord)*inColor.a : mat.Color*inColor.a;
-	vec3 normal = mat.normalSampler.ID != InvalidTextureID ?
-		normalize(TBN*(SampleTexture2D(mat.normalSampler, fragTexCoord).xyz*2.0 - 1.0)) : TBN[2];
-	float shininess = mat.shininessSampler.ID != InvalidTextureID ?
-		SampleTexture2D(mat.shininessSampler, fragTexCoord).r : mat.Shininess;
+	vec4 baseColor = SampleTexture2D(mat.texSampler, fragTexCoord, mat.Color*inColor.a)*inColor.a;
+	vec3 normal = normalize(TBN*(SampleTexture2D(mat.normalSampler, fragTexCoord, vec4(TBN[2], 1.0)).xyz*2.0 - 1.0));
+	float shininess = SampleTexture2D(mat.shininessSampler, fragTexCoord, vec4(mat.Shininess)).r;
 #else
 	vec4 baseColor = TextureEnabled(0) ? texture(texSampler, fragTexCoord)*inColor.a : mat.Color*inColor.a;
 	vec3 normal = TextureEnabled(1) ? normalize(TBN*(texture(normalSampler, fragTexCoord).xyz*2.0 - 1.0)) : TBN[2];

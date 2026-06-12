@@ -586,8 +586,6 @@ namespace Glory
 					return;
 				}
 
-				glBindBuffer(glBuffer->m_GLTarget, glBuffer->m_GLBufferID);
-				OpenGLGraphicsModule::LogGLError(glGetError());
 				glBindBufferBase(glBuffer->m_GLTarget, (GLuint)glSetLayout->m_BindingIndices[index], glBuffer->m_GLBufferID);
 				OpenGLGraphicsModule::LogGLError(glGetError());
 				++index;
@@ -598,8 +596,6 @@ namespace Glory
 				if (glSet->m_BindlessTexturesBuffers[i])
 				{
 					GL_Buffer* glBuffer = m_Buffers.Find(glSet->m_BindlessTexturesBuffers[i]);
-					glBindBuffer(glBuffer->m_GLTarget, glBuffer->m_GLBufferID);
-					OpenGLGraphicsModule::LogGLError(glGetError());
 					glBindBufferBase(glBuffer->m_GLTarget, (GLuint)glSetLayout->m_BindingIndices[index], glBuffer->m_GLBufferID);
 					OpenGLGraphicsModule::LogGLError(glGetError());
 					++index;
@@ -628,8 +624,6 @@ namespace Glory
 	{
 		GL_Buffer* glBuffer = m_Buffers.Find(m_ConstantsBuffer);
 		AssignBuffer(m_ConstantsBuffer, data, offset, size);
-		glBindBuffer(glBuffer->m_GLTarget, glBuffer->m_GLBufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindBufferBase(glBuffer->m_GLTarget, 0, glBuffer->m_GLBufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
@@ -1436,7 +1430,11 @@ namespace Glory
 			return;
 		}
 
-		glMakeTextureHandleNonResidentARB(glTexture->m_GLBindlessHandle);
+		if (glTexture->m_GLBindlessHandle)
+		{
+			glMakeTextureHandleNonResidentARB(glTexture->m_GLBindlessHandle);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
 		glBindTexture(glTexture->m_GLTextureType, glTexture->m_GLTextureID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
@@ -1453,52 +1451,57 @@ namespace Glory
 		glTexture->m_GLTextureWrapT = Texturewraps.at(sampler.AddressModeV);
 		glTexture->m_GLTextureWrapR = Texturewraps.at(sampler.AddressModeW);
 
-		glTexParameteri(glTexture->m_GLTextureType, GL_TEXTURE_MIN_FILTER, glTexture->m_GLMinFilter);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameteri(glTexture->m_GLTextureType, GL_TEXTURE_MAG_FILTER, glTexture->m_GLMagFilter);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameteri(glTexture->m_GLTextureType, GL_TEXTURE_WRAP_S, glTexture->m_GLTextureWrapS);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameteri(glTexture->m_GLTextureType, GL_TEXTURE_WRAP_T, glTexture->m_GLTextureWrapT);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameteri(glTexture->m_GLTextureType, GL_TEXTURE_WRAP_R, glTexture->m_GLTextureWrapR);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameterf(glTexture->m_GLTextureType, GL_TEXTURE_MIN_LOD, sampler.MinLOD);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameterf(glTexture->m_GLTextureType, GL_TEXTURE_MAX_LOD, sampler.MaxLOD);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glTexParameterf(glTexture->m_GLTextureType, GL_TEXTURE_LOD_BIAS, sampler.MipLODBias);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-
 		float aniso = 0.0f;
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		aniso = std::min(sampler.MaxAnisotropy, aniso);
-		glTexParameterf(glTexture->m_GLTextureType, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
-		OpenGLGraphicsModule::LogGLError(glGetError());
 
-		glCreateSamplers(1, &glTexture->m_GLSamplerID);
-		glSamplerParameteri(glTexture->m_GLSamplerID, GL_TEXTURE_MIN_FILTER, glTexture->m_GLMinFilter);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glSamplerParameteri(glTexture->m_GLSamplerID, GL_TEXTURE_MAG_FILTER, glTexture->m_GLMagFilter);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glSamplerParameteri(glTexture->m_GLSamplerID, GL_TEXTURE_WRAP_S, glTexture->m_GLTextureWrapS);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glSamplerParameteri(glTexture->m_GLSamplerID, GL_TEXTURE_WRAP_T, glTexture->m_GLTextureWrapT);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glSamplerParameteri(glTexture->m_GLSamplerID, GL_TEXTURE_WRAP_R, glTexture->m_GLTextureWrapR);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glSamplerParameterf(glTexture->m_GLSamplerID, GL_TEXTURE_MIN_LOD, sampler.MinLOD);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glSamplerParameterf(glTexture->m_GLSamplerID, GL_TEXTURE_MAX_LOD, sampler.MaxLOD);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glSamplerParameterf(glTexture->m_GLSamplerID, GL_TEXTURE_LOD_BIAS, sampler.MipLODBias);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glSamplerParameterf(glTexture->m_GLSamplerID, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		if (!glTexture->m_GLBindlessHandle)
+		{
+			glTexParameteri(glTexture->m_GLTextureType, GL_TEXTURE_MIN_FILTER, glTexture->m_GLMinFilter);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			glTexParameteri(glTexture->m_GLTextureType, GL_TEXTURE_MAG_FILTER, glTexture->m_GLMagFilter);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			glTexParameteri(glTexture->m_GLTextureType, GL_TEXTURE_WRAP_S, glTexture->m_GLTextureWrapS);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			glTexParameteri(glTexture->m_GLTextureType, GL_TEXTURE_WRAP_T, glTexture->m_GLTextureWrapT);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			glTexParameteri(glTexture->m_GLTextureType, GL_TEXTURE_WRAP_R, glTexture->m_GLTextureWrapR);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			glTexParameterf(glTexture->m_GLTextureType, GL_TEXTURE_MIN_LOD, sampler.MinLOD);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			glTexParameterf(glTexture->m_GLTextureType, GL_TEXTURE_MAX_LOD, sampler.MaxLOD);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			glTexParameterf(glTexture->m_GLTextureType, GL_TEXTURE_LOD_BIAS, sampler.MipLODBias);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			glTexParameterf(glTexture->m_GLTextureType, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+		else
+		{
+			glCreateSamplers(1, &glTexture->m_GLSamplerID);
+			glSamplerParameteri(glTexture->m_GLSamplerID, GL_TEXTURE_MIN_FILTER, glTexture->m_GLMinFilter);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			glSamplerParameteri(glTexture->m_GLSamplerID, GL_TEXTURE_MAG_FILTER, glTexture->m_GLMagFilter);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			glSamplerParameteri(glTexture->m_GLSamplerID, GL_TEXTURE_WRAP_S, glTexture->m_GLTextureWrapS);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			glSamplerParameteri(glTexture->m_GLSamplerID, GL_TEXTURE_WRAP_T, glTexture->m_GLTextureWrapT);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			glSamplerParameteri(glTexture->m_GLSamplerID, GL_TEXTURE_WRAP_R, glTexture->m_GLTextureWrapR);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			glSamplerParameterf(glTexture->m_GLSamplerID, GL_TEXTURE_MIN_LOD, sampler.MinLOD);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			glSamplerParameterf(glTexture->m_GLSamplerID, GL_TEXTURE_MAX_LOD, sampler.MaxLOD);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			glSamplerParameterf(glTexture->m_GLSamplerID, GL_TEXTURE_LOD_BIAS, sampler.MipLODBias);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			glSamplerParameterf(glTexture->m_GLSamplerID, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
+			OpenGLGraphicsModule::LogGLError(glGetError());
 
-		glTexture->m_GLBindlessHandle = glGetTextureSamplerHandleARB(glTexture->m_GLTextureID, glTexture->m_GLSamplerID);
-		glMakeTextureHandleResidentARB(glTexture->m_GLBindlessHandle);
+			glTexture->m_GLBindlessHandle = glGetTextureSamplerHandleARB(glTexture->m_GLTextureID, glTexture->m_GLSamplerID);
+			glMakeTextureHandleResidentARB(glTexture->m_GLBindlessHandle);
+		}
 
 		glBindTexture(glTexture->m_GLTextureType, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
@@ -1964,12 +1967,14 @@ namespace Glory
 		DescriptorSetHandle handle;
 		GL_DescriptorSet& set = m_Sets.Emplace(handle, GL_DescriptorSet());
 
-		set.m_BindlessTexturesBuffers.resize(glSetLayout->m_DescriptorCounts.size(), nullptr);
+		set.m_BindlessTexturesBuffers.resize(glSetLayout->m_DescriptorCounts.size(), 0u);
 		for (size_t i = 0; i < set.m_BindlessTexturesBuffers.size(); ++i)
 		{
 			const size_t descriptorCount = glSetLayout->m_DescriptorCounts[i];
 			if (descriptorCount <= 1) continue;
-			set.m_BindlessTexturesBuffers[i] = CreateBuffer(sizeof(uint64_t) * descriptorCount, BT_Storage, BF_None);
+			set.m_BindlessTexturesBuffers[i] = CreateBuffer(sizeof(uint64_t)*descriptorCount, BT_Storage, BF_None);
+			std::vector<uint64_t> clearValues(descriptorCount, 0ull);
+			AssignBuffer(set.m_BindlessTexturesBuffers[i], clearValues.data());
 			textureHandles[i] = nullptr;
 		}
 
