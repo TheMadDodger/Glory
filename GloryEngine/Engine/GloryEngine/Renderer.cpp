@@ -4,6 +4,9 @@
 #include "Resources.h"
 #include "MaterialData.h"
 #include "GPUTextureAtlas.h"
+#include "RenderHelpers.h"
+#include "CameraManager.h"
+#include "Camera.h"
 
 #include <Module.h>
 
@@ -290,9 +293,19 @@ namespace Glory
 
 	size_t Renderer::Submit(const glm::ivec2& pickPos, UUID cameraID)
 	{
+		/* Convert on inverted devices */
+
+		GraphicsDevice* pDevice = m_pModule->GetEngine()->ActiveGraphicsDevice();
+		glm::ivec2 converted = pickPos;
+		if (pDevice)
+		{
+			Camera* pCamera = m_pModule->GetEngine()->GetCameraManager().GetCamera(cameraID);
+			FixScreenCoords(converted, pCamera->GetResolution(), pDevice);
+		}
+
 		ProfileSample s{ &m_pModule->GetEngine()->Profiler(), "Renderer::Submit(pickPos, cameraID)" };
 		const size_t index = m_FrameData.Picking.size();
-		m_FrameData.Picking.push_back({ pickPos, cameraID });
+		m_FrameData.Picking.push_back({ converted, cameraID });
 		return index;
 	}
 
