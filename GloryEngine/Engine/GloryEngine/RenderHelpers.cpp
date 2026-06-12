@@ -62,6 +62,23 @@ namespace Glory
 		}
 	}
 
+	void FixScreenCoords(glm::ivec2& coords, const glm::uvec2& dimensions, GraphicsDevice* pDevice)
+	{
+		const ViewportOrigin origin = pDevice->GetViewportOrigin();
+		switch (origin)
+		{
+		case Glory::TopLeft:
+			/* Invert Y axis */
+			coords.y = dimensions.y - coords.y;
+			break;
+		case Glory::BottomLeft:
+			/* No need to do anything */
+			break;
+		default:
+			break;
+		}
+	}
+
 	//const glm::vec4 temp = coords;
 	//const float height = temp.w - temp.y;
 	//coords.y = 1.0f - temp.y - temp.w;

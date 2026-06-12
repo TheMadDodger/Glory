@@ -52,7 +52,7 @@ namespace Glory::Editor
         UUID m_PreviewPrefabID = 0;
         UUID m_PrefabInstance = 0;
         GScene* m_pPreviewScene;
-        glm::uvec2 m_PickPos;
+        glm::uvec2 m_PickPos{ 0, 0 };
         bool m_BlockNextPick{ false };
 
         struct

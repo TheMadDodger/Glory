@@ -24,6 +24,7 @@
 #include <imgui_internal.h>
 #include <Components.h>
 #include <GraphicsDevice.h>
+#include <RenderHelpers.h>
 
 namespace Glory::Editor
 {
@@ -80,8 +81,9 @@ namespace Glory::Editor
 
 	void SceneWindow::Draw()
 	{
-		Renderer* pRenderer = EditorApplication::GetInstance()->GetEngine()->ActiveRenderer();
-		EditorApplication::GetInstance()->GetEngine()->ActiveRenderer()->Submit(m_PickPos, m_SceneCamera.m_Camera.GetUUID());
+		IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
+		Renderer* pRenderer = pEngine->ActiveRenderer();
+		pRenderer->Submit(m_PickPos, m_SceneCamera.m_Camera.GetUUID());
 	}
 
 	void SceneWindow::MenuBar()
