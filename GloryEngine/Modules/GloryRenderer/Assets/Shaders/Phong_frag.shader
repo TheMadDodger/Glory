@@ -1,16 +1,36 @@
 #type frag
 
-#version 450
+#version 460 core
 #extension GL_ARB_separate_shader_objects : enable
 
 #define FEATURE_TEXTURED
 #define FEATURE_RECEIVE_SHADOWS
 #define FEATURE_TRANSPARENCY
 
+#include "Internal/RenderConstants.glsl"
+
+#ifdef WITH_TEXTURED
+#define ENABLE_BINDLESS
+
+#ifdef ENABLE_BINDLESS
+#include "internal/TexturedBindless.glsl"
+#else
+#include "internal/Textured.glsl"
+#endif
+
+#endif
+
 struct Material
 {
 	vec4 Color;
 	float Shininess;
+#ifdef WITH_TEXTURED
+#ifdef ENABLE_BINDLESS
+	Texture2D texSampler;
+	Texture2D normalSampler;
+	Texture2D shininessSampler;
+#endif
+#endif
 };
 
 #ifdef WITH_RECEIVE_SHADOWS
@@ -18,7 +38,6 @@ layout (set = 5, binding = 0) uniform sampler2D ShadowAtlas;
 //layout (set = 5, binding = 1) uniform samplerCube IrradianceMap;
 #endif
 
-#include "Internal/RenderConstants.glsl"
 #include "Internal/Camera.glsl"
 #include "Internal/Light.glsl"
 #include "Internal/Material.glsl"
@@ -26,11 +45,11 @@ layout (set = 5, binding = 0) uniform sampler2D ShadowAtlas;
 #include "Internal/DepthHelpers.glsl"
 
 #ifdef WITH_TEXTURED
-#include "internal/Textured.glsl"
-
+#ifndef ENABLE_BINDLESS
 layout(set = 6, binding = 1) uniform sampler2D texSampler;
 layout(set = 6, binding = 2) uniform sampler2D normalSampler;
 layout(set = 6, binding = 3) uniform sampler2D shininessSampler;
+#endif
 #endif
 
 layout(location = 0) in vec2 fragTexCoord;
@@ -52,10 +71,15 @@ void main()
 	Material mat = GetMaterial();
 
 #ifdef WITH_TEXTURED
+#ifdef ENABLE_BINDLESS
+	vec4 baseColor = SampleTexture2D(mat.texSampler, fragTexCoord, mat.Color*inColor.a)*inColor.a;
+	vec3 normal = normalize(TBN*(SampleTexture2D(mat.normalSampler, fragTexCoord, vec4(TBN[2], 1.0)).xyz*2.0 - 1.0));
+	float shininess = SampleTexture2D(mat.shininessSampler, fragTexCoord, vec4(mat.Shininess)).r;
+#else
 	vec4 baseColor = TextureEnabled(0) ? texture(texSampler, fragTexCoord)*inColor.a : mat.Color*inColor.a;
-
 	vec3 normal = TextureEnabled(1) ? normalize(TBN*(texture(normalSampler, fragTexCoord).xyz*2.0 - 1.0)) : TBN[2];
 	float shininess = TextureEnabled(2) ? texture(shininessSampler, fragTexCoord).r : mat.Shininess;
+#endif
 #else
 	vec4 baseColor = mat.Color*inColor.a;
 	vec3 normal = inNormal;

@@ -82,7 +82,7 @@ namespace Glory::Editor
 		DescriptorSetUpdateInfo writeInfo;
 		writeInfo.m_Samplers.resize(1);
 		writeInfo.m_Samplers[0].m_DescriptorIndex = 0;
-		writeInfo.m_Samplers[0].m_TextureHandle = texture;
+		writeInfo.m_Samplers[0].m_TextureHandles = &texture;
 		pDevice->UpdateDescriptorSet(ImageSetHandles[frameIndex], writeInfo);
 
 		RenderPassHandle renderPass = pRenderer->FinalColorRenderPass(frameIndex);
@@ -113,7 +113,7 @@ namespace Glory::Editor
 		DescriptorSetUpdateInfo writeInfo;
 		writeInfo.m_Samplers.resize(1);
 		writeInfo.m_Samplers[0].m_DescriptorIndex = 0;
-		writeInfo.m_Samplers[0].m_TextureHandle = texture;
+		writeInfo.m_Samplers[0].m_TextureHandles = &texture;
 		pDevice->UpdateDescriptorSet(ImageSetHandles[frameIndex], writeInfo);
 
 		RenderPassHandle renderPass = pRenderer->FinalColorRenderPass(frameIndex);

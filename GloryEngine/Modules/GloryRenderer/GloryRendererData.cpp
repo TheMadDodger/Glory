@@ -41,6 +41,7 @@ namespace Glory
 	DescriptorSetLayoutHandle RendererDSLayouts::m_GlobalClusterSetLayout = NULL;
 	DescriptorSetLayoutHandle RendererDSLayouts::m_GlobalLightSetLayout = NULL;
 	DescriptorSetLayoutHandle RendererDSLayouts::m_GlobalSampleDomeSetLayout = NULL;
+	DescriptorSetLayoutHandle RendererDSLayouts::m_GlobalSamplersLayout = NULL;
 
 	/* Individual */
 	DescriptorSetLayoutHandle RendererDSLayouts::m_CameraClusterSetLayout = NULL;

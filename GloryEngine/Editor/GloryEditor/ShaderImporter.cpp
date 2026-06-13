@@ -40,6 +40,7 @@ namespace Glory::Editor
         std::vector<char> Source;
         std::vector<char> ProcessedSource;
         std::vector<std::string> Features;
+        std::vector<std::string> OtherDefines;
         std::vector<std::filesystem::path> Includes;
     };
 
@@ -125,9 +126,10 @@ namespace Glory::Editor
     {
         if (define._Starts_with("FEATURE_"))
         {
-            shaderData.Features.push_back(define);
+            shaderData.Features.emplace_back(define);
             return true;
         }
+        shaderData.OtherDefines.emplace_back(define);
         return false;
     }
 
@@ -230,7 +232,8 @@ namespace Glory::Editor
         }
 
         return { path, new ShaderSourceData(shaderData.Type, std::move(shaderData.Source),
-            std::move(shaderData.ProcessedSource), std::move(shaderData.Features), std::move(shaderData.Includes)) };
+            std::move(shaderData.ProcessedSource), std::move(shaderData.Features),
+            std::move(shaderData.OtherDefines), std::move(shaderData.Includes))};
     }
 
     void ShaderImporter::Initialize()

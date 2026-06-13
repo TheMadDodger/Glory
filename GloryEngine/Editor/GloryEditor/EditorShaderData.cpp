@@ -104,6 +104,11 @@ namespace Glory::Editor
 		}
 	}
 
+	bool EditorShaderData::HasDefine(const std::string_view define) const
+	{
+		return std::find(m_Defines.begin(), m_Defines.end(), define) != m_Defines.end();
+	}
+
 	void EditorShaderData::Serialize(Utils::BinaryStream& container) const
 	{
 		container.Write(m_ShaderType).Write(m_ShaderData).
@@ -116,6 +121,7 @@ namespace Glory::Editor
 		container.Write(m_UniformBuffers);
 		container.Write(m_StorageBuffers);
 		container.Write(m_Features);
+		container.Write(m_Defines);
 	}
 
 	void EditorShaderData::Deserialize(Utils::BinaryStream& container)
@@ -132,6 +138,7 @@ namespace Glory::Editor
 		container.Read(m_UniformBuffers);
 		container.Read(m_StorageBuffers);
 		container.Read(m_Features);
+		container.Read(m_Defines);
 	}
 
 	EditorShaderData::PropertyInfo::PropertyInfo():

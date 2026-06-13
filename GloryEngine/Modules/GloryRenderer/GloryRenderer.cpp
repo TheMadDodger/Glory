@@ -31,6 +31,7 @@ namespace Glory
 	static const size_t NUM_CLUSTERS = GridSizeX*GridSizeY*NUM_DEPTH_SLICES;
 	static const size_t MAX_LIGHTS_PER_TILE = 50;
 	static const size_t MAX_KERNEL_SIZE = 1024;
+	static const size_t MAX_TEXTURES = 1024;
 
 	GloryRenderer::GloryRenderer(): m_pModule(nullptr), Renderer(nullptr)
 	{
@@ -113,68 +114,68 @@ namespace Glory
 			if (SSAOEnabled())
 			{
 				updateInfo.m_Samplers.resize(2);
-				updateInfo.m_Samplers[0].m_TextureHandle = normals;
+				updateInfo.m_Samplers[0].m_TextureHandles = &normals;
 				updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
-				updateInfo.m_Samplers[1].m_TextureHandle = depth;
+				updateInfo.m_Samplers[1].m_TextureHandles = &depth;
 				updateInfo.m_Samplers[1].m_DescriptorIndex = 1;
 				pDevice->UpdateDescriptorSet(ssaoSamplersSet, updateInfo);
 
 				updateInfo = DescriptorSetUpdateInfo();
 				updateInfo.m_Samplers.resize(1);
-				updateInfo.m_Samplers[0].m_TextureHandle = ao;
+				updateInfo.m_Samplers[0].m_TextureHandles = &ao;
 				updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
 				pDevice->UpdateDescriptorSet(ssaoBlurSamplersSet, updateInfo);
 
 				updateInfo = DescriptorSetUpdateInfo();
 				updateInfo.m_Samplers.resize(1);
-				updateInfo.m_Samplers[0].m_TextureHandle = aoBlur;
+				updateInfo.m_Samplers[0].m_TextureHandles = &aoBlur;
 				updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
 				pDevice->UpdateDescriptorSet(ssaoPostSamplersSet, updateInfo);
 			}
 
 			updateInfo = DescriptorSetUpdateInfo();
 			updateInfo.m_Samplers.resize(1);
-			updateInfo.m_Samplers[0].m_TextureHandle = color;
+			updateInfo.m_Samplers[0].m_TextureHandles = &color;
 			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
 			pDevice->UpdateDescriptorSet(colorSamplerSet, updateInfo);
 
 			updateInfo = DescriptorSetUpdateInfo();
 			updateInfo.m_Samplers.resize(3);
-			updateInfo.m_Samplers[0].m_TextureHandle = objectID;
+			updateInfo.m_Samplers[0].m_TextureHandles = &objectID;
 			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
-			updateInfo.m_Samplers[1].m_TextureHandle = normals;
+			updateInfo.m_Samplers[1].m_TextureHandles = &normals;
 			updateInfo.m_Samplers[1].m_DescriptorIndex = 1;
-			updateInfo.m_Samplers[2].m_TextureHandle = depth;
+			updateInfo.m_Samplers[2].m_TextureHandles = &depth;
 			updateInfo.m_Samplers[2].m_DescriptorIndex = 2;
 			pDevice->UpdateDescriptorSet(pickingSamplersSet, updateInfo);
 
 			updateInfo = DescriptorSetUpdateInfo();
 			updateInfo.m_Samplers.resize(1);
-			updateInfo.m_Samplers[0].m_TextureHandle = ppBack;
+			updateInfo.m_Samplers[0].m_TextureHandles = &ppBack;
 			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
 			pDevice->UpdateDescriptorSet(postProcessPass.m_BackDescriptor, updateInfo);
 
 			updateInfo = DescriptorSetUpdateInfo();
 			updateInfo.m_Samplers.resize(1);
-			updateInfo.m_Samplers[0].m_TextureHandle = ppFront;
+			updateInfo.m_Samplers[0].m_TextureHandles = &ppFront;
 			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
 			pDevice->UpdateDescriptorSet(postProcessPass.m_FrontDescriptor, updateInfo);
 
 			updateInfo = DescriptorSetUpdateInfo();
 			updateInfo.m_Samplers.resize(1);
-			updateInfo.m_Samplers[0].m_TextureHandle = normals;
+			updateInfo.m_Samplers[0].m_TextureHandles = &normals;
 			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
 			pDevice->UpdateDescriptorSet(normalSamplerSet, updateInfo);
 
 			updateInfo = DescriptorSetUpdateInfo();
 			updateInfo.m_Samplers.resize(1);
-			updateInfo.m_Samplers[0].m_TextureHandle = objectID;
+			updateInfo.m_Samplers[0].m_TextureHandles = &objectID;
 			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
 			pDevice->UpdateDescriptorSet(objectIDSamplerSet, updateInfo);
 
 			updateInfo = DescriptorSetUpdateInfo();
 			updateInfo.m_Samplers.resize(1);
-			updateInfo.m_Samplers[0].m_TextureHandle = depth;
+			updateInfo.m_Samplers[0].m_TextureHandles = &depth;
 			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
 			pDevice->UpdateDescriptorSet(depthSamplerSet, updateInfo);
 		}
@@ -317,6 +318,16 @@ namespace Glory
 		RendererDSLayouts::m_PickingSamplerSetLayout = CreateSamplerDescriptorLayout(pDevice, 3, { 0, 1, 2 }, { STF_Compute }, { "ObjectID", "Normal", "Depth" });
 		RendererDSLayouts::m_GlobalSkyboxSamplerSetLayout = CreateSamplerDescriptorLayout(pDevice, 1, { 0 }, { STF_Fragment }, { "Skybox" });
 		RendererDSLayouts::m_LightGridSetLayout = CreateBufferDescriptorLayout(pDevice, 1, { 1 }, { BT_Storage }, { STF_Fragment });
+
+		DescriptorSetLayoutInfo samplersSetLayoutInfo;
+		samplersSetLayoutInfo.m_SamplerNames = { "Textures2D" };
+		samplersSetLayoutInfo.m_Samplers.resize(1);
+		samplersSetLayoutInfo.m_Samplers[0].m_BindingIndex = 9;
+		samplersSetLayoutInfo.m_Samplers[0].m_SamplerCount = MAX_TEXTURES;
+		RendererDSLayouts::m_GlobalSamplersLayout = pDevice->CreateDescriptorSetLayout(std::move(samplersSetLayoutInfo));
+		DescriptorSetInfo samplersSetInfo;
+		samplersSetInfo.m_Layout = RendererDSLayouts::m_GlobalSamplersLayout;
+		m_GlobalSamplersSet = pDevice->CreateDescriptorSet(std::move(samplersSetInfo));
 
 		DescriptorSetLayoutInfo blurLayoutInfo;
 		blurLayoutInfo.m_PushConstantRange.m_Offset = 0;
@@ -1358,7 +1369,7 @@ namespace Glory
 
 			DescriptorSetUpdateInfo updateInfo;
 			updateInfo.m_Samplers.resize(1);
-			updateInfo.m_Samplers[0].m_TextureHandle = color;
+			updateInfo.m_Samplers[0].m_TextureHandles = &color;
 			updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
 			pDevice->UpdateDescriptorSet(m_FinalFrameColorSets[i], updateInfo);
 		}
@@ -1558,6 +1569,10 @@ namespace Glory
 
 			if (shadowsSet)
 				pDevice->BindDescriptorSets(commandBuffer, batchData.m_Pipeline, { shadowsSet }, 5);
+
+			const bool isBindless = pPipelineData->HasDefine("ENABLE_BINDLESS");
+			if (isBindless && pPipelineData->ResourcePropertyCount() > 0)
+				pDevice->BindDescriptorSets(commandBuffer, batchData.m_Pipeline, { m_GlobalSamplersSet }, 6);
 
 			if (pPipelineData->BlendEnabled())
 			{
@@ -1813,6 +1828,7 @@ namespace Glory
 		Resources& resources = m_pModule->GetEngine()->GetResources();
 
 		/* Prepare dynamic data */
+		size_t textureCounter = 0;
 		size_t batchIndex = 0;
 		batchDatas.reserve(batches.size());
 		for (const auto& pipelineBatch : batches)
@@ -1829,6 +1845,7 @@ namespace Glory
 
 			if (pipelineBatch.m_UniqueMeshOrder.empty()) continue;
 
+			/* Update world transforms */
 			size_t objectCount = 0;
 			for (const UUID meshID : pipelineBatch.m_UniqueMeshOrder)
 			{
@@ -1849,19 +1866,25 @@ namespace Glory
 				objectCount += meshBatch.m_Worlds.size();
 			}
 
-			const size_t propertyDataSize = pPipelineData->TotalPropertiesByteSize();
+			/* Prepare material data buffers */
+			const bool isBindless = pPipelineData->HasDefine("ENABLE_BINDLESS");
 			const size_t textureCount = pPipelineData->ResourcePropertyCount();
-			const size_t paddingBytes = 32 - propertyDataSize % 32;
+			const size_t basePropertyDataSize = pPipelineData->TotalPropertiesByteSize();
+			const size_t propertyDataSize = basePropertyDataSize + (isBindless ? textureCount*sizeof(uint32_t) : 0);
+			const size_t bytes32 = propertyDataSize % 32;
+			const size_t paddingBytes = bytes32 > 0 ? 32 - bytes32 : 0;
 			const size_t finalPropertyDataSize = propertyDataSize + paddingBytes;
 			const size_t totalBufferSize = finalPropertyDataSize*pipelineBatch.m_UniqueMaterials.size();
+
 			if (batchData.m_MaterialDatas->size() < totalBufferSize)
 				batchData.m_MaterialDatas.resize(totalBufferSize);
-			if (textureCount && batchData.m_TextureBits->size() < pipelineBatch.m_UniqueMaterials.size())
+			if (!isBindless && textureCount && batchData.m_TextureBits->size() < pipelineBatch.m_UniqueMaterials.size())
 				batchData.m_TextureBits.resize(pipelineBatch.m_UniqueMaterials.size());
 			if (batchData.m_LastFrameUniqueMaterials.size() < pipelineBatch.m_UniqueMaterials.size())
 				batchData.m_LastFrameUniqueMaterials.resize(pipelineBatch.m_UniqueMaterials.size(), NULL);
 
-			if (!batchData.m_TextureSetLayout && textureCount > 0)
+			/* Texture layouts */
+			if (!isBindless && !batchData.m_TextureSetLayout && textureCount > 0)
 			{
 				DescriptorSetLayoutInfo texturesSetLayoutInfo;
 				texturesSetLayoutInfo.m_Samplers.resize(textureCount);
@@ -1874,37 +1897,103 @@ namespace Glory
 				}
 				batchData.m_TextureSetLayout = pDevice->CreateDescriptorSetLayout(std::move(texturesSetLayoutInfo));
 			}
-			if (textureCount > 0 && batchData.m_TextureSets.size() < pipelineBatch.m_UniqueMaterials.size())
+			if (!isBindless && textureCount > 0 && batchData.m_TextureSets.size() < pipelineBatch.m_UniqueMaterials.size())
 				batchData.m_TextureSets.resize(pipelineBatch.m_UniqueMaterials.size(), nullptr);
 
-			for (size_t i = 0; i < pipelineBatch.m_UniqueMaterials.size(); ++i)
+			/* Update material data buffers */
+			std::map<UUID, uint32_t> uniqueTextureIndexes;
+			for (size_t materialIndex = 0; materialIndex < pipelineBatch.m_UniqueMaterials.size(); ++materialIndex)
 			{
-				const UUID materialID = pipelineBatch.m_UniqueMaterials[i];
-				const bool differentMaterial = batchData.m_LastFrameUniqueMaterials[i] != materialID;
-				batchData.m_LastFrameUniqueMaterials[i] = materialID;
+				const UUID materialID = pipelineBatch.m_UniqueMaterials[materialIndex];
+				const bool differentMaterial = batchData.m_LastFrameUniqueMaterials[materialIndex] != materialID;
+				batchData.m_LastFrameUniqueMaterials[materialIndex] = materialID;
 				uint64_t& materialCacheVersion = m_ResourceCacheVersions[materialID];
 
 				MaterialData* pMaterialData = materials.GetMaterial(materialID);
 				if (!pMaterialData) continue;
 				const auto& buffer = pMaterialData->GetBufferReference();
-				if (std::memcmp(&batchData.m_MaterialDatas.m_Data[i*finalPropertyDataSize], buffer.data(), buffer.size()) != 0)
+				if (std::memcmp(&batchData.m_MaterialDatas.m_Data[materialIndex*finalPropertyDataSize], buffer.data(), basePropertyDataSize) != 0)
 				{
-					std::memcpy(&batchData.m_MaterialDatas.m_Data[i*finalPropertyDataSize], buffer.data(), buffer.size());
-					batchData.m_MaterialDatas.SetDirty(i);
-					batchData.m_MaterialDatas.SetDirty(i + finalPropertyDataSize - 1);
+					std::memcpy(&batchData.m_MaterialDatas.m_Data[materialIndex*finalPropertyDataSize], buffer.data(), basePropertyDataSize);
+					batchData.m_MaterialDatas.SetDirty(materialIndex);
+					batchData.m_MaterialDatas.SetDirty(materialIndex + finalPropertyDataSize - 1);
 				}
 				const uint32_t textureBits = pMaterialData->TextureSetBits();
-				if (textureCount && batchData.m_TextureBits.m_Data[i] != textureBits)
+				if (!isBindless && textureCount && batchData.m_TextureBits.m_Data[materialIndex] != textureBits)
 				{
-					batchData.m_TextureBits.m_Data[i] = textureBits;
-					batchData.m_TextureBits.SetDirty(i);
+					batchData.m_TextureBits.m_Data[materialIndex] = textureBits;
+					batchData.m_TextureBits.SetDirty(materialIndex);
 				}
 
 				if (textureCount == 0)
 					continue;
 
+				if (m_AllTextures->size() < textureCounter + textureCount)
+				{
+					if (textureCounter + textureCount >= MAX_TEXTURES)
+					{
+						m_pModule->GetEngine()->GetDebug().LogError("Max textures exceeded.");
+						continue;
+					}
+
+					m_AllTextures.resize(textureCounter + textureCount);
+				}
+
+				if (isBindless)
+				{
+					bool texturesDirty = false;
+					std::vector<uint32_t> textureIds(textureCount);
+
+					for (size_t materialTextureIndex = 0; materialTextureIndex < textureCount; ++materialTextureIndex)
+					{
+						const UUID textureID = pMaterialData->GetResourceUUIDPointer(materialTextureIndex)->GetUUID();
+						uint64_t& textureCacheVersion = m_ResourceCacheVersions[textureID];
+						uint64_t& textureImageCacheVersion = m_TextureImageCacheVersions[textureID];
+						Resource* pResource = resources.GetResource(textureID);
+						TextureData* pTexture = pResource ? static_cast<TextureData*>(pResource) : nullptr;
+						ImageData* pImage = pTexture ? pTexture->GetImageData(&resources) : nullptr;
+						uint64_t* imageCacheVersion = pImage ? &m_ResourceCacheVersions[pImage->GetUUID()] : nullptr;
+						texturesDirty |= (pTexture ? pTexture->IsDirty(textureCacheVersion) : false) ||
+							(pImage ? (pImage->IsDirty(*imageCacheVersion) || pImage->IsDirty(textureImageCacheVersion)) : false);
+						textureCacheVersion = pTexture ? pTexture->DirtyVersion() : 0;
+
+						const TextureHandle texture = pImage ? pDevice->AcquireCachedTexture(pTexture) : nullptr;
+						auto textureIter = uniqueTextureIndexes.find(texture);
+						if (texture && !uniqueTextureIndexes.contains(texture))
+							textureIter = uniqueTextureIndexes.emplace(texture, textureCounter).first;
+
+						const uint32_t texId = texture ? textureIter->second : UINT32_MAX;
+						textureIds[materialTextureIndex] = texId;
+
+						if (texture && (texturesDirty || std::memcmp(&m_AllTextures.m_Data[texId], &texture, sizeof(TextureHandle)) != 0))
+						{
+							std::memcpy(&m_AllTextures.m_Data[texId], &texture, sizeof(TextureHandle));
+							m_AllTextures.SetDirty(texId);
+						}
+						if (texture)
+							++textureCounter;
+						if (pImage)
+						{
+							textureImageCacheVersion = pImage->DirtyVersion();
+							*imageCacheVersion = pImage->DirtyVersion();
+						}
+						else textureImageCacheVersion = 0;
+					}
+
+					if (std::memcmp(&batchData.m_MaterialDatas.m_Data[materialIndex*finalPropertyDataSize + basePropertyDataSize],
+						textureIds.data(), textureIds.size()*sizeof(uint32_t)) != 0)
+					{
+						std::memcpy(&batchData.m_MaterialDatas.m_Data[materialIndex*finalPropertyDataSize + basePropertyDataSize],
+							textureIds.data(), textureIds.size()*sizeof(uint32_t));
+						batchData.m_MaterialDatas.SetDirty(materialIndex*finalPropertyDataSize + basePropertyDataSize);
+						batchData.m_MaterialDatas.SetDirty(materialIndex*finalPropertyDataSize + basePropertyDataSize + textureIds.size()*sizeof(uint32_t));
+					}
+					materialCacheVersion = pMaterialData->DirtyVersion();
+					continue;
+				}
+
 				/* Textures */
-				if (!batchData.m_TextureSets[i])
+				if (!isBindless && !batchData.m_TextureSets[materialIndex])
 				{
 					DescriptorSetInfo setInfo;
 					setInfo.m_Layout = batchData.m_TextureSetLayout;
@@ -1921,30 +2010,30 @@ namespace Glory
 						TextureData* pTexture = static_cast<TextureData*>(pResource);
 						setInfo.m_Samplers[j].m_TextureHandle = pDevice->AcquireCachedTexture(pTexture);
 					}
-					batchData.m_TextureSets[i] = pDevice->CreateDescriptorSet(std::move(setInfo));
+					batchData.m_TextureSets[materialIndex] = pDevice->CreateDescriptorSet(std::move(setInfo));
 					materialCacheVersion = pMaterialData->DirtyVersion();
 					continue;
 				}
 
 				std::vector<TextureData*> textures(textureCount);
 				bool texturesDirty = false;
-				for (size_t j = 0; j < textureCount; ++j)
+				for (size_t materialTextureIndex = 0; materialTextureIndex < textureCount; ++materialTextureIndex)
 				{
-					const UUID textureID = pMaterialData->GetResourceUUIDPointer(j)->GetUUID();
+					const UUID textureID = pMaterialData->GetResourceUUIDPointer(materialTextureIndex)->GetUUID();
 					uint64_t& textureCacheVersion = m_ResourceCacheVersions[textureID];
 					uint64_t& textureImageCacheVersion = m_TextureImageCacheVersions[textureID];
 					Resource* pResource = resources.GetResource(textureID);
 					if (!pResource)
 					{
-						textures[j] = NULL;
+						textures[materialTextureIndex] = NULL;
 						continue;
 					}
-					textures[j] = static_cast<TextureData*>(pResource);
-					ImageData* pImage = textures[j]->GetImageData(&resources);
+					textures[materialTextureIndex] = static_cast<TextureData*>(pResource);
+					ImageData* pImage = textures[materialTextureIndex]->GetImageData(&resources);
 					uint64_t* imageCacheVersion = pImage ? &m_ResourceCacheVersions[pImage->GetUUID()] : nullptr;
-					texturesDirty |= textures[j]->IsDirty(textureCacheVersion) ||
+					texturesDirty |= textures[materialTextureIndex]->IsDirty(textureCacheVersion) ||
 						(pImage ? (pImage->IsDirty(*imageCacheVersion) || pImage->IsDirty(textureImageCacheVersion)) : false);
-					textureCacheVersion = textures[j]->DirtyVersion();
+					textureCacheVersion = textures[materialTextureIndex]->DirtyVersion();
 					if (pImage)
 					{
 						textureImageCacheVersion = pImage->DirtyVersion();
@@ -1960,10 +2049,11 @@ namespace Glory
 					for (size_t j = 0; j < textureCount; ++j)
 					{
 						TextureData* pTexture = textures[j];
+						const TextureHandle texture = pDevice->AcquireCachedTexture(pTexture);
+						dsUpdateInfo.m_Samplers[j].m_TextureHandles = &texture;
 						dsUpdateInfo.m_Samplers[j].m_DescriptorIndex = j;
-						dsUpdateInfo.m_Samplers[j].m_TextureHandle = pDevice->AcquireCachedTexture(pTexture);
 					}
-					pDevice->UpdateDescriptorSet(batchData.m_TextureSets[i], dsUpdateInfo);
+					pDevice->UpdateDescriptorSet(batchData.m_TextureSets[materialIndex], dsUpdateInfo);
 				}
 				materialCacheVersion = pMaterialData->DirtyVersion();
 			}
@@ -1989,6 +2079,7 @@ namespace Glory
 			}
 			if (pDevice->BufferSize(batchData.m_MaterialsBuffer) < batchData.m_MaterialDatas.TotalByteSize())
 				pDevice->ResizeBuffer(batchData.m_MaterialsBuffer, batchData.m_MaterialDatas.TotalByteSize());
+
 			if (batchData.m_MaterialDatas)
 			{
 				const size_t dirtySize = batchData.m_MaterialDatas.DirtySize();
@@ -1996,14 +2087,14 @@ namespace Glory
 					batchData.m_MaterialDatas.m_DirtyRange.first, dirtySize);
 			}
 
-			if (textureCount && !batchData.m_TextureBitsBuffer)
+			if (!isBindless && textureCount && !batchData.m_TextureBitsBuffer)
 			{
 				batchData.m_TextureBitsBuffer = pDevice->CreateBuffer(batchData.m_TextureBits->size()*sizeof(uint32_t), BT_Storage, BF_Write);
 				batchData.m_TextureBits.SetDirty();
 			}
-			if (textureCount && pDevice->BufferSize(batchData.m_TextureBitsBuffer) < batchData.m_TextureBits.TotalByteSize())
+			if (!isBindless && textureCount && pDevice->BufferSize(batchData.m_TextureBitsBuffer) < batchData.m_TextureBits.TotalByteSize())
 				pDevice->ResizeBuffer(batchData.m_TextureBitsBuffer, batchData.m_TextureBits.TotalByteSize());
-			if (textureCount && batchData.m_TextureBits)
+			if (!isBindless && textureCount && batchData.m_TextureBits)
 			{
 				const size_t dirtySize = batchData.m_TextureBits.DirtySize();
 				pDevice->AssignBuffer(batchData.m_TextureBitsBuffer, batchData.m_TextureBits.DirtyStart(),
@@ -2020,12 +2111,13 @@ namespace Glory
 				setInfo.m_Layout = RendererDSLayouts::m_ObjectDataSetLayout;
 				batchData.m_ObjectDataSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 			}
+
 			if (!batchData.m_MaterialSet)
 			{
 				DescriptorSetLayoutInfo setLayoutInfo;
 				DescriptorSetInfo setInfo;
-				setInfo.m_Buffers.resize(textureCount > 0 ? 2 : 1);
-				setLayoutInfo.m_Buffers.resize(textureCount > 0 ? 2 : 1);
+				setInfo.m_Buffers.resize(!isBindless && textureCount > 0 ? 2 : 1);
+				setLayoutInfo.m_Buffers.resize(!isBindless && textureCount > 0 ? 2 : 1);
 				setLayoutInfo.m_Buffers[0].m_BindingIndex = uint32_t(BufferBindingIndices::Materials);
 				setLayoutInfo.m_Buffers[0].m_Type = BT_Storage;
 				setLayoutInfo.m_Buffers[0].m_ShaderStages = STF_Fragment;
@@ -2059,7 +2151,7 @@ namespace Glory
 			if (batchData.m_MaterialDatas.SizeDirty() || batchData.m_TextureBits.SizeDirty())
 			{
 				DescriptorSetUpdateInfo dsWrite;
-				dsWrite.m_Buffers.resize(textureCount > 0 ? 2 : 1);
+				dsWrite.m_Buffers.resize(!isBindless && textureCount > 0 ? 2 : 1);
 				dsWrite.m_Buffers[0].m_BufferHandle = batchData.m_MaterialsBuffer;
 				dsWrite.m_Buffers[0].m_DescriptorIndex = 0;
 				dsWrite.m_Buffers[0].m_Offset = 0;
@@ -2085,7 +2177,8 @@ namespace Glory
 				descriptorSetLayouts[3] = RendererDSLayouts::m_CameraLightSetLayout;
 				descriptorSetLayouts[4] = batchData.m_MaterialSetLayout;
 				descriptorSetLayouts[5] = RendererDSLayouts::m_ShadowAtlasSamplerSetLayout;
-				if (textureCount) descriptorSetLayouts[6] = batchData.m_TextureSetLayout;
+				if (!isBindless && textureCount) descriptorSetLayouts[6] = batchData.m_TextureSetLayout;
+				else if (textureCount) descriptorSetLayouts[6] = RendererDSLayouts::m_GlobalSamplersLayout;
 
 				PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineBatch.m_PipelineID);
 				if (!pPipelineData) continue;
@@ -2095,6 +2188,16 @@ namespace Glory
 				batchData.m_Pipeline = pDevice->AcquireCachedPipeline(defaultRenderPass, pPipelineData,
 					std::move(descriptorSetLayouts), pMesh->VertexSize(), pMesh->AttributeTypesVector());
 				pipelineCacheVersion = pPipelineData->DirtyVersion();
+			}
+
+			if (m_AllTextures)
+			{
+				DescriptorSetUpdateInfo updateInfo;
+				updateInfo.m_Samplers.resize(1);
+				updateInfo.m_Samplers[0].m_TextureHandles = m_AllTextures->data();
+				updateInfo.m_Samplers[0].m_DescriptorCount = m_AllTextures->size();
+				updateInfo.m_Samplers[0].m_DescriptorIndex = 0;
+				pDevice->UpdateDescriptorSet(m_GlobalSamplersSet, updateInfo);
 			}
 		}
 	}
@@ -2189,7 +2292,7 @@ namespace Glory
 		if (!cubemapDirty && cubemap == m_SkyboxCubemap) return;
 
 		DescriptorSetUpdateInfo dsUpdateInfo;
-		dsUpdateInfo.m_Samplers = { { cubemap, 0 } };
+		dsUpdateInfo.m_Samplers = { { &cubemap, 1, 0 } };
 		pDevice->UpdateDescriptorSet(m_GlobalSkyboxSamplerSet, dsUpdateInfo);
 		m_SkyboxCubemap = cubemap;
 	}

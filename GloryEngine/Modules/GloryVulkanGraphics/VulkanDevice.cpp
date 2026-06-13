@@ -300,6 +300,9 @@ namespace Glory
 
 		vk::PhysicalDeviceVulkan12Features vk12Features{};
 		vk12Features.separateDepthStencilLayouts = VK_TRUE;
+		vk12Features.descriptorIndexing = VK_TRUE;
+		vk12Features.runtimeDescriptorArray = VK_TRUE;
+		vk12Features.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
 
 		vk::PhysicalDeviceRobustness2FeaturesKHR robustnessFeatures{};
 		robustnessFeatures.nullDescriptor = VK_FALSE;
@@ -315,10 +318,13 @@ namespace Glory
 		extendedDynamicState3Features.extendedDynamicState3ColorBlendEnable = VK_TRUE;
 		extendedDynamicState3Features.extendedDynamicState3ColorBlendEquation = VK_TRUE;
 
+		vk::PhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeaures{};
+
 		vk12Features.pNext = &robustnessFeatures;
 		robustnessFeatures.pNext = &extendedDynamicStateFeatures;
 		extendedDynamicStateFeatures.pNext = &extendedDynamicState3Properties;
 		extendedDynamicState3Properties.pNext = &extendedDynamicState3Features;
+		extendedDynamicState3Features.pNext = &descriptorIndexingFeaures;
 
 		vk::DeviceCreateInfo deviceCreateInfo = vk::DeviceCreateInfo()
 			.setPQueueCreateInfos(queueCreateInfos.data())
@@ -1824,6 +1830,11 @@ namespace Glory
 		m_LogicalDevice.unmapMemory(vkImage->m_VKMemory);
 	}
 
+	uint64_t VulkanDevice::GetTextureBindlessHandle(TextureHandle texture)
+	{
+		return 0ull;
+	}
+
 	RenderTextureHandle VulkanDevice::CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info)
 	{
 		ProfileSample s{ &Profiler(), "VulkanDevice::CreateRenderTexture" };
@@ -2450,7 +2461,7 @@ namespace Glory
 			{
 				const size_t index = setLayoutInfo.m_Buffers.size() + i;
 				layoutBindings[index].binding = setLayoutInfo.m_Samplers[i].m_BindingIndex;
-				layoutBindings[index].descriptorCount = 1;
+				layoutBindings[index].descriptorCount = setLayoutInfo.m_Samplers[i].m_SamplerCount;
 				layoutBindings[index].descriptorType = vk::DescriptorType::eCombinedImageSampler;
 				layoutBindings[index].pImmutableSamplers = nullptr;
 				layoutBindings[index].stageFlags = GetShaderStageFlags(setLayoutInfo.m_Samplers[i].m_ShaderStages);
@@ -2577,7 +2588,7 @@ namespace Glory
 
 		std::vector<vk::WriteDescriptorSet> descriptorWrites(setWriteInfo.m_Buffers.size() + setWriteInfo.m_Samplers.size());
 		std::vector<vk::DescriptorBufferInfo> bufferInfos(setWriteInfo.m_Buffers.size());
-		std::vector<vk::DescriptorImageInfo> imageInfos(setWriteInfo.m_Samplers.size());
+		std::vector<std::vector<vk::DescriptorImageInfo>> imageInfos(setWriteInfo.m_Samplers.size());
 		for (size_t i = 0; i < setWriteInfo.m_Buffers.size(); ++i)
 		{
 			auto& bufferInfo = setWriteInfo.m_Buffers[i];
@@ -2605,24 +2616,30 @@ namespace Glory
 		{
 			const size_t index = setWriteInfo.m_Buffers.size() + i;
 			auto& samplerInfo = setWriteInfo.m_Samplers[i];
-			VK_Texture* vkTexture = m_Textures.Find(setWriteInfo.m_Samplers[i].m_TextureHandle);
-			if (!vkTexture) vkTexture = m_Textures.Find(m_DefaultTexture);
-			VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
-			if (!vkImage)
-			{
-				vkTexture = m_Textures.Find(m_DefaultTexture);
-				vkImage = m_Images.Find(vkTexture->m_Image);
-			}
 
-			imageInfos[i].imageLayout = vkImage ? vkImage->m_VKFinalLayout : vk::ImageLayout::eUndefined;
-			imageInfos[i].imageView = vkImage ? vkImage->m_VKImageView : nullptr;
-			imageInfos[i].sampler = vkTexture ? vkTexture->m_VKSampler : nullptr;
+			imageInfos[i] = std::vector<vk::DescriptorImageInfo>(samplerInfo.m_DescriptorCount);
+
+			for (size_t j = 0; j < samplerInfo.m_DescriptorCount; ++j)
+			{
+				VK_Texture* vkTexture = m_Textures.Find(setWriteInfo.m_Samplers[i].m_TextureHandles[j]);
+				if (!vkTexture) vkTexture = m_Textures.Find(m_DefaultTexture);
+				VK_Image* vkImage = m_Images.Find(vkTexture->m_Image);
+				if (!vkImage)
+				{
+					vkTexture = m_Textures.Find(m_DefaultTexture);
+					vkImage = m_Images.Find(vkTexture->m_Image);
+				}
+
+				imageInfos[i][j].imageLayout = vkImage ? vkImage->m_VKFinalLayout : vk::ImageLayout::eUndefined;
+				imageInfos[i][j].imageView = vkImage ? vkImage->m_VKImageView : nullptr;
+				imageInfos[i][j].sampler = vkTexture ? vkTexture->m_VKSampler : nullptr;
+			}
 
 			descriptorWrites[index].dstBinding = vkDescriptorSetLayout->m_BindingIndices[samplerInfo.m_DescriptorIndex];
 			descriptorWrites[index].dstArrayElement = 0;
 			descriptorWrites[index].descriptorType = vkDescriptorSetLayout->m_DescriptorTypes[samplerInfo.m_DescriptorIndex];
-			descriptorWrites[index].descriptorCount = 1;
-			descriptorWrites[index].pImageInfo = &imageInfos[i];
+			descriptorWrites[index].descriptorCount = setWriteInfo.m_Samplers[i].m_DescriptorCount;
+			descriptorWrites[index].pImageInfo = imageInfos[i].data();
 		}
 
 		for (size_t i = 0; i < descriptorWrites.size(); ++i)

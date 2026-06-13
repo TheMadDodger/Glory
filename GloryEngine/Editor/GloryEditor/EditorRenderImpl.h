@@ -22,6 +22,7 @@ namespace Glory::Editor
 		/** @todo: Use a platform system to determine this */
 		virtual bool PushConstantsSupported() { return true; }
 		virtual void CompileShaderForEditor(const EditorShaderData& editorShader, std::vector<char>& out) = 0;
+		virtual const std::vector<std::string>& GetDeviceUniqueDefines() const = 0;
 
 	protected:
 		virtual void SetContext(ImGuiContext* pImguiConext) = 0;

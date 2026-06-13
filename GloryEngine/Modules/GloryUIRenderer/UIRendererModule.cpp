@@ -235,7 +235,7 @@ namespace Glory
 				DescriptorSetUpdateInfo dsWrite;
 				dsWrite.m_Samplers.resize(1);
 				dsWrite.m_Samplers[0].m_DescriptorIndex = 0;
-				dsWrite.m_Samplers[0].m_TextureHandle = texture;
+				dsWrite.m_Samplers[0].m_TextureHandles = &texture;
 				pDevice->UpdateDescriptorSet(batchData.m_TextureSets[i], dsWrite);
 				batchData.m_LastTextureIDs[i] = textureID;
 			}

@@ -38,7 +38,9 @@ namespace Glory
         uint32_t m_GLFormat;
         uint32_t m_GLInternalFormat;
         uint32_t m_GLDataType;
+        uint64_t m_GLBindlessHandle;
 
+        uint32_t m_GLSamplerID;
         int m_GLMinFilter;
         int m_GLMagFilter;
         int m_GLTextureWrapS;
@@ -107,6 +109,7 @@ namespace Glory
 
         std::vector<uint32_t> m_BindingIndices;
         std::vector<std::string> m_SamplerNames;
+        std::vector<uint32_t> m_DescriptorCounts;
     };
 
     struct GL_DescriptorSet
@@ -116,6 +119,7 @@ namespace Glory
         DescriptorSetLayoutHandle m_Layout;
         std::vector<BufferHandle> m_Buffers;
         std::vector<TextureHandle> m_Textures;
+        std::vector<BufferHandle> m_BindlessTexturesBuffers;
     };
 
     struct GL_Swapchain
@@ -198,6 +202,7 @@ namespace Glory
         virtual TextureHandle CreateTexture(const TextureCreateInfo& textureInfo, const void* pixels=nullptr, size_t dataSize=0) override;
         virtual void UpdateTexture(TextureHandle texture, TextureData* pTextureData) override;
         virtual void ReadTexturePixels(TextureHandle texture, void* dst, size_t offset, size_t size) override;
+        virtual uint64_t GetTextureBindlessHandle(TextureHandle texture) override;
 
         virtual RenderTextureHandle CreateRenderTexture(RenderPassHandle renderPass, RenderTextureCreateInfo&& info) override;
         virtual TextureHandle GetRenderTextureAttachment(RenderTextureHandle renderTexture, size_t index) override;

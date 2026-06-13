@@ -91,7 +91,8 @@ namespace Glory
 
 		inline void SetDirty(size_t index)
 		{
-			if (index >= m_Data.size()) return;
+			if (index >= m_Data.size())
+				index = m_Data.size() - 1;
 
 			const bool wasDirty = m_Dirty;
 			m_Dirty = true;
@@ -122,7 +123,7 @@ namespace Glory
 		inline void* DirtyStart()
 		{
 			char* start = (char*)m_Data.data();
-			return start + m_DirtyRange.first * sizeof(T);
+			return start + m_DirtyRange.first*sizeof(T);
 		}
 
 		inline size_t TotalByteSize()

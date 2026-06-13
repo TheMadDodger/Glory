@@ -39,6 +39,8 @@ namespace Glory::Editor
 		GLORY_EDITOR_API void LoadIntoMaterial(MaterialData* pMaterial) const;
 		GLORY_EDITOR_API void LoadIntoPipeline(PipelineData* pMaterial) const;
 
+		GLORY_EDITOR_API bool HasDefine(const std::string_view define) const;
+
 		void Serialize(Utils::BinaryStream& container) const;
 		void Deserialize(Utils::BinaryStream& container);
 
@@ -63,5 +65,6 @@ namespace Glory::Editor
 		std::vector<std::string> m_StorageBuffers;
 
 		std::vector<std::string> m_Features;
+		std::vector<std::string> m_Defines;
 	};
 }
