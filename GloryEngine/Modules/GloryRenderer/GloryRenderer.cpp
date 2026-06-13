@@ -1875,6 +1875,7 @@ namespace Glory
 			const size_t paddingBytes = bytes32 > 0 ? 32 - bytes32 : 0;
 			const size_t finalPropertyDataSize = propertyDataSize + paddingBytes;
 			const size_t totalBufferSize = finalPropertyDataSize*pipelineBatch.m_UniqueMaterials.size();
+
 			if (batchData.m_MaterialDatas->size() < totalBufferSize)
 				batchData.m_MaterialDatas.resize(totalBufferSize);
 			if (!isBindless && textureCount && batchData.m_TextureBits->size() < pipelineBatch.m_UniqueMaterials.size())
@@ -1900,6 +1901,7 @@ namespace Glory
 				batchData.m_TextureSets.resize(pipelineBatch.m_UniqueMaterials.size(), nullptr);
 
 			/* Update material data buffers */
+			std::map<UUID, uint32_t> uniqueTextureIndexes;
 			for (size_t materialIndex = 0; materialIndex < pipelineBatch.m_UniqueMaterials.size(); ++materialIndex)
 			{
 				const UUID materialID = pipelineBatch.m_UniqueMaterials[materialIndex];
@@ -1910,9 +1912,9 @@ namespace Glory
 				MaterialData* pMaterialData = materials.GetMaterial(materialID);
 				if (!pMaterialData) continue;
 				const auto& buffer = pMaterialData->GetBufferReference();
-				if (std::memcmp(&batchData.m_MaterialDatas.m_Data[materialIndex*finalPropertyDataSize], buffer.data(), buffer.size()) != 0)
+				if (std::memcmp(&batchData.m_MaterialDatas.m_Data[materialIndex*finalPropertyDataSize], buffer.data(), basePropertyDataSize) != 0)
 				{
-					std::memcpy(&batchData.m_MaterialDatas.m_Data[materialIndex*finalPropertyDataSize], buffer.data(), buffer.size());
+					std::memcpy(&batchData.m_MaterialDatas.m_Data[materialIndex*finalPropertyDataSize], buffer.data(), basePropertyDataSize);
 					batchData.m_MaterialDatas.SetDirty(materialIndex);
 					batchData.m_MaterialDatas.SetDirty(materialIndex + finalPropertyDataSize - 1);
 				}
@@ -1955,10 +1957,10 @@ namespace Glory
 							(pImage ? (pImage->IsDirty(*imageCacheVersion) || pImage->IsDirty(textureImageCacheVersion)) : false);
 						textureCacheVersion = pTexture ? pTexture->DirtyVersion() : 0;
 
-						const TextureHandle texture = pTexture ? pDevice->AcquireCachedTexture(pTexture) : nullptr;
-						auto textureIter = m_TextureIndexes.find(texture);
-						if (texture && !m_TextureIndexes.contains(texture))
-							textureIter = m_TextureIndexes.emplace(texture, textureCounter).first;
+						const TextureHandle texture = pImage ? pDevice->AcquireCachedTexture(pTexture) : nullptr;
+						auto textureIter = uniqueTextureIndexes.find(texture);
+						if (texture && !uniqueTextureIndexes.contains(texture))
+							textureIter = uniqueTextureIndexes.emplace(texture, textureCounter).first;
 
 						const uint32_t texId = texture ? textureIter->second : UINT32_MAX;
 						textureIds[materialTextureIndex] = texId;
@@ -1984,7 +1986,7 @@ namespace Glory
 						std::memcpy(&batchData.m_MaterialDatas.m_Data[materialIndex*finalPropertyDataSize + basePropertyDataSize],
 							textureIds.data(), textureIds.size()*sizeof(uint32_t));
 						batchData.m_MaterialDatas.SetDirty(materialIndex*finalPropertyDataSize + basePropertyDataSize);
-						batchData.m_MaterialDatas.SetDirty(materialIndex + textureIds.size()*sizeof(uint32_t));
+						batchData.m_MaterialDatas.SetDirty(materialIndex*finalPropertyDataSize + basePropertyDataSize + textureIds.size()*sizeof(uint32_t));
 					}
 					materialCacheVersion = pMaterialData->DirtyVersion();
 					continue;
@@ -2077,6 +2079,7 @@ namespace Glory
 			}
 			if (pDevice->BufferSize(batchData.m_MaterialsBuffer) < batchData.m_MaterialDatas.TotalByteSize())
 				pDevice->ResizeBuffer(batchData.m_MaterialsBuffer, batchData.m_MaterialDatas.TotalByteSize());
+
 			if (batchData.m_MaterialDatas)
 			{
 				const size_t dirtySize = batchData.m_MaterialDatas.DirtySize();
@@ -2108,6 +2111,7 @@ namespace Glory
 				setInfo.m_Layout = RendererDSLayouts::m_ObjectDataSetLayout;
 				batchData.m_ObjectDataSet = pDevice->CreateDescriptorSet(std::move(setInfo));
 			}
+
 			if (!batchData.m_MaterialSet)
 			{
 				DescriptorSetLayoutInfo setLayoutInfo;

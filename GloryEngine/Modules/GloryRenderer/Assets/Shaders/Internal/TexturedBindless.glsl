@@ -6,7 +6,6 @@ layout(set = 6, binding = 9) uniform sampler2D Textures2D[];
 layout(binding = 9) uniform sampler2D Textures2D[1024];
 #endif
 
-const vec4 MissingTextureColor = vec4(1.0, 0.753, 0.796, 1.0);
 const uint InvalidTextureID = ~0;
 
 struct Texture2D

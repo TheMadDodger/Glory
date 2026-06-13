@@ -270,7 +270,6 @@ namespace Glory
 		std::unordered_map<UUID, uint64_t> m_ResourceCacheVersions;
 		std::unordered_map<UUID, uint64_t> m_TextureImageCacheVersions;
 
-		std::unordered_map<UUID, uint32_t> m_TextureIndexes;
 		CPUBuffer<TextureHandle> m_AllTextures;
 		DescriptorSetHandle m_GlobalSamplersSet = nullptr;
 	};
