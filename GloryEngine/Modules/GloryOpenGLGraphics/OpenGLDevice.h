@@ -5,6 +5,10 @@
 
 #include <BitSet.h>
 
+#include <queue>
+
+typedef struct __GLsync* GLsync;
+
 namespace Glory
 {
     struct GL_Buffer
@@ -131,6 +135,13 @@ namespace Glory
         uint32_t m_CurrentImageIndex = 0;
     };
 
+    struct GL_CommandBuffer
+    {
+        static constexpr GraphicsHandleType HandleType = H_CommandBuffer;
+
+        GLsync m_Fence = nullptr;
+    };
+
     class OpenGLGraphicsModule;
 
     class OpenGLDevice : public GraphicsDevice
@@ -145,7 +156,7 @@ namespace Glory
 
     private: /* Render commands */
         virtual CommandBufferHandle CreateCommandBuffer() override;
-        virtual void Begin(CommandBufferHandle) override;
+        virtual void Begin(CommandBufferHandle commandBuffer) override;
         virtual void BeginRenderPass(CommandBufferHandle, RenderPassHandle renderPass) override;
         virtual void BeginPipeline(CommandBufferHandle, PipelineHandle pipeline) override;
         virtual void End(CommandBufferHandle) override;
@@ -162,11 +173,11 @@ namespace Glory
             Func fail, Func depthFail, Func pass, int8_t reference, uint8_t compareMask) override;
         virtual void SetStencilWriteMask(CommandBufferHandle, uint8_t mask) override;
 
-        virtual void Commit(CommandBufferHandle, const std::vector<SemaphoreHandle>&,
+        virtual void Commit(CommandBufferHandle commandBuffer, const std::vector<SemaphoreHandle>&,
             const std::vector<SemaphoreHandle>&) override;
-        virtual WaitResult Wait(CommandBufferHandle, uint64_t) override;
-        virtual void Release(CommandBufferHandle) override;
-        virtual void Reset(CommandBufferHandle) override;
+        virtual WaitResult Wait(CommandBufferHandle commandBuffer, uint64_t timeout) override;
+        virtual void Release(CommandBufferHandle commandBuffer) override;
+        virtual void Reset(CommandBufferHandle commandBuffer) override;
 
         virtual void SetViewport(CommandBufferHandle commandBuffer, float x, float y, float width, float height, float minDepth=0.0f, float maxDepth=1.0f) override;
         virtual void SetScissor(CommandBufferHandle commandBuffer, int x, int y, uint32_t width, uint32_t height) override;
@@ -254,6 +265,8 @@ namespace Glory
         GraphicsResources<GL_DescriptorSetLayout> m_SetLayouts;
         GraphicsResources<GL_DescriptorSet> m_Sets;
         GraphicsResources<GL_Swapchain> m_Swapchains;
+        GraphicsResources<GL_CommandBuffer> m_CommandBuffers;
+        std::queue<CommandBufferHandle> m_FreeCommandBuffers;
         std::unordered_map<DescriptorSetLayoutInfo, DescriptorSetLayoutHandle> m_CachedDescriptorSetLayouts;
 
         uint32_t m_GLCurrentPrimitives;
