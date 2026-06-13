@@ -12,6 +12,7 @@
 #include <TextureData.h>
 #include <CubemapData.h>
 #include <FileData.h>
+#include <GloryAssert.h>
 
 namespace Glory
 {
@@ -409,10 +410,19 @@ namespace Glory
 
 	CommandBufferHandle OpenGLDevice::CreateCommandBuffer()
 	{
-		return CommandBufferHandle();
+		if (m_FreeCommandBuffers.empty())
+		{
+			CommandBufferHandle handle;
+			m_CommandBuffers.Emplace(handle, GL_CommandBuffer());
+			return handle;
+		}
+
+		const CommandBufferHandle commandBuffer = m_FreeCommandBuffers.front();
+		m_FreeCommandBuffers.pop();
+		return commandBuffer;
 	}
 
-	void OpenGLDevice::Begin(CommandBufferHandle)
+	void OpenGLDevice::Begin(CommandBufferHandle commandBuffer)
 	{
 	}
 
@@ -683,22 +693,56 @@ namespace Glory
 		glStencilMask(GLuint(mask));
 	}
 
-	void OpenGLDevice::Commit(CommandBufferHandle, const std::vector<SemaphoreHandle>&, const std::vector<SemaphoreHandle>&)
+	void OpenGLDevice::Commit(CommandBufferHandle commandBuffer, const std::vector<SemaphoreHandle>&, const std::vector<SemaphoreHandle>&)
 	{
+		GL_CommandBuffer* glCommandBuffer = m_CommandBuffers.Find(commandBuffer);
+		glCommandBuffer->m_Fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 		glFlush();
 	}
 
-	GraphicsDevice::WaitResult OpenGLDevice::Wait(CommandBufferHandle, uint64_t)
+	GraphicsDevice::WaitResult OpenGLDevice::Wait(CommandBufferHandle commandBuffer, uint64_t timeout)
 	{
-		return WaitResult::WR_Success;
+		const GL_CommandBuffer* glCommandBuffer = m_CommandBuffers.Find(commandBuffer);
+		if (!glCommandBuffer->m_Fence) return WaitResult::WR_Success;
+		const GLenum result = glClientWaitSync(glCommandBuffer->m_Fence, 0, timeout);
+		switch (result)
+		{
+		case GL_ALREADY_SIGNALED:
+		case GL_CONDITION_SATISFIED:
+			return WaitResult::WR_Success;
+		case GL_TIMEOUT_EXPIRED:
+			return WaitResult::WR_Timeout;
+		case GL_WAIT_FAILED:
+			return WaitResult::WR_Fail;
+		}
+
+		GLORY_ASSERT_UNREACHABLE_CODE();
 	}
 
-	void OpenGLDevice::Release(CommandBufferHandle)
+	void OpenGLDevice::Release(CommandBufferHandle commandBuffer)
 	{
+		const GL_CommandBuffer* glCommandBuffer = m_CommandBuffers.Find(commandBuffer);
+		if (!glCommandBuffer)
+		{
+			Debug().LogError("OpenGLDevice::Release: Invalid command buffer handle.");
+			return;
+		}
+		m_FreeCommandBuffers.push(commandBuffer);
 	}
 
-	void OpenGLDevice::Reset(CommandBufferHandle)
+	void OpenGLDevice::Reset(CommandBufferHandle commandBuffer)
 	{
+		GL_CommandBuffer* glCommandBuffer = m_CommandBuffers.Find(commandBuffer);
+		if (!glCommandBuffer)
+		{
+			Debug().LogError("OpenGLDevice::Reset: Invalid command buffer handle.");
+			return;
+		}
+
+		if (glCommandBuffer->m_Fence)
+			glDeleteSync(glCommandBuffer->m_Fence);
+		glCommandBuffer->m_Fence = nullptr;
 	}
 
 	void OpenGLDevice::SetViewport(CommandBufferHandle, float x, float y, float width, float height, float minDepth, float maxDepth)
@@ -832,7 +876,6 @@ namespace Glory
 
 	void OpenGLDevice::WaitIdle()
 	{
-		glFlush();
 		glFinish();
 	}
 

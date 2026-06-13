@@ -27,12 +27,19 @@ namespace Glory::Utils
  */
 #define GLORY_ASSERT(assertion, message) do{ Glory::Utils::AssertImpl(assertion, message, __FILE__, __LINE__); } while(false);
 
+/** @brief Assert unreachable code */
+#define GLORY_ASSERT_UNREACHABLE_CODE() do{ Glory::Utils::AssertImpl(false, "Unreachable code reached!", __FILE__, __LINE__); } while(false);
+
 #ifdef _DEBUG
 /** @brief Custom assert for debug builds
  * @param assertion Assertion
  * @param message Message to log when assertion fails.
  */
-#define GLORY_DEBUG_ASSERT(assertion, message) do{ Glory::Utils::AssertImpl(assertion, message, __FILE__, __LINE__); } while(false);
+#define GLORY_DEBUG_ASSERT(assertion, message) GLORY_ASSERT(assertion, message)
+
+ /** @brief Assert unreachable code for debug builds */
+#define GLORY_DEBUG_ASSERT_UNREACHABLE_CODE() GLORY_ASSERT_UNREACHABLE_CODE()
 #else
 #define GLORY_DEBUG_ASSERT(assertion, message)
+#define GLORY_DEBUG_ASSERT_UNREACHABLE_CODE()
 #endif
