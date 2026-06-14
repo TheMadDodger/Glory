@@ -11,6 +11,7 @@ project "GloryOpenGLGraphics"
 	{
 		"**.h",
 		"**.cpp",
+		"**.natvis",
 		"Module.yaml",
 		"premake5.lua",
 		"Assets/**.*",

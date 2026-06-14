@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="Glory::GL_CommandBuffer">
+    <DisplayString>{{ Command Buffer size={m_CommandsSize} }}</DisplayString>
+    <Expand>
+      <Item Name="[Fence]">m_Fence</Item>
+      <Item Name="[size]">m_CommandsSize</Item>
+      <Item Name="[capacity]">m_CommandsCapacity</Item>
+      <Synthetic Name="Commands">
+        <DisplayString>{{ size={m_CommandsSize} }}</DisplayString>
+        <Expand>
+          <ArrayItems>
+            <Size>m_CommandsSize</Size>
+            <ValuePointer>m_Commands._Mypair._Myval2</ValuePointer>
+          </ArrayItems>
+        </Expand>
+      </Synthetic>
+      <Item Name="[Push Constant Data]">m_PushConstantData</Item>
+    </Expand>
+  </Type>
+</AutoVisualizer>
