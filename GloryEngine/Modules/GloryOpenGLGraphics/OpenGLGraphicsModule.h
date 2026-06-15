@@ -23,6 +23,8 @@ namespace Glory
 		virtual void PreInitialize() override;
 		virtual void Initialize() override;
 		virtual void Cleanup() override;
+		virtual void Update() override;
+		virtual void LoadSettings(ModuleSettings& settings) override;
 
 	private:
 		/* OpenGL can only have 1 device */

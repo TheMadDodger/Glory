@@ -8,7 +8,6 @@
 #include <Window.h>
 #include <Debug.h>
 #include <WindowModule.h>
-#include <Debug.h>
 #include <ios>
 #include <WindowData.h>
 
@@ -82,6 +81,19 @@ namespace Glory
 	{
 		GetEngine()->GetMainModule<WindowModule>()->GetMainWindow()->CleanupOpenGL();
 		LogGLError(glGetError());
+	}
+
+	void OpenGLGraphicsModule::Update()
+	{
+		const ModuleSettings& settings = Settings();
+		const bool enableCommandBufferEmulation = settings.Value<bool>("Enable Command Buffer Emulation");
+		m_Device.SetCommandBufferEmulationEnabled(enableCommandBufferEmulation);
+	}
+
+	void OpenGLGraphicsModule::LoadSettings(ModuleSettings& settings)
+	{
+		settings.PushGroup("Command Buffer Emulation");
+		settings.RegisterValue<bool>("Enable Command Buffer Emulation", true);
 	}
 
 	void OpenGLGraphicsModule::LogGLError(const GLenum& err, bool bIncludeTimeStamp)

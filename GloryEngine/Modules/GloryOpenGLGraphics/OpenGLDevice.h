@@ -11,6 +11,8 @@ typedef struct __GLsync* GLsync;
 
 namespace Glory
 {
+    inline constexpr size_t PushConstantsMaxSize = 128;
+
     struct GL_Buffer
     {
         static constexpr GraphicsHandleType HandleType = H_Buffer;
@@ -135,11 +137,134 @@ namespace Glory
         uint32_t m_CurrentImageIndex = 0;
     };
 
+    enum class GLCommandType : uint8_t
+    {
+        Unknown,
+        Begin,
+        BeginRenderPass,
+        BeginPipeline,
+        End,
+        EndRenderPass,
+        EndPipeline,
+        BindDescriptorSets,
+        PushConstants,
+        DrawMesh,
+        Dispatch,
+        SetStencilTestEnabled,
+        SetStencilOp,
+        SetStencilWriteMask,
+        SetViewport,
+        SetScissor,
+        PipelineBarrier,
+        CopyImage,
+        CopyImageToBuffer
+    };
+
+    struct GL_CommandData
+    {
+        GL_CommandData(): m_CommandType(GLCommandType::Unknown) {}
+        GL_CommandData(const GLCommandType& commandType): m_CommandType(commandType) {}
+        ~GL_CommandData()
+        {
+            m_RenderPass = nullptr;
+        }
+
+        GL_CommandData(GL_CommandData&& other) noexcept
+        {
+            m_CommandType = other.m_CommandType;
+            m_RenderPass = std::move(other.m_RenderPass);
+            m_XYZ = std::move(other.m_XYZ);
+        }
+        GL_CommandData& operator=(GL_CommandData&& other) noexcept
+        {
+            m_CommandType = other.m_CommandType;
+            m_RenderPass = std::move(other.m_RenderPass);
+            m_XYZ = std::move(other.m_XYZ);
+            return *this;
+        }
+
+        GLCommandType m_CommandType;
+
+        union
+        {
+            /* Renderpass commands */
+            RenderPassHandle m_RenderPass = nullptr;
+
+            /* Pipeline commands */
+            PipelineHandle m_Pipeline;
+
+            /* Mesh commands */
+            MeshHandle m_Mesh;
+
+            /* Stencil/depth test commands */
+            struct
+            {
+                uint8_t m_Enable;
+                uint8_t m_CompareOp;
+                uint8_t m_Fail;
+                uint8_t m_DepthFail;
+                uint8_t m_Pass;
+                int8_t m_Reference;
+                uint8_t m_Mask;
+                uint8_t m_StencilDepthPadding;
+            };
+
+            struct
+            {
+                uint32_t m_FlagBits;
+                uint32_t m_FlagBitsPadding;
+            };
+        };
+        union
+        {
+            glm::uvec4 m_XYZ = glm::uvec4{ 0 };
+
+            glm::uvec4 m_XYZSigned;
+
+            glm::vec4 m_XYZFloat;
+
+            /* Descriptor set */
+            struct
+            {
+                DescriptorSetHandle m_DescriptorSet;
+                uint64_t m_DescriptorSetPadding;
+            };
+
+            /* Texture/image commands */
+            struct
+            {
+                TextureHandle m_SrcTexture;
+                union
+                {
+                    TextureHandle m_DstTexture;
+                    BufferHandle m_DstBuffer;
+                };
+            };
+
+            /* Push constants */
+            struct
+            {
+                uint32_t m_PushConstantsOffset;
+                uint32_t m_PushConstantsSize;
+                uint32_t m_PushConstantsDataIndex;
+                uint32_t m_PushConstantsPadding;
+            };
+        };
+    };
+
     struct GL_CommandBuffer
     {
         static constexpr GraphicsHandleType HandleType = H_CommandBuffer;
 
+        GL_CommandBuffer(size_t capacity = 32);
+
         GLsync m_Fence = nullptr;
+        size_t m_CommandsSize = 0;
+        size_t m_CommandsCapacity;
+        mutable uint32_t m_GLCurrentPrimitives = 0;
+
+        std::unique_ptr<GL_CommandData[]> m_Commands;
+        std::vector<std::array<char, PushConstantsMaxSize>> m_PushConstantData;
     };
 
     class OpenGLGraphicsModule;
@@ -152,26 +277,28 @@ namespace Glory
 
         OpenGLGraphicsModule* GraphicsModule();
 
+        void SetCommandBufferEmulationEnabled(bool enable);
+
         GLORY_OGL_API uint32_t GetGLTextureID(TextureHandle texture);
 
     private: /* Render commands */
         virtual CommandBufferHandle CreateCommandBuffer() override;
         virtual void Begin(CommandBufferHandle commandBuffer) override;
-        virtual void BeginRenderPass(CommandBufferHandle, RenderPassHandle renderPass) override;
-        virtual void BeginPipeline(CommandBufferHandle, PipelineHandle pipeline) override;
-        virtual void End(CommandBufferHandle) override;
-        virtual void EndRenderPass(CommandBufferHandle) override;
-        virtual void EndPipeline(CommandBufferHandle) override;
-        virtual void BindDescriptorSets(CommandBufferHandle, PipelineHandle, const std::vector<DescriptorSetHandle>& sets, uint32_t firstSet=0) override;
-        virtual void PushConstants(CommandBufferHandle, PipelineHandle, uint32_t, uint32_t, const void*, ShaderTypeFlag) override;
+        virtual void BeginRenderPass(CommandBufferHandle commandBuffer, RenderPassHandle renderPass) override;
+        virtual void BeginPipeline(CommandBufferHandle commandBuffer, PipelineHandle pipeline) override;
+        virtual void End(CommandBufferHandle commandBuffer) override;
+        virtual void EndRenderPass(CommandBufferHandle commandBuffer) override;
+        virtual void EndPipeline(CommandBufferHandle commandBuffer) override;
+        virtual void BindDescriptorSets(CommandBufferHandle commandBuffer, PipelineHandle pipeline, const std::vector<DescriptorSetHandle>& sets, uint32_t firstSet=0) override;
+        virtual void PushConstants(CommandBufferHandle commandBuffer, PipelineHandle pipeline, uint32_t offset, uint32_t size, const void* data, ShaderTypeFlag) override;
 
-        virtual void DrawMesh(CommandBufferHandle, MeshHandle handle) override;
-        virtual void Dispatch(CommandBufferHandle, uint32_t x, uint32_t y, uint32_t z) override;
+        virtual void DrawMesh(CommandBufferHandle commandBuffer, MeshHandle handle) override;
+        virtual void Dispatch(CommandBufferHandle commandBuffer, uint32_t x, uint32_t y, uint32_t z) override;
 
-        virtual void SetStencilTestEnabled(CommandBufferHandle, bool enable) override;
-        virtual void SetStencilOp(CommandBufferHandle, CompareOp compareOp,
+        virtual void SetStencilTestEnabled(CommandBufferHandle commandBuffer, bool enable) override;
+        virtual void SetStencilOp(CommandBufferHandle commandBuffer, CompareOp compareOp,
             Func fail, Func depthFail, Func pass, int8_t reference, uint8_t compareMask) override;
-        virtual void SetStencilWriteMask(CommandBufferHandle, uint8_t mask) override;
+        virtual void SetStencilWriteMask(CommandBufferHandle commandBuffer, uint8_t mask) override;
 
         virtual void Commit(CommandBufferHandle commandBuffer, const std::vector<SemaphoreHandle>&,
             const std::vector<SemaphoreHandle>&) override;
@@ -253,8 +380,10 @@ namespace Glory
     private:
         void CreateRenderTexture(GL_RenderTexture& renderTexture);
         bool CreatePipeline(GL_Pipeline& pipeline, PipelineData* pPipeline);
+        void PushCommand(GL_CommandBuffer& buffer, GL_CommandData&& commandData);
 
     private:
+        friend class OpenGLCommandImpl;
         GraphicsResources<GL_Buffer> m_Buffers;
         GraphicsResources<GL_Mesh> m_Meshes;
         GraphicsResources<GL_Texture> m_Textures;
@@ -269,9 +398,9 @@ namespace Glory
         std::queue<CommandBufferHandle> m_FreeCommandBuffers;
         std::unordered_map<DescriptorSetLayoutInfo, DescriptorSetLayoutHandle> m_CachedDescriptorSetLayouts;
 
-        uint32_t m_GLCurrentPrimitives;
-
         /* For push constant emulation */
         BufferHandle m_ConstantsBuffer;
+
+        bool m_IsCommandBufferEmulationEnabled = true;
     };
 }
