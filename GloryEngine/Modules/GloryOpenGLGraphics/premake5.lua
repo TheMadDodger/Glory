@@ -20,7 +20,8 @@ project "GloryOpenGLGraphics"
 
 	vpaths
 	{
-		["Module"] = { "GloryOGL.*", "GLConverter.*", "OpenGLGraphicsModule.*", "OpenGLDevice.*" },
+		["Module"] = { "GloryOGL.*", "GLConverter.*", "OpenGLGraphicsModule.*", "ogl_visibility.h" },
+		["Implementation"] = { "OpenGLDevice.*", "OpenGLCommandImpl.*", "OpenGLData.h" },
 	}
 
 	includedirs

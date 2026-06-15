@@ -277,6 +277,8 @@ namespace Glory
 
         OpenGLGraphicsModule* GraphicsModule();
 
+        void SetCommandBufferEmulationEnabled(bool enable);
+
         GLORY_OGL_API uint32_t GetGLTextureID(TextureHandle texture);
 
     private: /* Render commands */
@@ -381,27 +383,7 @@ namespace Glory
         void PushCommand(GL_CommandBuffer& buffer, GL_CommandData&& commandData);
 
     private:
-        void Begin_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void BeginRenderPass_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void BeginPipeline_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void End_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void EndRenderPass_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void EndPipeline_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void BindDescriptorSets_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void PushConstants_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void DrawMesh_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void Dispatch_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void SetStencilTestEnabled_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void SetStencilOp_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void SetStencilWriteMask_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void Commit_Impl(const GL_CommandBuffer& commandBuffer);
-        void SetViewport_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void SetScissor_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void PipelineBarrier_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void CopyImage_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-        void CopyImageToBuffer_Impl(const GL_CommandBuffer& commandBuffer, const GL_CommandData& data);
-
-    private:
+        friend class OpenGLCommandImpl;
         GraphicsResources<GL_Buffer> m_Buffers;
         GraphicsResources<GL_Mesh> m_Meshes;
         GraphicsResources<GL_Texture> m_Textures;
@@ -418,5 +400,7 @@ namespace Glory
 
         /* For push constant emulation */
         BufferHandle m_ConstantsBuffer;
+
+        bool m_IsCommandBufferEmulationEnabled = true;
     };
 }
