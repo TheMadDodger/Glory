@@ -31,8 +31,46 @@ public:\
 		return &pTypeData;\
 	}
 
+#define GET_TYPE(type, ...) type
+#define GET_NAME(type, name, ...) name
+#define GET_DISPLAYNAME(type, name, displayname, ...) displayname
+#define GET_DESCRIPTION(type, name, displayname, description) description
+
+#define REFLECTABLE_FIELD_DESCRIPTIVE(x)\
+GET_TYPE x GET_NAME x;
+
+#define REFLECT_FIELD_INFO_DESCRIPTIVE(x)\
+FieldData(Reflect::Hash(typeid(GET_TYPE x)), STRINGIZE(GET_NAME x), STRINGIZE(GET_TYPE x), offsetof(TypeName, GET_NAME x), sizeof(GET_TYPE x), GET_DISPLAYNAME x, GET_DESCRIPTION x),
+
+#define REFLECTABLE_TYPEDATA_DESCRIPTIVE(typeName, bufferOffset, bufferSize, ...)\
+FOR_EACH(REFLECTABLE_FIELD_DESCRIPTIVE, __VA_ARGS__)\
+typedef typeName TypeName;\
+public:\
+	inline static const TypeData* GetTypeData()\
+	{\
+		static const char* typeNameString = STRINGIZE(typeName);\
+		static const uint32_t TYPE_HASH = Reflect::Hash<typeName>();\
+		static const int NUM_ARGS = NARGS(__VA_ARGS__);\
+		static const FieldData pFields[] = {\
+			FOR_EACH(REFLECT_FIELD_INFO_DESCRIPTIVE, __VA_ARGS__)\
+		};\
+		static const TypeData pTypeData = TypeData(typeNameString, pFields, uint32_t(CustomTypeHash::Struct), TYPE_HASH, NUM_ARGS, bufferOffset, bufferSize);\
+		return &pTypeData;\
+	}
+
 #define REFLECTABLE(typeName, ...)\
 REFLECTABLE_TYPEDATA(typeName, -1, 0, __VA_ARGS__)\
+	inline static int DataBufferOffset()\
+	{\
+		return -1;\
+	}\
+	inline static int DataBufferSize()\
+	{\
+		return 0;\
+	}
+
+#define REFLECTABLE_DESCRIPTIVE(typeName, ...)\
+REFLECTABLE_TYPEDATA_DESCRIPTIVE(typeName, -1, 0, __VA_ARGS__)\
 	inline static int DataBufferOffset()\
 	{\
 		return -1;\

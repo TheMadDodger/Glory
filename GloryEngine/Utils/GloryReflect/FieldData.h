@@ -1,5 +1,7 @@
 #pragma once
 #include <stdint.h>
+#include <string>
+#include <string_view>
 
 namespace Glory::Utils::Reflect
 {
@@ -9,14 +11,18 @@ namespace Glory::Utils::Reflect
 	struct FieldData
 	{
 	public:
-		FieldData(FieldType type, const char* name, const char* typeName, size_t offset, size_t size);
-		FieldData(FieldType type, ElementType elementType, const char* name, const char* typeName, size_t offset, size_t size);
+		FieldData(FieldType type, const char* name, const char* typeName, size_t offset, size_t size,
+			const char* displayName=nullptr, const char* description=nullptr);
+		FieldData(FieldType type, ElementType elementType, const char* name, const char* typeName, size_t offset, size_t size,
+			const char* displayName=nullptr, const char* description=nullptr);
 		virtual ~FieldData();
 
 		const FieldType Type() const;
 		const ElementType ArrayElementType() const;
-		const char* Name() const;
-		const char* TypeName() const;
+		const std::string& Name() const;
+		const std::string& TypeName() const;
+		const std::string& DisplayName() const;
+		const std::string& Description() const;
 		const size_t Offset() const;
 		const size_t Size() const;
 
@@ -30,8 +36,10 @@ namespace Glory::Utils::Reflect
 	private:
 		FieldType m_Type;
 		ElementType m_ElementType;
-		const char* m_Name;
-		const char* m_TypeName;
+		std::string m_Name;
+		std::string m_TypeName;
+		std::string m_DisplayName;
+		std::string m_Description;
 		size_t m_Offset;
 		size_t m_Size;
 	};
