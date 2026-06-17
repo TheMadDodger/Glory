@@ -6,6 +6,7 @@
 
 #include <imgui.h>
 #include <IEngine.h>
+#include <SettingsContainer.h>
 #include <PropertySerializer.h>
 
 #include <IconsFontAwesome6.h>
@@ -38,6 +39,9 @@ namespace Glory::Editor
             outFile << out.c_str();
             outFile.close();
         }
+
+        for (auto& [name, file] : m_SettingFiles)
+            file.Save();
     }
 
     void EngineSettings::DrawLeftPanel()
@@ -115,6 +119,21 @@ namespace Glory::Editor
         ImGui::Separator();
 
         ImGui::Spacing();
+
+        SettingsBase* pSettings = pModule->GetSettings();
+        if (pSettings)
+        {
+            const ModuleMetaData& moduleMetaData = pModule->GetMetaData();
+            auto iter = m_SettingFiles.find(moduleMetaData.Name());
+            if (iter == m_SettingFiles.end())
+            {
+                std::filesystem::path moduleSettingsPath = ProjectSpace::GetOpenProject()->ProjectPath();
+                moduleSettingsPath.append("Modules").append(moduleMetaData.Name() + ".yaml");
+                iter = m_SettingFiles.emplace(moduleMetaData.Name(), moduleSettingsPath).first;
+            }
+            change |= DrawSettings(*pSettings, iter->second);
+        }
+
         ModuleSettings& settings = pModule->Settings();
         YAML::Node& settingsNode = settings.Node();
 
@@ -178,6 +197,23 @@ namespace Glory::Editor
         if (change)
             settings.SetDirty();
 
+        return change;
+    }
+
+    bool EngineSettings::DrawSettings(SettingsBase& settings, Utils::YAMLFileRef& file)
+    {
+        bool change = false;
+        void* data = *settings;
+        const Utils::Reflect::TypeData* type = settings.GetType();
+
+        Undo::StartRecord("Engine Settings");
+        for (size_t i = 0; i < type->FieldCount(); ++i)
+        {
+            auto field = type->GetFieldData(i);
+            const std::filesystem::path propPath{ field->Name() };
+            change |= PropertyDrawer::DrawProperty(file, propPath, field->Type(), field->ArrayElementType(), 0);
+        }
+        Undo::StopRecord();
         return change;
     }
 }

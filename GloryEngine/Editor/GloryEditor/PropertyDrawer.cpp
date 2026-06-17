@@ -88,7 +88,11 @@ namespace Glory::Editor
 
 	struct PathGuard
 	{
-		PathGuard(const std::string name)
+		PathGuard(const std::string& name)
+		{
+			PropertyDrawer::PushPath(name);
+		}
+		PathGuard(const std::string_view name)
 		{
 			PropertyDrawer::PushPath(name);
 		}
@@ -304,6 +308,11 @@ namespace Glory::Editor
 	}
 
 	void PropertyDrawer::PushPath(const std::string& name)
+	{
+		m_CurrentPropertyPath.append(name);
+	}
+
+	void PropertyDrawer::PushPath(const std::string_view name)
 	{
 		m_CurrentPropertyPath.append(name);
 	}

@@ -58,6 +58,7 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API const TypeData* GetRootTypeData();
 
 		static GLORY_EDITOR_API void PushPath(const std::string& name);
+		static GLORY_EDITOR_API void PushPath(const std::string_view name);
 		static GLORY_EDITOR_API void PopPath();
 		static GLORY_EDITOR_API void DrawTooltip(const std::string_view tooltip);
 

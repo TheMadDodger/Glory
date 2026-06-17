@@ -53,6 +53,7 @@ namespace Glory
 	class IEngine;
 	class Resource;
 	struct Version;
+	struct SettingsBase;
 
 	class Module
 	{
@@ -74,6 +75,9 @@ namespace Glory
 
 		virtual const Version& ModuleVersion() const;
 
+		SettingsBase* GetSettings();
+		const SettingsBase* GetSettings() const;
+
 		ModuleSettings& Settings();
 		const ModuleSettings& Settings() const;
 
@@ -82,6 +86,9 @@ namespace Glory
 		virtual bool ClaimExtraSceneData(Resource* pSceneResource) { return false; }
 
 		virtual void CollectReferences(std::vector<UUID>& references) {};
+
+	protected:
+		void SetSettings(SettingsBase* pSettings);
 
 	private:
 		virtual void LoadSettings(ModuleSettings& settings) {};
@@ -113,5 +120,6 @@ namespace Glory
 		friend class GloryEngine;
 		ModuleMetaData m_MetaData;
 		ModuleSettings m_Settings;
+		SettingsBase* m_pSettings{ nullptr };
 	};
 }

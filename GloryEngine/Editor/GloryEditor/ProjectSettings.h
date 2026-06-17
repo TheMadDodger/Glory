@@ -13,6 +13,11 @@ if (!node.Exists() || !node.Is##nodeType()) \
 	node.Set(YAML::Node(YAML::NodeType::nodeType)); \
 }
 
+namespace Glory
+{
+	struct SettingsBase;
+}
+
 namespace Glory::Editor
 {
 	struct ActionRecord;
@@ -85,9 +90,11 @@ namespace Glory::Editor
 
 		void DrawLeftPanel();
 		bool DrawRightPanel();
+		bool DrawSettings(SettingsBase& settings, Utils::YAMLFileRef& file);
 
 	private:
 		size_t m_MenuIndex;
+		std::map<std::string, Utils::YAMLFileRef> m_SettingFiles;
 	};
 
 	class LayerSettings : public ProjectSettings

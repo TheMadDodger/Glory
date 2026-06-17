@@ -33,6 +33,8 @@ namespace Glory
 	void OpenGLGraphicsModule::Initialize()
 	{
 		EngineInstance = m_pEngine;
+		Reflect::SetReflectInstance(&m_pEngine->Reflection());
+		Reflect::RegisterType<OpenGLSettings>();
 
 		Window* pMainWindow = GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
 		pMainWindow->SetupForOpenGL();
@@ -92,6 +94,8 @@ namespace Glory
 
 	void OpenGLGraphicsModule::LoadSettings(ModuleSettings& settings)
 	{
+		SetSettings(&m_Settings);
+
 		settings.PushGroup("Command Buffer Emulation");
 		settings.RegisterValue<bool>("Enable Command Buffer Emulation", true);
 	}

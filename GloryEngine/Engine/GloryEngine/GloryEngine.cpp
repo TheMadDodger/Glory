@@ -848,6 +848,7 @@ namespace Glory
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
 			Module* pModule = m_pAllModules[i];
+			pModule->m_pEngine = this;
 			const ModuleMetaData& moduleMetaData = pModule->GetMetaData();
 
 			const std::filesystem::path modulePath = moduleMetaData.Path();
