@@ -132,7 +132,7 @@ namespace Glory::Editor
 			return change;
 		}
 
-		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), pFieldData->Name());
+		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), pFieldData->Name().data());
 		return false;
 	}
 

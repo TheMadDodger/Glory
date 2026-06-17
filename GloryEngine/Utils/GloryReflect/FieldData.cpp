@@ -4,11 +4,14 @@
 
 namespace Glory::Utils::Reflect
 {
-	FieldData::FieldData(FieldType type, const char* name, const char* typeName, size_t offset, size_t size) :
+	FieldData::FieldData(FieldType type, const char* name, const char* typeName, size_t offset, size_t size,
+		const char* displayName, const char* description):
 		m_Type(Reflect::GetCustomTypeHash(type)),
 		m_ElementType(type),
 		m_Name(name),
 		m_TypeName(typeName),
+		m_DisplayName(displayName ? displayName : name),
+		m_Description(description ? description : ""),
 		m_Offset(offset),
 		m_Size(size)
 	{
@@ -28,11 +31,14 @@ namespace Glory::Utils::Reflect
 		m_ElementType = pTemplatedType ? pTemplatedType->TypeHash() : 0;
 	}
 
-	FieldData::FieldData(FieldType type, ElementType elementType, const char* name, const char* typeName, size_t offset, size_t size) :
+	FieldData::FieldData(FieldType type, ElementType elementType, const char* name, const char* typeName, size_t offset, size_t size,
+		const char* displayName, const char* description):
 		m_Type(type),
 		m_ElementType(elementType),
 		m_Name(name),
 		m_TypeName(typeName),
+		m_DisplayName(displayName ? displayName : name),
+		m_Description(description ? description : ""),
 		m_Offset(offset),
 		m_Size(size)
 	{
@@ -52,14 +58,24 @@ namespace Glory::Utils::Reflect
 		return m_ElementType;
 	}
 
-	const char* FieldData::Name() const
+	const std::string& FieldData::Name() const
 	{
 		return m_Name;
 	}
 
-	const char* FieldData::TypeName() const
+	const std::string& FieldData::TypeName() const
 	{
 		return m_TypeName;
+	}
+
+	const std::string& FieldData::DisplayName() const
+	{
+		return m_DisplayName;
+	}
+
+	const std::string& FieldData::Description() const
+	{
+		return m_Description;
 	}
 
 	const size_t FieldData::Offset() const

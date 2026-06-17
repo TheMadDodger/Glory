@@ -36,7 +36,7 @@ namespace Glory::Editor
 		{
 			static uint32_t booleanType = ResourceTypes::GetHash<bool>();
 			const FieldData* pFieldData = pStructTypeData->GetFieldData(0);
-			mainToggle = strcmp(pFieldData->Name(), "m_Enable") == 0 && pFieldData->ArrayElementType() == booleanType;
+			mainToggle = pFieldData->Name() == "m_Enable" && pFieldData->ArrayElementType() == booleanType;
 		}
 
 		bool headerOpen = false;
@@ -106,7 +106,7 @@ namespace Glory::Editor
 		{
 			static uint32_t booleanType = ResourceTypes::GetHash<bool>();
 			const FieldData* pFieldData = pStructTypeData->GetFieldData(0);
-			mainToggle = strcmp(pFieldData->Name(), "m_Enable") == 0 && pFieldData->ArrayElementType() == booleanType;
+			mainToggle = pFieldData->Name() == "m_Enable" && pFieldData->ArrayElementType() == booleanType;
 		}
 
 		bool headerOpen = false;

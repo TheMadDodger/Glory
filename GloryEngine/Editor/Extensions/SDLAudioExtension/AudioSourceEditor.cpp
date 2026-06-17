@@ -48,34 +48,34 @@ namespace Glory::Editor
 		Audio3DModule* p3DAudio = EditorApplication::GetInstance()->GetEngine()->GetOptionalModule<Audio3DModule>();
 
 		PropertyDrawer::SetDisabledCheckCallback([&](const Utils::Reflect::FieldData* pField) {
-			if (strcmp(pField->Name(), "m_AmbisonicsOrder") == 0)
+			if (pField->Name() == "m_AmbisonicsOrder")
 			{
 				return component.m_Spatialization.m_Mode != SpatializationMode::Ambisonics;
 			}
-			if (strcmp(pField->Name(), "m_SpatialBlend") == 0)
+			if (pField->Name() == "m_SpatialBlend")
 			{
 				return component.m_Spatialization.m_Mode != SpatializationMode::Binaural;
 			}
 
-			if (strcmp(pField->Name(), "m_LowCoefficient") == 0 ||
-				strcmp(pField->Name(), "m_MidCoefficient") == 0 ||
-				strcmp(pField->Name(), "m_HighCoefficient") == 0)
+			if (pField->Name() == "m_LowCoefficient" ||
+				pField->Name() == "m_MidCoefficient" ||
+				pField->Name() == "m_HighCoefficient")
 			{
 				return component.m_Simulation.m_Direct.m_AirAbsorption.m_Type != AirAbsorptionType::Exponential;
 			}
 
-			if (strcmp(pField->Name(), "m_VolumetricRadius") == 0 ||
-				strcmp(pField->Name(), "m_VolumetricSamples") == 0)
+			if (pField->Name() == "m_VolumetricRadius" ||
+				pField->Name() == "m_VolumetricSamples")
 			{
 				return component.m_Simulation.m_Direct.m_Occlusion.m_Type != OcclusionType::Volumetric;
 			}
 
-			if (strcmp(pField->Name(), "m_Direct") == 0)
+			if (pField->Name() == "m_Direct")
 				return !(component.m_Enable3D && !component.m_Spatialization.m_Attenuation.m_Enable
 					&& p3DAudio && p3DAudio->HasFeature(Audio3DModule::Features::DirectSimulation));
-			if (strcmp(pField->Name(), "m_Reflections") == 0)
+			if (pField->Name() == "m_Reflections")
 				return !(component.m_Enable3D && p3DAudio && p3DAudio->HasFeature(Audio3DModule::Features::ReflectionSimulation));
-			if (strcmp(pField->Name(), "m_Pathing") == 0)
+			if (pField->Name() == "m_Pathing")
 				return !(component.m_Enable3D && p3DAudio && p3DAudio->HasFeature(Audio3DModule::Features::PathingSimulation));
 
 			switch (pField->Offset())
