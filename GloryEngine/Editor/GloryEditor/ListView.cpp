@@ -18,7 +18,7 @@ namespace Glory::Editor
 
 		const ImVec2 startPos = ImGui::GetCursorPos();
 		const ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-		const bool open = ImGui::TreeNodeEx(EditorUI::MakeCleanName(m_Label).data(), ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Framed);
+		const bool open = ImGui::TreeNodeEx(m_Label, ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Framed);
 		const float buttonSize = 24.0f;
 		if (OnResize != NULL)
 		{

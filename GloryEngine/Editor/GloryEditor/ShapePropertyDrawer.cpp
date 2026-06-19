@@ -101,7 +101,7 @@ namespace Glory::Editor
 	bool ShapePropertyDrawer::OnGUI(const std::string& label, ShapeProperty* data, uint32_t flags) const
 	{
 		const ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-		if (ImGui::TreeNodeEx("val", node_flags, EditorUI::MakeCleanName(label).data()))
+		if (ImGui::TreeNodeEx("val", node_flags, label.data()))
 		{
 			if (EditorUI::InputEnum<ShapeType>("Shape Type", &data->m_ShapeType))
 			{

@@ -75,7 +75,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputFloat(MakeCleanName(label.string()), &newValue, min, max))
+		if (InputFloat(label.string(), &newValue, min, max))
 		{
 			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -118,7 +118,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputFloat2(MakeCleanName(label.string()), &newValue, min, max))
+		if (InputFloat2(label.string(), &newValue, min, max))
 		{
 			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -161,7 +161,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputFloat3(MakeCleanName(label.string()), &newValue, min, max))
+		if (InputFloat3(label.string(), &newValue, min, max))
 		{
 			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -204,7 +204,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputFloat4(MakeCleanName(label.string()), &newValue, min, max))
+		if (InputFloat4(label.string(), &newValue, min, max))
 		{
 			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -247,7 +247,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputInt(MakeCleanName(label.string()), &newValue, min, max))
+		if (InputInt(label.string(), &newValue, min, max))
 		{
 			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -290,7 +290,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputInt2(MakeCleanName(label.string()), &newValue, min, max))
+		if (InputInt2(label.string(), &newValue, min, max))
 		{
 			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -333,7 +333,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputInt3(MakeCleanName(label.string()), &newValue, min, max))
+		if (InputInt3(label.string(), &newValue, min, max))
 		{
 			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -376,7 +376,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputInt4(MakeCleanName(label.string()), &newValue, min, max))
+		if (InputInt4(label.string(), &newValue, min, max))
 		{
 			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -419,7 +419,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputUInt(MakeCleanName(label.string()), &newValue, min, max, steps))
+		if (InputUInt(label.string(), &newValue, min, max, steps))
 		{
 			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -462,7 +462,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputDouble(MakeCleanName(label.string()), &newValue, slowSteps, fastSteps))
+		if (InputDouble(label.string(), &newValue, slowSteps, fastSteps))
 		{
 			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -537,7 +537,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (CheckBox(MakeCleanName(label.string()), &newValue))
+		if (CheckBox(label.string(), &newValue))
 		{
 			const bool record = Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -555,7 +555,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (CheckBoxFlags(MakeCleanName(label.string()), &newValue, names, values))
+		if (CheckBoxFlags(label.string(), &newValue, names, values))
 		{
 			const bool record = Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -663,7 +663,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputColor(MakeCleanName(label.string()), &newValue, hdr))
+		if (InputColor(label.string(), &newValue, hdr))
 		{
 			const bool record = Undo::StartRecord(label.string(), 0, true);
 			Undo::ApplyYAMLEdit(file, path, oldValue, newValue);
@@ -758,7 +758,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputText(MakeCleanName(label.string()), m_TextBuffer, TEXTSIZE, flags))
+		if (InputText(label.string(), m_TextBuffer, TEXTSIZE, flags))
 		{
 			const bool record = Undo::StartRecord(label.string());
 			Undo::ApplyYAMLEdit(file, path, oldValue, std::string(m_TextBuffer));
@@ -913,7 +913,7 @@ namespace Glory::Editor
 		auto end = path.end();
 		--end;
 		const std::filesystem::path label = *end;
-		if (InputEnum(MakeCleanName(label.string()), typeHash, &newValue, excludeValues))
+		if (InputEnum(label.string(), typeHash, &newValue, excludeValues))
 		{
 			std::string newValueStr;
 			pEnumType->ToString(&newValue, newValueStr);
@@ -1045,7 +1045,7 @@ namespace Glory::Editor
 	bool EditorUI::HeaderWithCheckbox(std::string_view label, bool& open, Utils::YAMLFileRef& file, const std::filesystem::path& path)
 	{
 		const ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_AllowItemOverlap;
-		open = ImGui::TreeNodeEx("node", node_flags, EditorUI::MakeCleanName(label).data());
+		open = ImGui::TreeNodeEx("node", node_flags, label.data());
 		ImGui::SameLine();
 		const float cursorX = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - 25.0f;
 		ImGui::SetCursorPosX(cursorX);
@@ -1081,61 +1081,6 @@ namespace Glory::Editor
 			ImGui::EndCombo();
 		}
 		ImGui::PopItemWidth();
-	}
-
-	std::string_view EditorUI::MakeCleanName(std::string_view label)
-	{
-		m_CleanNameBuffer[0] = '\0';
-		m_BufferWriteIndex = 0;
-
-		size_t startIndex = 0;
-		if (label._Starts_with("m_p"))
-			startIndex = 3;
-		else if (label._Starts_with("m_"))
-			startIndex = 2;
-		else if (label._Starts_with("_"))
-			startIndex = 1;
-
-		char lastChar = '\0';
-		bool charWasEdited = false;
-		for (size_t i = startIndex; i < label.size(); i++)
-		{
-			const bool editedCache = charWasEdited;
-			charWasEdited = false;
-			if (label[i] == '_')
-			{
-				lastChar = label[i];
-				continue;
-			}
-			const bool isAlpha = std::isalpha(label[i]);
-			const bool isDigit = std::isdigit(label[i]);
-
-			if (!isAlpha && !isDigit) continue;
-			if (lastChar == '\0')
-			{
-				lastChar = std::toupper(label[i]);
-				m_CleanNameBuffer[m_BufferWriteIndex] = lastChar;
-				++m_BufferWriteIndex;
-				charWasEdited = true;
-				continue;
-			}
-
-			if ((editedCache || std::islower(lastChar)) && (std::isupper(label[i]) || lastChar == '_'))
-			{
-				charWasEdited = true;
-				lastChar = std::toupper(label[i]);
-				m_CleanNameBuffer[m_BufferWriteIndex] = ' ';
-				m_CleanNameBuffer[m_BufferWriteIndex + 1] = lastChar;
-				m_BufferWriteIndex += 2;
-				continue;
-			}
-			lastChar = label[i];
-			m_CleanNameBuffer[m_BufferWriteIndex] = label[i];
-			++m_BufferWriteIndex;
-		}
-		m_CleanNameBuffer[m_BufferWriteIndex] = '\0';
-		++m_BufferWriteIndex;
-		return m_CleanNameBuffer;
 	}
 
 	void EditorUI::PushFlag(Flag flag)

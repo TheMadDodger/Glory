@@ -55,9 +55,9 @@ namespace Glory
 			: m_Mesh(0ull), m_Material(0ull), m_RenderStatic(false), m_WasSubmittedForStatic(false) {}
 
 		REFLECTABLE_DESCRIPTIVE(MeshRenderer,
-			(ResourceReference<MeshData>, m_Mesh, "Mesh", "Mesh to render"),
-			(ResourceReference<MaterialData>, m_Material, "Material", "Material to render the mesh with"),
-			(bool, m_RenderStatic, "Render as Static", "Render this mesh as a static object")
+			PROP_TOOLTIP(ResourceReference<MeshData>, Mesh, "Mesh to render"),
+			PROP_TOOLTIP(ResourceReference<MaterialData>, Material, "Material to render the mesh with"),
+			(bool, m_RenderStatic, "Render Static", "Render this mesh as a static object")
 		);
 
 		bool m_WasSubmittedForStatic;
@@ -72,16 +72,20 @@ namespace Glory
 			: m_HalfFOV(halfFOV), m_Near(near), m_Far(far), m_Priority(priority), m_ClearColor(clearColor), m_Offset(0.0f, 0.0f),
 			m_Resolution(1.0f, 1.0f), m_OutputMode(CameraOutputMode::ScaledResolution), m_LayerMask(0) {}
 
-		REFLECTABLE(CameraComponent,
-			(float)	(m_HalfFOV),
-			(float)	(m_Near),
-			(float)	(m_Far),
-			(int)	(m_Priority),
-			(LayerMask)	(m_LayerMask),
-			(glm::vec4)	(m_ClearColor),
-			(glm::vec2) (m_Offset),
-			(glm::vec2) (m_Resolution),
-			(CameraOutputMode) (m_OutputMode)
+		REFLECTABLE_DESCRIPTIVE(CameraComponent,
+			(float, m_HalfFOV, "Half FOV", "Half angle of horizontal Field of View"),
+			(float, m_Near, "Near", "Near clipping plane"),
+			(float, m_Far, "Far", "Far clipping plane"),
+			(int, m_Priority, "Priority", "Render priority, lower value means it gets rendered first"),
+			(LayerMask, m_LayerMask, "Layer Mask", "Mask to filter objects from being rendered with this camera"),
+			(glm::vec4, m_ClearColor, "Clear Color", "The color to clean the cameras output with before rendering a new frame"),
+			(glm::vec2, m_Offset, "Offset", "Set an offset on the render viewport\nWARNING! this feature is currently experimental!"),
+			(glm::vec2, m_Resolution, "Resolution", "Output resolution of the camera"),
+			(CameraOutputMode, m_OutputMode, "Output Mode",
+				"Scales the resolution based on an output mode and sends the cameras render result to the screen\n"
+				"	None - Do nothing\n"
+				"	ScaledResolution - The cameras resolution is Resolution*ScreenResolution\n"
+				"	FixedResolution - The resolution is fixed to the set resolution\n")
 		)
 
 		CameraRef m_Camera;
@@ -91,8 +95,8 @@ namespace Glory
 	{
 		GLORY_ENGINE_API LayerComponent() : m_Layer(0) {}
 
-		REFLECTABLE(LayerComponent,
-			(LayerRef)	(m_Layer)
+		REFLECTABLE_DESCRIPTIVE(LayerComponent,
+			(LayerRef, m_Layer, "Layer", "")
 		)
 	};
 
@@ -101,9 +105,9 @@ namespace Glory
 		GLORY_ENGINE_API ShadowSettings() : m_Enable(false), m_Bias(0.0000005f)
 		{}
 
-		REFLECTABLE(ShadowSettings,
-			(bool)(m_Enable),
-			(float)(m_Bias)
+		REFLECTABLE_DESCRIPTIVE(ShadowSettings,
+			(bool, m_Enable, "", ""),
+			(float, m_Bias, "Bias", "")
 		);
 	};
 
@@ -116,15 +120,15 @@ namespace Glory
 			m_Type(LightType::Point), m_Color(color), m_Intensity(intensity), m_Inner(45.0f),
 			m_Outer(60.0f), m_Range(range), m_FalloffExponent(exponent) {}
 
-		REFLECTABLE(LightComponent,
-			(LightType)	(m_Type),
-			(glm::vec3)	(m_Color),
-			(float)	(m_Intensity),
-			(float)	(m_Inner),
-			(float)	(m_Outer),
-			(float)	(m_Range),
-			(float)	(m_FalloffExponent),
-			(ShadowSettings)(m_Shadows)
+		REFLECTABLE_DESCRIPTIVE(LightComponent,
+			(LightType, m_Type, "Type", ""),
+			(glm::vec3, m_Color, "Color", ""),
+			(float, m_Intensity, "Intensity", ""),
+			(float, m_Inner, "Inner Range/Radius", ""),
+			(float, m_Outer, "Outer Range/Radius", ""),
+			(float, m_Range, "Range", ""),
+			(float, m_FalloffExponent, "Falloff Exponent", ""),
+			(ShadowSettings, m_Shadows, "Shadow Settings", "")
 		)
 	};
 
@@ -133,13 +137,13 @@ namespace Glory
 		GLORY_ENGINE_API TextComponent() : m_Font(0ull), m_Text("Hello World!"), m_Scale(0.01f),
 			m_Color(1.0f, 1.0f, 1.0f, 1.0f), m_Alignment(Alignment::Left), m_WrapWidth(0.0f), m_Dirty(true) {}
 
-		REFLECTABLE(TextComponent,
-			(ResourceReference<FontData>)(m_Font),
-			(std::string)(m_Text),
-			(float)(m_Scale),
-			(glm::vec4)(m_Color),
-			(Alignment)(m_Alignment),
-			(float)(m_WrapWidth)
+		REFLECTABLE_DESCRIPTIVE(TextComponent,
+			PROP(ResourceReference<FontData>, Font),
+			PROP(std::string, Text),
+			PROP(float, Scale),
+			PROP(glm::vec4, Color),
+			PROP(Alignment, Alignment),
+			PROP(float, WrapWidth)
 		);
 		bool m_Dirty;
 	};

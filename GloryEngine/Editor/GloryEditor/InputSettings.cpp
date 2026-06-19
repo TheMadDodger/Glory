@@ -289,7 +289,7 @@ namespace Glory::Editor
 
 		bool openPopup = false;
 		float start, width;
-		EditorUI::EmptyDropdown(EditorUI::MakeCleanName(label), value, [&]
+		EditorUI::EmptyDropdown(label, value, [&]
 		{
 			KeysNeedFilter = true;
 			CurrentDeviceType = InputDeviceType(-1);
