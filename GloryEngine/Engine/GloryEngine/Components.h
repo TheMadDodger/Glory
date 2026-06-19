@@ -54,10 +54,10 @@ namespace Glory
 		GLORY_ENGINE_API MeshRenderer()
 			: m_Mesh(0ull), m_Material(0ull), m_RenderStatic(false), m_WasSubmittedForStatic(false) {}
 
-		REFLECTABLE(MeshRenderer,
-			(ResourceReference<MeshData>)(m_Mesh),
-			(ResourceReference<MaterialData>)(m_Material),
-			(bool)(m_RenderStatic)
+		REFLECTABLE_DESCRIPTIVE(MeshRenderer,
+			(ResourceReference<MeshData>, m_Mesh, "Mesh", "Mesh to render"),
+			(ResourceReference<MaterialData>, m_Material, "Material", "Material to render the mesh with"),
+			(bool, m_RenderStatic, "Render as Static", "Render this mesh as a static object")
 		);
 
 		bool m_WasSubmittedForStatic;

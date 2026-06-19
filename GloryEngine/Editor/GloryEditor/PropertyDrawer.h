@@ -29,7 +29,8 @@ namespace Glory::Editor
 		virtual GLORY_EDITOR_API bool Draw(const std::string& label, std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, uint32_t flags) const;
 		virtual GLORY_EDITOR_API bool Draw(const std::string& label, void* data, uint32_t typeHash, uint32_t flags) const;
 		virtual GLORY_EDITOR_API bool Draw(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t flags) const;
-		virtual GLORY_EDITOR_API bool Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t flags) const;
+		virtual GLORY_EDITOR_API bool Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash,
+			uint32_t flags, const std::string_view customLabel, const std::string_view tooltip) const;
 
 		template<class T>
 		static void RegisterPropertyDrawer()
@@ -46,7 +47,8 @@ namespace Glory::Editor
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, std::vector<char>& buffer, uint32_t typeHash, size_t offset, size_t size, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, void* data, uint32_t typeHash, uint32_t flags);
 		static GLORY_EDITOR_API bool DrawProperty(const std::string& label, YAML::Node& node, uint32_t typeHash, uint32_t elementTypeHash, uint32_t flags);
-		static GLORY_EDITOR_API bool DrawProperty(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t elementTypeHash, uint32_t flags);
+		static GLORY_EDITOR_API bool DrawProperty(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash,
+			uint32_t elementTypeHash, uint32_t flags, const std::string_view customLabel, const std::string_view tooltip);
 
 		static GLORY_EDITOR_API PropertyDrawer* GetPropertyDrawer(uint32_t typeHash);
 
@@ -57,6 +59,7 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API void PushPath(const std::string& name);
 		static GLORY_EDITOR_API void PopPath();
+		static GLORY_EDITOR_API void DrawTooltip(const std::string_view tooltip);
 
 	public:
 		GLORY_EDITOR_API size_t GetPropertyTypeHash() const;
@@ -180,7 +183,8 @@ namespace Glory::Editor
 			return false;
 		}
 
-		virtual bool Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t flags) const override
+		virtual bool Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t flags,
+			const std::string_view customLabel, const std::string_view tooltip) const override
 		{
 			auto prop = file[path];
 			if (!prop.Exists())
@@ -188,7 +192,7 @@ namespace Glory::Editor
 
 			PropertyType value = prop.As<PropertyType>();
 			PropertyType originalValue = value;
-			std::string label = path.filename().string().data();
+			std::string label = !customLabel.empty() ? std::string{customLabel} : path.filename().string().data();
 			if (label == "Value")
 				label = path.parent_path().filename().string();
 
@@ -197,6 +201,8 @@ namespace Glory::Editor
 				Undo::ApplyYAMLEdit(file, path, originalValue, value);
 				return true;
 			}
+			DrawTooltip(tooltip);
+			
 			return false;
 		}
 	};

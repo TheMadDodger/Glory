@@ -77,10 +77,11 @@ namespace Glory::Editor
 		return change;
 	}
 
-	bool StructPropertyDrawer::Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t flags) const
+	bool StructPropertyDrawer::Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash,
+		uint32_t flags, const std::string_view customLabel, const std::string_view tooltip) const
 	{
 		auto structData = file[path];
-		std::string label = path.filename().string().data();
+		std::string label = !customLabel.empty() ? std::string{ customLabel } : path.filename().string().data();
 		if (label == "Value")
 			label = path.parent_path().filename().string();
 
@@ -88,7 +89,7 @@ namespace Glory::Editor
 
 		const TypeData* pStructTypeData = Reflect::GetTyeData(typeHash);
 		PropertyDrawer* pPropertyDrawer = PropertyDrawer::GetPropertyDrawer(typeHash);
-		if (pPropertyDrawer) return PropertyDrawer::DrawProperty(file, path, pStructTypeData->TypeHash(), pStructTypeData->InternalTypeHash(), flags);
+		if (pPropertyDrawer) return PropertyDrawer::DrawProperty(file, path, pStructTypeData->TypeHash(), pStructTypeData->InternalTypeHash(), flags, nullptr, nullptr);
 
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 
@@ -114,13 +115,15 @@ namespace Glory::Editor
 		{
 			node_flags |= ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_AllowItemOverlap;
 			headerOpen = ImGui::TreeNodeEx("node", node_flags, EditorUI::MakeCleanName(label).data());
+			DrawTooltip(tooltip);
 			const FieldData* pFieldData = pStructTypeData->GetFieldData(0);
 			auto enableValue = structData[pFieldData->Name()];
 			ImGui::SameLine();
 			const float cursorX = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - 25.0f;
 			ImGui::SetCursorPosX(cursorX);
 			EditorUI::PushFlag(EditorUI::Flag::NoLabel);
-			change |= PropertyDrawer::DrawProperty(file, enableValue.Path(), pFieldData->Type(), pFieldData->ArrayElementType(), flags);
+			change |= PropertyDrawer::DrawProperty(file, enableValue.Path(), pFieldData->Type(), pFieldData->ArrayElementType(),
+				flags, pFieldData->DisplayName(), pFieldData->Description());
 			EditorUI::PopFlag();
 			const bool enabled = enableValue.As<bool>();
 			ImGui::BeginDisabled(!enabled);
@@ -168,7 +171,8 @@ namespace Glory::Editor
 			const FieldData* pFieldData = pStructTypeData->GetFieldData(i);
 			auto field = structData[pFieldData->Name()];
 			const uint32_t fieldFlags = uint32_t(Reflect::GetFieldFlags(pFieldData));
-			change |= PropertyDrawer::DrawProperty(file, field.Path(), pFieldData->Type(), pFieldData->ArrayElementType(), fieldFlags);
+			change |= PropertyDrawer::DrawProperty(file, field.Path(), pFieldData->Type(), pFieldData->ArrayElementType(),
+				fieldFlags, pFieldData->DisplayName(), pFieldData->Description());
 		}
 		return change;
 	}

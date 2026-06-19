@@ -38,9 +38,12 @@ namespace Glory::Editor
 		return false;
 	}
 
-	bool PropertyDrawer::Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t flags) const
+	bool PropertyDrawer::Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash,
+		uint32_t flags, const std::string_view customLabel, const std::string_view tooltip) const
 	{
-		ImGui::Text(path.filename().string().data());
+		ImGui::Text(!customLabel.empty() ? customLabel.data() : path.filename().string().data());
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip(tooltip.data());
 		return false;
 	}
 
@@ -107,32 +110,45 @@ namespace Glory::Editor
 		}
 	};
 
+	struct FieldDataTooltipScope
+	{
+		FieldDataTooltipScope(const FieldData* pFieldData) : m_pFieldData(pFieldData) {}
+		~FieldDataTooltipScope()
+		{
+			if (m_pFieldData && !m_pFieldData->Description().empty() && ImGui::IsItemHovered())
+				ImGui::SetTooltip(m_pFieldData->Description().data());
+		}
+
+		const FieldData* m_pFieldData;
+	};
+
 	bool PropertyDrawer::DrawProperty(const FieldData* pFieldData, void* data, uint32_t flags)
 	{
 		PathGuard p(pFieldData->Name());
+		const FieldDataTooltipScope drawTooltip{ pFieldData };
 
 		const bool disabled = DisabledCheckCallback ? DisabledCheckCallback(pFieldData) : false;
 		DisableScope disabledScope{ disabled };
 
 		if (pFieldData->Type() == ST_Array)
 		{
-			return GetPropertyDrawer(ST_Array)->Draw(pFieldData->Name(), data, pFieldData->ArrayElementType(), flags);
+			return GetPropertyDrawer(ST_Array)->Draw(pFieldData->DisplayName(), data, pFieldData->ArrayElementType(), flags);
 		}
 
 		PropertyDrawer* pDrawer = GetPropertyDrawer(pFieldData->Type());
 		if (pDrawer)
 		{
-			return pDrawer->Draw(pFieldData->Name(), data, pFieldData->ArrayElementType(), flags);
+			return pDrawer->Draw(pFieldData->DisplayName(), data, pFieldData->ArrayElementType(), flags);
 		}
 
 		const TypeData* pTypeData = Reflect::GetTyeData(pFieldData->ArrayElementType());
 		if (pTypeData)
 		{
-			const bool change = DrawProperty(pFieldData->Name(), pTypeData, data, flags);
+			const bool change = DrawProperty(pFieldData->DisplayName(), pTypeData, data, flags);
 			return change;
 		}
 
-		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), pFieldData->Name().data());
+		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), pFieldData->DisplayName().data());
 		return false;
 	}
 
@@ -219,7 +235,8 @@ namespace Glory::Editor
 		return false;
 	}
 
-	bool PropertyDrawer::DrawProperty(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t elementTypeHash, uint32_t flags)
+	bool PropertyDrawer::DrawProperty(Utils::YAMLFileRef& file, const std::filesystem::path& path,
+		uint32_t typeHash, uint32_t elementTypeHash, uint32_t flags, const std::string_view customLabel, const std::string_view tooltip)
 	{
 		auto it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
 		{
@@ -229,7 +246,7 @@ namespace Glory::Editor
 		if (it != m_PropertyDrawers.end())
 		{
 			PropertyDrawer* drawer = *it;
-			return drawer->Draw(file, path, elementTypeHash, flags);
+			return drawer->Draw(file, path, elementTypeHash, flags, customLabel, tooltip);
 		}
 
 		it = std::find_if(m_PropertyDrawers.begin(), m_PropertyDrawers.end(), [&](PropertyDrawer* propertyDrawer)
@@ -240,7 +257,7 @@ namespace Glory::Editor
 		if (it != m_PropertyDrawers.end())
 		{
 			PropertyDrawer* drawer = *it;
-			return drawer->Draw(file, path, elementTypeHash, flags);
+			return drawer->Draw(file, path, elementTypeHash, flags, customLabel, tooltip);
 		}
 
 		const TypeData* pTypeData = Reflect::GetTyeData(typeHash);
@@ -251,6 +268,7 @@ namespace Glory::Editor
 		}
 
 		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "%s", path.filename().string().c_str());
+		DrawTooltip(tooltip);
 		return false;
 	}
 
@@ -293,6 +311,12 @@ namespace Glory::Editor
 	void PropertyDrawer::PopPath()
 	{
 		m_CurrentPropertyPath = m_CurrentPropertyPath.parent_path();
+	}
+
+	void PropertyDrawer::DrawTooltip(const std::string_view tooltip)
+	{
+		if (!tooltip.empty() && ImGui::IsItemHovered())
+			ImGui::SetTooltip(tooltip.data());
 	}
 
 	size_t PropertyDrawer::GetPropertyTypeHash() const
