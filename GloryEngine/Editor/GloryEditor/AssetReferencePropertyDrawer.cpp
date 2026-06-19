@@ -39,12 +39,13 @@ namespace Glory::Editor
 		return false;
 	}
 
-	bool AssetReferencePropertyDrawer::Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t flags) const
+	bool AssetReferencePropertyDrawer::Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash,
+		uint32_t flags, const std::string_view customLabel, const std::string_view tooltip) const
 	{
 		UUID uuid = file[path].As<uint64_t>(0);
 		const UUID oldUuid = uuid;
 
-		std::string label = path.filename().string().data();
+		std::string label = !customLabel.empty() ? std::string{ customLabel } : path.filename().string().data();
 		if (label == "Value")
 			label = path.parent_path().filename().string();
 
@@ -54,6 +55,7 @@ namespace Glory::Editor
 			Undo::ApplyYAMLEdit(file, path, uint64_t(oldUuid), uint64_t(uuid));
 			return true;
 		}
+		DrawTooltip(tooltip);
 
 		return false;
 	}

@@ -55,9 +55,10 @@ namespace Glory::Editor
 		return false;
 	}
 
-	bool EnumPropertyDrawer::Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t flags) const
+	bool EnumPropertyDrawer::Draw(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash,
+		uint32_t flags, const std::string_view customLabel, const std::string_view tooltip) const
 	{
-		std::string label = path.filename().string().data();
+		std::string label = !customLabel.empty() ? std::string{ customLabel } : path.filename().string().data();
 		if (label == "Value")
 			label = path.parent_path().filename().string();
 
@@ -87,6 +88,7 @@ namespace Glory::Editor
 			prop.Set(value);
 			return true;
 		}
+		DrawTooltip(tooltip);
 		return false;
 	}
 }

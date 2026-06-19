@@ -149,7 +149,7 @@ namespace Glory::Editor
 		}
 
 		const bool propertyChange = PropertyDrawer::DrawProperty(file, propValue.Path(), propInfo->TypeHash(),
-			propInfo->TypeHash(), propInfo->Flags() | PropertyFlags::Color);
+			propInfo->TypeHash(), propInfo->Flags() | PropertyFlags::Color, nullptr, nullptr);
 		if (propertyChange)
 		{
 			/* Deserialize new value into buffer if the material is loaded */

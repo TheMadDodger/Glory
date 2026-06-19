@@ -98,7 +98,8 @@ namespace Glory::Editor
 					const FieldData* pFieldData = pStructTypeData->GetFieldData(i);
 					auto field = structData[pFieldData->Name()];
 					const uint32_t fieldFlags = uint32_t(Reflect::GetFieldFlags(pFieldData));
-					change |= PropertyDrawer::DrawProperty(file, field.Path(), pFieldData->Type(), pFieldData->ArrayElementType(), fieldFlags);
+					change |= PropertyDrawer::DrawProperty(file, field.Path(), pFieldData->Type(), pFieldData->ArrayElementType(),
+						fieldFlags, pFieldData->DisplayName(), pFieldData->Description());
 				}
 				Undo::StopRecord();
 			}

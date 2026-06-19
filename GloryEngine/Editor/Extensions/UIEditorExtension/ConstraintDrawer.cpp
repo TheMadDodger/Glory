@@ -7,9 +7,10 @@
 
 namespace Glory::Editor
 {
-    bool DrawConstraintProperty(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash, uint32_t flags)
+    bool DrawConstraintProperty(Utils::YAMLFileRef& file, const std::filesystem::path& path, uint32_t typeHash,
+        uint32_t flags, const std::string_view customLabel, const std::string_view tooltip)
     {
-        std::string label = path.filename().string().data();
+        std::string label = !customLabel.empty() ? std::string{ customLabel } : path.filename().string().data();
         if (label == "Value")
             label = path.parent_path().filename().string();
 
@@ -23,6 +24,7 @@ namespace Glory::Editor
         size_t index = oldIndex;
 
         bool change = false;
+        bool showTooltip = false;
 
         ImGui::TextUnformatted(EditorUI::MakeCleanName(label).data());
         ImGui::PushID(label.data());
@@ -35,6 +37,7 @@ namespace Glory::Editor
             Undo::ApplyYAMLEdit(file, constraintType.Path(), oldType, type);
             change = true;
         }
+        showTooltip |= ImGui::IsItemHovered();
 
         const float oldValue = constraintValue.As<float>();
         float newValue = oldValue;
@@ -43,6 +46,9 @@ namespace Glory::Editor
             Undo::ApplyYAMLEdit(file, constraintValue.Path(), oldValue, newValue);
             change = true;
         }
+        showTooltip |= ImGui::IsItemHovered();
+
+        PropertyDrawer::DrawTooltip(tooltip);
 
         ImGui::Unindent();
         ImGui::Separator();
