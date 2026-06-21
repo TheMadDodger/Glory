@@ -146,4 +146,7 @@ inline const size_t Enum<nameSpace::enumName>::m_NumValues = NARGS(__VA_ARGS__);
 template<>																					\
 inline bool Enum<nameSpace::enumName>::Valid() { return true; }								\
 
+#define PROP(type, name) (type, m_##name, STRINGIZE(name), "")
+#define PROP_TOOLTIP(type, name, tooltip) (type, m_##name, STRINGIZE(name), tooltip)
+
 #pragma endregion

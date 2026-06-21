@@ -40,7 +40,7 @@ namespace Glory::Editor
 		bool openPopup = false;
 		float start, width;
 		bool change = false;
-		EditorUI::EmptyDropdown(EditorUI::MakeCleanName(label), objectName, [&]
+		EditorUI::EmptyDropdown(label, objectName, [&]
 		{
 			m_FilterBuffer[0] = '\0';
 			m_Filter = "";

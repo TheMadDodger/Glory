@@ -21,43 +21,43 @@ namespace Glory::Editor
 	bool PropertyDrawerTemplate<float>::OnGUI(const std::string& label, float* data, uint32_t flags) const
 	{
         float oldValue = *data;
-        return EditorUI::InputFloat(EditorUI::MakeCleanName(label), data);
+        return EditorUI::InputFloat(label, data);
 	}
 
 	template<>
 	bool PropertyDrawerTemplate<int>::OnGUI(const std::string& label, int* data, uint32_t flags) const
 	{
-		return EditorUI::InputInt(EditorUI::MakeCleanName(label), data);
+		return EditorUI::InputInt(label, data);
 	}
 
 	template<>
 	bool PropertyDrawerTemplate<uint32_t>::OnGUI(const std::string& label, uint32_t* data, uint32_t flags) const
 	{
-		return EditorUI::InputUInt(EditorUI::MakeCleanName(label), data);
+		return EditorUI::InputUInt(label, data);
 	}
 
 	template<>
 	bool PropertyDrawerTemplate<bool>::OnGUI(const std::string& label, bool* data, uint32_t flags) const
 	{
-		return EditorUI::CheckBox(EditorUI::MakeCleanName(label), data);
+		return EditorUI::CheckBox(label, data);
 	}
 
 	template<>
 	bool PropertyDrawerTemplate<double>::OnGUI(const std::string& label, double* data, uint32_t flags) const
 	{
-		return EditorUI::InputDouble(EditorUI::MakeCleanName(label), data);
+		return EditorUI::InputDouble(label, data);
 	}
 
 	template<>
 	bool PropertyDrawerTemplate<glm::vec2>::OnGUI(const std::string& label, glm::vec2* data, uint32_t flags) const
 	{
-		return EditorUI::InputFloat2(EditorUI::MakeCleanName(label), data);
+		return EditorUI::InputFloat2(label, data);
 	}
 
 	template<>
 	bool PropertyDrawerTemplate<glm::vec3>::OnGUI(const std::string& label, glm::vec3* data, uint32_t flags) const
 	{
-		return EditorUI::InputFloat3(EditorUI::MakeCleanName(label), data);
+		return EditorUI::InputFloat3(label, data);
 	}
 
 	template<>
@@ -66,17 +66,17 @@ namespace Glory::Editor
 		if (flags & Color)
 		{
             const bool hdr = flags & HDR;
-            return EditorUI::InputColor(EditorUI::MakeCleanName(label), data, hdr);
+            return EditorUI::InputColor(label, data, hdr);
 		}
 
-		return EditorUI::InputFloat4(EditorUI::MakeCleanName(label), data);
+		return EditorUI::InputFloat4(label, data);
 	}
 
 	template<>
     bool PropertyDrawerTemplate<glm::quat>::OnGUI(const std::string& label, glm::quat* data, uint32_t flags) const
     {
         glm::vec3 euler = glm::eulerAngles(*data) / 3.141592f * 180.0f;
-        if (EditorUI::InputFloat3(EditorUI::MakeCleanName(label), &euler))
+        if (EditorUI::InputFloat3(label, &euler))
         {
             glm::quat q = glm::quat(euler * 3.141592f / 180.0f);
             data->x = q.x;
@@ -91,21 +91,21 @@ namespace Glory::Editor
 	template<>
     bool PropertyDrawerTemplate<LayerMask>::OnGUI(const std::string& label, LayerMask* data, uint32_t flags) const
     {
-        return EditorUI::InputLayerMask(EditorUI::MakeCleanName(label), data);
+        return EditorUI::InputLayerMask(label, data);
     }
 
 	template<>
     bool PropertyDrawerTemplate<LayerRef>::OnGUI(const std::string& label, LayerRef* data, uint32_t flags) const
     {
-		return EditorUI::InputLeyerRef(EditorUI::MakeCleanName(label), data);
+		return EditorUI::InputLeyerRef(label, data);
     }
 
 	template<>
 	bool PropertyDrawerTemplate<std::string>::OnGUI(const std::string& label, std::string* data, uint32_t flags) const
 	{
 		if(flags & AreaText)
-			return EditorUI::InputTextMultiline(EditorUI::MakeCleanName(label), data);
+			return EditorUI::InputTextMultiline(label, data);
 
-		return EditorUI::InputText(EditorUI::MakeCleanName(label), data);
+		return EditorUI::InputText(label, data);
 	}
 }

@@ -43,7 +43,7 @@ namespace Glory::Editor
 		if (mainToggle)
 		{
 			node_flags |= ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_AllowItemOverlap;
-			headerOpen = ImGui::TreeNodeEx("node", node_flags, EditorUI::MakeCleanName(label).data());
+			headerOpen = ImGui::TreeNodeEx("node", node_flags, label.data());
 			const FieldData* pFieldData = pStructTypeData->GetFieldData(0);
 			const size_t offset = pFieldData->Offset();
 			void* pAddress = (void*)((char*)(data)+offset);
@@ -59,7 +59,7 @@ namespace Glory::Editor
 		}
 		else
 		{
-			headerOpen = ImGui::TreeNodeEx("node", node_flags, EditorUI::MakeCleanName(label).data());
+			headerOpen = ImGui::TreeNodeEx("node", node_flags, label.data());
 		}
 
 		if(headerOpen)
@@ -114,7 +114,7 @@ namespace Glory::Editor
 		if (mainToggle)
 		{
 			node_flags |= ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_AllowItemOverlap;
-			headerOpen = ImGui::TreeNodeEx("node", node_flags, EditorUI::MakeCleanName(label).data());
+			headerOpen = ImGui::TreeNodeEx("node", node_flags, label.data());
 			DrawTooltip(tooltip);
 			const FieldData* pFieldData = pStructTypeData->GetFieldData(0);
 			auto enableValue = structData[pFieldData->Name()];
@@ -130,7 +130,7 @@ namespace Glory::Editor
 		}
 		else
 		{
-			headerOpen = ImGui::TreeNodeEx("node", node_flags, EditorUI::MakeCleanName(label).data());
+			headerOpen = ImGui::TreeNodeEx("node", node_flags, label.data());
 		}
 
 		if (headerOpen)

@@ -7,7 +7,7 @@ namespace Glory::Editor
     template<>
     inline bool PropertyDrawerTemplate<AllowedDOFFlag>::OnGUI(const std::string& label, AllowedDOFFlag* data, uint32_t flags) const
     {
-        ImGui::TextUnformatted(EditorUI::MakeCleanName(label).data());
+        ImGui::TextUnformatted(label.data());
         ImGui::Indent();
         bool change = EditorUI::CheckBoxFlags("Position", reinterpret_cast<uint32_t*>(data), { "x", "y", "z" },
             { uint32_t(AllowedDOFFlag::TranslationX), uint32_t(AllowedDOFFlag::TranslationY), uint32_t(AllowedDOFFlag::TranslationZ) });

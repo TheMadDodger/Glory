@@ -32,7 +32,7 @@ namespace Glory::Editor
 
 		bool openPopup = false;
 		float start, width;
-		EditorUI::EmptyDropdown(EditorUI::MakeCleanName(label), index == 0 ? None : scriptManager.TypeName(index - 1), [&openPopup]() {
+		EditorUI::EmptyDropdown(label, index == 0 ? None : scriptManager.TypeName(index - 1), [&openPopup]() {
 			openPopup = true;
 			ForceFilter = true;
 		}, start, width, 0.0f);

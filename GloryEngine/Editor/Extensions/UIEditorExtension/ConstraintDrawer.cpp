@@ -26,7 +26,7 @@ namespace Glory::Editor
         bool change = false;
         bool showTooltip = false;
 
-        ImGui::TextUnformatted(EditorUI::MakeCleanName(label).data());
+        ImGui::TextUnformatted(label.data());
         ImGui::PushID(label.data());
         ImGui::Separator();
         ImGui::Indent();
@@ -41,7 +41,7 @@ namespace Glory::Editor
 
         const float oldValue = constraintValue.As<float>();
         float newValue = oldValue;
-        if (EditorUI::InputFloat(EditorUI::MakeCleanName(label), &newValue))
+        if (EditorUI::InputFloat(label, &newValue))
         {
             Undo::ApplyYAMLEdit(file, constraintValue.Path(), oldValue, newValue);
             change = true;

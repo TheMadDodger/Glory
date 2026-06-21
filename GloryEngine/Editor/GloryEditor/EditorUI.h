@@ -93,8 +93,6 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API void EmptyDropdown(std::string_view label, std::string_view value, std::function<void()> callback, float& start, float& width, const float borderPadding = 0.0f);
 
-		static GLORY_EDITOR_API std::string_view MakeCleanName(std::string_view label);
-
 		static GLORY_EDITOR_API void PushFlag(Flag flag);
 		static GLORY_EDITOR_API void PopFlag();
 		static GLORY_EDITOR_API bool HasFlag(Flag flag);
