@@ -16,7 +16,7 @@
 namespace Glory::Editor
 {
 	GeneralSettings General;
-	EngineSettings IEngine;
+	EngineSettings Engine;
 	LayerSettings Layer;
 	InputSettings Input;
 	PackageSettings Packaging;
@@ -24,7 +24,7 @@ namespace Glory::Editor
 
 	std::vector<ProjectSettings*> Settings = {
 		&General,
-		&IEngine,
+		&Engine,
 		&Layer,
 		&Input,
 		&Packaging,

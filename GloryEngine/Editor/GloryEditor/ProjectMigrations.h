@@ -2,6 +2,16 @@
 #include "GloryEditor.h"
 #include "ProjectSpace.h"
 
+namespace Glory
+{
+	struct SettingsBase;
+
+namespace Utils
+{
+	struct YAMLFileRef;
+}
+}
+
 namespace Glory::Editor
 {
 	GLORY_EDITOR_API void Migrate(ProjectSpace* pProject);
@@ -58,4 +68,15 @@ namespace Glory::Editor
 	 * @param pProject Project to remove shaders and pipelines in
 	 */
 	GLORY_EDITOR_API void Migrate_0_6_0_RemoveShaderAndPipelineAssets(ProjectSpace* pProject);
+
+	/** @brief Migrate module settings to use new settings structs
+	 * @param pProject Project to migrate settings in
+	 */
+	GLORY_EDITOR_API void MigrateModuleSettings(ProjectSpace* pProject);
+
+	/** @brief Migrate module settings for specific module
+	 * @param file Module settings file to migrate
+	 * @param pSettings Settings data
+	 */
+	GLORY_EDITOR_API void Migrate_0_6_0_ModuleSettings(Utils::YAMLFileRef& originalFile, Utils::YAMLFileRef& file, SettingsBase* pSettings);
 }

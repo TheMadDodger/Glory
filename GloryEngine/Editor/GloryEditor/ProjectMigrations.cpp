@@ -4,11 +4,13 @@
 #include "EditorResourceManager.h"
 #include "EditableResource.h"
 #include "JSONRef.h"
+#include "ProjectSettings.h"
 
 #include <TextureData.h>
 #include <MaterialData.h>
 #include <Debug.h>
 #include <PrefabData.h>
+#include <SettingsContainer.h>
 
 #include <NodeRef.h>
 #include <YAML_GLM.h>
@@ -33,7 +35,7 @@ namespace Glory::Editor
         }
 
         const std::string_view editorVersionStr = editorVersion.AsString();
-        const Version version = Version::Parse(editorVersionStr.data());
+        const Version version = Version::Parse(editorVersionStr);
 
         /* Perform 0.1.1 migrations */
         if (Version::Compare(version, { 0,1,1,0 }, true) < 0)
@@ -62,6 +64,8 @@ namespace Glory::Editor
 
         /* Update version to current */
         editorVersion.SetString(GloryEditorVersion);
+
+        MigrateModuleSettings(pProject);
     }
 
     void Migrate_0_1_1_DefaultTextureAndMaterialProperties(ProjectSpace* pProject)
@@ -730,6 +734,103 @@ namespace Glory::Editor
             str << "0.6.0> Removed asset ID " << toRemoveAssets[i];
             pApplication->GetEngine()->GetDebug().LogInfo(str.str());
             EditorAssetDatabase::SetDirty(true);
+        }
+    }
+
+    void MigrateModuleSettings(ProjectSpace* pProject)
+    {
+        EditorApplication* pApplication = EditorApplication::GetInstance();
+        IEngine* pEngine = pApplication->GetEngine();
+        EngineSettings* pEngineSettings = static_cast<EngineSettings*>(ProjectSettings::Get("Engine"));
+
+        for (size_t i = 0; i < pEngine->ModulesCount(); ++i)
+        {
+            Module* pModule = pEngine->GetModule(i);
+            auto settings = pModule->GetSettings();
+            if (!settings) continue;
+
+            auto& file = pEngineSettings->GetModuleSettingsFile(pModule);
+            auto editorVersion = file["EditorVersion"];
+            if (!editorVersion.Exists() || !editorVersion.IsScalar())
+                editorVersion.Set("0.1.0");
+
+            const std::string editorVersionStr = editorVersion.As<std::string>();
+            const Version version = Version::Parse(editorVersionStr);
+
+            std::filesystem::path pathToOriginal = file.Path();
+            pathToOriginal.replace_extension(".yaml");
+
+            if (!std::filesystem::exists(pathToOriginal))
+            {
+                editorVersion.Set(GloryEditorVersion);
+                continue;
+            }
+
+            /* Perform 0.6.0 migrations */
+            if (Version::Compare(version, { 0,6,0,0 }, true) < 0)
+            {
+                Utils::YAMLFileRef originalFile = pathToOriginal;
+                Migrate_0_6_0_ModuleSettings(originalFile, file, settings);
+            }
+
+            editorVersion.Set(GloryEditorVersion);
+        }
+    }
+
+    void Migrate_0_6_0_ModuleSettings(Utils::YAMLFileRef& originalFile, Utils::YAMLFileRef& file, SettingsBase* pSettings)
+    {
+        std::filesystem::path oldPropPath;
+        std::filesystem::path newPropPath;
+
+        const auto type = pSettings->GetType();
+        for (size_t i = 0; i < type->FieldCount(); ++i)
+        {
+            const auto field = type->GetFieldData(i);
+            auto& name = field->Name();
+            auto& displayName = field->DisplayName();
+
+            auto oldProp = originalFile[displayName];
+            auto newProp = file[name];
+
+            if (!oldProp.Exists())
+                continue;
+
+            /* Struct and array of structs was not supported before 0.6.0 so we don't have to care about migrating those */
+            const auto elementType = Utils::Reflect::Reflect::GetTyeData(field->ArrayElementType());
+
+            switch (field->Type())
+            {
+            case ST_Path:
+            case ST_Enum:
+            case ST_Basic:
+            case ST_String:
+            case ST_Asset:
+            case ST_Value:
+            {
+                if (!oldProp.IsScalar())
+                    break;
+                newProp.Set(oldProp.Node());
+                break;
+            }
+            case ST_Array:
+            {
+                if (!oldProp.IsSequence())
+                    break;
+
+                switch (elementType->TypeHash())
+                {
+                case ST_Path:
+                case ST_Enum:
+                case ST_Basic:
+                case ST_String:
+                case ST_Asset:
+                case ST_Value:
+                    newProp.Set(oldProp.Node());
+                    break;
+                }
+                break;
+            }
+            }
         }
     }
 }

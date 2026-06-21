@@ -16,6 +16,7 @@ if (!node.Exists() || !node.Is##nodeType()) \
 namespace Glory
 {
 	struct SettingsBase;
+	class Module;
 }
 
 namespace Glory::Editor
@@ -84,13 +85,18 @@ namespace Glory::Editor
 	public:
 		EngineSettings();
 
+		Utils::YAMLFileRef& GetModuleSettingsFile(Module* pModule);
+
 	private:
 		virtual bool OnGui() override;
 		void OnSave(ProjectSpace* pProject) override;
+		void OnSettingsLoaded() override;
 
 		void DrawLeftPanel();
 		bool DrawRightPanel();
 		bool DrawSettings(SettingsBase& settings, Utils::YAMLFileRef& file);
+
+		void OnModuleSettingsChanged(Utils::YAMLFileRef& file, const std::filesystem::path& path);
 
 	private:
 		size_t m_MenuIndex;

@@ -845,6 +845,7 @@ namespace Glory
 
 	void GloryEngine::LoadModuleSettings(const std::filesystem::path& overrideRootPath)
 	{
+		m_Resources->SetAllowReferenceCounting(false);
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
 			Module* pModule = m_pAllModules[i];
@@ -867,5 +868,6 @@ namespace Glory
 			settingsFilePath.append(moduleMetaData.Name() + ".yaml");
 			pModule->LoadSettings(settingsFilePath);
 		}
+		m_Resources->SetAllowReferenceCounting(true);
 	}
 }

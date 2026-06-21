@@ -12,14 +12,6 @@ namespace Glory::Editor
 
 	Toolbar::~Toolbar()
 	{
-		if (m_ToolChains.size())
-		{
-			for (auto it : m_ToolChains)
-			{
-				it.second.clear();
-			}
-			m_ToolChains.clear();
-		}
 	}
 
 	void Toolbar::AddToolChain(const ToolChainPosition& toolChain, IToolChain* pToolChain)

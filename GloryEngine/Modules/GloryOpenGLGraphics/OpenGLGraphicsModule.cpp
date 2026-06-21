@@ -77,6 +77,10 @@ namespace Glory
 		LogGLError(glGetError());
 
 		m_pEngine->AddGraphicsDevice(&m_Device);
+
+		m_Settings.RegisterChangeHandler(SETTING_NAME(OpenGLSettings::m_CmdBufferEmulationEnabled), [this]() {
+			m_Device.SetCommandBufferEmulationEnabled(m_Settings->m_CmdBufferEmulationEnabled);
+		});
 	}
 
 	void OpenGLGraphicsModule::Cleanup()
@@ -85,19 +89,10 @@ namespace Glory
 		LogGLError(glGetError());
 	}
 
-	void OpenGLGraphicsModule::Update()
-	{
-		const ModuleSettings& settings = Settings();
-		const bool enableCommandBufferEmulation = settings.Value<bool>("Enable Command Buffer Emulation");
-		m_Device.SetCommandBufferEmulationEnabled(enableCommandBufferEmulation);
-	}
-
 	void OpenGLGraphicsModule::LoadSettings(ModuleSettings& settings)
 	{
 		SetSettings(&m_Settings);
-
-		settings.PushGroup("Command Buffer Emulation");
-		settings.RegisterValue<bool>("Enable Command Buffer Emulation", true);
+		m_Settings.InsertGroupBefore(SETTING_NAME(OpenGLSettings::m_CmdBufferEmulationEnabled), "Command Buffer Emulation");
 	}
 
 	void OpenGLGraphicsModule::LogGLError(const GLenum& err, bool bIncludeTimeStamp)

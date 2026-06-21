@@ -50,6 +50,10 @@ namespace Glory
 	void OpenGLDevice::SetCommandBufferEmulationEnabled(bool enable)
 	{
 		m_IsCommandBufferEmulationEnabled = enable;
+		if (enable)
+			Debug().LogInfo("OpenGLDevice command buffer emulation is enabled!");
+		else
+			Debug().LogInfo("OpenGLDevice command buffer emulation is disabled!");
 	}
 
 	uint32_t OpenGLDevice::GetGLTextureID(TextureHandle texture)

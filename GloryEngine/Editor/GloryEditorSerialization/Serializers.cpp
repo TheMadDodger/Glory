@@ -4,6 +4,8 @@
 #include "PropertySerializer.h"
 #include "IEngine.h"
 
+#include <GloryAssert.h>
+
 namespace Glory
 {
 	/* This ensures legacy support by rerouting an old hash to a new one */
@@ -75,7 +77,7 @@ namespace Glory
 			return;
 		}
 
-		throw new std::exception("Missing serializer!");
+		GLORY_ASSERT_UNREACHABLE_CODE();
 	}
 
 	void Serializers::SerializeProperty(const FieldData* pFieldData, void* data, Utils::NodeValueRef node)
@@ -104,7 +106,7 @@ namespace Glory
 			return;
 		}
 
-		throw new std::exception("Missing serializer!");
+		GLORY_ASSERT_UNREACHABLE_CODE();
 	}
 
 	void Serializers::DeserializeProperty(const Utils::Reflect::TypeData* pTypeData, void* data, Utils::NodeValueRef node)
@@ -124,7 +126,7 @@ namespace Glory
 			return;
 		}
 
-		throw new std::exception("Missing serializer!");
+		GLORY_ASSERT_UNREACHABLE_CODE();
 	}
 
 	void Serializers::DeserializeProperty(const FieldData* pFieldData, void* data, Utils::NodeValueRef node)
@@ -155,7 +157,7 @@ namespace Glory
 			return;
 		}
 
-		throw new std::exception("Missing serializer!");
+		GLORY_ASSERT_UNREACHABLE_CODE();
 	}
 
 	IEngine* Serializers::GetEngine() const
