@@ -35,25 +35,23 @@ namespace Glory
 
 	void GloryRendererModule::CollectReferences(std::vector<UUID>& references)
 	{
-		ModuleSettings& settings = Settings();
-
 		std::vector<UUID> newReferences;
-		newReferences.push_back(settings.Value<uint64_t>("Lines Pipeline"));
-		newReferences.push_back(settings.Value<uint64_t>("SSAO Prepass Pipeline"));
-		newReferences.push_back(settings.Value<uint64_t>("SSAO Blur Pipeline"));
-		newReferences.push_back(settings.Value<uint64_t>("Text Pipeline"));
-		newReferences.push_back(settings.Value<uint64_t>("Display Copy Pipeline"));
-		newReferences.push_back(settings.Value<uint64_t>("Skybox Pipeline"));
-		newReferences.push_back(settings.Value<uint64_t>("Shadows Pipeline"));
-		newReferences.push_back(settings.Value<uint64_t>("Shadows Transparent Textured Pipeline"));
-		newReferences.push_back(settings.Value<uint64_t>("Cluster Generator"));
-		newReferences.push_back(settings.Value<uint64_t>("Cluster Cull Light"));
-		newReferences.push_back(settings.Value<uint64_t>("Picking"));
-		newReferences.push_back(settings.Value<uint64_t>("SSAO Postpass"));
-		newReferences.push_back(settings.Value<uint64_t>("SSAO Visualizer"));
-		newReferences.push_back(settings.Value<uint64_t>("ObjectID Visualizer"));
-		newReferences.push_back(settings.Value<uint64_t>("Depth Visualizer"));
-		newReferences.push_back(settings.Value<uint64_t>("Light Complexity Visualizer"));
+		newReferences.push_back(m_Settings->m_LinesPipeline.GetUUID());
+		newReferences.push_back(m_Settings->m_SSAOPrepassPipeline.GetUUID());
+		newReferences.push_back(m_Settings->m_SSAOBlurPipeline.GetUUID());
+		newReferences.push_back(m_Settings->m_TextPipeline.GetUUID());
+		newReferences.push_back(m_Settings->m_DisplayCopyPipeline.GetUUID());
+		newReferences.push_back(m_Settings->m_SkyboxPipeline.GetUUID());
+		newReferences.push_back(m_Settings->m_ShadowsPipeline.GetUUID());
+		newReferences.push_back(m_Settings->m_ShadowsTransparentTexturePipeline.GetUUID());
+		newReferences.push_back(m_Settings->m_ClusterPipeline.GetUUID());
+		newReferences.push_back(m_Settings->m_ClusterCullLightPipeline.GetUUID());
+		newReferences.push_back(m_Settings->m_PickingPipeline.GetUUID());
+		newReferences.push_back(m_Settings->m_SSAOPostpassPipeline.GetUUID());
+		newReferences.push_back(m_Settings->m_SSAOVisPipeline.GetUUID());
+		newReferences.push_back(m_Settings->m_ObjectIDVisPipeline.GetUUID());
+		newReferences.push_back(m_Settings->m_DepthVisPipeline.GetUUID());
+		newReferences.push_back(m_Settings->m_LightComplexityVisPipeline.GetUUID());
 
 		for (size_t i = 0; i < newReferences.size(); ++i)
 		{
@@ -69,6 +67,36 @@ namespace Glory
 				references.push_back(shaderID);
 			}
 		}
+	}
+
+	void GloryRendererModule::RegisterTypes()
+	{
+		Reflect::SetReflectInstance(&m_pEngine->Reflection());
+		Reflect::RegisterType<GloryRendererSettings>();
+	}
+
+	void GloryRendererModule::InitializeSettings()
+	{
+		SetSettings(&m_Settings);
+		m_Settings.InsertGroupBefore(SETTING_NAME(GloryRendererSettings::m_LinesPipeline), "Pipelines");
+
+		/* Default values for asset references need to be set during load otherwise we don't have a resource manager yet */
+		m_Settings->m_LinesPipeline = UUID(19ull);
+		m_Settings->m_SSAOPrepassPipeline = UUID(21ull);
+		m_Settings->m_SSAOBlurPipeline = UUID(4ull);
+		m_Settings->m_TextPipeline = UUID(23ull);
+		m_Settings->m_DisplayCopyPipeline = UUID(30ull);
+		m_Settings->m_SkyboxPipeline = UUID(33ull);
+		m_Settings->m_ShadowsPipeline = UUID(38ull);
+		m_Settings->m_ShadowsTransparentTexturePipeline = UUID(39ull);
+		m_Settings->m_ClusterPipeline = UUID(44ull);
+		m_Settings->m_ClusterCullLightPipeline = UUID(45ull);
+		m_Settings->m_PickingPipeline = UUID(47ull);
+		m_Settings->m_SSAOPostpassPipeline = UUID(49ull);
+		m_Settings->m_SSAOVisPipeline = UUID(51ull);
+		m_Settings->m_ObjectIDVisPipeline = UUID(50ull);
+		m_Settings->m_DepthVisPipeline = UUID(52ull);
+		m_Settings->m_LightComplexityVisPipeline = UUID(54ull);
 	}
 
 	void GloryRendererModule::Initialize()
@@ -117,26 +145,6 @@ namespace Glory
 			m_SecondaryRenderers[i].Cleanup();
 	}
 
-	void GloryRendererModule::LoadSettings(ModuleSettings& settings)
-	{
-		settings.RegisterAssetReference<PipelineData>("Lines Pipeline", 19);
-		settings.RegisterAssetReference<PipelineData>("SSAO Prepass Pipeline", 21);
-		settings.RegisterAssetReference<PipelineData>("SSAO Blur Pipeline", 4);
-		settings.RegisterAssetReference<PipelineData>("Text Pipeline", 23);
-		settings.RegisterAssetReference<PipelineData>("Display Copy Pipeline", 30);
-		settings.RegisterAssetReference<PipelineData>("Skybox Pipeline", 33);
-		settings.RegisterAssetReference<PipelineData>("Shadows Pipeline", 38);
-		settings.RegisterAssetReference<PipelineData>("Shadows Transparent Textured Pipeline", 39);
-		settings.RegisterAssetReference<PipelineData>("Cluster Generator", 44);
-		settings.RegisterAssetReference<PipelineData>("Cluster Cull Light", 45);
-		settings.RegisterAssetReference<PipelineData>("Picking", 47);
-		settings.RegisterAssetReference<PipelineData>("SSAO Postpass", 49);
-		settings.RegisterAssetReference<PipelineData>("SSAO Visualizer", 51);
-		settings.RegisterAssetReference<PipelineData>("ObjectID Visualizer", 50);
-		settings.RegisterAssetReference<PipelineData>("Depth Visualizer", 52);
-		settings.RegisterAssetReference<PipelineData>("Light Complexity Visualizer", 54);
-	}
-
 	void GloryRendererModule::Preload()
 	{
 		GraphicsDevice* pDevice = m_pEngine->ActiveGraphicsDevice();
@@ -166,16 +174,15 @@ namespace Glory
 
 	void GloryRendererModule::CheckCachedPipelines(GraphicsDevice* pDevice)
 	{
-		const ModuleSettings& settings = Settings();
-		const UUID clusterGeneratorPipeline = settings.Value<uint64_t>("Cluster Generator");
-		const UUID clusterCullLightPipeline = settings.Value<uint64_t>("Cluster Cull Light");
-		const UUID pickingPipeline = settings.Value<uint64_t>("Picking");
-		const UUID displayPipeline = settings.Value<uint64_t>("Display Copy Pipeline");
-		const UUID ssaoPostPassPipeline = settings.Value<uint64_t>("SSAO Postpass");
-		const UUID visualizeSSAOPipeline = settings.Value<uint64_t>("SSAO Visualizer");
-		const UUID visualizeObjectIDPipeline = settings.Value<uint64_t>("ObjectID Visualizer");
-		const UUID visualizeDepthPipeline = settings.Value<uint64_t>("Depth Visualizer");
-		const UUID visualizeLightComplexityPipeline = settings.Value<uint64_t>("Light Complexity Visualizer");
+		const UUID clusterGeneratorPipeline = m_Settings->m_ClusterPipeline.GetUUID();
+		const UUID clusterCullLightPipeline = m_Settings->m_ClusterCullLightPipeline.GetUUID();
+		const UUID pickingPipeline = m_Settings->m_PickingPipeline.GetUUID();
+		const UUID displayPipeline = m_Settings->m_DisplayCopyPipeline.GetUUID();
+		const UUID ssaoPostPassPipeline = m_Settings->m_SSAOPostpassPipeline.GetUUID();
+		const UUID visualizeSSAOPipeline = m_Settings->m_SSAOVisPipeline.GetUUID();
+		const UUID visualizeObjectIDPipeline = m_Settings->m_ObjectIDVisPipeline.GetUUID();
+		const UUID visualizeDepthPipeline = m_Settings->m_DepthVisPipeline.GetUUID();
+		const UUID visualizeLightComplexityPipeline = m_Settings->m_LightComplexityVisPipeline.GetUUID();
 
 		static DescriptorSetLayoutHandle doubleFloatPushConstantsLayout = NULL;
 
@@ -236,34 +243,34 @@ namespace Glory
 		RendererPipelines::m_SSAOPostPassPipeline = pDevice->AcquireCachedPipeline(m_Renderer.m_FinalFrameColorPasses[0], pPipeline,
 			{ doubleFloatPushConstantsLayout, RendererDSLayouts::m_DisplayCopySamplerSetLayout, RendererDSLayouts::m_SSAOPostSamplerSetLayout },
 			sizeof(glm::vec3), { AttributeType::Float3 });
-		const UUID shadowsPipeline = settings.Value<uint64_t>("Shadows Pipeline");
+		const UUID shadowsPipeline = m_Settings->m_ShadowsPipeline.GetUUID();
 		pPipeline = pipelines.GetPipelineData(shadowsPipeline);
 		RendererPipelines::m_ShadowRenderPipeline = pDevice->AcquireCachedPipeline(m_Renderer.m_ShadowsPasses[0], pPipeline,
 			{ RendererDSLayouts::m_GlobalShadowRenderSetLayout, RendererDSLayouts::m_ObjectDataSetLayout }, sizeof(DefaultVertex3D),
 			{ AttributeType::Float3, AttributeType::Float3, AttributeType::Float3,
 			AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 });
-		const UUID shadowsTransparentPipeline = settings.Value<uint64_t>("Shadows Transparent Textured Pipeline");
+		const UUID shadowsTransparentPipeline = m_Settings->m_ShadowsTransparentTexturePipeline.GetUUID();
 		pPipeline = pipelines.GetPipelineData(shadowsTransparentPipeline);
 		//m_TransparentShadowRenderPipeline = pDevice->AcquireCachedPipeline(m_ShadowsPasses[0], pPipeline, {}, sizeof(DefaultVertex3D),
 		//	{ AttributeType::Float3, AttributeType::Float3, AttributeType::Float3,
 		//	AttributeType::Float3, AttributeType::Float2, AttributeType::Float4 });
-		const UUID ssaoPipeline = settings.Value<uint64_t>("SSAO Prepass Pipeline");
+		const UUID ssaoPipeline = m_Settings->m_SSAOPrepassPipeline.GetUUID();
 		pPipeline = pipelines.GetPipelineData(ssaoPipeline);
 		RendererPipelines::m_SSAOPipeline = pDevice->AcquireCachedPipeline(DummyRenderPasses::m_DummySSAORenderPass, pPipeline,
 			{ RendererDSLayouts::m_GlobalClusterSetLayout, RendererDSLayouts::m_GlobalSampleDomeSetLayout,
 			RendererDSLayouts::m_SSAOSamplersSetLayout, RendererDSLayouts::m_NoiseSamplerSetLayout },
 			sizeof(glm::vec3), { AttributeType::Float3 });
-		const UUID ssaoBlurPipeline = settings.Value<uint64_t>("SSAO Blur Pipeline");
+		const UUID ssaoBlurPipeline = m_Settings->m_SSAOBlurPipeline.GetUUID();
 		pPipeline = pipelines.GetPipelineData(ssaoBlurPipeline);
 		RendererPipelines::m_SSAOBlurPipeline = pDevice->AcquireCachedPipeline(DummyRenderPasses::m_DummySSAORenderPass, pPipeline,
 			{ RendererDSLayouts::m_GlobalBlurSetLayout, RendererDSLayouts::m_DisplayCopySamplerSetLayout },
 			sizeof(glm::vec3), { AttributeType::Float3 });
-		const UUID skyboxPipeline = settings.Value<uint64_t>("Skybox Pipeline");
+		const UUID skyboxPipeline = m_Settings->m_SkyboxPipeline.GetUUID();
 		pPipeline = pipelines.GetPipelineData(skyboxPipeline);
 		RendererPipelines::m_SkyboxPipeline = pDevice->AcquireCachedPipeline(DummyRenderPasses::m_DummyRenderPass, pPipeline,
 			{ RendererDSLayouts::m_GlobalSkyboxRenderSetLayout, RendererDSLayouts::m_GlobalSkyboxSamplerSetLayout },
 			sizeof(glm::vec3), { AttributeType::Float3 });
-		const UUID lineRenderPipeline = settings.Value<uint64_t>("Lines Pipeline");
+		const UUID lineRenderPipeline = m_Settings->m_LinesPipeline.GetUUID();
 		pPipeline = pipelines.GetPipelineData(lineRenderPipeline);
 		RendererPipelines::m_LineRenderPipeline = pDevice->AcquireCachedPipeline(DummyRenderPasses::m_DummyRenderPass, pPipeline,
 			{ RendererDSLayouts::m_GlobalLineRenderSetLayout }, sizeof(LineVertex),

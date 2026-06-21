@@ -25,6 +25,18 @@ namespace Glory
 	{
 	}
 
+	void OpenGLGraphicsModule::RegisterTypes()
+	{
+		Reflect::SetReflectInstance(&m_pEngine->Reflection());
+		Reflect::RegisterType<OpenGLSettings>();
+	}
+
+	void OpenGLGraphicsModule::InitializeSettings()
+	{
+		SetSettings(&m_Settings);
+		m_Settings.InsertGroupBefore(SETTING_NAME(OpenGLSettings::m_CmdBufferEmulationEnabled), "Command Buffer Emulation");
+	}
+
 	void OpenGLGraphicsModule::PreInitialize()
 	{
 		m_pEngine->MainWindowInfo().WindowFlags |= W_OpenGL;
@@ -33,8 +45,6 @@ namespace Glory
 	void OpenGLGraphicsModule::Initialize()
 	{
 		EngineInstance = m_pEngine;
-		Reflect::SetReflectInstance(&m_pEngine->Reflection());
-		Reflect::RegisterType<OpenGLSettings>();
 
 		Window* pMainWindow = GetEngine()->GetMainModule<WindowModule>()->GetMainWindow();
 		pMainWindow->SetupForOpenGL();
@@ -87,12 +97,6 @@ namespace Glory
 	{
 		GetEngine()->GetMainModule<WindowModule>()->GetMainWindow()->CleanupOpenGL();
 		LogGLError(glGetError());
-	}
-
-	void OpenGLGraphicsModule::LoadSettings(ModuleSettings& settings)
-	{
-		SetSettings(&m_Settings);
-		m_Settings.InsertGroupBefore(SETTING_NAME(OpenGLSettings::m_CmdBufferEmulationEnabled), "Command Buffer Emulation");
 	}
 
 	void OpenGLGraphicsModule::LogGLError(const GLenum& err, bool bIncludeTimeStamp)

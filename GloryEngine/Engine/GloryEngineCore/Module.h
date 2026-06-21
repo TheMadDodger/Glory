@@ -92,6 +92,8 @@ namespace Glory
 
 	private:
 		virtual void LoadSettings(ModuleSettings& settings) {};
+		virtual void RegisterTypes() {};
+		virtual void InitializeSettings() {};
 		virtual void PreInitialize() {};
 		virtual void Initialize() = 0;
 		virtual void PostInitialize() {};

@@ -4,8 +4,6 @@
 #include <functional>
 #include <filesystem>
 
-#include "MacroHelpers.h"
-
 #define SETTING_NAME(x) STRINGIZE(x)
 
 namespace Glory
@@ -21,7 +19,7 @@ namespace Glory
 		SettingsBase(void* data):
 			m_pSettingsData(data) {}
 
-		void* operator*()
+		inline void* operator*()
 		{
 			return m_pSettingsData;
 		}
@@ -30,24 +28,24 @@ namespace Glory
 
 		virtual const Utils::Reflect::TypeData* GetType() const = 0;
 
-		void RegisterChangeHandler(const std::string& prop, Callback handler)
+		inline void RegisterChangeHandler(const std::string& prop, Callback handler)
 		{
 			m_ChangeHandlers.emplace(prop, handler);
 		}
 
-		void NotifyChange(const std::string& prop)
+		inline void NotifyChange(const std::string& prop)
 		{
 			auto handlerIter = m_ChangeHandlers.find(prop);
 			if (handlerIter == m_ChangeHandlers.end()) return;
 			handlerIter->second();
 		}
 
-		void InsertGroupBefore(std::string&& prop, std::string&& group)
+		inline void InsertGroupBefore(std::string&& prop, std::string&& group)
 		{
 			m_Groups.emplace(std::move(prop), std::move(group));
 		}
 
-		std::string_view GetGroup(const std::string& prop) const
+		inline std::string_view GetGroup(const std::string& prop) const
 		{
 			const auto iter = m_Groups.find(prop);
 			return iter != m_Groups.end() ? iter->second : std::string_view{};

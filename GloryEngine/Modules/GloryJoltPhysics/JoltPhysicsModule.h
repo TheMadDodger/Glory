@@ -201,6 +201,7 @@ namespace Glory
 
 	private:
 		virtual void LoadSettings(ModuleSettings& settings) override;
+		virtual void RegisterTypes() override;
 		virtual void Initialize() override;
 		virtual void PostInitialize() override;
 		virtual void Cleanup() override;

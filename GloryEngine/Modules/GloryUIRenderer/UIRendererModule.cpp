@@ -354,7 +354,7 @@ namespace Glory
 		return m_RegistryFactory;
 	}
 
-	void UIRendererModule::Initialize()
+	void UIRendererModule::RegisterTypes()
 	{
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
 		Reflect::RegisterEnum<UITarget>();
@@ -383,7 +383,10 @@ namespace Glory
 		Reflect::RegisterType<UIScrollView>();
 
 		Constraints::AddBuiltinConstraints();
+	}
 
+	void UIRendererModule::Initialize()
+	{
 		/* Register the renderer component using the main component types instance */
 		m_pEngine->GetSceneManager()->RegisterComponentManager<UIRenderManager, UIRenderer>(
 			[this](Utils::ECS::EntityRegistry*, UIRenderManager* manager) {

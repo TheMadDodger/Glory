@@ -80,6 +80,7 @@ namespace Glory
 		virtual bool ClaimExtraSceneData(Resource* pSceneResource) override;
 
 	protected:
+		virtual void RegisterTypes() override;
 		virtual void Initialize() override;
 		virtual void Update() override;
 		virtual void Cleanup() override;

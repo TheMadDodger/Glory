@@ -220,14 +220,17 @@ namespace Glory
 		m_AudioScenes.erase(sceneIter);
 	}
 
-	void SteamAudioModule::Initialize()
+	void SteamAudioModule::RegisterTypes()
 	{
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
+		Reflect::RegisterType<SoundMaterial>();
 
-		m_pEngine->Reflection().RegisterType<SoundMaterial>();
 		m_pEngine->GetResources().RegisterResource<SoundMaterialData>();
 		m_pEngine->GetResources().RegisterResource<AudioSceneData>();
+	}
 
+	void SteamAudioModule::Initialize()
+	{
 		m_pEngine->GetSceneManager()->RegisterComponentManager<SoundOccluderManager, SoundOccluder>();
 
 		m_pAudioModule = m_pEngine->GetOptionalModule<AudioModule>();

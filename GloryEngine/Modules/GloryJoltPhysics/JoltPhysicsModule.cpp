@@ -654,6 +654,13 @@ namespace Glory
 		}
 	}
 
+	void JoltPhysicsModule::RegisterTypes()
+	{
+		PhysicsModule::RegisterTypes();
+		Reflect::SetReflectInstance(&m_pEngine->Reflection());
+		Reflect::RegisterEnum<BPLayer>();
+	}
+
 	void JoltPhysicsModule::Initialize()
 	{
 		PhysicsModule::Initialize();
@@ -670,10 +677,6 @@ namespace Glory
 			});
 
 		m_ObjectVSBroadPhase.m_pLayers = &m_pEngine->GetLayerManager();
-
-		Reflect::SetReflectInstance(&m_pEngine->Reflection());
-
-		Reflect::RegisterEnum<BPLayer>();
 
 		// Register allocation hook
 		JPH::RegisterDefaultAllocator();

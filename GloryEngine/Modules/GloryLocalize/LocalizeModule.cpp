@@ -220,7 +220,7 @@ namespace Glory
 		return m_CurrentLanguage;
 	}
 
-	void LocalizeModule::Initialize()
+	void LocalizeModule::RegisterTypes()
 	{
 		Reflect::SetReflectInstance(&m_pEngine->Reflection());
 		m_pEngine->GetResources().RegisterResource<StringTable>();
@@ -228,7 +228,10 @@ namespace Glory
 
 		Reflect::RegisterType<StringTableLoader>();
 		Reflect::RegisterType<Localize>();
+	}
 
+	void LocalizeModule::Initialize()
+	{
 		m_pEngine->GetSceneManager()->RegisterComponentManager<StringTableLoaderManager, StringTableLoader>(
 			[this](Utils::ECS::EntityRegistry*, StringTableLoaderManager* manager) {
 				manager->m_pModule = this;

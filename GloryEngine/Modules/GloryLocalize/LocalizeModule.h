@@ -78,6 +78,7 @@ namespace Glory
 		GLORY_MODULE_VERSION_H(0, 2, 0);
 
 	private:
+		virtual void RegisterTypes() override;
 		virtual void Initialize() override;
 		virtual void PostInitialize() override;
 		virtual void Update() override;

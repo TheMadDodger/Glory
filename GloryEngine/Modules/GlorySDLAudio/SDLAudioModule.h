@@ -124,6 +124,7 @@ namespace Glory
 		GLORY_SDL_AUDIO_API glm::mat4& ListenerTransform() override { return m_ListerenTransform; }
 
 	protected:
+		virtual void RegisterTypes() override;
 		virtual void Initialize() override;
 		virtual void Cleanup() override;
 

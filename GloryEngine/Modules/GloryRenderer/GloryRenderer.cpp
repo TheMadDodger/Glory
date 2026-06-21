@@ -594,25 +594,6 @@ namespace Glory
 
 	void GloryRenderer::InitializeAsMainRenderer()
 	{
-		const ModuleSettings& settings = m_pModule->Settings();
-		const UUID linesPipeline = settings.Value<uint64_t>("Lines Pipeline");
-		const UUID screenPipeline = settings.Value<uint64_t>("Screen Pipeline");
-		const UUID SSAOPrePassPipeline = settings.Value<uint64_t>("SSAO Prepass Pipeline");
-		const UUID SSAOBlurPipeline = settings.Value<uint64_t>("SSAO Blur Pipeline");
-		const UUID textPipeline = settings.Value<uint64_t>("Text Pipeline");
-		const UUID displayPipeline = settings.Value<uint64_t>("Display Copy Pipeline");
-		const UUID skyboxPipeline = settings.Value<uint64_t>("Skybox Pipeline");
-		const UUID irradiancePipeline = settings.Value<uint64_t>("Irradiance Pipeline");
-		const UUID shadowsPipeline = settings.Value<uint64_t>("Shadows Pipeline");
-		const UUID shadowsTransparentPipeline = settings.Value<uint64_t>("Shadows Transparent Textured Pipeline");
-		const UUID clusterGeneratorPipeline = settings.Value<uint64_t>("Cluster Generator");
-		const UUID clusterCullLightPipeline = settings.Value<uint64_t>("Cluster Cull Light");
-		const UUID pickingPipeline = settings.Value<uint64_t>("Picking");
-		const UUID ssaoPostpassPipeline = settings.Value<uint64_t>("SSAO Postpass");
-		const UUID objectIDVisualizerPipeline = settings.Value<uint64_t>("ObjectID Visualizer");
-		const UUID depthVisualizerPipeline = settings.Value<uint64_t>("Depth Visualizer");
-		const UUID lightComplexityVisualizerPipeline = settings.Value<uint64_t>("Light Complexity Visualizer");
-
 		m_pModule->GetEngine()->GetConsole().RegisterCVar({ std::string{ RendererCVARs::ScreenSpaceAOCVarName }, "Enables/disables screen space ambient occlusion.",
 			float(SSAOEnabled()), CVar::Flags::Save });
 		m_pModule->GetEngine()->GetConsole().RegisterCVar({ std::string{ RendererCVARs::MinShadowResolutionVarName }, "Sets the minimum resolution for shadow maps.",

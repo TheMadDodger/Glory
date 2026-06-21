@@ -63,15 +63,17 @@ namespace Glory
 		settings.RegisterValue<bool>("Enable GC allocation logging", false);
 	}
 
+	void GloryMonoScipting::RegisterTypes()
+	{
+		Reflect::SetReflectInstance(&m_pEngine->Reflection());
+		Reflect::RegisterEnum<MonoLogLevel>();
+		Reflect::RegisterType<ScriptTypeReference>();
+	}
+
 	void GloryMonoScipting::Initialize()
 	{
 		m_pMonoManager->Initialize("./Modules/GloryMonoScripting/Dependencies");
 		m_pScriptingExtender->Initialize(this);
-
-		Reflect::SetReflectInstance(&m_pEngine->Reflection());
-
-		Reflect::RegisterEnum<MonoLogLevel>();
-		Reflect::RegisterType<ScriptTypeReference>();
 
 		CoreCSAPI::SetEngine(m_pEngine);
 		InputCSAPI::SetEngine(m_pEngine);

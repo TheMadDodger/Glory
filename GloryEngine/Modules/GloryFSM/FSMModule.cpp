@@ -72,7 +72,7 @@ namespace Glory
 		return &*iter;
 	}
 
-	void FSMModule::Initialize()
+	void FSMModule::RegisterTypes()
 	{
 		Utils::Reflect::Reflect::SetReflectInstance(&m_pEngine->Reflection());
 		Reflect::RegisterEnum<FSMPropertyType>();
@@ -81,6 +81,10 @@ namespace Glory
 		Reflect::RegisterType<FSMTransition>();
 		Reflect::RegisterType<FSMProperty>();
 		m_pEngine->GetResources().RegisterResource<FSMData>();
+	}
+
+	void FSMModule::Initialize()
+	{
 	}
 
 	void FSMModule::PostInitialize()

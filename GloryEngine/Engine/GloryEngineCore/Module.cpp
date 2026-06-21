@@ -1,5 +1,6 @@
 #include "Module.h"
 #include "IEngine.h"
+#include "SettingsContainer.h"
 
 namespace Glory
 {

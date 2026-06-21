@@ -14,12 +14,16 @@ namespace Glory
         return typeid(PhysicsModule);
     }
 
-    void PhysicsModule::Initialize()
+    void PhysicsModule::RegisterTypes()
     {
         Reflect::SetReflectInstance(&m_pEngine->Reflection());
         Reflect::RegisterEnum<BodyType>();
         Reflect::RegisterEnum<MotionQuality>();
         Reflect::RegisterEnum<AllowedDOFFlag>();
         Reflect::RegisterType<PhysicsSimulationSettings>();
+    }
+
+    void PhysicsModule::Initialize()
+    {
     }
 }

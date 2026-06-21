@@ -270,6 +270,10 @@ namespace Glory
 		Music.m_CurrentMusic = NULL;
 	}
 
+	void SDLAudioModule::RegisterTypes()
+	{
+	}
+
 	void SDLAudioModule::Initialize()
 	{
 		Audio_EngineInstance = m_pEngine;

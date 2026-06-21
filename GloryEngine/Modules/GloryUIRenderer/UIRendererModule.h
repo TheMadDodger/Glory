@@ -81,6 +81,7 @@ namespace Glory
 		std::function<void(IEngine*, UUID, UUID, UUID, UUID)> OnElementUp_Callback;
 
 	private:
+		virtual void RegisterTypes() override;
 		virtual void Initialize() override;
 		virtual void PostInitialize() override;
 		virtual void Update() override;

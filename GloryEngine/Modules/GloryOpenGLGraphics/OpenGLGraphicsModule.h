@@ -32,10 +32,11 @@ namespace Glory
 		GLORY_MODULE_VERSION_H(0, 3, 0);
 
 	protected:
+		virtual void RegisterTypes() override;
+		virtual void InitializeSettings() override;
 		virtual void PreInitialize() override;
 		virtual void Initialize() override;
 		virtual void Cleanup() override;
-		virtual void LoadSettings(ModuleSettings& settings) override;
 
 	private:
 		/* OpenGL can only have 1 device */

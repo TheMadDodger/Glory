@@ -16,6 +16,7 @@ namespace Glory
 		const std::type_info& GetBaseModuleType() override;
 		
 	protected:
+		virtual void RegisterTypes() override;
 		virtual void Initialize() override;
 		virtual void Cleanup() = 0;
     };
