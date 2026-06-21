@@ -905,8 +905,6 @@ namespace Glory
 			Utils::DeserializeData(fileStream, type, data);
 		}
 		m_Resources->SetAllowReferenceCounting(true);
-
-		SaveModuleSettings();
 	}
 
 	void GloryEngine::SaveModuleSettings()

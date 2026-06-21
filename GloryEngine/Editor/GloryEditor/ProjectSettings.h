@@ -97,6 +97,7 @@ namespace Glory::Editor
 		bool DrawSettings(SettingsBase& settings, Utils::YAMLFileRef& file);
 
 		void OnModuleSettingsChanged(Utils::YAMLFileRef& file, const std::filesystem::path& path);
+		void LoadDefaultSettings(Utils::YAMLFileRef& file, SettingsBase* pSettings);
 
 	private:
 		size_t m_MenuIndex;

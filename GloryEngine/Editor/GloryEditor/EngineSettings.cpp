@@ -26,6 +26,8 @@ namespace Glory::Editor
             std::filesystem::path moduleSettingsPath = ProjectSpace::GetOpenProject()->RootPath();
             moduleSettingsPath.append("Modules").append(moduleMetaData.Name() + ".module");
             iter = m_SettingFiles.emplace(moduleMetaData.Name(), moduleSettingsPath).first;
+
+            LoadDefaultSettings(iter->second, pModule->GetSettings());
         }
         return iter->second;
     }
@@ -298,5 +300,24 @@ namespace Glory::Editor
         std::stringstream str;
         str << parentType->TypeName() << "::" << field->Name();
         settings.NotifyChange(str.str());
+    }
+
+    void EngineSettings::LoadDefaultSettings(Utils::YAMLFileRef& file, SettingsBase* pSettings)
+    {
+        if (!pSettings) return;
+        auto type = pSettings->GetType();
+        void* data = **pSettings;
+
+        EditorApplication* pApp = EditorApplication::GetInstance();
+        auto& serializers = pApp->GetSerializers();
+
+        for (size_t i = 0; i < type->FieldCount(); ++i)
+        {
+            auto field = type->GetFieldData(i);
+            auto fieldNode = file[field->Name()];
+            if (fieldNode.Exists()) continue;
+            void* fieldData = field->GetAddress(data);
+            serializers.SerializeProperty(field, fieldData, fieldNode);
+        }
     }
 }
