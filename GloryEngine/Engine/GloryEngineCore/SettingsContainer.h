@@ -40,6 +40,12 @@ namespace Glory
 			handlerIter->second();
 		}
 
+		inline void NotifyFullChange()
+		{
+			for (const auto& [name, callback] : m_ChangeHandlers)
+				callback();
+		}
+
 		inline void InsertGroupBefore(std::string&& prop, std::string&& group)
 		{
 			m_Groups.emplace(std::move(prop), std::move(group));

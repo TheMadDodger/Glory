@@ -50,6 +50,13 @@ namespace Glory::Editor
             ModuleSettings& settings = pModule->Settings();
             std::filesystem::path settingsPath = pProject->ModuleSettingsPath();
             settingsPath.append(moduleName + ".yaml");
+
+            if (pModule->GetSettings() && std::filesystem::exists(settingsPath))
+            {
+                std::filesystem::remove(settingsPath);
+                continue;
+            }
+
             YAML::Emitter out;
             out << settings.Node();
             std::ofstream outFile(settingsPath);
@@ -66,6 +73,20 @@ namespace Glory::Editor
         Undo::RegisterChangeHandler(".module", "", [this](Utils::YAMLFileRef& file, const std::filesystem::path& path) {
 			OnModuleSettingsChanged(file, path);
 		});
+
+        EditorApplication* pApp = EditorApplication::GetInstance();
+        IEngine* pEngine = pApp->GetEngine();
+        auto& serializers = pApp->GetSerializers();
+
+        for (size_t i = 0; i < pEngine->ModulesCount(); ++i)
+        {
+            Module* pModule = pEngine->GetModule(i);
+            SettingsBase* pSettings = pModule->GetSettings();
+            if (!pSettings) continue;
+            auto settingsFile = GetModuleSettingsFile(pModule);
+            serializers.DeserializeProperty(pSettings->GetType(), **pSettings, settingsFile);
+            pSettings->NotifyFullChange();
+        }
     }
 
     void EngineSettings::DrawLeftPanel()
@@ -89,7 +110,7 @@ namespace Glory::Editor
 
         IEngine* pEngine = EditorApplication::GetInstance()->GetEngine();
 
-        for (size_t i = 0; i < pEngine->ModulesCount(); i++)
+        for (size_t i = 0; i < pEngine->ModulesCount(); ++i)
         {
             const std::string& moduleName = pEngine->GetModule(i)->GetMetaData().Name();
             if (moduleName.empty()) continue;

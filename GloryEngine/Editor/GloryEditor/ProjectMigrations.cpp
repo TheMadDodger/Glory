@@ -832,5 +832,7 @@ namespace Glory::Editor
             }
             }
         }
+
+        EditorAssetDatabase::SetDirty(true);
     }
 }
