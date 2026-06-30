@@ -231,6 +231,9 @@ namespace Glory::Editor
 	{
 		task.m_SubTaskName = "Loading assets";
 
+		/* Make sure the resource loader was updated */
+		pEngine->GetResourceLoader().WaitForNextUpdate();
+
 		while (pEngine->GetResourceLoader().IsBusy())
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
@@ -418,8 +421,6 @@ namespace Glory::Editor
 			for (size_t i = 0; i < assets.size(); ++i)
 				AssetReferences.emplace_back(assets[i]);
 
-			pEngine->GetResourceLoader().Update();
-
 			WaitForAssetLoading(pEngine, packageRoot, task);
 
 			{
@@ -460,8 +461,6 @@ namespace Glory::Editor
 
 			for (size_t i = 0; i < SharedAssets.size(); ++i)
 				AssetReferences.emplace_back(SharedAssets[i]);
-
-			pEngine->GetResourceLoader().Update();
 
 			WaitForAssetLoading(pEngine, packageRoot, task);
 

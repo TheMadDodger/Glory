@@ -10,6 +10,8 @@
 #include <PropertySerializer.h>
 #include <Debug.h>
 #include <GloryAssert.h>
+#include <BinarySerialization.h>
+#include <BinaryStream.h>
 
 #include <IconsFontAwesome6.h>
 
@@ -86,6 +88,29 @@ namespace Glory::Editor
             auto settingsFile = GetModuleSettingsFile(pModule);
             serializers.DeserializeProperty(pSettings->GetType(), **pSettings, settingsFile);
             pSettings->NotifyFullChange();
+        }
+    }
+
+    void EngineSettings::OnCompile(const std::filesystem::path& path)
+    {
+        EditorApplication* pApp = EditorApplication::GetInstance();
+        IEngine* pEngine = pApp->GetEngine();
+        auto& serializers = pApp->GetSerializers();
+
+        const std::filesystem::path modulesConfigPath = path.parent_path().parent_path().append("Modules/Config");
+        std::filesystem::create_directories(modulesConfigPath);
+
+        for (size_t i = 0; i < pEngine->ModulesCount(); ++i)
+        {
+            Module* pModule = pEngine->GetModule(i);
+            SettingsBase* pSettings = pModule->GetSettings();
+            if (!pSettings) continue;
+
+            std::filesystem::path configPath = modulesConfigPath;
+            configPath.append(pModule->GetMetaData().Name()).replace_extension(".gmodule");
+
+            Utils::BinaryFileStream fileStream{ configPath };
+            Utils::SerializeData(fileStream, pSettings->GetType(), **pSettings);
         }
     }
 

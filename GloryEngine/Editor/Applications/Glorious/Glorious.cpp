@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
         moduleSettingsRootPath.append("Modules");
         engine.RegisterTypes();
         engine.LoadLegacyModuleSettings(moduleSettingsRootPath);
-        engine.LoadModuleSettings();
+        engine.LoadModuleSettings("");
         engine.SetMainWindowInfo(std::move(windowCreateInfo));
 
         Glory::EditorLoader editorLoader;

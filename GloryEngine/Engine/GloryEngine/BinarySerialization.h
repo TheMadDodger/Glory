@@ -1,4 +1,6 @@
 #pragma once
+#include "engine_visibility.h"
+
 namespace Glory::Utils
 {
 	class BinaryStream;
@@ -8,8 +10,8 @@ namespace Glory::Utils
 		struct TypeData;
 	}
 
-	void SerializeData(BinaryStream& container, const Utils::Reflect::TypeData* pTypeData, void* data);
-	void SerializeData(BinaryStream& container, const Utils::Reflect::FieldData* pFieldData, void* data);
-	void DeserializeData(BinaryStream& container, const Utils::Reflect::TypeData* pTypeData, void* data);
-	void DeserializeData(BinaryStream& container, const Utils::Reflect::FieldData* pFieldData, void* data);
+	GLORY_ENGINE_API void SerializeData(BinaryStream& container, const Utils::Reflect::TypeData* pTypeData, void* data);
+	GLORY_ENGINE_API void SerializeData(BinaryStream& container, const Utils::Reflect::FieldData* pFieldData, void* data);
+	GLORY_ENGINE_API void DeserializeData(BinaryStream& container, const Utils::Reflect::TypeData* pTypeData, void* data);
+	GLORY_ENGINE_API void DeserializeData(BinaryStream& container, const Utils::Reflect::FieldData* pFieldData, void* data);
 }

@@ -26,6 +26,9 @@ namespace Glory
 		GLORY_ENGINE_API void SetResources(Resources* pResources);
 		GLORY_ENGINE_API Resource* LoadImmediately(UUID id);
 
+		/** @brief Stall the current thread until the next update call */
+		GLORY_ENGINE_API void WaitForNextUpdate();
+
 		virtual bool IsBusy() const = 0;
 
 	protected:
@@ -38,5 +41,6 @@ namespace Glory
 
 	protected:
 		Resources* m_pResources = nullptr;
+		std::atomic_uint64_t m_UpdateCounter = 0;
 	};
 }

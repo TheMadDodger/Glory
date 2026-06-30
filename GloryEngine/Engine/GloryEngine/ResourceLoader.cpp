@@ -25,6 +25,8 @@ namespace Glory
 		});
 
 		OnUpdate();
+
+		m_UpdateCounter.fetch_add(1ull);
 	}
 
 	void ResourceLoader::SetResources(Resources* pResources)
@@ -36,5 +38,12 @@ namespace Glory
 	{
 		QueueLoad(id, true);
 		return m_pResources->GetResource(id);
+	}
+
+	void ResourceLoader::WaitForNextUpdate()
+	{
+		const uint64_t lastUpdate = m_UpdateCounter.load();
+		while (lastUpdate == m_UpdateCounter.load())
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 }

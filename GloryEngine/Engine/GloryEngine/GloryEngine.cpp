@@ -312,6 +312,8 @@ namespace Glory
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
 		{
 			m_pAllModules[i]->PostInitialize();
+			const auto settings = m_pAllModules[i]->GetSettings();
+			if (settings) settings->NotifyFullChange();
 		}
 
 		/* Initialize renderers */
@@ -880,7 +882,7 @@ namespace Glory
 		}
 	}
 
-	void GloryEngine::LoadModuleSettings()
+	void GloryEngine::LoadModuleSettings(const std::filesystem::path& settingsPath)
 	{
 		m_Resources->SetAllowReferenceCounting(false);
 		for (size_t i = 0; i < m_pAllModules.size(); i++)
@@ -892,8 +894,8 @@ namespace Glory
 			const std::filesystem::path modulePath = moduleMetaData.Path();
 			/* Ignore built-in modules */
 			if (modulePath.empty()) continue;
-			std::filesystem::path settingsFilePath = modulePath.parent_path();
-			settingsFilePath.append("config");
+			std::filesystem::path settingsFilePath = settingsPath;
+			settingsFilePath.append(moduleMetaData.Name()).replace_extension(".gmodule");
 			pModule->InitializeSettings();
 			SettingsBase* pSettings = pModule->GetSettings();
 
@@ -905,34 +907,5 @@ namespace Glory
 			Utils::DeserializeData(fileStream, type, data);
 		}
 		m_Resources->SetAllowReferenceCounting(true);
-	}
-
-	void GloryEngine::SaveModuleSettings()
-	{
-		for (size_t i = 0; i < m_pAllModules.size(); i++)
-		{
-			Module* pModule = m_pAllModules[i];
-
-			const ModuleMetaData& moduleMetaData = pModule->GetMetaData();
-			const std::filesystem::path modulePath = moduleMetaData.Path();
-			/* Ignore built-in modules */
-			if (modulePath.empty()) continue;
-			std::filesystem::path settingsFilePath = modulePath.parent_path();
-			settingsFilePath.append("config");
-
-			SaveModuleSettings(pModule, settingsFilePath);
-		}
-	}
-
-	void GloryEngine::SaveModuleSettings(Module* pModule, const std::filesystem::path& path)
-	{
-		SettingsBase* pSettings = pModule->GetSettings();
-
-		if (!pSettings) return;
-		auto data = **pSettings;
-		auto type = pSettings->GetType();
-
-		Utils::BinaryFileStream fileStream{ path };
-		Utils::SerializeData(fileStream, type, data);
 	}
 }

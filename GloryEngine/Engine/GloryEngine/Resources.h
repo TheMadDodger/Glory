@@ -147,7 +147,6 @@ namespace Glory
 		static constexpr size_t LoadImmediatelyRingBufferSize = 1024;
 		std::array<UUID, LoadImmediatelyRingBufferSize> m_ToLoadImmediately;
 
-
 		std::set<UUID> m_ToLoadResources;
 		std::set<UUID> m_ToUnloadResources;
 

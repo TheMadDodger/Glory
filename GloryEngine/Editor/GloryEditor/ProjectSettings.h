@@ -91,6 +91,7 @@ namespace Glory::Editor
 		virtual bool OnGui() override;
 		void OnSave(ProjectSpace* pProject) override;
 		void OnSettingsLoaded() override;
+		void OnCompile(const std::filesystem::path& path) override;
 
 		void DrawLeftPanel();
 		bool DrawRightPanel();
