@@ -49,6 +49,7 @@ project "LocalizeEditorExtension"
 
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.implot}",
+		"%{LibDirs.ImGuiTestEngine}",
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
 	}
@@ -66,6 +67,7 @@ project "LocalizeEditorExtension"
 		"GloryUtilsVersion",
 
 		"ImGui",
+		"ImGuiTestEngine",
 		"yaml-cpp",
 	}
 

@@ -54,6 +54,7 @@ project "GloryEditorVulkan"
 		"%{LibDirs.glory}",
 		"%{LibDirs.glory}/Modules/GloryVulkanGraphics",
 		"%{LibDirs.ImGui}",
+		"%{LibDirs.ImGuiTestEngine}",
 		"%{LibDirs.yaml_cpp}",
 	}
 
@@ -70,6 +71,7 @@ project "GloryEditorVulkan"
 		"GloryUtils",
 
 		"ImGui",
+		"ImGuiTestEngine",
 		"vulkan-1",
 	}
 

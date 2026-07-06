@@ -1,10 +1,10 @@
-project "UIEditorExtension"
+project "TestEngineExtension"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++20"
 	staticruntime "Off"
 
-	targetdir ("%{modulesOutDir}/GloryUIRenderer/Editor/Extension")
+	targetdir ("%{engineOutDir}/Extensions")
 	objdir ("%{outputDir}")
 
 	files
@@ -32,6 +32,7 @@ project "UIEditorExtension"
 
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.ImGuiTestEngine}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
@@ -71,7 +72,7 @@ project "UIEditorExtension"
 
 	defines
 	{
-		"GLORY_UI_EXTENSION_EXPORTS"
+		"GLORY_TESTENGINE_EXTENSION_EXPORTS"
 	}
 
 	filter "system:windows"

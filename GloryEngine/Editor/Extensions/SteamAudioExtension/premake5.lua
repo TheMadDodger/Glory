@@ -50,6 +50,7 @@ project "SteamAudioExtension"
 		"%{DepsLibDir}",
 
 		"%{LibDirs.ImGui}",
+		"%{LibDirs.ImGuiTestEngine}",
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
 
@@ -71,6 +72,7 @@ project "SteamAudioExtension"
 		"GloryUtilsVersion",
 
 		"ImGui",
+		"ImGuiTestEngine",
 		"yaml-cpp",
 		"phonon",
 	}

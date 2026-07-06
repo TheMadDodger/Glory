@@ -80,6 +80,7 @@ project "GloryEditor"
 
 		"%{LibDirs.glory}",
 		"%{LibDirs.ImGui}",
+		"%{LibDirs.ImGuiTestEngine}",
 		"%{LibDirs.ImGuizmo}",
 		"%{LibDirs.implot}",
 		"%{LibDirs.yaml_cpp}",
@@ -108,6 +109,7 @@ project "GloryEditor"
 		"ImGui",
 		"ImGuizmo",
 		"implot",
+		"ImGuiTestEngine",
 	}
 
 	defines

@@ -50,6 +50,7 @@ project "SDLAudioExtension"
 
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.implot}",
+		"%{LibDirs.ImGuiTestEngine}",
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
 
@@ -71,6 +72,7 @@ project "SDLAudioExtension"
 		"GloryUtilsVersion",
 
 		"ImGui",
+		"ImGuiTestEngine",
 		"yaml-cpp",
 	}
 

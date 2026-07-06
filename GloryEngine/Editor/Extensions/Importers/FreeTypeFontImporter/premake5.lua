@@ -45,6 +45,7 @@ project "FreeTypeFontImporter"
 		"%{DepsLibDir}",
 
 		"%{LibDirs.ImGui}",
+		"%{LibDirs.ImGuiTestEngine}",
 		"%{LibDirs.glory}",
 	}
 
@@ -55,6 +56,7 @@ project "FreeTypeFontImporter"
 		"GloryEditor",
 
 		"ImGui",
+		"ImGuiTestEngine",
 	}
 
 	defines

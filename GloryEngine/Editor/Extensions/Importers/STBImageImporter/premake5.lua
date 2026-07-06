@@ -46,6 +46,7 @@ project "STBImageImporter"
 		"%{DepsLibDir}",
 
 		"%{LibDirs.ImGui}",
+		"%{LibDirs.ImGuiTestEngine}",
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
 	}
@@ -61,6 +62,7 @@ project "STBImageImporter"
 		"GloryUtilsVersion",
 
 		"ImGui",
+		"ImGuiTestEngine",
 		"yaml-cpp",
 	}
 

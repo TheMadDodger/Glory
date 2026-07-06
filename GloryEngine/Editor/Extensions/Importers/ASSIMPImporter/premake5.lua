@@ -44,6 +44,7 @@ project "ASSIMPImporter"
 		"%{DepsLibDir}",
 
 		"%{LibDirs.ImGui}",
+		"%{LibDirs.ImGuiTestEngine}",
 		"%{LibDirs.implot}",
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
@@ -56,6 +57,7 @@ project "ASSIMPImporter"
 		"GloryEditor",
 
 		"ImGui",
+		"ImGuiTestEngine",
 		"yaml-cpp",
 
 		"GloryECS",

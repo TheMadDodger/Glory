@@ -52,6 +52,7 @@ project "GloryEditorOGL"
 		"%{LibDirs.glory}",
 		"%{LibDirs.glory}/Modules/GloryOpenGLGraphics",
 		"%{LibDirs.ImGui}",
+		"%{LibDirs.ImGuiTestEngine}",
 		"%{LibDirs.yaml_cpp}",
 	}
 
@@ -68,6 +69,7 @@ project "GloryEditorOGL"
 
 		"yaml-cpp",
 		"ImGui",
+		"ImGuiTestEngine",
 	}
 
 	defines
