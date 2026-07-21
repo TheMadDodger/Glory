@@ -97,6 +97,11 @@ namespace Glory::Editor
 
 	void EditorPreferencesWindow::Shortcuts()
 	{
+		static bool enabled = true;
+		if (ImGui::Checkbox("Enable Shortcuts", &enabled))
+			Shortcuts::EnableShortcuts(enabled);
+
+		ImGui::BeginDisabled(!enabled);
 		if (ImGui::BeginListBox("##shortcutslist", ImGui::GetContentRegionAvail()))
 		{
 			for (auto itor = Shortcuts::Begin(); itor != Shortcuts::End(); itor++)
@@ -118,6 +123,7 @@ namespace Glory::Editor
 			}
 			ImGui::EndListBox();
 		}
+		ImGui::EndDisabled();
 
 		if (!m_RebindingShortcut.empty())
 		{

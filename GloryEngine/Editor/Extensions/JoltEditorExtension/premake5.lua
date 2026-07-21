@@ -72,6 +72,7 @@ project "JoltEditorExtension"
 		"GloryUtils",
 
 		"ImGui",
+		"implot",
 		"ImGuiTestEngine",
 		"yaml-cpp",
 	}

@@ -61,6 +61,7 @@ project "GenericAudioImporter"
 		"GloryUtilsVersion",
 
 		"ImGui",
+		"implot",
 		"ImGuiTestEngine",
 		"yaml-cpp",
 	}

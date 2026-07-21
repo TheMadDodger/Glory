@@ -158,9 +158,14 @@ namespace Glory
 
 	void SceneManager::SetActiveScene(GScene* pScene)
 	{
-		auto it = std::find(m_pOpenScenes.begin(), m_pOpenScenes.end(), pScene);
-		if (it == m_pOpenScenes.end()) return;
-		m_ActiveSceneIndex = it - m_pOpenScenes.begin();
+		if (!pScene)
+			m_ActiveSceneIndex = 0;
+		else
+		{
+			auto it = std::find(m_pOpenScenes.begin(), m_pOpenScenes.end(), pScene);
+			if (it == m_pOpenScenes.end()) return;
+			m_ActiveSceneIndex = it - m_pOpenScenes.begin();
+		}
 		OnSetActiveScene(pScene);
 	}
 

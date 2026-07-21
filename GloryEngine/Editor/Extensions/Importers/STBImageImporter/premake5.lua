@@ -62,6 +62,7 @@ project "STBImageImporter"
 		"GloryUtilsVersion",
 
 		"ImGui",
+		"implot",
 		"ImGuiTestEngine",
 		"yaml-cpp",
 	}

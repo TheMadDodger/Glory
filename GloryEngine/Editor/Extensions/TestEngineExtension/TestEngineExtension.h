@@ -15,10 +15,11 @@ namespace Glory::Editor
         TestEngineEditorExtension();
         virtual ~TestEngineEditorExtension();
 
+        GLORY_TESTENGINE_EXTENSION_API static ImGuiTestEngine* GetTestEngine();
+
     private:
         virtual void Initialize() override;
 
-    private:
-        ImGuiTestEngine* m_pEngine;
+        void RegisterTests();
     };
 }

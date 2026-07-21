@@ -72,6 +72,7 @@ project "SteamAudioExtension"
 		"GloryUtilsVersion",
 
 		"ImGui",
+		"implot",
 		"ImGuiTestEngine",
 		"yaml-cpp",
 		"phonon",

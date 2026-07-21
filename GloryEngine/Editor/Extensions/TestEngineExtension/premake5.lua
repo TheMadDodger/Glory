@@ -66,6 +66,7 @@ project "TestEngineExtension"
 		"GloryUtilsVersion",
 
 		"ImGui",
+		"implot",
 		"ImGuiTestEngine",
 		"yaml-cpp",
 	}

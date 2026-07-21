@@ -57,6 +57,7 @@ project "ASSIMPImporter"
 		"GloryEditor",
 
 		"ImGui",
+		"implot",
 		"ImGuiTestEngine",
 		"yaml-cpp",
 

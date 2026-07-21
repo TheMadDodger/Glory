@@ -56,6 +56,7 @@ project "FreeTypeFontImporter"
 		"GloryEditor",
 
 		"ImGui",
+		"implot",
 		"ImGuiTestEngine",
 	}
 

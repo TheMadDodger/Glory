@@ -92,6 +92,13 @@ namespace Glory::Utils::ECS
 		}
 
 		template<ComponentCompatible Component>
+		Component& GetComponent(EntityID entity) const
+		{
+			const ComponentManager<Component>* manager = GetComponentManager<Component>();
+			return manager->Get(entity);
+		}
+
+		template<ComponentCompatible Component>
 		bool HasComponent(EntityID entity) const
 		{
 			size_t index = 0;

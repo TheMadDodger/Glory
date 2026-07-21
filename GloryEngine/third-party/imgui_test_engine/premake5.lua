@@ -13,11 +13,13 @@ project "ImGuiTestEngine"
 	{
         "%{ImGuiTestEngineDir}/*.h",
         "%{ImGuiTestEngineDir}/*.cpp",
+		"premake5.lua"
 	}
 
     includedirs
     {
         "%{IncludeDir.ImGui}",
+        "%{IncludeDir.implot}",
     }
 
     defines

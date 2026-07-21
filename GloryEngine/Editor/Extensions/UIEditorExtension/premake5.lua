@@ -65,6 +65,7 @@ project "UIEditorExtension"
 		"GloryUtilsVersion",
 
 		"ImGui",
+		"implot",
 		"ImGuiTestEngine",
 		"yaml-cpp",
 	}

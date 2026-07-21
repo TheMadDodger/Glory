@@ -70,6 +70,7 @@ project "GloryEditorSDL"
 		"SDL2",
 		"yaml-cpp",
 		"ImGui",
+		"implot",
 		"ImGuiTestEngine",
 	}
 

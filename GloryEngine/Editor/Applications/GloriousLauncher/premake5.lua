@@ -63,6 +63,7 @@ project "GloriousLauncher"
 		"GloryUtils",
 
 		"ImGui",
+		"implot",
 		"ImGuiTestEngine",
 		"yaml-cpp",
 		"tinyfiledialogs",

@@ -67,6 +67,7 @@ project "LocalizeEditorExtension"
 		"GloryUtilsVersion",
 
 		"ImGui",
+		"implot",
 		"ImGuiTestEngine",
 		"yaml-cpp",
 	}

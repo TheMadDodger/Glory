@@ -84,6 +84,7 @@ project "Glorious"
 		"UIEditorExtension",
 		"FSMEditorExtension",
 		"LocalizeEditorExtension",
+		"TestEngineExtension",
 		"SDLImageImporter",
 		"STBImageImporter",
 		"ASSIMPImporter",

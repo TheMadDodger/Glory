@@ -69,6 +69,7 @@ project "GloryEditorOGL"
 
 		"yaml-cpp",
 		"ImGui",
+		"implot",
 		"ImGuiTestEngine",
 	}
 

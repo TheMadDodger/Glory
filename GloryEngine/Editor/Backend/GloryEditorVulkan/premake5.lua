@@ -71,6 +71,7 @@ project "GloryEditorVulkan"
 		"GloryUtils",
 
 		"ImGui",
+		"implot",
 		"ImGuiTestEngine",
 		"vulkan-1",
 	}

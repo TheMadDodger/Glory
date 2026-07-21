@@ -26,13 +26,19 @@ namespace Glory
 		}
 
 		template<typename T>
-		inline bool HasComponent()
+		inline bool HasComponent() const
 		{
 			return m_pRegistry->HasComponent<T>(m_EntityID);
 		}
 
 		template<typename T>
 		inline T& GetComponent()
+		{
+			return m_pRegistry->GetComponent<T>(m_EntityID);
+		}
+
+		template<typename T>
+		inline const T& GetComponent() const
 		{
 			return m_pRegistry->GetComponent<T>(m_EntityID);
 		}

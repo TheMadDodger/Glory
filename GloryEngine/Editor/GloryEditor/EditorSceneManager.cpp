@@ -213,12 +213,17 @@ namespace Glory::Editor
 		GScene* pScene = GetOpenScene(uuid);
 		pScene->Stop();
 		SetSceneDirty(pScene, false);
+		GScene* pActiveScene = SceneManager::GetActiveScene();
 		m_OpenedSceneIDs.erase(it);
 		m_pOpenScenes.erase(m_pOpenScenes.begin() + index);
 		m_SceneFiles.erase(m_SceneFiles.begin() + index);
+		if (m_pOpenScenes.empty() || pActiveScene == pScene)
+			SetActiveScene(m_pOpenScenes.empty() ? nullptr : m_pOpenScenes.front());
+		else
+			SetActiveScene(pActiveScene);
 		delete pScene;
 
-		GScene* pActiveScene = SceneManager::GetActiveScene();
+		pActiveScene = SceneManager::GetActiveScene();
 		TitleBar::SetText("Scene", pActiveScene ? pActiveScene->Name().c_str() : "No Scene open");
 
 		SceneEventsDispatcher().Dispatch({ SceneEventType::Closed, uuid });

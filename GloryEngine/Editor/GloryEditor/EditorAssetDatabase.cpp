@@ -673,6 +673,25 @@ namespace Glory::Editor
 		return m_PathToUUIDCache[absolutePath.string()];
 	}
 
+	UUID EditorAssetDatabase::FindAssetUUIDByName(const std::string& name)
+	{
+		ProjectSpace* pProject = ProjectSpace::GetOpenProject();
+		if (!pProject) return 0;
+		JSONFileRef& projectFile = pProject->ProjectFile();
+		JSONValueRef assetsNode = projectFile["Assets"];
+
+		for (const auto& f : assetsNode)
+		{
+			const std::string_view key = f.name.GetString();
+			const UUID uuid = std::stoull(key.data());
+			ResourceMeta meta;
+			if (!GetAssetMetadata(uuid, meta)) continue;
+			if (meta.Name() != name) continue;
+			return uuid;
+		}
+		return 0;
+	}
+
 	UUID EditorAssetDatabase::FindAssetUUID(std::string& path, const std::filesystem::path& subPath)
 	{
 		std::replace(path.begin(), path.end(), '/', '\\');

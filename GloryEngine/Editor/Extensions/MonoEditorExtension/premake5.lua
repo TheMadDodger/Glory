@@ -70,6 +70,7 @@ project "MonoEditorExtension"
 		"GloryUtilsVersion",
 
 		"ImGui",
+		"implot",
 		"ImGuiTestEngine",
 		"yaml-cpp",
 		"mono-2.0-sgen",

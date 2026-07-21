@@ -52,6 +52,7 @@ namespace Glory::Editor
 
 		static GLORY_EDITOR_API std::pair<UUID, bool> ReserveAssetUUID(std::string& path, const std::filesystem::path& subPath);
 		static GLORY_EDITOR_API UUID FindAssetUUID(const std::string& path);
+		static GLORY_EDITOR_API UUID FindAssetUUIDByName(const std::string& name);
 		static GLORY_EDITOR_API UUID FindAssetUUID(std::string& path, const std::filesystem::path& subPath);
 		static GLORY_EDITOR_API bool AssetExists(UUID uuid);
 		static GLORY_EDITOR_API std::string GetAssetName(UUID uuid);
