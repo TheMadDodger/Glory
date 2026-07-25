@@ -92,7 +92,17 @@ project "TestEngineExtension"
 		defines "_DEBUG"
 		symbols "On"
 
+		links
+		{
+			"efsw-static-debug"
+		}
+
 	filter "configurations:Release"
 		runtime "Release"
 		defines "NDEBUG"
 		optimize "On"
+
+		links
+		{
+			"efsw-static-release"
+		}
