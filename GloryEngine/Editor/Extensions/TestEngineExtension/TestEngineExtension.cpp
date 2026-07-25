@@ -106,6 +106,8 @@ namespace Glory::Editor
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		MainEditor& editor = pApp->GetMainEditor();
 
+		Utils::Reflect::Reflect::SetReflectInstance(&pApp->GetEngine()->Reflection());
+
 		MenuBar::AddMenuItem("Window/Test Engine", [&editor]() { editor.GetWindow<TestEngineWindow>(); }, NULL, Shortcut_Window_TestEngine);
 
 		m_OnOpenProjectCallback = ProjectSpace::RegisterCallback(ProjectCallback::OnOpen, &TestEngineEditorExtension::RegisterTests);

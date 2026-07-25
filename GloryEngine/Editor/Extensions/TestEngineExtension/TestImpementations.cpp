@@ -4,9 +4,16 @@
 #include <EditorApplication.h>
 #include <EditorSceneManager.h>
 
+#include <Reflection.h>
+
 namespace Glory::Editor
 {
 	constexpr std::string_view IndexKey = "index_";
+
+	bool ValidateChild(GScene* pScene, const std::filesystem::path& path, Utils::ECS::EntityID parent, YAML::Node& child, ImGuiTestContext* ctx);
+	bool ValidateChildren(GScene* pScene, const std::filesystem::path& path, Utils::ECS::EntityID parent, YAML::Node& children, ImGuiTestContext* ctx);
+	bool ValidateComponents(const std::filesystem::path& path, const Entity& entity, YAML::Node& components, ImGuiTestContext* ctx);
+	bool ValidateComponent(const std::filesystem::path& path, const Entity& entity, YAML::Node& component, size_t index, ImGuiTestContext* ctx);
 
 	TESTOP_IMPLEMENTATION_BODY(setRef)
 	{
@@ -84,6 +91,7 @@ namespace Glory::Editor
 		auto sizeGreaterThan = operation["sizeGreaterThan"];
 		auto sizeLessThan = operation["sizeLessThan"];
 		auto sizeEquals = operation["sizeEquals"];
+
 		if (sizeGreaterThan.IsDefined())
 		{
 			GLORY_YAMLTEST_CHECK_NODE_TYPE("validatePopupStack", "sizeGreaterThan", sizeGreaterThan, Scalar, path);
@@ -110,6 +118,7 @@ namespace Glory::Editor
 			GLORY_YAMLTEST_CHECK_NODE_MSG(uiCtx.OpenPopupStack.Size == ref, operation, path,
 				("Popup stack size({}) == ref({})", uiCtx.OpenPopupStack.Size, ref));
 		}
+
 		return true;
 	}
 
@@ -120,6 +129,7 @@ namespace Glory::Editor
 		auto index = scene["index"];
 		auto name = scene["name"];
 		auto childCount = scene["childCount"];
+		auto children = scene["children"];
 		GLORY_YAMLTEST_CHECK_NODE_MSG(index.IsDefined() || name.IsDefined(), scene, path,
 			("validateSceneManager:scene index defined == {} || name defined == {}",
 				index.IsDefined() ? "true" : "false", name.IsDefined() ? "true" : "false"));
@@ -148,11 +158,103 @@ namespace Glory::Editor
 		if (childCount.IsDefined())
 		{
 			GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene", "childCount", childCount, Scalar, path);
-
 			const size_t ref = childCount.as<size_t>();
 			GLORY_YAMLTEST_CHECK_NODE_MSG(pScene->ChildCount(0) == ref, scene, path,
 				("Scene child count({}) == ref({})", pScene->ChildCount(0), ref));
 		}
+		if (children.IsDefined() && !ValidateChildren(pScene, path, 0, children, ctx))
+			return false;
+
+		return true;
+	}
+
+	bool ValidateChildren(GScene* pScene, const std::filesystem::path& path, Utils::ECS::EntityID parent, YAML::Node& children, ImGuiTestContext* ctx)
+	{
+		GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene", "children", children, Sequence, path);
+
+		for (size_t i = 0; i < children.size(); ++i)
+		{
+			auto child = children[i];
+			GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene:children", "child", child, Map, path);
+			if (!ValidateChild(pScene, path, 0, child, ctx))
+				return false;
+		}
+
+		return true;
+	}
+
+	bool ValidateChild(GScene* pScene, const std::filesystem::path& path, Utils::ECS::EntityID parent, YAML::Node& child, ImGuiTestContext* ctx)
+	{
+		auto index = child["index"];
+		auto childCount = child["childCount"];
+		auto children = child["children"];
+		auto componentCount = child["componentCount"];
+		auto components = child["components"];
+		auto name = child["name"];
+
+		GLORY_YAMLTEST_CHECK_NODE_DEFINED("validateSceneManager:scene:child", "index", child, index, path);
+		GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene:child", "index", index, Scalar, path);
+		const size_t childIndex = index.as<size_t>();
+		const Utils::ECS::EntityID childID = pScene->Child(parent, childIndex);
+		const Entity childEntity = pScene->GetEntityByEntityID(childID);
+
+		if (name.IsDefined())
+		{
+			GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene:child", "name", name, Scalar, path);
+			const std::string nameStr = name.as<std::string>();
+			GLORY_YAMLTEST_CHECK_NODE_MSG(childEntity.Name() == nameStr, name, path,
+				("Entity name({}) == ref({})", childEntity.Name(), nameStr));
+		}
+
+		if (childCount.IsDefined())
+		{
+			GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene:child", "childCount", childCount, Scalar, path);
+			const size_t ref = childCount.as<size_t>();
+			GLORY_YAMLTEST_CHECK_NODE_MSG(pScene->ChildCount(childID) == ref, childCount, path,
+				("Entity child count({}) == ref({})", pScene->ChildCount(childID), ref));
+		}
+
+		if (componentCount.IsDefined())
+		{
+			GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene:child", "componentCount", componentCount, Scalar, path);
+			const size_t ref = componentCount.as<size_t>();
+			GLORY_YAMLTEST_CHECK_NODE_MSG(childEntity.ComponentCount() == ref, componentCount, path,
+				("Entity component count({}) == ref({})", childEntity.ComponentCount(), ref));
+		}
+
+		if (components.IsDefined() && !ValidateComponents(path, childEntity, components, ctx))
+			return false;
+
+		if (children.IsDefined() && !ValidateChildren(pScene, path, childID, children, ctx))
+			return false;
+
+		return true;
+	}
+
+	bool ValidateComponents(const std::filesystem::path& path, const Entity& entity, YAML::Node& components, ImGuiTestContext* ctx)
+	{
+		GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene:child", "components", components, Sequence, path);
+
+		for (size_t i = 0; i < components.size(); ++i)
+		{
+			auto component = components[i];
+			GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene:child:component", "component", component, Map, path);
+			if (!ValidateComponent(path, entity, component, i, ctx))
+				return false;
+		}
+	}
+
+	bool ValidateComponent(const std::filesystem::path& path, const Entity& entity, YAML::Node& component, size_t index, ImGuiTestContext* ctx)
+	{
+		auto typeName = component["type"];
+		GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene:child:component", "type", typeName, Scalar, path);
+		const std::string typeNameStr = typeName.as<std::string>();
+		const Utils::Reflect::TypeData* pType = Utils::Reflect::Reflect::GetTyeData(typeNameStr);
+		GLORY_YAMLTEST_CHECK_NODE_MSG(pType, typeName, path,
+			("Type {} exists == {}", typeNameStr, pType ? "true" : "false"));
+
+		/* TODO! */
+		return true;
 	}
 
 	TESTOP_IMPLEMENTATION_BODY(validateSceneManager)
