@@ -1,10 +1,14 @@
 #include "TestImpementations.h"
 
-#include <yaml-cpp/yaml.h>
 #include <EditorApplication.h>
 #include <EditorSceneManager.h>
+#include <Serializers.h>
 
+#include <YAML_GLM.h>
 #include <Reflection.h>
+
+#include <yaml-cpp/yaml.h>
+#include <glm/glm.hpp>
 
 namespace Glory::Editor
 {
@@ -14,6 +18,7 @@ namespace Glory::Editor
 	bool ValidateChildren(GScene* pScene, const std::filesystem::path& path, Utils::ECS::EntityID parent, YAML::Node& children, ImGuiTestContext* ctx);
 	bool ValidateComponents(const std::filesystem::path& path, const Entity& entity, YAML::Node& components, ImGuiTestContext* ctx);
 	bool ValidateComponent(const std::filesystem::path& path, const Entity& entity, YAML::Node& component, size_t index, ImGuiTestContext* ctx);
+	bool ValidateProperty(const std::filesystem::path& path, YAML::Node& value, const Utils::Reflect::FieldData* pField, void* data);
 
 	TESTOP_IMPLEMENTATION_BODY(setRef)
 	{
@@ -192,6 +197,7 @@ namespace Glory::Editor
 		auto components = child["components"];
 		auto name = child["name"];
 
+		/* @todo: Make child searchable by name? */
 		GLORY_YAMLTEST_CHECK_NODE_DEFINED("validateSceneManager:scene:child", "index", child, index, path);
 		GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene:child", "index", index, Scalar, path);
 		const size_t childIndex = index.as<size_t>();
@@ -242,6 +248,8 @@ namespace Glory::Editor
 			if (!ValidateComponent(path, entity, component, i, ctx))
 				return false;
 		}
+
+		return true;
 	}
 
 	bool ValidateComponent(const std::filesystem::path& path, const Entity& entity, YAML::Node& component, size_t index, ImGuiTestContext* ctx)
@@ -253,7 +261,65 @@ namespace Glory::Editor
 		GLORY_YAMLTEST_CHECK_NODE_MSG(pType, typeName, path,
 			("Type {} exists == {}", typeNameStr, pType ? "true" : "false"));
 
-		/* TODO! */
+		const uint32_t actualTypeHash = entity.ComponentType(index);
+
+		const Utils::Reflect::TypeData* pActualType = Utils::Reflect::Reflect::GetTyeData(actualTypeHash);
+		GLORY_YAMLTEST_CHECK_NODE_MSG(pType == pActualType, typeName, path,
+			("Component type at index {} == {}", pActualType->TypeName(), pType->TypeName()));
+
+		auto properties = component["properties"];
+		if (properties.IsDefined())
+		{
+			GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene:child:component", "properties", properties, Map, path);
+			
+			void* data = entity.GetRegistry()->GetComponentAddress(entity.GetEntityID(), pType->TypeHash());
+
+			for (auto iter = properties.begin(); iter != properties.end(); ++iter)
+			{
+				const std::string propName = iter->first.as<std::string>();
+				auto prop = iter->second;
+
+				const Utils::Reflect::FieldData* pField = pType->GetFieldData(propName);
+				GLORY_YAMLTEST_CHECK_NODE_MSG(pField, prop, path,
+					("Property {} exists == {}", propName, pField ? "true" : "false"));
+
+				if (!ValidateProperty(path, prop, pField, pField->GetAddress(data)))
+					return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool ValidateProperty(const std::filesystem::path& path, YAML::Node& value, const Utils::Reflect::FieldData* pField, void* data)
+	{
+		EditorApplication* pApp = EditorApplication::GetInstance();
+		Serializers& serializers = pApp->GetSerializers();
+
+		switch (pField->Type())
+		{
+			case ST_Value:
+			case ST_Basic:
+			case ST_String:
+			case ST_Object:
+			case ST_Asset:
+			case ST_Enum:
+			case ST_Path:
+			{
+				return YAMLTest::Comparators::Compare(path, data, value, pField);
+			}
+			case ST_Struct:
+				GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene:child:component:property", pField->Name(), value, Map, path);
+				throw "Not implented";
+				break;
+			case ST_Array:
+				GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene:child:component:property", pField->Name(), value, Sequence, path);
+				throw "Not implented";
+				break;
+		default:
+			break;
+		}
+
 		return true;
 	}
 
@@ -283,5 +349,176 @@ namespace Glory::Editor
 		}
 
 		return true;
+	}
+}
+
+#include <print>
+
+template<>
+struct std::formatter<glm::vec2> : std::formatter<float> {
+	auto format(const glm::vec2& x, auto& ctx) const {
+		auto out = ctx.out();
+		out = std::format_to(out, "[");
+		out = std::formatter<float>::format(x.x, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<float>::format(x.y, ctx);
+		return std::format_to(out, "]");
+	}
+};
+
+template<>
+struct std::formatter<glm::vec3> : std::formatter<float> {
+	auto format(const glm::vec3& x, auto& ctx) const {
+		auto out = ctx.out();
+		out = std::format_to(out, "[");
+		out = std::formatter<float>::format(x.x, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<float>::format(x.y, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<float>::format(x.z, ctx);
+		return std::format_to(out, "]");
+	}
+};
+
+template<>
+struct std::formatter<glm::vec4> : std::formatter<float> {
+	auto format(const glm::vec4& x, auto& ctx) const {
+		auto out = ctx.out();
+		out = std::format_to(out, "[");
+		out = std::formatter<float>::format(x.x, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<float>::format(x.y, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<float>::format(x.z, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<float>::format(x.w, ctx);
+		return std::format_to(out, "]");
+	}
+};
+
+template<>
+struct std::formatter<glm::uvec2> : std::formatter<uint32_t> {
+	auto format(const glm::uvec2& x, auto& ctx) const {
+		auto out = ctx.out();
+		out = std::format_to(out, "[");
+		out = std::formatter<uint32_t>::format(x.x, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<uint32_t>::format(x.y, ctx);
+		return std::format_to(out, "]");
+	}
+};
+
+template<>
+struct std::formatter<glm::uvec3> : std::formatter<uint32_t> {
+	auto format(const glm::uvec3& x, auto& ctx) const {
+		auto out = ctx.out();
+		out = std::format_to(out, "[");
+		out = std::formatter<uint32_t>::format(x.x, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<uint32_t>::format(x.y, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<uint32_t>::format(x.z, ctx);
+		return std::format_to(out, "]");
+	}
+};
+
+template<>
+struct std::formatter<glm::uvec4> : std::formatter<uint32_t> {
+	auto format(const glm::uvec4& x, auto& ctx) const {
+		auto out = ctx.out();
+		out = std::format_to(out, "[");
+		out = std::formatter<uint32_t>::format(x.x, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<uint32_t>::format(x.y, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<uint32_t>::format(x.z, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<uint32_t>::format(x.w, ctx);
+		return std::format_to(out, "]");
+	}
+};
+
+template<>
+struct std::formatter<glm::ivec2> : std::formatter<int32_t> {
+	auto format(const glm::ivec2& x, auto& ctx) const {
+		auto out = ctx.out();
+		out = std::format_to(out, "[");
+		out = std::formatter<int32_t>::format(x.x, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<int32_t>::format(x.y, ctx);
+		return std::format_to(out, "]");
+	}
+};
+
+template<>
+struct std::formatter<glm::ivec3> : std::formatter<int32_t> {
+	auto format(const glm::ivec3& x, auto& ctx) const {
+		auto out = ctx.out();
+		out = std::format_to(out, "[");
+		out = std::formatter<int32_t>::format(x.x, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<int32_t>::format(x.y, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<int32_t>::format(x.z, ctx);
+		return std::format_to(out, "]");
+	}
+};
+
+template<>
+struct std::formatter<glm::ivec4> : std::formatter<int32_t> {
+	auto format(const glm::ivec4& x, auto& ctx) const {
+		auto out = ctx.out();
+		out = std::format_to(out, "[");
+		out = std::formatter<int32_t>::format(x.x, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<int32_t>::format(x.y, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<int32_t>::format(x.z, ctx);
+		out = std::format_to(out, ", ");
+		out = std::formatter<int32_t>::format(x.w, ctx);
+		return std::format_to(out, "]");
+	}
+};
+
+namespace Glory::Editor::YAMLTest
+{
+	Comparators::Comparators()
+	{
+		m_Comparators.emplace_back(new TemplatedComparator<int8_t>());
+		m_Comparators.emplace_back(new TemplatedComparator<int16_t>());
+		m_Comparators.emplace_back(new TemplatedComparator<int32_t>());
+		m_Comparators.emplace_back(new TemplatedComparator<int64_t>());
+		m_Comparators.emplace_back(new TemplatedComparator<uint8_t>());
+		m_Comparators.emplace_back(new TemplatedComparator<uint16_t>());
+		m_Comparators.emplace_back(new TemplatedComparator<uint32_t>());
+		m_Comparators.emplace_back(new TemplatedComparator<uint64_t>());
+		m_Comparators.emplace_back(new TemplatedComparator<bool>());
+		m_Comparators.emplace_back(new TemplatedComparator<float>());
+		m_Comparators.emplace_back(new TemplatedComparator<double>());
+		m_Comparators.emplace_back(new TemplatedComparator<glm::vec2>());
+		m_Comparators.emplace_back(new TemplatedComparator<glm::vec3>());
+		m_Comparators.emplace_back(new TemplatedComparator<glm::vec4>());
+		m_Comparators.emplace_back(new TemplatedComparator<glm::uvec2>());
+		m_Comparators.emplace_back(new TemplatedComparator<glm::uvec3>());
+		m_Comparators.emplace_back(new TemplatedComparator<glm::uvec4>());
+		m_Comparators.emplace_back(new TemplatedComparator<glm::ivec2>());
+		m_Comparators.emplace_back(new TemplatedComparator<glm::ivec3>());
+		m_Comparators.emplace_back(new TemplatedComparator<glm::ivec4>());
+	}
+
+	bool Comparators::Compare(const std::filesystem::path& path, void* data,
+		YAML::Node& value, const Utils::Reflect::FieldData* pField)
+	{
+		static Comparators comparators;
+
+		auto iter = std::find_if(comparators.m_Comparators.begin(), comparators.m_Comparators.end(), [pField](std::unique_ptr<BaseComparator>& pComp) {
+			return pComp->Type() == pField->ArrayElementType();
+		});
+
+		const bool exists = iter != comparators.m_Comparators.end();
+		GLORY_YAMLTEST_CHECK_NODE_MSG(exists, value, path,
+			("Property {} : Comparator for type {} exists == {}", pField->Name(), pField->TypeName(), exists ? "true" : "false"));
+
+		return (*iter)->Compare(path, data, value, pField->Name());
 	}
 }

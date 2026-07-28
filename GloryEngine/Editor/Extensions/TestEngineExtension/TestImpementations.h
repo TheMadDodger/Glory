@@ -6,6 +6,11 @@
 #include <string_view>
 #include <filesystem>
 #include <array>
+#include <memory>
+
+#include <Hash.h>
+
+#include <yaml-cpp/node/node.h>
 
 #define TESTOP_ARGS const std::filesystem::path& path, YAML::Node& operation, ImGuiTestContext* ctx
 
@@ -52,8 +57,8 @@ namespace Glory::Editor
 	BUILT_IN_TESTOPS
 }
 
-#undef X;
-#undef BUILT_IN_TESTS;
+#undef X
+#undef BUILT_IN_TESTS
 
 #define GLORY_YAMLTEST_CHECK_NODE_MSG(expr, node, file, msg)\
 do\
@@ -71,4 +76,54 @@ GLORY_YAMLTEST_CHECK_NODE_MSG(node.IsDefined(), node, file,\
 
 #define GLORY_YAMLTEST_CHECK_NODE_TYPE(parentName, name, node, type, file)\
 GLORY_YAMLTEST_CHECK_NODE_MSG(node.Type() == YAML::NodeType::type, node, file,\
-(parentName " : " name " type {} == {}", NodeTypeToString[node.Type()], NodeTypeToString[YAML::NodeType::type]))
+("{} : {} type {} == {}", parentName, name, NodeTypeToString[node.Type()], NodeTypeToString[YAML::NodeType::type]))
+
+namespace Glory::Utils::Reflect
+{
+	struct FieldData;
+}
+
+namespace Glory::Editor::YAMLTest
+{
+	class BaseComparator
+	{
+	public:
+		virtual uint32_t Type() const = 0;
+
+		virtual bool Compare(const std::filesystem::path& path, void* data,
+			YAML::Node& value, std::string_view name) const = 0;
+	};
+
+	template<typename T>
+	class TemplatedComparator : public BaseComparator
+	{
+	public:
+		virtual uint32_t Type() const override
+		{
+			return Hashing::Hash(typeid(T).name());
+		}
+
+		virtual bool Compare(const std::filesystem::path& path, void* data,
+			YAML::Node& value, std::string_view name) const override
+		{
+			const T& a = *reinterpret_cast<T*>(data);
+			const T b = value.as<T>();
+			const bool comp = a == b;
+
+			GLORY_YAMLTEST_CHECK_NODE_MSG(comp, value, path, ("Property {}: value({}) == reference({})", name, a, b));
+			return true;
+		}
+	};
+
+	struct Comparators
+	{
+	public:
+		Comparators();
+
+		static bool Compare(const std::filesystem::path& path, void* data,
+			YAML::Node& value, const Utils::Reflect::FieldData* pField);
+
+	private:
+		std::vector<std::unique_ptr<BaseComparator>> m_Comparators;
+	};
+}
