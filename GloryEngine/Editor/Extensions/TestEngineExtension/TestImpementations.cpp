@@ -105,9 +105,6 @@ namespace Glory::Editor
 	}
 
 	template<typename T>
-	static T ConvertTestVar(const std::string& value);
-
-	template<typename T>
 	static bool GetTestValue(const std::filesystem::path& path, YAML::Node& node, T& value)
 	{
 		const std::string str = node.as<std::string>();
@@ -124,9 +121,17 @@ namespace Glory::Editor
 	}
 
 	template<>
-	static uint64_t ConvertTestVar<uint64_t>(const std::string& value)
+	static bool GetTestValue<std::string>(const std::filesystem::path& path, YAML::Node& node, std::string& value)
 	{
-		return std::stoull(value);
+		const std::string str = node.as<std::string>();
+		if (str.find("%{") != std::string::npos)
+		{
+			value = FindAndReplaceVarsInString(path, node, str);
+			if (value.empty()) return false;
+			return true;
+		}
+		value = str;
+		return true;
 	}
 
 	bool ExecuteOperation(const std::filesystem::path& path, YAML::Node& operation, ImGuiTestContext* ctx)
@@ -149,7 +154,8 @@ namespace Glory::Editor
 		GLORY_YAMLTEST_CHECK_NODE_DEFINED("setRef", "path", operation, refPath, path);
 		GLORY_YAMLTEST_CHECK_NODE_TYPE("setRef", "path", refPath, Scalar, path);
 
-		const std::string pathStr = refPath.as<std::string>();
+		std::string pathValue;
+		if (!GetTestValue<std::string>(path, refPath, pathValue)) return false;
 
 		if (mode.IsDefined())
 		{
@@ -159,13 +165,13 @@ namespace Glory::Editor
 			if (modeStr == "popupStack")
 			{
 				ImGuiWindow* popup = nullptr;
-				if(pathStr == "back")
+				if(pathValue == "back")
 					popup = uiCtx.OpenPopupStack.back().Window;
-				else if(pathStr == "front")
+				else if(pathValue == "front")
 					popup = uiCtx.OpenPopupStack.front().Window;
-				else if (pathStr.starts_with(IndexKey))
+				else if (pathValue.starts_with(IndexKey))
 				{
-					const size_t index = std::stoull(pathStr.substr(IndexKey.size()));
+					const size_t index = std::stoull(pathValue.substr(IndexKey.size()));
 					popup = uiCtx.OpenPopupStack[index].Window;
 				}
 				else
@@ -176,7 +182,7 @@ namespace Glory::Editor
 			}
 		}
 
-		ctx->SetRef(pathStr.c_str());
+		ctx->SetRef(pathValue.c_str());
 		return true;
 	}
 
@@ -185,6 +191,9 @@ namespace Glory::Editor
 		auto refPath = operation["path"];
 		GLORY_YAMLTEST_CHECK_NODE_DEFINED("itemClick", "path", operation, refPath, path);
 		GLORY_YAMLTEST_CHECK_NODE_TYPE("itemClick", "path", refPath, Scalar, path);
+
+		std::string pathValue;
+		if (!GetTestValue<std::string>(path, refPath, pathValue)) return false;
 
 		ImGuiMouseButton imguiButton = ImGuiMouseButton_Left;
 		auto button = operation["button"];
@@ -200,7 +209,7 @@ namespace Glory::Editor
 				imguiButton = ImGuiMouseButton_Middle;
 		}
 
-		ctx->ItemClick(refPath.as<std::string>().c_str(), imguiButton);
+		ctx->ItemClick(pathValue.c_str(), imguiButton);
 		return true;
 	}
 
@@ -209,7 +218,10 @@ namespace Glory::Editor
 		auto refPath = operation["path"];
 		GLORY_YAMLTEST_CHECK_NODE_DEFINED("mouseMove", "path", operation, refPath, path);
 		GLORY_YAMLTEST_CHECK_NODE_TYPE("mouseMove", "path", refPath, Scalar, path);
-		ctx->MouseMove(refPath.as<std::string>().c_str());
+		std::string pathValue;
+		if (!GetTestValue<std::string>(path, refPath, pathValue)) return false;
+
+		ctx->MouseMove(pathValue.c_str());
 		return true;
 	}
 
