@@ -1,4 +1,6 @@
 #pragma once
+#include "test_engine_editor_visibility.h"
+
 #include <CommonMacros.h>
 
 #include <imgui_te_context.h>
@@ -7,6 +9,8 @@
 #include <filesystem>
 #include <array>
 #include <memory>
+#include <functional>
+#include <unordered_map>
 
 #include <Hash.h>
 
@@ -36,6 +40,7 @@ X(itemClick);\
 X(mouseMove);\
 X(validatePopupStack);\
 X(validateSceneManager);\
+X(repeat);\
 
 namespace YAML
 {
@@ -70,6 +75,16 @@ do\
 	if (!res) return false;\
 } while (false);
 
+#define GLORY_YAMLTEST_CHECK_NODE_MSG_RET(expr, node, file, msg, ret)\
+do\
+{\
+	const bool res = (bool)(expr);\
+	auto mark = node.Mark();\
+	const auto formatMsg = std::format msg;\
+	ImGuiTestEngine_Check(file.string().c_str(), "", mark.line, ImGuiTestCheckFlags_None, res, formatMsg.c_str());\
+	if (!res) return ret;\
+} while (false);
+
 #define GLORY_YAMLTEST_CHECK_NODE_DEFINED(parentName, name, parent, node, file)\
 GLORY_YAMLTEST_CHECK_NODE_MSG(node.IsDefined(), node, file,\
 (parentName " : " name " defined == {}", node.IsDefined() ? "true" : "false"))
@@ -85,6 +100,8 @@ namespace Glory::Utils::Reflect
 
 namespace Glory::Editor::YAMLTest
 {
+	using TestOperation = std::function<bool(const std::filesystem::path&, YAML::Node&, ImGuiTestContext*)>;
+
 	class BaseComparator
 	{
 	public:
@@ -126,4 +143,8 @@ namespace Glory::Editor::YAMLTest
 	private:
 		std::vector<std::unique_ptr<BaseComparator>> m_Comparators;
 	};
+
+	GLORY_TESTENGINE_EXTENSION_API void RegisterTestOperation(std::string_view name, TestOperation testOp);
+	GLORY_TESTENGINE_EXTENSION_API void RunYAMLTest(const std::filesystem::path& path, YAML::Node& root, ImGuiTestContext* ctx);
+	GLORY_TESTENGINE_EXTENSION_API bool RunYAMLTestOperations(const std::filesystem::path& path, YAML::Node& operations, ImGuiTestContext* ctx);
 }

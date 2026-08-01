@@ -25,9 +25,7 @@ namespace Glory::Editor
         TestEngineEditorExtension();
         virtual ~TestEngineEditorExtension();
 
-        using Operation = std::function<bool(const std::filesystem::path&, YAML::Node&, ImGuiTestContext*)>;
         GLORY_TESTENGINE_EXTENSION_API static ImGuiTestEngine* GetTestEngine();
-        GLORY_TESTENGINE_EXTENSION_API static void RegisterOperation(std::string&& name, Operation operation);
 
         GLORY_TESTENGINE_EXTENSION_API static void RegisterTests(ProjectSpace* pProject);
 

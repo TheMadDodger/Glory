@@ -31,7 +31,7 @@ if(!expr)\
 	debug.LogError(std::format msg );\
 IM_CHECK(expr);
 
-#define X(x) Operations.emplace(TESTOP_NAME_VAR_NAME(x), TESTOP_FUNC_NAME(x))
+#define X(x) Glory::Editor::YAMLTest::RegisterTestOperation(TESTOP_NAME_VAR_NAME(x), TESTOP_FUNC_NAME(x))
 
 namespace Glory::Editor
 {
@@ -41,8 +41,6 @@ namespace Glory::Editor
 	static std::vector<std::string> TestNames;
 	static efsw::WatchID TestsWatchID = 0l;
 	static bool ShouldRefreshTests = false;
-
-	static std::unordered_map<std::string_view, TestEngineEditorExtension::Operation> Operations;
 
 	static constexpr const char* Shortcut_Window_TestEngine = "Open Test Engine";
 
@@ -82,11 +80,6 @@ namespace Glory::Editor
 	ImGuiTestEngine* TestEngineEditorExtension::GetTestEngine()
 	{
 		return TestEngine;
-	}
-
-	void TestEngineEditorExtension::RegisterOperation(std::string&& name, Operation operation)
-	{
-		
 	}
 
 	void TestEngineEditorExtension::Initialize()
@@ -400,19 +393,6 @@ namespace Glory::Editor
 		FindTestsRecursive(testsPath, testsPath);
 	}
 
-	bool ExecuteOperation(const std::filesystem::path& path, YAML::Node& operation, ImGuiTestContext* ctx)
-	{
-		auto name = operation["op"];
-		GLORY_YAMLTEST_CHECK_NODE_DEFINED("operation", "op", operation, name, path);
-		GLORY_YAMLTEST_CHECK_NODE_TYPE("operation", "op", name, Scalar, path);
-
-		const std::string nameStr = name.as<std::string>();
-		auto opIter = Operations.find(nameStr);
-		GLORY_YAMLTEST_CHECK_NODE_MSG(opIter != Operations.end(), name, path, ("operation: {}", nameStr));
-
-		return opIter->second(path, operation, ctx);
-	}
-
 	void TestEngineEditorExtension::FindTestsRecursive(const std::filesystem::path& rootPath, const std::filesystem::path& path)
 	{
 		for (const auto& entry : std::filesystem::directory_iterator(path))
@@ -452,23 +432,7 @@ namespace Glory::Editor
 				try
 				{
 					YAML::Node root = YAML::LoadFile(path.string());
-					auto operations = root["operations"];
-					IM_CHECK(operations.IsDefined());
-
-					const std::function<bool()> f = [&]() {
-						GLORY_YAMLTEST_CHECK_NODE_DEFINED("root", "operations", operations, root, path);
-						GLORY_YAMLTEST_CHECK_NODE_TYPE("root", "operations", operations, Sequence, path);
-						return true;
-					};
-
-					if (!f()) return;
-
-					for (size_t i = 0; i < operations.size(); ++i)
-					{
-						auto operation = operations[i];
-						if (!ExecuteOperation(path, operation, ctx))
-							return;
-					}
+					Glory::Editor::YAMLTest::RunYAMLTest(path, root, ctx);
 				}
 				catch (const YAML::ParserException& e)
 				{

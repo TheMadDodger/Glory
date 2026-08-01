@@ -12,13 +12,135 @@
 
 namespace Glory::Editor
 {
+	static std::unordered_map<std::string_view, Glory::Editor::YAMLTest::TestOperation> Operations;
+	static std::unordered_map<std::string, std::string> TestVars;
+
 	constexpr std::string_view IndexKey = "index_";
 
-	bool ValidateChild(GScene* pScene, const std::filesystem::path& path, Utils::ECS::EntityID parent, YAML::Node& child, ImGuiTestContext* ctx);
-	bool ValidateChildren(GScene* pScene, const std::filesystem::path& path, Utils::ECS::EntityID parent, YAML::Node& children, ImGuiTestContext* ctx);
-	bool ValidateComponents(const std::filesystem::path& path, const Entity& entity, YAML::Node& components, ImGuiTestContext* ctx);
-	bool ValidateComponent(const std::filesystem::path& path, const Entity& entity, YAML::Node& component, size_t index, ImGuiTestContext* ctx);
-	bool ValidateProperty(const std::filesystem::path& path, YAML::Node& value, const Utils::Reflect::FieldData* pField, void* data);
+	static bool ValidateChild(GScene* pScene, const std::filesystem::path& path, Utils::ECS::EntityID parent, YAML::Node& child, ImGuiTestContext* ctx);
+	static bool ValidateChildren(GScene* pScene, const std::filesystem::path& path, Utils::ECS::EntityID parent, YAML::Node& children, ImGuiTestContext* ctx);
+	static bool ValidateComponents(const std::filesystem::path& path, const Entity& entity, YAML::Node& components, ImGuiTestContext* ctx);
+	static bool ValidateComponent(const std::filesystem::path& path, const Entity& entity, YAML::Node& component, size_t index, ImGuiTestContext* ctx);
+	static bool ValidateProperty(const std::filesystem::path& path, YAML::Node& value, const Utils::Reflect::FieldData* pField, void* data);
+
+	static std::string FindAndReplaceVarsInString(const std::filesystem::path& path, YAML::Node& node, const std::string& str)
+	{
+		std::string result = str;
+
+		size_t nextVarStartIndex = result.find("%{");
+		while (nextVarStartIndex != std::string::npos)
+		{
+			const size_t actualStart = nextVarStartIndex + 2;
+			const size_t varEndIndex = result.find('}', actualStart);
+
+			if (varEndIndex == std::string::npos)
+			{
+				GLORY_YAMLTEST_CHECK_NODE_MSG_RET(false, node, path,
+					("Expression ({}) is invalid", str), "");
+			}
+
+			const size_t count = varEndIndex - actualStart;
+			const std::string varName = result.substr(actualStart, count);
+			const auto iter = TestVars.find(varName);
+
+			GLORY_YAMLTEST_CHECK_NODE_MSG_RET(iter != TestVars.end(), node, path,
+				("Test var {} exists == {}", varName, iter != TestVars.end() ? "true" : "false"), "");
+
+			const size_t replaceCount = 2 + varName.size() + 1;
+			result.replace(nextVarStartIndex, replaceCount, iter->second);
+
+			nextVarStartIndex = result.find("%{");
+		}
+
+		return result;
+	}
+
+	static int ResolveExpression(const std::string_view expression)
+	{
+		std::vector<std::string_view> tokens;
+		Utils::Reflect::Reflect::Tokenize(expression, tokens, ' ');
+
+		int result = 0;
+
+		enum LastOperator
+		{
+			Init,
+			Add,
+			Subtract,
+		} lastOp = Init;
+
+		for (const auto token : tokens)
+		{
+			if (token == "+")
+			{
+				lastOp = Add;
+				continue;
+			}
+			else if (token == "-")
+			{
+				lastOp = Subtract;
+				continue;
+			}
+
+			int num = 0;
+			const auto convertResult = std::from_chars(token.data(), token.data() + token.size(), num);
+			if (convertResult.ec == std::errc::invalid_argument)
+				num = 0;
+
+			switch (lastOp)
+			{
+			case Init:
+				result = num;
+				break;
+			case Add:
+				result += num;
+				break;
+			case Subtract:
+				result -= num;
+				break;
+			}
+		}
+
+		return result;
+	}
+
+	template<typename T>
+	static T ConvertTestVar(const std::string& value);
+
+	template<typename T>
+	static bool GetTestValue(const std::filesystem::path& path, YAML::Node& node, T& value)
+	{
+		const std::string str = node.as<std::string>();
+		if (str.find("%{") != std::string::npos)
+		{
+			const std::string expression = FindAndReplaceVarsInString(path, node, str);
+			if (expression.empty()) return false;
+			value = T(ResolveExpression(expression));
+			return true;
+		}
+
+		value = node.as<T>();
+		return true;
+	}
+
+	template<>
+	static uint64_t ConvertTestVar<uint64_t>(const std::string& value)
+	{
+		return std::stoull(value);
+	}
+
+	bool ExecuteOperation(const std::filesystem::path& path, YAML::Node& operation, ImGuiTestContext* ctx)
+	{
+		auto name = operation["op"];
+		GLORY_YAMLTEST_CHECK_NODE_DEFINED("operation", "op", operation, name, path);
+		GLORY_YAMLTEST_CHECK_NODE_TYPE("operation", "op", name, Scalar, path);
+
+		const std::string nameStr = name.as<std::string>();
+		auto opIter = Operations.find(nameStr);
+		GLORY_YAMLTEST_CHECK_NODE_MSG(opIter != Operations.end(), name, path, ("operation: {}", nameStr));
+
+		return opIter->second(path, operation, ctx);
+	}
 
 	TESTOP_IMPLEMENTATION_BODY(setRef)
 	{
@@ -127,13 +249,14 @@ namespace Glory::Editor
 		return true;
 	}
 
-	bool ValidateScene(EditorSceneManager& sceneManager, const std::filesystem::path& path, YAML::Node& scene, ImGuiTestContext* ctx)
+	static bool ValidateScene(EditorSceneManager& sceneManager, const std::filesystem::path& path, YAML::Node& scene, ImGuiTestContext* ctx)
 	{
 		GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene", "scene", scene, Map, path);
 
 		auto index = scene["index"];
 		auto name = scene["name"];
 		auto childCount = scene["childCount"];
+		auto isActive = scene["isActive"];
 		auto children = scene["children"];
 		GLORY_YAMLTEST_CHECK_NODE_MSG(index.IsDefined() || name.IsDefined(), scene, path,
 			("validateSceneManager:scene index defined == {} || name defined == {}",
@@ -145,6 +268,8 @@ namespace Glory::Editor
 			GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene", "index", index, Scalar, path);
 			pScene = sceneManager.GetOpenScene(index.as<size_t>());
 		}
+		if (!pScene) return false;
+
 		if (name.IsDefined())
 		{
 			const std::string nameStr = name.as<std::string>();
@@ -163,9 +288,22 @@ namespace Glory::Editor
 		if (childCount.IsDefined())
 		{
 			GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene", "childCount", childCount, Scalar, path);
-			const size_t ref = childCount.as<size_t>();
-			GLORY_YAMLTEST_CHECK_NODE_MSG(pScene->ChildCount(0) == ref, scene, path,
-				("Scene child count({}) == ref({})", pScene->ChildCount(0), ref));
+
+			size_t countRef = 0;
+			if (!GetTestValue<size_t>(path, childCount, countRef)) return false;
+
+			GLORY_YAMLTEST_CHECK_NODE_MSG(pScene->ChildCount(0) == countRef, scene, path,
+				("Scene child count({}) == ref({})", pScene->ChildCount(0), countRef));
+		}
+		if (isActive.IsDefined())
+		{
+			GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene", "isActive", isActive, Scalar, path);
+
+			const bool ref = isActive.as<bool>();
+			const bool isActiveValue = pScene == sceneManager.GetActiveScene();
+
+			GLORY_YAMLTEST_CHECK_NODE_MSG(ref == isActiveValue, scene, path,
+				("Scene is active ({}) == ref({})", isActiveValue ? "true" : "false", ref ? "true" : "false"));
 		}
 		if (children.IsDefined() && !ValidateChildren(pScene, path, 0, children, ctx))
 			return false;
@@ -173,7 +311,7 @@ namespace Glory::Editor
 		return true;
 	}
 
-	bool ValidateChildren(GScene* pScene, const std::filesystem::path& path, Utils::ECS::EntityID parent, YAML::Node& children, ImGuiTestContext* ctx)
+	static bool ValidateChildren(GScene* pScene, const std::filesystem::path& path, Utils::ECS::EntityID parent, YAML::Node& children, ImGuiTestContext* ctx)
 	{
 		GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene", "children", children, Sequence, path);
 
@@ -188,7 +326,7 @@ namespace Glory::Editor
 		return true;
 	}
 
-	bool ValidateChild(GScene* pScene, const std::filesystem::path& path, Utils::ECS::EntityID parent, YAML::Node& child, ImGuiTestContext* ctx)
+	static bool ValidateChild(GScene* pScene, const std::filesystem::path& path, Utils::ECS::EntityID parent, YAML::Node& child, ImGuiTestContext* ctx)
 	{
 		auto index = child["index"];
 		auto childCount = child["childCount"];
@@ -215,9 +353,12 @@ namespace Glory::Editor
 		if (childCount.IsDefined())
 		{
 			GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene:child", "childCount", childCount, Scalar, path);
-			const size_t ref = childCount.as<size_t>();
-			GLORY_YAMLTEST_CHECK_NODE_MSG(pScene->ChildCount(childID) == ref, childCount, path,
-				("Entity child count({}) == ref({})", pScene->ChildCount(childID), ref));
+
+			size_t countRef = 0;
+			if (!GetTestValue<size_t>(path, childCount, countRef)) return false;
+
+			GLORY_YAMLTEST_CHECK_NODE_MSG(pScene->ChildCount(childID) == countRef, childCount, path,
+				("Entity child count({}) == ref({})", pScene->ChildCount(childID), countRef));
 		}
 
 		if (componentCount.IsDefined())
@@ -237,7 +378,7 @@ namespace Glory::Editor
 		return true;
 	}
 
-	bool ValidateComponents(const std::filesystem::path& path, const Entity& entity, YAML::Node& components, ImGuiTestContext* ctx)
+	static bool ValidateComponents(const std::filesystem::path& path, const Entity& entity, YAML::Node& components, ImGuiTestContext* ctx)
 	{
 		GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene:child", "components", components, Sequence, path);
 
@@ -252,7 +393,7 @@ namespace Glory::Editor
 		return true;
 	}
 
-	bool ValidateComponent(const std::filesystem::path& path, const Entity& entity, YAML::Node& component, size_t index, ImGuiTestContext* ctx)
+	static bool ValidateComponent(const std::filesystem::path& path, const Entity& entity, YAML::Node& component, size_t index, ImGuiTestContext* ctx)
 	{
 		auto typeName = component["type"];
 		GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene:child:component", "type", typeName, Scalar, path);
@@ -291,7 +432,7 @@ namespace Glory::Editor
 		return true;
 	}
 
-	bool ValidateProperty(const std::filesystem::path& path, YAML::Node& value, const Utils::Reflect::FieldData* pField, void* data)
+	static bool ValidateProperty(const std::filesystem::path& path, YAML::Node& value, const Utils::Reflect::FieldData* pField, void* data)
 	{
 		EditorApplication* pApp = EditorApplication::GetInstance();
 		Serializers& serializers = pApp->GetSerializers();
@@ -333,7 +474,10 @@ namespace Glory::Editor
 		if (count.IsDefined())
 		{
 			GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager", "count", count, Scalar, path);
-			const size_t countRef = count.as<size_t>();
+			
+			size_t countRef = 0;
+			if (!GetTestValue<size_t>(path, count, countRef)) return false;
+
 			GLORY_YAMLTEST_CHECK_NODE_MSG(sceneManager.OpenScenesCount() == countRef, operation, path,
 				("Open scene count({}) == ref({})", sceneManager.OpenScenesCount(), countRef));
 		}
@@ -346,6 +490,30 @@ namespace Glory::Editor
 				if (!ValidateScene(sceneManager, path, scene, ctx))
 					return false;
 			}
+		}
+
+		return true;
+	}
+
+	TESTOP_IMPLEMENTATION_BODY(repeat)
+	{
+		auto count = operation["count"];
+		auto operations = operation["operations"];
+
+		GLORY_YAMLTEST_CHECK_NODE_DEFINED("repeat", "count", operation, count, path);
+		GLORY_YAMLTEST_CHECK_NODE_TYPE("repeat", "count", count, Scalar, path);
+		GLORY_YAMLTEST_CHECK_NODE_DEFINED("repeat", "operations", operation, operations, path);
+		GLORY_YAMLTEST_CHECK_NODE_TYPE("repeat", "operations", operations, Sequence, path);
+
+		size_t repeatCount = 0;
+		if (!GetTestValue<size_t>(path, count, repeatCount)) return false;
+
+		for (size_t i = 0; i < repeatCount; ++i)
+		{
+			TestVars["repeat.count"] = std::to_string(repeatCount);
+			TestVars["repeat.iteration"] = std::to_string(i);
+			if (!Glory::Editor::YAMLTest::RunYAMLTestOperations(path, operations, ctx))
+				return false;
 		}
 
 		return true;
@@ -520,5 +688,38 @@ namespace Glory::Editor::YAMLTest
 			("Property {} : Comparator for type {} exists == {}", pField->Name(), pField->TypeName(), exists ? "true" : "false"));
 
 		return (*iter)->Compare(path, data, value, pField->Name());
+	}
+
+	void RegisterTestOperation(std::string_view name, TestOperation testOp)
+	{
+		Operations.emplace(name, testOp);
+	}
+
+	void RunYAMLTest(const std::filesystem::path& path, YAML::Node& root, ImGuiTestContext* ctx)
+	{
+		TestVars.clear();
+
+		auto operations = root["operations"];
+		IM_CHECK(operations.IsDefined());
+
+		const std::function<bool()> f = [&]() {
+			GLORY_YAMLTEST_CHECK_NODE_DEFINED("root", "operations", operations, root, path);
+			GLORY_YAMLTEST_CHECK_NODE_TYPE("root", "operations", operations, Sequence, path);
+			return true;
+		};
+
+		if (!f()) return;
+		Glory::Editor::YAMLTest::RunYAMLTestOperations(path, operations, ctx);
+	}
+
+	bool RunYAMLTestOperations(const std::filesystem::path& path, YAML::Node& operations, ImGuiTestContext* ctx)
+	{
+		for (size_t i = 0; i < operations.size(); ++i)
+		{
+			auto operation = operations[i];
+			if (!ExecuteOperation(path, operation, ctx))
+				return false;
+		}
+		return true;
 	}
 }

@@ -60,7 +60,7 @@ namespace Glory::Utils::Reflect
 		size_t pos = 0;
 		while ((pos = str.find(separator, lastPos)) != std::string::npos)
 		{
-			std::string_view token = str.substr(0, pos);
+			std::string_view token = str.substr(lastPos, pos - lastPos);
 			tokens.push_back(token);
 			lastPos = pos + 1;
 		}
