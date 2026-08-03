@@ -67,6 +67,8 @@ namespace Glory::Editor
 			Init,
 			Add,
 			Subtract,
+			Multiply,
+			Divide
 		} lastOp = Init;
 
 		for (const auto token : tokens)
@@ -76,9 +78,19 @@ namespace Glory::Editor
 				lastOp = Add;
 				continue;
 			}
-			else if (token == "-")
+			if (token == "-")
 			{
 				lastOp = Subtract;
+				continue;
+			}
+			if (token == "*")
+			{
+				lastOp = Multiply;
+				continue;
+			}
+			if (token == "/")
+			{
+				lastOp = Divide;
 				continue;
 			}
 
@@ -97,6 +109,12 @@ namespace Glory::Editor
 				break;
 			case Subtract:
 				result -= num;
+				break;
+			case Multiply:
+				result *= num;
+				break;
+			case Divide:
+				result /= num;
 				break;
 			}
 		}
@@ -212,6 +230,58 @@ namespace Glory::Editor
 		ctx->ItemClick(pathValue.c_str(), imguiButton);
 		return true;
 	}
+	
+	TESTOP_IMPLEMENTATION_BODY(itemOpen)
+	{
+		auto refPath = operation["path"];
+		GLORY_YAMLTEST_CHECK_NODE_DEFINED("itemOpen", "path", operation, refPath, path);
+		GLORY_YAMLTEST_CHECK_NODE_TYPE("itemOpen", "path", refPath, Scalar, path);
+
+		std::string pathValue;
+		if (!GetTestValue<std::string>(path, refPath, pathValue)) return false;
+
+		ctx->ItemOpen(pathValue.c_str());
+		return true;
+	}
+
+	TESTOP_IMPLEMENTATION_BODY(itemInputValue)
+	{
+		auto refPath = operation["path"];
+		auto value = operation["value"];
+		auto mode = operation["mode"];
+		GLORY_YAMLTEST_CHECK_NODE_DEFINED("itemInputValue", "path", operation, refPath, path);
+		GLORY_YAMLTEST_CHECK_NODE_TYPE("itemInputValue", "path", refPath, Scalar, path);
+
+		GLORY_YAMLTEST_CHECK_NODE_DEFINED("itemInputValue", "value", operation, value, path);
+		GLORY_YAMLTEST_CHECK_NODE_TYPE("itemInputValue", "value", value, Scalar, path);
+
+		std::string pathValue;
+		if (!GetTestValue<std::string>(path, refPath, pathValue)) return false;
+		std::string modeStr = "string";
+		std::string finalValue;
+
+		if (mode.IsDefined())
+		{
+			GLORY_YAMLTEST_CHECK_NODE_TYPE("itemInputValue", "mode", mode, Scalar, path);
+			modeStr = mode.as<std::string>();
+		}
+
+		if (modeStr == "string")
+		{
+			std::string valueStr;
+			if (!GetTestValue<std::string>(path, value, valueStr)) return false;
+			finalValue = valueStr;
+		}
+		else if (modeStr == "number")
+		{
+			int valueInt;
+			if (!GetTestValue<int>(path, value, valueInt)) return false;
+			finalValue = std::to_string(valueInt);
+		}
+
+		ctx->ItemInputValue(pathValue.c_str(), finalValue.c_str());
+		return true;
+	}
 
 	TESTOP_IMPLEMENTATION_BODY(mouseMove)
 	{
@@ -281,6 +351,8 @@ namespace Glory::Editor
 			pScene = sceneManager.GetOpenScene(index.as<size_t>());
 		}
 		if (!pScene) return false;
+
+		TestVars["scene.uuid"] = std::to_string(pScene->GetUUID());
 
 		if (name.IsDefined())
 		{
@@ -354,6 +426,11 @@ namespace Glory::Editor
 		const Utils::ECS::EntityID childID = pScene->Child(parent, childIndex);
 		const Entity childEntity = pScene->GetEntityByEntityID(childID);
 
+		GLORY_YAMLTEST_CHECK_NODE_MSG(childEntity.IsValid(), child, path,
+			("Entity is valid == {}", childEntity.IsValid() ? "true" : "false"));
+
+		TestVars["entity.uuid"] = std::to_string(childEntity.EntityUUID());
+
 		if (name.IsDefined())
 		{
 			GLORY_YAMLTEST_CHECK_NODE_TYPE("validateSceneManager:scene:child", "name", name, Scalar, path);
@@ -415,6 +492,8 @@ namespace Glory::Editor
 			("Type {} exists == {}", typeNameStr, pType ? "true" : "false"));
 
 		const uint32_t actualTypeHash = entity.ComponentType(index);
+
+		TestVars["component.uuid"] = std::to_string(entity.ComponentID(index));
 
 		const Utils::Reflect::TypeData* pActualType = Utils::Reflect::Reflect::GetTyeData(actualTypeHash);
 		GLORY_YAMLTEST_CHECK_NODE_MSG(pType == pActualType, typeName, path,
@@ -662,6 +741,19 @@ struct std::formatter<glm::ivec4> : std::formatter<int32_t> {
 
 namespace Glory::Editor::YAMLTest
 {
+	class ResourceReferenceComparator : public BaseComparator
+	{
+	public:
+		uint32_t Type() const override { return ST_Asset; };
+
+		bool Compare(const std::filesystem::path& path, void* data,
+			YAML::Node& value, std::string_view name) const override
+		{
+			ResourceReferenceBase* pReference = static_cast<ResourceReferenceBase*>(data);
+			return pReference->GetUUID() == value.as<uint64_t>();
+		}
+	};
+
 	Comparators::Comparators()
 	{
 		m_Comparators.emplace_back(new TemplatedComparator<int8_t>());
@@ -684,6 +776,8 @@ namespace Glory::Editor::YAMLTest
 		m_Comparators.emplace_back(new TemplatedComparator<glm::ivec2>());
 		m_Comparators.emplace_back(new TemplatedComparator<glm::ivec3>());
 		m_Comparators.emplace_back(new TemplatedComparator<glm::ivec4>());
+		m_Comparators.emplace_back(new TemplatedComparator<std::string>());
+		m_Comparators.emplace_back(new ResourceReferenceComparator());
 	}
 
 	bool Comparators::Compare(const std::filesystem::path& path, void* data,
@@ -694,6 +788,13 @@ namespace Glory::Editor::YAMLTest
 		auto iter = std::find_if(comparators.m_Comparators.begin(), comparators.m_Comparators.end(), [pField](std::unique_ptr<BaseComparator>& pComp) {
 			return pComp->Type() == pField->ArrayElementType();
 		});
+
+		if (iter == comparators.m_Comparators.end())
+		{
+			iter = std::find_if(comparators.m_Comparators.begin(), comparators.m_Comparators.end(), [pField](std::unique_ptr<BaseComparator>& pComp) {
+				return pComp->Type() == pField->Type();
+			});
+		}
 
 		const bool exists = iter != comparators.m_Comparators.end();
 		GLORY_YAMLTEST_CHECK_NODE_MSG(exists, value, path,

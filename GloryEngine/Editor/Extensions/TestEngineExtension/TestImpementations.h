@@ -37,6 +37,8 @@ bool TESTOP_##x##_Func(TESTOP_ARGS)
 #define BUILT_IN_TESTOPS \
 X(setRef);\
 X(itemClick);\
+X(itemOpen);\
+X(itemInputValue);\
 X(mouseMove);\
 X(validatePopupStack);\
 X(validateSceneManager);\
