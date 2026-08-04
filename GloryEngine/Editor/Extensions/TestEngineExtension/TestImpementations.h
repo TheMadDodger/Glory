@@ -40,6 +40,9 @@ X(itemClick);\
 X(itemOpen);\
 X(itemInputValue);\
 X(mouseMove);\
+X(mouseMoveToPos);\
+X(mouseClick);\
+X(findAssetUUIDByName);\
 X(validatePopupStack);\
 X(validateSceneManager);\
 X(repeat);\

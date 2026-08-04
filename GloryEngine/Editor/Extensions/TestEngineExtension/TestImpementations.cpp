@@ -1,8 +1,10 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "TestImpementations.h"
 
 #include <EditorApplication.h>
 #include <EditorSceneManager.h>
 #include <Serializers.h>
+#include <EditorAssetDatabase.h>
 
 #include <YAML_GLM.h>
 #include <Reflection.h>
@@ -10,10 +12,12 @@
 #include <yaml-cpp/yaml.h>
 #include <glm/glm.hpp>
 
+#include <NodeRef.h>
+
 namespace Glory::Editor
 {
 	static std::unordered_map<std::string_view, Glory::Editor::YAMLTest::TestOperation> Operations;
-	static std::unordered_map<std::string, std::string> TestVars;
+	static Utils::InMemoryYAML TestVars;
 
 	constexpr std::string_view IndexKey = "index_";
 
@@ -40,14 +44,42 @@ namespace Glory::Editor
 			}
 
 			const size_t count = varEndIndex - actualStart;
-			const std::string varName = result.substr(actualStart, count);
-			const auto iter = TestVars.find(varName);
+			const std::string originalVarName = result.substr(actualStart, count);
+			std::string varName = originalVarName;
 
-			GLORY_YAMLTEST_CHECK_NODE_MSG_RET(iter != TestVars.end(), node, path,
-				("Test var {} exists == {}", varName, iter != TestVars.end() ? "true" : "false"), "");
+			/* Find array indexer */
+			const size_t arrayIndexerStart = varName.find('[');
+			const size_t arrayIndexerEnd = varName.find(']');
 
-			const size_t replaceCount = 2 + varName.size() + 1;
-			result.replace(nextVarStartIndex, replaceCount, iter->second);
+			const bool validSyntax = (arrayIndexerStart == std::string::npos) == (arrayIndexerEnd == std::string::npos);
+			GLORY_YAMLTEST_CHECK_NODE_MSG_RET(validSyntax, node, path,
+				("Test var {} valid syntax == {}", originalVarName, validSyntax ? "true" : "false"), "");
+
+			size_t index = UINT64_MAX;
+			if (arrayIndexerStart != std::string::npos)
+			{
+				const size_t count = arrayIndexerStart + 1 - arrayIndexerEnd;
+				if (count == 0)
+				{
+					const std::string indexStr = TestVars["repeat.iteration"].As<std::string>();
+					index = std::stoull(indexStr);
+				}
+				else
+				{
+					const std::string indexStr = varName.substr(arrayIndexerStart + 1, count);
+					index = std::stoull(indexStr);
+				}
+				varName = varName.substr(0, arrayIndexerStart);
+			}
+
+			auto testVar = TestVars[varName];
+			auto indexedTestVar = index == UINT64_MAX ? testVar : testVar[index];
+
+			GLORY_YAMLTEST_CHECK_NODE_MSG_RET(indexedTestVar.Exists(), node, path,
+				("Test var {} exists == {}", originalVarName, indexedTestVar.Exists() ? "true" : "false"), "");
+
+			const size_t replaceCount = 2 + originalVarName.size() + 1;
+			result.replace(nextVarStartIndex, replaceCount, indexedTestVar.As<std::string>());
 
 			nextVarStartIndex = result.find("%{");
 		}
@@ -295,6 +327,65 @@ namespace Glory::Editor
 		return true;
 	}
 
+	TESTOP_IMPLEMENTATION_BODY(mouseMoveToPos)
+	{
+		auto mode = operation["mode"];
+		auto pos = operation["pos"];
+
+		GLORY_YAMLTEST_CHECK_NODE_DEFINED("mouseMoveToPos", "pos", operation, pos, path);
+		GLORY_YAMLTEST_CHECK_NODE_TYPE("mouseMoveToPos", "pos", pos, Sequence, path);
+
+		std::string modeStr = "absolute";
+		if (mode.IsDefined())
+		{
+			GLORY_YAMLTEST_CHECK_NODE_TYPE("mouseMoveToPos", "mode", mode, Scalar, path);
+			modeStr = mode.as<std::string>();
+		}
+
+		ImVec2 position;
+		position.x = pos[0].as<float>();
+		position.y = pos[1].as<float>();
+
+		ImGuiContext& uiCtx = *ctx->UiContext;
+		if (modeStr == "relative")
+			ctx->MouseMoveToPos(uiCtx.IO.MousePos + position);
+		else
+			ctx->MouseMoveToPos(position);
+
+		return true;
+	}
+
+	TESTOP_IMPLEMENTATION_BODY(mouseClick)
+	{
+		ctx->MouseClick();
+		return true;
+	}
+
+	TESTOP_IMPLEMENTATION_BODY(findAssetUUIDByName)
+	{
+		auto name = operation["name"];
+		auto store = operation["store"];
+
+		GLORY_YAMLTEST_CHECK_NODE_DEFINED("findAssetUUIDByName", "name", operation, name, path);
+		GLORY_YAMLTEST_CHECK_NODE_TYPE("findAssetUUIDByName", "name", name, Scalar, path);
+
+		GLORY_YAMLTEST_CHECK_NODE_DEFINED("findAssetUUIDByName", "store", operation, store, path);
+		GLORY_YAMLTEST_CHECK_NODE_TYPE("findAssetUUIDByName", "store", store, Scalar, path);
+
+		std::string nameStr;
+		if (!GetTestValue<std::string>(path, name, nameStr)) return false;
+
+		const UUID assetID = EditorAssetDatabase::FindAssetUUIDByName(nameStr);
+
+		GLORY_YAMLTEST_CHECK_NODE_MSG(assetID != 0ull, name, path,
+			("Asset {} ID {}", nameStr, uint64_t(assetID)));
+
+		const std::string testVarName = store.as<std::string>();
+		TestVars[testVarName].Set(std::to_string(assetID));
+
+		return true;
+	}
+
 	TESTOP_IMPLEMENTATION_BODY(validatePopupStack)
 	{
 		auto sizeGreaterThan = operation["sizeGreaterThan"];
@@ -352,7 +443,7 @@ namespace Glory::Editor
 		}
 		if (!pScene) return false;
 
-		TestVars["scene.uuid"] = std::to_string(pScene->GetUUID());
+		TestVars["scene.uuid"].Set(std::to_string(pScene->GetUUID()));
 
 		if (name.IsDefined())
 		{
@@ -429,7 +520,7 @@ namespace Glory::Editor
 		GLORY_YAMLTEST_CHECK_NODE_MSG(childEntity.IsValid(), child, path,
 			("Entity is valid == {}", childEntity.IsValid() ? "true" : "false"));
 
-		TestVars["entity.uuid"] = std::to_string(childEntity.EntityUUID());
+		TestVars["entity.uuid"].Set(std::to_string(childEntity.EntityUUID()));
 
 		if (name.IsDefined())
 		{
@@ -493,7 +584,7 @@ namespace Glory::Editor
 
 		const uint32_t actualTypeHash = entity.ComponentType(index);
 
-		TestVars["component.uuid"] = std::to_string(entity.ComponentID(index));
+		TestVars["component.uuid"].Set(std::to_string(entity.ComponentID(index)));
 
 		const Utils::Reflect::TypeData* pActualType = Utils::Reflect::Reflect::GetTyeData(actualTypeHash);
 		GLORY_YAMLTEST_CHECK_NODE_MSG(pType == pActualType, typeName, path,
@@ -601,8 +692,8 @@ namespace Glory::Editor
 
 		for (size_t i = 0; i < repeatCount; ++i)
 		{
-			TestVars["repeat.count"] = std::to_string(repeatCount);
-			TestVars["repeat.iteration"] = std::to_string(i);
+			TestVars["repeat.count"].Set(std::to_string(repeatCount));
+			TestVars["repeat.iteration"].Set(std::to_string(i));
 			if (!Glory::Editor::YAMLTest::RunYAMLTestOperations(path, operations, ctx))
 				return false;
 		}
@@ -750,7 +841,12 @@ namespace Glory::Editor::YAMLTest
 			YAML::Node& value, std::string_view name) const override
 		{
 			ResourceReferenceBase* pReference = static_cast<ResourceReferenceBase*>(data);
-			return pReference->GetUUID() == value.as<uint64_t>();
+
+			std::string valueStr;
+			if (!GetTestValue<std::string>(path, value, valueStr)) return false;
+			const uint64_t id = std::stoull(valueStr);
+
+			return pReference->GetUUID() == id;
 		}
 	};
 
@@ -810,7 +906,17 @@ namespace Glory::Editor::YAMLTest
 
 	void RunYAMLTest(const std::filesystem::path& path, YAML::Node& root, ImGuiTestContext* ctx)
 	{
-		TestVars.clear();
+		TestVars.RootNodeRef().ValueRef().SetMap();
+
+		auto vars = root["vars"];
+		if (vars.IsDefined() && vars.IsMap())
+		{
+			for (auto key : vars)
+			{
+				const std::string name = key.first.as<std::string>();
+				TestVars[name].Set(key.second);
+			}
+		}
 
 		auto operations = root["operations"];
 		IM_CHECK(operations.IsDefined());
