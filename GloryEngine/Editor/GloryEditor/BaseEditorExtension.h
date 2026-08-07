@@ -33,6 +33,7 @@ namespace Glory::Editor
 		virtual GLORY_EDITOR_API ~BaseEditorExtension();
 
 		GLORY_EDITOR_API void SetSetContextProc(SetContextProc proc);
+		GLORY_EDITOR_API void BroadcastMessage(std::string_view message, void* data);
 
 	protected:
 		virtual void Initialize() = 0;
@@ -40,6 +41,7 @@ namespace Glory::Editor
 		virtual void OnBeginPackage(const std::filesystem::path& path) {};
 		virtual void OnGenerateConfigExec(std::ofstream& stream) {};
 		virtual void OnEndPackage(const std::filesystem::path& path) {};
+		virtual void OnBroadcastMessage(std::string_view message, void* data) {};
 
 	private:
 		void SetCurrentContext();

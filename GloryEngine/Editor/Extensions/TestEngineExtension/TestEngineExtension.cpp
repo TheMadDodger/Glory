@@ -23,6 +23,7 @@
 #include <imgui_te_internal.h>
 
 #include <efsw/efsw.hpp>
+#include <GloryAssert.h>
 
 EXTENSION_CPP(TestEngineEditorExtension)
 
@@ -43,6 +44,7 @@ namespace Glory::Editor
 	static bool ShouldRefreshTests = false;
 
 	static constexpr const char* Shortcut_Window_TestEngine = "Open Test Engine";
+	static constexpr std::string_view RunTestsMessage = "RUNTESTS";
 
 	class TestFilesWatcher : public efsw::FileWatchListener
 	{
@@ -115,6 +117,12 @@ namespace Glory::Editor
 		ShouldRefreshTests = false;
 	}
 
+	void TestEngineEditorExtension::OnBroadcastMessage(std::string_view message, void* data)
+	{
+		if (message != RunTestsMessage) return;
+		RunTests();
+	}
+
 	void TestEngineEditorExtension::RegisterTests(ProjectSpace* pProject)
 	{
 		ImGuiTestEngine_UnregisterAllTests(TestEngine);
@@ -163,6 +171,16 @@ namespace Glory::Editor
 			};
 			pTest->UserData = reinterpret_cast<void*>(i);
 		}
+	}
+
+	void TestEngineEditorExtension::RunTests()
+	{
+		GLORY_ASSERT(TestEngine != nullptr, "Missing imgui test engine!");
+
+		auto pApp = EditorApplication::GetInstance();
+		pApp->GetMainEditor().GetWindow<TestEngineWindow>();
+
+		ImGuiTestEngine_QueueTests(TestEngine, ImGuiTestGroup_Unknown, "all");
 	}
 
 	void TestEngineEditorExtension::FindTestsRecursive(const std::filesystem::path& rootPath, const std::filesystem::path& path)

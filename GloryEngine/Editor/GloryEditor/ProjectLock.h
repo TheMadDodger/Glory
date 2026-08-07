@@ -1,4 +1,6 @@
 #pragma once
+#include "GloryEditor.h"
+
 #include <string>
 #include <fstream>
 #include <filesystem>
@@ -8,12 +10,12 @@ namespace Glory::Editor
 	class ProjectLock
 	{
 	public:
-		ProjectLock(const std::string& path);
-		virtual ~ProjectLock();
+		GLORY_EDITOR_API ProjectLock(const std::string& path);
+		GLORY_EDITOR_API virtual ~ProjectLock();
 
-		bool Lock();
-		void Unlock();
-		bool CanLock();
+		GLORY_EDITOR_API bool Lock();
+		GLORY_EDITOR_API void Unlock();
+		GLORY_EDITOR_API bool CanLock();
 
 	private:
 		const std::string m_ProjectPath;

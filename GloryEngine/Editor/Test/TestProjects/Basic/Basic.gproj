@@ -1,0 +1,874 @@
+{
+    "ProjectName": "Basic",
+    "Assets": {
+        "800": {
+            "Location": {
+                "Path": ".\\Modules\\GloryOpenGLGraphics\\Assets\\Shaders\\Passthrough_Frag.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Passthrough_Frag",
+                "UUID": 800,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "801": {
+            "Location": {
+                "Path": ".\\Modules\\GloryOpenGLGraphics\\Assets\\Shaders\\Passthrough_Vert.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Passthrough_Vert",
+                "UUID": 801,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "802": {
+            "Location": {
+                "Path": ".\\Modules\\GloryOpenGLGraphics\\Assets\\Pipelines\\Passthrough.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "Passthrough",
+                "UUID": 802,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "1": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Phong_frag.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Phong_frag",
+                "UUID": 1,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "2": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Default_vert.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Default_vert",
+                "UUID": 2,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "11": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Lines_Vert.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Lines_Vert",
+                "UUID": 11,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "12": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Lines_Frag.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Lines_Frag",
+                "UUID": 12,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "13": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Screen_Vert.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Screen_Vert",
+                "UUID": 13,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "29": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Screen_Frag.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Screen_Frag",
+                "UUID": 29,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "15": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\SSAO_Frag.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "SSAO_Frag",
+                "UUID": 15,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "3": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Blur_Frag.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Blur_Frag",
+                "UUID": 3,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "17": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Text_Vert.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Text_Vert",
+                "UUID": 17,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "18": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Text_Frag.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Text_Frag",
+                "UUID": 18,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "24": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\PBR_frag.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "PBR_frag",
+                "UUID": 24,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "9": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\Phong.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "Phong",
+                "UUID": 9,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "10": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\PhongTextured.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "PhongTextured",
+                "UUID": 10,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "19": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\Lines.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "Lines",
+                "UUID": 19,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "21": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\SSAO_Prepass.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "SSAO_Prepass",
+                "UUID": 21,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "4": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\RedBlur.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "RedBlur",
+                "UUID": 4,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "23": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\Text.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "Text",
+                "UUID": 23,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "26": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\PBR.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "PBR",
+                "UUID": 26,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "28": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\PBR_Textured.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "PBR_Textured",
+                "UUID": 28,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "30": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\DisplayCopy.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "DisplayCopy",
+                "UUID": 30,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "5": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Models\\Cube.fbx",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Cube",
+                "UUID": 5,
+                "Hash": 1373658899,
+                "SerializedVersion": 0
+            }
+        },
+        "481522175194108683": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Models\\Cube.fbx",
+                "SubresourcePath": "Material",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Cube\\Material",
+                "UUID": 481522175194108683,
+                "Hash": 1884319791,
+                "SerializedVersion": 0
+            }
+        },
+        "5358288982669952013": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Models\\Cube.fbx",
+                "SubresourcePath": "Cube Material 0",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Cube\\Cube Material 0",
+                "UUID": 5358288982669952013,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "5994050620247004162": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Models\\Cube.fbx",
+                "SubresourcePath": "Cube_Prefab",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Cube\\Cube_Prefab",
+                "UUID": 5994050620247004162,
+                "Hash": 1319002352,
+                "SerializedVersion": 0
+            }
+        },
+        "6": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Models\\Plane.fbx",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Plane",
+                "UUID": 6,
+                "Hash": 1373658899,
+                "SerializedVersion": 0
+            }
+        },
+        "3483207246868522474": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Models\\Plane.fbx",
+                "SubresourcePath": "DefaultMaterial",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Plane\\DefaultMaterial",
+                "UUID": 3483207246868522474,
+                "Hash": 1884319791,
+                "SerializedVersion": 0
+            }
+        },
+        "13302911520629185025": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Models\\Plane.fbx",
+                "SubresourcePath": "Plane Material 0",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Plane\\Plane Material 0",
+                "UUID": 13302911520629185025,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "1420104428016215850": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Models\\Plane.fbx",
+                "SubresourcePath": "Plane_Prefab",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Plane\\Plane_Prefab",
+                "UUID": 1420104428016215850,
+                "Hash": 1319002352,
+                "SerializedVersion": 0
+            }
+        },
+        "7": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Models\\Sphere.fbx",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sphere",
+                "UUID": 7,
+                "Hash": 1373658899,
+                "SerializedVersion": 0
+            }
+        },
+        "17150578462651381196": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Models\\Sphere.fbx",
+                "SubresourcePath": "DefaultMaterial",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sphere\\DefaultMaterial",
+                "UUID": 17150578462651381196,
+                "Hash": 1884319791,
+                "SerializedVersion": 0
+            }
+        },
+        "13098152191988519584": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Models\\Sphere.fbx",
+                "SubresourcePath": "Icosphere Material 0",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sphere\\Icosphere Material 0",
+                "UUID": 13098152191988519584,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "9722000631952948470": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Models\\Sphere.fbx",
+                "SubresourcePath": "Sphere_Prefab",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Sphere\\Sphere_Prefab",
+                "UUID": 9722000631952948470,
+                "Hash": 1319002352,
+                "SerializedVersion": 0
+            }
+        },
+        "8": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Models\\Suzanne.fbx",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Suzanne",
+                "UUID": 8,
+                "Hash": 1373658899,
+                "SerializedVersion": 0
+            }
+        },
+        "11796362053524406653": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Models\\Suzanne.fbx",
+                "SubresourcePath": "DefaultMaterial",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Suzanne\\DefaultMaterial",
+                "UUID": 11796362053524406653,
+                "Hash": 1884319791,
+                "SerializedVersion": 0
+            }
+        },
+        "2395717343953596026": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Models\\Suzanne.fbx",
+                "SubresourcePath": "Suzanne Material 0",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Suzanne\\Suzanne Material 0",
+                "UUID": 2395717343953596026,
+                "Hash": 111102399,
+                "SerializedVersion": 0
+            }
+        },
+        "8112929749273092511": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Models\\Suzanne.fbx",
+                "SubresourcePath": "Suzanne_Prefab",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".fbx",
+                "Name": "Suzanne\\Suzanne_Prefab",
+                "UUID": 8112929749273092511,
+                "Hash": 1319002352,
+                "SerializedVersion": 0
+            }
+        },
+        "31": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Skybox_Frag.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Skybox_Frag",
+                "UUID": 31,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "32": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Skybox_Vert.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Skybox_Vert",
+                "UUID": 32,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "33": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\Skybox.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "Skybox",
+                "UUID": 33,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "36": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Shadows_frag.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Shadows_frag",
+                "UUID": 36,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "37": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Shadows_vert.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Shadows_vert",
+                "UUID": 37,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "38": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\Shadows.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "Shadows",
+                "UUID": 38,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "39": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\ShadowsTransparentTextured.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "ShadowsTransparentTextured",
+                "UUID": 39,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "40": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Compute\\ClusterShader.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "ClusterShader",
+                "UUID": 40,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "41": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Compute\\ClusterCullLight.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "ClusterCullLight",
+                "UUID": 41,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "42": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Compute\\MarkActiveClusters.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "MarkActiveClusters",
+                "UUID": 42,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "43": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Compute\\BuildCompactClusterList.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "BuildCompactClusterList",
+                "UUID": 43,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "44": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\Compute\\ClusterGenerator.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "ClusterGenerator",
+                "UUID": 44,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "45": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\Compute\\ClusterCullLight.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "ClusterCullLight",
+                "UUID": 45,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "46": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\Compute\\Picking.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "Picking",
+                "UUID": 46,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "47": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\Compute\\Picking.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "Picking",
+                "UUID": 47,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "48": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\SSAOPost_Frag.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "SSAOPost_Frag",
+                "UUID": 48,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "49": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\SSAO_Postpass.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "SSAO_Postpass",
+                "UUID": 49,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "50": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\VisualizeObjectID.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "VisualizeObjectID",
+                "UUID": 50,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "51": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\VisualizeSSAO.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "VisualizeSSAO",
+                "UUID": 51,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "52": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\VisualizeDepth.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "VisualizeDepth",
+                "UUID": 52,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "53": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Shaders\\LightComplexity_Frag.shader",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".shader",
+                "Name": "LightComplexity_Frag",
+                "UUID": 53,
+                "Hash": 3732387374,
+                "SerializedVersion": 0
+            }
+        },
+        "54": {
+            "Location": {
+                "Path": ".\\Modules\\GloryRenderer\\Assets\\Pipelines\\LightComplexity.gpln",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gpln",
+                "Name": "LightComplexity",
+                "UUID": 54,
+                "Hash": 4237740980,
+                "SerializedVersion": 0
+            }
+        },
+        "16881562859750560441": {
+            "Location": {
+                "Path": "Materials\\White.gmat",
+                "SubresourcePath": "",
+                "Index": 0
+            },
+            "Metadata": {
+                "Extension": ".gmat",
+                "Name": "White",
+                "UUID": 16881562859750560441,
+                "Hash": 1884319791,
+                "SerializedVersion": 0
+            }
+        }
+    },
+    "EditorVersion": "0.6.0"
+}

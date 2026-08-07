@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "EditorCreateInfo.h"
 #include "EditorLoader.h"
 
 #include <Debug.h>
@@ -68,12 +68,21 @@ namespace Glory
 			delete m_pExtensions[i];
 		}
 		m_pExtensions.clear();
+		m_ExtensionNames.clear();
 
 		for (size_t i = 0; i < m_Libs.size(); i++)
 		{
 			FreeLibrary(m_Libs[i]);
 		}
 		m_Libs.clear();
+	}
+
+	Editor::BaseEditorExtension* EditorLoader::GetExtension(const std::string& name)
+	{
+		auto iter = std::find(m_ExtensionNames.begin(), m_ExtensionNames.end(), name);
+		if (iter == m_ExtensionNames.end()) return nullptr;
+		const size_t index = iter - m_ExtensionNames.begin();
+		return m_pExtensions[index];
 	}
 
 	void EditorLoader::LoadModuleMetadata(Glory::EditorCreateInfo& editorCreateInfo, const std::string& name)
@@ -188,6 +197,7 @@ namespace Glory
 		Editor::BaseEditorExtension* pExtension = (loadProc)();
 		m_Libs.push_back(lib);
 		if (pExtension == nullptr) return;
+		m_ExtensionNames.push_back(name);
 		m_pExtensions.push_back(pExtension);
 		pExtension->SetSetContextProc(contextProc);
 	}

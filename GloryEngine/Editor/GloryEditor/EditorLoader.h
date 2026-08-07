@@ -1,7 +1,8 @@
 #pragma once
+#include "EditorApplication.h"
+#include "Package.h"
+
 #include <EngineLoader.h>
-#include <EditorApplication.h>
-#include <Package.h>
 
 namespace Glory
 {
@@ -10,11 +11,13 @@ namespace Glory
 	class EditorLoader
 	{
 	public:
-		EditorLoader();
-		virtual ~EditorLoader();
+		GLORY_EDITOR_API EditorLoader();
+		GLORY_EDITOR_API virtual ~EditorLoader();
 
-		Glory::EditorCreateInfo LoadEditor(IEngine* pEngine, EngineLoader& engineLoader);
-		void Unload();
+		GLORY_EDITOR_API Glory::EditorCreateInfo LoadEditor(IEngine* pEngine, EngineLoader& engineLoader);
+		GLORY_EDITOR_API void Unload();
+
+		GLORY_EDITOR_API Editor::BaseEditorExtension* GetExtension(const std::string& name);
 
 	private:
 		void LoadModuleMetadata(Glory::EditorCreateInfo& editorCreateInfo, const std::string& name);
@@ -30,6 +33,7 @@ namespace Glory
 
 	private:
 		std::vector<HMODULE> m_Libs;
+		std::vector<std::string> m_ExtensionNames;
 		std::vector<Editor::BaseEditorExtension*> m_pExtensions;
 	};
 }

@@ -1,4 +1,4 @@
-// Glorious.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// GloriousTestApp.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
 #include "pch.h"
@@ -12,6 +12,7 @@
 
 #include <ProjectLock.h>
 #include <EditorLoader.h>
+#include <GloryAssert.h>
 
 int main(int argc, char* argv[])
 {
@@ -19,9 +20,9 @@ int main(int argc, char* argv[])
 
     {
         Glory::WindowCreateInfo windowCreateInfo;
-        windowCreateInfo.WindowName = "Glorious";
-        windowCreateInfo.Width = 0.0f;
-        windowCreateInfo.Height = 0.0f;
+        windowCreateInfo.WindowName = "GloriousTestApp";
+        windowCreateInfo.Width = 0u;
+        windowCreateInfo.Height = 0u;
         windowCreateInfo.WindowFlags = Glory::WindowFlags::W_Resizeable;
         windowCreateInfo.Fullscreen = false;
         windowCreateInfo.Maximize = true;
@@ -41,20 +42,20 @@ int main(int argc, char* argv[])
         if (!commandLine.GetValue("projectPath", projectPath))
         {
             debug.LogError("Missing project path in launch arguments!");
-            return -1;
+            return 1;
         }
 
         if (!std::filesystem::exists(projectPath))
         {
             debug.LogError("Invalid project path!");
-            return -1;
+            return 1;
         }
 
         Glory::Editor::ProjectLock lock(projectPath);
         if (!lock.Lock())
         {
             debug.LogError("Project already open in another editor!");
-            return -1;
+            return 1;
         }
 
         std::filesystem::path engineConfPath = projectPath;
@@ -77,6 +78,11 @@ int main(int argc, char* argv[])
         Glory::Editor::EditorApplication application(editorCreateInfo);
         application.Initialize();
         application.Start(projectPath);
+
+        Glory::Editor::BaseEditorExtension* pTestExtension = editorLoader.GetExtension("TestEngineExtension");
+        GLORY_ASSERT(pTestExtension, "TestEngineExtension not loaded!");
+        pTestExtension->BroadcastMessage("RUNTESTS", nullptr);
+
         application.Run();
     }
 

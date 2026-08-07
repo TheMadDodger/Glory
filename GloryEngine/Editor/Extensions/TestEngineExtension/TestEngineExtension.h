@@ -29,12 +29,15 @@ namespace Glory::Editor
 
         GLORY_TESTENGINE_EXTENSION_API static void RegisterTests(ProjectSpace* pProject);
 
+        GLORY_TESTENGINE_EXTENSION_API static void RunTests();
+
     private:
         virtual void Initialize() override;
         virtual void Update() override;
 
-        static void FindTestsRecursive(const std::filesystem::path& rootPath, const std::filesystem::path& path);
+        virtual void OnBroadcastMessage(std::string_view message, void* data) override;
 
+        static void FindTestsRecursive(const std::filesystem::path& rootPath, const std::filesystem::path& path);
 
     private:
         UUID m_OnOpenProjectCallback = 0ull;

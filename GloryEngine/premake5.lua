@@ -39,6 +39,8 @@ premakeDir								= "%{rootDir}/third-party/premake"
 demosDir								= "%{rootDir}/Demos"
 editorBuildDir							= "%{buildDir}/Editor"
 
+EditorTestDir							= "%{editorDir}/Test"
+
 GloryIncludeDir = {}
 GloryIncludeDir["assimp"]				= "%{modulesDir}/GloryASSIMPModelLoader"
 GloryIncludeDir["clusteredrenderer"]	= "%{modulesDir}/GloryClusteredRenderer"
@@ -59,6 +61,8 @@ GloryIncludeDir["enginecore"]			= "%{engineDir}/GloryEngineCore"
 GloryIncludeDir["engine"]				= "%{engineDir}/GloryEngine"
 GloryIncludeDir["serialization"]		= "%{editorDir}/GloryEditorSerialization"
 GloryIncludeDir["editor"]				= "%{editorDir}/GloryEditor"
+GloryIncludeDir["editorTest"]			= "%{EditorTestDir}/GloriousTestApp"
+GloryIncludeDir["testExtension"]		= "%{editorDir}/Extensions/TestEngineExtension"
 GloryIncludeDir["api"]					= "%{editorDir}/GloryAPI"
 GloryIncludeDir["runtime"]				= "%{runtimeDir}/GloryRuntime"
 GloryIncludeDir["runtimeApp"]			= "%{runtimeDir}/Application"
@@ -184,6 +188,10 @@ group ""
 group "Editor/Applications"
 	include "Editor/Applications/Glorious"
 	include "Editor/Applications/GloriousLauncher"
+group ""
+
+group "Editor/Test"
+	include "Editor/Test/GloriousTestApp"
 group ""
 
 group "Editor/Backend"

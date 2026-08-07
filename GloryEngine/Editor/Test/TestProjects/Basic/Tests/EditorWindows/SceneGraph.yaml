@@ -1,0 +1,430 @@
+vars:
+  menuItems:
+  - "//Menu_01/\uF03D  Camera"
+  - "//Menu_01/\uF0EB  Light"
+  - "//Menu_01/\uF031  Text"
+operations:
+# Create new scene
+- op: setRef
+  path: "//Scene Graph##4"
+- op: "itemClick"
+  button: right
+  path: "WINDOWTARGET"
+- op: validatePopupStack
+  sizeGreaterThan: 0
+- op: setRef
+  mode: "popupStack"
+  path: "back"
+- op: mouseMove
+  path: "Create"
+- op: itemClick
+  path: "//Menu_00/New Scene"
+- op: validateSceneManager
+  count: 1
+  scenes:
+  - index: 0
+    childCount: 0
+# Create empty object in scene
+- op: setRef
+  path: "//Scene Graph##4"
+- op: "itemClick"
+  button: right
+  path: "WINDOWTARGET"
+- op: validatePopupStack
+  sizeGreaterThan: 0
+- op: setRef
+  mode: "popupStack"
+  path: "back"
+- op: mouseMove
+  path: "Create"
+- op: itemClick
+  path: "//Menu_00/Empty Object"
+- op: validateSceneManager
+  scenes:
+  - index: 0
+    childCount: 1
+    children:
+    - index: 0
+      componentCount: 1
+      components:
+      - type: Transform
+        properties:
+          Position: [0, 0, 0]
+          Scale: [1, 1, 1]
+# Remove scene
+- op: setRef
+  path: "//Scene Graph##4"
+- op: itemClick
+  path: "$$0/##scenenode"
+  button: right
+- op: validatePopupStack
+  sizeGreaterThan: 0
+- op: setRef
+  mode: "popupStack"
+  path: "back"
+- op: itemClick
+  path: "Remove Scene"
+- op: validateSceneManager
+  count: 0
+# Create scene by creating new empty object
+- op: setRef
+  path: "//Scene Graph##4"
+- op: itemClick
+  path: "WINDOWTARGET"
+  button: right
+- op: validatePopupStack
+  sizeGreaterThan: 0
+- op: setRef
+  mode: "popupStack"
+  path: "back"
+- op: mouseMove
+  path: "Create"
+- op: itemClick
+  path: "//Menu_00/Empty Object"
+- op: validateSceneManager
+  scenes:
+  - index: 0
+    childCount: 1
+    children:
+    - index: 0
+      componentCount: 1
+      components:
+      - type: Transform
+# Delete the entity
+- op: setRef
+  path: "//Scene Graph##4"
+- op: itemClick
+  path: "$$0/##scenenode/$$0/##entitynode"
+  button: right
+- op: validatePopupStack
+  sizeGreaterThan: 0
+- op: setRef
+  mode: "popupStack"
+  path: "back"
+- op: itemClick
+  path: "Delete"
+- op: validateSceneManager
+  scenes:
+  - index: 0
+    childCount: 0
+# Create 2 new scenes
+- op: repeat
+  count: 2
+  operations:
+  - op: setRef
+    path: "//Scene Graph##4"
+  - op: itemClick
+    path: "WINDOWTARGET"
+    button: right
+  - op: validatePopupStack
+    sizeGreaterThan: 0
+  - op: setRef
+    mode: "popupStack"
+    path: "back"
+  - op: mouseMove
+    path: "Create"
+  - op: itemClick
+    path: "//Menu_00/New Scene"
+  - op: validateSceneManager
+    count: "%{repeat.iteration} + 2"
+- op: validateSceneManager
+  count: 3
+  scenes:
+  - index: 0
+    isActive: true
+  - index: 1
+    isActive: false
+  - index: 2
+    isActive: false
+# Change active scene
+- op: setRef
+  path: "//Scene Graph##4"
+- op: itemClick
+  path: "$$1/##scenenode"
+  button: right
+- op: validatePopupStack
+  sizeGreaterThan: 0
+- op: setRef
+  mode: "popupStack"
+  path: "back"
+- op: itemClick
+  path: "Set As Active Scene"
+- op: validateSceneManager
+  count: 3
+  scenes:
+  - index: 0
+    isActive: false
+  - index: 1
+    isActive: true
+  - index: 2
+    isActive: false
+# Remove active scene
+- op: setRef
+  path: "//Scene Graph##4"
+- op: itemClick
+  path: "$$1/##scenenode"
+  button: right
+- op: validatePopupStack
+  sizeGreaterThan: 0
+- op: setRef
+  mode: "popupStack"
+  path: "back"
+- op: itemClick
+  path: "Remove Scene"
+- op: validateSceneManager
+  count: 2
+  scenes:
+  - index: 0
+    isActive: true
+  - index: 1
+    isActive: false
+- op: setRef
+  path: "//Scene Graph##4"
+- op: itemClick
+  path: "$$1/##scenenode"
+  button: right
+- op: validatePopupStack
+  sizeGreaterThan: 0
+- op: setRef
+  mode: "popupStack"
+  path: "back"
+- op: itemClick
+  path: "Remove Scene"
+- op: validateSceneManager
+  count: 1
+  scenes:
+  - index: 0
+    isActive: true
+# Create mesh entity
+- op: setRef
+  path: "//Scene Graph##4"
+- op: itemClick
+  path: "WINDOWTARGET"
+  button: right
+- op: validatePopupStack
+  sizeGreaterThan: 0
+- op: setRef
+  mode: "popupStack"
+  path: "back"
+- op: mouseMove
+  path: "Create"
+- op: mouseMove
+  path: "//Menu_00/New Scene"
+- op: mouseMove
+  path: "//Menu_00/Entity Object"
+- op: itemClick
+  path: "//Menu_01/\uF1B2  Mesh"
+- op: validateSceneManager
+  count: 1
+  scenes:
+  - index: 0
+    isActive: true
+    childCount: 1
+    children:
+    - index: 0
+      componentCount: 2
+      components:
+      - type: Transform
+        properties:
+          Position: [0, 0, 0]
+          Scale: [1, 1, 1]
+      - type: MeshRenderer
+        properties:
+          m_Mesh: 0
+          m_Material: 0
+- op: setRef
+  path: "//Scene Graph##4"
+- op: itemOpen
+  path: "$$0/##scenenode"
+- op: itemClick
+  path: "$$0/##scenenode/$$0/##entitynode"
+- op: setRef
+  path: "//Inspector##3"
+- op: itemInputValue
+  path: "%{entity.uuid}/Object/Name/##value"
+  value: "MyMesh"
+- op: validateSceneManager
+  count: 1
+  scenes:
+  - index: 0
+    isActive: true
+    childCount: 1
+    children:
+    - index: 0
+      name: "MyMesh"
+- op: repeat
+  count: 3
+  operations:
+  - op: itemInputValue
+    path: "%{entity.uuid}/Components/$$0/Position/##value/$$%{repeat.iteration}"
+    value: "%{repeat.iteration} * 10 + 10"
+    mode: number
+  - op: itemInputValue
+    path: "%{entity.uuid}/Components/$$0/Scale/##value/$$%{repeat.iteration}"
+    value: "%{repeat.iteration} + 2"
+    mode: number
+- op: validateSceneManager
+  count: 1
+  scenes:
+  - index: 0
+    isActive: true
+    childCount: 1
+    children:
+    - index: 0
+      componentCount: 2
+      components:
+      - type: Transform
+        properties:
+          Position: [10, 20, 30]
+          Scale: [2, 3, 4]
+      - type: MeshRenderer
+        properties:
+          m_Mesh: 0
+          m_Material: 0
+- op: repeat
+  count: 3
+  operations:
+  - op: itemInputValue
+    path: "%{entity.uuid}/Components/$$0/Position/##value/$$%{repeat.iteration}"
+    value: "0"
+    mode: "number"
+  - op: itemInputValue
+    path: "%{entity.uuid}/Components/$$0/Scale/##value/$$%{repeat.iteration}"
+    value: "1"
+    mode: "number"
+- op: validateSceneManager
+  count: 1
+  scenes:
+  - index: 0
+    isActive: true
+    childCount: 1
+    children:
+    - index: 0
+      componentCount: 2
+      components:
+      - type: Transform
+        properties:
+          Position: [0, 0, 0]
+          Scale: [1, 1, 1]
+      - type: MeshRenderer
+        properties:
+          m_Mesh: 0
+          m_Material: 0
+- op: itemClick
+  path: "%{entity.uuid}/Components/$$1/Mesh/##dropdown"
+- op: validatePopupStack
+  sizeGreaterThan: 0
+- op: setRef
+  mode: "popupStack"
+  path: "back"
+- op: itemInputValue
+  path: "##Search"
+  value: "Cube"
+- op: mouseMoveToPos
+  pos: [0.0, 50.0]
+  mode: relative
+- op: mouseClick
+- op: setRef
+  path: "//Inspector##3"
+- op: itemClick
+  path: "%{entity.uuid}/Components/$$1/Material/##dropdown"
+- op: validatePopupStack
+  sizeGreaterThan: 0
+- op: setRef
+  mode: "popupStack"
+  path: "back"
+- op: itemInputValue
+  path: "##Search"
+  value: "White"
+- op: mouseMoveToPos
+  pos: [0.0, 50.0]
+  mode: relative
+- op: mouseClick
+- op: findAssetUUIDByName
+  name: "Cube\\Cube Material 0"
+  store: "cubeMeshID"
+- op: findAssetUUIDByName
+  name: "White"
+  store: "whiteMaterialID"
+- op: validateSceneManager
+  count: 1
+  scenes:
+  - index: 0
+    isActive: true
+    childCount: 1
+    children:
+    - index: 0
+      componentCount: 2
+      components:
+      - type: Transform
+        properties:
+          Position: [0, 0, 0]
+          Scale: [1, 1, 1]
+      - type: MeshRenderer
+        properties:
+          m_Mesh: "%{cubeMeshID}"
+          m_Material: "%{whiteMaterialID}"
+# Create other non-module entity objects
+- op: repeat
+  count: 3
+  operations:
+  - op: setRef
+    path: "//Scene Graph##4"
+  - op: itemClick
+    path: "WINDOWTARGET"
+    button: right
+  - op: validatePopupStack
+    sizeGreaterThan: 0
+  - op: setRef
+    mode: "popupStack"
+    path: "back"
+  - op: mouseMove
+    path: "Create"
+  - op: mouseMove
+    path: "//Menu_00/New Scene"
+  - op: mouseMove
+    path: "//Menu_00/Entity Object"
+  - op: itemClick
+    path: "%{menuItems[]}"
+- op: validateSceneManager
+  count: 1
+  scenes:
+  - index: 0
+    isActive: true
+    childCount: 4
+    children:
+    - index: 0
+      componentCount: 2
+      components:
+      - type: Transform
+        properties:
+          Position: [0, 0, 0]
+          Scale: [1, 1, 1]
+      - type: MeshRenderer
+        properties:
+          m_Mesh: "%{cubeMeshID}"
+          m_Material: "%{whiteMaterialID}"
+    - index: 1
+      componentCount: 2
+      components:
+      - type: Transform
+        properties:
+          Position: [0, 0, 0]
+          Scale: [1, 1, 1]
+      - type: CameraComponent
+    - index: 2
+      componentCount: 2
+      components:
+      - type: Transform
+        properties:
+          Position: [0, 0, 0]
+          Scale: [1, 1, 1]
+      - type: LightComponent
+    - index: 3
+      componentCount: 2
+      components:
+      - type: Transform
+        properties:
+          Position: [0, 0, 0]
+          Scale: [1, 1, 1]
+      - type: TextComponent
