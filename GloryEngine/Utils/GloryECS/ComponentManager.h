@@ -97,6 +97,11 @@ namespace Glory::Utils::ECS
 			return SparseSet<EntityID, Component>::Get(entity);
 		}
 
+		const Component& Get(EntityID entity) const
+		{
+			return SparseSet<EntityID, Component>::Get(entity);
+		}
+
 		virtual void Clear() override
 		{
 			SparseSet<EntityID, Component>::Clear();

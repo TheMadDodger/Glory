@@ -53,6 +53,7 @@ project "GloryEditorSDL"
 		"%{LibDirs.glory}/Modules/GlorySDLWindow",
 
 		"%{LibDirs.ImGui}",
+		"%{LibDirs.ImGuiTestEngine}",
 	}
 
 	links
@@ -69,6 +70,8 @@ project "GloryEditorSDL"
 		"SDL2",
 		"yaml-cpp",
 		"ImGui",
+		"implot",
+		"ImGuiTestEngine",
 	}
 
 	defines

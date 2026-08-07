@@ -98,7 +98,11 @@ namespace Glory::Editor
 		 * @param action The action to check for.
 		 */
 		static GLORY_EDITOR_API bool IsActionTriggered(std::string_view action);
-
+		/*
+		 * @brief Enable/disable shortcuts completely.
+		 * @param enable State.
+		 */
+		static GLORY_EDITOR_API void EnableShortcuts(bool enable);
 
 	private:
 		/* @brief Clears all shortcuts and actions, used for cleanup. */
@@ -112,6 +116,7 @@ namespace Glory::Editor
 
 	private:
 		friend class MainEditor;
+		static bool m_Enabled;
 		static std::map<std::string_view, Shortcut> m_Shortcuts;
 		static std::vector<ImGuiKey> m_CurrentBlockedKeys;
 		static std::vector<std::string_view> m_TriggeredThisFame;

@@ -179,4 +179,76 @@ namespace YAML
 			return true;
 		}
 	};
+
+	template<>
+	struct convert<glm::uvec2>
+	{
+		static Node encode(const glm::uvec2& v)
+		{
+			Node node;
+			node.push_back(v.x);
+			node.push_back(v.y);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::uvec2& v)
+		{
+			if (!node.IsSequence() || node.size() < 2)
+				return false;
+
+			v.x = node[0].as<uint32_t>();
+			v.y = node[1].as<uint32_t>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<glm::uvec3>
+	{
+		static Node encode(const glm::uvec3& v)
+		{
+			Node node;
+			node.push_back(v.x);
+			node.push_back(v.y);
+			node.push_back(v.z);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::uvec3& v)
+		{
+			if (!node.IsSequence() || node.size() < 3)
+				return false;
+
+			v.x = node[0].as<uint32_t>();
+			v.y = node[1].as<uint32_t>();
+			v.z = node[2].as<uint32_t>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<glm::uvec4>
+	{
+		static Node encode(const glm::uvec4& v)
+		{
+			Node node;
+			node.push_back(v.x);
+			node.push_back(v.y);
+			node.push_back(v.z);
+			node.push_back(v.w);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::uvec4& v)
+		{
+			if (!node.IsSequence() || node.size() < 4)
+				return false;
+
+			v.x = node[0].as<uint32_t>();
+			v.y = node[1].as<uint32_t>();
+			v.z = node[2].as<uint32_t>();
+			v.w = node[3].as<uint32_t>();
+			return true;
+		}
+	};
 }

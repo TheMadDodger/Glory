@@ -24,7 +24,7 @@ namespace Glory::Editor
 		return m_IsFocused;
 	}
 
-	void EditorWindow::RenderGUI()
+	void EditorWindow::DrawWindow()
 	{
 		ImGuiWindowFlags window_flags = m_WindowFlags | (m_Resizeable? 0 : ImGuiWindowFlags_::ImGuiWindowFlags_NoResize);
 		ImGui::SetNextWindowSize(m_WindowDimensions);

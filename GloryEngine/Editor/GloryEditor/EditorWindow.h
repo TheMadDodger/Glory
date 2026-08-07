@@ -35,8 +35,7 @@ namespace Glory::Editor
 		virtual void Update() {}
 		virtual void Draw() {}
 
-	private:
-		void RenderGUI();
+		GLORY_EDITOR_API virtual void DrawWindow();
 
 	protected:
 		friend class MainEditor;

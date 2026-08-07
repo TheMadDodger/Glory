@@ -45,6 +45,7 @@ project "GenericAudioImporter"
 
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.implot}",
+		"%{LibDirs.ImGuiTestEngine}",
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
 	}
@@ -60,6 +61,8 @@ project "GenericAudioImporter"
 		"GloryUtilsVersion",
 
 		"ImGui",
+		"implot",
+		"ImGuiTestEngine",
 		"yaml-cpp",
 	}
 

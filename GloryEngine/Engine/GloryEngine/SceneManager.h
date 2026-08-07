@@ -54,6 +54,7 @@ namespace Glory
 		GLORY_ENGINE_API size_t OpenScenesCount();
 		GLORY_ENGINE_API GScene* GetOpenScene(size_t index);
 		GLORY_ENGINE_API GScene* GetOpenScene(UUID uuid);
+		GLORY_ENGINE_API GScene* GetOpenScene(std::string_view name);
 		GLORY_ENGINE_API size_t GetSceneIndex(UUID uuid) const;
 		GLORY_ENGINE_API size_t ExternalSceneCount();
 		GLORY_ENGINE_API GScene* GetExternalScene(size_t index);

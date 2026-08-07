@@ -44,6 +44,7 @@ project "SDLImageImporter"
 		"%{DepsLibDir}",
 
 		"%{LibDirs.ImGui}",
+		"%{LibDirs.ImGuiTestEngine}",
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
 	}
@@ -62,6 +63,8 @@ project "SDLImageImporter"
 		"GloryUtilsVersion",
 
 		"ImGui",
+		"implot",
+		"ImGuiTestEngine",
 		"yaml-cpp",
 	}
 

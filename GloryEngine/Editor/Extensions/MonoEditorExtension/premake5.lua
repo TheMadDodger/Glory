@@ -50,6 +50,7 @@ project "MonoEditorExtension"
 
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.implot}",
+		"%{LibDirs.ImGuiTestEngine}",
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
 
@@ -69,6 +70,8 @@ project "MonoEditorExtension"
 		"GloryUtilsVersion",
 
 		"ImGui",
+		"implot",
+		"ImGuiTestEngine",
 		"yaml-cpp",
 		"mono-2.0-sgen",
 		"MonoPosixHelper",

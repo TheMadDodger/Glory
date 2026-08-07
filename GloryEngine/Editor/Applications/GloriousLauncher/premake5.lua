@@ -51,6 +51,7 @@ project "GloriousLauncher"
 
 		"%{LibDirs.glory}",
 		"%{LibDirs.ImGui}",
+		"%{LibDirs.ImGuiTestEngine}",
 		"%{LibDirs.yaml_cpp}",
 	}
 
@@ -62,6 +63,8 @@ project "GloriousLauncher"
 		"GloryUtils",
 
 		"ImGui",
+		"implot",
+		"ImGuiTestEngine",
 		"yaml-cpp",
 		"tinyfiledialogs",
 		"SDL2",

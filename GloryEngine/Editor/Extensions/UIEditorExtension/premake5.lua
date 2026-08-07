@@ -47,6 +47,7 @@ project "UIEditorExtension"
 		"%{DepsLibDir}",
 
 		"%{LibDirs.ImGui}",
+		"%{LibDirs.ImGuiTestEngine}",
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
 	}
@@ -64,6 +65,8 @@ project "UIEditorExtension"
 		"GloryUtilsVersion",
 
 		"ImGui",
+		"implot",
+		"ImGuiTestEngine",
 		"yaml-cpp",
 	}
 

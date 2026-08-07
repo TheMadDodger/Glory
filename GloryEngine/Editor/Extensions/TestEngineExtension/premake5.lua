@@ -1,46 +1,44 @@
-project "GloryEditorOGL"
+project "TestEngineExtension"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++20"
 	staticruntime "Off"
 
-	targetdir ("%{modulesOutDir}/GloryOpenGLGraphics/Editor/Backend")
+	targetdir ("%{engineOutDir}/Extensions")
 	objdir ("%{outputDir}")
 
 	files
 	{
 		"**.h",
 		"**.cpp",
-		"%{SubmodoleDirs.ImGui}/backends/imgui_impl_opengl3.h",
-		"%{SubmodoleDirs.ImGui}/backends/imgui_impl_opengl3.cpp",
 		"premake5.lua"
 	}
 
 	vpaths
 	{
-
 	}
 
 	includedirs
 	{
 		"%{DepsIncludeDir}",
 
+		"%{GloryIncludeDir.serialization}",
 		"%{GloryIncludeDir.enginecore}",
 		"%{GloryIncludeDir.engine}",
-		"%{GloryIncludeDir.opengl}",
-		"%{GloryIncludeDir.editor}",
 		"%{GloryIncludeDir.threads}",
+		"%{GloryIncludeDir.jobs}",
+		"%{GloryIncludeDir.editor}",
+		"%{GloryIncludeDir.ui}",
 
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.ImGuiTestEngine}",
+		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.ECS}",
 		"%{IncludeDir.Reflect}",
 		"%{IncludeDir.Version}",
 		"%{IncludeDir.Utils}",
-		"%{IncludeDir.ECS}",
 		"%{IncludeDir.FA}",
-
-		"%{SubmodoleDirs.ImGui}/backends/",
 
 		"%{rapidjson}",
 	}
@@ -49,10 +47,9 @@ project "GloryEditorOGL"
 	{
 		"%{DepsLibDir}",
 
-		"%{LibDirs.glory}",
-		"%{LibDirs.glory}/Modules/GloryOpenGLGraphics",
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.ImGuiTestEngine}",
+		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
 	}
 
@@ -61,23 +58,22 @@ project "GloryEditorOGL"
 		"GloryEngineCore",
 		"GloryEngine",
 		"GloryEditor",
-		"GloryOpenGLGraphics",
+		"GloryEditorSerialization",
+		"GloryUIRenderer",
 		"GloryECS",
 		"GloryReflect",
-		"GloryUtilsVersion",
 		"GloryUtils",
+		"GloryUtilsVersion",
 
-		"yaml-cpp",
 		"ImGui",
 		"implot",
 		"ImGuiTestEngine",
+		"yaml-cpp",
 	}
 
 	defines
 	{
-		"GLORY_EDITOROGL_EXPORTS",
-		"GLM_FORCE_RADIANS",
-		"GLM_FORCE_DEPTH_ZERO_TO_ONE"
+		"GLORY_TESTENGINE_EXTENSION_EXPORTS"
 	}
 
 	filter "system:windows"
@@ -96,14 +92,9 @@ project "GloryEditorOGL"
 		defines "_DEBUG"
 		symbols "On"
 
-		links "glew32d"
-
 		links
 		{
-			"glew32d",
-			"spirv-cross-cd",
-			"spirv-cross-cored",
-			"spirv-cross-glsld",
+			"efsw-static-debug"
 		}
 
 	filter "configurations:Release"
@@ -113,8 +104,5 @@ project "GloryEditorOGL"
 
 		links
 		{
-			"glew32",
-			"spirv-cross-c",
-			"spirv-cross-core",
-			"spirv-cross-glsl",
+			"efsw-static-release"
 		}

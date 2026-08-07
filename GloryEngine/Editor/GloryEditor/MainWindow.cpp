@@ -44,7 +44,7 @@ namespace Glory::Editor
         const size_t numWindows = m_pActiveEditorWindows.size();
         for (size_t i = 0; i < numWindows; ++i)
         {
-            m_pActiveEditorWindows[i]->RenderGUI();
+            m_pActiveEditorWindows[i]->DrawWindow();
         }
     }
 

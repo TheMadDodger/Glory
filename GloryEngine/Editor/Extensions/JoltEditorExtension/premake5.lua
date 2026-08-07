@@ -51,6 +51,7 @@ project "JoltEditorExtension"
 
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.implot}",
+		"%{LibDirs.ImGuiTestEngine}",
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
 
@@ -71,6 +72,8 @@ project "JoltEditorExtension"
 		"GloryUtils",
 
 		"ImGui",
+		"implot",
+		"ImGuiTestEngine",
 		"yaml-cpp",
 	}
 

@@ -260,7 +260,7 @@ namespace Glory::Editor
 			change = true;
 		}
 
-		ImGui::BeginChild("scrollregion");
+		ImGui::BeginChild("##scrollregion");
 		const float rowHeight = 64.0f;
 		ImGuiListClipper clipper;
 		clipper.Begin(items.size(), rowHeight);
@@ -272,7 +272,7 @@ namespace Glory::Editor
 
 			for (auto it = start; it != end; ++it)
 			{
-				ImGui::PushID(*it);
+				ImGui::PushID(std::to_string(*it).c_str());
 				const std::string name = EditorAssetDatabase::GetAssetName(*it);
 				if (ImGui::Selectable("##select", *it == *value, ImGuiSelectableFlags_AllowOverlap, { 0.0f, rowHeight }))
 				{

@@ -22,7 +22,7 @@ public:\
 	inline static const TypeData* GetTypeData()\
 	{\
 		static const char* typeNameString = STRINGIZE(typeName);\
-		static const uint32_t TYPE_HASH = Reflect::Hash<typeName>();\
+		static const uint32_t TYPE_HASH = Hash();\
 		static const int NUM_ARGS = NARGS(__VA_ARGS__);\
 		static const FieldData pFields[] = {\
 			FOR_EACH(REFLECT_FIELD_INFO, __VA_ARGS__)\
@@ -42,6 +42,13 @@ GET_TYPE x GET_NAME x;
 #define REFLECT_FIELD_INFO_DESCRIPTIVE(x)\
 FieldData(Reflect::Hash(typeid(GET_TYPE x)), STRINGIZE(GET_NAME x), STRINGIZE(GET_TYPE x), offsetof(TypeName, GET_NAME x), sizeof(GET_TYPE x), GET_DISPLAYNAME x, GET_DESCRIPTION x),
 
+#define REFLECTABLE_TYPE_HASH(x)\
+inline static const uint32_t Hash()\
+{\
+	static const uint32_t TYPE_HASH = Reflect::Hash<x>(); \
+	return TYPE_HASH;\
+}\
+
 #define REFLECTABLE_TYPEDATA_DESCRIPTIVE(typeName, bufferOffset, bufferSize, ...)\
 FOR_EACH(REFLECTABLE_FIELD_DESCRIPTIVE, __VA_ARGS__)\
 typedef typeName TypeName;\
@@ -49,7 +56,7 @@ public:\
 	inline static const TypeData* GetTypeData()\
 	{\
 		static const char* typeNameString = STRINGIZE(typeName);\
-		static const uint32_t TYPE_HASH = Reflect::Hash<typeName>();\
+		static const uint32_t TYPE_HASH = Hash();\
 		static const int NUM_ARGS = NARGS(__VA_ARGS__);\
 		static const FieldData pFields[] = {\
 			FOR_EACH(REFLECT_FIELD_INFO_DESCRIPTIVE, __VA_ARGS__)\
@@ -59,6 +66,7 @@ public:\
 	}
 
 #define REFLECTABLE(typeName, ...)\
+REFLECTABLE_TYPE_HASH(typeName)\
 REFLECTABLE_TYPEDATA(typeName, -1, 0, __VA_ARGS__)\
 	inline static int DataBufferOffset()\
 	{\
@@ -70,6 +78,7 @@ REFLECTABLE_TYPEDATA(typeName, -1, 0, __VA_ARGS__)\
 	}
 
 #define REFLECTABLE_DESCRIPTIVE(typeName, ...)\
+REFLECTABLE_TYPE_HASH(typeName)\
 REFLECTABLE_TYPEDATA_DESCRIPTIVE(typeName, -1, 0, __VA_ARGS__)\
 	inline static int DataBufferOffset()\
 	{\
@@ -81,6 +90,7 @@ REFLECTABLE_TYPEDATA_DESCRIPTIVE(typeName, -1, 0, __VA_ARGS__)\
 	}
 
 #define REFLECTABLE_WITH_BUFFER(typeName, bufferMember, bufferSize, ...)\
+REFLECTABLE_TYPE_HASH(typeName)\
 REFLECTABLE_TYPEDATA(typeName, offsetof(typeName, bufferMember), bufferSize, __VA_ARGS__);\
 	inline static int DataBufferOffset()\
 	{\

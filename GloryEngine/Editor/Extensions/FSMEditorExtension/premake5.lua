@@ -47,6 +47,7 @@ project "FSMEditorExtension"
 
 		"%{LibDirs.ImGui}",
 		"%{LibDirs.implot}",
+		"%{LibDirs.ImGuiTestEngine}",
 		"%{LibDirs.glory}",
 		"%{LibDirs.yaml_cpp}",
 	}
@@ -64,6 +65,8 @@ project "FSMEditorExtension"
 		"GloryUtilsVersion",
 
 		"ImGui",
+		"implot",
+		"ImGuiTestEngine",
 		"yaml-cpp",
 	}
 
