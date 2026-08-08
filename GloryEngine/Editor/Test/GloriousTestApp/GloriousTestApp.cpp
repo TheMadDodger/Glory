@@ -18,6 +18,8 @@ int main(int argc, char* argv[])
 {
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
+    int result = 0;
+
     {
         Glory::WindowCreateInfo windowCreateInfo;
         windowCreateInfo.WindowName = "GloriousTestApp";
@@ -81,12 +83,13 @@ int main(int argc, char* argv[])
 
         Glory::Editor::BaseEditorExtension* pTestExtension = editorLoader.GetExtension("TestEngineExtension");
         GLORY_ASSERT(pTestExtension, "TestEngineExtension not loaded!");
-        pTestExtension->BroadcastMessage("RUNTESTS", nullptr);
+        bool quitAfterFinish = true;
+        pTestExtension->BroadcastMessage("RUNTESTS", &quitAfterFinish);
 
-        application.Run();
+        result = application.Run();
     }
 
     _CrtDumpMemoryLeaks();
 
-    return 0;
+    return result;
 }

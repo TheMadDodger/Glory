@@ -29,7 +29,7 @@ namespace Glory::Editor
 
         GLORY_TESTENGINE_EXTENSION_API static void RegisterTests(ProjectSpace* pProject);
 
-        GLORY_TESTENGINE_EXTENSION_API static void RunTests();
+        GLORY_TESTENGINE_EXTENSION_API static void RunTests(bool quitAfterFinish);
 
     private:
         virtual void Initialize() override;
@@ -41,5 +41,13 @@ namespace Glory::Editor
 
     private:
         UUID m_OnOpenProjectCallback = 0ull;
+        static bool m_IsRunning;
+        static bool m_ShouldQuitAfterFinish;
+
+        struct
+        {
+            int CountTested;
+            int CountSucceeded;
+        } m_TestResults;
     };
 }

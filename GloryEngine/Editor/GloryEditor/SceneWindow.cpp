@@ -58,12 +58,18 @@ namespace Glory::Editor
 		SceneManager* pScenes = EditorApplication::GetInstance()->GetEngine()->GetSceneManager();
 		pScenes->AddExternalScene(m_pPreviewScene);
 
-		EditorApplication::GetInstance()->GetEngine()->ActiveRenderer()->SubmitCamera(m_SceneCamera.m_Camera);
+		Renderer* pRenderer = EditorApplication::GetInstance()->GetEngine()->ActiveRenderer();
+
+		if (pRenderer)
+			pRenderer->SubmitCamera(m_SceneCamera.m_Camera);
 	}
 
 	void SceneWindow::OnClose()
 	{
-		EditorApplication::GetInstance()->GetEngine()->ActiveRenderer()->UnsubmitCamera(m_SceneCamera.m_Camera);
+		Renderer* pRenderer = EditorApplication::GetInstance()->GetEngine()->ActiveRenderer();
+
+		if (pRenderer)
+			pRenderer->UnsubmitCamera(m_SceneCamera.m_Camera);
 
 		Gizmos::Clear();
 		m_SceneCamera.Cleanup();
