@@ -125,6 +125,12 @@ namespace Glory::Utils
 		m_State.m_CurrentLine = source.line();
 	}
 
+	void Tester::SetFunctionName(const std::string_view name)
+	{
+		if (m_State.m_CurrentFunction.empty())
+			m_State.m_CurrentFunction = name;
+	}
+
 	void Tester::VerifyInternal(const char* expression, bool result)
 	{
 		assert(m_pCurrentTest != nullptr);

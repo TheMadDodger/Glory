@@ -192,6 +192,7 @@ group ""
 
 group "Editor/Test"
 	include "Editor/Test/GloriousTestApp"
+	include "Editor/Test/GloriousEditorTest"
 group ""
 
 group "Editor/Backend"
