@@ -36,16 +36,19 @@ jobs:
     - name: Checkout LFS objects
       run: git lfs checkout
 
-    - name: Download mono
+    - if: ${{ contains(runner.labels, 'no-mono') != 'true' }}
+      name: Download mono
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: curl "https://download.mono-project.com/archive/6.12.0/windows-installer/mono-6.12.0.182-x64-0.msi" -o mono.msi
 
-    - name: Install mono
+    - if: ${{ contains(runner.labels, 'no-mono') != 'true' }}
+      name: Install mono
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: |
         .\install-mono.ps1
 
-    - name: Install Vulkan SDK
+    - if: ${{ contains(runner.labels, 'no-vulkan') != 'true' }}
+      name: Install Vulkan SDK
       uses: jakoch/install-vulkan-sdk-action@v1
       with:
         vulkan_version: 1.4.321.1
