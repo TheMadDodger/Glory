@@ -12,6 +12,8 @@ namespace Glory::Editor
 
 	private:
 		virtual void OnGUI() override;
+		virtual void OnOpen() override;
+		virtual void OnClose() override;
 		void CreateEditor();
 
 		void OnSelectionChange();

@@ -1,0 +1,17 @@
+m_LinesPipeline: 19
+m_SSAOPrepassPipeline: 21
+m_SSAOBlurPipeline: 4
+m_TextPipeline: 23
+m_DisplayCopyPipeline: 30
+m_SkyboxPipeline: 33
+m_ShadowsPipeline: 38
+m_ShadowsTransparentTexturePipeline: 39
+m_ClusterPipeline: 44
+m_ClusterCullLightPipeline: 45
+m_PickingPipeline: 47
+m_SSAOPostpassPipeline: 49
+m_SSAOVisPipeline: 51
+m_ObjectIDVisPipeline: 50
+m_DepthVisPipeline: 52
+m_LightComplexityVisPipeline: 54
+EditorVersion: 0.6.0

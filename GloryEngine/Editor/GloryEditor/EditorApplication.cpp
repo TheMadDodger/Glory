@@ -233,7 +233,7 @@ namespace Glory::Editor
 		m_pEngine->Cleanup();
 	}
 
-	void EditorApplication::Run()
+	int EditorApplication::Run()
 	{
 		GloryAPI::FetchEditorVersion(VersionCheck);
 
@@ -278,7 +278,7 @@ namespace Glory::Editor
 				// End the current frame
 				m_pEngine->EndFrame();
 			}
-			return;
+			return m_ReturnValue;
 		}
 
 		while (m_Running)
@@ -350,11 +350,14 @@ namespace Glory::Editor
 
 			if (wasCapture) EndCapture();
 		}
+
+		return m_ReturnValue;
 	}
 
-	void EditorApplication::Quit()
+	void EditorApplication::Quit(int returnValue)
 	{
 		m_Running = false;
+		m_ReturnValue = returnValue;
 	}
 
 	EditorPlatform& EditorApplication::GetEditorPlatform()

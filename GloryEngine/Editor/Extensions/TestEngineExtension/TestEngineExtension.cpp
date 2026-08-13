@@ -17,12 +17,14 @@
 
 #include <imgui_te_engine.h>
 #include <imgui_te_context.h>
+#include <imgui_te_exporters.h>
 
 #include <yaml-cpp/yaml.h>
 #include <imgui_te_utils.h>
 #include <imgui_te_internal.h>
 
 #include <efsw/efsw.hpp>
+#include <GloryAssert.h>
 
 EXTENSION_CPP(TestEngineEditorExtension)
 
@@ -43,6 +45,7 @@ namespace Glory::Editor
 	static bool ShouldRefreshTests = false;
 
 	static constexpr const char* Shortcut_Window_TestEngine = "Open Test Engine";
+	static constexpr std::string_view RunTestsMessage = "RUNTESTS";
 
 	class TestFilesWatcher : public efsw::FileWatchListener
 	{
@@ -62,6 +65,9 @@ namespace Glory::Editor
 	};
 
 	static TestFilesWatcher Watcher;
+
+	bool TestEngineEditorExtension::m_IsRunning = false;
+	bool TestEngineEditorExtension::m_ShouldQuitAfterFinish = false;
 
 	TestEngineEditorExtension::TestEngineEditorExtension()
 	{
@@ -110,9 +116,30 @@ namespace Glory::Editor
 
 	void TestEngineEditorExtension::Update()
 	{
-		if (!ShouldRefreshTests) return;
-		TestEngineEditorExtension::RegisterTests(ProjectSpace::GetOpenProject());
-		ShouldRefreshTests = false;
+		if (ShouldRefreshTests)
+		{
+			TestEngineEditorExtension::RegisterTests(ProjectSpace::GetOpenProject());
+			ShouldRefreshTests = false;
+		}
+
+		EditorApplication* pApp = EditorApplication::GetInstance();
+		if (TestEngine && m_IsRunning && ImGuiTestEngine_IsTestQueueEmpty(TestEngine))
+		{
+			ImGuiTestEngine_GetResult(TestEngine, m_TestResults.CountTested, m_TestResults.CountSucceeded);
+			ImGuiTestEngine_PrintResultSummary(TestEngine);
+
+			if (m_ShouldQuitAfterFinish)
+				pApp->Quit(m_TestResults.CountTested - m_TestResults.CountSucceeded);
+
+			m_IsRunning = false;
+		}
+	}
+
+	void TestEngineEditorExtension::OnBroadcastMessage(std::string_view message, void* data)
+	{
+		if (message != RunTestsMessage) return;
+		const bool quitAfterFinish = data ? *reinterpret_cast<bool*>(data) : false;
+		RunTests(quitAfterFinish);
 	}
 
 	void TestEngineEditorExtension::RegisterTests(ProjectSpace* pProject)
@@ -163,6 +190,19 @@ namespace Glory::Editor
 			};
 			pTest->UserData = reinterpret_cast<void*>(i);
 		}
+	}
+
+	void TestEngineEditorExtension::RunTests(bool quitAfterFinish)
+	{
+		GLORY_ASSERT(TestEngine != nullptr, "Missing imgui test engine!");
+
+		auto pApp = EditorApplication::GetInstance();
+		pApp->GetMainEditor().GetWindow<TestEngineWindow>();
+
+		ImGuiTestEngine_QueueTests(TestEngine, ImGuiTestGroup_Unknown, "all");
+
+		m_ShouldQuitAfterFinish = quitAfterFinish;
+		m_IsRunning = true;
 	}
 
 	void TestEngineEditorExtension::FindTestsRecursive(const std::filesystem::path& rootPath, const std::filesystem::path& path)

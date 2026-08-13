@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "ProjectLock.h"
 
 namespace Glory::Editor

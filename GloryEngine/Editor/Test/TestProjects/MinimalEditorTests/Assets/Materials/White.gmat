@@ -1,0 +1,14 @@
+Properties:
+  Color:
+    DisplayName: Color
+    TypeHash: 1650774632
+    Value:
+      - 1
+      - 1
+      - 1
+      - 1
+  Shininess:
+    ShaderName: Shininess
+    TypeHash: 2776867809
+    Value: 0
+Pipeline: 9

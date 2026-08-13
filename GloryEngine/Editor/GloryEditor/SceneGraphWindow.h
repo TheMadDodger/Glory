@@ -18,6 +18,8 @@ namespace Editor
 
 	private:
 		virtual void OnGUI() override;
+		virtual void OnOpen() override;
+		virtual void OnClose() override;
 
 		void SceneDropdown(size_t index, GScene* pScene, bool isActive);
 		bool ChildrenList(const Utils::BitSet& forceOpen, size_t index, Entity& entity);
@@ -36,7 +38,7 @@ namespace Editor
 
 		std::vector<UUID> m_SearchResultExcludeCache;
 
-		UUID m_SelectionChanged;
+		UUID m_SelectionChanged = 0ull;
 		bool m_SelectionNeedsFilter;
 		std::vector<Utils::BitSet> m_ForceOpen;
 	};

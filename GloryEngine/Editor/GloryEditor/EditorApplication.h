@@ -47,7 +47,7 @@ namespace Editor
 
 		GLORY_EDITOR_API void Start(const std::string& projectPath);
 		GLORY_EDITOR_API void Destroy();
-		GLORY_EDITOR_API void Run();
+		GLORY_EDITOR_API int Run();
 
 		GLORY_EDITOR_API EditorPlatform& GetEditorPlatform();
 		GLORY_EDITOR_API MainEditor& GetMainEditor();
@@ -60,7 +60,7 @@ namespace Editor
 		GLORY_EDITOR_API void TogglePause();
 		GLORY_EDITOR_API void TickFrame();
 		GLORY_EDITOR_API bool IsPaused();
-		GLORY_EDITOR_API void Quit();
+		GLORY_EDITOR_API void Quit(int returnValue=0);
 		GLORY_EDITOR_API void TryToQuit();
 		GLORY_EDITOR_API Glory::IEngine* GetEngine();
 		GLORY_EDITOR_API EditorResourceLoader& GetResourceLoader();
@@ -115,6 +115,7 @@ namespace Editor
 		std::vector<BaseEditorExtension*> m_pExtensions;
 		EditorMode m_Mode = EditorMode::M_Edit;
 		bool m_Running = false;
+		int m_ReturnValue = 0;
 		std::atomic_bool m_IsStarting = false;
 
 		bool m_MakeCapture = false;

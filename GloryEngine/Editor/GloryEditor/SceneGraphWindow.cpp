@@ -31,12 +31,10 @@ namespace Glory::Editor
 
 	SceneGraphWindow::SceneGraphWindow() : EditorWindowTemplate("Scene Graph", 300.0f, 680.0f)
 	{
-		m_SelectionChanged = Selection::SubscribeToSelectionChange([this]() { m_SelectionNeedsFilter = true; });
 	}
 
 	SceneGraphWindow::~SceneGraphWindow()
 	{
-		Selection::UnsubscribeToSelectionChange(m_SelectionChanged);
 	}
 
 	void SceneGraphWindow::OnGUI()
@@ -152,6 +150,18 @@ namespace Glory::Editor
 		ImGui::PopStyleVar();
 
 		m_NeedsFilter = false;
+	}
+
+	void SceneGraphWindow::OnOpen()
+	{
+		m_SelectionChanged = Selection::SubscribeToSelectionChange([this]() { m_SelectionNeedsFilter = true; });
+		m_SelectionNeedsFilter = true;
+	}
+
+	void SceneGraphWindow::OnClose()
+	{
+		if (m_SelectionChanged)
+			Selection::UnsubscribeToSelectionChange(m_SelectionChanged);
 	}
 
 	void SceneGraphWindow::SceneDropdown(size_t index, GScene* pScene, bool isActive)

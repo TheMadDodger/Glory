@@ -15,6 +15,11 @@ namespace Glory::Editor
 		m_SetContextProc = proc;
 	}
 
+	void BaseEditorExtension::BroadcastMessage(std::string_view message, void* data)
+	{
+		OnBroadcastMessage(message, data);
+	}
+
 	void BaseEditorExtension::SetCurrentContext()
 	{
 		if (m_SetContextProc == NULL) return;

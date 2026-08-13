@@ -1,0 +1,6 @@
+Modules:
+  - GlorySDLWindow
+  - GloryRenderer
+  - GloryOpenGLGraphics
+  - GlorySDLInput
+EditorVersion: 0.6.0

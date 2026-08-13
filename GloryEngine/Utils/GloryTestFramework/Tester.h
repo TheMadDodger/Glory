@@ -85,6 +85,11 @@ namespace Glory::Utils
 		 */
 		void SetState(const std::source_location& source, bool fail=false);
 		/**
+		 * @brief Overwrite current test state function name.
+		 * @param name Current function name of test.
+		 */
+		void SetFunctionName(const std::string_view name);
+		/**
 		 * @brief Verify an expressions result and report it.
 		 * @param expression Expression string.
 		 * @param result Result of the expression.

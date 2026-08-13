@@ -20,17 +20,31 @@ env:
   BUILD_CONFIGURATION: Release
 
   BUILD_PATH: ./GloryEngine/Build/Release/x64/Launcher
-  TEST_PATH: ./bin/Engine/Release/x64/Tests
+  UTIL_TEST_PATH: ./bin/Engine/Release/x64/Tests
+  EDITOR_TEST_PATH: ./bin/Engine/Release/x64/Tests/Editor
 
 permissions:
   contents: read
 
 jobs:
   build-editor-win64:
-    runs-on: windows-2022
+    runs-on: [self-hosted, windows]
+    # runs-on: windows-2022
     environment: 'dev'
 
     steps:
+    - name: Load .env
+      shell: bash
+      run: |
+        if [ -f ../../../.env ]; then
+          while IFS= read -r line || [ -n "$line" ]; do
+            [[ "$line" =~ ^#.*$ ]] || [ -z "$line" ] && continue
+            echo "$line" >> $GITHUB_ENV
+          done < ../../../.env
+        else
+          echo "Relative .env file not found"
+        fi
+
     - name: Checkout repo and submodules
       uses: actions/checkout@v3
       with:
@@ -40,16 +54,24 @@ jobs:
     - name: Checkout LFS objects
       run: git lfs checkout
 
-    - name: Download mono
-      working-directory: ${{env.SOLUTION_FILE_PATH}}
-      run: curl "https://download.mono-project.com/archive/6.12.0/windows-installer/mono-6.12.0.182-x64-0.msi" -o mono.msi
-
     - name: Install mono
       working-directory: ${{env.SOLUTION_FILE_PATH}}
+      shell: bash
+      run: ./install-mono.sh
+
+    - name: Check vulkan install
+      shell: bash
       run: |
-        .\install-mono.ps1
+          if [ -d "/C/VulkanSDK/1.4.321.1" ]; then
+            echo "Vulkan SDK found, skipping installation..."
+            echo "SKIP_VULKAN=true" >> $GITHUB_ENV
+          else
+            echo "Vulkan SDK not found, vulkan will be installed..."
+            echo "SKIP_VULKAN=false" >> $GITHUB_ENV
+          fi
 
     - name: Install Vulkan SDK
+      if: env.SKIP_VULKAN != 'true'
       uses: jakoch/install-vulkan-sdk-action@v1
       with:
         vulkan_version: 1.4.321.1
@@ -72,13 +94,13 @@ jobs:
         path: ${{env.SOLUTION_FILE_PATH}}/Dependencies
         key: ${{ runner.os }}-dependencies
 
-    - if: ${{ steps.cache-dependencies-restore.outputs.cache-hit != 'true' }}
+    - if: steps.cache-dependencies-restore.outputs.cache-hit != 'true'
       name: Install dependencies
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       shell: bash
       run: ./install-dependencies.sh Release
 
-    - if: ${{ steps.cache-dependencies-restore.outputs.cache-hit != 'true' }}
+    - if: steps.cache-dependencies-restore.outputs.cache-hit != 'true'
       name: Cache dependencies
       id: cache-dependencies-save
       uses: actions/cache/save@v3
@@ -92,10 +114,6 @@ jobs:
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: ${{env.PREMAKE_PATH}} ${{env.PREMAKE_ARG}}
 
-    - name: Restore NuGet packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
-
     - name: Build
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x64 .
@@ -105,11 +123,18 @@ jobs:
       with:
         python-version: 3.8
 
-    - name: Test
+    - name: Util Tests
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       env:
         PYTHONUNBUFFERED: "1"
-      run: python RunTests.py --path=${{env.TEST_PATH}}
+      run: python RunTests.py --path=${{env.UTIL_TEST_PATH}}
+
+    - if: env.GRAPHICS_AVAILABLE == 'true'
+      name: Editor Tests
+      working-directory: ${{env.SOLUTION_FILE_PATH}}
+      env:
+        PYTHONUNBUFFERED: "1"
+      run: python RunTests.py --path=${{env.EDITOR_TEST_PATH}}
 
     - name: Upload editor Artifact
       uses: actions/upload-artifact@v4

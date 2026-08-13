@@ -660,7 +660,7 @@ namespace Glory::Editor
 	UUID EditorAssetDatabase::FindAssetUUID(const std::string& path)
 	{
 		std::string fixedPath = path;
-		std::replace(fixedPath.begin(), fixedPath.end(), '/', '\\');
+		FixAssetPathSlashes(fixedPath);
 
 		std::filesystem::path absolutePath = fixedPath;
 		if (!absolutePath.is_absolute() && fixedPath[0] != '.')
@@ -792,6 +792,11 @@ namespace Glory::Editor
 		}
 	}
 
+	void EditorAssetDatabase::FixAssetPathSlashes(std::string& path)
+	{
+		std::replace(path.begin(), path.end(), '/', '\\');
+	}
+
 	std::filesystem::path EditorAssetDatabase::GetAbsoluteAssetPath(const std::string& path)
 	{
 		std::filesystem::path absolutePath = path;
@@ -875,6 +880,8 @@ namespace Glory::Editor
 		auto children = value["Children"];
 
 		std::string pathString = path.string();
+		FixAssetPathSlashes(pathString);
+
 		if (FindAssetUUID(pathString))
 		{
 			bool allSubAssetsFound = true;
