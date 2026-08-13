@@ -20,7 +20,8 @@ env:
   BUILD_CONFIGURATION: Release
 
   BUILD_PATH: ./GloryEngine/Build/Release/x64/Launcher
-  TEST_PATH: ./bin/Engine/Release/x64/Tests
+  UTIL_TEST_PATH: ./bin/Engine/Release/x64/Tests
+  EDITOR_TEST_PATH: ./bin/Engine/Release/x64/Tests/Editor
 
 permissions:
   contents: read
@@ -122,11 +123,17 @@ jobs:
       with:
         python-version: 3.8
 
-    - name: Test
+    - name: Util Tests
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       env:
         PYTHONUNBUFFERED: "1"
-      run: python RunTests.py --path=${{env.TEST_PATH}}
+      run: python RunTests.py --path=${{env.UTIL_TEST_PATH}}
+
+    - name: Editor Tests
+      working-directory: ${{env.SOLUTION_FILE_PATH}}
+      env:
+        PYTHONUNBUFFERED: "1"
+      run: python RunTests.py --path=${{env.EDITOR_TEST_PATH}}
 
     - name: Upload editor Artifact
       uses: actions/upload-artifact@v4

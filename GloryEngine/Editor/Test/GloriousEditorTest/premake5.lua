@@ -3,9 +3,9 @@ project "GloriousEditorTest"
 	cppdialect "C++23"
 	staticruntime "Off"
 	kind "ConsoleApp"
-	debugdir "%{engineOutDir}/Tests"
+	debugdir "%{engineOutDir}/Tests/Editor"
 
-	targetdir ("%{engineOutDir}/Tests")
+	targetdir ("%{engineOutDir}/Tests/Editor")
 	objdir ("%{outputDir}")
 
 	files

@@ -65,7 +65,7 @@ project "GloriousTestApp"
 
 	postbuildcommands
 	{
-		("{COPY} %{EditorTestDir}/TestProjects %{engineOutDir}/Tests/TestProjects"),
+		("{COPY} %{EditorTestDir}/TestProjects %{engineOutDir}/Tests/Editor/TestProjects"),
 	}
 
 	filter "system:windows"

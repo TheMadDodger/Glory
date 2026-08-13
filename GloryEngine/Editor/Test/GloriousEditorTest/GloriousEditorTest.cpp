@@ -5,7 +5,7 @@
 namespace Glory::Test
 {
 	constexpr std::string_view TestProjectsPath = "./TestProjects";
-	constexpr std::string_view TestProjectsPathFromTestApp = "./Tests/TestProjects";
+	constexpr std::string_view TestProjectsPathFromTestApp = "./Tests/Editor/TestProjects";
 	constexpr std::string_view TestRunnerName = "GloriousTestApp.exe";
 
 	class GloriousEditorTest : public Utils::Tester
@@ -55,7 +55,7 @@ namespace Glory::Test
 		testProjectPath.append(name).append(name).replace_extension(".gproj");
 
 		std::stringstream str;
-		str << "cd \"..\" && " << TestRunnerName << " -projectPath=\"" << testProjectPath.string() << "\"";
+		str << "cd \"../..\" && " << TestRunnerName << " -projectPath=\"" << testProjectPath.string() << "\"";
 		const int errors = system(str.str().c_str());
 
 		GLORY_TEST_COMPARE(errors, 0);
