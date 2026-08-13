@@ -129,7 +129,8 @@ jobs:
         PYTHONUNBUFFERED: "1"
       run: python RunTests.py --path=${{env.UTIL_TEST_PATH}}
 
-    - name: Editor Tests
+    - if: env.GRAPHICS_AVAILABLE == 'true'
+      name: Editor Tests
       working-directory: ${{env.SOLUTION_FILE_PATH}}
       env:
         PYTHONUNBUFFERED: "1"
