@@ -155,6 +155,10 @@ group "Engine"
 	include "Engine/RenderDocAPI"
 group ""
 
+group "Engine/Tests"
+	include "Engine/Tests/FragmentedBufferTest"
+group ""
+
 group "Modules"
 	include "Modules/GloryOpenGLGraphics"
 	include "Modules/GlorySDLWindow"
