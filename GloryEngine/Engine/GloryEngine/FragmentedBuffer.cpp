@@ -1,4 +1,5 @@
 #include "FragmentedBuffer.h"
+#include "GraphicsDevice.h"
 
 #include <GloryAssert.h>
 
@@ -102,11 +103,12 @@ namespace Glory
 			return startIndex;
 
 		/* Assign data to buffer at index */
+		pDevice->AssignBuffer(m_BufferHandle, data, startIndex, size);
 
 		return startIndex;
 	}
 
-	void FragmentedBuffer::FreeData(size_t start, size_t size, GraphicsDevice* pDevice)
+	void FragmentedBuffer::FreeData(size_t start, size_t size)
 	{
 		/* Find fragments adjacent to data */
 		std::optional<size_t> leftAdjacentFragment;

@@ -24,6 +24,10 @@ namespace Glory::Test
 		void SplitAndMergeFragments();
 		void EdgeFreeBoundaries();
 		void UnorderedFragmentsSort();
+
+		// New edge-case tests
+		void AdjacentFreeMerges();
+		void OutOfOrderFreesSorted();
 	};
 
 	FragmentedBufferTest::FragmentedBufferTest()
@@ -42,6 +46,10 @@ namespace Glory::Test
 			&FragmentedBufferTest::SplitAndMergeFragments,
 			&FragmentedBufferTest::EdgeFreeBoundaries,
 			&FragmentedBufferTest::UnorderedFragmentsSort,
+
+			// Edge-case tests
+			&FragmentedBufferTest::AdjacentFreeMerges,
+			&FragmentedBufferTest::OutOfOrderFreesSorted,
 		});
 	}
 
@@ -404,6 +412,46 @@ namespace Glory::Test
 		GLORY_TEST_COMPARE(buffer.Fragment(1).first, 300ull);
 		GLORY_TEST_COMPARE(buffer.Fragment(1).second, 25ull);
 		GLORY_TEST_COMPARE(buffer.Fragment(2).first, 700ull);
+		GLORY_TEST_COMPARE(buffer.Fragment(2).second, 50ull);
+	}
+
+	// Edge-case test: freeing two adjacent regions should merge into a single fragment
+	void FragmentedBufferTest::AdjacentFreeMerges()
+	{
+		FragmentedBuffer buffer{ 1000ull, nullptr };
+		GLORY_TEST_COMPARE(buffer.PushData(nullptr, 1000ull, 0, nullptr), 0ull);
+
+		buffer.FreeData(400ull, 50ull, nullptr); // 400..450
+		GLORY_TEST_COMPARE(buffer.FragmentCount(), 1ull);
+		GLORY_TEST_COMPARE(buffer.Fragment(0).first, 400ull);
+		GLORY_TEST_COMPARE(buffer.Fragment(0).second, 50ull);
+
+		// Free adjacent region that starts exactly where previous ends
+		buffer.FreeData(450ull, 50ull, nullptr); // 450..500
+		// Expect merged fragment 400..500 -> size 100
+		GLORY_TEST_COMPARE(buffer.FragmentCount(), 1ull);
+		GLORY_TEST_COMPARE(buffer.Fragment(0).first, 400ull);
+		GLORY_TEST_COMPARE(buffer.Fragment(0).second, 100ull);
+	}
+
+	// Edge-case test: frees applied out-of-order should result in sorted fragment list
+	void FragmentedBufferTest::OutOfOrderFreesSorted()
+	{
+		FragmentedBuffer buffer{ 1000ull, nullptr };
+		GLORY_TEST_COMPARE(buffer.PushData(nullptr, 1000ull, 0, nullptr), 0ull);
+
+		// Free regions out of ascending order
+		buffer.FreeData(500ull, 50ull, nullptr);
+		buffer.FreeData(100ull, 50ull, nullptr);
+		buffer.FreeData(300ull, 50ull, nullptr);
+
+		// Expect fragments sorted by start: 100, 300, 500
+		GLORY_TEST_COMPARE(buffer.FragmentCount(), 3ull);
+		GLORY_TEST_COMPARE(buffer.Fragment(0).first, 100ull);
+		GLORY_TEST_COMPARE(buffer.Fragment(0).second, 50ull);
+		GLORY_TEST_COMPARE(buffer.Fragment(1).first, 300ull);
+		GLORY_TEST_COMPARE(buffer.Fragment(1).second, 50ull);
+		GLORY_TEST_COMPARE(buffer.Fragment(2).first, 500ull);
 		GLORY_TEST_COMPARE(buffer.Fragment(2).second, 50ull);
 	}
 }

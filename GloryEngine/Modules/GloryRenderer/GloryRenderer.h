@@ -2,6 +2,7 @@
 #include "GloryRendererData.h"
 
 #include <Renderer.h>
+#include <UberMesh.h>
 #include <GraphicsEnums.h>
 
 #include <BitSet.h>
@@ -32,6 +33,8 @@ namespace Glory
 		DescriptorSetHandle m_ObjectDataSet = 0;
 		DescriptorSetHandle m_MaterialSet = 0;
 		std::vector<DescriptorSetHandle> m_TextureSets;
+
+		UberMesh m_UberMesh;
 	};
 
 	struct UniqueCameraData

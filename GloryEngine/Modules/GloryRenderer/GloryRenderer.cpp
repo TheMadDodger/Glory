@@ -1827,7 +1827,7 @@ namespace Glory
 		for (const auto& pipelineBatch : batches)
 		{
 			if (batchIndex >= batchDatas.size())
-				batchDatas.emplace_back(PipelineBatchData{});
+				batchDatas.emplace_back();
 
 			PipelineData* pPipelineData = pipelines.GetPipelineData(pipelineBatch.m_PipelineID);
 			if (!pPipelineData) continue;
@@ -1838,10 +1838,13 @@ namespace Glory
 
 			if (pipelineBatch.m_UniqueMeshOrder.empty()) continue;
 
-			/* Update world transforms */
+			/* Update world transforms and uber mesh */
 			size_t objectCount = 0;
 			for (const UUID meshID : pipelineBatch.m_UniqueMeshOrder)
 			{
+				if (!batchData.m_UberMesh.HasMesh(meshID))
+					batchData.m_UberMesh.AddMesh(meshID);
+
 				const PipelineMeshBatch& meshBatch = pipelineBatch.m_Meshes.at(meshID);
 				if (batchData.m_Worlds->size() < objectCount + meshBatch.m_Worlds.size())
 					batchData.m_Worlds.resize(objectCount + meshBatch.m_Worlds.size());
@@ -1858,6 +1861,9 @@ namespace Glory
 				}
 				objectCount += meshBatch.m_Worlds.size();
 			}
+
+			if (batchData.m_UberMesh.UpdateDirtyStates(resources))
+				batchData.m_UberMesh.UpdateMeshes(resources, pDevice);
 
 			/* Prepare material data buffers */
 			const bool isBindless = pPipelineData->HasDefine("ENABLE_BINDLESS");

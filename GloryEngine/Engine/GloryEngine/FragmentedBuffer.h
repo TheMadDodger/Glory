@@ -66,7 +66,7 @@ namespace Glory
 		 * @param size Size of the data to free
 		 * @param pDevice Device that owns the buffer
 		 */
-		GLORY_ENGINE_API void FreeData(size_t start, size_t size, GraphicsDevice* pDevice);
+		GLORY_ENGINE_API void FreeData(size_t start, size_t size);
 
 		/** @brief Maximum size of the buffer */
 		GLORY_ENGINE_API size_t Size() const;
