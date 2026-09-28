@@ -34,6 +34,13 @@ namespace Glory
 		BF_ReadAndWrite = BF_Read | BF_Write,
 		/** @brief Force copying to be enabled on this buffer */
 		BF_CopyDst = 1 << 2,
+		/** @brief Data written to the buffer by either the CPU or device will be immediately visible to the other */
+		BF_Coherent = 1 << 3,
+		/** @brief Stores the buffer on the local RAM rather than device memory */
+		BF_Client = 1 << 4,
+		/** @brief Allows direct read and writes from the CPU, not recommended for performance,
+		 * use @ref BF_Persistent and @ref BF_Read and/or @ref BF_Write instead */
+		BF_Dynamic = 1 << 5,
 	};
 
 	/** @brief Mesh usage */
