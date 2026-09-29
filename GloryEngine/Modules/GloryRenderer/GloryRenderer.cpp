@@ -251,10 +251,10 @@ namespace Glory
 		}
 
 		/* Global data buffers */
-		m_CameraDatasBuffer = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_CAMERAS, BufferType::BT_Storage, BF_Write);
-		m_LightCameraDatasBuffer = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_LIGHTS, BufferType::BT_Storage, BF_Write);
-		m_LightsSSBO = pDevice->CreateBuffer(sizeof(LightData)*MAX_LIGHTS, BufferType::BT_Storage, BF_Write);
-		m_LightSpaceTransformsSSBO = pDevice->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferType::BT_Storage, BF_Write);
+		m_CameraDatasBuffer = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_CAMERAS, BufferType::BT_Storage, BufferFlags(BF_Coherent | BF_Write));
+		m_LightCameraDatasBuffer = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_LIGHTS, BufferType::BT_Storage, BufferFlags(BF_Coherent | BF_Write));
+		m_LightsSSBO = pDevice->CreateBuffer(sizeof(LightData)*MAX_LIGHTS, BufferType::BT_Storage, BufferFlags(BF_Coherent | BF_Write));
+		m_LightSpaceTransformsSSBO = pDevice->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferType::BT_Storage, BufferFlags(BF_Coherent | BF_Write));
 
 		GenerateDomeSamplePointsSSBO(pDevice, 64);
 		GenerateNoiseTexture(pDevice);
@@ -382,7 +382,7 @@ namespace Glory
 		for (size_t i = 0; i < m_LightDistancesSSBOs.size(); ++i)
 		{
 			if (!m_LightDistancesSSBOs[i])
-				m_LightDistancesSSBOs[i] = pDevice->CreateBuffer(sizeof(uint32_t)*MAX_LIGHTS, BufferType::BT_Storage, BF_ReadAndWrite);
+				m_LightDistancesSSBOs[i] = pDevice->CreateBuffer(sizeof(uint32_t)*MAX_LIGHTS, BufferType::BT_Storage, BufferFlags(BF_Coherent | BF_ReadAndWrite));
 
 			if (!m_LightDistancesSets[i])
 			{
@@ -2041,7 +2041,7 @@ namespace Glory
 
 			if (!batchData.m_WorldsBuffer)
 			{
-				batchData.m_WorldsBuffer = pDevice->CreateBuffer(batchData.m_Worlds->size()*sizeof(glm::mat4), BT_Storage, BF_Write);
+				batchData.m_WorldsBuffer = pDevice->CreateBuffer(batchData.m_Worlds->size()*sizeof(glm::mat4), BT_Storage, BufferFlags(BF_Coherent | BF_Write));
 				batchData.m_Worlds.SetDirty();
 			}
 			if (pDevice->BufferSize(batchData.m_WorldsBuffer) < batchData.m_Worlds.TotalByteSize())
@@ -2055,7 +2055,7 @@ namespace Glory
 
 			if (!batchData.m_MaterialsBuffer)
 			{
-				batchData.m_MaterialsBuffer = pDevice->CreateBuffer(batchData.m_MaterialDatas->size(), BT_Storage, BF_Write);
+				batchData.m_MaterialsBuffer = pDevice->CreateBuffer(batchData.m_MaterialDatas->size(), BT_Storage, BufferFlags(BF_Coherent | BF_Write));
 				batchData.m_MaterialDatas.SetDirty();
 			}
 			if (pDevice->BufferSize(batchData.m_MaterialsBuffer) < batchData.m_MaterialDatas.TotalByteSize())
@@ -2070,7 +2070,7 @@ namespace Glory
 
 			if (!isBindless && textureCount && !batchData.m_TextureBitsBuffer)
 			{
-				batchData.m_TextureBitsBuffer = pDevice->CreateBuffer(batchData.m_TextureBits->size()*sizeof(uint32_t), BT_Storage, BF_Write);
+				batchData.m_TextureBitsBuffer = pDevice->CreateBuffer(batchData.m_TextureBits->size()*sizeof(uint32_t), BT_Storage, BufferFlags(BF_Coherent | BF_Write));
 				batchData.m_TextureBits.SetDirty();
 			}
 			if (!isBindless && textureCount && pDevice->BufferSize(batchData.m_TextureBitsBuffer) < batchData.m_TextureBits.TotalByteSize())
@@ -2229,7 +2229,7 @@ namespace Glory
 			pDevice->FreeBuffer(m_LineBuffers[m_CurrentFrameIndex]);
 		if (!m_LineBuffers[m_CurrentFrameIndex])
 		{
-			m_LineBuffers[m_CurrentFrameIndex] = pDevice->CreateBuffer(m_LineVertices->size()*sizeof(LineVertex), BT_Vertex, BF_None);
+			m_LineBuffers[m_CurrentFrameIndex] = pDevice->CreateBuffer(m_LineVertices->size()*sizeof(LineVertex), BT_Vertex, BufferFlags(BF_Coherent | BF_Write));
 			m_LineMeshes[m_CurrentFrameIndex] = pDevice->CreateMesh({ m_LineBuffers[m_CurrentFrameIndex] }, m_LineVertexCount, 0, sizeof(LineVertex),
 				{ AttributeType::Float3, AttributeType::Float4 });
 			resizeBuffer = false;
@@ -2647,7 +2647,7 @@ namespace Glory
 			if (!lightGridSSBO)
 				lightGridSSBO = pDevice->CreateBuffer(sizeof(LightGrid)*NUM_CLUSTERS, BufferType::BT_Storage, BF_None);
 			if (!pickResultsUBO)
-				pickResultsUBO = pDevice->CreateBuffer(sizeof(GPUPickResult)*MaxPicks + sizeof(uint32_t)*4, BufferType::BT_Storage, BF_Read);
+				pickResultsUBO = pDevice->CreateBuffer(sizeof(GPUPickResult)*MaxPicks + sizeof(uint32_t)*4, BufferType::BT_Storage, BufferFlags(BF_Coherent | BF_Read));
 
 			if (!lightSet)
 			{

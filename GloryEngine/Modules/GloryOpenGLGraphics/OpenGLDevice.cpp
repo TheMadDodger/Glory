@@ -655,6 +655,8 @@ namespace Glory
 		}
 		if (flags & BF_Coherent)
 			glFlags |= GL_MAP_COHERENT_BIT;
+		else if (glFlags & GL_MAP_PERSISTENT_BIT)
+			glFlags |= GL_MAP_FLUSH_EXPLICIT_BIT;
 		if (flags & BF_Client)
 			glFlags |= GL_CLIENT_STORAGE_BIT;
 		if (flags & BF_Dynamic)
@@ -704,7 +706,7 @@ namespace Glory
 
 		if (buffer.m_GLFlags & GL_MAP_PERSISTENT_BIT)
 		{
-			buffer.m_pMappedBuffer = glMapBufferRange(GL_ARRAY_BUFFER, 0, buffer.m_Size, buffer.m_GLFlags);
+			buffer.m_pMappedBuffer = glMapBufferRange(buffer.m_GLTarget, 0, buffer.m_Size, buffer.m_GLFlags);
 			OpenGLGraphicsModule::LogGLError(glGetError());
 		}
 
@@ -1797,7 +1799,7 @@ namespace Glory
 		{
 			const size_t descriptorCount = glSetLayout->m_DescriptorCounts[i];
 			if (descriptorCount <= 1) continue;
-			set.m_BindlessTexturesBuffers[i] = CreateBuffer(sizeof(uint64_t)*descriptorCount, BT_Storage, BF_None);
+			set.m_BindlessTexturesBuffers[i] = CreateBuffer(sizeof(uint64_t)*descriptorCount, BT_Storage, BufferFlags(BF_Coherent | BF_Write));
 			std::vector<uint64_t> clearValues(descriptorCount, 0ull);
 			AssignBuffer(set.m_BindlessTexturesBuffers[i], clearValues.data());
 			textureHandles[i] = nullptr;
@@ -2112,7 +2114,7 @@ namespace Glory
 
 	void OpenGLDevice::OnInitialize()
 	{
-		m_ConstantsBuffer = CreateBuffer(PushConstantsMaxSize, BT_Uniform, BF_Write);
+		m_ConstantsBuffer = CreateBuffer(PushConstantsMaxSize, BT_Uniform, BufferFlags(BF_Coherent | BF_Write));
 	}
 
 	void OpenGLDevice::CreateRenderTexture(GL_RenderTexture& renderTexture)
@@ -2308,7 +2310,25 @@ namespace Glory
 			return;
 		}
 
-		GLORY_ASSERT(false, "Buffer is not visible to CPU!");
+		/* Buffer not visible to CPU, we need a staging buffer to write to */
+		BufferHandle stagingBuffer = CreateBuffer(size, BT_TransferRead, BufferFlags(BF_Coherent | BF_Write));
+		AssignBuffer(stagingBuffer, data);
+		GL_Buffer* glStagingBuffer = m_Buffers.Find(stagingBuffer);
+
+		glBindBuffer(GL_COPY_WRITE_BUFFER, buffer.m_GLBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindBuffer(GL_COPY_READ_BUFFER, glStagingBuffer->m_GLBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		
+		glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, offset, size);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glBindBuffer(GL_COPY_READ_BUFFER, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindBuffer(GL_COPY_WRITE_BUFFER, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		FreeBuffer(stagingBuffer);
 	}
 
 #pragma endregion

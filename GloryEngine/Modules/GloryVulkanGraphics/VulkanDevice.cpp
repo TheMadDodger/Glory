@@ -1424,7 +1424,7 @@ namespace Glory
 		if (!buffer->m_CPUVisible)
 		{
 			/* We have to assign it using a buffer copy */
-			BufferHandle staging = CreateBuffer(size, BufferType::BT_TransferRead, BufferFlags::BF_Write);
+			BufferHandle staging = CreateBuffer(size, BT_TransferRead, BufferFlags(BF_Coherent | BF_Write));
 			AssignBuffer(staging, data, offset, size);
 			VK_Buffer* vkStaging = m_Buffers.Find(staging);
 
@@ -3562,7 +3562,8 @@ namespace Glory
 				vk::ImageLayout::eTransferDstOptimal, image.m_VKAspect,
 				imageInfo.mipLevels, imageInfo.arrayLayers);
 			const vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
-			BufferHandle stagingBuffer = CreateBuffer(memRequirements.size, BufferType::BT_TransferRead, BufferFlags::BF_Write);
+			BufferHandle stagingBuffer = CreateBuffer(memRequirements.size,
+				BufferType::BT_TransferRead, BufferFlags(BF_Coherent | BF_Write));
 			VK_Buffer* vkStagingBuffer = m_Buffers.Find(stagingBuffer);
 			AssignBuffer(stagingBuffer, pixels, uint32_t(dataSize));
 
@@ -3649,8 +3650,10 @@ namespace Glory
 		TransitionImageLayout(commandBuffer, vkImage->m_VKImage, format, vkImage->m_VKFinalLayout,
 			vk::ImageLayout::eTransferDstOptimal, vkImage->m_VKAspect, mipLevels, 1);
 
-		const vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
-		BufferHandle stagingBuffer = CreateBuffer(memRequirements.size, BufferType::BT_TransferRead, BufferFlags::BF_Write);
+		const vk::MemoryPropertyFlags memoryFlags = vk::MemoryPropertyFlagBits::eHostVisible |
+			vk::MemoryPropertyFlagBits::eHostCoherent;
+		BufferHandle stagingBuffer = CreateBuffer(memRequirements.size,
+			BT_TransferRead, BufferFlags(BF_Coherent | BF_Write));
 		VK_Buffer* vkStagingBuffer = m_Buffers.Find(stagingBuffer);
 		AssignBuffer(stagingBuffer, pImage->GetPixels(), uint32_t(pImage->DataSize()));
 

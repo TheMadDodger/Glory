@@ -145,7 +145,8 @@ namespace Glory::Editor
 			texInfo.m_Type = DataType::DT_Float;
 			texInfo.m_Flags = ImageFlags(IF_CopyDst | IF_CopySrc);
 			m_CubemapFaces[i] = pDevice->CreateTexture(texInfo);
-			m_StagingBuffers[i] = pDevice->CreateBuffer(IrradianceMapTotalByteSize, BufferType::BT_TransferWrite, BufferFlags::BF_Read);
+			m_StagingBuffers[i] = pDevice->CreateBuffer(IrradianceMapTotalByteSize,
+				BT_TransferWrite, BufferFlags(BF_Coherent | BF_Read));
 		}
 	}
 

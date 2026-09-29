@@ -380,7 +380,7 @@ namespace Glory
 			m_InputTextDirty = false;
 		}
 
-		m_ConsoleTextMesh = pDevice->AcquireCachedMesh(m_pConsoleLogTextMesh.get(), MU_Dynamic);
+		m_ConsoleTextMesh = pDevice->AcquireCachedMesh(m_pConsoleLogTextMesh.get());
 		m_InputTextBracketMesh = pDevice->AcquireCachedMesh(m_pInputTextBracketMesh.get());
 		m_CursorTextMesh = pDevice->AcquireCachedMesh(m_pInputTextCursorMesh.get());
 
@@ -416,7 +416,7 @@ namespace Glory
 		const float inputTextXOffset = (pBracketGlyph->Size.x + (pBracketGlyph->Advance >> 6))*textScale;
 		if (m_pInputTextMesh->VertexCount() > 0 && m_CursorPos > 0)
 		{
-			m_InputTextMesh = pDevice->AcquireCachedMesh(m_pInputTextMesh.get(), MU_Dynamic);
+			m_InputTextMesh = pDevice->AcquireCachedMesh(m_pInputTextMesh.get());
 			constants.Model = glm::translate(glm::identity<glm::mat4>(), glm::vec3(inputTextXOffset, inputTextHeight, 0.0f));
 			pDevice->PushConstants(commandBuffer, m_ConsoleTextPipeline, 0, sizeof(ConsoleRenderConstants), &constants, STF_Vertex);
 			pDevice->DrawMesh(commandBuffer, m_InputTextMesh);
