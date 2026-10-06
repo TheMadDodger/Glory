@@ -169,6 +169,9 @@ namespace Glory
 
 	VulkanDevice::~VulkanDevice()
 	{
+		if (m_VMAAllocator)
+			vmaDestroyAllocator(m_VMAAllocator);
+
 		m_LogicalDevice.waitIdle();
 		m_Semaphores.FreeAll(std::bind(&VulkanDevice::FreeSemaphore, this, std::placeholders::_1));
 		m_Swapchains.FreeAll(std::bind(&VulkanDevice::FreeSwapchain, this, std::placeholders::_1));
@@ -371,6 +374,20 @@ namespace Glory
 
 		CreateGraphicsCommandPool();
 		AllocateFreeFences(10);
+
+		VmaVulkanFunctions vulkanFunctions = {};
+		vulkanFunctions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
+		vulkanFunctions.vkGetDeviceProcAddr = &vkGetDeviceProcAddr;
+
+		VmaAllocatorCreateInfo allocatorCreateInfo = {};
+		allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
+		allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+		allocatorCreateInfo.physicalDevice = m_VKDevice;
+		allocatorCreateInfo.device = m_LogicalDevice;
+		allocatorCreateInfo.instance = GraphicsModule()->GetCInstance();
+		allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
+
+		vmaCreateAllocator(&allocatorCreateInfo, &m_VMAAllocator);
 	}
 
 	void VulkanDevice::AllocateFreeFences(size_t numFences)
@@ -1281,6 +1298,7 @@ namespace Glory
 	{
 		if (flags == BF_None)
 			return vk::MemoryPropertyFlagBits::eDeviceLocal;
+
 		vk::MemoryPropertyFlags result;
 		if (flags & BF_Write)
 		{
@@ -1290,16 +1308,39 @@ namespace Glory
 		if (flags & BF_Read)
 		{
 			result |= vk::MemoryPropertyFlagBits::eHostVisible;
-			result |= vk::MemoryPropertyFlagBits::eHostCoherent;
 			result |= vk::MemoryPropertyFlagBits::eHostCached;
 		}
+		if (flags & BF_Coherent)
+			result |= vk::MemoryPropertyFlagBits::eHostCoherent;
+		if (!(flags & BF_Client))
+			result |= vk::MemoryPropertyFlagBits::eDeviceLocal;
+
 		return result;
+	}
+
+	VmaMemoryUsage GetVmaMemoryUsage(BufferFlags flags)
+	{
+		if (flags & BF_Client)
+			return VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
+
+		return VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+	}
+
+	VmaAllocationCreateFlags GetVmaAllocationFlags(BufferFlags flags)
+	{
+		if (flags & BF_Read)
+			return VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
+		if (flags & BF_Write)
+			return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
+
+		return 0;
 	}
 
 	vk::MemoryPropertyFlags GetImageMemoryPropertyFlags(ImageFlags flags)
 	{
 		if (flags == IF_None)
 			return vk::MemoryPropertyFlagBits::eDeviceLocal;
+
 		vk::MemoryPropertyFlags result;
 		if (flags & IF_Write)
 		{
@@ -1312,6 +1353,7 @@ namespace Glory
 			result |= vk::MemoryPropertyFlagBits::eHostCoherent;
 			result |= vk::MemoryPropertyFlagBits::eHostCached;
 		}
+
 		return result;
 	}
 
@@ -1324,40 +1366,23 @@ namespace Glory
 		buffer.m_CPUVisible = (flags & BF_ReadAndWrite) != 0;
 		buffer.m_Flags = flags;
 
-		vk::BufferCreateInfo bufferInfo = vk::BufferCreateInfo();
+		vk::BufferCreateInfo bufferInfo;
 		bufferInfo.size = (vk::DeviceSize)buffer.m_Size;
-		bufferInfo.sharingMode = vk::SharingMode::eExclusive;
+		//bufferInfo.sharingMode = vk::SharingMode::eExclusive;
 		bufferInfo.usage = buffer.m_VKUsage = GetBufferUsageFlags(type, flags);
 
-		vk::Result result = m_LogicalDevice.createBuffer(&bufferInfo, nullptr, &buffer.m_VKBuffer);
-		if (result != vk::Result::eSuccess)
+		VmaAllocationCreateInfo allocInfo = {};
+		allocInfo.usage = GetVmaMemoryUsage(flags);
+		allocInfo.flags = GetVmaAllocationFlags(flags);
+		const VkResult result = vmaCreateBuffer(m_VMAAllocator, reinterpret_cast<VkBufferCreateInfo*>(&bufferInfo), &allocInfo,
+			reinterpret_cast<VkBuffer*>(&buffer.m_VKBuffer), &buffer.m_VMAAllocation, nullptr);
+
+		if (static_cast<vk::Result>(result) != vk::Result::eSuccess)
 		{
 			Debug().LogError("VulkanDevice::CreateBuffer: Failed to create buffer.");
 			m_Buffers.Erase(handle);
 			return NULL;
 		}
-
-		vk::MemoryRequirements memRequirements;
-		m_LogicalDevice.getBufferMemoryRequirements(buffer.m_VKBuffer, &memRequirements);
-
-		const uint32_t typeFilter = memRequirements.memoryTypeBits;
-		const vk::MemoryPropertyFlags properties = GetBufferMemoryPropertyFlags(flags);
-		const uint32_t memoryIndex = GetSupportedMemoryIndex(typeFilter, properties);
-
-		// Allocate device memory
-		vk::MemoryAllocateInfo allocateInfo = vk::MemoryAllocateInfo();
-		allocateInfo.allocationSize = memRequirements.size;
-		allocateInfo.memoryTypeIndex = memoryIndex;
-
-		result = m_LogicalDevice.allocateMemory(&allocateInfo, nullptr, &buffer.m_VKMemory);
-		if (result != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::CreateBuffer: Failed to create buffer memory.");
-			m_Buffers.Erase(handle);
-			return NULL;
-		}
-
-		m_LogicalDevice.bindBufferMemory(buffer.m_VKBuffer, buffer.m_VKMemory, 0);
 
 		return handle;
 	}
@@ -1437,7 +1462,9 @@ namespace Glory
 
 		if (!buffer->m_pMappedMemory)
 		{
-			const vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)0, (vk::DeviceSize)buffer->m_Size, (vk::MemoryMapFlags)0, &buffer->m_pMappedMemory);
+			const vk::Result result = static_cast<vk::Result>(
+				vmaMapMemory(m_VMAAllocator, buffer->m_VMAAllocation, &buffer->m_pMappedMemory)
+			);
 			if (result != vk::Result::eSuccess)
 			{
 				Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
@@ -1470,7 +1497,7 @@ namespace Glory
 
 		if (!buffer->m_pMappedMemory)
 		{
-			const vk::Result result = m_LogicalDevice.mapMemory(buffer->m_VKMemory, (vk::DeviceSize)0, (vk::DeviceSize)buffer->m_Size, (vk::MemoryMapFlags)0, &buffer->m_pMappedMemory);
+			const vk::Result result = static_cast<vk::Result>(vmaMapMemory(m_VMAAllocator, buffer->m_VMAAllocation, &buffer->m_pMappedMemory));
 			if (result != vk::Result::eSuccess)
 			{
 				Debug().LogError("VulkanDevice::CreateBuffer: Failed to map buffer memory.");
@@ -2815,12 +2842,11 @@ namespace Glory
 
 		if (buffer->m_pMappedMemory)
 		{
-			m_LogicalDevice.unmapMemory(buffer->m_VKMemory);
+			vmaUnmapMemory(m_VMAAllocator, buffer->m_VMAAllocation);
 			buffer->m_pMappedMemory = nullptr;
 		}
 
-		m_LogicalDevice.destroyBuffer(buffer->m_VKBuffer);
-		m_LogicalDevice.freeMemory(buffer->m_VKMemory);
+		vmaDestroyBuffer(m_VMAAllocator, buffer->m_VKBuffer, buffer->m_VMAAllocation);
 		m_Buffers.Erase(handle);
 
 		handle = 0;
@@ -4110,49 +4136,32 @@ namespace Glory
 	{
 		if (buffer.m_pMappedMemory)
 		{
-			m_LogicalDevice.unmapMemory(buffer.m_VKMemory);
+			vmaUnmapMemory(m_VMAAllocator, buffer.m_VMAAllocation);
 			buffer.m_pMappedMemory = nullptr;
 		}
 
-		vk::BufferCreateInfo bufferInfo = vk::BufferCreateInfo();
+		vk::BufferCreateInfo bufferInfo;
 		bufferInfo.size = (vk::DeviceSize)buffer.m_Size;
-		bufferInfo.sharingMode = vk::SharingMode::eExclusive;
 		bufferInfo.usage = buffer.m_VKUsage;
 
+		VmaAllocationCreateInfo allocInfo = {};
+		allocInfo.usage = GetVmaMemoryUsage(buffer.m_Flags);
+		allocInfo.flags = GetVmaAllocationFlags(buffer.m_Flags);
+
 		vk::Buffer newBuffer;
-		vk::Result result = m_LogicalDevice.createBuffer(&bufferInfo, nullptr, &newBuffer);
-		if (result != vk::Result::eSuccess)
+		VmaAllocation newAllocation;
+		const VkResult result = vmaCreateBuffer(m_VMAAllocator, reinterpret_cast<VkBufferCreateInfo*>(&bufferInfo), &allocInfo,
+			reinterpret_cast<VkBuffer*>(&newBuffer), &newAllocation, nullptr);
+
+		if (static_cast<vk::Result>(result) != vk::Result::eSuccess)
 		{
 			Debug().LogError("VulkanDevice::ResizeBuffer: Failed to create buffer.");
 			return;
 		}
 
-		vk::MemoryRequirements memRequirements;
-		m_LogicalDevice.getBufferMemoryRequirements(newBuffer, &memRequirements);
-
-		const uint32_t typeFilter = memRequirements.memoryTypeBits;
-		const vk::MemoryPropertyFlags properties = GetBufferMemoryPropertyFlags(buffer.m_Flags);
-		const uint32_t memoryIndex = GetSupportedMemoryIndex(typeFilter, properties);
-
-		/* Allocate device memory */
-		vk::MemoryAllocateInfo allocateInfo = vk::MemoryAllocateInfo();
-		allocateInfo.allocationSize = memRequirements.size;
-		allocateInfo.memoryTypeIndex = memoryIndex;
-
-		vk::DeviceMemory newMemory;
-		result = m_LogicalDevice.allocateMemory(&allocateInfo, nullptr, &newMemory);
-		if (result != vk::Result::eSuccess)
-		{
-			Debug().LogError("VulkanDevice::ResizeBuffer: Failed to create buffer memory.");
-			m_LogicalDevice.destroyBuffer(newBuffer);
-			return;
-		}
-
-		m_LogicalDevice.destroyBuffer(buffer.m_VKBuffer);
-		m_LogicalDevice.freeMemory(buffer.m_VKMemory);
+		vmaDestroyBuffer(m_VMAAllocator, buffer.m_VKBuffer, buffer.m_VMAAllocation);
 
 		buffer.m_VKBuffer = newBuffer;
-		buffer.m_VKMemory = newMemory;
-		m_LogicalDevice.bindBufferMemory(buffer.m_VKBuffer, buffer.m_VKMemory, 0);
+		buffer.m_VMAAllocation = newAllocation;
 	}
 }

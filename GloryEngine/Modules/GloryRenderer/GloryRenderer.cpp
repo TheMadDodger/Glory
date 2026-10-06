@@ -2027,11 +2027,14 @@ namespace Glory
 				{
 					DescriptorSetUpdateInfo dsUpdateInfo;
 					dsUpdateInfo.m_Samplers.resize(textureCount);
+					std::vector<TextureHandle> textureHandles(textureCount, nullptr);
+
 					for (size_t j = 0; j < textureCount; ++j)
 					{
 						TextureData* pTexture = textures[j];
 						const TextureHandle texture = pDevice->AcquireCachedTexture(pTexture);
-						dsUpdateInfo.m_Samplers[j].m_TextureHandles = &texture;
+						textureHandles[j] = texture;
+						dsUpdateInfo.m_Samplers[j].m_TextureHandles = &textureHandles[j];
 						dsUpdateInfo.m_Samplers[j].m_DescriptorIndex = j;
 					}
 					pDevice->UpdateDescriptorSet(batchData.m_TextureSets[materialIndex], dsUpdateInfo);
