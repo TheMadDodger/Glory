@@ -1798,7 +1798,7 @@ namespace Glory
 		{
 			const size_t descriptorCount = glSetLayout->m_DescriptorCounts[i];
 			if (descriptorCount <= 1) continue;
-			set.m_BindlessTexturesBuffers[i] = CreateBuffer(sizeof(uint64_t)*descriptorCount, BT_Storage, BF_Dynamic);//BufferFlags(BF_Coherent | BF_Write));
+			set.m_BindlessTexturesBuffers[i] = CreateBuffer(sizeof(uint64_t)*descriptorCount, BT_Storage, BufferFlags(BF_Coherent | BF_Write));
 			std::vector<uint64_t> clearValues(descriptorCount, 0ull);
 			AssignBuffer(set.m_BindlessTexturesBuffers[i], clearValues.data());
 			textureHandles[i] = nullptr;
@@ -2301,7 +2301,9 @@ namespace Glory
 				OpenGLGraphicsModule::LogGLError(glGetError());
 			}
 
-			std::memcpy(buffer.m_pMappedBuffer, data, size);
+			char* p = (char*)buffer.m_pMappedBuffer;
+			void* offsettedData = p + offset;
+			std::memcpy(offsettedData, data, size);
 			OpenGLGraphicsModule::LogGLError(glGetError());
 
 			if (!(buffer.m_GLFlags & GL_MAP_COHERENT_BIT))
