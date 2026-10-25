@@ -260,8 +260,7 @@ namespace Glory
 			 1.0f, -1.0f*(flipY? -1.0f : 1.0f), 0.0f,
 			 1.0f,  1.0f*(flipY? -1.0f : 1.0f), 0.0f,
 		};
-		BufferHandle buffer = CreateBuffer(sizeof(vertices),
-			BufferType::BT_Vertex, BufferFlags(BF_Coherent | BF_Write | BF_CopyDst));
+		BufferHandle buffer = CreateBuffer(sizeof(vertices), BufferType::BT_Vertex, BF_CopyDst);
 		AssignBuffer(buffer, vertices, sizeof(vertices));
 		m_ScreenMesh = CreateMesh({ buffer }, 6, 0, sizeof(glm::vec3), { AttributeType::Float3 });
 

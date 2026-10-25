@@ -2318,7 +2318,7 @@ namespace Glory
 		}
 
 		/* Buffer not visible to CPU, we need a staging buffer to write to */
-		BufferHandle stagingBuffer = CreateBuffer(size, BT_TransferRead, BufferFlags(BF_Coherent | BF_Write));
+		BufferHandle stagingBuffer = CreateBuffer(size, BT_TransferRead, BF_Dynamic);
 		AssignBuffer(stagingBuffer, data);
 		GL_Buffer* glStagingBuffer = m_Buffers.Find(stagingBuffer);
 
