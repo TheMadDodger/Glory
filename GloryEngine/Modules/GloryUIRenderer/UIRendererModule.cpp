@@ -149,13 +149,15 @@ namespace Glory
 
 		if (!batchData.m_WorldsBuffers)
 		{
-			batchData.m_WorldsBuffers = pDevice->CreateBuffer(std::max(pDocument->m_UIBatch.m_Worlds.size(), 1ull)*sizeof(glm::mat4), BT_Storage, BF_Write);
+			batchData.m_WorldsBuffers = pDevice->CreateBuffer(std::max(pDocument->m_UIBatch.m_Worlds.size(), 1ull)*
+				sizeof(glm::mat4), BT_Storage, BufferFlags(BF_Coherent | BF_Write));
 			batchData.m_Worlds.SetDirty();
 		}
 
 		if (!batchData.m_ColorsBuffers)
 		{
-			batchData.m_ColorsBuffers = pDevice->CreateBuffer(std::max(pDocument->m_UIBatch.m_UniqueColors.size(), 1ull)*sizeof(glm::vec4), BT_Storage, BF_Write);
+			batchData.m_ColorsBuffers = pDevice->CreateBuffer(std::max(pDocument->m_UIBatch.m_UniqueColors.size(), 1ull)*
+				sizeof(glm::vec4), BT_Storage, BufferFlags(BF_Coherent | BF_Write));
 			batchData.m_Colors.SetDirty();
 		}
 
@@ -296,7 +298,7 @@ namespace Glory
 			const UUID meshID = pDocument->m_UIBatch.m_TextMeshes[i];
 
 			MeshData* pMesh = meshID ? pDocument->m_pTextMeshes.at(meshID).get() : nullptr;
-			MeshHandle mesh = pMesh ? pDevice->AcquireCachedMesh(pMesh, MU_Dynamic) : m_ImageMesh;
+			MeshHandle mesh = pMesh ? pDevice->AcquireCachedMesh(pMesh) : m_ImageMesh;
 
 			const PipelineHandle pipeline = meshID ? m_UITextPipeline : m_UIPipeline;
 			pDevice->BeginPipeline(commandBuffer, pipeline);

@@ -41,6 +41,7 @@ project "GloryEditorVulkan"
 		"%{IncludeDir.Utils}",
 		"%{IncludeDir.ECS}",
 		"%{IncludeDir.FA}",
+		"%{IncludeDir.VMA}",
 
 		"%{SubmodoleDirs.ImGui}/backends/",
 

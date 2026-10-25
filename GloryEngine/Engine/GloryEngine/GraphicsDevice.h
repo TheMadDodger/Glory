@@ -34,6 +34,13 @@ namespace Glory
 		BF_ReadAndWrite = BF_Read | BF_Write,
 		/** @brief Force copying to be enabled on this buffer */
 		BF_CopyDst = 1 << 2,
+		/** @brief Data written to the buffer by either the CPU or device will be immediately visible to the other */
+		BF_Coherent = 1 << 3,
+		/** @brief Stores the buffer on the local RAM rather than device memory */
+		BF_Client = 1 << 4,
+		/** @brief Allows direct read and writes from the CPU, not recommended for performance,
+		 * use @ref BF_Persistent and @ref BF_Read and/or @ref BF_Write instead */
+		BF_Dynamic = 1 << 5,
 	};
 
 	/** @brief Mesh usage */
@@ -648,7 +655,7 @@ namespace Glory
 		 * @brief Acquire a cached mesh or create a new one
 		 * @param pMesh The mesh data to create a mesh from
 		 */
-		GLORY_ENGINE_API MeshHandle AcquireCachedMesh(MeshData* pMesh, MeshUsage usage=MeshUsage::MU_Static);
+		GLORY_ENGINE_API MeshHandle AcquireCachedMesh(MeshData* pMesh);
 		/**
 		 * @brief Acquire a cached texture or create a new one
 		 * @param pTexture The texture data to create a texture from
@@ -728,7 +735,7 @@ namespace Glory
 		 * @brief Create a mesh on this device
 		 * @param pMeshData Mesh data
 		 */
-		GLORY_ENGINE_API MeshHandle CreateMesh(MeshData* pMeshData, MeshUsage usage=MeshUsage::MU_Static);
+		GLORY_ENGINE_API MeshHandle CreateMesh(MeshData* pMeshData);
 		/**
 		 * @brief Create a mesh on this device
 		 * @param buffers Vertex buffers and an index buffer at the last index

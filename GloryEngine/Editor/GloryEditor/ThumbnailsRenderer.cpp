@@ -149,7 +149,8 @@ namespace Glory::Editor
 		Utils::ECS::IComponentManager* manager = pScene->GetRegistry().GetComponentManager<CameraComponent>();
 		manager->EnableDraw();
 
-		m_PixelCopyBuffer = pDevice->CreateBuffer(ThumbnailResolution.x*ThumbnailResolution.y*4, BufferType::BT_TransferWrite, BufferFlags::BF_Read);
+		m_PixelCopyBuffer = pDevice->CreateBuffer(ThumbnailResolution.x*ThumbnailResolution.y*4,
+			BT_TransferWrite, BufferFlags(BF_Coherent | BF_Read));
 	}
 
 	void ThumbnailsRenderer::CheckRenders()

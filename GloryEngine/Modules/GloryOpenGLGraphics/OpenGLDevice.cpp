@@ -17,6 +17,25 @@
 
 namespace Glory
 {
+	struct BufferBindScope
+	{
+		BufferBindScope(uint32_t target, uint32_t bufferId) :
+			m_GLTarget(target), m_GLBufferId(bufferId)
+		{
+			glBindBuffer(m_GLTarget, m_GLBufferId);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+
+		~BufferBindScope()
+		{
+			glBindBuffer(m_GLTarget, NULL);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+
+		uint32_t m_GLTarget;
+		uint32_t m_GLBufferId;
+	};
+
 	GL_CommandBuffer::GL_CommandBuffer(size_t capacity) :
 		m_CommandsCapacity(capacity), m_Commands(new GL_CommandData[capacity]),
 		m_GLCurrentPrimitives(PrimitiveTypes.at(PrimitiveType::Triangles))
@@ -399,13 +418,13 @@ namespace Glory
 
 	void OpenGLDevice::Release(CommandBufferHandle commandBuffer)
 	{
-		const GL_CommandBuffer* glCommandBuffer = m_CommandBuffers.Find(commandBuffer);
+		GL_CommandBuffer* glCommandBuffer = m_CommandBuffers.Find(commandBuffer);
 		if (!glCommandBuffer)
 		{
 			Debug().LogError("OpenGLDevice::Release: Invalid command buffer handle.");
 			return;
 		}
-		if (glCommandBuffer->m_CommandsSize > 0)
+		if (glCommandBuffer->m_CommandsSize > 0 || !m_IsCommandBufferEmulationEnabled)
 			Reset(commandBuffer);
 
 		m_FreeCommandBuffers.push(commandBuffer);
@@ -505,6 +524,9 @@ namespace Glory
 			default:
 				break;
 			}
+
+			if (glBuffer->m_GLFlags & GL_MAP_PERSISTENT_BIT)
+				barrierBitField |= GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT;
 		}
 
 		if (!images.empty())
@@ -620,53 +642,69 @@ namespace Glory
 			return GL_DYNAMIC_READ;
 	}
 
+	uint32_t GetBufferFlags(BufferFlags flags)
+	{
+		uint32_t glFlags = 0;
+
+		if (flags & BF_Read)
+		{
+			glFlags |= GL_MAP_READ_BIT;
+			glFlags |= GL_MAP_PERSISTENT_BIT;
+		}
+		if (flags & BF_Write)
+		{
+			glFlags |= GL_MAP_WRITE_BIT;
+			glFlags |= GL_MAP_PERSISTENT_BIT;
+		}
+		if (flags & BF_Coherent)
+			glFlags |= GL_MAP_COHERENT_BIT;
+		else if (glFlags & GL_MAP_PERSISTENT_BIT)
+			glFlags |= GL_MAP_FLUSH_EXPLICIT_BIT;
+		if (flags & BF_Client)
+			glFlags |= GL_CLIENT_STORAGE_BIT;
+		if (flags & BF_Dynamic)
+			glFlags |= GL_DYNAMIC_STORAGE_BIT;
+
+		return glFlags;
+	}
+
 	BufferHandle OpenGLDevice::CreateBuffer(size_t bufferSize, BufferType type, BufferFlags flags)
 	{
 		BufferHandle handle;
 		GL_Buffer& buffer = m_Buffers.Emplace(handle, GL_Buffer());
 		buffer.m_Size = bufferSize;
-
-		glGenBuffers(1, &buffer.m_GLBufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		buffer.m_GLFlags = GetBufferFlags(flags);
 
 		switch (type)
 		{
 		case Glory::BT_TransferRead:
 			buffer.m_GLTarget = GL_COPY_READ_BUFFER;
-			buffer.m_GLUsage = GL_DYNAMIC_COPY;
 			break;
 		case Glory::BT_TransferWrite:
 			buffer.m_GLTarget = GL_COPY_WRITE_BUFFER;
-			buffer.m_GLUsage = GL_DYNAMIC_COPY;
 			break;
 		case Glory::BT_Vertex:
 			buffer.m_GLTarget = GL_ARRAY_BUFFER;
-			buffer.m_GLUsage = GL_STATIC_DRAW;
 			break;
 		case Glory::BT_Index:
 			buffer.m_GLTarget = GL_ELEMENT_ARRAY_BUFFER;
-			buffer.m_GLUsage = GL_STATIC_DRAW;
 			break;
 		case Glory::BT_Storage:
 			buffer.m_GLTarget = GL_SHADER_STORAGE_BUFFER;
-			buffer.m_GLUsage = GL_STATIC_DRAW;
 			break;
 		case Glory::BT_Uniform:
 			buffer.m_GLTarget = GL_UNIFORM_BUFFER;
-			buffer.m_GLUsage = GL_DYNAMIC_DRAW;
 			break;
 		default:
 			break;
 		}
 
-		if (flags != BF_None && flags != BF_CopyDst)
-			buffer.m_GLUsage = GetBufferUsage(flags);
+		glGenBuffers(1, &buffer.m_GLBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 
-		glBindBuffer(buffer.m_GLTarget, buffer.m_GLBufferID);
+		const BufferBindScope bindScope{ buffer.m_GLTarget, buffer.m_GLBufferID };
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBufferData(buffer.m_GLTarget, buffer.m_Size, NULL, buffer.m_GLUsage);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindBuffer(buffer.m_GLTarget, NULL);
+		glBufferStorage(buffer.m_GLTarget, buffer.m_Size, NULL, buffer.m_GLFlags);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 
 		return handle;
@@ -682,10 +720,33 @@ namespace Glory
 		}
 
 		glBuffer->m_Size = bufferSize;
+
+		const uint32_t oldGLBufferID = glBuffer->m_GLBufferID;
+
+		glDeleteBuffers(1, &glBuffer->m_GLBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glGenBuffers(1, &glBuffer->m_GLBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
 		glBindBuffer(glBuffer->m_GLTarget, glBuffer->m_GLBufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBufferData(glBuffer->m_GLTarget, glBuffer->m_Size, NULL, glBuffer->m_GLUsage);
+		glBufferStorage(glBuffer->m_GLTarget, glBuffer->m_Size, NULL, glBuffer->m_GLFlags);
 		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glBindBuffer(glBuffer->m_GLTarget, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		/* @todo: Copy old buffer to new buffer */
+
+		glBindBuffer(glBuffer->m_GLTarget, oldGLBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		if (glBuffer->m_pMappedBuffer)
+		{
+			glUnmapBuffer(glBuffer->m_GLTarget);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+
 		glBindBuffer(glBuffer->m_GLTarget, NULL);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 	}
@@ -710,12 +771,7 @@ namespace Glory
 			return;
 		}
 
-		glBindBuffer(buffer->m_GLTarget, buffer->m_GLBufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBufferData(buffer->m_GLTarget, buffer->m_Size, data, buffer->m_GLUsage);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindBuffer(buffer->m_GLTarget, NULL);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		AssignBuffer_Internal(*buffer, data, 0, buffer->m_Size);
 	}
 
 	void OpenGLDevice::AssignBuffer(BufferHandle handle, const void* data, uint32_t size)
@@ -727,18 +783,10 @@ namespace Glory
 			return;
 		}
 
-		glBindBuffer(buffer->m_GLTarget, buffer->m_GLBufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
 		if (size > buffer->m_Size)
-		{
-			buffer->m_Size = size;
-			glBufferData(buffer->m_GLTarget, buffer->m_Size, data, buffer->m_GLUsage);
-		}
-		else
-			glBufferSubData(buffer->m_GLTarget, 0, size, data);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindBuffer(buffer->m_GLTarget, NULL);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+			ResizeBuffer(handle, size);
+
+		AssignBuffer_Internal(*buffer, data, 0, size);
 	}
 
 	void OpenGLDevice::AssignBuffer(BufferHandle handle, const void* data, uint32_t offset, uint32_t size)
@@ -750,40 +798,50 @@ namespace Glory
 			return;
 		}
 
-		if (offset + size > buffer->m_Size)
-		{
-			Debug().LogError("OpenGLDevice::AssignBuffer: Attempting to write beyond buffer size");
-			return;
-		}
-
-		glBindBuffer(buffer->m_GLTarget, buffer->m_GLBufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBufferSubData(buffer->m_GLTarget, offset, size, data);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindBuffer(buffer->m_GLTarget, NULL);
-		OpenGLGraphicsModule::LogGLError(glGetError());
+		AssignBuffer_Internal(*buffer, data, offset, size);
 	}
 
 	void OpenGLDevice::ReadBuffer(BufferHandle handle, void* outData, uint32_t offset, uint32_t size)
 	{
-		GL_Buffer* buffer = m_Buffers.Find(handle);
-		if (!buffer)
+		GL_Buffer* glBuffer = m_Buffers.Find(handle);
+		if (!glBuffer)
 		{
 			Debug().LogError("OpenGLDevice::ReadBuffer: Invalid buffer handle");
 			return;
 		}
 
-		if (offset + size > buffer->m_Size)
+		if (offset + size > glBuffer->m_Size)
 		{
 			Debug().LogError("OpenGLDevice::ReadBuffer: Attempting to read beyond buffer size");
 			return;
 		}
 
-		glBindBuffer(buffer->m_GLTarget, buffer->m_GLBufferID);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glGetBufferSubData(buffer->m_GLTarget, offset, size, outData);
-		OpenGLGraphicsModule::LogGLError(glGetError());
-		glBindBuffer(buffer->m_GLTarget, NULL);
+		if (glBuffer->m_GLFlags & GL_MAP_PERSISTENT_BIT)
+		{
+			GLORY_ASSERT(glBuffer->m_GLFlags & GL_MAP_READ_BIT, "Buffer can't be read from!");
+			if (glBuffer->m_pMappedBuffer == nullptr)
+			{
+				const BufferBindScope bindScope{ glBuffer->m_GLTarget, glBuffer->m_GLBufferID };
+				glBuffer->m_pMappedBuffer = glMapBufferRange(glBuffer->m_GLTarget, 0, glBuffer->m_Size, glBuffer->m_GLFlags);
+				OpenGLGraphicsModule::LogGLError(glGetError());
+			}
+
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			char* pOffsetData = static_cast<char*>(glBuffer->m_pMappedBuffer);
+			pOffsetData += offset;
+			std::memcpy(outData, pOffsetData, size);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			return;
+		}
+		if (glBuffer->m_GLFlags & GL_DYNAMIC_STORAGE_BIT)
+		{
+			const BufferBindScope bindScope{ glBuffer->m_GLTarget, glBuffer->m_GLBufferID };
+			glGetBufferSubData(glBuffer->m_GLTarget, offset, size, outData);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			return;
+		}
+
+		GLORY_ASSERT(false, "OpenGLDevice::ReadBuffer: Buffer is not visible to the CPU!");
 	}
 
 	MeshHandle OpenGLDevice::CreateMesh(std::vector<BufferHandle>&& buffers, uint32_t vertexCount,
@@ -1224,7 +1282,7 @@ namespace Glory
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		aniso = std::min(sampler.MaxAnisotropy, aniso);
 
-		if (!glTexture->m_GLBindlessHandle)
+		if (glTexture->m_GLBindlessHandle == NULL)
 		{
 			glTexParameteri(glTexture->m_GLTextureType, GL_TEXTURE_MIN_FILTER, glTexture->m_GLMinFilter);
 			OpenGLGraphicsModule::LogGLError(glGetError());
@@ -1740,7 +1798,7 @@ namespace Glory
 		{
 			const size_t descriptorCount = glSetLayout->m_DescriptorCounts[i];
 			if (descriptorCount <= 1) continue;
-			set.m_BindlessTexturesBuffers[i] = CreateBuffer(sizeof(uint64_t)*descriptorCount, BT_Storage, BF_None);
+			set.m_BindlessTexturesBuffers[i] = CreateBuffer(sizeof(uint64_t)*descriptorCount, BT_Storage, BufferFlags(BF_Coherent | BF_Write));
 			std::vector<uint64_t> clearValues(descriptorCount, 0ull);
 			AssignBuffer(set.m_BindlessTexturesBuffers[i], clearValues.data());
 			textureHandles[i] = nullptr;
@@ -1870,14 +1928,21 @@ namespace Glory
 
 	void OpenGLDevice::FreeBuffer(BufferHandle& handle)
 	{
-		GL_Buffer* buffer = m_Buffers.Find(handle);
-		if (!buffer)
+		GL_Buffer* glBuffer = m_Buffers.Find(handle);
+		if (!glBuffer)
 		{
 			Debug().LogError("OpenGLDevice::FreeBuffer: Invalid buffer handle.");
 			return;
 		}
 
-		glDeleteBuffers(1, &buffer->m_GLBufferID);
+		if (glBuffer->m_pMappedBuffer)
+		{
+			const BufferBindScope scope{ glBuffer->m_GLTarget, glBuffer->m_GLBufferID };
+			glUnmapBuffer(glBuffer->m_GLTarget);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+		}
+
+		glDeleteBuffers(1, &glBuffer->m_GLBufferID);
 		OpenGLGraphicsModule::LogGLError(glGetError());
 		m_Buffers.Erase(handle);
 
@@ -2048,7 +2113,7 @@ namespace Glory
 
 	void OpenGLDevice::OnInitialize()
 	{
-		m_ConstantsBuffer = CreateBuffer(PushConstantsMaxSize, BT_Uniform, BF_Write);
+		m_ConstantsBuffer = CreateBuffer(PushConstantsMaxSize, BT_Uniform, BufferFlags(BF_Dynamic));
 	}
 
 	void OpenGLDevice::CreateRenderTexture(GL_RenderTexture& renderTexture)
@@ -2215,6 +2280,62 @@ namespace Glory
 
 		buffer.m_Commands[buffer.m_CommandsSize] = std::move(commandData);
 		++buffer.m_CommandsSize;
+	}
+
+	void OpenGLDevice::AssignBuffer_Internal(GL_Buffer& buffer, const void* data, uint32_t offset, uint32_t size)
+	{
+		if (offset + size > buffer.m_Size)
+		{
+			Debug().LogError("OpenGLDevice::AssignBuffer: Attempting to write beyond buffer size");
+			return;
+		}
+
+		const BufferBindScope scope{ buffer.m_GLTarget, buffer.m_GLBufferID };
+
+		if (buffer.m_GLFlags & GL_MAP_PERSISTENT_BIT)
+		{
+			GLORY_ASSERT(buffer.m_GLFlags & GL_MAP_WRITE_BIT, "Buffer can't be written to!");
+			if (buffer.m_pMappedBuffer == nullptr)
+			{
+				buffer.m_pMappedBuffer = glMapBufferRange(buffer.m_GLTarget, 0, buffer.m_Size, buffer.m_GLFlags);
+				OpenGLGraphicsModule::LogGLError(glGetError());
+			}
+
+			char* p = (char*)buffer.m_pMappedBuffer;
+			void* offsettedData = p + offset;
+			std::memcpy(offsettedData, data, size);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+
+			if (!(buffer.m_GLFlags & GL_MAP_COHERENT_BIT))
+				glFlushMappedBufferRange(buffer.m_GLTarget, offset, size);
+			return;
+		}
+		if (buffer.m_GLFlags & GL_DYNAMIC_STORAGE_BIT)
+		{
+			glBufferSubData(buffer.m_GLTarget, offset, size, data);
+			OpenGLGraphicsModule::LogGLError(glGetError());
+			return;
+		}
+
+		/* Buffer not visible to CPU, we need a staging buffer to write to */
+		BufferHandle stagingBuffer = CreateBuffer(size, BT_TransferRead, BF_Dynamic);
+		AssignBuffer(stagingBuffer, data);
+		GL_Buffer* glStagingBuffer = m_Buffers.Find(stagingBuffer);
+
+		glBindBuffer(GL_COPY_WRITE_BUFFER, buffer.m_GLBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindBuffer(GL_COPY_READ_BUFFER, glStagingBuffer->m_GLBufferID);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		
+		glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, offset, size);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		glBindBuffer(GL_COPY_READ_BUFFER, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+		glBindBuffer(GL_COPY_WRITE_BUFFER, NULL);
+		OpenGLGraphicsModule::LogGLError(glGetError());
+
+		FreeBuffer(stagingBuffer);
 	}
 
 #pragma endregion

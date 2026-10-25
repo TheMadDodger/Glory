@@ -34,6 +34,7 @@ project "GloryVulkanGraphics"
 		"%{IncludeDir.Version}",
 		"%{IncludeDir.Utils}",
 		"%{IncludeDir.ECS}",
+		"%{IncludeDir.VMA}",
 	}
 
 	libdirs

@@ -1,5 +1,6 @@
 #pragma once
 #include "vulkan_visibility.h"
+#include "VMA.h"
 
 #include "DescriptorAllocator.h"
 #include "CommandBufferAllocator.h"
@@ -11,6 +12,7 @@
 
 #include <BitSet.h>
 
+
 namespace Glory
 {
     struct VK_Buffer
@@ -20,7 +22,7 @@ namespace Glory
         size_t m_Size;
         BufferFlags m_Flags;
         vk::Buffer m_VKBuffer;
-        vk::DeviceMemory m_VKMemory;
+        VmaAllocation m_VMAAllocation;
         vk::BufferUsageFlags m_VKUsage;
 
         void* m_pMappedMemory = nullptr;
@@ -373,6 +375,8 @@ namespace Glory
         vk::Device m_LogicalDevice;
         vk::Queue m_GraphicsAndComputeQueue;
         vk::Queue m_PresentQueue;
+
+        VmaAllocator m_VMAAllocator = nullptr;
 
         std::vector<const char*> m_DeviceExtensions;
         vk::CommandPool m_GraphicsCommandPool;

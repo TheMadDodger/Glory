@@ -251,10 +251,10 @@ namespace Glory
 		}
 
 		/* Global data buffers */
-		m_CameraDatasBuffer = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_CAMERAS, BufferType::BT_Storage, BF_Write);
-		m_LightCameraDatasBuffer = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_LIGHTS, BufferType::BT_Storage, BF_Write);
-		m_LightsSSBO = pDevice->CreateBuffer(sizeof(LightData)*MAX_LIGHTS, BufferType::BT_Storage, BF_Write);
-		m_LightSpaceTransformsSSBO = pDevice->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferType::BT_Storage, BF_Write);
+		m_CameraDatasBuffer = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_CAMERAS, BufferType::BT_Storage, BufferFlags(BF_Coherent | BF_Write));
+		m_LightCameraDatasBuffer = pDevice->CreateBuffer(sizeof(PerCameraData)*MAX_LIGHTS, BufferType::BT_Storage, BufferFlags(BF_Coherent | BF_Write));
+		m_LightsSSBO = pDevice->CreateBuffer(sizeof(LightData)*MAX_LIGHTS, BufferType::BT_Storage, BufferFlags(BF_Coherent | BF_Write));
+		m_LightSpaceTransformsSSBO = pDevice->CreateBuffer(sizeof(glm::mat4)*MAX_LIGHTS, BufferType::BT_Storage, BufferFlags(BF_Coherent | BF_Write));
 
 		GenerateDomeSamplePointsSSBO(pDevice, 64);
 		GenerateNoiseTexture(pDevice);
@@ -382,7 +382,7 @@ namespace Glory
 		for (size_t i = 0; i < m_LightDistancesSSBOs.size(); ++i)
 		{
 			if (!m_LightDistancesSSBOs[i])
-				m_LightDistancesSSBOs[i] = pDevice->CreateBuffer(sizeof(uint32_t)*MAX_LIGHTS, BufferType::BT_Storage, BF_ReadAndWrite);
+				m_LightDistancesSSBOs[i] = pDevice->CreateBuffer(sizeof(uint32_t)*MAX_LIGHTS, BufferType::BT_Storage, BufferFlags(BF_Coherent | BF_ReadAndWrite));
 
 			if (!m_LightDistancesSets[i])
 			{
@@ -648,47 +648,59 @@ namespace Glory
 
 	void GloryRenderer::WaitForCurrentFrame()
 	{
+		ProfileSample s{ &m_pModule->GetEngine()->Profiler(), "GloryRenderer::WaitForCurrentFrame" };
+
 		GraphicsDevice* pDevice = m_pModule->GetEngine()->ActiveGraphicsDevice();
 		if (!pDevice) return;
 
 		for (;;)
 		{
 			if (!m_FrameCommandBuffers[m_CurrentFrameIndex]) break;
+
+			m_pModule->GetEngine()->Profiler().BeginSample("Wait for device");
 			const GraphicsDevice::WaitResult result = pDevice->Wait(m_FrameCommandBuffers[m_CurrentFrameIndex], 1);
+			m_pModule->GetEngine()->Profiler().EndSample();
+
 			if (result == GraphicsDevice::WR_Success)
 			{
 				pDevice->Release(m_FrameCommandBuffers[m_CurrentFrameIndex]);
 				m_FrameCommandBuffers[m_CurrentFrameIndex] = 0;
 
-				/* Read buffers since they are guaranteed to be finished writing to */
-				const BufferHandle lightDistancesSSBO = m_LightDistancesSSBOs[m_CurrentFrameIndex];
-				pDevice->ReadBuffer(lightDistancesSSBO, m_ClosestLightDepthSlices.data(), 0, m_FrameData.ActiveLights.count()*sizeof(uint32_t));
+				{
+					ProfileSample s{ &m_pModule->GetEngine()->Profiler(), "Read Light distances" };
+					/* Read buffers since they are guaranteed to be finished writing to */
+					const BufferHandle lightDistancesSSBO = m_LightDistancesSSBOs[m_CurrentFrameIndex];
+					pDevice->ReadBuffer(lightDistancesSSBO, m_ClosestLightDepthSlices.data(), 0, m_FrameData.ActiveLights.count()*sizeof(uint32_t));
 
-				/* @todo: Reset using a compute shader */
-				pDevice->AssignBuffer(lightDistancesSSBO, ResetLightDistances, 0, m_FrameData.ActiveLights.count()*sizeof(uint32_t));
+					/* @todo: Reset using a compute shader */
+					pDevice->AssignBuffer(lightDistancesSSBO, ResetLightDistances, 0, m_FrameData.ActiveLights.count()*sizeof(uint32_t));
+				}
 
 				/* Read picking results */
-				m_PickResults.clear();
-				for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
 				{
-					CameraRef camera = m_ActiveCameras[i];
-					const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
-					BufferHandle pickResults = uniqueCameraData.m_PickResultsSSBOs[m_CurrentFrameIndex];
-					uint32_t numPicks = 0;
-					pDevice->ReadBuffer(pickResults, &numPicks, 0, sizeof(uint32_t));
-					if (numPicks == 0) continue;
-
-					std::vector<GPUPickResult> results(numPicks);
-					pDevice->ReadBuffer(pickResults, results.data(), sizeof(uint32_t)*4, numPicks*sizeof(GPUPickResult));
-					const size_t start = m_PickResults.size();
-					m_PickResults.reserve(m_PickResults.size() + numPicks);
-
-					for (size_t j = 0; j < results.size(); ++j)
+					ProfileSample s{ &m_pModule->GetEngine()->Profiler(), "Read picking results" };
+					m_PickResults.clear();
+					for (size_t i = 0; i < m_ActiveCameras.size(); ++i)
 					{
-						const GPUPickResult& pick = results[j];
-						if (!pick.SceneID || !pick.ObjectID) continue;
-						m_PickResults.emplace_back(PickResult{ camera.GetUUID(),
-							SceneObjectRef{ pick.SceneID, pick.ObjectID }, glm::vec3(pick.Position), glm::vec3(pick.Normal) });
+						CameraRef camera = m_ActiveCameras[i];
+						const UniqueCameraData& uniqueCameraData = m_UniqueCameraDatas.at(camera.GetUUID());
+						BufferHandle pickResults = uniqueCameraData.m_PickResultsSSBOs[m_CurrentFrameIndex];
+						uint32_t numPicks = 0;
+						pDevice->ReadBuffer(pickResults, &numPicks, 0, sizeof(uint32_t));
+						if (numPicks == 0) continue;
+
+						std::vector<GPUPickResult> results(numPicks);
+						pDevice->ReadBuffer(pickResults, results.data(), sizeof(uint32_t)*4, numPicks*sizeof(GPUPickResult));
+						const size_t start = m_PickResults.size();
+						m_PickResults.reserve(m_PickResults.size() + numPicks);
+
+						for (size_t j = 0; j < results.size(); ++j)
+						{
+							const GPUPickResult& pick = results[j];
+							if (!pick.SceneID || !pick.ObjectID) continue;
+							m_PickResults.emplace_back(PickResult{ camera.GetUUID(),
+								SceneObjectRef{ pick.SceneID, pick.ObjectID }, glm::vec3(pick.Position), glm::vec3(pick.Normal) });
+						}
 					}
 				}
 
@@ -2027,11 +2039,14 @@ namespace Glory
 				{
 					DescriptorSetUpdateInfo dsUpdateInfo;
 					dsUpdateInfo.m_Samplers.resize(textureCount);
+					std::vector<TextureHandle> textureHandles(textureCount, nullptr);
+
 					for (size_t j = 0; j < textureCount; ++j)
 					{
 						TextureData* pTexture = textures[j];
 						const TextureHandle texture = pDevice->AcquireCachedTexture(pTexture);
-						dsUpdateInfo.m_Samplers[j].m_TextureHandles = &texture;
+						textureHandles[j] = texture;
+						dsUpdateInfo.m_Samplers[j].m_TextureHandles = &textureHandles[j];
 						dsUpdateInfo.m_Samplers[j].m_DescriptorIndex = j;
 					}
 					pDevice->UpdateDescriptorSet(batchData.m_TextureSets[materialIndex], dsUpdateInfo);
@@ -2041,7 +2056,7 @@ namespace Glory
 
 			if (!batchData.m_WorldsBuffer)
 			{
-				batchData.m_WorldsBuffer = pDevice->CreateBuffer(batchData.m_Worlds->size()*sizeof(glm::mat4), BT_Storage, BF_Write);
+				batchData.m_WorldsBuffer = pDevice->CreateBuffer(batchData.m_Worlds->size()*sizeof(glm::mat4), BT_Storage, BufferFlags(BF_Coherent | BF_Write));
 				batchData.m_Worlds.SetDirty();
 			}
 			if (pDevice->BufferSize(batchData.m_WorldsBuffer) < batchData.m_Worlds.TotalByteSize())
@@ -2055,7 +2070,7 @@ namespace Glory
 
 			if (!batchData.m_MaterialsBuffer)
 			{
-				batchData.m_MaterialsBuffer = pDevice->CreateBuffer(batchData.m_MaterialDatas->size(), BT_Storage, BF_Write);
+				batchData.m_MaterialsBuffer = pDevice->CreateBuffer(batchData.m_MaterialDatas->size(), BT_Storage, BufferFlags(BF_Coherent | BF_Write));
 				batchData.m_MaterialDatas.SetDirty();
 			}
 			if (pDevice->BufferSize(batchData.m_MaterialsBuffer) < batchData.m_MaterialDatas.TotalByteSize())
@@ -2070,7 +2085,7 @@ namespace Glory
 
 			if (!isBindless && textureCount && !batchData.m_TextureBitsBuffer)
 			{
-				batchData.m_TextureBitsBuffer = pDevice->CreateBuffer(batchData.m_TextureBits->size()*sizeof(uint32_t), BT_Storage, BF_Write);
+				batchData.m_TextureBitsBuffer = pDevice->CreateBuffer(batchData.m_TextureBits->size()*sizeof(uint32_t), BT_Storage, BufferFlags(BF_Coherent | BF_Write));
 				batchData.m_TextureBits.SetDirty();
 			}
 			if (!isBindless && textureCount && pDevice->BufferSize(batchData.m_TextureBitsBuffer) < batchData.m_TextureBits.TotalByteSize())
@@ -2229,7 +2244,7 @@ namespace Glory
 			pDevice->FreeBuffer(m_LineBuffers[m_CurrentFrameIndex]);
 		if (!m_LineBuffers[m_CurrentFrameIndex])
 		{
-			m_LineBuffers[m_CurrentFrameIndex] = pDevice->CreateBuffer(m_LineVertices->size()*sizeof(LineVertex), BT_Vertex, BF_None);
+			m_LineBuffers[m_CurrentFrameIndex] = pDevice->CreateBuffer(m_LineVertices->size()*sizeof(LineVertex), BT_Vertex, BufferFlags(BF_Coherent | BF_Write));
 			m_LineMeshes[m_CurrentFrameIndex] = pDevice->CreateMesh({ m_LineBuffers[m_CurrentFrameIndex] }, m_LineVertexCount, 0, sizeof(LineVertex),
 				{ AttributeType::Float3, AttributeType::Float4 });
 			resizeBuffer = false;
@@ -2647,7 +2662,7 @@ namespace Glory
 			if (!lightGridSSBO)
 				lightGridSSBO = pDevice->CreateBuffer(sizeof(LightGrid)*NUM_CLUSTERS, BufferType::BT_Storage, BF_None);
 			if (!pickResultsUBO)
-				pickResultsUBO = pDevice->CreateBuffer(sizeof(GPUPickResult)*MaxPicks + sizeof(uint32_t)*4, BufferType::BT_Storage, BF_Read);
+				pickResultsUBO = pDevice->CreateBuffer(sizeof(GPUPickResult)*MaxPicks + sizeof(uint32_t)*4, BufferType::BT_Storage, BufferFlags(BF_Coherent | BF_Read));
 
 			if (!lightSet)
 			{

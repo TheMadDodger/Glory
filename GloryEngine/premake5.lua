@@ -86,6 +86,7 @@ SubmodoleDirs["yaml_cpp"]				= "%{rootDir}/submodules/yaml-cpp"
 SubmodoleDirs["glm"]					= "%{rootDir}/submodules/glm"
 SubmodoleDirs["CRCpp"]					= "%{rootDir}/submodules/CRCpp"
 SubmodoleDirs["HdriToCubemap"]			= "%{rootDir}/submodules/HdriToCubemap"
+SubmodoleDirs["VMA"]	= "%{rootDir}/submodules/VulkanMemoryAllocator"
 
 IncludeDir = {}
 IncludeDir["glm"]						= "%{SubmodoleDirs.glm}"
@@ -104,6 +105,7 @@ IncludeDir["Version"]					= "%{IncludeDir.Utils}/Version"
 IncludeDir["CommandLine"]				= "%{IncludeDir.Utils}/GloryCommandLine"
 IncludeDir["TestFramework"]				= "%{IncludeDir.Utils}/GloryTestFramework"
 IncludeDir["RenderDoc"]					= "%{rootDir}/third-party/RenderDoc"
+IncludeDir["VMA"]						= "%{SubmodoleDirs.VMA}/include"
 
 IncludeDir["FA"]						= "%{rootDir}/third-party/FontAwesome"
 

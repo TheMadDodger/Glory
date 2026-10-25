@@ -20,7 +20,8 @@ namespace Glory
         size_t m_Size;
         uint32_t m_GLBufferID;
         uint32_t m_GLTarget;
-        uint32_t m_GLUsage;
+        uint32_t m_GLFlags;
+        void* m_pMappedBuffer = nullptr;
     };
 
     struct GL_Mesh
@@ -381,6 +382,7 @@ namespace Glory
         void CreateRenderTexture(GL_RenderTexture& renderTexture);
         bool CreatePipeline(GL_Pipeline& pipeline, PipelineData* pPipeline);
         void PushCommand(GL_CommandBuffer& buffer, GL_CommandData&& commandData);
+        void AssignBuffer_Internal(GL_Buffer& buffer, const void* data, uint32_t offset, uint32_t size);
 
     private:
         friend class OpenGLCommandImpl;
